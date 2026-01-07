@@ -57,9 +57,7 @@ export default function SignupPage() {
                 setResolvedAddress(address);
 
                 // Show info message if using fallback
-                if (address.source === 'osm') {
-                    setLocError('Using OpenStreetMap (backend unavailable)');
-                }
+                // Removed at user request: if (address.source === 'osm') { setLocError('Using OpenStreetMap (backend unavailable)'); }
             } else {
                 console.warn('🌍 Geocoding failed, showing coordinates only');
                 setResolvedAddress({
