@@ -114,7 +114,7 @@ export default function SignupPage() {
                     longitude: Number(lng),
                     state: resolvedAddress?.state || 'Detection Pending',
                     lga: resolvedAddress?.lga || 'Detection Pending',
-                    neighborhood: resolvedAddress?.neighborhood || '',
+                    neighborhood: resolvedAddress?.neighborhood || resolvedAddress?.lga || 'Region Detected',
                     formattedAddress: resolvedAddress?.formatted || '',
                     resolutionSource: resolvedAddress?.source || 'unknown'
                 };
