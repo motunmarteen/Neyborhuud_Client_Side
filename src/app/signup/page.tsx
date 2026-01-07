@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
+import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
 import { fetchAPI } from '@/lib/api';
 
 export default function SignupPage() {
@@ -18,7 +19,7 @@ export default function SignupPage() {
         agree: false,
     });
     const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
-    const [resolvedAddress, setResolvedAddress] = useState<{ state?: string, lga?: string } | null>(null);
+    const [resolvedAddress, setResolvedAddress] = useState<LocationAddress | null>(null);
     const [locError, setLocError] = useState<string | null>(null);
     const [isResolving, setIsResolving] = useState(false);
 
@@ -47,37 +48,34 @@ export default function SignupPage() {
             });
             console.log('🌍 Google Maps Link:', `https://www.google.com/maps?q=${loc.lat},${loc.lng}`);
 
-            try {
-                console.log('🌍 Calling geocoding API with:', { lat: loc.lat, lng: loc.lng });
-                const response = await fetchAPI('/geo/preview', {
-                    method: 'POST',
-                    body: JSON.stringify({ lat: loc.lat, lng: loc.lng })
-                });
+            // Use reverse geocoding with fallback support
+            const address = await reverseGeocode(loc.lat, loc.lng);
 
-                console.log('🌍 Backend geocoding response:', response);
+            if (address) {
+                console.log('✅ Location resolved:', address.formatted || `${address.lga}, ${address.state}`);
+                console.log('📍 Source:', address.source);
+                setResolvedAddress(address);
 
-                // Robust parsing for wrapped or direct responses
-                const addr = response.data || response;
-                console.log('🌍 Extracted address data:', addr);
-
-                if (addr.state && addr.lga) {
-                    console.log('✅ Location resolved to:', `${addr.lga}, ${addr.state}`);
-                    setResolvedAddress({ state: addr.state, lga: addr.lga });
-                } else {
-                    console.warn('🌍 Missing state/lga in response, using fallback');
-                    setResolvedAddress({ state: 'Region Found', lga: 'Detected' });
+                // Show info message if using fallback
+                if (address.source === 'osm') {
+                    setLocError('Using OpenStreetMap (backend unavailable)');
                 }
-                console.log('🌍 === LOCATION DIAGNOSTIC END ===');
-            } catch (err) {
-                console.error("🌍 Geocoding failed with error:", err);
-                setResolvedAddress({ state: 'Verify LGA on signup', lga: 'GPS Locked' });
-            } finally {
-                setIsResolving(false);
+            } else {
+                console.warn('🌍 Geocoding failed, showing coordinates only');
+                setResolvedAddress({
+                    lga: 'Location Detected',
+                    state: 'GPS Locked',
+                    formatted: `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`
+                });
+                setLocError('Could not resolve address - coordinates captured');
             }
+
+            console.log('🌍 === LOCATION DIAGNOSTIC END ===');
+            setIsResolving(false);
 
         } else {
             setIsResolving(false);
-            setLocError("Location access required for local safety features.");
+            setLocError("Location access denied. Please enable location permissions.");
         }
     };
 
@@ -219,12 +217,20 @@ export default function SignupPage() {
             `}>
                 <div className="flex items-center gap-2.5 overflow-hidden">
                     <div className={`w-1.5 h-1.5 shrink-0 rounded-full ${location ? 'bg-neon-green animate-pulse' : 'bg-charcoal/30'}`}></div>
-                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-charcoal/40 truncate">
-                        {isResolving ? 'Resolving Address...' :
-                            resolvedAddress ? `${resolvedAddress.lga}, ${resolvedAddress.state}` :
-                                location ? `LOCKED: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` :
-                                    locError || 'Detecting Location...'}
-                    </span>
+                    <div className="flex flex-col overflow-hidden">
+                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-charcoal/40 truncate">
+                            {isResolving ? 'Resolving Address...' :
+                                resolvedAddress?.formatted ? resolvedAddress.formatted :
+                                    resolvedAddress ? `${resolvedAddress.lga}, ${resolvedAddress.state}` :
+                                        location ? `GPS: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` :
+                                            'Detecting Location...'}
+                        </span>
+                        {locError && (
+                            <span className="text-[8px] text-orange-500 font-medium mt-0.5">
+                                {locError}
+                            </span>
+                        )}
+                    </div>
                 </div>
                 {!location && !isResolving && (
                     <button
