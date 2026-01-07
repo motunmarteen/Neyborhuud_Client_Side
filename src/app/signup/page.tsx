@@ -115,7 +115,10 @@ export default function SignupPage() {
                     latitude: Number(lat),
                     longitude: Number(lng),
                     state: resolvedAddress?.state || 'Detection Pending',
-                    lga: resolvedAddress?.lga || 'Detection Pending'
+                    lga: resolvedAddress?.lga || 'Detection Pending',
+                    neighborhood: resolvedAddress?.neighborhood || '',
+                    formattedAddress: resolvedAddress?.formatted || '',
+                    resolutionSource: resolvedAddress?.source || 'unknown'
                 };
 
                 signupPayload.deviceLocation = {

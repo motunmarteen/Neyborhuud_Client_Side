@@ -1,29 +1,80 @@
-
-> next-app@0.1.0 build
+﻿
+> next-app@0.1.0 build C:\Users\teebl\Documents\NeyborHuud\neyborhuud-PWA
 > next build --webpack
 
-▲ Next.js 16.1.1 (webpack)
+Γû▓ Next.js 16.1.1 (webpack)
+- Environments: .env.local
 
   Creating an optimized production build ...
 > [PWA] Compile server
 > [PWA] Compile server
 > [PWA] Compile client (static)
-> [PWA] Auto register service worker with: C:\Users\Hp\Desktop\neyborhuud\NeyborHuud-PWA\node_modules\next-pwa\register.js
-> [PWA] Service worker: C:\Users\Hp\Desktop\neyborhuud\NeyborHuud-PWA\public\sw.js
+> [PWA] Auto register service worker with: C:\Users\teebl\Documents\NeyborHuud\neyborhuud-PWA\node_modules\.pnpm\next-pwa@5.6.0_@babel+core@_3cf6ef472b19b7a87fe9ac53160da222\node_modules\next-pwa\register.js
+> [PWA] Service worker: C:\Users\teebl\Documents\NeyborHuud\neyborhuud-PWA\public\sw.js
 > [PWA]   url: /sw.js
 > [PWA]   scope: /
-✓ Compiled successfully in 6.6s
+Γ£ô Compiled successfully in 5.6s
   Running TypeScript ...
-Failed to compile.
+node.exe : Failed to 
+compile.
+At C:\Users\teebl\App
+Data\Roaming\npm\pnpm
+.ps1:24 char:5
++     & "node$exe"  "
+$basedir/node_modules
+/pnpm/bin/pnpm.cjs" 
+$args
++     ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Failed    
+ to compile.:Stri    
+ng) [], RemoteEx    
+ception
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
 
-./src/app/page.tsx:99:16
-Type error: Cannot find name 'NeumorphicCircle'. Did you mean 'NeumorphicCard'?
+./src/app/signup/page
+.tsx:127:36
+Type error: Cannot 
+find name 'fetchAPI'.
 
-[0m [90m  97 |[39m             {[90m/* Hub Location */[39m}
- [90m  98 |[39m             [33m<[39m[33mNeumorphicCard[39m className[33m=[39m[32m"flex gap-6 items-center border border-white/40 p-8"[39m[33m>[39m
-[31m[1m>[22m[39m[90m  99 |[39m               [33m<[39m[33mNeumorphicCircle[39m className[33m=[39m[32m"w-16 h-16 text-neon-green flex-shrink-0"[39m[33m>[39m
- [90m     |[39m                [31m[1m^[22m[39m
- [90m 100 |[39m                 [33m<[39m[33mi[39m className[33m=[39m[32m"bi bi-geo-alt-fill text-2xl"[39m[33m>[39m[33m<[39m[33m/[39m[33mi[39m[33m>[39m
- [90m 101 |[39m               [33m<[39m[33m/[39m[33mNeumorphicCircle[39m[33m>[39m
- [90m 102 |[39m               [33m<[39m[33mdiv[39m[33m>[39m[0m
-Next.js build worker exited with code: 1 and signal: null
+[0m [90m 125 
+|[39m             }
+ [90m 126 |[39m
+[31m[1m>[22m[39m
+[90m 127 |[39m      
+       
+[36mconst[39m 
+response [33m=[39m 
+[36mawait[39m fetch
+API([32m'/auth/regis
+ter'[39m[33m,[39m 
+{
+ [90m     |[39m    
+                     
+           
+[31m[1m^[22m[39m
+ [90m 128 |[39m    
+             
+method[33m:[39m [3
+2m'POST'[39m[33m,[
+39m
+ [90m 129 |[39m    
+             
+body[33m:[39m [33m
+JSON[39m[33m.[39ms
+tringify(signupPayloa
+d)
+ [90m 130 |[39m    
+         
+})[33m;[39m[0m
+Next.js build worker 
+exited with code: 1 
+and signal: null
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.
