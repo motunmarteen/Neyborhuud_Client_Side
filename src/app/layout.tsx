@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
+import { Providers } from "@/components/providers";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -40,7 +41,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable} antialiased`}>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

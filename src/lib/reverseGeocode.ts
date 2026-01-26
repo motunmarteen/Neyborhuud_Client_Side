@@ -63,17 +63,38 @@ async function reverseGeocodeBackend(lat: number, lng: number): Promise<Location
 
     const data = response.data || response;
 
+    // ✅ CRITICAL: Log if backend is still returning communityId (should not happen)
+    if (data.communityId || data.assignedCommunityId) {
+        console.warn('⚠️ WARNING: /geo/preview response contains communityId/assignedCommunityId:', {
+            communityId: data.communityId,
+            assignedCommunityId: data.assignedCommunityId
+        });
+        console.warn('⚠️ These fields will be IGNORED - backend should not return them');
+    }
+
+    // ✅ Only extract allowed fields: state, lga, ward, communityName
+    // ❌ Explicitly ignore communityId - backend no longer returns it
     if (data.state && data.lga) {
-        return {
+        const result = {
             lga: data.lga,
             state: data.state,
-            neighborhood: data.neighborhood || data.area,
+            neighborhood: data.neighborhood || data.area || data.communityName,
             country: data.country || 'Nigeria',
-            formatted: data.neighborhood 
-                ? `${data.neighborhood}, ${data.lga}, ${data.state}`
+            formatted: data.neighborhood || data.communityName
+                ? `${data.neighborhood || data.communityName}, ${data.lga}, ${data.state}`
                 : `${data.lga}, ${data.state}`,
-            source: 'backend'
+            source: 'backend' as const
+            // ❌ DO NOT include communityId or assignedCommunityId
         };
+        
+        // Double-check: Ensure no communityId fields leaked in
+        if ((result as any).communityId || (result as any).assignedCommunityId) {
+            console.error('❌ ERROR: communityId leaked into LocationAddress result!');
+            delete (result as any).communityId;
+            delete (result as any).assignedCommunityId;
+        }
+        
+        return result;
     }
 
     return null;

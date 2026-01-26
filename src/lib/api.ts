@@ -21,6 +21,29 @@ export interface APIResponse<T = any> {
 }
 
 /**
+ * Recursively remove assignedCommunityId and communityId from any object
+ * This prevents BSON casting errors on the backend
+ */
+function sanitizePayload(obj: any): any {
+    if (obj === null || obj === undefined) return obj;
+    if (Array.isArray(obj)) {
+        return obj.map(sanitizePayload);
+    }
+    if (typeof obj === 'object') {
+        const sanitized: any = {};
+        for (const key in obj) {
+            // Skip communityId fields completely
+            if (key === 'assignedCommunityId' || key === 'communityId') {
+                continue;
+            }
+            sanitized[key] = sanitizePayload(obj[key]);
+        }
+        return sanitized;
+    }
+    return obj;
+}
+
+/**
  * Enhanced fetch wrapper for the NeyborHuud backend
  */
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
@@ -38,9 +61,41 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
         }
     }
 
+    // ✅ CRITICAL: Sanitize request body to remove assignedCommunityId/communityId
+    // This prevents BSON casting errors on registration requests
+    let sanitizedBody = options.body;
+    if (options.body && typeof options.body === 'string') {
+        try {
+            const parsed = JSON.parse(options.body);
+            const sanitized = sanitizePayload(parsed);
+            sanitizedBody = JSON.stringify(sanitized);
+            
+            // Debug: Log if we found and removed communityId fields
+            if (JSON.stringify(parsed) !== JSON.stringify(sanitized)) {
+                console.warn('⚠️ Removed assignedCommunityId/communityId from request body');
+                console.warn('⚠️ Original payload had:', {
+                    hasAssignedCommunityId: 'assignedCommunityId' in parsed,
+                    hasCommunityId: 'communityId' in parsed,
+                    endpoint
+                });
+            }
+            
+            // For registration requests, log the sanitized payload for debugging
+            if (endpoint.includes('/auth/register')) {
+                console.log('🔍 Registration request payload (after sanitization):', JSON.stringify(sanitized, null, 2));
+                if (sanitized.assignedCommunityId || sanitized.communityId) {
+                    console.error('❌ CRITICAL ERROR: assignedCommunityId/communityId still present after sanitization!');
+                }
+            }
+        } catch (e) {
+            // If body is not JSON, leave it as is
+        }
+    }
+
     try {
         const response = await fetch(url, {
             ...options,
+            body: sanitizedBody,
             headers: {
                 ...defaultHeaders,
                 ...options.headers,

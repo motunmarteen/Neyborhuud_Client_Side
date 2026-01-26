@@ -102,6 +102,7 @@ export default function SignupPage() {
                 email: formData.email.trim().toLowerCase(),
                 password: formData.password,
                 agreeToTerms: formData.agree
+                // Note: assignedCommunityId and communityId are NOT sent - backend handles community assignment automatically
             };
 
             // Only add location if we have it
@@ -117,6 +118,7 @@ export default function SignupPage() {
                     neighborhood: resolvedAddress?.neighborhood || resolvedAddress?.lga || 'Region Detected',
                     formattedAddress: resolvedAddress?.formatted || '',
                     resolutionSource: resolvedAddress?.source || 'unknown'
+                    // ❌ DO NOT include assignedCommunityId or communityId here
                 };
 
                 signupPayload.deviceLocation = {
@@ -126,9 +128,50 @@ export default function SignupPage() {
                 };
             }
 
+            // ✅ CRITICAL: Aggressively sanitize payload to remove assignedCommunityId/communityId
+            // Use deep sanitization to catch any nested fields
+            const sanitizePayload = (obj: any): any => {
+                if (obj === null || obj === undefined) return obj;
+                if (Array.isArray(obj)) {
+                    return obj.map(sanitizePayload);
+                }
+                if (typeof obj === 'object') {
+                    const sanitized: any = {};
+                    for (const key in obj) {
+                        // Skip communityId fields completely
+                        if (key === 'assignedCommunityId' || key === 'communityId') {
+                            continue;
+                        }
+                        sanitized[key] = sanitizePayload(obj[key]);
+                    }
+                    return sanitized;
+                }
+                return obj;
+            };
+
+            const sanitizedPayload = sanitizePayload(signupPayload);
+
+            // Double-check: Explicitly delete from root and nested objects
+            delete sanitizedPayload.assignedCommunityId;
+            delete sanitizedPayload.communityId;
+            if (sanitizedPayload.location) {
+                delete sanitizedPayload.location.assignedCommunityId;
+                delete sanitizedPayload.location.communityId;
+            }
+            if (sanitizedPayload.deviceLocation) {
+                delete sanitizedPayload.deviceLocation.assignedCommunityId;
+                delete sanitizedPayload.deviceLocation.communityId;
+            }
+
+            // Debug: Log payload to verify no communityId fields
+            console.log('🔍 Registration Payload (sanitized):', JSON.stringify(sanitizedPayload, null, 2));
+            if (sanitizedPayload.assignedCommunityId || sanitizedPayload.communityId) {
+                console.error('❌ ERROR: assignedCommunityId or communityId still present after sanitization!');
+            }
+
             const response = await fetchAPI('/auth/register', {
                 method: 'POST',
-                body: JSON.stringify(signupPayload)
+                body: JSON.stringify(sanitizedPayload)
             });
 
             // Store authentication tokens and user data
