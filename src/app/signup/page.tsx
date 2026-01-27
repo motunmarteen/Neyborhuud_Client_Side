@@ -138,8 +138,8 @@ export default function SignupPage() {
                 if (typeof obj === 'object') {
                     const sanitized: any = {};
                     for (const key in obj) {
-                        // Skip communityId fields completely
-                        if (key === 'assignedCommunityId' || key === 'communityId') {
+                        // Skip communityId fields completely (including communityName)
+                        if (key === 'assignedCommunityId' || key === 'communityId' || key === 'communityName') {
                             continue;
                         }
                         sanitized[key] = sanitizePayload(obj[key]);
@@ -154,13 +154,16 @@ export default function SignupPage() {
             // Double-check: Explicitly delete from root and nested objects
             delete sanitizedPayload.assignedCommunityId;
             delete sanitizedPayload.communityId;
+            delete sanitizedPayload.communityName;
             if (sanitizedPayload.location) {
                 delete sanitizedPayload.location.assignedCommunityId;
                 delete sanitizedPayload.location.communityId;
+                delete sanitizedPayload.location.communityName;
             }
             if (sanitizedPayload.deviceLocation) {
                 delete sanitizedPayload.deviceLocation.assignedCommunityId;
                 delete sanitizedPayload.deviceLocation.communityId;
+                delete sanitizedPayload.deviceLocation.communityName;
             }
 
             // Debug: Log payload to verify no communityId fields
@@ -169,24 +172,29 @@ export default function SignupPage() {
                 console.error('❌ ERROR: assignedCommunityId or communityId still present after sanitization!');
             }
 
-            const response = await fetchAPI('/auth/register', {
+            const response = await fetchAPI('/auth/create-account', {
                 method: 'POST',
                 body: JSON.stringify(sanitizedPayload)
             });
 
             // Store authentication tokens and user data
-            if (response.success && response.data?.session) {
-                const { session, user } = response.data;
+            // New endpoint returns: { success, data: { user, token, community } }
+            if (response.success && response.data) {
+                const { user, token, community } = response.data;
 
-                // Store tokens in localStorage
-                localStorage.setItem('neyborhuud_access_token', session.access_token);
-                if (session.refresh_token) {
-                    localStorage.setItem('neyborhuud_refresh_token', session.refresh_token);
+                // Store token in localStorage
+                if (token) {
+                    localStorage.setItem('neyborhuud_access_token', token);
                 }
 
                 // Store user data
                 if (user) {
                     localStorage.setItem('neyborhuud_user', JSON.stringify(user));
+                }
+
+                // Log community info if available
+                if (community) {
+                    console.log('✅ Community assigned:', community.communityName || community);
                 }
 
                 console.log('✅ Authentication tokens stored successfully');
@@ -195,10 +203,19 @@ export default function SignupPage() {
             setStep('success');
         } catch (error: any) {
             console.error("DIAGNOSTIC LOG:", error);
-            const friendlyMsg = error.message.includes('query of #<IncomingMessage>')
-                ? "The backend server is currently having trouble processing requests. Our engineers are on it!"
-                : error.message;
-            alert(`⚠️ Connection Issue: ${friendlyMsg}`);
+            console.error("Full error object:", error);
+            
+            // Provide more helpful error messages
+            let friendlyMsg = error.message;
+            if (error.message.includes('Failed to create user')) {
+                friendlyMsg = "Registration failed. Please check:\n- All required fields are filled\n- Email is valid and not already registered\n- Username is available\n- Password meets requirements";
+            } else if (error.message.includes('query of #<IncomingMessage>')) {
+                friendlyMsg = "The backend server is currently having trouble processing requests. Our engineers are on it!";
+            } else if (error.message.includes('500')) {
+                friendlyMsg = "Server error occurred. Please try again or contact support if the issue persists.";
+            }
+            
+            alert(`⚠️ Registration Error: ${friendlyMsg}`);
         } finally {
             setLoading(false);
         }

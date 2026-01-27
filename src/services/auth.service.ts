@@ -11,18 +11,20 @@ export const authService = {
    * Register a new user
    */
   async register(payload: RegisterPayload) {
-    // ✅ Safeguard: Explicitly remove assignedCommunityId and communityId
+    // ✅ Safeguard: Explicitly remove assignedCommunityId, communityId, and communityName
     // Backend handles community assignment automatically - these fields cause BSON casting errors
     const sanitizedPayload = { ...payload };
     delete (sanitizedPayload as any).assignedCommunityId;
     delete (sanitizedPayload as any).communityId;
+    delete (sanitizedPayload as any).communityName;
     if (sanitizedPayload.location) {
       delete (sanitizedPayload.location as any).assignedCommunityId;
       delete (sanitizedPayload.location as any).communityId;
+      delete (sanitizedPayload.location as any).communityName;
     }
 
     const response = await apiClient.post<{ user: User; token: string }>(
-      "/auth/register",
+      "/auth/create-account",
       sanitizedPayload,
     );
 
