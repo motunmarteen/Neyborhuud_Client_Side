@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
 import { fetchAPI } from '@/lib/api';
+import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValidation';
 
 export default function SignupPage() {
     const router = useRouter();
-    const [step, setStep] = useState<'form' | 'success'>('form');
+    const [step, setStep] = useState<'form' | 'verify-email' | 'success'>('form');
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -22,6 +23,32 @@ export default function SignupPage() {
     const [resolvedAddress, setResolvedAddress] = useState<LocationAddress | null>(null);
     const [locError, setLocError] = useState<string | null>(null);
     const [isResolving, setIsResolving] = useState(false);
+    
+    // Resend verification email state
+    const [resendCooldown, setResendCooldown] = useState(0);
+    const [isResending, setIsResending] = useState(false);
+
+    // Email & Username validation hooks
+    const emailValidation = useEmailValidation({ debounceMs: 600, checkAvailability: true });
+    const usernameValidation = useUsernameValidation({ debounceMs: 600, checkAvailability: true });
+
+    // Validate email when it changes
+    useEffect(() => {
+        emailValidation.validate(formData.email);
+    }, [formData.email]);
+
+    // Validate username when it changes
+    useEffect(() => {
+        usernameValidation.validate(formData.username);
+    }, [formData.username]);
+
+    // Resend cooldown timer
+    useEffect(() => {
+        if (resendCooldown > 0) {
+            const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [resendCooldown]);
 
     // Password Validation States
     const passRules = {
@@ -32,6 +59,25 @@ export default function SignupPage() {
         special: /[!@#$%^&*]/.test(formData.password),
     };
     const isPassValid = Object.values(passRules).every(Boolean);
+
+    // Handle resend verification email
+    const handleResendVerification = async () => {
+        if (resendCooldown > 0 || isResending) return;
+        
+        setIsResending(true);
+        try {
+            await fetchAPI('/auth/resend-verification', {
+                method: 'POST',
+                body: JSON.stringify({ email: formData.email })
+            });
+            setResendCooldown(60); // 60 second cooldown
+        } catch (error: any) {
+            console.error('Failed to resend verification:', error);
+            alert('Failed to resend verification email. Please try again.');
+        } finally {
+            setIsResending(false);
+        }
+    };
 
     const fetchLocation = async () => {
         setLocError(null);
@@ -200,7 +246,9 @@ export default function SignupPage() {
                 console.log('✅ Authentication tokens stored successfully');
             }
 
-            setStep('success');
+            // Show email verification screen
+            setStep('verify-email');
+            setResendCooldown(60); // Start with cooldown
         } catch (error: any) {
             console.error("DIAGNOSTIC LOG:", error);
             console.error("Full error object:", error);
@@ -213,6 +261,8 @@ export default function SignupPage() {
                 friendlyMsg = "The backend server is currently having trouble processing requests. Our engineers are on it!";
             } else if (error.message.includes('500')) {
                 friendlyMsg = "Server error occurred. Please try again or contact support if the issue persists.";
+            } else if (error.message.includes('Load failed') || error.message.includes('Failed to fetch')) {
+                friendlyMsg = "Could not reach the server. Please check your connection and try again.";
             }
             
             alert(`⚠️ Registration Error: ${friendlyMsg}`);
@@ -221,6 +271,93 @@ export default function SignupPage() {
         }
     };
 
+    // Email Verification Screen
+    if (step === 'verify-email') {
+        return (
+            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
+                    {/* Decorative Background Glow */}
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/10 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-neon-green/10 rounded-full blur-2xl"></div>
+
+                    {/* Email Icon with Animation */}
+                    <div className="w-28 h-28 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
+                        <div className="relative">
+                            <i className="bi bi-envelope-check text-5xl text-brand-blue"></i>
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-neon-green rounded-full flex items-center justify-center animate-bounce">
+                                <i className="bi bi-check text-white text-[10px]"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
+                        Check Your Email
+                    </h1>
+                    
+                    <p className="text-charcoal/50 text-sm mb-2 relative z-10 leading-relaxed">
+                        We sent a verification link to
+                    </p>
+                    <p className="text-charcoal font-bold text-base mb-6 relative z-10 break-all px-4">
+                        {formData.email}
+                    </p>
+
+                    {/* Instructions */}
+                    <div className="w-full bg-charcoal/5 rounded-2xl p-4 mb-6 relative z-10">
+                        <div className="flex items-start gap-3 text-left">
+                            <i className="bi bi-info-circle text-brand-blue text-lg mt-0.5"></i>
+                            <div className="text-xs text-charcoal/60 leading-relaxed">
+                                <p className="mb-2">Click the link in your email to verify your account.</p>
+                                <p>Can't find it? Check your <strong>spam folder</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Resend Button with Cooldown */}
+                    <button
+                        onClick={handleResendVerification}
+                        disabled={resendCooldown > 0 || isResending}
+                        className={`
+                            text-sm font-bold transition-all mb-8 relative z-10
+                            ${resendCooldown > 0 || isResending 
+                                ? 'text-charcoal/30 cursor-not-allowed' 
+                                : 'text-brand-blue hover:text-brand-blue/70'}
+                        `}
+                    >
+                        {isResending ? (
+                            <span className="flex items-center gap-2">
+                                <span className="w-4 h-4 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
+                                Sending...
+                            </span>
+                        ) : resendCooldown > 0 ? (
+                            `Resend in ${resendCooldown}s`
+                        ) : (
+                            'Resend Verification Email'
+                        )}
+                    </button>
+
+                    {/* Continue Button */}
+                    <button
+                        onClick={() => setStep('success')}
+                        className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10"
+                    >
+                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-neon-green transition-colors">
+                            Continue to Profile
+                        </span>
+                    </button>
+
+                    {/* Change Email */}
+                    <button
+                        onClick={() => setStep('form')}
+                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-4"
+                    >
+                        Change Email Address
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Success Screen (after verification or skip)
     if (step === 'success') {
         return (
             <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
@@ -312,6 +449,9 @@ export default function SignupPage() {
                     className="py-1"
                     value={formData.username}
                     onChange={e => setFormData({ ...formData, username: e.target.value })}
+                    validationStatus={usernameValidation.status}
+                    error={usernameValidation.errorMessage || undefined}
+                    successText={usernameValidation.status === 'valid' ? 'Username available' : undefined}
                 />
                 <PremiumInput
                     label="Email"
@@ -321,6 +461,9 @@ export default function SignupPage() {
                     className="py-1"
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    validationStatus={emailValidation.status}
+                    error={emailValidation.errorMessage || undefined}
+                    successText={emailValidation.status === 'valid' ? 'Email available' : undefined}
                 />
                 <div className="flex flex-col gap-2">
                     <PremiumInput
@@ -356,10 +499,25 @@ export default function SignupPage() {
                 </div>
 
                 <button
-                    disabled={loading || !isPassValid || !formData.username || !formData.email || !formData.agree}
+                    disabled={
+                        loading || 
+                        !isPassValid || 
+                        !formData.username || 
+                        !formData.email || 
+                        !formData.agree ||
+                        emailValidation.status === 'invalid' ||
+                        emailValidation.status === 'taken' ||
+                        emailValidation.status === 'checking' ||
+                        usernameValidation.status === 'invalid' ||
+                        usernameValidation.status === 'taken' ||
+                        usernameValidation.status === 'checking'
+                    }
                     className={`
                         neumorphic-btn py-4.5 rounded-2xl mt-2 transition-all duration-300
-                        ${(loading || !isPassValid || !formData.username || !formData.email || !formData.agree) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01]'}
+                        ${(loading || !isPassValid || !formData.username || !formData.email || !formData.agree || 
+                          emailValidation.status === 'checking' || usernameValidation.status === 'checking') 
+                            ? 'opacity-50 cursor-not-allowed' 
+                            : 'hover:scale-[1.01]'}
                     `}
                 >
                     <span className="text-charcoal font-black uppercase tracking-widest text-sm">

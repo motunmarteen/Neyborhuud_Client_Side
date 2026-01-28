@@ -56,7 +56,18 @@ export default function LoginPage() {
             router.push('/feed');
         } catch (error: any) {
             console.error(error);
-            alert(`Login Error: ${error.message}`);
+            
+            // Provide friendly error messages
+            let friendlyMsg = error.message;
+            if (error.message.includes('Load failed') || error.message.includes('Failed to fetch')) {
+                friendlyMsg = 'Could not reach the server. Please check your connection and try again.';
+            } else if (error.message.includes('Invalid credentials') || error.message.includes('incorrect')) {
+                friendlyMsg = 'Invalid email or password. Please try again.';
+            } else if (error.message.includes('not found') || error.message.includes('No user')) {
+                friendlyMsg = 'No account found with this email. Would you like to sign up?';
+            }
+            
+            alert(`Login Error: ${friendlyMsg}`);
         } finally {
             setLoading(false);
         }
@@ -90,9 +101,12 @@ export default function LoginPage() {
                         onChange={e => setFormData({ ...formData, password: e.target.value })}
                     />
                     <div className="flex justify-end px-2">
-                        <button type="button" className="text-[10px] font-black uppercase tracking-widest text-brand-blue hover:text-brand-blue/70">
+                        <Link 
+                            href="/forgot-password" 
+                            className="text-[10px] font-black uppercase tracking-widest text-brand-blue hover:text-brand-blue/70 transition-colors"
+                        >
                             Forgot Password?
-                        </button>
+                        </Link>
                     </div>
                 </div>
 

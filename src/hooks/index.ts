@@ -19,3 +19,4 @@ export {
 } from "./useNotifications";
 export { useGeolocation, useWatchLocation } from "./useGeolocation";
 export { useDebouncedValue } from "./useDebouncedValue";
+export { useEmailValidation, useUsernameValidation } from "./useEmailValidation";
