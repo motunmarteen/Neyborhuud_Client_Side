@@ -10,10 +10,16 @@ export const getApiUrl = () => {
     // Check both environment variable names for compatibility
     const envUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
     if (envUrl && envUrl !== 'undefined') {
-        console.log('🌐 Using API URL:', envUrl);
+        // Only log in browser/client-side, not during build
+        if (typeof window !== 'undefined') {
+            console.log('🌐 Using API URL:', envUrl);
+        }
         return envUrl;
     }
-    console.warn('⚠️ No API URL in env, using production:', PRODUCTION_API_URL);
+    // Only log in browser/client-side, not during build
+    if (typeof window !== 'undefined') {
+        console.warn('⚠️ No API URL in env, using production:', PRODUCTION_API_URL);
+    }
     return PRODUCTION_API_URL;
 };
 
