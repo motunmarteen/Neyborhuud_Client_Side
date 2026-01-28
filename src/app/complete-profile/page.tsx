@@ -1,14 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { fetchAPI } from '@/lib/api';
+
+const TOKEN_KEY = 'neyborhuud_access_token';
+
+function clearAuth() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('neyborhuud_refresh_token');
+    localStorage.removeItem('neyborhuud_user');
+}
 
 export default function CompleteProfilePage() {
     const router = useRouter();
     const [step, setStep] = useState<'form' | 'success'>('form');
     const [loading, setLoading] = useState(false);
+    const [hasToken, setHasToken] = useState<boolean | null>(null);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -20,8 +30,24 @@ export default function CompleteProfilePage() {
     const isPhoneValid = /^(?:\+234|0)[789][01]\d{8}$/.test(formData.phone);
     const isFormValid = formData.firstName && formData.lastName;
 
+    useEffect(() => {
+        const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+        setHasToken(!!token);
+        if (!token) {
+            router.replace('/login');
+        }
+    }, [router]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+
+        if (!token) {
+            alert('Your session expired. Please sign up or log in again.');
+            router.push('/login');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -32,12 +58,30 @@ export default function CompleteProfilePage() {
 
             setStep('success');
         } catch (error: any) {
-            console.error(error);
-            alert(`Profile Error: ${error.message}`);
+            console.error('Complete-profile error:', error);
+            const msg = error?.message || '';
+
+            if (msg.toLowerCase().includes('invalid token') || msg.toLowerCase().includes('user not active')) {
+                clearAuth();
+                alert('Your session is invalid or your account isn’t active yet. Please log in again or finish email verification, then try completing your profile.');
+                router.push('/login');
+                return;
+            }
+
+            alert(`Profile Error: ${msg}`);
         } finally {
             setLoading(false);
         }
     };
+
+    if (hasToken === false) {
+        return (
+            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6">
+                <div className="w-10 h-10 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin" />
+                <p className="text-charcoal/50 text-sm mt-4">Redirecting to login…</p>
+            </div>
+        );
+    }
 
     if (step === 'success') {
         return (

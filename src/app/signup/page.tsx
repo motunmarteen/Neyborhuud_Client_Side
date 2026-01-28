@@ -276,26 +276,29 @@ export default function SignupPage() {
             });
 
             // Store authentication tokens and user data
-            // New endpoint returns: { success, data: { user, token, community } }
+            // Backend may return { data: { user, token, community } } or { data: { user, session: { access_token }, community } }
             if (response.success && response.data) {
-                const { user, token, community } = response.data;
+                const d = response.data;
+                const user = d.user;
+                const community = d.community;
 
-                // Store token in localStorage
-                if (token) {
-                    localStorage.setItem('neyborhuud_access_token', token);
+                const sessionToken = typeof d.session === 'object' && d.session?.access_token ? d.session.access_token : undefined;
+                const accessToken = d.token ?? d.access_token ?? d.accessToken ?? sessionToken ?? null;
+
+                if (accessToken) {
+                    localStorage.setItem('neyborhuud_access_token', accessToken);
+                    console.log('✅ Authentication tokens stored successfully');
+                } else {
+                    console.warn('⚠️ Create-account succeeded but no token received. Check backend response shape.');
                 }
 
-                // Store user data
                 if (user) {
                     localStorage.setItem('neyborhuud_user', JSON.stringify(user));
                 }
 
-                // Log community info if available
                 if (community) {
                     console.log('✅ Community assigned:', community.communityName || community);
                 }
-
-                console.log('✅ Authentication tokens stored successfully');
             }
 
             // Show email verification screen
