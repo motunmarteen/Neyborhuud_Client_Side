@@ -418,7 +418,7 @@ function VerifyEmailContent() {
                 </p>
 
                 <button
-                    onClick={() => token && verifyEmail(token)}
+                    onClick={() => token && verifyWithToken(token)}
                     className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10 mb-4"
                 >
                     <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
