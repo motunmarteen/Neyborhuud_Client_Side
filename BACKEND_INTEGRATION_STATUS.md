@@ -1,13 +1,32 @@
 # Backend Integration Status — Auth & Email Sync
 
-**Last Updated:** January 2026  
+**Last Updated:** January 28, 2026  
 **Backend Reference:** `neyborhuud-ServerSide` → `docs/FRONTEND_AUTH_SYNC_SUMMARY.md`
 
 ---
 
-## Status: ✅ Backend Ready for Integration
+## Status: ⚠️ Action Required - Code-Based Verification
 
-The backend team has implemented all auth/email endpoints per the sync spec. Frontend and backend are aligned.
+### Critical Issue Identified
+
+**Problem:** Verification emails are not being received by users. Accounts are created but users cannot verify their email because:
+- No email arrives in inbox
+- No email in spam folder
+- User stuck with `emailVerified: false`
+- Email shows "already registered" on signup (correct, but unverifiable)
+
+### Solution Implemented (Frontend)
+
+Frontend has been updated to use **6-digit code verification (OTP style)** instead of link-based verification:
+- After signup → Show "Enter 6-digit code" screen
+- User enters code → `POST /auth/verify-email` with `{ email, code }`
+- Resend code → `POST /auth/resend-verification` with `{ email }`
+
+**See:** `BACKEND_CODE_VERIFICATION_PROMPT.md` for detailed backend implementation requirements.
+
+---
+
+## Backend Endpoints
 
 ---
 
@@ -46,10 +65,19 @@ The backend team has implemented all auth/email endpoints per the sync spec. Fro
   - **Signup "Check Your Email" screen:** Sends `{ email: formData.email }` (user may have token but we explicitly send email).
   - **Settings:** Sends `POST` with no body; `Authorization: Bearer` from `localStorage`.
 
-### Verify Email
+### Verify Email (UPDATED - Code-Based)
 
-- **Backend:** `POST` with `{ token }`. Returns `data.user` with `verificationStatus: "verified"`; optional +10 HuudCoins.
-- **Frontend:** Sends `{ token }` from `?token=...`; shows success and bonus coins UI.
+- **Backend MUST support BOTH:**
+  1. `{ email, code }` - NEW code-based verification (6-digit OTP)
+  2. `{ token }` - Legacy link-based verification (backward compatible)
+  
+- **Frontend sends:**
+  - From signup flow: `{ email, code }` (user enters 6-digit code)
+  - From email link: `{ token }` (if user clicks link in email)
+  
+- **Backend returns:** `data.user` with `verificationStatus: "verified"`; optional +10 HuudCoins.
+
+**See:** `BACKEND_CODE_VERIFICATION_PROMPT.md` for full implementation details.
 
 ### Forgot Password
 
@@ -89,14 +117,17 @@ The backend team has implemented all auth/email endpoints per the sync spec. Fro
 
 ## Quick QA Checklist
 
-After backend production deploy:
+After backend implements code-based verification:
 
-- [ ] **Signup:** Email/username show "checking" → "available" or "taken"; create account → "Check Your Email" screen.
-- [ ] **Resend verification:** Cooldown 60s; success message; email received.
-- [ ] **Verify email:** Open link → `/verify-email?token=...` → success + bonus coins.
-- [ ] **Forgot password:** Submit email → "Check your inbox"; link → reset password form → success → login.
-- [ ] **Settings:** Notifications & privacy toggles save; resend verification works when logged in.
-- [ ] **Errors:** Invalid/expired tokens, duplicate email, etc. show clear messages.
+- [ ] **Signup:** Email/username show "checking" → "available" or "taken"
+- [ ] **Signup → Verify:** Create account → "Enter 6-digit code" screen appears
+- [ ] **Email received:** User receives email with 6-digit code (not a link)
+- [ ] **Code verification:** Enter correct code → success + bonus coins
+- [ ] **Invalid code:** Enter wrong code → "Invalid code" error
+- [ ] **Resend code:** Cooldown 60s; new code email received
+- [ ] **Forgot password:** Submit email → email with code/link received
+- [ ] **Settings:** Notifications & privacy toggles save
+- [ ] **Errors:** Expired codes, too many attempts, etc. show clear messages
 
 ---
 
@@ -105,13 +136,13 @@ After backend production deploy:
 - **Frontend implementation details:** `FRONTEND_EMAIL_IMPLEMENTATION.md`
 - **Backend spec (request/response, curl):** `neyborhuud-ServerSide` → `docs/FRONTEND_AUTH_SYNC_SUMMARY.md`
 - **Original backend sync prompt:** `BACKEND_SYNC_PROMPT.md`
+- **Code-based verification spec:** `BACKEND_CODE_VERIFICATION_PROMPT.md` ⬅️ **NEW**
 
 ---
 
 ## Mismatches or Issues
 
-If you find any mismatch with the backend (status codes, body shapes, error format, or behavior), document it here and notify the backend team.
-
 | Date | Issue | Resolution |
 |------|-------|------------|
-| — | — | — |
+| 2026-01-28 | Verification emails not being received by users | Frontend updated to code-based (OTP) verification; backend needs to implement sending 6-digit codes. See `BACKEND_CODE_VERIFICATION_PROMPT.md` |
+| 2026-01-28 | Users stuck with `emailVerified: false` but "already registered" | Related to above - once code verification works, users can verify existing unverified accounts |

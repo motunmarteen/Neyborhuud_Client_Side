@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
+import { OTPInput } from '@/components/ui/OTPInput';
 import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
@@ -27,6 +28,11 @@ export default function SignupPage() {
     // Resend verification email state
     const [resendCooldown, setResendCooldown] = useState(0);
     const [isResending, setIsResending] = useState(false);
+    
+    // Verification code state
+    const [verificationCode, setVerificationCode] = useState('');
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [verificationError, setVerificationError] = useState<string | null>(null);
 
     // Email & Username validation hooks
     const emailValidation = useEmailValidation({ debounceMs: 600, checkAvailability: true });
@@ -60,22 +66,68 @@ export default function SignupPage() {
     };
     const isPassValid = Object.values(passRules).every(Boolean);
 
-    // Handle resend verification email
+    // Handle resend verification code
     const handleResendVerification = async () => {
         if (resendCooldown > 0 || isResending) return;
         
         setIsResending(true);
+        setVerificationError(null);
         try {
             await fetchAPI('/auth/resend-verification', {
                 method: 'POST',
                 body: JSON.stringify({ email: formData.email })
             });
             setResendCooldown(60); // 60 second cooldown
+            setVerificationCode(''); // Clear any entered code
         } catch (error: any) {
             console.error('Failed to resend verification:', error);
-            alert('Failed to resend verification email. Please try again.');
+            alert('Failed to resend verification code. Please try again.');
         } finally {
             setIsResending(false);
+        }
+    };
+
+    // Handle verification code submission
+    const handleVerifyCode = async (code?: string) => {
+        const codeToVerify = code || verificationCode;
+        if (codeToVerify.length !== 6 || isVerifying) return;
+        
+        setIsVerifying(true);
+        setVerificationError(null);
+        
+        try {
+            const response = await fetchAPI('/auth/verify-email', {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    email: formData.email,
+                    code: codeToVerify 
+                })
+            });
+            
+            // Update stored user data with verified status
+            if (response.data?.user) {
+                localStorage.setItem('neyborhuud_user', JSON.stringify(response.data.user));
+            }
+            
+            console.log('✅ Email verified successfully');
+            setStep('success');
+        } catch (error: any) {
+            console.error('Verification failed:', error);
+            
+            // Provide helpful error messages
+            if (error.message.includes('expired')) {
+                setVerificationError('Code expired. Please request a new one.');
+            } else if (error.message.includes('invalid') || error.message.includes('incorrect')) {
+                setVerificationError('Invalid code. Please check and try again.');
+            } else if (error.message.includes('attempts')) {
+                setVerificationError('Too many attempts. Please request a new code.');
+            } else {
+                setVerificationError(error.message || 'Verification failed. Please try again.');
+            }
+            
+            setVerificationCode(''); // Clear code on error
+        } finally {
+            setIsVerifying(false);
         }
     };
 
@@ -271,84 +323,119 @@ export default function SignupPage() {
         }
     };
 
-    // Email Verification Screen
+    // Email Verification Screen - OTP Code Entry
     if (step === 'verify-email') {
         return (
             <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
+                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-8 sm:p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
                     {/* Decorative Background Glow */}
                     <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/10 rounded-full blur-3xl"></div>
                     <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-neon-green/10 rounded-full blur-2xl"></div>
 
-                    {/* Email Icon with Animation */}
-                    <div className="w-28 h-28 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
-                        <div className="relative">
-                            <i className="bi bi-envelope-check text-5xl text-brand-blue"></i>
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-neon-green rounded-full flex items-center justify-center animate-bounce">
-                                <i className="bi bi-check text-white text-[10px]"></i>
-                            </div>
-                        </div>
+                    {/* Email Icon */}
+                    <div className="w-20 h-20 rounded-full neumorphic-inset flex items-center justify-center mb-6 relative z-10">
+                        <i className="bi bi-shield-lock text-4xl text-brand-blue"></i>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
-                        Check Your Email
+                    <h1 className="text-2xl font-light text-charcoal mb-2 relative z-10 tracking-tight">
+                        Verify Your Email
                     </h1>
                     
-                    <p className="text-charcoal/50 text-sm mb-2 relative z-10 leading-relaxed">
-                        We sent a verification link to
+                    <p className="text-charcoal/50 text-sm mb-1 relative z-10 leading-relaxed">
+                        We sent a 6-digit code to
                     </p>
-                    <p className="text-charcoal font-bold text-base mb-6 relative z-10 break-all px-4">
+                    <p className="text-charcoal font-bold text-sm mb-6 relative z-10 break-all px-2">
                         {formData.email}
                     </p>
 
-                    {/* Instructions */}
-                    <div className="w-full bg-charcoal/5 rounded-2xl p-4 mb-6 relative z-10">
-                        <div className="flex items-start gap-3 text-left">
-                            <i className="bi bi-info-circle text-brand-blue text-lg mt-0.5"></i>
-                            <div className="text-xs text-charcoal/60 leading-relaxed">
-                                <p className="mb-2">Click the link in your email to verify your account.</p>
-                                <p>Can't find it? Check your <strong>spam folder</strong>.</p>
-                            </div>
-                        </div>
+                    {/* OTP Code Input */}
+                    <div className="w-full mb-4 relative z-10">
+                        <OTPInput
+                            length={6}
+                            value={verificationCode}
+                            onChange={setVerificationCode}
+                            onComplete={handleVerifyCode}
+                            disabled={isVerifying}
+                            error={!!verificationError}
+                            autoFocus={true}
+                        />
                     </div>
 
-                    {/* Resend Button with Cooldown */}
+                    {/* Error Message */}
+                    {verificationError && (
+                        <div className="w-full mb-4 p-3 rounded-xl bg-brand-red/10 border border-brand-red/20 relative z-10">
+                            <p className="text-xs text-brand-red font-bold flex items-center justify-center gap-2">
+                                <i className="bi bi-exclamation-circle"></i>
+                                {verificationError}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Verify Button */}
                     <button
-                        onClick={handleResendVerification}
-                        disabled={resendCooldown > 0 || isResending}
+                        onClick={() => handleVerifyCode()}
+                        disabled={verificationCode.length !== 6 || isVerifying}
                         className={`
-                            text-sm font-bold transition-all mb-8 relative z-10
-                            ${resendCooldown > 0 || isResending 
-                                ? 'text-charcoal/30 cursor-not-allowed' 
-                                : 'text-brand-blue hover:text-brand-blue/70'}
+                            neumorphic-btn w-full py-4 rounded-2xl group transition-all relative z-10 mb-4
+                            ${(verificationCode.length !== 6 || isVerifying) ? 'opacity-50 cursor-not-allowed' : ''}
                         `}
                     >
-                        {isResending ? (
-                            <span className="flex items-center gap-2">
-                                <span className="w-4 h-4 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
-                                Sending...
-                            </span>
-                        ) : resendCooldown > 0 ? (
-                            `Resend in ${resendCooldown}s`
-                        ) : (
-                            'Resend Verification Email'
-                        )}
+                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-neon-green transition-colors">
+                            {isVerifying ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <span className="w-4 h-4 border-2 border-charcoal/30 border-t-charcoal rounded-full animate-spin"></span>
+                                    Verifying...
+                                </span>
+                            ) : (
+                                'Verify Email'
+                            )}
+                        </span>
                     </button>
 
-                    {/* Continue Button */}
+                    {/* Resend Code */}
+                    <div className="flex flex-col items-center gap-2 relative z-10">
+                        <p className="text-charcoal/40 text-xs">
+                            Didn't receive the code?
+                        </p>
+                        <button
+                            onClick={handleResendVerification}
+                            disabled={resendCooldown > 0 || isResending}
+                            className={`
+                                text-sm font-bold transition-all
+                                ${resendCooldown > 0 || isResending 
+                                    ? 'text-charcoal/30 cursor-not-allowed' 
+                                    : 'text-brand-blue hover:text-brand-blue/70'}
+                            `}
+                        >
+                            {isResending ? (
+                                <span className="flex items-center gap-2">
+                                    <span className="w-3 h-3 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
+                                    Sending...
+                                </span>
+                            ) : resendCooldown > 0 ? (
+                                `Resend in ${resendCooldown}s`
+                            ) : (
+                                'Resend Code'
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Skip for now (optional - remove if verification is mandatory) */}
                     <button
                         onClick={() => setStep('success')}
-                        className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10"
+                        className="text-charcoal/20 hover:text-charcoal/40 text-[9px] font-bold uppercase tracking-[0.15em] transition-colors relative z-10 mt-6"
                     >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-neon-green transition-colors">
-                            Continue to Profile
-                        </span>
+                        Skip for Now
                     </button>
 
                     {/* Change Email */}
                     <button
-                        onClick={() => setStep('form')}
-                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-4"
+                        onClick={() => {
+                            setStep('form');
+                            setVerificationCode('');
+                            setVerificationError(null);
+                        }}
+                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-2"
                     >
                         Change Email Address
                     </button>
