@@ -90,12 +90,22 @@ export default function SignupPage() {
     // Handle verification code submission
     const handleVerifyCode = async (code?: string) => {
         const codeToVerify = code || verificationCode;
-        if (codeToVerify.length !== 6 || isVerifying) return;
+        console.log('🔍 handleVerifyCode called:', { codeToVerify, length: codeToVerify.length, isVerifying });
         
+        if (codeToVerify.length !== 6 || isVerifying) {
+            console.log('⚠️ Verification skipped:', { length: codeToVerify.length, isVerifying });
+            return;
+        }
+        
+        console.log('✅ Starting verification...');
         setIsVerifying(true);
         setVerificationError(null);
         
         try {
+            // Get current token to send with verification request
+            const currentToken = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
+            console.log('🔑 Current token before verification:', currentToken ? 'Present' : 'Missing');
+            
             const response = await fetchAPI('/auth/verify-email', {
                 method: 'POST',
                 body: JSON.stringify({ 
@@ -104,10 +114,44 @@ export default function SignupPage() {
                 })
             });
             
-            // Update stored user data with verified status
-            if (response.data?.user) {
-                localStorage.setItem('neyborhuud_user', JSON.stringify(response.data.user));
+            console.log('📦 Verification response:', response);
+            
+            // Store/update authentication tokens if provided
+            if (response.data) {
+                const d = response.data;
+                
+                // Check for tokens in various possible locations
+                const sessionToken = typeof d.session === 'object' && d.session?.access_token ? d.session.access_token : undefined;
+                const accessToken = d.token ?? d.access_token ?? d.accessToken ?? sessionToken ?? null;
+                
+                if (accessToken) {
+                    localStorage.setItem('neyborhuud_access_token', accessToken);
+                    console.log('✅ Access token stored after verification');
+                } else if (currentToken) {
+                    // If no new token but we have an old one, keep it
+                    console.log('ℹ️ No new token returned, keeping existing token');
+                } else {
+                    console.warn('⚠️ No token available after verification - user may need to login');
+                }
+                
+                if (d.session?.refresh_token) {
+                    localStorage.setItem('neyborhuud_refresh_token', d.session.refresh_token);
+                }
+                
+                // Update stored user data with verified status
+                if (d.user) {
+                    localStorage.setItem('neyborhuud_user', JSON.stringify(d.user));
+                    console.log('✅ User data updated:', { 
+                        emailVerified: d.user.emailVerified, 
+                        isVerified: d.user.isVerified,
+                        verificationStatus: d.user.verificationStatus
+                    });
+                }
             }
+            
+            // Verify token is still valid by checking stored token
+            const finalToken = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
+            console.log('🔑 Final token after verification:', finalToken ? 'Present' : 'Missing');
             
             console.log('✅ Email verified successfully');
             setStep('success');
@@ -374,26 +418,15 @@ export default function SignupPage() {
                         </div>
                     )}
 
-                    {/* Verify Button */}
-                    <button
-                        onClick={() => handleVerifyCode()}
-                        disabled={verificationCode.length !== 6 || isVerifying}
-                        className={`
-                            neumorphic-btn w-full py-4 rounded-2xl group transition-all relative z-10 mb-4
-                            ${(verificationCode.length !== 6 || isVerifying) ? 'opacity-50 cursor-not-allowed' : ''}
-                        `}
-                    >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-neon-green transition-colors">
-                            {isVerifying ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <span className="w-4 h-4 border-2 border-charcoal/30 border-t-charcoal rounded-full animate-spin"></span>
-                                    Verifying...
-                                </span>
-                            ) : (
-                                'Verify Email'
-                            )}
-                        </span>
-                    </button>
+                    {/* Verifying Indicator */}
+                    {isVerifying && (
+                        <div className="w-full mb-4 p-3 rounded-xl bg-brand-blue/10 border border-brand-blue/20 relative z-10">
+                            <p className="text-xs text-brand-blue font-bold flex items-center justify-center gap-2">
+                                <span className="w-4 h-4 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
+                                Verifying...
+                            </p>
+                        </div>
+                    )}
 
                     {/* Resend Code */}
                     <div className="flex flex-col items-center gap-2 relative z-10">
@@ -471,19 +504,19 @@ export default function SignupPage() {
                     </div>
 
                     <button
-                        onClick={() => router.push('/complete-profile')}
+                        onClick={() => router.push('/feed')}
                         className="neumorphic-btn w-full py-6 rounded-2xl group transition-all mb-4 relative z-10"
                     >
                         <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-neon-green transition-colors">
-                            Claim 100 More Coins
+                            Get Started
                         </span>
                     </button>
 
                     <button
-                        onClick={() => router.push('/feed')}
+                        onClick={() => router.push('/complete-profile')}
                         className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10"
                     >
-                        I'll do this later
+                        Complete Profile to Claim 100 More Coins
                     </button>
                 </div>
             </div>

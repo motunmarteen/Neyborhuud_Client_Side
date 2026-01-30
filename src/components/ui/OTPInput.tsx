@@ -67,9 +67,23 @@ export const OTPInput: React.FC<OTPInputProps> = ({
             focusInput(index + 1);
         }
 
-        // Check if complete
-        if (newCode.length === length && !newCode.includes('')) {
-            onComplete?.(newCode);
+        // Check if complete - all fields must be filled
+        const isComplete = newCode.length === length && newValues.every(v => v !== '' && v !== undefined);
+        console.log('🔍 OTPInput completion check:', { 
+            newCode, 
+            length: newCode.length, 
+            expectedLength: length,
+            allFilled: newValues.every(v => v !== '' && v !== undefined),
+            isComplete,
+            hasOnComplete: !!onComplete
+        });
+        
+        if (isComplete && onComplete) {
+            // Small delay to ensure UI updates before calling onComplete
+            console.log('✅ Calling onComplete with code:', newCode);
+            setTimeout(() => {
+                onComplete(newCode);
+            }, 100);
         }
     };
 
@@ -118,9 +132,13 @@ export const OTPInput: React.FC<OTPInputProps> = ({
             const nextEmptyIndex = newValues.findIndex(v => !v);
             focusInput(nextEmptyIndex >= 0 ? nextEmptyIndex : length - 1);
 
-            // Check if complete
-            if (newCode.length === length) {
-                onComplete?.(newCode);
+            // Check if complete - all fields must be filled
+            const finalValues = newValues.slice(0, length);
+            if (newCode.length === length && finalValues.every(v => v !== '' && v !== undefined)) {
+                // Small delay to ensure UI updates before calling onComplete
+                setTimeout(() => {
+                    onComplete?.(newCode);
+                }, 100);
             }
         }
     };

@@ -32,9 +32,38 @@ export default function CompleteProfilePage() {
 
     useEffect(() => {
         const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+        const userData = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_user') : null;
+        
         setHasToken(!!token);
+        
         if (!token) {
             router.replace('/login');
+            return;
+        }
+        
+        // Check if user is verified before allowing profile completion
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+                const isVerified = user.emailVerified === true || user.isVerified === true || user.email_verified === true || user.verificationStatus === 'verified';
+                
+                console.log('🔍 Profile completion check:', {
+                    hasToken: !!token,
+                    isVerified,
+                    emailVerified: user.emailVerified,
+                    isVerified_field: user.isVerified,
+                    verificationStatus: user.verificationStatus
+                });
+                
+                if (!isVerified) {
+                    console.log('⚠️ User not verified, redirecting to email verification');
+                    alert('Please verify your email before completing your profile.');
+                    router.replace('/verify-email');
+                    return;
+                }
+            } catch (e) {
+                console.error('Error parsing user data:', e);
+            }
         }
     }, [router]);
 
@@ -60,14 +89,85 @@ export default function CompleteProfilePage() {
         } catch (error: any) {
             console.error('Complete-profile error:', error);
             const msg = error?.message || '';
+            const status = error?.status;
+            const msgLower = msg.toLowerCase();
 
-            if (msg.toLowerCase().includes('invalid token') || msg.toLowerCase().includes('user not active')) {
+            // Check if user is actually verified before redirecting
+            const storedUser = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_user') : null;
+            let userVerified = false;
+            if (storedUser) {
+                try {
+                    const user = JSON.parse(storedUser);
+                    userVerified = user.emailVerified === true || user.isVerified === true || user.email_verified === true;
+                    console.log('🔍 User verification status:', { 
+                        emailVerified: user.emailVerified, 
+                        isVerified: user.isVerified,
+                        email_verified: user.email_verified,
+                        userVerified 
+                    });
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+
+            // Log full error details for debugging
+            console.log('🔍 Error Analysis:', {
+                status,
+                message: msg,
+                hasStatus: !!status,
+                responseData: error?.responseData,
+                userVerified,
+                hasToken: !!localStorage.getItem('neyborhuud_access_token')
+            });
+
+            // Priority 1: Handle 403 error for unverified email (NEW: Backend requirement)
+            // Check status code first, then message content
+            if (status === 403 || msgLower.includes('verify your email') || msgLower.includes('verification') || msgLower.includes('email not verified')) {
+                console.log('✅ Detected email verification required (403 or verification message)');
+                alert(msg || 'Please verify your email before completing your profile. Check your email for the verification code.');
+                router.push('/verify-email');
+                return;
+            }
+
+            // Priority 2: Handle "user not active" - but check if user is actually verified first
+            // If user IS verified but getting this error, it's likely a token issue, not verification issue
+            if (msgLower.includes('user not active') || msgLower.includes('account isn\'t active') || msgLower.includes('account is not active')) {
+                // If user is verified but getting "user not active", it's likely a token/session issue
+                if (userVerified && status === 401) {
+                    console.log('⚠️ User is verified but getting 401 - likely token issue');
+                    // Try to refresh or get a new token by redirecting to login
+                    clearAuth();
+                    alert('Your session expired. Please log in again to continue.');
+                    router.push('/login');
+                    return;
+                }
+                
+                console.log('✅ Detected "user not active" - redirecting to email verification');
+                // If status is 403, definitely email verification issue
+                if (status === 403) {
+                    alert('Please verify your email before completing your profile. Check your email for the verification code.');
+                    router.push('/verify-email');
+                    return;
+                }
+                // Otherwise, could be either email verification or account activation issue
+                // Show message that covers both cases
+                alert('Your account isn\'t active yet. Please verify your email first, then try completing your profile again.');
+                router.push('/verify-email');
+                return;
+            }
+
+            // Priority 3: Handle 401 authentication errors (token issues)
+            if (status === 401 || msgLower.includes('authentication required') || msgLower.includes('session is invalid') || msgLower.includes('expired') || msgLower.includes('invalid token')) {
+                console.log('✅ Detected authentication error (401 or token issue)');
                 clearAuth();
-                alert('Your session is invalid or your account isn’t active yet. Please log in again or finish email verification, then try completing your profile.');
+                const authMsg = msg || 'Your session is invalid or expired. Please log in again.';
+                alert(authMsg);
                 router.push('/login');
                 return;
             }
 
+            // Generic error handling
+            console.log('⚠️ Unhandled error - showing generic message');
             alert(`Profile Error: ${msg}`);
         } finally {
             setLoading(false);

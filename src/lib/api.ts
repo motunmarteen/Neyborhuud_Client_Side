@@ -126,7 +126,9 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
             // Check if response is HTML (404 page) instead of JSON
             if (typeof data === 'object' && data.message && typeof data.message === 'string' && data.message.includes('<!DOCTYPE html>')) {
                 const errorMsg = `Endpoint not found (${response.status}). The backend route may not exist.`;
-                throw new Error(errorMsg);
+                const error = new Error(errorMsg);
+                (error as any).status = response.status;
+                throw error;
             }
             
             // Extract detailed error for backend debugging
@@ -142,7 +144,11 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
                 fullResponse: data
             });
             
-            throw new Error(errorMsg);
+            // Create error with status code attached for better error handling
+            const error = new Error(errorMsg);
+            (error as any).status = response.status;
+            (error as any).responseData = data;
+            throw error;
         }
 
         return data;
