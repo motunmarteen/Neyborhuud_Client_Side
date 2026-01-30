@@ -8,8 +8,22 @@ import {
   Post,
   Comment,
   PaginatedResponse,
+  FeedResponse,
   CreatePostPayload,
 } from "@/types/api";
+
+/** Normalize feed response: backend may return content at data.content or top-level content */
+function normalizeFeedResponse<T>(res: any): FeedResponse<T> {
+  const content = res?.content ?? res?.data?.content ?? res?.data?.data ?? [];
+  const pagination = res?.pagination ?? res?.data?.pagination ?? {
+    total: 0,
+    page: 1,
+    limit: 20,
+    totalPages: 0,
+    hasMore: false,
+  };
+  return { content: Array.isArray(content) ? content : [], pagination };
+}
 
 export const contentService = {
   // ==================== Posts ====================
@@ -41,16 +55,67 @@ export const contentService = {
   },
 
   /**
-   * Get posts (feed)
+   * Get location-based feed (primary feed endpoint)
+   * Falls back to /content/posts if /feed is 404 or 500 (server error)
+   */
+  async getLocationFeed(
+    latitude: number,
+    longitude: number,
+    options?: {
+      radius?: number;
+      category?: string;
+      page?: number;
+      limit?: number;
+    },
+  ): Promise<FeedResponse<Post>> {
+    try {
+      const res = await apiClient.get<any>("/feed", {
+        params: {
+          lat: latitude,
+          lng: longitude,
+          radius: options?.radius || 5000,
+          category: options?.category,
+          page: options?.page || 1,
+          limit: options?.limit || 20,
+        },
+      });
+      return normalizeFeedResponse<Post>(res);
+    } catch (error: any) {
+      const status = error.response?.status;
+      const isUnavailable =
+        status === 404 ||
+        status === 500 ||
+        status === 502 ||
+        status === 503;
+      if (isUnavailable) {
+        console.warn(
+          `⚠️ /feed returned ${status}, falling back to /content/posts for recent posts`
+        );
+        const res = await apiClient.get<any>("/content/posts", {
+          params: {
+            page: options?.page || 1,
+            limit: options?.limit || 20,
+            filter: "neighborhood",
+          },
+        });
+        return normalizeFeedResponse<Post>(res);
+      }
+      throw error;
+    }
+  },
+
+  /**
+   * Get posts (feed) – returns { content: Post[], pagination }
    */
   async getPosts(
     page = 1,
     limit = 20,
     filter?: "all" | "friends" | "neighborhood",
-  ) {
-    return await apiClient.get<PaginatedResponse<Post>>("/content/posts", {
+  ): Promise<FeedResponse<Post>> {
+    const res = await apiClient.get<any>("/content/posts", {
       params: { page, limit, filter },
     });
+    return normalizeFeedResponse<Post>(res);
   },
 
   /**

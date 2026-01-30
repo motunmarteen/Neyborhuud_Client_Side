@@ -165,7 +165,7 @@ export default function ExampleDashboard() {
             <>
               {postsData?.pages.map((page) => {
                 // Extract the posts array from the paginated response
-                const posts = Array.isArray(page.data) ? page.data : (page.data as any)?.data || [];
+                const posts = page.content ?? [];
                 return posts.map((post: any) => (
                   <div key={post.id} className="bg-white rounded-lg shadow p-6">
                     {/* Post Header */}
