@@ -6,6 +6,7 @@ import { PremiumInput } from '@/components/ui/PremiumInput';
 import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { fetchAPI } from '@/lib/api';
+import apiClient from '@/lib/api-client';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -36,20 +37,25 @@ export default function LoginPage() {
             });
 
             // Store authentication tokens and user data
-            if (response.success && response.data?.session) {
-                const { session, user } = response.data;
+            // Backend may return either data.session.access_token or data.token
+            const data = response.data as any;
+            const accessToken =
+                data?.session?.access_token ??
+                data?.session?.accessToken ??
+                data?.token;
+            const user = data?.user;
+            const refreshToken = data?.session?.refresh_token ?? data?.session?.refreshToken;
 
-                // Store tokens in localStorage
-                localStorage.setItem('neyborhuud_access_token', session.access_token);
-                if (session.refresh_token) {
-                    localStorage.setItem('neyborhuud_refresh_token', session.refresh_token);
+            if (response.success && accessToken) {
+                localStorage.setItem('neyborhuud_access_token', accessToken);
+                if (refreshToken) {
+                    localStorage.setItem('neyborhuud_refresh_token', refreshToken);
                 }
-
-                // Store user data
                 if (user) {
                     localStorage.setItem('neyborhuud_user', JSON.stringify(user));
                 }
-
+                // Sync token with api-client so feed requests are authenticated immediately
+                apiClient.setToken(accessToken);
                 console.log('✅ Login successful, tokens stored');
             }
 

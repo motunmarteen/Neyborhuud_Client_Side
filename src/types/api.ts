@@ -25,6 +25,26 @@ export interface PaginatedResponse<T> {
   };
 }
 
+/** Feed/list response from GET /feed or GET /content/posts – use response.data.content */
+export interface FeedResponse<T> {
+  content: T[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+}
+
+/** Author shape returned by backend for posts (feed and create-post) */
+export interface PostAuthor {
+  id: string;
+  name: string;
+  username: string;
+  avatarUrl: string | null;
+}
+
 // ==================== User & Authentication Types ====================
 
 export interface LocationData {
@@ -110,28 +130,31 @@ export interface MediaItem {
   caption?: string;
 }
 
+/** Post shape from backend: id, author (id/name/username/avatarUrl), content, media (URLs or items), createdAt, etc. */
 export interface Post {
   id: string;
-  userId: string;
-  author: User;
-  type: "text" | "image" | "video" | "poll" | "event" | "article";
+  userId?: string;
+  /** Backend returns author with id, name, username, avatarUrl (same shape for feed and create-post) */
+  author: (User & { name?: string; avatarUrl?: string | null }) | PostAuthor;
+  type?: "text" | "image" | "video" | "poll" | "event" | "article";
   content: string;
-  media?: MediaItem[];
-  location?: LocationData;
-  visibility: "public" | "friends" | "neighborhood" | "ward" | "lga" | "state";
-  tags: string[];
-  mentions: string[];
+  /** Backend returns array of image URLs (strings) or media items with url */
+  media?: (MediaItem | string)[];
+  location?: LocationData | { lat?: number; lng?: number; lga?: string; [k: string]: unknown };
+  visibility?: "public" | "friends" | "neighborhood" | "ward" | "lga" | "state";
+  tags?: string[];
+  mentions?: string[];
   likes: number;
   comments: number;
   shares: number;
   views: number;
   isLiked?: boolean;
   isSaved?: boolean;
-  isPinned: boolean;
-  isReported: boolean;
-  status: "active" | "pending" | "removed" | "archived";
+  isPinned?: boolean;
+  isReported?: boolean;
+  status?: "active" | "pending" | "removed" | "archived";
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface Comment {
