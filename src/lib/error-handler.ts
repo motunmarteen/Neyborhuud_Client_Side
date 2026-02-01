@@ -40,18 +40,64 @@ export function handleApiError(error: unknown): ErrorResponse | null {
       // Handle specific HTTP status codes
       switch (error.response.status) {
         case 401:
-          toast.error("Authentication required", {
-            description: "Please log in to continue",
-          });
+          const errorMessage401 = response?.message || error.response?.data?.message || '';
+          const isNotAuthorized = errorMessage401.toLowerCase().includes('not authorized') ||
+                                 errorMessage401.toLowerCase().includes('unauthorized') ||
+                                 errorMessage401.toLowerCase().includes('access denied') ||
+                                 errorMessage401.toLowerCase().includes('permission');
+          
+          if (isNotAuthorized) {
+            // User is logged in but not authorized for this action
+            toast.error("Not Authorized", {
+              description: errorMessage401 || "You don't have permission to perform this action. This might be a backend permissions issue.",
+              duration: 6000,
+            });
+            console.error('🔍 Backend Authorization Issue:');
+            console.error('   - User has valid token but backend rejected request');
+            console.error('   - Check backend route permissions/middleware');
+            console.error('   - Error:', errorMessage401);
+          } else {
+            // Token is invalid/expired
+            toast.error("Authentication required", {
+              description: "Your session has expired. Please log in again.",
+              duration: 3000,
+            });
+          }
           break;
         case 403:
-          toast.error("Access denied", {
-            description: "You do not have permission to perform this action",
-          });
+          const errorMessage = response?.message || error.response?.data?.message || "Access denied";
+          const isVerificationError = errorMessage.toLowerCase().includes("verif") || 
+                                     errorMessage.toLowerCase().includes("not authorized");
+          
+          if (isVerificationError) {
+            toast.error("Verification Required", {
+              description: "Please verify your account to create posts. Check your email for verification link.",
+              duration: 6000,
+            });
+          } else {
+            toast.error("Access Denied", {
+              description: errorMessage || "You do not have permission to perform this action",
+              duration: 5000,
+            });
+          }
           break;
         case 404:
-          toast.error("Not found", {
-            description: "The requested resource was not found",
+          const requestUrl = error.config?.url || 'unknown';
+          const requestMethod = error.config?.method?.toUpperCase() || 'GET';
+          console.error('🔍 404 Error Details for Backend:');
+          console.error('   Request URL:', error.config?.baseURL + requestUrl);
+          console.error('   Request Method:', requestMethod);
+          console.error('   Expected Endpoint:', requestUrl);
+          console.error('   Full Request Config:', {
+            url: error.config?.url,
+            method: error.config?.method,
+            baseURL: error.config?.baseURL,
+            headers: error.config?.headers,
+          });
+          
+          toast.error("Endpoint Not Found (404)", {
+            description: `${requestMethod} ${requestUrl} - Check backend route registration`,
+            duration: 5000,
           });
           break;
         case 429:
