@@ -41,27 +41,28 @@ export function handleApiError(error: unknown): ErrorResponse | null {
       switch (error.response.status) {
         case 401:
           const errorMessage401 = response?.message || error.response?.data?.message || '';
-          const isNotAuthorized = errorMessage401.toLowerCase().includes('not authorized') ||
-                                 errorMessage401.toLowerCase().includes('unauthorized') ||
-                                 errorMessage401.toLowerCase().includes('access denied') ||
-                                 errorMessage401.toLowerCase().includes('permission');
+          const isTokenInvalidError = errorMessage401.toLowerCase().includes('token') &&
+                                     (errorMessage401.toLowerCase().includes('expired') ||
+                                      errorMessage401.toLowerCase().includes('invalid') ||
+                                      errorMessage401.toLowerCase().includes('malformed'));
           
-          if (isNotAuthorized) {
-            // User is logged in but not authorized for this action
-            toast.error("Not Authorized", {
-              description: errorMessage401 || "You don't have permission to perform this action. This might be a backend permissions issue.",
-              duration: 6000,
-            });
-            console.error('🔍 Backend Authorization Issue:');
-            console.error('   - User has valid token but backend rejected request');
-            console.error('   - Check backend route permissions/middleware');
-            console.error('   - Error:', errorMessage401);
-          } else {
+          if (isTokenInvalidError) {
             // Token is invalid/expired
             toast.error("Authentication required", {
               description: "Your session has expired. Please log in again.",
               duration: 3000,
             });
+          } else {
+            // User is logged in but not authorized for this action (permissions issue)
+            toast.error("Access Denied", {
+              description: errorMessage401 || "You don't have permission to access this resource. This might be a backend configuration issue.",
+              duration: 6000,
+            });
+            console.error('🔍 Backend Authorization Issue:');
+            console.error('   - User has valid token but backend rejected request with 401');
+            console.error('   - This should typically be a 403 (Forbidden), not 401 (Unauthorized)');
+            console.error('   - Check backend route permissions/middleware');
+            console.error('   - Error:', errorMessage401);
           }
           break;
         case 403:

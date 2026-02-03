@@ -62,6 +62,17 @@ body {
   font-style: normal;
 }
 
+/* X.com Style Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* X.com Style Focus Rings */
+*:focus-visible {
+  outline: 2px solid var(--neon-green);
+  outline-offset: 2px;
+}
+
 /* --- Soft Minimal Neumorphism --- */
 
 .neumorphic {
@@ -140,6 +151,24 @@ body {
 
 .glow-neon {
   box-shadow: 0 0 15px rgba(0, 255, 42, 0.4);
+}
+
+/* Mobile-first: safe area for notched devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Hide scrollbar but keep scroll (stories, filters) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom Scrollbar */

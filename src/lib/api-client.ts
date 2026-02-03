@@ -53,28 +53,37 @@ class ApiClient {
         console.groupEnd();
 
         if (status === 401) {
-          // Check if it's a "not authorized" vs "token invalid" error
-          const isNotAuthorizedError = errorMessage.toLowerCase().includes('not authorized') ||
-                                       errorMessage.toLowerCase().includes('unauthorized') ||
-                                       errorMessage.toLowerCase().includes('access denied') ||
-                                       errorMessage.toLowerCase().includes('permission');
+          // Check if it's a token validity issue (expired, invalid, malformed)
+          const errorMessageLower = (errorMessage || '').toLowerCase();
+          const isTokenInvalidError = errorMessageLower.includes('token') &&
+                                     (errorMessageLower.includes('expired') ||
+                                      errorMessageLower.includes('invalid') ||
+                                      errorMessageLower.includes('malformed'));
           
-          if (isNotAuthorizedError && this.getToken()) {
-            // User has token but not authorized - don't logout, just show error
-            console.warn('⚠️ User has token but not authorized. This might be a permissions issue, not auth issue.');
+          const hasToken = !!this.getToken();
+          
+          if (isTokenInvalidError || !hasToken) {
+            // Token is actually invalid/expired OR user has no token - logout
+            console.error('❌ Token invalid or expired. Logging out...');
+            console.error('   - Has token:', hasToken);
+            console.error('   - Is token invalid error:', isTokenInvalidError);
+            console.error('   - Error message:', errorMessage);
+            this.clearToken();
+            
+            // Delay redirect to allow error message to show
+            if (typeof window !== "undefined") {
+              setTimeout(() => {
+                window.location.href = "/login";
+              }, 2000); // 2 second delay
+            }
+          } else {
+            // User has token but got 401 - likely a permissions/authorization issue
             // Don't logout - let the error handler show the message
+            console.warn('⚠️ User has token but received 401. This might be a backend permissions issue.');
+            console.warn('   - Has token:', hasToken);
+            console.warn('   - Error message:', errorMessage);
+            console.warn('   - NOT logging out - staying on page');
             return Promise.reject(error);
-          }
-          
-          // Token is actually invalid/expired - logout
-          console.error('❌ Token invalid or expired. Logging out...');
-          this.clearToken();
-          
-          // Delay redirect to allow error message to show
-          if (typeof window !== "undefined") {
-            setTimeout(() => {
-              window.location.href = "/login";
-            }, 2000); // 2 second delay
           }
         }
         
