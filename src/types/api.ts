@@ -25,6 +25,14 @@ export interface PaginatedResponse<T> {
   };
 }
 
+/** Feed metadata returned by backend */
+export interface FeedMeta {
+  feedType: "chronological" | "ranked";
+  boostedCategories: string[];
+  hasPinnedBulletins?: boolean;
+  pinnedCount?: number;
+}
+
 /** Feed/list response from GET /feed or GET /content/posts – use response.data.content */
 export interface FeedResponse<T> {
   content: T[];
@@ -35,6 +43,7 @@ export interface FeedResponse<T> {
     totalPages: number;
     hasMore: boolean;
   };
+  meta?: FeedMeta;
 }
 
 /** Author shape returned by backend for posts (feed and create-post) */
@@ -137,8 +146,10 @@ export interface Post {
   /** Backend returns author with id, name, username, avatarUrl (same shape for feed and create-post) */
   author: (User & { name?: string; avatarUrl?: string | null }) | PostAuthor;
   type?: "text" | "image" | "video" | "poll" | "event" | "article";
+  /** Post body – prefer content; backend sends both (GET /feed, GET /content/posts) */
   content: string;
-  /** Backend returns array of image URLs (strings) or media items with url */
+  body?: string;
+  /** Backend returns mediaUrls (array of URLs) or media (array of items); normalized to media */
   media?: (MediaItem | string)[];
   location?: LocationData | { lat?: number; lng?: number; lga?: string; [k: string]: unknown };
   visibility?: "public" | "friends" | "neighborhood" | "ward" | "lga" | "state";

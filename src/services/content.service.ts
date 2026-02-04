@@ -12,17 +12,80 @@ import {
   CreatePostPayload,
 } from "@/types/api";
 
-/** Normalize feed response: backend may return content at data.content or top-level content */
+/**
+ * Normalize a single feed item from API shape to Post.
+ * API sends: id/_id, content, body, title, mediaUrls, authorId, likesCount, commentsCount, etc.
+ */
+function normalizeFeedItem(item: any): Post {
+  const authorId = item?.authorId ?? item?.author;
+  const fullName = [authorId?.firstName, authorId?.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const name =
+    authorId?.name ?? (fullName || authorId?.username || "");
+  const postContent = item?.content ?? item?.body ?? "";
+  return {
+    id: item?.id ?? item?._id ?? "",
+    content: postContent,
+    body: item?.body ?? postContent,
+    author: authorId
+      ? {
+          id: authorId._id ?? authorId.id ?? "",
+          name: name ?? "",
+          username: authorId?.username ?? "",
+          avatarUrl: authorId?.avatarUrl ?? authorId?.profilePicture ?? null,
+        }
+      : ({} as Post["author"]),
+    media: item?.mediaUrls ?? item?.media,
+    likes: item?.likesCount ?? item?.likes ?? 0,
+    comments: item?.commentsCount ?? item?.comments ?? 0,
+    shares: item?.sharesCount ?? item?.shares ?? 0,
+    views: item?.viewsCount ?? item?.views ?? 0,
+    isLiked: item?.isLiked,
+    isSaved: item?.isSaved,
+    createdAt: item?.createdAt ?? "",
+    updatedAt: item?.updatedAt,
+    location: item?.location,
+    tags: item?.tags,
+    type: item?.type,
+    visibility: item?.visibility,
+  };
+}
+
+/** Normalize feed response: backend returns data.content and data.pagination (GET /feed, GET /content/posts) */
 function normalizeFeedResponse<T>(res: any): FeedResponse<T> {
-  const content = res?.content ?? res?.data?.content ?? res?.data?.data ?? [];
-  const pagination = res?.pagination ?? res?.data?.pagination ?? {
+  const raw =
+    res?.content ?? res?.data?.content ?? res?.data?.data?.content ?? [];
+  const list = Array.isArray(raw) ? raw : [];
+  const content = list.map((item: any) =>
+    normalizeFeedItem(item)
+  ) as unknown as T[];
+  const p = res?.pagination ?? res?.data?.pagination ?? {
     total: 0,
     page: 1,
     limit: 20,
     totalPages: 0,
-    hasMore: false,
   };
-  return { content: Array.isArray(content) ? content : [], pagination };
+  const totalPages =
+    p.totalPages ?? (p.limit ? Math.ceil((p.total ?? 0) / p.limit) : 0);
+  const pagination = {
+    total: p.total ?? 0,
+    page: p.page ?? 1,
+    limit: p.limit ?? 20,
+    totalPages,
+    hasMore: (p.page ?? 1) < totalPages,
+  };
+  
+  // Preserve metadata from response
+  const meta = res?.meta ?? res?.data?.meta;
+  
+  // Log feed type for verification
+  if (meta?.feedType) {
+    console.log(`📊 Feed Type: ${meta.feedType}`);
+  }
+  
+  return { content, pagination, meta };
 }
 
 export const contentService = {
@@ -66,6 +129,7 @@ export const contentService = {
       category?: string;
       page?: number;
       limit?: number;
+      ranked?: boolean;
     },
   ): Promise<FeedResponse<Post>> {
     try {
@@ -77,6 +141,7 @@ export const contentService = {
           category: options?.category,
           page: options?.page || 1,
           limit: options?.limit || 20,
+          ranked: options?.ranked || undefined,
         },
       });
       return normalizeFeedResponse<Post>(res);

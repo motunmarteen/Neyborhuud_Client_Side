@@ -22,10 +22,11 @@ export function useLocationFeed(
   options?: {
     radius?: number;
     category?: string;
+    ranked?: boolean;
   },
 ) {
   return useInfiniteQuery({
-    queryKey: ["locationFeed", latitude, longitude, options?.category, options?.radius],
+    queryKey: ["locationFeed", latitude, longitude, options?.category, options?.radius, options?.ranked],
     queryFn: ({ pageParam = 1 }) => {
       if (!latitude || !longitude) {
         throw new Error("Location required for feed");

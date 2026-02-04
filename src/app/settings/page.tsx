@@ -396,6 +396,23 @@ export default function SettingsPage() {
                 {/* Account Tab */}
                 {activeTab === 'account' && (
                     <div className="animate-in fade-in duration-300">
+                        {/* Complete profile - accessible from bottom nav (Profile tab) */}
+                        <div className="neumorphic rounded-2xl p-6 mb-6 border border-neon-green/20">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-3">
+                                Profile
+                            </h2>
+                            <Link
+                                href="/complete-profile"
+                                className="flex items-center justify-between py-3 px-4 rounded-xl bg-neon-green/10 border border-neon-green/20 min-h-[44px] touch-manipulation active:bg-neon-green/20 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <i className="bi bi-person-plus text-neon-green text-lg" aria-hidden />
+                                    <span className="text-sm font-bold text-charcoal">Complete your profile</span>
+                                </div>
+                                <i className="bi bi-chevron-right text-charcoal/40" aria-hidden />
+                            </Link>
+                        </div>
+
                         {/* User Info */}
                         {user && (
                             <div className="neumorphic rounded-2xl p-6 mb-6">
