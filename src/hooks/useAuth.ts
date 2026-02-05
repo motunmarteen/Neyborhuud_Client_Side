@@ -12,7 +12,7 @@ import apiClient from "@/lib/api-client";
 export function useAuth() {
   const queryClient = useQueryClient();
 
-  // Get current user
+  // Get current user from localStorage (backend doesn't have /auth/me endpoint)
   const {
     data: user,
     isLoading,
@@ -20,11 +20,13 @@ export function useAuth() {
   } = useQuery({
     queryKey: ["currentUser"],
     queryFn: async () => {
-      const response = await authService.getCurrentUser();
-      return response.data || null;
+      // Use cached user data from localStorage instead of fetching from backend
+      const cachedUser = authService.getCachedUser();
+      return cachedUser;
     },
     enabled: apiClient.isAuthenticated(),
     retry: false,
+    staleTime: Infinity, // User data doesn't change unless explicitly updated
   });
 
   // Login mutation

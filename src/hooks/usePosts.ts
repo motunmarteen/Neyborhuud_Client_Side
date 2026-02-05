@@ -70,8 +70,7 @@ export function usePost(postId: string | null) {
     queryKey: ["post", postId],
     queryFn: async () => {
       if (!postId) return null;
-      const response = await contentService.getPost(postId);
-      return response.data || null;
+      return await contentService.getPost(postId);
     },
     enabled: !!postId,
   });

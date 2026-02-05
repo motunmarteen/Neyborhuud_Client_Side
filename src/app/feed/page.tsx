@@ -9,6 +9,7 @@ import { XPostCard } from '@/components/feed/XPostCard';
 import { FeedSkeleton } from '@/components/feed/PostSkeleton';
 import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { BottomNav } from '@/components/feed/BottomNav';
+import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
 import { useLocationFeed, usePostMutations } from '@/hooks/usePosts';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { Post } from '@/types/api';
@@ -19,6 +20,8 @@ function XFeedInner() {
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [locationError, setLocationError] = useState<string | null>(null);
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+    const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+    const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
     const [feedTab, setFeedTab] = useState<'for-you' | 'following'>('following');
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -127,6 +130,11 @@ function XFeedInner() {
         }
     };
 
+    const openPostDetails = (postId: string) => {
+        setSelectedPostId(postId);
+        setIsPostDetailsOpen(true);
+    };
+
     // Helper to format time ago
     const formatTimeAgo = (dateString: string): string => {
         const date = new Date(dateString);
@@ -232,10 +240,11 @@ function XFeedInner() {
                             key={post.id}
                             post={post}
                             onLike={() => handleLike(post)}
-                            onComment={() => { }}
+                            onComment={() => openPostDetails(post.id)}
                             onShare={() => { }}
                             onSave={() => handleSave(post)}
                             formatTimeAgo={formatTimeAgo}
+                            onCardClick={() => openPostDetails(post.id)}
                         />
                     ))}
                 </div>
@@ -262,6 +271,13 @@ function XFeedInner() {
                 onSuccess={() => {
                     queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
                 }}
+            />
+
+            {/* Post Details Modal */}
+            <PostDetailsModal
+                postId={selectedPostId}
+                isOpen={isPostDetailsOpen}
+                onClose={() => setIsPostDetailsOpen(false)}
             />
         </div>
     );

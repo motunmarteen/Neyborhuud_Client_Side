@@ -7,6 +7,7 @@ import apiClient from "@/lib/api-client";
 import {
   Post,
   Comment,
+  PostDetails,
   PaginatedResponse,
   FeedResponse,
   CreatePostPayload,
@@ -186,8 +187,34 @@ export const contentService = {
   /**
    * Get a single post
    */
-  async getPost(postId: string) {
-    return await apiClient.get<Post>(`/content/posts/${postId}`);
+  async getPost(postId: string): Promise<PostDetails> {
+    const res = await apiClient.get<any>(`/content/posts/${postId}`);
+    // The response is { success: true, data: { content, comments } }
+    const data = res.data?.data || res.data || res;
+    
+    return {
+      content: normalizeFeedItem(data.content),
+      comments: (data.comments || []).map((c: any) => this.normalizeComment(c))
+    };
+  },
+
+  /**
+   * Normalize comment structure
+   */
+  normalizeComment(c: any): Comment {
+    return {
+      id: c.id ?? c._id ?? "",
+      _id: c._id,
+      body: c.body || c.content || "",
+      mediaUrls: c.mediaUrls || [],
+      userId: c.userId,
+      parentId: c.parentId,
+      replies: (c.replies || []).map((r: any) => this.normalizeComment(r)),
+      likes: c.likes ?? 0,
+      isLiked: c.isLiked,
+      createdAt: c.createdAt || "",
+      updatedAt: c.updatedAt
+    };
   },
 
   /**
@@ -301,27 +328,24 @@ export const contentService = {
   /**
    * Create a comment
    */
-  async createComment(postId: string, content: string, parentId?: string) {
-    return await apiClient.post<Comment>(`/content/posts/${postId}/comments`, {
-      content,
-      parentId,
-    });
+  async createComment(postId: string, payload: { body: string; mediaUrls?: string[]; parentId?: string }) {
+    return await apiClient.post<Comment>(`/content/posts/${postId}/comments`, payload);
   },
 
   /**
    * Update a comment
    */
-  async updateComment(commentId: string, content: string) {
+  async updateComment(commentId: string, body: string) {
     return await apiClient.put<Comment>(`/content/comments/${commentId}`, {
-      content,
+      body,
     });
   },
 
   /**
    * Delete a comment
    */
-  async deleteComment(commentId: string) {
-    return await apiClient.delete(`/content/comments/${commentId}`);
+  async deleteComment(postId: string, commentId: string) {
+    return await apiClient.delete(`/content/posts/${postId}/comments/${commentId}`);
   },
 
   /**
