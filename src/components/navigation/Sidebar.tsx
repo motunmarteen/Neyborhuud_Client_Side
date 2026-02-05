@@ -7,8 +7,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SidebarProps {
     onCreatePost?: () => void;
@@ -18,8 +19,11 @@ interface SidebarProps {
 
 export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: SidebarProps) {
     const pathname = usePathname();
+    const router = useRouter();
+    const { user, logout } = useAuth();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
 
     // Load collapsed state from localStorage
     useEffect(() => {
@@ -43,11 +47,49 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
         };
     }, [isMobileOpen]);
 
+    // Close user menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (showUserMenu && !target.closest('.user-menu-container')) {
+                setShowUserMenu(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showUserMenu]);
+
     // Save collapsed state to localStorage
     const toggleCollapsed = () => {
         const newState = !isCollapsed;
         setIsCollapsed(newState);
         localStorage.setItem('sidebar_collapsed', String(newState));
+    };
+
+    const handleLogout = async () => {
+        try {
+            setShowUserMenu(false);
+            // Try to logout from backend, but don't block if it fails
+            try {
+                await logout();
+            } catch (error) {
+                console.warn('Backend logout failed, but clearing local session:', error);
+                // Clear local session even if backend fails
+                localStorage.removeItem('neyborhuud_token');
+                localStorage.removeItem('neyborhuud_user');
+            }
+            // Always redirect to login
+            router.push('/login');
+        } catch (error) {
+            console.error('Logout failed:', error);
+            // Fallback: clear everything and redirect anyway
+            localStorage.removeItem('neyborhuud_token');
+            localStorage.removeItem('neyborhuud_user');
+            router.push('/login');
+        }
     };
 
     const navItems = [
@@ -67,6 +109,36 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
     };
 
     if (!isMounted) return null;
+
+    const userDisplayName = user ? (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || user.username) : 'User';
+    const userHandle = user ? `@${user.username}` : '@username';
+    const userInitial = userDisplayName[0]?.toUpperCase() || 'U';
+
+    const UserMenu = () => (
+        <div className="absolute bottom-full mb-2 left-0 w-full min-w-[260px] bg-white dark:bg-gray-950 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-gray-100 dark:border-gray-800 p-2 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-3 border-b border-gray-100 dark:border-gray-800">
+                <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{userDisplayName}</p>
+                <p className="text-xs text-gray-500 truncate">{userHandle}</p>
+            </div>
+
+            <Link
+                href="/settings"
+                onClick={() => setShowUserMenu(false)}
+                className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors text-gray-700 dark:text-gray-200"
+            >
+                <i className="bi bi-gear text-xl" />
+                <span className="font-medium">Settings</span>
+            </Link>
+
+            <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors text-red-500"
+            >
+                <i className="bi bi-box-arrow-right text-xl" />
+                <span className="font-medium">Log out {userHandle}</span>
+            </button>
+        </div>
+    );
 
     // Mobile Drawer
     const mobileDrawer = (
@@ -128,21 +200,25 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                     </nav>
 
                     {/* User Profile Section */}
-                    <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
-                        <Link
-                            href="/settings"
-                            onClick={handleNavClick}
-                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 relative user-menu-container">
+                        {showUserMenu && <UserMenu />}
+                        <button
+                            onClick={() => setShowUserMenu(!showUserMenu)}
+                            className="flex items-center gap-3 p-3 w-full rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
                         >
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-neon-green to-brand-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                                U
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-neon-green to-brand-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
+                                {user?.avatarUrl ? (
+                                    <img src={user.avatarUrl} alt={userDisplayName} className="w-full h-full object-cover" />
+                                ) : (
+                                    userInitial
+                                )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="font-bold text-base truncate">User</p>
-                                <p className="text-sm text-gray-500 truncate">@username</p>
+                                <p className="font-bold text-base truncate text-gray-900 dark:text-gray-100">{userDisplayName}</p>
+                                <p className="text-sm text-gray-500 truncate">{userHandle}</p>
                             </div>
-                            <i className="bi bi-chevron-right text-gray-400" />
-                        </Link>
+                            <i className="bi bi-three-dots text-gray-400" />
+                        </button>
                     </div>
                 </div>
             </aside>
@@ -209,26 +285,31 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
             </nav>
 
             {/* User Profile Section */}
-            <div className="mt-auto mb-4">
-                <Link
-                    href="/settings"
-                    className={`flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isCollapsed ? 'justify-center' : ''
+            <div className="mt-auto mb-4 relative user-menu-container">
+                {showUserMenu && !isCollapsed && <UserMenu />}
+                <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className={`flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full ${isCollapsed ? 'justify-center' : ''
                         }`}
                     title={isCollapsed ? 'Profile' : undefined}
                 >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-neon-green to-brand-blue flex items-center justify-center text-white font-bold flex-shrink-0">
-                        U
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-neon-green to-brand-blue flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden">
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={userDisplayName} className="w-full h-full object-cover" />
+                        ) : (
+                            userInitial
+                        )}
                     </div>
                     {!isCollapsed && (
                         <>
-                            <div className="flex-1 min-w-0">
-                                <p className="font-bold text-sm truncate">User</p>
-                                <p className="text-xs text-gray-500 truncate">@username</p>
+                            <div className="flex-1 min-w-0 text-left">
+                                <p className="font-bold text-sm truncate text-gray-900 dark:text-gray-100">{userDisplayName}</p>
+                                <p className="text-xs text-gray-500 truncate">{userHandle}</p>
                             </div>
                             <i className="bi bi-three-dots text-lg" />
                         </>
                     )}
-                </Link>
+                </button>
             </div>
         </aside>
     );

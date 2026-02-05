@@ -109,6 +109,7 @@ export interface User {
   middleName?: string;
   phoneNumber?: string;
   profilePicture?: string;
+  avatarUrl?: string | null; // Added for consistency with comments author shape
   coverPhoto?: string;
   bio?: string;
   gender?: "male" | "female" | "other";
@@ -170,16 +171,30 @@ export interface Post {
 
 export interface Comment {
   id: string;
-  postId: string;
-  userId: string;
-  author: User;
-  content: string;
+  _id?: string; // Support for MongoDB _id
+  postId?: string;
+  userId: string | {
+    id?: string;
+    _id?: string;
+    username: string;
+    avatarUrl?: string | null;
+    firstName?: string;
+    lastName?: string;
+  };
+  content?: string;
+  body: string; // The backend uses 'body' for the text content
+  mediaUrls?: string[];
   parentId?: string;
   replies?: Comment[];
   likes: number;
   isLiked?: boolean;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+}
+
+export interface PostDetails {
+  content: Post;
+  comments: Comment[];
 }
 
 // ==================== Chat Types ====================

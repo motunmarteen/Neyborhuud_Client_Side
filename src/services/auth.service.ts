@@ -73,7 +73,7 @@ export const authService = {
    */
   async logout() {
     try {
-      await apiClient.post("/auth/logout");
+      await apiClient.post("/auth/logout", { allDevices: false });
     } finally {
       apiClient.clearToken();
     }

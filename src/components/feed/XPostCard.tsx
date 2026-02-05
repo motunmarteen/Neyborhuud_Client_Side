@@ -13,6 +13,7 @@ interface XPostCardProps {
     onShare: () => void;
     onSave: () => void;
     formatTimeAgo: (date: string) => string;
+    onCardClick?: () => void;
 }
 
 export function XPostCard({
@@ -22,6 +23,7 @@ export function XPostCard({
     onShare,
     onSave,
     formatTimeAgo,
+    onCardClick,
 }: XPostCardProps) {
     const [imageError, setImageError] = useState(false);
 
@@ -39,7 +41,16 @@ export function XPostCard({
         : [];
 
     return (
-        <article className="border-b border-gray-200 dark:border-gray-800 px-4 py-3 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer">
+        <article
+            className="border-b border-gray-200 dark:border-gray-800 px-4 py-3 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer"
+            onClick={(e) => {
+                // Only trigger card click if not clicking on an action button
+                const target = e.target as HTMLElement;
+                if (!target.closest('button')) {
+                    onCardClick?.();
+                }
+            }}
+        >
             <div className="flex gap-3">
                 {/* Avatar */}
                 <div className="flex-shrink-0">
