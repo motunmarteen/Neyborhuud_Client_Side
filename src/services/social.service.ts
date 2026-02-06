@@ -157,10 +157,17 @@ export const socialService = {
   },
 
   /**
-   * Get user profile
+   * Get user profile by ID
    */
   async getUserProfile(userId: string) {
     return await apiClient.get<User>(`/social/users/${userId}`);
+  },
+
+  /**
+   * Get user profile by username
+   */
+  async getUserByUsername(username: string) {
+    return await apiClient.get<User>(`/social/users/username/${username}`);
   },
 
   /**

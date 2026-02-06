@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, KeyboardEvent, ClipboardEvent } from 'react';
+import React, { useRef, useEffect, useMemo, KeyboardEvent, ClipboardEvent } from 'react';
 
 interface OTPInputProps {
     length?: number;
@@ -26,14 +26,10 @@ export const OTPInput: React.FC<OTPInputProps> = ({
     autoFocus = true,
 }) => {
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-    const [localValues, setLocalValues] = useState<string[]>(
-        value.split('').concat(Array(length - value.length).fill(''))
-    );
-
-    // Sync local values with prop value
-    useEffect(() => {
-        const newValues = value.split('').concat(Array(length - value.length).fill(''));
-        setLocalValues(newValues.slice(0, length));
+    
+    // Derive display values from prop value
+    const localValues = useMemo(() => {
+        return value.split('').concat(Array(length - value.length).fill('')).slice(0, length);
     }, [value, length]);
 
     // Auto-focus first input on mount
@@ -57,7 +53,6 @@ export const OTPInput: React.FC<OTPInputProps> = ({
         
         const newValues = [...localValues];
         newValues[index] = digit;
-        setLocalValues(newValues);
 
         const newCode = newValues.join('');
         onChange(newCode);
@@ -97,12 +92,10 @@ export const OTPInput: React.FC<OTPInputProps> = ({
             if (localValues[index]) {
                 // Clear current input
                 newValues[index] = '';
-                setLocalValues(newValues);
                 onChange(newValues.join(''));
             } else if (index > 0) {
                 // Move to previous input and clear it
                 newValues[index - 1] = '';
-                setLocalValues(newValues);
                 onChange(newValues.join(''));
                 focusInput(index - 1);
             }
@@ -123,9 +116,8 @@ export const OTPInput: React.FC<OTPInputProps> = ({
         
         if (pastedData) {
             const newValues = pastedData.split('').concat(Array(length - pastedData.length).fill(''));
-            setLocalValues(newValues.slice(0, length));
-            
             const newCode = newValues.slice(0, length).join('');
+            
             onChange(newCode);
 
             // Focus the next empty input or the last one

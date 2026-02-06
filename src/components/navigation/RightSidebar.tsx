@@ -7,6 +7,7 @@
 'use client';
 
 import Link from 'next/link';
+import { GlobalSearch } from '@/components/GlobalSearch';
 
 interface TrendingItem {
     category: string;
@@ -38,16 +39,9 @@ export function RightSidebar() {
 
     return (
         <aside className="hidden xl:block fixed right-0 top-0 h-screen w-[350px] 2xl:w-[400px] py-3 px-4 overflow-y-auto">
-            {/* Search Bar */}
+            {/* Global Search */}
             <div className="sticky top-0 pt-1 pb-3 bg-white dark:bg-black z-10">
-                <div className="relative">
-                    <i className="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search NeyborHuud"
-                        className="w-full bg-gray-100 dark:bg-gray-900 rounded-full py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-neon-green focus:bg-white dark:focus:bg-gray-800 transition-all placeholder:text-gray-500"
-                    />
-                </div>
+                <GlobalSearch />
             </div>
 
             {/* What's Happening */}

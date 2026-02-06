@@ -23,8 +23,7 @@ function normalizeFeedItem(item: any): Post {
     .filter(Boolean)
     .join(" ")
     .trim();
-  const name =
-    authorId?.name ?? (fullName || authorId?.username || "");
+  const name = authorId?.name ?? (fullName || authorId?.username || "");
   const postContent = item?.content ?? item?.body ?? "";
   return {
     id: item?.id ?? item?._id ?? "",
@@ -60,14 +59,15 @@ function normalizeFeedResponse<T>(res: any): FeedResponse<T> {
     res?.content ?? res?.data?.content ?? res?.data?.data?.content ?? [];
   const list = Array.isArray(raw) ? raw : [];
   const content = list.map((item: any) =>
-    normalizeFeedItem(item)
+    normalizeFeedItem(item),
   ) as unknown as T[];
-  const p = res?.pagination ?? res?.data?.pagination ?? {
-    total: 0,
-    page: 1,
-    limit: 20,
-    totalPages: 0,
-  };
+  const p = res?.pagination ??
+    res?.data?.pagination ?? {
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
   const totalPages =
     p.totalPages ?? (p.limit ? Math.ceil((p.total ?? 0) / p.limit) : 0);
   const pagination = {
@@ -77,15 +77,15 @@ function normalizeFeedResponse<T>(res: any): FeedResponse<T> {
     totalPages,
     hasMore: (p.page ?? 1) < totalPages,
   };
-  
+
   // Preserve metadata from response
   const meta = res?.meta ?? res?.data?.meta;
-  
+
   // Log feed type for verification
   if (meta?.feedType) {
     console.log(`📊 Feed Type: ${meta.feedType}`);
   }
-  
+
   return { content, pagination, meta };
 }
 
@@ -149,13 +149,10 @@ export const contentService = {
     } catch (error: any) {
       const status = error.response?.status;
       const isUnavailable =
-        status === 404 ||
-        status === 500 ||
-        status === 502 ||
-        status === 503;
+        status === 404 || status === 500 || status === 502 || status === 503;
       if (isUnavailable) {
         console.warn(
-          `⚠️ /feed returned ${status}, falling back to /content/posts for recent posts`
+          `⚠️ /feed returned ${status}, falling back to /content/posts for recent posts`,
         );
         const res = await apiClient.get<any>("/content/posts", {
           params: {
@@ -191,10 +188,10 @@ export const contentService = {
     const res = await apiClient.get<any>(`/content/posts/${postId}`);
     // The response is { success: true, data: { content, comments } }
     const data = res.data?.data || res.data || res;
-    
+
     return {
       content: normalizeFeedItem(data.content),
-      comments: (data.comments || []).map((c: any) => this.normalizeComment(c))
+      comments: (data.comments || []).map((c: any) => this.normalizeComment(c)),
     };
   },
 
@@ -213,7 +210,7 @@ export const contentService = {
       likes: c.likes ?? 0,
       isLiked: c.isLiked,
       createdAt: c.createdAt || "",
-      updatedAt: c.updatedAt
+      updatedAt: c.updatedAt,
     };
   },
 
@@ -302,13 +299,67 @@ export const contentService = {
   /**
    * Get posts by user
    */
-  async getUserPosts(userId: string, page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<Post>>(
-      `/content/users/${userId}/posts`,
-      {
+  async getUserPosts(
+    userId: string,
+    page = 1,
+    limit = 20,
+  ): Promise<FeedResponse<Post>> {
+    console.log("🔍 getUserPosts called with:", { userId, page, limit });
+
+    try {
+      const res = await apiClient.get<any>(`/content/users/${userId}/posts`, {
         params: { page, limit },
-      },
-    );
+      });
+
+      console.log("📦 getUserPosts raw response:", res);
+      console.log("📦 Response data:", res.data);
+      console.log("📦 Posts array:", res.data?.posts);
+      console.log("📦 Pagination:", res.data?.pagination);
+
+      // Backend returns: { success, message, data: { posts, pagination, user } }
+      const postsData = res.data?.posts || [];
+      const paginationData = res.data?.pagination || {};
+
+      const normalized = {
+        content: postsData.map((item: any) => normalizeFeedItem(item)),
+        pagination: {
+          total: paginationData.total || 0,
+          page: paginationData.page || 1,
+          limit: paginationData.limit || 20,
+          totalPages: paginationData.pages || 0,
+          hasMore: paginationData.hasMore || false,
+        },
+      };
+
+      console.log("✅ getUserPosts normalized response:", normalized);
+      console.log("📊 Total posts found:", normalized.content.length);
+
+      return normalized;
+    } catch (error: any) {
+      // If endpoint doesn't exist (404), return empty result
+      if (error?.response?.status === 404) {
+        console.warn(
+          "⚠️ User posts endpoint not implemented yet (404). Returning empty result.",
+        );
+        console.warn(
+          "⚠️ Backend needs to implement: GET /content/users/:userId/posts",
+        );
+
+        return {
+          content: [],
+          pagination: {
+            total: 0,
+            page: 1,
+            limit: 20,
+            totalPages: 0,
+            hasMore: false,
+          },
+        };
+      }
+
+      // Re-throw other errors
+      throw error;
+    }
   },
 
   // ==================== Comments ====================
@@ -328,8 +379,14 @@ export const contentService = {
   /**
    * Create a comment
    */
-  async createComment(postId: string, payload: { body: string; mediaUrls?: string[]; parentId?: string }) {
-    return await apiClient.post<Comment>(`/content/posts/${postId}/comments`, payload);
+  async createComment(
+    postId: string,
+    payload: { body: string; mediaUrls?: string[]; parentId?: string },
+  ) {
+    return await apiClient.post<Comment>(
+      `/content/posts/${postId}/comments`,
+      payload,
+    );
   },
 
   /**
@@ -345,7 +402,9 @@ export const contentService = {
    * Delete a comment
    */
   async deleteComment(postId: string, commentId: string) {
-    return await apiClient.delete(`/content/posts/${postId}/comments/${commentId}`);
+    return await apiClient.delete(
+      `/content/posts/${postId}/comments/${commentId}`,
+    );
   },
 
   /**

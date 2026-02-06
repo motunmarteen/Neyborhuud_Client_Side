@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { GlobalSearch } from '@/components/GlobalSearch';
 
 interface SidebarProps {
     onCreatePost?: () => void;
@@ -98,7 +99,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
         { icon: 'bi-search', iconOutline: 'bi-search', label: 'Explore', href: '/feed?search=1', active: false },
         { icon: 'bi-bell-fill', iconOutline: 'bi-bell', label: 'Notifications', href: '/feed', active: false },
         { icon: 'bi-envelope-fill', iconOutline: 'bi-envelope', label: 'Messages', href: '/feed', active: false },
-        { icon: 'bi-person-fill', iconOutline: 'bi-person', label: 'Profile', href: '/settings', active: pathname === '/settings' },
+        { icon: 'bi-person-fill', iconOutline: 'bi-person', label: 'Profile', href: user ? `/profile/${user.username}` : '/settings', active: pathname?.startsWith('/profile') || pathname === '/settings' },
     ];
 
     const handleNavClick = () => {
@@ -120,6 +121,15 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                 <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{userDisplayName}</p>
                 <p className="text-xs text-gray-500 truncate">{userHandle}</p>
             </div>
+
+            <Link
+                href={user ? `/profile/${user.username}` : '/settings'}
+                onClick={() => setShowUserMenu(false)}
+                className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors text-gray-700 dark:text-gray-200"
+            >
+                <i className="bi bi-person text-xl" />
+                <span className="font-medium">View Profile</span>
+            </Link>
 
             <Link
                 href="/settings"
@@ -168,6 +178,11 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                         >
                             <i className="bi bi-x-lg text-xl" />
                         </button>
+                    </div>
+
+                    {/* Search Bar - Mobile */}
+                    <div className="mb-4">
+                        <GlobalSearch />
                     </div>
 
                     {/* Navigation Items */}

@@ -42,31 +42,46 @@ class ApiClient {
         const errorMessage = errorData?.message || errorData?.error || '';
         
         // Log detailed error info before handling
-        console.group('🔐 Authorization Error');
-        console.error('Status:', status);
-        console.error('URL:', error.config?.url);
-        console.error('Method:', error.config?.method);
-        console.error('Error Message:', errorMessage);
-        console.error('Error Data:', errorData);
-        console.error('Has Token:', !!this.getToken());
-        console.error('Token Preview:', this.getToken() ? `${this.getToken()?.substring(0, 20)}...` : 'None');
-        console.groupEnd();
+        // Only log detailed auth errors for actual authorization issues (401, 403)
+        // Don't spam console for expected errors like 409 (already following)
+        if (status === 401 || status === 403) {
+          console.group('🔐 Authorization Error');
+          console.error('Status:', status);
+          console.error('URL:', error.config?.url);
+          console.error('Method:', error.config?.method);
+          console.error('Error Message:', errorMessage);
+          console.error('Error Data:', errorData);
+          console.error('Has Token:', !!this.getToken());
+          console.error('Token Preview:', this.getToken() ? `${this.getToken()?.substring(0, 20)}...` : 'None');
+          console.groupEnd();
+        }
 
         if (status === 401) {
           // Check if it's a token validity issue (expired, invalid, malformed)
           const errorMessageLower = (errorMessage || '').toLowerCase();
-          const isTokenInvalidError = errorMessageLower.includes('token') &&
+          
+          // Only logout for actual token expiry/invalidity issues
+          // Don't logout for "user not active" or other authorization issues
+          const isTokenExpiredError = errorMessageLower.includes('token') &&
                                      (errorMessageLower.includes('expired') ||
-                                      errorMessageLower.includes('invalid') ||
                                       errorMessageLower.includes('malformed'));
+          
+          const isTokenInvalidError = errorMessageLower.includes('token') &&
+                                     errorMessageLower.includes('invalid') &&
+                                     !errorMessageLower.includes('user not active');
           
           const hasToken = !!this.getToken();
           
-          if (isTokenInvalidError || !hasToken) {
+          // Only logout if:
+          // 1. No token exists at all, OR
+          // 2. Token is explicitly expired/malformed, OR
+          // 3. Token is invalid (but not "user not active" errors)
+          if (!hasToken || isTokenExpiredError || isTokenInvalidError) {
             // Token is actually invalid/expired OR user has no token - logout
             console.error('❌ Token invalid or expired. Logging out...');
             console.error('   - Has token:', hasToken);
-            console.error('   - Is token invalid error:', isTokenInvalidError);
+            console.error('   - Is token expired:', isTokenExpiredError);
+            console.error('   - Is token invalid:', isTokenInvalidError);
             console.error('   - Error message:', errorMessage);
             this.clearToken();
             
@@ -78,8 +93,9 @@ class ApiClient {
             }
           } else {
             // User has token but got 401 - likely a permissions/authorization issue
+            // or backend validation issue (e.g., "user not active")
             // Don't logout - let the error handler show the message
-            console.warn('⚠️ User has token but received 401. This might be a backend permissions issue.');
+            console.warn('⚠️ User has token but received 401. This might be a backend permissions or validation issue.');
             console.warn('   - Has token:', hasToken);
             console.warn('   - Error message:', errorMessage);
             console.warn('   - NOT logging out - staying on page');

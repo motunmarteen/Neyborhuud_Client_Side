@@ -26,7 +26,14 @@ export function useLocationFeed(
   },
 ) {
   return useInfiniteQuery({
-    queryKey: ["locationFeed", latitude, longitude, options?.category, options?.radius, options?.ranked],
+    queryKey: [
+      "locationFeed",
+      latitude,
+      longitude,
+      options?.category,
+      options?.radius,
+      options?.ranked,
+    ],
     queryFn: ({ pageParam = 1 }) => {
       if (!latitude || !longitude) {
         throw new Error("Location required for feed");
@@ -82,18 +89,31 @@ export function usePost(postId: string | null) {
 export function useUserPosts(userId: string | null) {
   return useInfiniteQuery({
     queryKey: ["userPosts", userId],
-    queryFn: ({ pageParam = 1 }) => {
-      if (!userId) throw new Error("User ID required");
-      return contentService.getUserPosts(userId, pageParam, 20);
+    queryFn: async ({ pageParam = 1 }) => {
+      console.log("🎣 useUserPosts queryFn called:", { userId, pageParam });
+
+      if (!userId) {
+        console.error("❌ No userId provided to useUserPosts");
+        throw new Error("User ID required");
+      }
+
+      try {
+        const result = await contentService.getUserPosts(userId, pageParam, 20);
+        console.log("✅ useUserPosts result:", result);
+        return result;
+      } catch (error) {
+        console.error("❌ useUserPosts error:", error);
+        throw error;
+      }
     },
     getNextPageParam: (lastPage) => {
-      const paginatedData = lastPage.data as any;
-      return paginatedData?.pagination?.hasMore
-        ? paginatedData.pagination.page + 1
+      return lastPage.pagination?.hasMore
+        ? (lastPage.pagination.page ?? 0) + 1
         : undefined;
     },
     initialPageParam: 1,
     enabled: !!userId,
+    retry: 1,
   });
 }
 
@@ -145,7 +165,7 @@ export function usePostMutations() {
               pagination: { ...pagination, total: (pagination.total ?? 0) + 1 },
             };
             return { ...old, pages: [newFirstPage, ...restPages] };
-          }
+          },
         );
       }
       // Invalidate so next load gets fresh data from server
@@ -188,7 +208,9 @@ export function usePostMutations() {
 
       // Snapshot previous values
       const previousPost = queryClient.getQueryData(["post", postId]);
-      const previousFeed = queryClient.getQueriesData({ queryKey: ["locationFeed"] });
+      const previousFeed = queryClient.getQueriesData({
+        queryKey: ["locationFeed"],
+      });
       const previousPosts = queryClient.getQueriesData({ queryKey: ["posts"] });
 
       // Optimistically update
@@ -214,7 +236,7 @@ export function usePostMutations() {
             content: (page.content ?? []).map((post: any) =>
               post.id === postId
                 ? { ...post, isLiked: true, likes: (post.likes || 0) + 1 }
-                : post
+                : post,
             ),
           })),
         };
@@ -244,7 +266,9 @@ export function usePostMutations() {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
 
       const previousPost = queryClient.getQueryData(["post", postId]);
-      const previousFeed = queryClient.getQueriesData({ queryKey: ["locationFeed"] });
+      const previousFeed = queryClient.getQueriesData({
+        queryKey: ["locationFeed"],
+      });
       const previousPosts = queryClient.getQueriesData({ queryKey: ["posts"] });
 
       queryClient.setQueryData(["post", postId], (old: any) => {
@@ -267,8 +291,12 @@ export function usePostMutations() {
             ...page,
             content: (page.content ?? []).map((post: any) =>
               post.id === postId
-                ? { ...post, isLiked: false, likes: Math.max(0, (post.likes || 0) - 1) }
-                : post
+                ? {
+                    ...post,
+                    isLiked: false,
+                    likes: Math.max(0, (post.likes || 0) - 1),
+                  }
+                : post,
             ),
           })),
         };
@@ -297,7 +325,9 @@ export function usePostMutations() {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
 
       const previousPost = queryClient.getQueryData(["post", postId]);
-      const previousFeed = queryClient.getQueriesData({ queryKey: ["locationFeed"] });
+      const previousFeed = queryClient.getQueriesData({
+        queryKey: ["locationFeed"],
+      });
       const previousPosts = queryClient.getQueriesData({ queryKey: ["posts"] });
 
       queryClient.setQueryData(["post", postId], (old: any) => {
@@ -315,7 +345,7 @@ export function usePostMutations() {
           pages: old.pages.map((page: any) => ({
             ...page,
             content: (page.content ?? []).map((post: any) =>
-              post.id === postId ? { ...post, isSaved: true } : post
+              post.id === postId ? { ...post, isSaved: true } : post,
             ),
           })),
         };
@@ -344,7 +374,9 @@ export function usePostMutations() {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
 
       const previousPost = queryClient.getQueryData(["post", postId]);
-      const previousFeed = queryClient.getQueriesData({ queryKey: ["locationFeed"] });
+      const previousFeed = queryClient.getQueriesData({
+        queryKey: ["locationFeed"],
+      });
       const previousPosts = queryClient.getQueriesData({ queryKey: ["posts"] });
 
       queryClient.setQueryData(["post", postId], (old: any) => {
@@ -362,7 +394,7 @@ export function usePostMutations() {
           pages: old.pages.map((page: any) => ({
             ...page,
             content: (page.content ?? []).map((post: any) =>
-              post.id === postId ? { ...post, isSaved: false } : post
+              post.id === postId ? { ...post, isSaved: false } : post,
             ),
           })),
         };

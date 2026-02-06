@@ -12,6 +12,7 @@ export {
   usePostMutations,
 } from "./usePosts";
 export { useComments, useCommentMutations } from "./useComments";
+export { useFollow, useFollowers, useFollowing } from "./useFollow";
 export {
   useNotifications,
   useUnreadCount,
@@ -19,4 +20,8 @@ export {
 } from "./useNotifications";
 export { useGeolocation, useWatchLocation } from "./useGeolocation";
 export { useDebouncedValue } from "./useDebouncedValue";
-export { useEmailValidation, useUsernameValidation } from "./useEmailValidation";
+export {
+  useEmailValidation,
+  useUsernameValidation,
+} from "./useEmailValidation";
+export { useSearch } from "./useSearch";

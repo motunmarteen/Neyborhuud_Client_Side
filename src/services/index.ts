@@ -7,6 +7,7 @@ export { authService } from "./auth.service";
 export { contentService } from "./content.service";
 export { chatService } from "./chat.service";
 export { eventsService } from "./events.service";
+export { followService } from "./follow.service";
 export { jobsService } from "./jobs.service";
 export { marketplaceService } from "./marketplace.service";
 export { servicesService } from "./services.service";
