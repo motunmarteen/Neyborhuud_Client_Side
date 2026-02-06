@@ -3,6 +3,7 @@ import { Comment } from '@/types/api';
 import { useAuth } from '@/hooks/useAuth';
 import { useCommentMutations } from '@/hooks/useComments';
 import { CommentForm } from './CommentForm';
+import Link from 'next/link';
 
 interface CommentItemProps {
     comment: Comment;
@@ -56,27 +57,36 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
     return (
         <div className={`flex gap-3 ${isReply ? 'mt-3 pl-2 sm:pl-4 border-l-2 border-gray-100 dark:border-gray-800' : 'py-4 border-b border-gray-100 dark:border-gray-800'}`}>
             {/* Avatar & Thread Line - Avatar is smaller for replies */}
-            <div className="flex flex-col items-center flex-shrink-0">
+            <Link 
+                href={`/profile/${username}`} 
+                className="flex flex-col items-center flex-shrink-0"
+            >
                 <img
                     src={avatarUrl}
                     alt={username}
-                    className={`${isReply ? 'w-8 h-8' : 'w-10 h-10'} rounded-full object-cover transition-opacity hover:opacity-90 cursor-pointer`}
+                    className={`${isReply ? 'w-8 h-8' : 'w-10 h-10'} rounded-full object-cover transition-opacity hover:opacity-80 cursor-pointer`}
                     onError={(e) => {
                         e.currentTarget.src = 'https://i.pravatar.cc/100?u=' + username;
                     }}
                 />
-            </div>
+            </Link>
 
             {/* Content Container */}
             <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:underline cursor-pointer">
+                        <Link 
+                            href={`/profile/${username}`}
+                            className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:underline cursor-pointer"
+                        >
                             {displayName}
-                        </span>
-                        <span className="text-[14px] text-gray-500 dark:text-gray-400 truncate max-w-[100px] sm:max-w-none">
+                        </Link>
+                        <Link
+                            href={`/profile/${username}`}
+                            className="text-[14px] text-gray-500 dark:text-gray-400 hover:underline truncate max-w-[100px] sm:max-w-none"
+                        >
                             @{username}
-                        </span>
+                        </Link>
                         <span className="text-gray-500 dark:text-gray-400">·</span>
                         <span className="text-[14px] text-gray-500 dark:text-gray-400 hover:underline cursor-pointer">
                             {formatTimeAgo(comment.createdAt)}

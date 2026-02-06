@@ -5,6 +5,7 @@
 
 import { Post, PostAuthor } from '@/types/api';
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface XPostCardProps {
     post: Post;
@@ -40,24 +41,33 @@ export function XPostCard({
             : []
         : [];
 
+    const handleProfileClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+    };
+
     return (
         <article
             className="border-b border-gray-200 dark:border-gray-800 px-4 py-3 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer"
             onClick={(e) => {
-                // Only trigger card click if not clicking on an action button
+                // Only trigger card click if not clicking on an action button or link
                 const target = e.target as HTMLElement;
-                if (!target.closest('button')) {
+                if (!target.closest('button') && !target.closest('a')) {
                     onCardClick?.();
                 }
             }}
         >
             <div className="flex gap-3">
                 {/* Avatar */}
-                <div className="flex-shrink-0">
+                <Link 
+                    href={`/profile/${authorUsername}`} 
+                    className="flex-shrink-0 group" 
+                    onClick={handleProfileClick}
+                    aria-label={`View ${authorName}'s profile`}
+                >
                     <img
                         src={authorAvatar}
                         alt={authorName}
-                        className="w-10 h-10 rounded-full object-cover"
+                        className="w-10 h-10 rounded-full object-cover group-hover:opacity-80 transition-opacity"
                         onError={(e) => {
                             if (!imageError) {
                                 e.currentTarget.src = 'https://i.pravatar.cc/100?u=user';
@@ -65,18 +75,26 @@ export function XPostCard({
                             }
                         }}
                     />
-                </div>
+                </Link>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                     {/* Header */}
                     <div className="flex items-center gap-1 mb-0.5">
-                        <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:underline truncate">
+                        <Link
+                            href={`/profile/${authorUsername}`}
+                            onClick={handleProfileClick}
+                            className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:underline truncate"
+                        >
                             {authorName}
-                        </span>
-                        <span className="text-[15px] text-gray-500 dark:text-gray-400 truncate">
+                        </Link>
+                        <Link
+                            href={`/profile/${authorUsername}`}
+                            onClick={handleProfileClick}
+                            className="text-[15px] text-gray-500 dark:text-gray-400 hover:underline truncate"
+                        >
                             @{authorUsername}
-                        </span>
+                        </Link>
                         <span className="text-gray-500 dark:text-gray-400">·</span>
                         <span className="text-[15px] text-gray-500 dark:text-gray-400 hover:underline">
                             {formatTimeAgo(post.createdAt)}

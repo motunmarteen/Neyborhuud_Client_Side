@@ -14,10 +14,27 @@ import {
   MarketplaceItem,
   Service,
 } from "@/types/api";
+import { SearchParams, SearchResponse } from "@/types/search";
 
 export const searchService = {
   /**
-   * Global search across all content types
+   * Global search with unified response format
+   * This is the primary search method matching the new API spec
+   */
+  async search(params: SearchParams): Promise<SearchResponse> {
+    const { q, type = "all", page = 1, limit = 20 } = params;
+
+    // apiClient.get returns the full response object { success, message, data }
+    const response = await apiClient.get("/search", {
+      params: { q, type, page, limit },
+    });
+
+    // Return the full response as SearchResponse
+    return response as unknown as SearchResponse;
+  },
+
+  /**
+   * Global search across all content types (legacy method)
    */
   async globalSearch(
     query: string,
@@ -28,7 +45,8 @@ export const searchService = {
       | "events"
       | "jobs"
       | "marketplace"
-      | "services",
+      | "services"
+      | "locations",
     page = 1,
     limit = 20,
   ) {
@@ -41,18 +59,21 @@ export const searchService = {
    * Search users
    */
   async searchUsers(query: string, page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<User>>("/search/users", {
-      params: { q: query, page, limit },
-    });
+    return this.search({ q: query, type: "users", page, limit });
   },
 
   /**
    * Search posts
    */
   async searchPosts(query: string, page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<Post>>("/search/posts", {
-      params: { q: query, page, limit },
-    });
+    return this.search({ q: query, type: "posts", page, limit });
+  },
+
+  /**
+   * Search locations
+   */
+  async searchLocations(query: string, page = 1, limit = 20) {
+    return this.search({ q: query, type: "locations", page, limit });
   },
 
   /**

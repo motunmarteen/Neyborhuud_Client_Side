@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, KeyboardEvent, ClipboardEvent } from 'react';
+import React, { useState, useRef, useEffect, useMemo, KeyboardEvent, ClipboardEvent } from 'react';
 
 interface OTPInputProps {
     length?: number;
@@ -26,15 +26,13 @@ export const OTPInput: React.FC<OTPInputProps> = ({
     autoFocus = true,
 }) => {
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-    const [localValues, setLocalValues] = useState<string[]>(
-        value.split('').concat(Array(length - value.length).fill(''))
-    );
-
-    // Sync local values with prop value
-    useEffect(() => {
-        const newValues = value.split('').concat(Array(length - value.length).fill(''));
-        setLocalValues(newValues.slice(0, length));
+    
+    // Derive local values from prop value instead of syncing in effect
+    const localValues = useMemo(() => {
+        return value.split('').concat(Array(length - value.length).fill('')).slice(0, length);
     }, [value, length]);
+
+    const [focusedIndex, setFocusedIndex] = useState<number>(-1);
 
     // Auto-focus first input on mount
     useEffect(() => {

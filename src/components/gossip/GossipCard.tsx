@@ -4,6 +4,7 @@
  */
 
 import { GossipPost } from '@/types/gossip';
+import Link from 'next/link';
 
 interface GossipCardProps {
     post: GossipPost;
@@ -39,31 +40,69 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
         }
     };
 
+    const handleProfileClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+    };
+
     return (
         <article
             className="border-b border-gray-200 dark:border-gray-800 px-4 py-3 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer"
-            onClick={onClick}
+            onClick={(e) => {
+                // Don't trigger onClick if clicking on a link
+                const target = e.target as HTMLElement;
+                if (!target.closest('a')) {
+                    onClick?.();
+                }
+            }}
         >
             <div className="flex gap-3">
-                {/* Avatar */}
-                <div className="flex-shrink-0">
-                    <img
-                        src={post.author.avatarUrl || '/default-avatar.png'}
-                        alt={post.author.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                        onError={(e) => {
-                            e.currentTarget.src = 'https://ui-avatars.com/api/?name=Anonymous&background=6B9FED&color=fff';
-                        }}
-                    />
-                </div>
+                {/* Avatar - Only clickable if not anonymous */}
+                {!post.anonymous && post.author.username ? (
+                    <Link 
+                        href={`/profile/${post.author.username}`} 
+                        className="flex-shrink-0 group"
+                        onClick={handleProfileClick}
+                        aria-label={`View ${post.author.name}'s profile`}
+                    >
+                        <img
+                            src={post.author.avatarUrl || '/default-avatar.png'}
+                            alt={post.author.name}
+                            className="w-10 h-10 rounded-full object-cover group-hover:opacity-80 transition-opacity"
+                            onError={(e) => {
+                                e.currentTarget.src = 'https://ui-avatars.com/api/?name=Anonymous&background=6B9FED&color=fff';
+                            }}
+                        />
+                    </Link>
+                ) : (
+                    <div className="flex-shrink-0">
+                        <img
+                            src={post.author.avatarUrl || '/default-avatar.png'}
+                            alt={post.author.name}
+                            className="w-10 h-10 rounded-full object-cover"
+                            onError={(e) => {
+                                e.currentTarget.src = 'https://ui-avatars.com/api/?name=Anonymous&background=6B9FED&color=fff';
+                            }}
+                        />
+                    </div>
+                )}
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                     {/* Header */}
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">
-                            {post.author.name}
-                        </span>
+                        {!post.anonymous && post.author.username ? (
+                            <Link 
+                                href={`/profile/${post.author.username}`}
+                                onClick={handleProfileClick}
+                                className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:underline"
+                            >
+                                {post.author.name}
+                            </Link>
+                        ) : (
+                            <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">
+                                {post.author.name}
+                            </span>
+                        )}
                         {post.anonymous && (
                             <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs rounded-full flex items-center gap-1 text-gray-600 dark:text-gray-400">
                                 <i className="bi bi-incognito" />
