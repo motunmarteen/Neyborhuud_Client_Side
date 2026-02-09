@@ -373,25 +373,25 @@ export default function SignupPage() {
     // Email Verification Screen - OTP Code Entry
     if (step === 'verify-email') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-8 sm:p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-8 sm:p-10 flex flex-col items-center relative overflow-hidden">
                     {/* Decorative Background Glow */}
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/10 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-neon-green/10 rounded-full blur-2xl"></div>
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/5 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
 
                     {/* Email Icon */}
-                    <div className="w-20 h-20 rounded-full neumorphic-inset flex items-center justify-center mb-6 relative z-10">
+                    <div className="w-20 h-20 rounded-full neu-socket flex items-center justify-center mb-6 relative z-10">
                         <i className="bi bi-shield-lock text-4xl text-brand-blue"></i>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-2 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-2 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Verify Your Email
                     </h1>
                     
-                    <p className="text-charcoal/50 text-sm mb-1 relative z-10 leading-relaxed">
+                    <p className="text-sm mb-1 relative z-10 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
                         We sent a 6-digit code to
                     </p>
-                    <p className="text-charcoal font-bold text-sm mb-6 relative z-10 break-all px-2">
+                    <p className="font-bold text-sm mb-6 relative z-10 break-all px-2" style={{ color: 'var(--neu-text)' }}>
                         {formData.email}
                     </p>
 
@@ -410,7 +410,7 @@ export default function SignupPage() {
 
                     {/* Error Message */}
                     {verificationError && (
-                        <div className="w-full mb-4 p-3 rounded-xl bg-brand-red/10 border border-brand-red/20 relative z-10">
+                        <div className="w-full mb-4 p-3 rounded-xl neu-socket relative z-10" style={{ border: '1px solid rgba(255,107,107,0.2)' }}>
                             <p className="text-xs text-brand-red font-bold flex items-center justify-center gap-2">
                                 <i className="bi bi-exclamation-circle"></i>
                                 {verificationError}
@@ -420,7 +420,7 @@ export default function SignupPage() {
 
                     {/* Verifying Indicator */}
                     {isVerifying && (
-                        <div className="w-full mb-4 p-3 rounded-xl bg-brand-blue/10 border border-brand-blue/20 relative z-10">
+                        <div className="w-full mb-4 p-3 rounded-xl neu-socket relative z-10" style={{ border: '1px solid rgba(107,159,237,0.2)' }}>
                             <p className="text-xs text-brand-blue font-bold flex items-center justify-center gap-2">
                                 <span className="w-4 h-4 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
                                 Verifying...
@@ -430,7 +430,7 @@ export default function SignupPage() {
 
                     {/* Resend Code */}
                     <div className="flex flex-col items-center gap-2 relative z-10">
-                        <p className="text-charcoal/40 text-xs">
+                        <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
                             Didn't receive the code?
                         </p>
                         <button
@@ -459,7 +459,8 @@ export default function SignupPage() {
                     {/* Skip for now (optional - remove if verification is mandatory) */}
                     <button
                         onClick={() => setStep('success')}
-                        className="text-charcoal/20 hover:text-charcoal/40 text-[9px] font-bold uppercase tracking-[0.15em] transition-colors relative z-10 mt-6"
+                        className="text-[9px] font-bold uppercase tracking-[0.15em] transition-colors relative z-10 mt-6"
+                        style={{ color: 'var(--neu-text-muted)' }}
                     >
                         Skip for Now
                     </button>
@@ -471,7 +472,8 @@ export default function SignupPage() {
                             setVerificationCode('');
                             setVerificationError(null);
                         }}
-                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-2"
+                        className="text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-2"
+                        style={{ color: 'var(--neu-text-muted)' }}
                     >
                         Change Email Address
                     </button>
@@ -483,38 +485,39 @@ export default function SignupPage() {
     // Success Screen (after verification or skip)
     if (step === 'success') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
                     {/* Decorative Background Glow */}
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-neon-green/10 rounded-full blur-3xl"></div>
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl"></div>
 
-                    <div className="w-24 h-24 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
-                        <i className="bi bi-person-check-fill text-5xl text-neon-green"></i>
+                    <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
+                        <i className="bi bi-person-check-fill text-5xl text-primary"></i>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-2 relative z-10 uppercase tracking-tighter">Welcome, Neyborh!</h1>
-                    <p className="text-deep-text/50 text-xs mb-8 font-light uppercase tracking-widest relative z-10">Account Secured</p>
+                    <h1 className="text-2xl font-semibold mb-2 relative z-10 uppercase tracking-tighter" style={{ color: 'var(--neu-text)' }}>Welcome, Neyborh!</h1>
+                    <p className="text-xs mb-8 font-light uppercase tracking-widest relative z-10" style={{ color: 'var(--neu-text-secondary)' }}>Account Secured</p>
 
                     <div className="flex flex-col items-center gap-1 mb-10 relative z-10">
                         <div className="flex items-center gap-3">
-                            <span className="text-6xl font-black text-neon-green leading-none italic">20</span>
+                            <span className="text-6xl font-black text-primary leading-none italic">20</span>
                             <i className="bi bi-coin text-3xl text-yellow-400"></i>
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-charcoal/40 mt-2">HuudCoins Earnt</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] mt-2" style={{ color: 'var(--neu-text-muted)' }}>HuudCoins Earnt</span>
                     </div>
 
                     <button
                         onClick={() => router.push('/feed')}
-                        className="neumorphic-btn w-full py-6 rounded-2xl group transition-all mb-4 relative z-10"
+                        className="neu-btn w-full py-6 rounded-2xl group transition-all mb-4 relative z-10 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-neon-green transition-colors">
+                        <span className="font-black uppercase tracking-widest text-xs group-hover:text-primary transition-colors" style={{ color: 'var(--neu-text)' }}>
                             Get Started
                         </span>
                     </button>
 
                     <button
                         onClick={() => router.push('/complete-profile')}
-                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10"
+                        className="text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10"
+                        style={{ color: 'var(--neu-text-muted)' }}
                     >
                         Complete Profile to Claim 100 More Coins
                     </button>
@@ -524,22 +527,23 @@ export default function SignupPage() {
     }
 
     return (
-        <div className="h-[100dvh] bg-soft-bg flex flex-col px-6 py-6 max-w-md mx-auto overflow-hidden">
+        <div className="h-[100dvh] neu-base overflow-hidden">
+        <div className="h-full flex flex-col px-6 py-6 max-w-md mx-auto w-full">
             {/* Header */}
             <div className="mt-4 mb-4">
-                <h1 className="text-4xl font-light text-charcoal tracking-tighter leading-none">Join the <span className="text-neon-green italic">Huud</span></h1>
-                <p className="text-deep-text/50 font-light mt-2 text-base">Your journey to local prosperity starts here.</p>
+                <h1 className="text-4xl font-semibold tracking-tighter leading-none" style={{ color: 'var(--neu-text)' }}>Join the <span className="text-primary italic">Huud</span></h1>
+                <p className="font-light mt-2 text-base" style={{ color: 'var(--neu-text-secondary)' }}>Your journey to local prosperity starts here.</p>
             </div>
 
             {/* Location status */}
             <div className={`
                 flex items-center justify-between p-2.5 rounded-xl mb-4 transition-all
-                ${location ? 'bg-neon-green/5 ring-1 ring-neon-green/20' : 'bg-charcoal/5'}
+                ${location ? 'neu-socket ring-1 ring-primary/20' : 'neu-socket'}
             `}>
                 <div className="flex items-center gap-2.5 overflow-hidden">
-                    <div className={`w-1.5 h-1.5 shrink-0 rounded-full ${location ? 'bg-neon-green animate-pulse' : 'bg-charcoal/30'}`}></div>
+                    <div className={`w-1.5 h-1.5 shrink-0 rounded-full ${location ? 'bg-primary animate-pulse' : 'bg-charcoal/30'}`}></div>
                     <div className="flex flex-col overflow-hidden">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-charcoal/40 truncate">
+                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] truncate" style={{ color: 'var(--neu-text-muted)' }}>
                             {isResolving ? 'Resolving Address...' :
                                 resolvedAddress?.formatted ? resolvedAddress.formatted :
                                     resolvedAddress ? `${resolvedAddress.lga}, ${resolvedAddress.state}` :
@@ -612,7 +616,7 @@ export default function SignupPage() {
                     <input
                         type="checkbox"
                         id="agree"
-                        className="w-4 h-4 accent-neon-green"
+                        className="w-4 h-4 accent-primary"
                         checked={formData.agree}
                         onChange={e => setFormData({ ...formData, agree: e.target.checked })}
                     />
@@ -636,31 +640,32 @@ export default function SignupPage() {
                         usernameValidation.status === 'checking'
                     }
                     className={`
-                        neumorphic-btn py-4.5 rounded-2xl mt-2 transition-all duration-300
+                        py-4.5 rounded-2xl mt-2 transition-all duration-200 cursor-pointer
                         ${(loading || !isPassValid || !formData.username || !formData.email || !formData.agree || 
                           emailValidation.status === 'checking' || usernameValidation.status === 'checking') 
-                            ? 'opacity-50 cursor-not-allowed' 
-                            : 'hover:scale-[1.01]'}
+                            ? 'neu-btn opacity-40 cursor-not-allowed' 
+                            : 'neu-btn active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]'}
                     `}
                 >
-                    <span className="text-charcoal font-black uppercase tracking-widest text-sm">
+                    <span className="font-black uppercase tracking-widest text-sm" style={{ color: 'var(--neu-text)' }}>
                         {loading ? 'Processing...' : 'Create Account'}
                     </span>
                 </button>
             </form>
 
             <div className="mt-auto pb-4 text-center">
-                <p className="text-charcoal/40 text-[10px] font-light uppercase tracking-tighter">
+                <p className="text-[10px] font-light uppercase tracking-tighter" style={{ color: 'var(--neu-text-muted)' }}>
                     Already a Neyborh? <Link href="/login" className="text-brand-blue font-bold">Log in</Link>
                 </p>
             </div>
+        </div>
         </div>
     );
 }
 
 const Rule = ({ label, met }: { label: string, met: boolean }) => (
     <div className="flex items-center gap-2">
-        <i className={`bi ${met ? 'bi-check-circle-fill text-neon-green' : 'bi-circle text-charcoal/10'} text-[10px]`}></i>
+        <i className={`bi ${met ? 'bi-check-circle-fill text-primary' : 'bi-circle text-charcoal/10'} text-[10px]`}></i>
         <span className={`text-[9px] uppercase tracking-wider ${met ? 'text-charcoal' : 'text-charcoal/20'}`}>{label}</span>
     </div>
 );

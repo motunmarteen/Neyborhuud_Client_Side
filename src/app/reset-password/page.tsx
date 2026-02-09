@@ -73,27 +73,27 @@ function ResetPasswordContent() {
     // Success Screen
     if (step === 'success') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-neon-green/10 rounded-full blur-3xl"></div>
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl"></div>
 
-                    <div className="w-28 h-28 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
-                        <i className="bi bi-shield-check text-5xl text-neon-green"></i>
+                    <div className="w-28 h-28 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
+                        <i className="bi bi-shield-check text-5xl text-primary"></i>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Password Updated!
                     </h1>
                     
-                    <p className="text-charcoal/50 text-sm mb-8 relative z-10 leading-relaxed px-4">
+                    <p className="text-sm mb-8 relative z-10 leading-relaxed px-4" style={{ color: 'var(--neu-text-secondary)' }}>
                         Your password has been successfully reset. You can now log in with your new password.
                     </p>
 
                     <button
                         onClick={() => router.push('/login')}
-                        className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10"
+                        className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-neon-green transition-colors">
+                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-primary transition-colors">
                             Continue to Login
                         </span>
                     </button>
@@ -105,34 +105,34 @@ function ResetPasswordContent() {
     // Expired/Invalid Token Screen
     if (step === 'expired') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl"></div>
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-yellow-500/5 rounded-full blur-3xl"></div>
 
-                    <div className="w-28 h-28 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
+                    <div className="w-28 h-28 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
                         <i className="bi bi-clock-history text-5xl text-yellow-500"></i>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Link Expired
                     </h1>
                     
-                    <p className="text-charcoal/50 text-sm mb-8 relative z-10 leading-relaxed px-4">
+                    <p className="text-sm mb-8 relative z-10 leading-relaxed px-4" style={{ color: 'var(--neu-text-secondary)' }}>
                         {errorMessage || 'This password reset link has expired or is invalid.'}
                     </p>
 
                     <button
                         onClick={() => router.push('/forgot-password')}
-                        className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10 mb-4"
+                        className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 mb-4 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
+                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
                             Request New Link
                         </span>
                     </button>
 
                     <Link 
                         href="/login"
-                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors"
+                        className="[color:var(--neu-text-muted)] hover:[color:var(--neu-text-secondary)] text-[10px] font-bold uppercase tracking-[0.2em] transition-colors"
                     >
                         Back to Login
                     </Link>
@@ -144,27 +144,27 @@ function ResetPasswordContent() {
     // Error Screen
     if (step === 'error') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-red/10 rounded-full blur-3xl"></div>
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-red/5 rounded-full blur-3xl"></div>
 
-                    <div className="w-24 h-24 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
+                    <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
                         <i className="bi bi-exclamation-triangle text-5xl text-brand-red"></i>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Reset Failed
                     </h1>
                     
-                    <p className="text-charcoal/50 text-sm mb-8 relative z-10 leading-relaxed px-4">
+                    <p className="text-sm mb-8 relative z-10 leading-relaxed px-4" style={{ color: 'var(--neu-text-secondary)' }}>
                         {errorMessage}
                     </p>
 
                     <button
                         onClick={() => setStep('form')}
-                        className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10"
+                        className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
+                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
                             Try Again
                         </span>
                     </button>
@@ -175,20 +175,21 @@ function ResetPasswordContent() {
 
     // Form Screen
     return (
-        <div className="h-[100dvh] bg-soft-bg flex flex-col p-6 max-w-md mx-auto overflow-hidden">
+        <div className="h-[100dvh] neu-base overflow-hidden">
+        <div className="h-full flex flex-col p-6 max-w-md mx-auto w-full">
             {/* Header */}
             <div className="mt-12 mb-8">
-                <h1 className="text-3xl font-light text-charcoal tracking-tighter leading-none">
+                <h1 className="text-3xl font-semibold tracking-tighter leading-none" style={{ color: 'var(--neu-text)' }}>
                     Create New Password
                 </h1>
-                <p className="text-deep-text/50 font-light mt-3 text-base leading-relaxed">
+                <p className="font-light mt-3 text-base leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
                     Choose a strong password to secure your account.
                 </p>
             </div>
 
             {/* Icon */}
             <div className="flex justify-center mb-8">
-                <div className="w-24 h-24 rounded-full neumorphic flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full neu-card-raised flex items-center justify-center">
                     <i className="bi bi-lock-fill text-4xl text-brand-blue"></i>
                 </div>
             </div>
@@ -229,13 +230,13 @@ function ResetPasswordContent() {
                 <button
                     disabled={loading || !isPassValid || !passwordsMatch}
                     className={`
-                        neumorphic-btn py-5 rounded-2xl mt-4 transition-all duration-300
+                        neu-btn py-5 rounded-2xl mt-4 transition-all duration-300
                         ${(loading || !isPassValid || !passwordsMatch) 
-                            ? 'opacity-50 cursor-not-allowed scale-[0.98]' 
-                            : 'hover:scale-[1.02]'}
+                            ? 'opacity-40 cursor-not-allowed' 
+                            : 'hover:scale-[1.02] active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]'}
                     `}
                 >
-                    <span className="text-charcoal font-black uppercase tracking-widest text-sm">
+                    <span className="font-black uppercase tracking-widest text-sm" style={{ color: 'var(--neu-text)' }}>
                         {loading ? (
                             <span className="flex items-center justify-center gap-2">
                                 <span className="w-4 h-4 border-2 border-charcoal/30 border-t-charcoal rounded-full animate-spin"></span>
@@ -250,7 +251,7 @@ function ResetPasswordContent() {
 
             {/* Footer */}
             <div className="mt-auto pb-10 text-center">
-                <p className="text-charcoal/40 text-sm font-light">
+                <p className="text-sm font-light" style={{ color: 'var(--neu-text-muted)' }}>
                     Remember your password?{' '}
                     <Link href="/login" className="text-brand-blue font-bold hover:underline">
                         Log in
@@ -258,14 +259,15 @@ function ResetPasswordContent() {
                 </p>
             </div>
         </div>
+        </div>
     );
 }
 
 // Password rule indicator component
 const Rule = ({ label, met }: { label: string, met: boolean }) => (
     <div className="flex items-center gap-2">
-        <i className={`bi ${met ? 'bi-check-circle-fill text-neon-green' : 'bi-circle text-charcoal/10'} text-[10px]`}></i>
-        <span className={`text-[9px] uppercase tracking-wider ${met ? 'text-charcoal' : 'text-charcoal/20'}`}>{label}</span>
+        <i className={`bi ${met ? 'bi-check-circle-fill text-primary' : 'bi-circle [color:var(--neu-text-muted)]'} text-[10px]`}></i>
+        <span className={`text-[9px] uppercase tracking-wider ${met ? '[color:var(--neu-text)]' : '[color:var(--neu-text-muted)]'}`}>{label}</span>
     </div>
 );
 
@@ -273,7 +275,7 @@ const Rule = ({ label, met }: { label: string, met: boolean }) => (
 export default function ResetPasswordPage() {
     return (
         <Suspense fallback={
-            <div className="h-[100dvh] bg-soft-bg flex items-center justify-center">
+            <div className="h-[100dvh] neu-base flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></div>
             </div>
         }>

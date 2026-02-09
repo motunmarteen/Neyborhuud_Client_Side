@@ -21,7 +21,7 @@ export default function NeumorphicDemo() {
                 <button
                     onClick={() => setActiveView('HOME')}
                     className={`w-16 h-16 rounded-2xl transition-all duration-300 flex items-center justify-center ${activeView === 'HOME'
-                            ? 'neumorphic-inset text-neon-green'
+                            ? 'neumorphic-inset text-primary'
                             : 'neumorphic text-deep-text/20'
                         }`}
                 >
@@ -157,7 +157,7 @@ export default function NeumorphicDemo() {
                                 </NeumorphicCard>
 
                                 <NeumorphicCard className="flex flex-col gap-2 py-5 px-4 items-center rounded-2xl border border-white/20" isBtn={false}>
-                                    <i className="bi bi-lightning-fill text-2xl text-neon-green mb-1"></i>
+                                    <i className="bi bi-lightning-fill text-2xl text-primary mb-1"></i>
                                     <span className="text-[9px] font-medium text-deep-text/40">Electricity</span>
                                     <span className="text-xl font-bold text-deep-text leading-none">265</span>
                                     <span className="text-[8px] font-normal text-deep-text/30">Yesterday</span>

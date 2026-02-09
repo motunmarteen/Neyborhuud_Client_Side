@@ -60,7 +60,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             <div className="flex gap-3">
                 <img
                     src={user?.avatarUrl || user?.profilePicture || 'https://i.pravatar.cc/100?u=user'}
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 neu-avatar"
                     alt="Current user"
                 />
                 <div className="flex-1 min-w-0">
@@ -70,7 +70,8 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                         value={body}
                         onChange={(e) => setBody(e.target.value)}
                         placeholder={placeholder}
-                        className="w-full bg-transparent border-none focus:ring-0 text-[16px] text-gray-900 dark:text-gray-100 placeholder-gray-500 resize-none py-1.5 h-auto overflow-hidden min-h-[40px]"
+                        className="w-full bg-transparent border-none focus:ring-0 text-[16px] placeholder-[var(--neu-text-muted)] resize-none py-1.5 h-auto overflow-hidden min-h-[40px]"
+                        style={{ color: 'var(--neu-text)' }}
                         rows={1}
                         onInput={(e) => {
                             const target = e.target as HTMLTextAreaElement;
@@ -87,7 +88,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                 <div key={idx} className="relative group">
                                     <img
                                         src={url}
-                                        className="w-20 h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-800"
+                                        className="w-20 h-20 object-cover rounded-lg neu-card-sm"
                                         alt="Preview"
                                         onError={(e) => {
                                             e.currentTarget.src = 'https://placehold.co/100x100?text=Invalid+Image';
@@ -96,9 +97,9 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                     <button
                                         type="button"
                                         onClick={() => removeMediaUrl(idx)}
-                                        className="absolute -top-1.5 -right-1.5 bg-black/50 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-black/70"
+                                        className="absolute -top-1.5 -right-1.5 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-black/80"
                                     >
-                                        <i className="bi bi-x text-xs" />
+                                        <span className="material-symbols-outlined text-xs">close</span>
                                     </button>
                                 </div>
                             ))}
@@ -113,54 +114,54 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                 value={tempUrl}
                                 onChange={(e) => setTempUrl(e.target.value)}
                                 placeholder="Paste image URL..."
-                                className="flex-1 text-xs p-2 border border-blue-500/30 rounded-lg bg-blue-50/10 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+                                className="flex-1 text-xs p-2 rounded-lg neu-input transition-all"
                                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addMediaUrl())}
                             />
                             <button
                                 type="button"
                                 onClick={addMediaUrl}
-                                className="text-xs bg-blue-500 text-white px-3 py-1 rounded-lg font-bold hover:bg-blue-600 active:scale-95 transition-all"
+                                className="text-xs neu-btn-active text-primary px-3 py-1 rounded-lg font-bold active:scale-95 transition-all"
                             >
                                 Add
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setShowMediaInput(false)}
-                                className="text-xs text-gray-500 hover:text-gray-700"
+                                className="text-xs" style={{ color: 'var(--neu-text-muted)' }}
                             >
                                 Cancel
                             </button>
                         </div>
                     )}
 
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                    <div className="flex items-center justify-between mt-3 pt-3">
                         <div className="flex gap-1">
                             <button
                                 type="button"
                                 onClick={() => setShowMediaInput(!showMediaInput)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                className="w-8 h-8 rounded-xl flex items-center justify-center text-primary hover:bg-primary/10 transition-colors"
                                 title="Add Media URL"
                                 disabled={isCreating}
                             >
-                                <i className="bi bi-image text-[16px]" />
+                                <span className="material-symbols-outlined text-[18px]">image</span>
                             </button>
                             <button
                                 type="button"
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                className="w-8 h-8 rounded-xl flex items-center justify-center text-primary hover:bg-primary/10 transition-colors"
                                 title="Emoji"
                                 disabled={isCreating}
                             >
-                                <i className="bi bi-emoji-smile text-[16px]" />
+                                <span className="material-symbols-outlined text-[18px]">mood</span>
                             </button>
                         </div>
 
                         <button
                             type="submit"
                             disabled={isCreating || (!body.trim() && mediaUrls.length === 0)}
-                            className="bg-neon-green text-white px-4 py-1.5 rounded-full text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neon-green/90 active:scale-95 transition-all shadow-sm"
+                            className="neu-btn-active text-primary px-4 py-1.5 rounded-2xl text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
                         >
                             {isCreating ? (
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                             ) : parentId ? 'Reply' : 'Post'}
                         </button>
                     </div>

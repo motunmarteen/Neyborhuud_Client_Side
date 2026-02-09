@@ -1,131 +1,189 @@
-import Image from "next/image";
-import { GlassCard, NeumorphicCard, NeumorphicCircle } from "@/components/ui/PremiumCards";
+'use client';
 
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
+const slides = [
+    {
+        id: 'safety',
+        title: 'Zero-Lag Safety',
+        subtitle: 'Trigger an SOS in 2 seconds. Sentinel AI watches over your street.',
+        icon: 'bi-shield-check',
+        accentColor: '#11d473',
+    },
+    {
+        id: 'community',
+        title: 'Your Voice Matters',
+        subtitle: 'Join the conversation. Build your Reputation. Lead your street.',
+        icon: 'bi-people-fill',
+        accentColor: '#FF6B6B',
+    },
+    {
+        id: 'identity',
+        title: 'Identity is Power',
+        subtitle: 'Build your Trust Score. Unlock the Huud Economy.',
+        icon: 'bi-patch-check-fill',
+        accentColor: '#9F7AEA',
+    },
+];
 
 export default function Home() {
-  return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground animate-in fade-in duration-700 overflow-x-hidden">
-      {/* Mobile-First Header: Optimized Height */}
-      <header className="fixed top-0 w-full z-50 glass px-5 py-4 flex justify-between items-center border-b border-charcoal/5">
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 overflow-hidden rounded-xl shadow-lg border-2 border-white p-1 bg-white">
-            <Image
-              src="/icon.png"
-              alt="NeyborHuud Logo"
-              fill
-              className="object-cover"
+    const router = useRouter();
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [isPressed, setIsPressed] = useState(false);
+
+    const activeSlide = slides[currentSlide];
+
+    const nextSlide = () => {
+        if (isAnimating) return;
+        if (currentSlide < slides.length - 1) {
+            setIsAnimating(true);
+            setTimeout(() => {
+                setCurrentSlide((prev) => prev + 1);
+                setIsAnimating(false);
+            }, 300);
+        } else {
+            router.push('/signup');
+        }
+    };
+
+    const goToSlide = (idx: number) => {
+        if (idx !== currentSlide && !isAnimating) {
+            setIsAnimating(true);
+            setTimeout(() => {
+                setCurrentSlide(idx);
+                setIsAnimating(false);
+            }, 300);
+        }
+    };
+
+    const handleSkip = () => router.push('/signup');
+
+    return (
+        <div className="neu-base min-h-[100dvh] flex flex-col items-center justify-between py-10 px-6 overflow-hidden relative">
+            {/* Very subtle ambient glow */}
+            <div
+                className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[160px] opacity-[0.05] pointer-events-none transition-all duration-1000"
+                style={{ backgroundColor: activeSlide.accentColor }}
             />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-lg font-black tracking-tighter leading-none italic uppercase text-charcoal">
-              NEYBOR<span className="text-neon-green">HUUD</span>
-            </span>
-            <span className="text-[8px] font-black tracking-[0.2em] text-charcoal/30 uppercase">
-              Fortress OS
-            </span>
-          </div>
-        </div>
-        <button className="bg-charcoal text-white px-5 py-2.5 rounded-xl text-[10px] font-black shadow-lg shadow-charcoal/10 active:scale-95 transition-all uppercase tracking-tight">
-          CORE
-        </button>
-      </header>
 
-      <main className="flex-grow pt-28 pb-32 px-5 max-w-md mx-auto w-full">
-        {/* Mobile Hero: Compact & Architectural */}
-        <section className="relative neumorphic rounded-[3rem] p-8 mb-12 overflow-hidden border border-white/40">
-          <div className="relative z-10 flex flex-col gap-8">
-            <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full w-fit border border-white/50">
-              <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse"></span>
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-charcoal/50">Zone 1 Secure</span>
+            {/* ── Skip Button ── */}
+            <div className="w-full flex justify-end z-20 max-w-md lg:max-w-none lg:absolute lg:top-8 lg:right-10">
+                <button
+                    onClick={handleSkip}
+                    className="neu-btn-pill"
+                    aria-label="Skip onboarding"
+                >
+                    Skip
+                </button>
             </div>
 
-            <h1 className="text-5xl font-black leading-[0.9] tracking-tighter italic uppercase text-charcoal">
-              OWN YOUR <br />
-              <span className="text-neon-green">HUUD.</span> <br />
-              <span className="text-3xl opacity-20">VIGILANCE.</span>
-            </h1>
+            {/* ── Main Content ── */}
+            <div className="grow flex flex-col items-center justify-center w-full max-w-md z-10 gap-10">
+                {/* Raised Icon Container */}
+                <div
+                    className={`
+                        neu-card-raised rounded-[2.5rem] w-56 h-56 flex items-center justify-center
+                        animate-neu-float transition-all duration-500
+                        ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}
+                    `}
+                >
+                    {/* Inset Icon Socket */}
+                    <div
+                        className="neu-socket rounded-full w-36 h-36 flex items-center justify-center transition-shadow duration-700"
+                        style={{
+                            boxShadow: `inset 6px 6px 14px var(--neu-shadow-dark), inset -6px -6px 14px var(--neu-shadow-light), 0 0 25px ${activeSlide.accentColor}12`,
+                        }}
+                    >
+                        <i
+                            className={`bi ${activeSlide.icon} text-7xl drop-shadow-sm transition-colors duration-500`}
+                            style={{ color: activeSlide.accentColor }}
+                        />
+                    </div>
+                </div>
 
-            <p className="text-charcoal/40 text-base leading-snug font-bold italic pr-4">
-              Premium safety and local economics through a clean architectural interface.
-            </p>
-
-            <div className="flex flex-col gap-4 mt-2">
-              <button className="bg-neon-green text-charcoal px-8 py-4 rounded-[2rem] font-black shadow-xl shadow-neon-green/20 active:scale-95 transition-all text-sm tracking-tight uppercase">
-                AUTHENTICATE
-              </button>
-              <button className="glass text-charcoal px-8 py-4 rounded-[2rem] font-black text-sm border border-white/60 active:scale-95 transition-all uppercase">
-                EXPLORE
-              </button>
+                {/* Text */}
+                <div
+                    className={`
+                        text-center flex flex-col gap-3 transition-all duration-500 delay-75
+                        ${isAnimating ? 'translate-y-5 opacity-0' : 'translate-y-0 opacity-100'}
+                    `}
+                >
+                    <h1
+                        className="text-3xl font-semibold tracking-tight"
+                        style={{ color: 'var(--neu-text)' }}
+                    >
+                        {activeSlide.title}
+                    </h1>
+                    <p
+                        className="leading-relaxed max-w-xs mx-auto text-base"
+                        style={{ color: 'var(--neu-text-secondary)' }}
+                    >
+                        {activeSlide.subtitle}
+                    </p>
+                </div>
             </div>
-          </div>
 
-          <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-neon-green/10 rounded-full blur-3xl"></div>
-        </section>
+            {/* ── Footer ── */}
+            <div className="w-full max-w-md flex flex-col gap-7 z-20">
+                {/* Neumorphic Indicator Track */}
+                <div className="flex justify-center">
+                    <div className="neu-track rounded-full px-5 py-2.5 flex gap-3 items-center">
+                        {slides.map((slide, idx) => (
+                            <button
+                                key={slide.id}
+                                onClick={() => goToSlide(idx)}
+                                className={`
+                                    rounded-full transition-all duration-500 cursor-pointer
+                                    ${currentSlide === idx
+                                        ? 'w-8 h-2.5 neu-dot-active'
+                                        : 'w-2.5 h-2.5 neu-dot hover:scale-110'
+                                    }
+                                `}
+                                style={currentSlide === idx ? { backgroundColor: slide.accentColor } : undefined}
+                                aria-label={`Go to slide ${idx + 1}`}
+                            />
+                        ))}
+                    </div>
+                </div>
 
-        {/* Features Preview: Mobile-Optimized Grid */}
-        <div className="flex flex-col gap-10">
-          <h2 className="text-3xl font-black italic uppercase tracking-tighter border-l-8 border-neon-green pl-5 text-charcoal">Global Core</h2>
+                {/* CTA Button */}
+                <button
+                    onClick={nextSlide}
+                    onMouseDown={() => setIsPressed(true)}
+                    onMouseUp={() => setIsPressed(false)}
+                    onMouseLeave={() => setIsPressed(false)}
+                    onTouchStart={() => setIsPressed(true)}
+                    onTouchEnd={() => setIsPressed(false)}
+                    className={`
+                        w-full py-5 rounded-2xl flex items-center justify-center
+                        transition-all duration-150 cursor-pointer
+                        ${isPressed ? 'neu-btn-active' : 'neu-btn'}
+                    `}
+                >
+                    <span
+                        className="font-black uppercase tracking-[0.25em] text-sm"
+                        style={{ color: 'var(--neu-text)' }}
+                    >
+                        {currentSlide === slides.length - 1 ? 'Get Started' : 'Continue'}
+                    </span>
+                </button>
 
-          <div className="flex flex-col gap-8">
-            {/* Sentinel Feature */}
-            <NeumorphicCard className="flex flex-col gap-6 border border-white/40 p-8">
-              <div className="w-16 h-16 rounded-2xl glass flex items-center justify-center text-neon-green shadow-inner">
-                <i className="bi bi-shield-fill-check text-3xl"></i>
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="text-xl font-black uppercase tracking-tight italic text-charcoal">Sentinel AI</h3>
-                <p className="text-charcoal/40 text-xs font-bold leading-relaxed">
-                  Military-grade threat detection monitoring your zone.
+                {/* Login Link */}
+                <p className="text-center pb-2">
+                    <span className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
+                        Already have an account?{' '}
+                    </span>
+                    <Link
+                        href="/login"
+                        className="text-brand-blue font-semibold text-sm hover:underline transition-colors"
+                    >
+                        Log in
+                    </Link>
                 </p>
-              </div>
-            </NeumorphicCard>
-
-            {/* Pulse Metric */}
-            <GlassCard className="flex flex-col gap-6 shadow-inner border-white/60 p-8" intensity="high">
-              <div className="flex justify-between items-center">
-                <span className="text-[9px] font-black uppercase tracking-widest text-charcoal/20">Sector Pulse</span>
-                <div className="w-2 h-2 rounded-full bg-neon-green"></div>
-              </div>
-              <div className="flex items-end gap-2 text-charcoal">
-                <span className="text-5xl font-black leading-none tracking-tighter">98<span className="text-xl ml-0.5">%</span></span>
-                <span className="text-neon-green font-black text-[8px] uppercase mb-1 tracking-widest italic">OPTIMAL</span>
-              </div>
-              <div className="w-full h-3 neumorphic-inset rounded-full overflow-hidden p-0.5 mt-2">
-                <div className="w-3/4 h-full bg-neon-green rounded-full"></div>
-              </div>
-            </GlassCard>
-
-            {/* Hub Location */}
-            <NeumorphicCard className="flex gap-6 items-center border border-white/40 p-8">
-              <NeumorphicCircle className="w-16 h-16 text-neon-green flex-shrink-0">
-                <i className="bi bi-geo-alt-fill text-2xl"></i>
-              </NeumorphicCircle>
-              <div>
-                <p className="text-[9px] font-black uppercase tracking-widest opacity-20 mb-1">Hub Location</p>
-                <h4 className="text-xl font-black uppercase italic tracking-tighter text-charcoal leading-none">SURULERE CORE</h4>
-              </div>
-            </NeumorphicCard>
-          </div>
+            </div>
         </div>
-      </main>
-
-      {/* Mobile Bottom Nav: Native Ergonomics */}
-      <nav className="fixed bottom-6 left-6 right-6 z-50">
-        <div className="glass border border-white/60 p-3 flex justify-between items-center rounded-[2rem] shadow-2xl backdrop-blur-3xl px-8">
-          <div className="text-neon-green flex flex-col items-center">
-            <i className="bi bi-grid-fill text-2xl"></i>
-          </div>
-
-          {/* Center Call to Action */}
-          <div className="w-14 h-14 rounded-full bg-brand-red flex items-center justify-center text-white shadow-xl -translate-y-6 border-[6px] border-background active:scale-90 transition-all">
-            <i className="bi bi-megaphone-fill text-xl"></i>
-          </div>
-
-          <div className="text-charcoal/20 flex flex-col items-center">
-            <i className="bi bi-person-fill text-2xl"></i>
-          </div>
-        </div>
-      </nav>
-    </div>
-  );
+    );
 }

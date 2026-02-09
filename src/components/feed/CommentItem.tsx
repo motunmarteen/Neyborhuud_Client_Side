@@ -55,7 +55,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
     };
 
     return (
-        <div className={`flex gap-3 ${isReply ? 'mt-3 pl-2 sm:pl-4 border-l-2 border-gray-100 dark:border-gray-800' : 'py-4 border-b border-gray-100 dark:border-gray-800'}`}>
+        <div className={`flex gap-3 ${isReply ? 'mt-3 pl-2 sm:pl-4' : 'py-4'}`} style={isReply ? { borderLeft: '2px solid var(--neu-shadow-dark)' } : {}}>
             {/* Avatar & Thread Line - Avatar is smaller for replies */}
             <Link 
                 href={`/profile/${username}`} 
@@ -64,7 +64,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                 <img
                     src={avatarUrl}
                     alt={username}
-                    className={`${isReply ? 'w-8 h-8' : 'w-10 h-10'} rounded-full object-cover transition-opacity hover:opacity-80 cursor-pointer`}
+                    className={`${isReply ? 'w-8 h-8' : 'w-10 h-10'} rounded-full object-cover transition-opacity hover:opacity-80 cursor-pointer neu-avatar`}
                     onError={(e) => {
                         e.currentTarget.src = 'https://i.pravatar.cc/100?u=' + username;
                     }}
@@ -77,18 +77,20 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                     <div className="flex items-center gap-1.5 flex-wrap">
                         <Link 
                             href={`/profile/${username}`}
-                            className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:underline cursor-pointer"
+                            className="font-bold text-[15px] hover:underline cursor-pointer"
+                            style={{ color: 'var(--neu-text)' }}
                         >
                             {displayName}
                         </Link>
                         <Link
                             href={`/profile/${username}`}
-                            className="text-[14px] text-gray-500 dark:text-gray-400 hover:underline truncate max-w-[100px] sm:max-w-none"
+                            className="text-[14px] hover:underline truncate max-w-[100px] sm:max-w-none"
+                            style={{ color: 'var(--neu-text-muted)' }}
                         >
                             @{username}
                         </Link>
-                        <span className="text-gray-500 dark:text-gray-400">·</span>
-                        <span className="text-[14px] text-gray-500 dark:text-gray-400 hover:underline cursor-pointer">
+                        <span style={{ color: 'var(--neu-text-muted)' }}>·</span>
+                        <span className="text-[14px] hover:underline cursor-pointer" style={{ color: 'var(--neu-text-muted)' }}>
                             {formatTimeAgo(comment.createdAt)}
                         </span>
                     </div>
@@ -96,28 +98,29 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                     {isAuthor && (
                         <button
                             onClick={handleDelete}
-                            className="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-900/10"
+                            className="hover:text-red-400 transition-colors p-1.5 rounded-full hover:bg-red-400/10"
+                            style={{ color: 'var(--neu-text-muted)' }}
                             title="Delete comment"
                         >
-                            <i className="bi bi-trash text-sm" />
+                            <span className="material-symbols-outlined text-sm">delete</span>
                         </button>
                     )}
                 </div>
 
                 {/* Comment Body */}
-                <div className="text-[15px] text-gray-900 dark:text-gray-100 leading-normal mt-0.5 whitespace-pre-wrap break-words">
+                <div className="text-[15px] leading-normal mt-0.5 whitespace-pre-wrap break-words" style={{ color: 'var(--neu-text)' }}>
                     {comment.body}
                 </div>
 
                 {/* Media Grid */}
                 {comment.mediaUrls && comment.mediaUrls.length > 0 && (
-                    <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 grid grid-cols-2 gap-0.5 max-w-md shadow-sm">
+                    <div className="mt-3 neu-card-sm rounded-xl overflow-hidden grid grid-cols-2 gap-0.5 max-w-md">
                         {comment.mediaUrls.map((url, idx) => (
                             <div key={idx} className={`${comment.mediaUrls?.length === 1 ? 'col-span-2' : ''} relative aspect-square`}>
                                 <img
                                     src={url}
                                     alt="Comment media"
-                                    className="w-full h-full object-cover cursor-zoom-in hover:brightness-95 transition-all"
+                                    className="w-full h-full object-cover cursor-zoom-in hover:brightness-90 transition-all"
                                     onError={(e) => {
                                         e.currentTarget.src = 'https://placehold.co/400x400?text=Image+Unavailable';
                                     }}
@@ -128,29 +131,29 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                 )}
 
                 {/* Actions Toolbar */}
-                <div className="flex items-center gap-6 mt-3 text-gray-500">
+                <div className="flex items-center gap-6 mt-3" style={{ color: 'var(--neu-text-muted)' }}>
                     <button
                         onClick={handleLike}
-                        className={`flex items-center gap-2 group transition-colors ${comment.isLiked ? 'text-pink-600' : 'hover:text-pink-600'}`}
+                        className={`flex items-center gap-2 group transition-colors ${comment.isLiked ? 'text-pink-400' : 'hover:text-pink-400'}`}
                     >
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:bg-pink-50 dark:group-hover:bg-pink-900/10 transition-colors`}>
-                            <i className={`bi ${comment.isLiked ? 'bi-heart-fill' : 'bi-heart'} text-[15px]`} />
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center group-hover:bg-pink-400/10 transition-colors`}>
+                            <span className={`material-symbols-outlined text-[18px] ${comment.isLiked ? 'fill-1' : ''}`}>favorite</span>
                         </div>
                         {comment.likes > 0 && <span className="text-xs font-medium">{comment.likes}</span>}
                     </button>
 
                     <button
                         onClick={() => setIsReplying(!isReplying)}
-                        className={`flex items-center gap-2 group transition-colors ${isReplying ? 'text-blue-500' : 'hover:text-blue-500'}`}
+                        className={`flex items-center gap-2 group transition-colors ${isReplying ? 'text-primary' : 'hover:text-primary'}`}
                     >
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-900/10 transition-colors">
-                            <i className="bi bi-chat text-[15px]" />
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                            <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
                         </div>
                         <span className="text-xs font-medium">Reply</span>
                     </button>
 
-                    <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-green-50 dark:hover:bg-green-900/10 hover:text-green-500 transition-colors group">
-                        <i className="bi bi-share text-[15px]" />
+                    <button className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors group">
+                        <span className="material-symbols-outlined text-[18px]">share</span>
                     </button>
                 </div>
 

@@ -80,11 +80,12 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="h-[100dvh] bg-soft-bg flex flex-col p-6 max-w-md mx-auto overflow-hidden">
+        <div className="h-[100dvh] neu-base overflow-hidden">
+        <div className="h-full flex flex-col p-6 max-w-md mx-auto w-full">
             {/* Header */}
             <div className="mt-12 mb-10">
-                <h1 className="text-4xl font-light text-charcoal tracking-tighter leading-none">Welcome Back</h1>
-                <p className="text-deep-text/50 font-light mt-3 text-lg">Continue your NeyborHuud journey.</p>
+                <h1 className="text-4xl font-semibold tracking-tighter leading-none" style={{ color: 'var(--neu-text)' }}>Welcome Back</h1>
+                <p className="font-light mt-3 text-lg" style={{ color: 'var(--neu-text-secondary)' }}>Continue your NeyborHuud journey.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -119,21 +120,24 @@ export default function LoginPage() {
                 <button
                     disabled={loading || !formData.email || !formData.password}
                     className={`
-                        neumorphic-btn py-5 rounded-2xl mt-6 transition-all duration-300
-                        ${(loading || !formData.email || !formData.password) ? 'opacity-50 cursor-not-allowed scale-[0.98]' : 'hover:scale-[1.02]'}
+                        py-5 rounded-2xl mt-6 transition-all duration-200 cursor-pointer
+                        ${(loading || !formData.email || !formData.password) 
+                            ? 'neu-btn opacity-40 cursor-not-allowed' 
+                            : 'neu-btn hover:shadow-none active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]'}
                     `}
                 >
-                    <span className="text-charcoal font-black uppercase tracking-widest">
+                    <span className="font-black uppercase tracking-widest" style={{ color: 'var(--neu-text)' }}>
                         {loading ? 'Logging in...' : 'Log In'}
                     </span>
                 </button>
             </form>
 
             <div className="mt-auto pb-10 text-center">
-                <p className="text-charcoal/40 text-sm font-light uppercase tracking-tighter">
+                <p className="text-sm font-light uppercase tracking-tighter" style={{ color: 'var(--neu-text-muted)' }}>
                     New to the NeyborHuud? <Link href="/signup" className="text-brand-blue font-bold">Join for Free</Link>
                 </p>
             </div>
+        </div>
         </div>
     );
 }

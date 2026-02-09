@@ -89,41 +89,41 @@ export default function ForgotPasswordPage() {
     // Success: Email Sent Screen
     if (step === 'sent') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
                     {/* Decorative Glows */}
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/10 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-neon-green/10 rounded-full blur-2xl"></div>
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/5 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
 
                     {/* Icon */}
-                    <div className="w-28 h-28 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
+                    <div className="w-28 h-28 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
                         <div className="relative">
                             <i className="bi bi-envelope-paper text-5xl text-brand-blue"></i>
-                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-neon-green rounded-full flex items-center justify-center">
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                                 <i className="bi bi-check text-white text-xs"></i>
                             </div>
                         </div>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Check Your Inbox
                     </h1>
                     
-                    <p className="text-charcoal/50 text-sm mb-2 relative z-10 leading-relaxed">
+                    <p className="text-sm mb-2 relative z-10 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
                         If an account exists for
                     </p>
-                    <p className="text-charcoal font-bold text-base mb-6 relative z-10 break-all px-4">
+                    <p className="font-bold text-base mb-6 relative z-10 break-all px-4" style={{ color: 'var(--neu-text)' }}>
                         {email}
                     </p>
-                    <p className="text-charcoal/50 text-sm mb-6 relative z-10 leading-relaxed">
+                    <p className="text-sm mb-6 relative z-10 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
                         you'll receive a password reset link.
                     </p>
 
                     {/* Instructions Box */}
-                    <div className="w-full bg-charcoal/5 rounded-2xl p-4 mb-6 relative z-10">
+                    <div className="w-full neu-socket rounded-2xl p-4 mb-6 relative z-10">
                         <div className="flex items-start gap-3 text-left">
                             <i className="bi bi-lightbulb text-yellow-500 text-lg mt-0.5"></i>
-                            <div className="text-xs text-charcoal/60 leading-relaxed">
+                            <div className="text-xs leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
                                 <p className="mb-2">The link will expire in <strong>15 minutes</strong>.</p>
                                 <p>Check your <strong>spam folder</strong> if you don't see it.</p>
                             </div>
@@ -137,9 +137,10 @@ export default function ForgotPasswordPage() {
                         className={`
                             text-sm font-bold transition-all mb-6 relative z-10
                             ${resendCooldown > 0 || loading 
-                                ? 'text-charcoal/30 cursor-not-allowed' 
+                                ? 'cursor-not-allowed' 
                                 : 'text-brand-blue hover:text-brand-blue/70'}
                         `}
+                        style={{ color: resendCooldown > 0 || loading ? 'var(--neu-text-muted)' : undefined }}
                     >
                         {loading ? (
                             <span className="flex items-center gap-2">
@@ -156,9 +157,9 @@ export default function ForgotPasswordPage() {
                     {/* Back to Login */}
                     <button
                         onClick={() => router.push('/login')}
-                        className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10"
+                        className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
+                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
                             Back to Login
                         </span>
                     </button>
@@ -166,7 +167,8 @@ export default function ForgotPasswordPage() {
                     {/* Try Different Email */}
                     <button
                         onClick={() => setStep('form')}
-                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-4"
+                        className="hover:opacity-70 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-4"
+                        style={{ color: 'var(--neu-text-muted)' }}
                     >
                         Try Different Email
                     </button>
@@ -178,27 +180,27 @@ export default function ForgotPasswordPage() {
     // Error Screen
     if (step === 'error') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-red/10 rounded-full blur-3xl"></div>
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-red/5 rounded-full blur-3xl"></div>
 
-                    <div className="w-24 h-24 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
+                    <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
                         <i className="bi bi-exclamation-triangle text-5xl text-brand-red"></i>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Something Went Wrong
                     </h1>
                     
-                    <p className="text-charcoal/50 text-sm mb-8 relative z-10 leading-relaxed px-4">
+                    <p className="text-sm mb-8 relative z-10 leading-relaxed px-4" style={{ color: 'var(--neu-text-secondary)' }}>
                         {errorMessage || 'We couldn\'t process your request. Please try again.'}
                     </p>
 
                     <button
                         onClick={() => setStep('form')}
-                        className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10"
+                        className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
+                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
                             Try Again
                         </span>
                     </button>
@@ -209,28 +211,30 @@ export default function ForgotPasswordPage() {
 
     // Form Screen
     return (
-        <div className="h-[100dvh] bg-soft-bg flex flex-col p-6 max-w-md mx-auto overflow-hidden">
+        <div className="h-[100dvh] neu-base overflow-hidden">
+        <div className="h-full flex flex-col p-6 max-w-md mx-auto w-full">
             {/* Header */}
             <div className="mt-12 mb-8">
                 <button 
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-charcoal/40 hover:text-charcoal mb-6 transition-colors"
+                    className="flex items-center gap-2 hover:opacity-70 mb-6 transition-colors"
+                    style={{ color: 'var(--neu-text-muted)' }}
                 >
                     <i className="bi bi-arrow-left text-lg"></i>
                     <span className="text-xs font-bold uppercase tracking-widest">Back</span>
                 </button>
                 
-                <h1 className="text-3xl font-light text-charcoal tracking-tighter leading-none">
+                <h1 className="text-3xl font-semibold tracking-tighter leading-none" style={{ color: 'var(--neu-text)' }}>
                     Forgot Password?
                 </h1>
-                <p className="text-deep-text/50 font-light mt-3 text-base leading-relaxed">
+                <p className="font-light mt-3 text-base leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
                     No worries! Enter your email and we'll send you a reset link.
                 </p>
             </div>
 
             {/* Icon */}
             <div className="flex justify-center mb-8">
-                <div className="w-24 h-24 rounded-full neumorphic flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full neu-card-raised flex items-center justify-center">
                     <i className="bi bi-key text-4xl text-brand-blue"></i>
                 </div>
             </div>
@@ -250,13 +254,13 @@ export default function ForgotPasswordPage() {
                 <button
                     disabled={loading || !emailValidation.isFormatValid}
                     className={`
-                        neumorphic-btn py-5 rounded-2xl mt-4 transition-all duration-300
+                        neu-btn py-5 rounded-2xl mt-4 transition-all duration-300 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]
                         ${(loading || !emailValidation.isFormatValid) 
                             ? 'opacity-50 cursor-not-allowed scale-[0.98]' 
                             : 'hover:scale-[1.02]'}
                     `}
                 >
-                    <span className="text-charcoal font-black uppercase tracking-widest text-sm">
+                    <span className="font-black uppercase tracking-widest text-sm" style={{ color: 'var(--neu-text)' }}>
                         {loading ? (
                             <span className="flex items-center justify-center gap-2">
                                 <span className="w-4 h-4 border-2 border-charcoal/30 border-t-charcoal rounded-full animate-spin"></span>
@@ -271,13 +275,14 @@ export default function ForgotPasswordPage() {
 
             {/* Footer */}
             <div className="mt-auto pb-10 text-center">
-                <p className="text-charcoal/40 text-sm font-light">
+                <p className="text-sm font-light" style={{ color: 'var(--neu-text-muted)' }}>
                     Remember your password?{' '}
                     <Link href="/login" className="text-brand-blue font-bold hover:underline">
                         Log in
                     </Link>
                 </p>
             </div>
+        </div>
         </div>
     );
 }

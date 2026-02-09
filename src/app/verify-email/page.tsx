@@ -189,32 +189,32 @@ function VerifyEmailContent() {
     // Code Entry Screen (when no token provided)
     if (step === 'code-entry') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-8 bg-white/40 flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/10 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-neon-green/10 rounded-full blur-2xl"></div>
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-8 flex flex-col items-center relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/5 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
 
                     {/* Icon */}
-                    <div className="w-20 h-20 rounded-full neumorphic-inset flex items-center justify-center mb-6 relative z-10">
+                    <div className="w-20 h-20 rounded-full neu-socket flex items-center justify-center mb-6 relative z-10">
                         <i className="bi bi-shield-lock text-4xl text-brand-blue"></i>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-2 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-2 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Verify Your Email
                     </h1>
                     
                     {emailParam ? (
                         <>
-                            <p className="text-charcoal/50 text-sm mb-2 relative z-10 leading-relaxed">
+                            <p className="text-sm mb-2 relative z-10 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
                                 We sent a 6-digit code to
                             </p>
-                            <p className="text-charcoal font-bold text-sm mb-6 relative z-10 break-all">
+                            <p className="font-bold text-sm mb-6 relative z-10 break-all" style={{ color: 'var(--neu-text)' }}>
                                 {email}
                             </p>
                         </>
                     ) : (
                         <>
-                            <p className="text-charcoal/50 text-sm mb-6 relative z-10 leading-relaxed">
+                            <p className="text-sm mb-6 relative z-10 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
                                 Enter your email and the 6-digit code we sent you.
                             </p>
                             {/* Email Input */}
@@ -245,7 +245,7 @@ function VerifyEmailContent() {
 
                     {/* Error Message */}
                     {errorMessage && (
-                        <div className="w-full mb-4 p-3 rounded-xl bg-brand-red/10 border border-brand-red/20 relative z-10">
+                        <div className="w-full mb-4 p-3 rounded-xl neu-socket relative z-10" style={{ border: '1px solid rgba(239, 68, 68, 0.2)' }}>
                             <p className="text-xs text-brand-red font-bold flex items-center justify-center gap-2">
                                 <i className="bi bi-exclamation-circle"></i>
                                 {errorMessage}
@@ -255,7 +255,7 @@ function VerifyEmailContent() {
 
                     {/* Verifying Indicator */}
                     {isVerifying && (
-                        <div className="w-full mb-4 p-3 rounded-xl bg-brand-blue/10 border border-brand-blue/20 relative z-10">
+                        <div className="w-full mb-4 p-3 rounded-xl neu-socket relative z-10" style={{ border: '1px solid rgba(59, 130, 246, 0.2)' }}>
                             <p className="text-xs text-brand-blue font-bold flex items-center justify-center gap-2">
                                 <span className="w-4 h-4 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
                                 Verifying...
@@ -265,7 +265,7 @@ function VerifyEmailContent() {
 
                     {/* Resend Code */}
                     <div className="flex flex-col items-center gap-2 relative z-10">
-                        <p className="text-charcoal/40 text-xs">
+                        <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
                             Didn't receive the code?
                         </p>
                         <button
@@ -274,7 +274,7 @@ function VerifyEmailContent() {
                             className={`
                                 text-sm font-bold transition-all
                                 ${resendCooldown > 0 || isResending || !email
-                                    ? 'text-charcoal/30 cursor-not-allowed' 
+                                    ? '[color:var(--neu-text-muted)] cursor-not-allowed' 
                                     : 'text-brand-blue hover:text-brand-blue/70'}
                             `}
                         >
@@ -287,7 +287,7 @@ function VerifyEmailContent() {
                     {/* Back to Login */}
                     <Link 
                         href="/login"
-                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-6"
+                        className="[color:var(--neu-text-muted)] hover:[color:var(--neu-text-secondary)] text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-6"
                     >
                         Back to Login
                     </Link>
@@ -299,12 +299,12 @@ function VerifyEmailContent() {
     // Verifying Screen (Loading - for token verification)
     if (step === 'verifying') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/5 rounded-full blur-3xl animate-pulse"></div>
 
                     {/* Animated Loading */}
-                    <div className="w-28 h-28 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
+                    <div className="w-28 h-28 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
                         <div className="relative">
                             <i className="bi bi-envelope-open text-4xl text-brand-blue"></i>
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -313,11 +313,11 @@ function VerifyEmailContent() {
                         </div>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Verifying Email...
                     </h1>
                     
-                    <p className="text-charcoal/50 text-sm relative z-10 leading-relaxed">
+                    <p className="text-sm relative z-10 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
                         Please wait while we verify your email address.
                     </p>
 
@@ -335,56 +335,56 @@ function VerifyEmailContent() {
     // Success Screen
     if (step === 'success') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
                     {/* Celebration Glows */}
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-neon-green/20 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-brand-blue/10 rounded-full blur-2xl"></div>
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-brand-blue/5 rounded-full blur-2xl"></div>
 
                     {/* Success Icon with Animation */}
-                    <div className="w-28 h-28 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10 animate-in zoom-in duration-300">
+                    <div className="w-28 h-28 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10 animate-in zoom-in duration-300">
                         <div className="relative">
-                            <i className="bi bi-envelope-check-fill text-5xl text-neon-green"></i>
+                            <i className="bi bi-envelope-check-fill text-5xl text-primary"></i>
                         </div>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-2 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-2 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Email Verified!
                     </h1>
 
                     {username && (
-                        <p className="text-charcoal/60 text-sm mb-2 relative z-10">
-                            Welcome, <span className="font-bold text-charcoal">{username}</span>!
+                        <p className="text-sm mb-2 relative z-10" style={{ color: 'var(--neu-text-secondary)' }}>
+                            Welcome, <span className="font-bold" style={{ color: 'var(--neu-text)' }}>{username}</span>!
                         </p>
                     )}
                     
-                    <p className="text-charcoal/50 text-sm mb-6 relative z-10 leading-relaxed px-4">
+                    <p className="text-sm mb-6 relative z-10 leading-relaxed px-4" style={{ color: 'var(--neu-text-secondary)' }}>
                         Your email has been successfully verified. Your account is now fully activated.
                     </p>
 
                     {/* Reward Badge */}
-                    <div className="w-full bg-neon-green/10 rounded-2xl p-4 mb-8 relative z-10 border border-neon-green/20">
+                    <div className="w-full neu-socket rounded-2xl p-4 mb-8 relative z-10" style={{ border: '1px solid rgba(34, 197, 94, 0.2)' }}>
                         <div className="flex items-center justify-center gap-3">
                             <i className="bi bi-coin text-2xl text-yellow-500"></i>
                             <div className="text-left">
-                                <p className="text-xs text-charcoal/50 uppercase tracking-widest">Bonus Earned</p>
-                                <p className="text-xl font-black text-neon-green">+10 HuudCoins</p>
+                                <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--neu-text-secondary)' }}>Bonus Earned</p>
+                                <p className="text-xl font-black text-primary">+10 HuudCoins</p>
                             </div>
                         </div>
                     </div>
 
                     <button
                         onClick={() => router.push('/feed')}
-                        className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10 mb-4"
+                        className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 mb-4 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-neon-green transition-colors">
+                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-primary transition-colors">
                             Get Started
                         </span>
                     </button>
 
                     <button
                         onClick={() => router.push('/complete-profile')}
-                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10"
+                        className="[color:var(--neu-text-muted)] hover:[color:var(--neu-text-secondary)] text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10"
                     >
                         Complete Profile to Claim 100 More Coins
                     </button>
@@ -396,19 +396,19 @@ function VerifyEmailContent() {
     // Expired Token Screen
     if (step === 'expired') {
         return (
-            <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl"></div>
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-yellow-500/5 rounded-full blur-3xl"></div>
 
-                    <div className="w-28 h-28 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
+                    <div className="w-28 h-28 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
                         <i className="bi bi-clock-history text-5xl text-yellow-500"></i>
                     </div>
 
-                    <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
+                    <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                         Link Expired
                     </h1>
                     
-                    <p className="text-charcoal/50 text-sm mb-6 relative z-10 leading-relaxed px-4">
+                    <p className="text-sm mb-6 relative z-10 leading-relaxed px-4" style={{ color: 'var(--neu-text-secondary)' }}>
                         {errorMessage || 'This verification link has expired or is invalid.'}
                     </p>
 
@@ -418,16 +418,16 @@ function VerifyEmailContent() {
                             setErrorMessage('');
                             setVerificationCode('');
                         }}
-                        className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10 mb-4"
+                        className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 mb-4 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
-                        <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
+                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
                             Enter Code Instead
                         </span>
                     </button>
 
                     <Link 
                         href="/login"
-                        className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10"
+                        className="[color:var(--neu-text-muted)] hover:[color:var(--neu-text-secondary)] text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10"
                     >
                         Back to Login
                     </Link>
@@ -438,34 +438,34 @@ function VerifyEmailContent() {
 
     // Error Screen
     return (
-        <div className="h-[100dvh] bg-soft-bg flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-            <div className="neumorphic-extreme rounded-[3rem] w-full max-w-sm p-10 bg-white/40 flex flex-col items-center relative overflow-hidden">
-                <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-red/10 rounded-full blur-3xl"></div>
+        <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
+            <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
+                <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-red/5 rounded-full blur-3xl"></div>
 
-                <div className="w-24 h-24 rounded-full neumorphic-inset flex items-center justify-center mb-8 relative z-10">
+                <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
                     <i className="bi bi-exclamation-triangle text-5xl text-brand-red"></i>
                 </div>
 
-                <h1 className="text-2xl font-light text-charcoal mb-3 relative z-10 tracking-tight">
+                <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
                     Verification Failed
                 </h1>
                 
-                <p className="text-charcoal/50 text-sm mb-8 relative z-10 leading-relaxed px-4">
+                <p className="text-sm mb-8 relative z-10 leading-relaxed px-4" style={{ color: 'var(--neu-text-secondary)' }}>
                     {errorMessage}
                 </p>
 
                 <button
                     onClick={() => token && verifyWithToken(token)}
-                    className="neumorphic-btn w-full py-5 rounded-2xl group transition-all relative z-10 mb-4"
+                    className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 mb-4 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                 >
-                    <span className="text-charcoal font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
+                    <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
                         Try Again
                     </span>
                 </button>
 
                 <Link 
                     href="/login"
-                    className="text-charcoal/30 hover:text-charcoal/60 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors"
+                    className="[color:var(--neu-text-muted)] hover:[color:var(--neu-text-secondary)] text-[10px] font-bold uppercase tracking-[0.2em] transition-colors"
                 >
                     Back to Login
                 </Link>
@@ -478,7 +478,7 @@ function VerifyEmailContent() {
 export default function VerifyEmailPage() {
     return (
         <Suspense fallback={
-            <div className="h-[100dvh] bg-soft-bg flex items-center justify-center">
+            <div className="h-[100dvh] neu-base flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></div>
             </div>
         }>

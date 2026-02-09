@@ -208,7 +208,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                                 onCreatePost?.();
                                 onMobileClose?.();
                             }}
-                            className="w-full mt-6 bg-neon-green hover:bg-neon-green/90 text-white font-bold text-lg rounded-full py-3.5 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
+                            className="w-full mt-6 bg-primary hover:bg-primary/90 text-white font-bold text-lg rounded-full py-3.5 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
                         >
                             Create Post
                         </button>
@@ -221,7 +221,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                             onClick={() => setShowUserMenu(!showUserMenu)}
                             className="flex items-center gap-3 p-3 w-full rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
                         >
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-neon-green to-brand-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-brand-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
                                 {user?.avatarUrl ? (
                                     <img src={user.avatarUrl} alt={userDisplayName} className="w-full h-full object-cover" />
                                 ) : (
@@ -291,7 +291,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                 {/* Post Button */}
                 <button
                     onClick={onCreatePost}
-                    className={`w-full mt-4 bg-neon-green hover:bg-neon-green/90 text-white font-bold text-lg rounded-full py-3 transition-colors shadow-lg hover:shadow-xl ${isCollapsed ? 'px-0' : 'px-6'
+                    className={`w-full mt-4 bg-primary hover:bg-primary/90 text-white font-bold text-lg rounded-full py-3 transition-colors shadow-lg hover:shadow-xl ${isCollapsed ? 'px-0' : 'px-6'
                         }`}
                     title={isCollapsed ? 'Post' : undefined}
                 >
@@ -308,7 +308,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                         }`}
                     title={isCollapsed ? 'Profile' : undefined}
                 >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-neon-green to-brand-blue flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-brand-blue flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden">
                         {user?.avatarUrl ? (
                             <img src={user.avatarUrl} alt={userDisplayName} className="w-full h-full object-cover" />
                         ) : (
