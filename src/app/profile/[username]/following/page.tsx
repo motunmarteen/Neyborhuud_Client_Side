@@ -88,7 +88,7 @@ export default function FollowingPage() {
             Followers
           </button>
           <button
-            className="flex-1 py-4 text-center font-semibold text-gray-900 dark:text-white border-b-4 border-neon-green"
+            className="flex-1 py-4 text-center font-semibold text-gray-900 dark:text-white border-b-4 border-primary"
             type="button"
           >
             Following

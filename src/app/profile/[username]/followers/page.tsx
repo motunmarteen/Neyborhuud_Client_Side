@@ -81,7 +81,7 @@ export default function FollowersPage() {
       <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-black sticky top-14 z-10">
         <div className="flex">
           <button
-            className="flex-1 py-4 text-center font-semibold text-gray-900 dark:text-white border-b-4 border-neon-green"
+            className="flex-1 py-4 text-center font-semibold text-gray-900 dark:text-white border-b-4 border-primary"
             type="button"
           >
             Followers

@@ -67,6 +67,7 @@ export default function ProfilePage() {
     if (profile) {
       console.log('👤 Profile Data:', profile);
       console.log('🆔 Profile ID:', profile.id);
+      console.log('🆔 Profile _id:', (profile as unknown as Record<string, unknown>)._id);
       console.log('👤 Username:', profile.username);
     }
   }, [profile]);
@@ -188,27 +189,27 @@ export default function ProfilePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black">
+      <div className="min-h-screen neu-base">
         {/* Header Skeleton */}
-        <div className="border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md z-10">
+        <div className="neu-base sticky top-0 z-10" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
           <div className="flex items-center gap-8 px-4 h-14">
-            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
-            <div className="w-32 h-6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+            <div className="w-8 h-8 rounded-full neu-socket animate-pulse" />
+            <div className="w-32 h-6 neu-socket rounded-xl animate-pulse" />
           </div>
         </div>
 
         {/* Profile Skeleton */}
         <div className="max-w-2xl mx-auto px-4 py-8">
           <div className="flex items-start gap-6 mb-6">
-            <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse flex-shrink-0" />
+            <div className="w-32 h-32 rounded-full neu-socket animate-pulse flex-shrink-0" />
             <div className="flex-1 space-y-3 pt-4">
-              <div className="w-48 h-8 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-              <div className="w-32 h-5 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+              <div className="w-48 h-8 neu-socket rounded-xl animate-pulse" />
+              <div className="w-32 h-5 neu-socket rounded-xl animate-pulse" />
             </div>
           </div>
           <div className="space-y-2">
-            <div className="w-full h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-            <div className="w-3/4 h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+            <div className="w-full h-4 neu-socket rounded-xl animate-pulse" />
+            <div className="w-3/4 h-4 neu-socket rounded-xl animate-pulse" />
           </div>
         </div>
       </div>
@@ -218,20 +219,20 @@ export default function ProfilePage() {
   // Error state
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
+      <div className="min-h-screen neu-base flex items-center justify-center">
         <div className="text-center px-4">
-          <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center mx-auto mb-6">
-            <i className="bi bi-person-x text-5xl text-gray-400 dark:text-gray-600" />
+          <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mx-auto mb-6">
+            <i className="bi bi-person-x text-5xl" style={{ color: 'var(--neu-text-muted)' }} />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+          <h1 className="text-3xl font-bold mb-3" style={{ color: 'var(--neu-text)' }}>
             User Not Found
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md">
+          <p className="mb-6 max-w-md" style={{ color: 'var(--neu-text-muted)' }}>
             The user @{username} doesn't exist or their profile is unavailable.
           </p>
           <button
             onClick={() => router.back()}
-            className="px-6 py-2.5 bg-neon-green hover:bg-neon-green/90 text-white font-semibold rounded-full transition-colors"
+            className="neu-btn rounded-2xl px-6 py-2.5 font-semibold text-primary transition-colors"
           >
             Go Back
           </button>
@@ -249,24 +250,24 @@ export default function ProfilePage() {
   const userInitial = displayName[0]?.toUpperCase() || 'U';
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen neu-base">
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md z-10">
+      <div className="neu-base sticky top-0 z-10" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
         <div className="flex items-center gap-4 px-4 h-14">
           <button
             onClick={() => router.back()}
-            className="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 flex items-center justify-center transition-colors"
+            className="neu-btn w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
             aria-label="Go back"
             type="button"
           >
             <i className="bi bi-arrow-left text-xl" />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-xl text-gray-900 dark:text-white truncate">
+            <h1 className="font-bold text-xl truncate" style={{ color: 'var(--neu-text)' }}>
               {displayName}
             </h1>
             {profile.location?.lga && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              <p className="text-xs truncate" style={{ color: 'var(--neu-text-muted)' }}>
                 {profile.location.lga}, {profile.location.state}
               </p>
             )}
@@ -275,15 +276,15 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Content */}
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         {/* Cover Photo Area (placeholder for future) */}
-        <div className="h-48 bg-gradient-to-br from-neon-green/20 to-brand-blue/20 dark:from-neon-green/10 dark:to-brand-blue/10" />
+        <div className="h-48 bg-gradient-to-br from-primary/20 to-brand-blue/20 dark:from-primary/10 dark:to-brand-blue/10" />
 
         {/* Profile Info Section */}
-        <div className="px-4 -mt-16 pb-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="px-4 -mt-16 pb-4">
           <div className="flex items-start justify-between mb-4">
             {/* Profile Picture */}
-            <div className="w-32 h-32 rounded-full border-4 border-white dark:border-black bg-gradient-to-br from-neon-green to-brand-blue flex items-center justify-center text-white font-bold text-4xl overflow-hidden">
+            <div className="w-32 h-32 rounded-full neu-avatar border-4 bg-gradient-to-br from-primary to-brand-blue flex items-center justify-center text-white font-bold text-4xl overflow-hidden" style={{ borderColor: 'var(--neu-bg)' }}>
               {profile.profilePicture || profile.avatarUrl ? (
                 <img
                   src={profile.profilePicture || profile.avatarUrl || ''}
@@ -300,23 +301,23 @@ export default function ProfilePage() {
               {isOwnProfile ? (
                 <Link
                   href="/settings"
-                  className="inline-flex items-center gap-2 px-5 py-2 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-full font-semibold text-sm transition-colors"
+                  className="neu-btn inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-colors"
                 >
                   <i className="bi bi-pencil text-sm" />
                   Edit Profile
                 </Link>
               ) : isLoadingStatus ? (
-                <div className="px-5 py-2 rounded-full border border-gray-300 dark:border-gray-700 font-semibold text-sm inline-flex items-center gap-2 animate-pulse">
-                  <div className="w-16 h-4 bg-gray-300 dark:bg-gray-700 rounded" />
+                <div className="neu-btn px-5 py-2 rounded-2xl font-semibold text-sm inline-flex items-center gap-2 animate-pulse">
+                  <div className="w-16 h-4 neu-socket rounded-xl" />
                 </div>
               ) : (
                 <button
                   onClick={toggleFollow}
                   disabled={isFollowPending}
-                  className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-semibold text-sm transition-all ${
+                  className={`inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-all ${
                     isFollowing
-                      ? 'border border-gray-300 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 dark:hover:text-red-500 group'
-                      : 'bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100'
+                      ? 'neu-btn hover:text-red-500 group'
+                      : 'neu-btn-active text-primary'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                   type="button"
                 >
@@ -349,23 +350,23 @@ export default function ProfilePage() {
           {/* User Info */}
           <div className="space-y-3">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>
                 {displayName}
               </h2>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p style={{ color: 'var(--neu-text-muted)' }}>
                 @{profile.username}
               </p>
             </div>
 
             {/* Bio */}
             {profile.bio && (
-              <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
+              <p className="whitespace-pre-wrap" style={{ color: 'var(--neu-text)' }}>
                 {profile.bio}
               </p>
             )}
 
             {/* Additional Info */}
-            <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex flex-wrap gap-4 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
               {/* Location */}
               {profile.location?.lga && (
                 <div className="flex items-center gap-1.5">
@@ -390,7 +391,7 @@ export default function ProfilePage() {
 
               {/* Verification Badge */}
               {profile.identityVerified && (
-                <div className="flex items-center gap-1.5 text-blue-500">
+                <div className="flex items-center gap-1.5 text-primary">
                   <i className="bi bi-patch-check-fill" />
                   <span>Verified</span>
                 </div>
@@ -401,12 +402,12 @@ export default function ProfilePage() {
             {!isOwnProfile && (followsYou || isMutual) && (
               <div className="flex flex-wrap gap-2">
                 {isMutual ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full">
+                  <span className="neu-chip inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full" style={{ color: 'var(--neu-text-secondary)' }}>
                     <i className="bi bi-arrow-left-right" />
                     You follow each other
                   </span>
                 ) : followsYou ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full">
+                  <span className="neu-chip inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full" style={{ color: 'var(--neu-text-secondary)' }}>
                     <i className="bi bi-person-check" />
                     Follows you
                   </span>
@@ -421,40 +422,157 @@ export default function ProfilePage() {
                 onClick={() => router.push(`/profile/${username}/following`)}
                 type="button"
               >
-                <span className="font-bold text-gray-900 dark:text-white">
+                <span className="font-bold" style={{ color: 'var(--neu-text)' }}>
                   {followingCount.toLocaleString()}
                 </span>{' '}
-                <span className="text-gray-500 dark:text-gray-400">Following</span>
+                <span style={{ color: 'var(--neu-text-muted)' }}>Following</span>
               </button>
               <button
                 className="hover:underline"
                 onClick={() => router.push(`/profile/${username}/followers`)}
                 type="button"
               >
-                <span className="font-bold text-gray-900 dark:text-white">
+                <span className="font-bold" style={{ color: 'var(--neu-text)' }}>
                   {followerCount.toLocaleString()}
                 </span>{' '}
-                <span className="text-gray-500 dark:text-gray-400">Followers</span>
+                <span style={{ color: 'var(--neu-text-muted)' }}>Followers</span>
               </button>
             </div>
           </div>
         </div>
+        <div className="neu-divider" />
 
-        {/* Tabs Section (placeholder for future: Posts, Replies, Media, Likes) */}
-        <div className="border-b border-gray-200 dark:border-gray-800 sticky top-14 bg-white dark:bg-black z-10">
-          <div className="flex">
-            <button 
-              className="flex-1 py-4 text-center font-semibold text-gray-900 dark:text-white border-b-4 border-neon-green hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors relative"
-              aria-label="View posts"
-              type="button"
-            >
-              Posts
-            </button>
+        {/* ══════ Two-Column Layout ══════ */}
+        <div className="flex flex-col lg:flex-row gap-6 px-4 py-6">
+
+          {/* ── Left Sidebar ── */}
+          <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
+
+            {/* Neybor Score */}
+            <div className="neu-card-sm rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: 'var(--neu-text-muted)' }}>
+                  Neybor Score
+                </p>
+                <i className="bi bi-info-circle text-primary text-sm" />
+              </div>
+
+              <div className="flex justify-center mb-4">
+                <div className="score-ring" style={{ '--score-pct': 74 } as React.CSSProperties}>
+                  <svg viewBox="0 0 140 140" width="160" height="160">
+                    <circle className="ring-bg" cx="70" cy="70" r="65" />
+                    <circle className="ring-fg" cx="70" cy="70" r="65" />
+                  </svg>
+                  <div className="ring-label">
+                    <span className="text-4xl font-bold" style={{ color: 'var(--neu-text)' }}>742</span>
+                    <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-primary">Trusted</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <p className="font-bold text-sm" style={{ color: 'var(--neu-text)' }}>Top 5% Neighbor</p>
+                <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>Consistency Score: 98%</p>
+              </div>
+            </div>
+
+            {/* Reputation Stats */}
+            <div className="neu-card-sm rounded-2xl p-6">
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-4" style={{ color: 'var(--neu-text-muted)' }}>
+                Reputation Stats
+              </p>
+
+              <div className="flex items-baseline gap-3 mb-3">
+                <span className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>Level 24</span>
+                <span className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>14.2k XP</span>
+              </div>
+
+              <div className="xp-bar mb-6">
+                <div className="xp-bar-fill" style={{ width: '68%' }} />
+              </div>
+
+              <div className="neu-socket rounded-2xl p-4 flex">
+                <div className="flex-1 text-center">
+                  <p className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: 'var(--neu-text-muted)' }}>Total Points</p>
+                  <p className="text-xl font-bold text-primary">84.9k</p>
+                </div>
+                <div className="w-px" style={{ background: 'var(--neu-shadow-dark)' }} />
+                <div className="flex-1 text-center">
+                  <p className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: 'var(--neu-text-muted)' }}>Helpful Acts</p>
+                  <p className="text-xl font-bold text-primary">142</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Verification Status */}
+            <div className="neu-card-sm rounded-2xl p-6">
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-5" style={{ color: 'var(--neu-text-muted)' }}>
+                Verification Status
+              </p>
+              <div className="space-y-4">
+                {[
+                  { label: 'Home Address', icon: 'bi-house-door' },
+                  { label: 'Identity Document', icon: 'bi-person-badge' },
+                  { label: 'Neighborhood Vouch', icon: 'bi-people' },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+                      <i className="bi bi-check-circle-fill text-primary text-sm" />
+                    </div>
+                    <span className="text-sm font-medium" style={{ color: 'var(--neu-text)' }}>{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Posts Section */}
-        <div>
+          {/* ── Right Content Area ── */}
+          <div className="flex-1 min-w-0 space-y-6">
+
+            {/* Achievements */}
+            <div className="neu-card-sm rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--neu-text)' }}>
+                  <span>🏆</span> Achievements
+                </h3>
+                <button className="text-xs font-bold text-primary uppercase tracking-wider" type="button">View All</button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                  { name: 'Good Samaritan', tier: 'Gold', icon: 'bi-heart-pulse-fill', color: '#22c55e' },
+                  { name: 'Watch Leader', tier: 'Diamond', icon: 'bi-star-fill', color: '#f59e0b' },
+                  { name: 'Top Seller', tier: 'Silver', icon: 'bi-shop', color: '#3b82f6' },
+                  { name: 'First Responder', tier: 'Verified', icon: 'bi-asterisk', color: '#ec4899' },
+                ].map((badge) => (
+                  <div key={badge.name} className="text-center">
+                    <div className="neu-socket w-14 h-14 mx-auto rounded-2xl flex items-center justify-center mb-2">
+                      <i className={`bi ${badge.icon} text-xl`} style={{ color: badge.color }} />
+                    </div>
+                    <p className="text-xs font-semibold leading-tight" style={{ color: 'var(--neu-text)' }}>{badge.name}</p>
+                    <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>{badge.tier}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--neu-text)' }}>
+                  <i className="bi bi-clock-history" /> Recent Activity
+                </h3>
+              </div>
+
+              {/* Activity Tabs */}
+              <div className="neu-socket rounded-2xl p-1 flex mb-6">
+                <button className="neu-card-sm flex-1 py-2 rounded-xl text-sm font-semibold text-primary" type="button">All</button>
+                <button className="flex-1 py-2 rounded-xl text-sm font-semibold" style={{ color: 'var(--neu-text-muted)' }} type="button">Alerts</button>
+                <button className="flex-1 py-2 rounded-xl text-sm font-semibold" style={{ color: 'var(--neu-text-muted)' }} type="button">Market</button>
+              </div>
+
+              {/* Activity Feed (Posts) */}
+              <div className="space-y-4">
           {/* Loading State */}
           {isLoadingPosts && (
             <div>
@@ -467,26 +585,26 @@ export default function ProfilePage() {
           {/* Error State */}
           {isErrorPosts && !isLoadingPosts && (
             <div className="text-center py-16 px-4">
-              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-full neu-socket flex items-center justify-center mx-auto mb-4">
                 <i className="bi bi-exclamation-triangle text-3xl text-red-500" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--neu-text)' }}>
                 Failed to load posts
               </h2>
-              <p className="text-gray-500 dark:text-gray-400 mb-4">
+              <p className="mb-4" style={{ color: 'var(--neu-text-muted)' }}>
                 {postsError?.message || 'Something went wrong. Please try again.'}
               </p>
               <details className="text-left max-w-md mx-auto mb-4">
-                <summary className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                <summary className="text-sm cursor-pointer" style={{ color: 'var(--neu-text-muted)' }}>
                   Debug Info
                 </summary>
-                <pre className="text-xs mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded overflow-auto">
+                <pre className="text-xs mt-2 p-2 neu-socket rounded-xl overflow-auto">
                   {JSON.stringify({ userId, isErrorPosts, error: postsError }, null, 2)}
                 </pre>
               </details>
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black font-semibold rounded-full hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                className="neu-btn rounded-2xl px-6 py-2.5 font-semibold text-primary transition-colors"
                 type="button"
               >
                 Retry
@@ -496,10 +614,10 @@ export default function ProfilePage() {
 
           {/* Empty State */}
           {!isLoadingPosts && !isErrorPosts && posts.length === 0 && (
-            <div className="p-8 text-center text-gray-500 dark:text-gray-400 py-16">
+            <div className="p-8 text-center py-16" style={{ color: 'var(--neu-text-muted)' }}>
               <div className="max-w-md mx-auto">
                 <i className="bi bi-inbox text-6xl mb-4 block opacity-50" />
-                <p className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                <p className="text-xl font-semibold mb-2" style={{ color: 'var(--neu-text-secondary)' }}>
                   No posts yet
                 </p>
                 <p className="text-base">
@@ -508,7 +626,7 @@ export default function ProfilePage() {
                 {isOwnProfile && (
                   <Link
                     href="/feed"
-                    className="inline-block mt-6 px-6 py-2.5 bg-neon-green hover:bg-neon-green/90 text-white font-semibold rounded-full transition-colors"
+                    className="neu-btn-active inline-block mt-6 px-6 py-2.5 text-primary font-semibold rounded-2xl transition-colors"
                   >
                     Create Your First Post
                   </Link>
@@ -516,20 +634,20 @@ export default function ProfilePage() {
                 {/* Backend notification */}
                 {typeof window !== 'undefined' && (
                   <details className="mt-6 text-left">
-                    <summary className="text-sm text-gray-500 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300">
+                    <summary className="text-sm cursor-pointer" style={{ color: 'var(--neu-text-muted)' }}>
                       Developer Info
                     </summary>
-                    <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs text-left">
-                      <p className="font-semibold text-yellow-800 dark:text-yellow-200 mb-1">
+                    <div className="mt-2 p-3 neu-socket rounded-xl text-xs text-left">
+                      <p className="font-semibold text-yellow-600 mb-1">
                         ⚠️ Backend Endpoint Missing
                       </p>
-                      <p className="text-yellow-700 dark:text-yellow-300 mb-2">
+                      <p className="text-yellow-600 mb-2">
                         The backend endpoint for user posts is not implemented yet.
                       </p>
-                      <code className="block bg-yellow-100 dark:bg-yellow-900/40 p-2 rounded text-yellow-900 dark:text-yellow-100">
+                      <code className="block neu-card-sm p-2 rounded-xl" style={{ color: 'var(--neu-text-secondary)' }}>
                         GET /api/v1/content/users/:userId/posts
                       </code>
-                      <p className="mt-2 text-yellow-700 dark:text-yellow-300">
+                      <p className="mt-2 text-yellow-600">
                         Once this endpoint is implemented, user posts will appear here.
                       </p>
                     </div>
@@ -559,7 +677,7 @@ export default function ProfilePage() {
               {hasNextPage && (
                 <div ref={loadMoreRef} className="py-8 flex items-center justify-center">
                   {isFetchingNextPage ? (
-                    <div className="flex items-center gap-2 text-gray-500">
+                    <div className="flex items-center gap-2" style={{ color: 'var(--neu-text-muted)' }}>
                       <i className="bi bi-hourglass-split animate-spin" />
                       <span>Loading more posts...</span>
                     </div>
@@ -571,6 +689,17 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
+        {/* end space-y-4 activity feed */}
+
+            </div>
+            {/* end Recent Activity */}
+
+          </div>
+          {/* end Right Content Area */}
+
+        </div>
+        {/* end Two-Column Layout */}
+
       </div>
 
       {/* Post Details Modal */}

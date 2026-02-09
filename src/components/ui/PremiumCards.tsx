@@ -10,7 +10,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({ children, className = '', 
     const intensityClasses = {
         low: 'bg-white/10 backdrop-blur-sm',
         medium: 'glass',
-        high: 'bg-white/40 backdrop-blur-2xl',
+        high: 'bg-white/40 dark:bg-surface-dark/60 dark:bg-surface-dark/60 backdrop-blur-2xl',
     };
 
     return (

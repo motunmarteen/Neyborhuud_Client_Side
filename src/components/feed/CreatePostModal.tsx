@@ -143,28 +143,29 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="neu-modal rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Success state */}
                 {showSuccess ? (
                     <div className="flex flex-col items-center justify-center py-16 px-6">
-                        <div className="w-16 h-16 rounded-full bg-neon-green/20 flex items-center justify-center mb-4">
-                            <i className="bi bi-check-lg text-4xl text-neon-green"></i>
+                        <div className="w-16 h-16 rounded-full neu-socket flex items-center justify-center mb-4">
+                            <span className="material-symbols-outlined text-4xl text-primary">check_circle</span>
                         </div>
-                        <h3 className="text-xl font-black uppercase text-charcoal tracking-tight">Post shared!</h3>
-                        <p className="text-sm text-charcoal/60 mt-1">It will appear at the top of your feed.</p>
+                        <h3 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Post shared!</h3>
+                        <p className="text-sm mt-1" style={{ color: 'var(--neu-text-muted)' }}>It will appear at the top of your feed.</p>
                     </div>
                 ) : (
                     <>
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-charcoal/10">
-                    <h2 className="text-lg font-black uppercase text-charcoal">Create Post</h2>
+                <div className="flex items-center justify-between p-4">
+                    <div className="neu-divider absolute bottom-0 left-0 right-0" />
+                    <h2 className="text-lg font-bold" style={{ color: 'var(--neu-text)' }}>Create Post</h2>
                     <button
                         onClick={handleClose}
                         disabled={isSubmitting}
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-charcoal/60 hover:bg-charcoal/5 disabled:opacity-50"
+                        className="w-8 h-8 rounded-xl neu-btn flex items-center justify-center disabled:opacity-50 transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
                     >
-                        <i className="bi bi-x-lg text-xl"></i>
+                        <span className="material-symbols-outlined text-xl" style={{ color: 'var(--neu-text-muted)' }}>close</span>
                     </button>
                 </div>
 
@@ -177,11 +178,11 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 placeholder="What's happening in your neighborhood?"
-                                className="w-full p-3 border border-charcoal/20 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-neon-green/50 text-sm min-h-[120px]"
+                                className="w-full p-3 rounded-xl resize-none focus:outline-none text-sm min-h-[120px] neu-input"
                                 rows={5}
                                 disabled={isSubmitting}
                             />
-                            <p className="text-xs text-charcoal/50 mt-1">
+                            <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
                                 Use #hashtags for tags (e.g., #safety #event)
                             </p>
                         </div>
@@ -202,7 +203,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                                             disabled={isSubmitting}
                                             className="absolute top-2 right-2 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 disabled:opacity-50"
                                         >
-                                            <i className="bi bi-x text-xs"></i>
+                                            <span className="material-symbols-outlined text-sm">close</span>
                                         </button>
                                     </div>
                                 ))}
@@ -211,7 +212,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
 
                         {/* Category Selection */}
                         <div>
-                            <label className="block text-xs font-bold uppercase text-charcoal/60 mb-2">
+                            <label className="block text-xs font-bold uppercase mb-2" style={{ color: 'var(--neu-text-muted)' }}>
                                 Category (Optional)
                             </label>
                             <div className="flex flex-wrap gap-2">
@@ -221,11 +222,12 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                                         type="button"
                                         onClick={() => setCategory(category === cat ? '' : cat)}
                                         disabled={isSubmitting}
-                                        className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-all ${
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all ${
                                             category === cat
-                                                ? 'bg-neon-green text-white'
-                                                : 'bg-charcoal/5 text-charcoal/60 hover:bg-charcoal/10'
+                                                ? 'neu-btn-active text-primary'
+                                                : 'neu-btn'
                                         } disabled:opacity-50`}
+                                        style={category !== cat ? { color: 'var(--neu-text-muted)' } : undefined}
                                     >
                                         {cat}
                                     </button>
@@ -235,14 +237,14 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
 
                         {/* Visibility Selection */}
                         <div>
-                            <label className="block text-xs font-bold uppercase text-charcoal/60 mb-2">
+                            <label className="block text-xs font-bold uppercase mb-2" style={{ color: 'var(--neu-text-muted)' }}>
                                 Visibility
                             </label>
                             <select
                                 value={visibility}
                                 onChange={(e) => setVisibility(e.target.value as any)}
                                 disabled={isSubmitting}
-                                className="w-full p-2 border border-charcoal/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neon-green/50"
+                                className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
                             >
                                 <option value="public">Public</option>
                                 <option value="neighborhood">Neighborhood</option>
@@ -253,13 +255,13 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                         {/* Upload Progress */}
                         {uploadProgress > 0 && uploadProgress < 100 && (
                             <div className="space-y-1">
-                                <div className="flex justify-between text-xs text-charcoal/60">
+                                <div className="flex justify-between text-xs" style={{ color: 'var(--neu-text-muted)' }}>
                                     <span>Uploading...</span>
                                     <span>{uploadProgress}%</span>
                                 </div>
-                                <div className="w-full bg-charcoal/10 rounded-full h-2">
+                                <div className="w-full neu-socket rounded-full h-2">
                                     <div
-                                        className="bg-neon-green h-2 rounded-full transition-all duration-300"
+                                        className="bg-primary h-2 rounded-full transition-all duration-300"
                                         style={{ width: `${uploadProgress}%` }}
                                     ></div>
                                 </div>
@@ -268,16 +270,27 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="p-4 border-t border-charcoal/10 flex items-center justify-between gap-2">
+                    <div className="p-4 flex items-center justify-between gap-2">
+                        <div className="neu-divider absolute top-0 left-0 right-0" />
                         {/* File Upload Button */}
-                        <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isSubmitting}
-                            className="w-10 h-10 rounded-full bg-charcoal/5 flex items-center justify-center text-charcoal/60 hover:bg-charcoal/10 disabled:opacity-50"
-                        >
-                            <i className="bi bi-image text-lg"></i>
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isSubmitting}
+                                className="flex items-center justify-center p-2 rounded-xl neu-btn transition-all text-primary disabled:opacity-50 active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">image</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isSubmitting}
+                                className="flex items-center justify-center p-2 rounded-xl neu-btn transition-all text-primary disabled:opacity-50 active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">videocam</span>
+                            </button>
+                        </div>
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -292,16 +305,17 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                         <button
                             type="submit"
                             disabled={isSubmitting || (!content.trim() && selectedFiles.length === 0)}
-                            className="px-6 py-2 bg-brand-red text-white rounded-full text-sm font-bold uppercase tracking-wider hover:bg-brand-red/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-6 py-2 neu-btn rounded-xl text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+                            style={{ color: 'var(--neu-text)' }}
                         >
                             {isSubmitting ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="w-4 h-4 border-2 border-[#11221a] border-t-transparent rounded-full animate-spin"></div>
                                     <span>Posting...</span>
                                 </>
                             ) : (
                                 <>
-                                    <i className="bi bi-send-fill"></i>
+                                    <span className="material-symbols-outlined text-[18px]">send</span>
                                     <span>Post</span>
                                 </>
                             )}

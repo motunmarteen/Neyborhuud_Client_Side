@@ -166,7 +166,7 @@ export default function SettingsPage() {
                 onClick={() => onChange(!enabled)}
                 className={`
                     relative w-12 h-7 rounded-full transition-all duration-300
-                    ${enabled ? 'bg-neon-green' : 'bg-charcoal/20'}
+                    ${enabled ? 'bg-primary' : 'bg-charcoal/20'}
                 `}
             >
                 <div className={`
@@ -180,7 +180,7 @@ export default function SettingsPage() {
     return (
         <div className="min-h-screen bg-soft-bg pb-24">
             {/* Header */}
-            <div className="bg-white/60 backdrop-blur-xl sticky top-0 z-50 border-b border-charcoal/5">
+            <div className="bg-white/60 dark:bg-surface-dark/60 backdrop-blur-xl sticky top-0 z-50 border-b border-charcoal/5">
                 <div className="max-w-md mx-auto px-6 py-4 flex items-center gap-4">
                     <button 
                         onClick={() => router.back()}
@@ -338,7 +338,7 @@ export default function SettingsPage() {
                                         className={`
                                             p-4 rounded-xl text-left transition-all
                                             ${privacy.profileVisibility === option.value 
-                                                ? 'neumorphic-inset bg-neon-green/10 border border-neon-green/20' 
+                                                ? 'neumorphic-inset bg-primary/10 border border-primary/20' 
                                                 : 'neumorphic hover:scale-[1.01]'}
                                         `}
                                     >
@@ -348,7 +348,7 @@ export default function SettingsPage() {
                                                 <p className="text-xs text-charcoal/40">{option.desc}</p>
                                             </div>
                                             {privacy.profileVisibility === option.value && (
-                                                <i className="bi bi-check-circle-fill text-neon-green"></i>
+                                                <i className="bi bi-check-circle-fill text-primary"></i>
                                             )}
                                         </div>
                                     </button>
@@ -397,16 +397,16 @@ export default function SettingsPage() {
                 {activeTab === 'account' && (
                     <div className="animate-in fade-in duration-300">
                         {/* Complete profile - accessible from bottom nav (Profile tab) */}
-                        <div className="neumorphic rounded-2xl p-6 mb-6 border border-neon-green/20">
+                        <div className="neumorphic rounded-2xl p-6 mb-6 border border-primary/20">
                             <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-3">
                                 Profile
                             </h2>
                             <Link
                                 href="/complete-profile"
-                                className="flex items-center justify-between py-3 px-4 rounded-xl bg-neon-green/10 border border-neon-green/20 min-h-[44px] touch-manipulation active:bg-neon-green/20 transition-colors"
+                                className="flex items-center justify-between py-3 px-4 rounded-xl bg-primary/10 border border-primary/20 min-h-[44px] touch-manipulation active:bg-primary/20 transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <i className="bi bi-person-plus text-neon-green text-lg" aria-hidden />
+                                    <i className="bi bi-person-plus text-primary text-lg" aria-hidden />
                                     <span className="text-sm font-bold text-charcoal">Complete your profile</span>
                                 </div>
                                 <i className="bi bi-chevron-right text-charcoal/40" aria-hidden />
@@ -430,7 +430,7 @@ export default function SettingsPage() {
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm font-bold text-charcoal">{user.email}</span>
                                             {emailVerified ? (
-                                                <i className="bi bi-patch-check-fill text-neon-green text-sm"></i>
+                                                <i className="bi bi-patch-check-fill text-primary text-sm"></i>
                                             ) : (
                                                 <i className="bi bi-exclamation-circle text-yellow-500 text-sm"></i>
                                             )}

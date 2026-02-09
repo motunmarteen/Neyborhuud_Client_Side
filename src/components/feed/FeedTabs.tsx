@@ -1,5 +1,5 @@
 /**
- * Feed Tabs Component - X.com Style
+ * Feed Tabs Component - Stitch Design
  * Tabs for switching between "For You" and "Following" feeds
  */
 
@@ -10,30 +10,34 @@ interface FeedTabsProps {
 
 export function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
     return (
-        <div className="sticky top-0 z-10 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        <div className="neu-socket rounded-2xl overflow-hidden">
             <div className="flex">
                 <button
                     onClick={() => onTabChange('for-you')}
-                    className={`flex-1 py-4 text-[15px] font-medium transition-colors relative hover:bg-gray-50 dark:hover:bg-gray-900 ${activeTab === 'for-you'
-                            ? 'font-bold'
-                            : 'text-gray-500 dark:text-gray-400'
-                        }`}
+                    className={`flex-1 py-3 text-sm font-medium transition-all relative ${
+                        activeTab === 'for-you'
+                            ? 'font-bold neu-card-sm m-1 rounded-xl'
+                            : ''
+                    }`}
+                    style={{ color: activeTab === 'for-you' ? 'var(--neu-text)' : 'var(--neu-text-muted)' }}
                 >
                     For you
                     {activeTab === 'for-you' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-neon-green rounded-full" />
+                        <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
                     )}
                 </button>
                 <button
                     onClick={() => onTabChange('following')}
-                    className={`flex-1 py-4 text-[15px] font-medium transition-colors relative hover:bg-gray-50 dark:hover:bg-gray-900 ${activeTab === 'following'
-                            ? 'font-bold'
-                            : 'text-gray-500 dark:text-gray-400'
-                        }`}
+                    className={`flex-1 py-3 text-sm font-medium transition-all relative ${
+                        activeTab === 'following'
+                            ? 'font-bold neu-card-sm m-1 rounded-xl'
+                            : ''
+                    }`}
+                    style={{ color: activeTab === 'following' ? 'var(--neu-text)' : 'var(--neu-text-muted)' }}
                 >
                     Following
                     {activeTab === 'following' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-neon-green rounded-full" />
+                        <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
                     )}
                 </button>
             </div>

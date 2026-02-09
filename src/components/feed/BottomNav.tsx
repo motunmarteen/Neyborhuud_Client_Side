@@ -14,12 +14,15 @@ export function BottomNav({ onCreatePost }: BottomNavProps) {
   const isGossip = pathname === '/gossip';
 
   const navItemClass = (active: boolean) =>
-    `min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors touch-manipulation ${active ? 'text-charcoal' : 'text-charcoal/50 active:text-charcoal'
+    `min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors touch-manipulation ${
+      active
+        ? 'text-primary'
+        : ''
     }`;
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-black/5 safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 neu-nav safe-area-bottom"
       role="navigation"
       aria-label="Main navigation"
     >
@@ -31,7 +34,7 @@ export function BottomNav({ onCreatePost }: BottomNavProps) {
           aria-current={isFeed ? 'page' : undefined}
           aria-label="Home"
         >
-          <i className={`bi text-2xl ${isFeed ? 'bi-house-fill' : 'bi-house'}`} aria-hidden />
+          <span className={`material-symbols-outlined text-2xl ${isFeed ? 'fill-1' : ''}`}>home</span>
           <span>Home</span>
         </Link>
 
@@ -42,51 +45,40 @@ export function BottomNav({ onCreatePost }: BottomNavProps) {
           aria-current={isGossip ? 'page' : undefined}
           aria-label="Gossip"
         >
-          <i className={`bi text-2xl ${isGossip ? 'bi-chat-dots-fill' : 'bi-chat-dots'}`} aria-hidden />
+          <span className={`material-symbols-outlined text-2xl ${isGossip ? 'fill-1' : ''}`}>chat_bubble</span>
           <span>Gossip</span>
-        </Link>
-
-        {/* Search - opens search on feed */}
-        <Link
-          href="/feed?search=1"
-          className={navItemClass(false)}
-          aria-label="Search"
-        >
-          <i className="bi bi-search text-2xl" aria-hidden />
-          <span>Search</span>
         </Link>
 
         {/* Create Post (center + button) */}
         <button
           type="button"
           onClick={onCreatePost}
-          className="min-w-[44px] min-h-[44px] -mt-5 flex flex-col items-center justify-center touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-neon-green focus-visible:ring-offset-2 rounded-full"
+          className="min-w-[44px] min-h-[44px] -mt-5 flex flex-col items-center justify-center touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-full"
           aria-label="Create post"
         >
-          <span className="w-12 h-12 rounded-full bg-charcoal text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform">
-            <i className="bi bi-plus-lg text-2xl" aria-hidden />
+          <span className="w-12 h-12 rounded-2xl neu-fab text-primary flex items-center justify-center active:scale-95 transition-transform">
+            <span className="material-symbols-outlined text-2xl">add</span>
           </span>
-          <span className="text-[10px] font-medium text-charcoal/50 mt-1 sr-only sm:not-sr-only">Create</span>
         </button>
 
-        {/* Notifications */}
+        {/* Search */}
         <Link
-          href="/feed"
+          href="/feed?search=1"
           className={navItemClass(false)}
-          aria-label="Notifications"
+          aria-label="Search"
         >
-          <i className="bi bi-heart text-2xl" aria-hidden />
-          <span>Activity</span>
+          <span className="material-symbols-outlined text-2xl">search</span>
+          <span>Search</span>
         </Link>
 
-        {/* Profile → Settings (complete profile accessible from there) */}
+        {/* Profile */}
         <Link
           href="/settings"
           className={navItemClass(pathname === '/settings')}
           aria-current={pathname === '/settings' ? 'page' : undefined}
           aria-label="Profile and settings"
         >
-          <i className={`bi text-2xl ${pathname === '/settings' ? 'bi-person-fill' : 'bi-person'}`} aria-hidden />
+          <span className={`material-symbols-outlined text-2xl ${pathname === '/settings' ? 'fill-1' : ''}`}>person</span>
           <span>Profile</span>
         </Link>
       </div>

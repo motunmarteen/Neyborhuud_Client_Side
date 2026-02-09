@@ -42,7 +42,7 @@ export function UserListItem({ user }: UserListItemProps) {
         className="flex items-center gap-3 flex-1 min-w-0"
       >
         {/* Profile Picture */}
-        <div className="w-12 h-12 rounded-full bg-linear-to-br from-neon-green to-brand-blue flex items-center justify-center text-white font-bold text-lg overflow-hidden shrink-0">
+        <div className="w-12 h-12 rounded-full bg-linear-to-br from-primary to-brand-blue flex items-center justify-center text-white font-bold text-lg overflow-hidden shrink-0">
           {user.profilePicture || user.avatarUrl ? (
             <img
               src={user.profilePicture || user.avatarUrl || ''}
@@ -61,7 +61,7 @@ export function UserListItem({ user }: UserListItemProps) {
               {displayName}
             </p>
             {user.isVerified && (
-              <i className="bi bi-patch-check-fill text-blue-500 text-sm shrink-0" />
+              <i className="bi bi-patch-check-fill text-primary text-sm shrink-0" />
             )}
           </div>
           <p className="text-gray-500 dark:text-gray-400 text-sm truncate">

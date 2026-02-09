@@ -39,7 +39,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
             return 'ring-1 ring-brand-red/30';
         }
         if (success || validationStatus === 'valid') {
-            return 'ring-1 ring-neon-green/30';
+            return 'ring-1 ring-primary/30';
         }
         if (validationStatus === 'checking') {
             return 'ring-1 ring-brand-blue/30';
@@ -60,7 +60,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
             return <i className="bi bi-exclamation-circle text-brand-red ml-2" title={error}></i>;
         }
         if (success || validationStatus === 'valid') {
-            return <i className="bi bi-check-circle text-neon-green ml-2"></i>;
+            return <i className="bi bi-check-circle text-primary ml-2"></i>;
         }
         return null;
     };
@@ -80,7 +80,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
             return { text: 'Checking availability...', color: 'text-brand-blue' };
         }
         if (successText && (success || validationStatus === 'valid')) {
-            return { text: successText, color: 'text-neon-green' };
+            return { text: successText, color: 'text-primary' };
         }
         if (helperText) {
             return { text: helperText, color: 'text-charcoal/40' };
@@ -93,29 +93,31 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
     return (
         <div className="flex flex-col gap-2 w-full group">
             {label && (
-                <label className="text-xs font-bold uppercase tracking-widest text-charcoal/40 ml-4">
+                <label className="text-xs font-bold uppercase tracking-widest ml-4" style={{ color: 'var(--neu-text-muted)' }}>
                     {label}
                 </label>
             )}
             <div className={`
                 relative flex items-center transition-all duration-300
-                neumorphic-socket rounded-2xl px-4 py-1
+                neu-input rounded-2xl px-4 py-1
                 ${getRingClass()}
                 ${className}
             `}>
                 {icon && (
-                    <i className={`bi ${icon} text-lg mr-3 text-charcoal/30 group-focus-within:text-brand-blue transition-colors`}></i>
+                    <i className={`bi ${icon} text-lg mr-3 group-focus-within:text-brand-blue transition-colors`} style={{ color: 'var(--neu-text-muted)' }}></i>
                 )}
                 <input
                     type={inputType}
-                    className="bg-transparent w-full py-3 text-charcoal placeholder:text-charcoal/20 focus:outline-none font-light"
+                    className="bg-transparent w-full py-3 placeholder:opacity-40 focus:outline-none font-light"
+                    style={{ color: 'var(--neu-text)' }}
                     {...props}
                 />
                 {isPasswordField && (
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="ml-2 text-charcoal/40 hover:text-brand-blue transition-colors focus:outline-none"
+                        className="ml-2 hover:text-brand-blue transition-colors focus:outline-none"
+                        style={{ color: 'var(--neu-text-muted)' }}
                         tabIndex={-1}
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                         title={showPassword ? 'Hide password' : 'Show password'}

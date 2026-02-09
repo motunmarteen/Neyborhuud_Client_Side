@@ -1,15 +1,14 @@
 import React from "react";
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
-const montserrat = Montserrat({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-montserrat",
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-jakarta",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#00E241",
+  themeColor: "#11d473",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -40,8 +39,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${montserrat.variable} antialiased`}>
+    <html lang="en" className="dark">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+      </head>
+      <body className={`${jakarta.variable} font-display bg-background-light dark:bg-background-dark text-[#11221a] dark:text-white transition-colors duration-200`}>
         <Providers>
           {children}
         </Providers>

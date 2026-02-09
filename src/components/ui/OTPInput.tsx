@@ -164,12 +164,13 @@ export const OTPInput: React.FC<OTPInputProps> = ({
                         focus:outline-none focus:ring-2
                         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
                         ${error 
-                            ? 'neumorphic-inset ring-2 ring-brand-red/50 text-brand-red' 
+                            ? 'neu-socket ring-2 ring-brand-red/50 text-brand-red' 
                             : localValues[index]
-                                ? 'neumorphic-inset ring-2 ring-neon-green/50 text-charcoal'
-                                : 'neumorphic-socket text-charcoal focus:ring-brand-blue/50'
+                                ? 'neu-socket ring-2 ring-primary/50'
+                                : 'neu-socket focus:ring-brand-blue/50'
                         }
                     `}
+                    style={{ color: error ? undefined : 'var(--neu-text)' }}
                 />
             ))}
         </div>

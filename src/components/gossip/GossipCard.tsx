@@ -1,6 +1,6 @@
 /**
  * GossipCard Component
- * X.com-style card for displaying gossip posts with anonymous indicator
+ * Card for displaying gossip posts with anonymous indicator – Stitch theme
  */
 
 import { GossipPost } from '@/types/gossip';
@@ -30,13 +30,14 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
     const getDiscussionTypeColor = (type: string) => {
         switch (type) {
             case 'safety':
-                return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+                return 'bg-red-500/10 text-red-400';
             case 'event':
-                return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+                return 'bg-blue-500/10 text-blue-400';
             case 'question':
-                return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+            case 'community_question':
+                return 'bg-purple-500/10 text-purple-400';
             default:
-                return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+                return 'neu-chip';
         }
     };
 
@@ -46,9 +47,8 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
 
     return (
         <article
-            className="border-b border-gray-200 dark:border-gray-800 px-4 py-3 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer"
+            className="neu-card-sm rounded-2xl p-4 hover:opacity-90 transition-all cursor-pointer"
             onClick={(e) => {
-                // Don't trigger onClick if clicking on a link
                 const target = e.target as HTMLElement;
                 if (!target.closest('a')) {
                     onClick?.();
@@ -56,7 +56,7 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
             }}
         >
             <div className="flex gap-3">
-                {/* Avatar - Only clickable if not anonymous */}
+                {/* Avatar */}
                 {!post.anonymous && post.author.username ? (
                     <Link 
                         href={`/profile/${post.author.username}`} 
@@ -67,9 +67,9 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
                         <img
                             src={post.author.avatarUrl || '/default-avatar.png'}
                             alt={post.author.name}
-                            className="w-10 h-10 rounded-full object-cover group-hover:opacity-80 transition-opacity"
+                            className="w-10 h-10 rounded-full object-cover group-hover:opacity-80 transition-opacity neu-avatar"
                             onError={(e) => {
-                                e.currentTarget.src = 'https://ui-avatars.com/api/?name=Anonymous&background=6B9FED&color=fff';
+                                e.currentTarget.src = 'https://ui-avatars.com/api/?name=Anonymous&background=11d473&color=102219';
                             }}
                         />
                     </Link>
@@ -78,9 +78,9 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
                         <img
                             src={post.author.avatarUrl || '/default-avatar.png'}
                             alt={post.author.name}
-                            className="w-10 h-10 rounded-full object-cover"
+                            className="w-10 h-10 rounded-full object-cover neu-avatar"
                             onError={(e) => {
-                                e.currentTarget.src = 'https://ui-avatars.com/api/?name=Anonymous&background=6B9FED&color=fff';
+                                e.currentTarget.src = 'https://ui-avatars.com/api/?name=AN&background=11d473&color=102219';
                             }}
                         />
                     </div>
@@ -94,40 +94,41 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
                             <Link 
                                 href={`/profile/${post.author.username}`}
                                 onClick={handleProfileClick}
-                                className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:underline"
+                                className="font-bold text-[15px] hover:underline"
+                                style={{ color: 'var(--neu-text)' }}
                             >
                                 {post.author.name}
                             </Link>
                         ) : (
-                            <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">
+                            <span className="font-bold text-[15px]" style={{ color: 'var(--neu-text)' }}>
                                 {post.author.name}
                             </span>
                         )}
                         {post.anonymous && (
-                            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs rounded-full flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                                <i className="bi bi-incognito" />
+                            <span className="neu-chip px-2 py-0.5 text-xs rounded-full flex items-center gap-1" style={{ color: 'var(--neu-text-muted)' }}>
+                                <span className="material-symbols-outlined text-xs">lock</span>
                                 Anonymous
                             </span>
                         )}
-                        <span className="text-gray-500 dark:text-gray-400 text-[15px]">
+                        <span className="text-[15px]" style={{ color: 'var(--neu-text-muted)' }}>
                             · {formatTimeAgo(post.createdAt)}
                         </span>
                     </div>
 
                     {/* Discussion Type Badge */}
                     <div className="mb-2">
-                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${getDiscussionTypeColor(post.discussionType)}`}>
+                        <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${getDiscussionTypeColor(post.discussionType)}`}>
                             {post.discussionType.charAt(0).toUpperCase() + post.discussionType.slice(1)}
                         </span>
                     </div>
 
                     {/* Title */}
-                    <h3 className="font-bold text-[17px] mb-1 text-gray-900 dark:text-gray-100">
+                    <h3 className="font-bold text-[17px] mb-1" style={{ color: 'var(--neu-text)' }}>
                         {post.title}
                     </h3>
 
                     {/* Body */}
-                    <p className="text-[15px] text-gray-900 dark:text-gray-100 leading-5 whitespace-pre-wrap break-words">
+                    <p className="text-[15px] leading-5 whitespace-pre-wrap break-words" style={{ color: 'var(--neu-text)' }}>
                         {post.body}
                     </p>
 
@@ -137,7 +138,7 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
                             {post.tags.map((tag) => (
                                 <span
                                     key={tag}
-                                    className="text-blue-500 dark:text-blue-400 text-[15px] hover:underline cursor-pointer"
+                                    className="text-primary text-[15px] hover:underline cursor-pointer"
                                 >
                                     #{tag}
                                 </span>
@@ -147,16 +148,16 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
 
                     {/* Location */}
                     {post.location && (
-                        <div className="flex items-center gap-1 mt-2 text-gray-500 dark:text-gray-400 text-[13px]">
-                            <i className="bi bi-geo-alt" />
+                        <div className="flex items-center gap-1 mt-2 text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>
+                            <span className="material-symbols-outlined text-sm">location_on</span>
                             <span>{post.location.lga}, {post.location.state}</span>
                         </div>
                     )}
 
                     {/* Stats */}
-                    <div className="flex items-center gap-6 mt-3 text-gray-500 dark:text-gray-400">
-                        <button className="flex items-center gap-1 hover:text-blue-500 transition-colors group">
-                            <i className="bi bi-chat text-lg group-hover:text-blue-500" />
+                    <div className="flex items-center gap-6 mt-3" style={{ color: 'var(--neu-text-muted)' }}>
+                        <button className="flex items-center gap-1 hover:text-primary transition-colors group">
+                            <span className="material-symbols-outlined text-lg group-hover:text-primary transition-colors">chat_bubble_outline</span>
                             <span className="text-[13px]">{post.commentsCount || 0}</span>
                         </button>
                     </div>
