@@ -6,7 +6,7 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "node run-lint.js",
+    "lint": "node run-lint.mjs",
     "lint:strict": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "echo \"No tests configured\" && exit 0",

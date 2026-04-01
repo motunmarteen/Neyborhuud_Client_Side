@@ -115,7 +115,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
     const userHandle = user ? `@${user.username}` : '@username';
     const userInitial = userDisplayName[0]?.toUpperCase() || 'U';
 
-    const UserMenu = () => (
+    const userMenuContent = (
         <div className="absolute bottom-full mb-2 left-0 w-full min-w-[260px] bg-white dark:bg-gray-950 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-gray-100 dark:border-gray-800 p-2 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-3 border-b border-gray-100 dark:border-gray-800">
                 <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{userDisplayName}</p>
@@ -216,7 +216,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
 
                     {/* User Profile Section */}
                     <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 relative user-menu-container">
-                        {showUserMenu && <UserMenu />}
+                        {showUserMenu && userMenuContent}
                         <button
                             onClick={() => setShowUserMenu(!showUserMenu)}
                             className="flex items-center gap-3 p-3 w-full rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
@@ -301,7 +301,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
 
             {/* User Profile Section */}
             <div className="mt-auto mb-4 relative user-menu-container">
-                {showUserMenu && !isCollapsed && <UserMenu />}
+                {showUserMenu && !isCollapsed && userMenuContent}
                 <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className={`flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full ${isCollapsed ? 'justify-center' : ''
