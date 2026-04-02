@@ -2,15 +2,35 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { fetchAPI } from '@/lib/api';
 import apiClient from '@/lib/api-client';
+import { persistAuthSessionPayload } from '@/lib/communityContext';
+
+function friendlyLoginMessage(raw: string): string {
+    const m = raw.toLowerCase();
+    if (m.includes('load failed') || m.includes('failed to fetch') || m.includes('network')) {
+        return 'Could not reach the server. Check your connection and try again.';
+    }
+    if (
+        m.includes('invalid') &&
+        (m.includes('password') || m.includes('credential') || m.includes('email') || m.includes('login'))
+    ) {
+        return 'Invalid email or password. Check your details or use Forgot password.';
+    }
+    if (m.includes('not found') || m.includes('no user') || m.includes('does not exist')) {
+        return 'No account found with this email. You can create one from Join for Free.';
+    }
+    return raw || 'Something went wrong. Please try again.';
+}
 
 export default function LoginPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [formError, setFormError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -18,6 +38,7 @@ export default function LoginPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setFormError(null);
         setLoading(true);
 
         try {
@@ -51,29 +72,22 @@ export default function LoginPage() {
                 if (refreshToken) {
                     localStorage.setItem('neyborhuud_refresh_token', refreshToken);
                 }
-                if (user) {
-                    localStorage.setItem('neyborhuud_user', JSON.stringify(user));
-                }
-                // Sync token with api-client so feed requests are authenticated immediately
+                persistAuthSessionPayload({
+                    user,
+                    community: data?.community,
+                    assignedCommunityId: data?.assignedCommunityId,
+                });
                 apiClient.setToken(accessToken);
                 console.log('✅ Login successful, tokens stored');
             }
 
             router.push('/feed');
-        } catch (error: any) {
-            console.error(error);
-            
-            // Provide friendly error messages
-            let friendlyMsg = error.message;
-            if (error.message.includes('Load failed') || error.message.includes('Failed to fetch')) {
-                friendlyMsg = 'Could not reach the server. Please check your connection and try again.';
-            } else if (error.message.includes('Invalid credentials') || error.message.includes('incorrect')) {
-                friendlyMsg = 'Invalid email or password. Please try again.';
-            } else if (error.message.includes('not found') || error.message.includes('No user')) {
-                friendlyMsg = 'No account found with this email. Would you like to sign up?';
-            }
-            
-            alert(`Login Error: ${friendlyMsg}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+
+            const friendlyMsg = friendlyLoginMessage(message);
+            setFormError(friendlyMsg);
+            toast.error(friendlyMsg, { duration: 5000 });
         } finally {
             setLoading(false);
         }
@@ -95,7 +109,10 @@ export default function LoginPage() {
                     icon="bi-envelope"
                     placeholder="nancy@example.com"
                     value={formData.email}
-                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => {
+                        setFormError(null);
+                        setFormData({ ...formData, email: e.target.value });
+                    }}
                 />
 
                 <div className="flex flex-col gap-2">
@@ -105,7 +122,10 @@ export default function LoginPage() {
                         icon="bi-lock"
                         placeholder="••••••••"
                         value={formData.password}
-                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                        onChange={(e) => {
+                            setFormError(null);
+                            setFormData({ ...formData, password: e.target.value });
+                        }}
                     />
                     <div className="flex justify-end px-2">
                         <Link 
@@ -116,6 +136,15 @@ export default function LoginPage() {
                         </Link>
                     </div>
                 </div>
+
+                {formError && (
+                    <div
+                        role="alert"
+                        className="rounded-2xl px-4 py-3 text-sm font-medium leading-relaxed border border-red-500/35 bg-red-500/10 text-red-200"
+                    >
+                        {formError}
+                    </div>
+                )}
 
                 <button
                     disabled={loading || !formData.email || !formData.password}

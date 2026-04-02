@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
 import { fetchAPI } from '@/lib/api';
+import { persistAuthSessionPayload } from '@/lib/communityContext';
 import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValidation';
 
 export default function SignupPage() {
@@ -138,13 +139,16 @@ export default function SignupPage() {
                     localStorage.setItem('neyborhuud_refresh_token', d.session.refresh_token);
                 }
                 
-                // Update stored user data with verified status
+                persistAuthSessionPayload({
+                    user: d.user,
+                    community: d.community,
+                    assignedCommunityId: d.assignedCommunityId,
+                });
                 if (d.user) {
-                    localStorage.setItem('neyborhuud_user', JSON.stringify(d.user));
-                    console.log('✅ User data updated:', { 
-                        emailVerified: d.user.emailVerified, 
+                    console.log('✅ User data updated:', {
+                        emailVerified: d.user.emailVerified,
                         isVerified: d.user.isVerified,
-                        verificationStatus: d.user.verificationStatus
+                        verificationStatus: d.user.verificationStatus,
                     });
                 }
             }
@@ -336,9 +340,11 @@ export default function SignupPage() {
                     console.warn('⚠️ Create-account succeeded but no token received. Check backend response shape.');
                 }
 
-                if (user) {
-                    localStorage.setItem('neyborhuud_user', JSON.stringify(user));
-                }
+                persistAuthSessionPayload({
+                    user,
+                    community,
+                    assignedCommunityId: (d as { assignedCommunityId?: string }).assignedCommunityId,
+                });
 
                 if (community) {
                     console.log('✅ Community assigned:', community.communityName || community);

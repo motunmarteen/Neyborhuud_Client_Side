@@ -6,6 +6,31 @@ import { PremiumInput } from '@/components/ui/PremiumInput';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 import { useEmailValidation } from '@/hooks/useEmailValidation';
+import { toast } from 'sonner';
+
+function forgotPasswordBody(email: string) {
+    const normalized = email.trim().toLowerCase();
+    // Backend accepts either field; we send both (same as login identifier).
+    return JSON.stringify({ email: normalized, identifier: normalized });
+}
+
+function getErrorStatus(error: unknown): number | undefined {
+    if (error && typeof error === 'object' && 'status' in error) {
+        const s = (error as { status?: number }).status;
+        return typeof s === 'number' ? s : undefined;
+    }
+    return undefined;
+}
+
+function isNetworkError(message: string): boolean {
+    const m = message.toLowerCase();
+    return (
+        m.includes('failed to fetch') ||
+        m.includes('load failed') ||
+        m.includes('network') ||
+        m.includes('networkerror')
+    );
+}
 
 type Step = 'form' | 'sent' | 'error';
 
@@ -46,24 +71,45 @@ export default function ForgotPasswordPage() {
         try {
             await fetchAPI('/auth/forgot-password', {
                 method: 'POST',
-                body: JSON.stringify({ email: email.trim().toLowerCase() })
+                body: forgotPasswordBody(email),
             });
 
             setStep('sent');
             setResendCooldown(60);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Password reset request failed:', error);
-            
-            // Show success even if email doesn't exist (security best practice)
-            // Only show error for actual server errors
-            if (error.message.includes('500') || error.message.includes('Load failed')) {
-                setErrorMessage('Unable to process request. Please try again later.');
+            const message = error instanceof Error ? error.message : 'Something went wrong.';
+            const status = getErrorStatus(error);
+
+            // Rate limit — backend returns 429 + message; must not show fake "email sent" success.
+            if (status === 429) {
+                setErrorMessage(message);
                 setStep('error');
-            } else {
-                // For security, show success regardless of whether email exists
-                setStep('sent');
-                setResendCooldown(60);
+                toast.error(message);
+                return;
             }
+
+            // Validation / bad request (e.g. Joi) — show real message, not anti-enumeration success.
+            if (status !== undefined && status >= 400 && status < 500) {
+                setErrorMessage(message);
+                setStep('error');
+                toast.error(message);
+                return;
+            }
+
+            // Server or connectivity failure
+            if (status === undefined ? isNetworkError(message) : status >= 500) {
+                const generic = 'Unable to process request. Please try again later.';
+                setErrorMessage(generic);
+                setStep('error');
+                toast.error(generic);
+                return;
+            }
+
+            // 2xx-style anti-enumeration is handled in try; remaining cases: show generic error
+            setErrorMessage(message);
+            setStep('error');
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -76,11 +122,20 @@ export default function ForgotPasswordPage() {
         try {
             await fetchAPI('/auth/forgot-password', {
                 method: 'POST',
-                body: JSON.stringify({ email: email.trim().toLowerCase() })
+                body: forgotPasswordBody(email),
             });
             setResendCooldown(60);
-        } catch (error) {
+            toast.success('If that account exists, we sent another reset link.');
+        } catch (error: unknown) {
+            const msg =
+                error instanceof Error ? error.message : 'Could not resend. Try again later.';
+            const status = getErrorStatus(error);
             console.error('Resend failed:', error);
+            if (status === 429) {
+                toast.error(msg, { duration: 6000 });
+            } else {
+                toast.error(msg);
+            }
         } finally {
             setLoading(false);
         }

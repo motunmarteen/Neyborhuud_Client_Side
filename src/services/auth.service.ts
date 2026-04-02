@@ -4,7 +4,18 @@
  */
 
 import apiClient from "@/lib/api-client";
-import { User, RegisterPayload } from "@/types/api";
+import {
+  persistAuthSessionPayload,
+  applyProfileMeCommunity,
+} from "@/lib/communityContext";
+import { User, RegisterPayload, CommunitySummary } from "@/types/api";
+
+type AuthSessionData = {
+  user: User;
+  token: string;
+  community?: CommunitySummary;
+  assignedCommunityId?: string | null;
+};
 
 export const authService = {
   /**
@@ -23,19 +34,19 @@ export const authService = {
       delete (sanitizedPayload.location as any).communityName;
     }
 
-    const response = await apiClient.post<{ user: User; token: string }>(
+    const response = await apiClient.post<AuthSessionData>(
       "/auth/create-account",
       sanitizedPayload,
     );
 
     if (response.success && response.data) {
       apiClient.setToken(response.data.token);
-      // Store user data
       if (typeof window !== "undefined") {
-        localStorage.setItem(
-          "neyborhuud_user",
-          JSON.stringify(response.data.user),
-        );
+        persistAuthSessionPayload({
+          user: response.data.user,
+          community: response.data.community,
+          assignedCommunityId: response.data.assignedCommunityId,
+        });
       }
     }
 
@@ -46,22 +57,19 @@ export const authService = {
    * Login user
    */
   async login(identifier: string, password: string) {
-    const response = await apiClient.post<{ user: User; token: string }>(
-      "/auth/login",
-      {
-        identifier,
-        password,
-      },
-    );
+    const response = await apiClient.post<AuthSessionData>("/auth/login", {
+      identifier,
+      password,
+    });
 
     if (response.success && response.data) {
       apiClient.setToken(response.data.token);
-      // Store user data
       if (typeof window !== "undefined") {
-        localStorage.setItem(
-          "neyborhuud_user",
-          JSON.stringify(response.data.user),
-        );
+        persistAuthSessionPayload({
+          user: response.data.user,
+          community: response.data.community,
+          assignedCommunityId: response.data.assignedCommunityId,
+        });
       }
     }
 
@@ -84,6 +92,27 @@ export const authService = {
    */
   async getCurrentUser() {
     return await apiClient.get<User>("/auth/me");
+  },
+
+  /**
+   * Sync assigned community from GET /profile/me (patches localStorage only).
+   */
+  async syncCommunityFromProfile(): Promise<void> {
+    try {
+      const response = await apiClient.get<{
+        user?: unknown;
+        community?: CommunitySummary;
+        assignedCommunityId?: string | null;
+      }>("/profile/me");
+      if (response.success && response.data && typeof window !== "undefined") {
+        applyProfileMeCommunity({
+          assignedCommunityId: response.data.assignedCommunityId,
+          community: response.data.community,
+        });
+      }
+    } catch {
+      /* offline or old backend — ignore */
+    }
   },
 
   /**
@@ -143,7 +172,11 @@ export const authService = {
    * Request password reset
    */
   async requestPasswordReset(email: string) {
-    return await apiClient.post("/auth/forgot-password", { email });
+    const normalized = email.trim().toLowerCase();
+    return await apiClient.post("/auth/forgot-password", {
+      email: normalized,
+      identifier: normalized,
+    });
   },
 
   /**

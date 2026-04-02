@@ -59,8 +59,6 @@ export default function Home() {
         }
     };
 
-    const handleSkip = () => router.push('/signup');
-
     return (
         <div className="neu-base min-h-[100dvh] flex flex-col items-center justify-between py-10 px-6 overflow-hidden relative">
             {/* Very subtle ambient glow */}
@@ -68,17 +66,6 @@ export default function Home() {
                 className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[160px] opacity-[0.05] pointer-events-none transition-all duration-1000"
                 style={{ backgroundColor: activeSlide.accentColor }}
             />
-
-            {/* ── Skip Button ── */}
-            <div className="w-full flex justify-end z-20 max-w-md lg:max-w-none lg:absolute lg:top-8 lg:right-10">
-                <button
-                    onClick={handleSkip}
-                    className="neu-btn-pill"
-                    aria-label="Skip onboarding"
-                >
-                    Skip
-                </button>
-            </div>
 
             {/* ── Main Content ── */}
             <div className="grow flex flex-col items-center justify-center w-full max-w-md z-10 gap-10">

@@ -100,10 +100,23 @@ export interface UserSettings {
   };
 }
 
+/** Geo community returned with auth (id = Mongo ObjectId for /geo/communities/:id/...). */
+export interface CommunitySummary {
+  id?: string;
+  locationKey?: string;
+  communityName?: string;
+  name?: string;
+  state?: string;
+  lga?: string;
+  ward?: string;
+}
+
 export interface User {
   id: string;
   username: string;
   email: string;
+  /** Set by backend after location-based assignment (Mongo Community _id). */
+  assignedCommunityId?: string | null;
   firstName?: string;
   lastName?: string;
   middleName?: string;

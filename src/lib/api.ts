@@ -55,6 +55,59 @@ function sanitizePayload(obj: any): any {
 }
 
 /**
+ * Normalize backend error payloads (message, error string, validation arrays, nested error).
+ */
+function extractErrorMessage(data: unknown, status: number, statusText: string): string {
+    if (data == null || data === '') {
+        return statusText?.trim() || `Request failed (${status})`;
+    }
+    if (typeof data === 'string' && data.trim()) {
+        return data.trim();
+    }
+    if (typeof data !== 'object') {
+        return `Request failed (${status})`;
+    }
+    const d = data as Record<string, unknown>;
+
+    if (typeof d.message === 'string' && d.message.trim()) {
+        return d.message.trim();
+    }
+
+    if (typeof d.error === 'string' && d.error.trim()) {
+        return d.error.trim();
+    }
+    if (d.error && typeof d.error === 'object' && d.error !== null) {
+        const errObj = d.error as Record<string, unknown>;
+        const inner = errObj.message;
+        if (typeof inner === 'string' && inner.trim()) {
+            return inner.trim();
+        }
+        const body = errObj.body;
+        if (body && typeof body === 'object' && body !== null) {
+            const bm = (body as Record<string, unknown>).message;
+            if (typeof bm === 'string' && bm.trim()) {
+                return bm.trim();
+            }
+        }
+    }
+
+    if (Array.isArray(d.errors) && d.errors.length > 0) {
+        const first = d.errors[0];
+        if (typeof first === 'string' && first.trim()) {
+            return first.trim();
+        }
+        if (first && typeof first === 'object' && first !== null) {
+            const m = (first as Record<string, unknown>).message;
+            if (typeof m === 'string' && m.trim()) {
+                return m.trim();
+            }
+        }
+    }
+
+    return statusText?.trim() || `Request failed (${status})`;
+}
+
+/**
  * Enhanced fetch wrapper for the NeyborHuud backend
  */
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
@@ -130,20 +183,19 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
                 (error as any).status = response.status;
                 throw error;
             }
-            
-            // Extract detailed error for backend debugging
-            const errorMsg = data.message || data.error || `Server Error (${response.status})`;
-            
-            // Log full error details for debugging
-            console.error('❌ Backend Error Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                endpoint: url,
-                error: data.error,
-                message: data.message,
-                fullResponse: data
-            });
-            
+
+            const errorMsg = extractErrorMessage(data, response.status, response.statusText);
+
+            // Expected 4xx: use debug so Next.js dev overlay does not treat it as an app error.
+            // 5xx / unknown: still error-level for visibility.
+            const logLine =
+                `Backend ${response.status} ${response.statusText} — ${url}\nParsed body: ${JSON.stringify(data)}`;
+            if (response.status >= 500) {
+                console.error('❌', logLine);
+            } else {
+                console.debug('[API]', logLine);
+            }
+
             // Create error with status code attached for better error handling
             const error = new Error(errorMsg);
             (error as any).status = response.status;
@@ -153,7 +205,10 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 
         return data;
     } catch (error: any) {
-        console.error(`[API Error] ${endpoint}:`, error);
+        // HTTP errors were already logged above; avoid duplicate console.error + dev overlay noise.
+        if (error?.responseData === undefined) {
+            console.error(`[API Error] ${endpoint}:`, error);
+        }
         throw error;
     }
 }
