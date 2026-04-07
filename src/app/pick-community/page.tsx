@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import apiClient from '@/lib/api-client';
@@ -18,7 +18,7 @@ type PickerOption = {
   kind: 'ward' | 'lga_general' | 'lcda';
 };
 
-export default function PickCommunityPage() {
+function PickCommunityContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isChangingCommunity = searchParams.get('change') === 'true';
@@ -316,5 +316,19 @@ export default function PickCommunityPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PickCommunityPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[100dvh] neu-base flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
+        </div>
+      }
+    >
+      <PickCommunityContent />
+    </Suspense>
   );
 }
