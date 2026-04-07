@@ -7,14 +7,18 @@ import apiClient from "@/lib/api-client";
 import {
   persistAuthSessionPayload,
   applyProfileMeCommunity,
+  type PickerContext,
 } from "@/lib/communityContext";
 import { User, RegisterPayload, CommunitySummary } from "@/types/api";
 
 type AuthSessionData = {
   user: User;
   token: string;
-  community?: CommunitySummary;
+  community?: CommunitySummary | null;
   assignedCommunityId?: string | null;
+  needsCommunitySelection?: boolean;
+  needsGpsLocationVerification?: boolean;
+  pickerContext?: PickerContext | null;
 };
 
 export const authService = {
@@ -46,6 +50,10 @@ export const authService = {
           user: response.data.user,
           community: response.data.community,
           assignedCommunityId: response.data.assignedCommunityId,
+          needsCommunitySelection: response.data.needsCommunitySelection,
+          needsGpsLocationVerification:
+            response.data.needsGpsLocationVerification,
+          pickerContext: response.data.pickerContext ?? null,
         });
       }
     }
@@ -69,10 +77,48 @@ export const authService = {
           user: response.data.user,
           community: response.data.community,
           assignedCommunityId: response.data.assignedCommunityId,
+          needsCommunitySelection: response.data.needsCommunitySelection,
+          needsGpsLocationVerification:
+            response.data.needsGpsLocationVerification,
+          pickerContext: response.data.pickerContext ?? null,
         });
       }
     }
 
+    return response;
+  },
+
+  /** Flow A: confirm ward/LGA-area after signup (Bearer token). */
+  async confirmCommunity(body: {
+    communityId: string;
+    state: string;
+    lga: string;
+  }) {
+    const response = await apiClient.post<{
+      assignedCommunityId?: string | null;
+      community?: CommunitySummary;
+      needsCommunitySelection?: boolean;
+      needsGpsLocationVerification?: boolean;
+    }>("/auth/confirm-community", body);
+    if (response.success && response.data && typeof window !== "undefined") {
+      let existing: unknown;
+      try {
+        existing = JSON.parse(
+          localStorage.getItem("neyborhuud_user") || "null",
+        );
+      } catch {
+        existing = null;
+      }
+      persistAuthSessionPayload({
+        user: existing && typeof existing === "object" ? existing : undefined,
+        community: response.data.community,
+        assignedCommunityId: response.data.assignedCommunityId,
+        needsCommunitySelection: response.data.needsCommunitySelection ?? false,
+        needsGpsLocationVerification:
+          response.data.needsGpsLocationVerification ?? true,
+        pickerContext: null,
+      });
+    }
     return response;
   },
 
@@ -103,11 +149,18 @@ export const authService = {
         user?: unknown;
         community?: CommunitySummary;
         assignedCommunityId?: string | null;
+        needsCommunitySelection?: boolean;
+        needsGpsLocationVerification?: boolean;
+        pickerContext?: PickerContext | null;
       }>("/profile/me");
       if (response.success && response.data && typeof window !== "undefined") {
         applyProfileMeCommunity({
           assignedCommunityId: response.data.assignedCommunityId,
           community: response.data.community,
+          needsCommunitySelection: response.data.needsCommunitySelection,
+          needsGpsLocationVerification:
+            response.data.needsGpsLocationVerification,
+          pickerContext: response.data.pickerContext ?? null,
         });
       }
     } catch {
@@ -232,10 +285,23 @@ export const authService = {
   },
 
   /**
-   * Delete account
+   * NDPR export — GET /auth/export-data (Bearer).
    */
-  async deleteAccount(password: string) {
-    return await apiClient.post("/auth/delete-account", { password });
+  async exportUserData() {
+    return await apiClient.get<{ export?: unknown }>("/auth/export-data");
+  },
+
+  /**
+   * Delete account — DELETE /auth/delete-account (Bearer). Backend soft-deletes PII; optional reason in body.
+   */
+  async deleteAccount(reason?: string) {
+    const res = await apiClient.delete("/auth/delete-account", {
+      data: reason ? { reason } : {},
+    });
+    if (res.success !== false && typeof window !== "undefined") {
+      apiClient.clearToken();
+    }
+    return res;
   },
 
   /**

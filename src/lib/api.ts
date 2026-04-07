@@ -4,7 +4,8 @@
  */
 
 const PRODUCTION_API_URL = 'https://neyborhuud-serverside.onrender.com/api/v1';
-const LOCAL_API_URL = 'http://localhost:5000/api/v1';
+/** Default local API — NeyborHuud-ServerSide uses PORT=3000 (see server `.env.example`). */
+const LOCAL_API_URL = 'http://localhost:3000/api/v1';
 
 export const getApiUrl = () => {
     // Check both environment variable names for compatibility

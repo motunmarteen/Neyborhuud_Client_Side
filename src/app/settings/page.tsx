@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
+import { authService } from '@/services/auth.service';
+import { toast } from 'sonner';
 
 interface NotificationSettings {
     email: boolean;
@@ -36,6 +38,7 @@ export default function SettingsPage() {
     const [emailVerified, setEmailVerified] = useState(false);
     const [resendingVerification, setResendingVerification] = useState(false);
     const [resendCooldown, setResendCooldown] = useState(0);
+    const [accountActionLoading, setAccountActionLoading] = useState<'export' | 'delete' | null>(null);
 
     const [notifications, setNotifications] = useState<NotificationSettings>({
         email: true,
@@ -79,6 +82,67 @@ export default function SettingsPage() {
             return () => clearTimeout(timer);
         }
     }, [resendCooldown]);
+
+    const handleExportMyData = async () => {
+        setAccountActionLoading('export');
+        try {
+            const res = await authService.exportUserData();
+            if (!res.success || !res.data) {
+                toast.error(
+                    (res as { message?: string }).message || 'Export failed',
+                );
+                return;
+            }
+            const wrap = res.data as { export?: unknown };
+            const payload = wrap.export ?? res.data;
+            const blob = new Blob([JSON.stringify(payload, null, 2)], {
+                type: 'application/json',
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `neyborhuud-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('Download started.');
+        } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : 'Export failed';
+            toast.error(msg);
+        } finally {
+            setAccountActionLoading(null);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (
+            !window.confirm(
+                'Delete your NeyborHuud account? Your posts will be hidden and personal data scrubbed. This cannot be undone.',
+            )
+        ) {
+            return;
+        }
+        const reason =
+            window.prompt('Optional: why are you leaving? (Cancel to skip)') ||
+            undefined;
+        setAccountActionLoading('delete');
+        try {
+            await authService.deleteAccount(reason);
+            toast.success('Account deleted.');
+            router.push('/login');
+        } catch (e: unknown) {
+            const ax = e as {
+                response?: { data?: { message?: string } };
+                message?: string;
+            };
+            toast.error(
+                ax.response?.data?.message ||
+                    ax.message ||
+                    'Could not delete account',
+            );
+        } finally {
+            setAccountActionLoading(null);
+        }
+    };
 
     const handleSaveNotifications = async () => {
         setSaving(true);
@@ -548,10 +612,37 @@ export default function SettingsPage() {
                             <h2 className="text-sm font-black uppercase tracking-widest text-brand-red/60 mb-4">
                                 Danger Zone
                             </h2>
-                            
-                            <button className="flex items-center gap-3 py-3 text-brand-red/60 hover:text-brand-red transition-colors">
+                            <p className="text-[10px] text-charcoal/40 mb-4 leading-relaxed">
+                                Download your data (NDPR portability) or permanently delete this account
+                                (matches{' '}
+                                <code className="text-[9px]">GET /auth/export-data</code> and{' '}
+                                <code className="text-[9px]">DELETE /auth/delete-account</code> on the API).
+                            </p>
+                            <button
+                                type="button"
+                                disabled={accountActionLoading !== null}
+                                onClick={() => void handleExportMyData()}
+                                className="flex items-center gap-3 py-3 w-full text-left text-charcoal/70 hover:text-brand-blue transition-colors disabled:opacity-50"
+                            >
+                                <i className="bi bi-download"></i>
+                                <span className="text-sm font-bold">
+                                    {accountActionLoading === 'export'
+                                        ? 'Preparing export…'
+                                        : 'Download my data'}
+                                </span>
+                            </button>
+                            <button
+                                type="button"
+                                disabled={accountActionLoading !== null}
+                                onClick={() => void handleDeleteAccount()}
+                                className="flex items-center gap-3 py-3 w-full text-left text-brand-red/60 hover:text-brand-red transition-colors disabled:opacity-50"
+                            >
                                 <i className="bi bi-trash3"></i>
-                                <span className="text-sm font-bold">Delete Account</span>
+                                <span className="text-sm font-bold">
+                                    {accountActionLoading === 'delete'
+                                        ? 'Deleting…'
+                                        : 'Delete account'}
+                                </span>
                             </button>
                         </div>
                     </div>
