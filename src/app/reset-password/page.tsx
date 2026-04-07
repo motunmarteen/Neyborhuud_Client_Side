@@ -5,6 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
+import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
+import {
+    evaluatePasswordPolicy,
+    PASSWORD_REQUIREMENTS_HINT,
+} from '@/lib/passwordPolicy';
 
 type Step = 'form' | 'success' | 'error' | 'expired';
 
@@ -19,15 +24,8 @@ function ResetPasswordContent() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    // Password validation rules
-    const passRules = {
-        length: password.length >= 8,
-        upper: /[A-Z]/.test(password),
-        lower: /[a-z]/.test(password),
-        number: /[0-9]/.test(password),
-        special: /[!@#$%^&*]/.test(password),
-    };
-    const isPassValid = Object.values(passRules).every(Boolean);
+    const policy = evaluatePasswordPolicy(password, {});
+    const isPassValid = policy.ok;
     const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
 
     // Check if token exists
@@ -200,19 +198,14 @@ function ResetPasswordContent() {
                         label="New Password"
                         type="password"
                         icon="bi-lock"
-                        placeholder="••••••••"
+                        placeholder="12+ chars, mixed case, number, symbol"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                     />
-                    
-                    {/* Password Strength Checklist */}
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 px-4">
-                        <Rule label="8+ Chars" met={passRules.length} />
-                        <Rule label="Uppercase" met={passRules.upper} />
-                        <Rule label="Lowercase" met={passRules.lower} />
-                        <Rule label="Number" met={passRules.number} />
-                        <Rule label="Symbol" met={passRules.special} />
-                    </div>
+                    <p className="text-[10px] leading-relaxed px-1" style={{ color: 'var(--neu-text-muted)' }}>
+                        {PASSWORD_REQUIREMENTS_HINT}
+                    </p>
+                    <PasswordStrengthMeter password={password} />
                 </div>
 
                 <PremiumInput
@@ -262,14 +255,6 @@ function ResetPasswordContent() {
         </div>
     );
 }
-
-// Password rule indicator component
-const Rule = ({ label, met }: { label: string, met: boolean }) => (
-    <div className="flex items-center gap-2">
-        <i className={`bi ${met ? 'bi-check-circle-fill text-primary' : 'bi-circle [color:var(--neu-text-muted)]'} text-[10px]`}></i>
-        <span className={`text-[9px] uppercase tracking-wider ${met ? '[color:var(--neu-text)]' : '[color:var(--neu-text-muted)]'}`}>{label}</span>
-    </div>
-);
 
 // Main export with Suspense wrapper for useSearchParams
 export default function ResetPasswordPage() {

@@ -413,6 +413,66 @@ export default function SettingsPage() {
                             </Link>
                         </div>
 
+                        {/* Location & Community */}
+                        <div className="neumorphic rounded-2xl p-6 mb-6">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
+                                Location & Community
+                            </h2>
+                            
+                            {user?.location && (
+                                <div className="space-y-3 mb-4">
+                                    <div className="flex justify-between items-center py-2 border-b border-charcoal/5">
+                                        <span className="text-xs text-charcoal/50 uppercase tracking-wider">Current Area</span>
+                                        <span className="text-sm font-bold text-charcoal">
+                                            {user.location.lga || user.location.neighborhood || 'Not set'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-2 border-b border-charcoal/5">
+                                        <span className="text-xs text-charcoal/50 uppercase tracking-wider">State</span>
+                                        <span className="text-sm font-bold text-charcoal">
+                                            {user.location.state || 'Not set'}
+                                        </span>
+                                    </div>
+                                    {user.assignedCommunity?.name && (
+                                        <div className="flex justify-between items-center py-2 border-b border-charcoal/5">
+                                            <span className="text-xs text-charcoal/50 uppercase tracking-wider">Community</span>
+                                            <span className="text-sm font-bold text-primary">
+                                                {user.assignedCommunity.name}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            
+                            <Link
+                                href="/pick-community?change=true"
+                                className="flex items-center justify-between py-4 border-t border-charcoal/5 group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <i className="bi bi-geo-alt text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                                    <div>
+                                        <span className="text-sm font-bold text-charcoal block">Change Community</span>
+                                        <span className="text-[10px] text-charcoal/40">Switch to a different ward or area</span>
+                                    </div>
+                                </div>
+                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                            </Link>
+                            
+                            <Link
+                                href="/verify-location"
+                                className="flex items-center justify-between py-4 group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <i className="bi bi-crosshair text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                                    <div>
+                                        <span className="text-sm font-bold text-charcoal block">Update GPS Location</span>
+                                        <span className="text-[10px] text-charcoal/40">Re-detect your current location</span>
+                                    </div>
+                                </div>
+                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                            </Link>
+                        </div>
+
                         {/* User Info */}
                         {user && (
                             <div className="neumorphic rounded-2xl p-6 mb-6">
@@ -453,12 +513,23 @@ export default function SettingsPage() {
                             </h2>
                             
                             <Link 
-                                href="/forgot-password"
+                                href="/settings/password"
                                 className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
                             >
                                 <div className="flex items-center gap-3">
                                     <i className="bi bi-key text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
                                     <span className="text-sm font-bold text-charcoal">Change Password</span>
+                                </div>
+                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                            </Link>
+                            
+                            <Link 
+                                href="/forgot-password"
+                                className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <i className="bi bi-envelope text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                                    <span className="text-sm font-bold text-charcoal">Forgot password</span>
                                 </div>
                                 <i className="bi bi-chevron-right text-charcoal/20"></i>
                             </Link>

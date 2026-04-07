@@ -4,12 +4,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { OTPInput } from '@/components/ui/OTPInput';
+import { LocationPicker } from '@/components/ui/LocationPicker';
 import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
 import { fetchAPI } from '@/lib/api';
-import { persistAuthSessionPayload } from '@/lib/communityContext';
+import { persistAuthSessionPayload, getNeedsCommunitySelection } from '@/lib/communityContext';
+import apiClient from '@/lib/api-client';
 import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValidation';
+import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
+import {
+    evaluatePasswordPolicy,
+    PASSWORD_REQUIREMENTS_HINT,
+} from '@/lib/passwordPolicy';
 
 export default function SignupPage() {
     const router = useRouter();
@@ -22,6 +29,7 @@ export default function SignupPage() {
         agree: false,
     });
     const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
+    const [gpsAccuracy, setGpsAccuracy] = useState<number | undefined>(undefined);
     const [resolvedAddress, setResolvedAddress] = useState<LocationAddress | null>(null);
     const [locError, setLocError] = useState<string | null>(null);
     const [isResolving, setIsResolving] = useState(false);
@@ -57,15 +65,12 @@ export default function SignupPage() {
         }
     }, [resendCooldown]);
 
-    // Password Validation States
-    const passRules = {
-        length: formData.password.length >= 8,
-        upper: /[A-Z]/.test(formData.password),
-        lower: /[a-z]/.test(formData.password),
-        number: /[0-9]/.test(formData.password),
-        special: /[!@#$%^&*]/.test(formData.password),
-    };
-    const isPassValid = Object.values(passRules).every(Boolean);
+    /** Matches server Joi / `src/utils/passwordPolicy` on NeyborHuud-ServerSide (min 12, complexity, patterns, etc.). */
+    const passwordPolicy = evaluatePasswordPolicy(formData.password, {
+        email: formData.email,
+        username: formData.username,
+    });
+    const isPassValid = passwordPolicy.ok;
 
     // Handle resend verification code
     const handleResendVerification = async () => {
@@ -139,17 +144,38 @@ export default function SignupPage() {
                     localStorage.setItem('neyborhuud_refresh_token', d.session.refresh_token);
                 }
                 
+                const vd = d as {
+                    user?: unknown;
+                    community?: unknown;
+                    assignedCommunityId?: string | null;
+                    needsCommunitySelection?: boolean;
+                    needsGpsLocationVerification?: boolean;
+                    pickerContext?: { state: string; lga: string; locationKey?: string; hint?: string };
+                };
                 persistAuthSessionPayload({
-                    user: d.user,
-                    community: d.community,
-                    assignedCommunityId: d.assignedCommunityId,
+                    user: vd.user,
+                    community: vd.community,
+                    assignedCommunityId: vd.assignedCommunityId,
+                    needsCommunitySelection: vd.needsCommunitySelection,
+                    needsGpsLocationVerification: vd.needsGpsLocationVerification,
+                    pickerContext: vd.pickerContext ?? null,
                 });
-                if (d.user) {
+                const tok = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
+                if (tok) apiClient.setToken(tok);
+                if (vd.user) {
                     console.log('✅ User data updated:', {
-                        emailVerified: d.user.emailVerified,
-                        isVerified: d.user.isVerified,
-                        verificationStatus: d.user.verificationStatus,
+                        emailVerified: (vd.user as { emailVerified?: boolean }).emailVerified,
+                        isVerified: (vd.user as { isVerified?: boolean }).isVerified,
+                        verificationStatus: (vd.user as { verificationStatus?: string }).verificationStatus,
                     });
+                }
+                if (vd.needsCommunitySelection) {
+                    router.push('/pick-community');
+                    return;
+                }
+                if (vd.needsGpsLocationVerification) {
+                    router.push('/verify-location');
+                    return;
                 }
             }
             
@@ -186,6 +212,7 @@ export default function SignupPage() {
 
         if (loc) {
             setLocation({ lat: loc.lat, lng: loc.lng });
+            setGpsAccuracy(loc.accuracy);
             console.log('🌍 === LOCATION DIAGNOSTIC START ===');
             console.log('🌍 Raw GPS Coordinates:', {
                 lat: loc.lat,
@@ -201,9 +228,6 @@ export default function SignupPage() {
                 console.log('✅ Location resolved:', address.formatted || `${address.lga}, ${address.state}`);
                 console.log('📍 Source:', address.source);
                 setResolvedAddress(address);
-
-                // Show info message if using fallback
-                // Removed at user request: if (address.source === 'osm') { setLocError('Using OpenStreetMap (backend unavailable)'); }
             } else {
                 console.warn('🌍 Geocoding failed, showing coordinates only');
                 setResolvedAddress({
@@ -222,6 +246,15 @@ export default function SignupPage() {
             setLocError("Location access denied. Please enable location permissions.");
         }
     };
+
+    // Handle manual location adjustment from map
+    const handleLocationSelect = useCallback((newLocation: { lat: number; lng: number }, newAddress: LocationAddress | null) => {
+        setLocation(newLocation);
+        if (newAddress) {
+            setResolvedAddress(newAddress);
+        }
+        setLocError(null);
+    }, []);
 
     // Fetch Location on Mount
     useEffect(() => {
@@ -335,20 +368,26 @@ export default function SignupPage() {
 
                 if (accessToken) {
                     localStorage.setItem('neyborhuud_access_token', accessToken);
+                    apiClient.setToken(accessToken);
                     console.log('✅ Authentication tokens stored successfully');
                 } else {
                     console.warn('⚠️ Create-account succeeded but no token received. Check backend response shape.');
                 }
 
+                const ext = d as {
+                    assignedCommunityId?: string | null;
+                    needsCommunitySelection?: boolean;
+                    needsGpsLocationVerification?: boolean;
+                    pickerContext?: { state: string; lga: string; locationKey?: string; hint?: string };
+                };
                 persistAuthSessionPayload({
                     user,
                     community,
-                    assignedCommunityId: (d as { assignedCommunityId?: string }).assignedCommunityId,
+                    assignedCommunityId: ext.assignedCommunityId,
+                    needsCommunitySelection: ext.needsCommunitySelection,
+                    needsGpsLocationVerification: ext.needsGpsLocationVerification,
+                    pickerContext: ext.pickerContext ?? null,
                 });
-
-                if (community) {
-                    console.log('✅ Community assigned:', community.communityName || community);
-                }
             }
 
             // Show email verification screen
@@ -376,33 +415,23 @@ export default function SignupPage() {
         }
     };
 
-    // Email Verification Screen - OTP Code Entry
+    // Email Verification Screen - OTP Code Entry (Simplified)
     if (step === 'verify-email') {
         return (
-            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-8 sm:p-10 flex flex-col items-center relative overflow-hidden">
-                    {/* Decorative Background Glow */}
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/5 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
-
-                    {/* Email Icon */}
-                    <div className="w-20 h-20 rounded-full neu-socket flex items-center justify-center mb-6 relative z-10">
-                        <i className="bi bi-shield-lock text-4xl text-brand-blue"></i>
-                    </div>
-
-                    <h1 className="text-2xl font-semibold mb-2 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
-                        Verify Your Email
+            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-full max-w-sm flex flex-col items-center">
+                    {/* Simple Header */}
+                    <h1 className="text-2xl font-semibold mb-3 tracking-tight" style={{ color: 'var(--neu-text)' }}>
+                        Check your email
                     </h1>
                     
-                    <p className="text-sm mb-1 relative z-10 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
-                        We sent a 6-digit code to
-                    </p>
-                    <p className="font-bold text-sm mb-6 relative z-10 break-all px-2" style={{ color: 'var(--neu-text)' }}>
-                        {formData.email}
+                    <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
+                        We sent a 6-digit code to{' '}
+                        <span className="font-bold" style={{ color: 'var(--neu-text)' }}>{formData.email}</span>
                     </p>
 
                     {/* OTP Code Input */}
-                    <div className="w-full mb-4 relative z-10">
+                    <div className="w-full mb-5">
                         <OTPInput
                             length={6}
                             value={verificationCode}
@@ -416,73 +445,52 @@ export default function SignupPage() {
 
                     {/* Error Message */}
                     {verificationError && (
-                        <div className="w-full mb-4 p-3 rounded-xl neu-socket relative z-10" style={{ border: '1px solid rgba(255,107,107,0.2)' }}>
-                            <p className="text-xs text-brand-red font-bold flex items-center justify-center gap-2">
-                                <i className="bi bi-exclamation-circle"></i>
-                                {verificationError}
-                            </p>
-                        </div>
+                        <p className="text-xs text-brand-red font-medium mb-4 flex items-center justify-center gap-2">
+                            <i className="bi bi-exclamation-circle"></i>
+                            {verificationError}
+                        </p>
                     )}
 
                     {/* Verifying Indicator */}
                     {isVerifying && (
-                        <div className="w-full mb-4 p-3 rounded-xl neu-socket relative z-10" style={{ border: '1px solid rgba(107,159,237,0.2)' }}>
-                            <p className="text-xs text-brand-blue font-bold flex items-center justify-center gap-2">
-                                <span className="w-4 h-4 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
-                                Verifying...
-                            </p>
-                        </div>
+                        <p className="text-xs text-brand-blue font-medium mb-4 flex items-center justify-center gap-2">
+                            <span className="w-3 h-3 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
+                            Verifying...
+                        </p>
                     )}
 
-                    {/* Resend Code */}
-                    <div className="flex flex-col items-center gap-2 relative z-10">
-                        <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
-                            Didn't receive the code?
-                        </p>
+                    {/* Resend Code - Inline */}
+                    <p className="text-xs mb-6" style={{ color: 'var(--neu-text-muted)' }}>
+                        Didn't get it?{' '}
                         <button
                             onClick={handleResendVerification}
                             disabled={resendCooldown > 0 || isResending}
-                            className={`
-                                text-sm font-bold transition-all
-                                ${resendCooldown > 0 || isResending 
-                                    ? 'text-charcoal/30 cursor-not-allowed' 
-                                    : 'text-brand-blue hover:text-brand-blue/70'}
-                            `}
+                            className={`font-bold ${resendCooldown > 0 || isResending ? 'text-charcoal/30' : 'text-brand-blue'}`}
                         >
-                            {isResending ? (
-                                <span className="flex items-center gap-2">
-                                    <span className="w-3 h-3 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
-                                    Sending...
-                                </span>
-                            ) : resendCooldown > 0 ? (
-                                `Resend in ${resendCooldown}s`
-                            ) : (
-                                'Resend Code'
-                            )}
+                            {isResending ? 'Sending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend'}
+                        </button>
+                    </p>
+
+                    {/* Footer Actions */}
+                    <div className="flex items-center gap-4 text-[10px] uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
+                        <button
+                            onClick={() => setStep('success')}
+                            className="font-bold hover:text-brand-blue transition-colors"
+                        >
+                            Skip
+                        </button>
+                        <span>•</span>
+                        <button
+                            onClick={() => {
+                                setStep('form');
+                                setVerificationCode('');
+                                setVerificationError(null);
+                            }}
+                            className="font-bold hover:text-brand-blue transition-colors"
+                        >
+                            Change Email
                         </button>
                     </div>
-
-                    {/* Skip for now (optional - remove if verification is mandatory) */}
-                    <button
-                        onClick={() => setStep('success')}
-                        className="text-[9px] font-bold uppercase tracking-[0.15em] transition-colors relative z-10 mt-6"
-                        style={{ color: 'var(--neu-text-muted)' }}
-                    >
-                        Skip for Now
-                    </button>
-
-                    {/* Change Email */}
-                    <button
-                        onClick={() => {
-                            setStep('form');
-                            setVerificationCode('');
-                            setVerificationError(null);
-                        }}
-                        className="text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-2"
-                        style={{ color: 'var(--neu-text-muted)' }}
-                    >
-                        Change Email Address
-                    </button>
                 </div>
             </div>
         );
@@ -512,7 +520,13 @@ export default function SignupPage() {
                     </div>
 
                     <button
-                        onClick={() => router.push('/feed')}
+                        onClick={() => {
+                            if (getNeedsCommunitySelection()) {
+                                router.push('/pick-community');
+                                return;
+                            }
+                            router.push('/feed');
+                        }}
                         className="neu-btn w-full py-6 rounded-2xl group transition-all mb-4 relative z-10 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
                         <span className="font-black uppercase tracking-widest text-xs group-hover:text-primary transition-colors" style={{ color: 'var(--neu-text)' }}>
@@ -534,44 +548,25 @@ export default function SignupPage() {
 
     return (
         <div className="h-[100dvh] neu-base overflow-hidden">
-        <div className="h-full flex flex-col px-6 py-6 max-w-md mx-auto w-full">
+        <div className="h-full flex flex-col px-6 py-6 max-w-md mx-auto w-full overflow-y-auto">
             {/* Header */}
             <div className="mt-4 mb-4">
                 <h1 className="text-4xl font-semibold tracking-tighter leading-none" style={{ color: 'var(--neu-text)' }}>Join the <span className="text-primary italic">Huud</span></h1>
                 <p className="font-light mt-2 text-base" style={{ color: 'var(--neu-text-secondary)' }}>Your journey to local prosperity starts here.</p>
             </div>
 
-            {/* Location status */}
-            <div className={`
-                flex items-center justify-between p-2.5 rounded-xl mb-4 transition-all
-                ${location ? 'neu-socket ring-1 ring-primary/20' : 'neu-socket'}
-            `}>
-                <div className="flex items-center gap-2.5 overflow-hidden">
-                    <div className={`w-1.5 h-1.5 shrink-0 rounded-full ${location ? 'bg-primary animate-pulse' : 'bg-charcoal/30'}`}></div>
-                    <div className="flex flex-col overflow-hidden">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] truncate" style={{ color: 'var(--neu-text-muted)' }}>
-                            {isResolving ? 'Resolving Address...' :
-                                resolvedAddress?.formatted ? resolvedAddress.formatted :
-                                    resolvedAddress ? `${resolvedAddress.lga}, ${resolvedAddress.state}` :
-                                        location ? `GPS: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` :
-                                            'Detecting Location...'}
-                        </span>
-                        {locError && (
-                            <span className="text-[8px] text-orange-500 font-medium mt-0.5">
-                                {locError}
-                            </span>
-                        )}
-                    </div>
-                </div>
-                {!location && !isResolving && (
-                    <button
-                        type="button"
-                        onClick={fetchLocation}
-                        className="text-[8px] font-black uppercase tracking-widest text-brand-blue bg-brand-blue/10 px-2 py-1 rounded-lg hover:bg-brand-blue/20 transition-colors"
-                    >
-                        Retry
-                    </button>
-                )}
+            {/* Interactive Map Location Picker */}
+            <div className="mb-4">
+                <LocationPicker
+                    initialLocation={location}
+                    accuracy={gpsAccuracy}
+                    onLocationSelect={handleLocationSelect}
+                    isDetecting={isResolving && !location}
+                    error={locError}
+                    onRetry={fetchLocation}
+                    mapHeight="160px"
+                    label="Confirm Your Location"
+                />
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -603,19 +598,19 @@ export default function SignupPage() {
                         label="Secure Password"
                         type="password"
                         icon="bi-lock"
-                        placeholder="••••••••"
+                        placeholder="12+ chars, mixed case, number, symbol"
                         className="py-1"
                         value={formData.password}
                         onChange={e => setFormData({ ...formData, password: e.target.value })}
                     />
-                    {/* Password Strength Checklist */}
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 px-4">
-                        <Rule label="8+ Chars" met={passRules.length} />
-                        <Rule label="Uppercase" met={passRules.upper} />
-                        <Rule label="Lowercase" met={passRules.lower} />
-                        <Rule label="Number" met={passRules.number} />
-                        <Rule label="Symbol" met={passRules.special} />
-                    </div>
+                    <p className="text-[10px] leading-relaxed px-1" style={{ color: 'var(--neu-text-muted)' }}>
+                        {PASSWORD_REQUIREMENTS_HINT}
+                    </p>
+                    <PasswordStrengthMeter
+                        password={formData.password}
+                        email={formData.email}
+                        username={formData.username}
+                    />
                 </div>
 
                 <div className="flex items-center gap-3 px-2 mt-1">
@@ -668,10 +663,3 @@ export default function SignupPage() {
         </div>
     );
 }
-
-const Rule = ({ label, met }: { label: string, met: boolean }) => (
-    <div className="flex items-center gap-2">
-        <i className={`bi ${met ? 'bi-check-circle-fill text-primary' : 'bi-circle text-charcoal/10'} text-[10px]`}></i>
-        <span className={`text-[9px] uppercase tracking-wider ${met ? 'text-charcoal' : 'text-charcoal/20'}`}>{label}</span>
-    </div>
-);
