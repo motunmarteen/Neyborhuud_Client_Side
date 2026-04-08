@@ -602,7 +602,7 @@ export function getPasswordStrengthSummary(
     return {
       tier: "strong",
       scorePercent: 100,
-      label: "Strong — meets NeyborHuud policy",
+      label: "Strong — meets requirements",
       checklist,
       meetsPolicy: true,
     };
@@ -615,16 +615,16 @@ export function getPasswordStrengthSummary(
   let label: string;
   if (ratio < 0.35) {
     tier = "weak";
-    label = "Weak — see checklist";
+    label = "Weak";
   } else if (ratio < 0.55) {
     tier = "fair";
-    label = "Fair — keep going";
+    label = "Fair";
   } else if (ratio < 0.85) {
     tier = "good";
-    label = "Good — almost there";
+    label = "Good";
   } else {
     tier = "good";
-    label = "Almost — one or more rules left";
+    label = "Almost there";
   }
 
   return {

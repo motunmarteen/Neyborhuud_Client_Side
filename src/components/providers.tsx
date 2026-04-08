@@ -12,21 +12,35 @@ import { queryClient } from '@/lib/query-client';
 import { useEffect } from 'react';
 import socketService from '@/lib/socket';
 import apiClient from '@/lib/api-client';
+import { authService } from '@/services/auth.service';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
 
 function isMetaMaskExtensionNoise(reason: unknown): boolean {
-  const msg =
-    typeof reason === 'object' && reason !== null && 'message' in reason
-      ? String((reason as { message?: string }).message)
-      : String(reason);
-  const stack =
-    typeof reason === 'object' && reason !== null && 'stack' in reason
-      ? String((reason as { stack?: string }).stack)
+  const details =
+    typeof reason === 'object' && reason !== null
+      ? (reason as {
+          message?: unknown;
+          stack?: unknown;
+          cause?: unknown;
+          filename?: unknown;
+          fileName?: unknown;
+          source?: unknown;
+        })
+      : null;
+  const msg = details?.message ? String(details.message) : String(reason);
+  const stack = details?.stack ? String(details.stack) : '';
+  const cause = details?.cause ? String(details.cause) : '';
+  const filename =
+    details?.filename || details?.fileName || details?.source
+      ? `${String(details.filename ?? '')} ${String(details.fileName ?? '')} ${String(details.source ?? '')}`
       : '';
   return (
     msg.includes('MetaMask') ||
     msg.includes('Failed to connect to MetaMask') ||
+    cause.includes('MetaMask') ||
+    filename.includes(METAMASK_EXTENSION_SUBSTRING) ||
+    filename.includes('MetaMask') ||
     stack.includes(METAMASK_EXTENSION_SUBSTRING)
   );
 }
@@ -38,29 +52,33 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const onUnhandledRejection = (event: PromiseRejectionEvent) => {
       if (isMetaMaskExtensionNoise(event.reason)) {
         event.preventDefault();
+        event.stopImmediatePropagation();
       }
     };
 
     const onError = (event: ErrorEvent) => {
       const fromMetaMask =
         event.filename?.includes(METAMASK_EXTENSION_SUBSTRING) ||
-        event.message?.includes('MetaMask');
+        event.message?.includes('MetaMask') ||
+        isMetaMaskExtensionNoise(event.error ?? event.message);
       if (fromMetaMask) {
         event.preventDefault();
+        event.stopImmediatePropagation();
       }
     };
 
-    window.addEventListener('unhandledrejection', onUnhandledRejection);
-    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onUnhandledRejection, true);
+    window.addEventListener('error', onError, true);
     return () => {
-      window.removeEventListener('unhandledrejection', onUnhandledRejection);
-      window.removeEventListener('error', onError);
+      window.removeEventListener('unhandledrejection', onUnhandledRejection, true);
+      window.removeEventListener('error', onError, true);
     };
   }, []);
 
   useEffect(() => {
     // Initialize socket connection if user is authenticated
     if (apiClient.isAuthenticated()) {
+      void authService.touchSession();
       socketService.connect();
 
       // Setup real-time event listeners
@@ -86,6 +104,25 @@ export function Providers({ children }: { children: React.ReactNode }) {
         socketService.disconnect();
       };
     }
+  }, []);
+
+  useEffect(() => {
+    const pingIfAuthed = () => {
+      if (
+        typeof document !== 'undefined' &&
+        document.visibilityState === 'visible' &&
+        apiClient.isAuthenticated()
+      ) {
+        void authService.touchSession();
+      }
+    };
+    const onVisibility = () => pingIfAuthed();
+    document.addEventListener('visibilitychange', onVisibility);
+    const interval = window.setInterval(pingIfAuthed, 12 * 60 * 1000);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.clearInterval(interval);
+    };
   }, []);
 
   return (

@@ -1,7 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import {
+  getNeedsCommunitySelection,
+  getNeedsGpsLocationVerification,
+} from '@/lib/communityContext';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
@@ -12,6 +16,7 @@ import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
 import { useLocationFeed, usePostMutations } from '@/hooks/usePosts';
+import { authService } from '@/services/auth.service';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { Post } from '@/types/api';
 import { useInView } from 'react-intersection-observer';
@@ -60,6 +65,7 @@ function Composer({ onOpenCreate }: { onOpenCreate: () => void }) {
 }
 
 function XFeedInner() {
+    const router = useRouter();
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [locationError, setLocationError] = useState<string | null>(null);
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
@@ -68,6 +74,20 @@ function XFeedInner() {
     const [feedTab, setFeedTab] = useState<'for-you' | 'following'>('following');
     const locationFetched = useRef(false);
     const queryClient = useQueryClient();
+
+    useEffect(() => {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
+        if (!token) return;
+        void authService.syncCommunityFromProfile().finally(() => {
+            if (getNeedsCommunitySelection()) {
+                router.replace('/pick-community');
+                return;
+            }
+            if (getNeedsGpsLocationVerification()) {
+                router.replace('/verify-location');
+            }
+        });
+    }, [router]);
 
     // Fetch user location on mount
     useEffect(() => {

@@ -539,6 +539,23 @@ export interface AnalyticsData {
 
 // ==================== Request Payload Types ====================
 
+export type ConsentType =
+  | "marketing"
+  | "analytics"
+  | "third_party"
+  | "data_processing";
+
+export interface UserConsentRecord {
+  _id?: string;
+  userId?: string;
+  consentType: ConsentType;
+  granted: boolean;
+  grantedAt?: string;
+  revokedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface RegisterPayload {
   username: string;
   email: string;
@@ -555,6 +572,11 @@ export interface RegisterPayload {
     neighborhood?: string;
   };
   agreeToTerms: boolean;
+  /** NDPR / Privacy Policy — required by API */
+  agreeToPrivacy: boolean;
+  consentMarketing?: boolean;
+  consentAnalytics?: boolean;
+  consentThirdParty?: boolean;
   referralCode?: string;
 }
 

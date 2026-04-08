@@ -9,7 +9,18 @@ import {
   applyProfileMeCommunity,
   type PickerContext,
 } from "@/lib/communityContext";
-import { User, RegisterPayload, CommunitySummary } from "@/types/api";
+import {
+  User,
+  RegisterPayload,
+  CommunitySummary,
+  ConsentType,
+  UserConsentRecord,
+  ApiResponse,
+} from "@/types/api";
+
+/** Throttle session keepalive pings (rolling expiry on server). */
+let lastSessionTouchAt = 0;
+const SESSION_TOUCH_MIN_MS = 4 * 60 * 1000;
 
 type AuthSessionData = {
   user: User;
@@ -134,10 +145,63 @@ export const authService = {
   },
 
   /**
-   * Get current authenticated user
+   * Get current authenticated user (full profile payload).
    */
   async getCurrentUser() {
-    return await apiClient.get<User>("/auth/me");
+    return await apiClient.get<User>("/profile/me");
+  },
+
+  /**
+   * Light ping so Better Auth can roll session expiry while the app is open (social-style persistence).
+   * Uses GET /profile/me — safe to call on an interval / visibility resume.
+   */
+  async touchSession(): Promise<boolean> {
+    if (!apiClient.isAuthenticated()) return false;
+    const now = Date.now();
+    if (now - lastSessionTouchAt < SESSION_TOUCH_MIN_MS) return true;
+    try {
+      const res = await apiClient.get("/profile/me");
+      if (res.success) {
+        lastSessionTouchAt = Date.now();
+        return true;
+      }
+    } catch {
+      /* 401 etc. — caller / interceptor handles auth */
+    }
+    return false;
+  },
+
+  /**
+   * Full GET /profile/me (user, community, username change policy).
+   */
+  async getMyProfileFull(): Promise<
+    ApiResponse<{
+      user: User & {
+        usernameTimeline?: unknown;
+        usernameChangeHistory?: unknown;
+      };
+      usernameChangePolicy?: {
+        cooldownDays: number;
+        canChangeUsername: boolean;
+        nextUsernameChangeAt: string | null;
+        lastUsernameRenameAt: string | null;
+      };
+      assignedCommunityId?: string | null;
+      community?: CommunitySummary | null;
+      needsCommunitySelection?: boolean;
+      needsGpsLocationVerification?: boolean;
+      pickerContext?: PickerContext | null;
+    }>
+  > {
+    return await apiClient.get("/profile/me");
+  },
+
+  /** PATCH /profile/username — 429 when inside cooldown window. */
+  async changeUsername(newUsername: string) {
+    return await apiClient.patch<{
+      username: string;
+      usernameTimeline: unknown;
+    }>("/profile/username", { newUsername });
   },
 
   /**
@@ -282,6 +346,47 @@ export const authService = {
    */
   async updateAccessibilitySettings(settings: any) {
     return await apiClient.put("/auth/settings/accessibility", settings);
+  },
+
+  /**
+   * NDPR consent ledger — GET /auth/consents (Bearer).
+   */
+  async getConsents() {
+    return await apiClient.get<{ consents: UserConsentRecord[] }>(
+      "/auth/consents",
+    );
+  },
+
+  /**
+   * Update one consent flag — POST /auth/consents (Bearer).
+   */
+  async updateConsent(consentType: ConsentType, granted: boolean) {
+    return await apiClient.post<{ consent: UserConsentRecord }>(
+      "/auth/consents",
+      { consentType, granted },
+    );
+  },
+
+  /**
+   * NDPR: audit of who accessed this user’s data — GET /auth/data-access-history (Bearer).
+   */
+  async getDataAccessHistory(page = 1, limit = 20) {
+    return await apiClient.get<{
+      accessHistory: {
+        id: string;
+        accessType: string;
+        reason?: string;
+        ipAddress?: string;
+        createdAt: string;
+        accessor: {
+          id: string;
+          firstName?: string;
+          lastName?: string;
+          role?: string;
+        } | null;
+      }[];
+      pagination: { page: number; limit: number; total: number };
+    }>(`/auth/data-access-history?page=${page}&limit=${limit}`);
   },
 
   /**

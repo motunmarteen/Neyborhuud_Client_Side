@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { OTPInput } from '@/components/ui/OTPInput';
 import { LocationPicker } from '@/components/ui/LocationPicker';
@@ -13,20 +13,22 @@ import { persistAuthSessionPayload, getNeedsCommunitySelection } from '@/lib/com
 import apiClient from '@/lib/api-client';
 import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValidation';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
-import {
-    evaluatePasswordPolicy,
-    PASSWORD_REQUIREMENTS_HINT,
-} from '@/lib/passwordPolicy';
+import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
 
-export default function SignupPage() {
+function SignupPageContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const [referralCodeInput, setReferralCodeInput] = useState('');
     const [step, setStep] = useState<'form' | 'verify-email' | 'success'>('form');
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: '',
-        agree: false,
+        /** Single UI control: must stay in sync with API fields agreeToTerms + agreeToPrivacy */
+        acceptTermsAndPrivacy: false,
+        /** One optional opt-in → maps to marketing, analytics & third_party on the API */
+        optionalProcessing: false,
     });
     const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [gpsAccuracy, setGpsAccuracy] = useState<number | undefined>(undefined);
@@ -261,6 +263,21 @@ export default function SignupPage() {
         fetchLocation();
     }, []);
 
+    // Referral: ?ref= & ?invite= & ?referral= & ?code= — backend resolves neighbor username or legacy invite codes
+    useEffect(() => {
+        const raw =
+            searchParams.get('ref') ??
+            searchParams.get('invite') ??
+            searchParams.get('referral') ??
+            searchParams.get('code');
+        if (!raw?.trim()) return;
+        try {
+            setReferralCodeInput(decodeURIComponent(raw.trim()));
+        } catch {
+            setReferralCodeInput(raw.trim());
+        }
+    }, [searchParams]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!isPassValid) return;
@@ -276,13 +293,22 @@ export default function SignupPage() {
             }
 
             // 3. Build Sanitize Payload
-            const signupPayload: any = {
+            const opt = formData.optionalProcessing;
+            const signupPayload: Record<string, unknown> = {
                 username: formData.username.trim(),
                 email: formData.email.trim().toLowerCase(),
                 password: formData.password,
-                agreeToTerms: formData.agree
+                agreeToTerms: formData.acceptTermsAndPrivacy,
+                agreeToPrivacy: formData.acceptTermsAndPrivacy,
+                consentMarketing: opt,
+                consentAnalytics: opt,
+                consentThirdParty: opt,
                 // Note: assignedCommunityId and communityId are NOT sent - backend handles community assignment automatically
             };
+            const refTrim = referralCodeInput.trim();
+            if (refTrim) {
+                signupPayload.referralCode = refTrim;
+            }
 
             // Only add location if we have it
             if (finalLoc || location) {
@@ -553,6 +579,13 @@ export default function SignupPage() {
             <div className="mt-4 mb-4">
                 <h1 className="text-4xl font-semibold tracking-tighter leading-none" style={{ color: 'var(--neu-text)' }}>Join the <span className="text-primary italic">Huud</span></h1>
                 <p className="font-light mt-2 text-base" style={{ color: 'var(--neu-text-secondary)' }}>Your journey to local prosperity starts here.</p>
+                {referralCodeInput.trim() ? (
+                    <p className="mt-3 text-[11px] rounded-xl px-3 py-2 border border-primary/25 bg-primary/10" style={{ color: 'var(--neu-text-secondary)' }}>
+                        <span className="font-bold text-primary">Invite link:</span> You&apos;re signing up with{' '}
+                        <span className="font-mono text-charcoal dark:text-white">{referralCodeInput.trim()}</span>
+                        {' —'} both of you can earn HuudCoins when the account is created.
+                    </p>
+                ) : null}
             </div>
 
             {/* Interactive Map Location Picker */}
@@ -603,9 +636,6 @@ export default function SignupPage() {
                         value={formData.password}
                         onChange={e => setFormData({ ...formData, password: e.target.value })}
                     />
-                    <p className="text-[10px] leading-relaxed px-1" style={{ color: 'var(--neu-text-muted)' }}>
-                        {PASSWORD_REQUIREMENTS_HINT}
-                    </p>
                     <PasswordStrengthMeter
                         password={formData.password}
                         email={formData.email}
@@ -613,17 +643,68 @@ export default function SignupPage() {
                     />
                 </div>
 
-                <div className="flex items-center gap-3 px-2 mt-1">
-                    <input
-                        type="checkbox"
-                        id="agree"
-                        className="w-4 h-4 accent-primary"
-                        checked={formData.agree}
-                        onChange={e => setFormData({ ...formData, agree: e.target.checked })}
-                    />
-                    <label htmlFor="agree" className="text-[10px] text-charcoal/40 font-light leading-tight">
-                        I agree to the <span className="text-brand-blue underline font-bold">Rules</span> and <span className="text-brand-blue underline font-bold">Policy</span>.
-                    </label>
+                <PremiumInput
+                    label="Invite (optional)"
+                    icon="bi-gift"
+                    placeholder="Neighbor's username or invite code"
+                    className="py-1"
+                    value={referralCodeInput}
+                    onChange={(e) => setReferralCodeInput(e.target.value)}
+                />
+                <p className="text-[10px] px-1 -mt-2" style={{ color: 'var(--neu-text-muted)' }}>
+                    Matches the API: your inviter&apos;s <strong>username</strong> (e.g. from their invite link) or a legacy code.
+                </p>
+
+                <div className="flex flex-col gap-3 px-2 mt-1">
+                    <div className="flex items-start gap-3">
+                        <input
+                            type="checkbox"
+                            id="acceptTermsAndPrivacy"
+                            className="w-4 h-4 mt-0.5 shrink-0 accent-primary"
+                            checked={formData.acceptTermsAndPrivacy}
+                            onChange={e =>
+                                setFormData({
+                                    ...formData,
+                                    acceptTermsAndPrivacy: e.target.checked,
+                                })
+                            }
+                        />
+                        <label
+                            htmlFor="acceptTermsAndPrivacy"
+                            className="text-[10px] text-charcoal/40 font-light leading-relaxed"
+                        >
+                            I agree to the{' '}
+                            <span className="text-brand-blue font-bold">Community Rules</span> and{' '}
+                            <span className="text-brand-blue font-bold">Terms of Service</span>, and I have
+                            read the{' '}
+                            <span className="text-brand-blue font-bold">Privacy Policy</span>. I consent to
+                            the processing of my personal data needed to run my account, as described there,
+                            including under Nigerian data protection law (
+                            <span className="font-bold text-charcoal/50">NDPA / NDPR</span>).
+                        </label>
+                    </div>
+                    <div className="rounded-xl px-3 py-3 border border-charcoal/10 bg-charcoal/[0.02]">
+                        <p className="text-[9px] uppercase tracking-widest text-charcoal/35 font-bold mb-2">
+                            Optional — change anytime in Settings
+                        </p>
+                        <label className="flex items-start gap-2 text-[10px] text-charcoal/45 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                className="w-3.5 h-3.5 mt-0.5 accent-primary shrink-0"
+                                checked={formData.optionalProcessing}
+                                onChange={e =>
+                                    setFormData({
+                                        ...formData,
+                                        optionalProcessing: e.target.checked,
+                                    })
+                                }
+                            />
+                            <span className="leading-relaxed">
+                                Yes — product updates &amp; offers, analytics to improve the app, and limited
+                                partner use only as described in the Privacy Policy.
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <button
@@ -632,7 +713,7 @@ export default function SignupPage() {
                         !isPassValid || 
                         !formData.username || 
                         !formData.email || 
-                        !formData.agree ||
+                        !formData.acceptTermsAndPrivacy ||
                         emailValidation.status === 'invalid' ||
                         emailValidation.status === 'taken' ||
                         emailValidation.status === 'checking' ||
@@ -642,7 +723,8 @@ export default function SignupPage() {
                     }
                     className={`
                         py-4.5 rounded-2xl mt-2 transition-all duration-200 cursor-pointer
-                        ${(loading || !isPassValid || !formData.username || !formData.email || !formData.agree || 
+                        ${(loading || !isPassValid || !formData.username || !formData.email || 
+                          !formData.acceptTermsAndPrivacy ||
                           emailValidation.status === 'checking' || usernameValidation.status === 'checking') 
                             ? 'neu-btn opacity-40 cursor-not-allowed' 
                             : 'neu-btn active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]'}
@@ -661,5 +743,19 @@ export default function SignupPage() {
             </div>
         </div>
         </div>
+    );
+}
+
+export default function SignupPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="h-[100dvh] neu-base flex items-center justify-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
+                </div>
+            }
+        >
+            <SignupPageContent />
+        </Suspense>
     );
 }

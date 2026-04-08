@@ -8,6 +8,10 @@ type Props = {
   username?: string;
   /** Optional extra classes on the outer wrapper (e.g. neu styling). */
   className?: string;
+  /**
+   * Full rule-by-rule checklist (verbose). Default off — bar only under the field.
+   */
+  showChecklist?: boolean;
 };
 
 function cx(...parts: (string | false | null | undefined)[]): string {
@@ -19,6 +23,7 @@ export function PasswordStrengthMeter({
   email = "",
   username = "",
   className,
+  showChecklist = false,
 }: Props) {
   const summary = getPasswordStrengthSummary(password, { email, username });
   const { tier, scorePercent, label, checklist, meetsPolicy } = summary;
@@ -33,6 +38,25 @@ export function PasswordStrengthMeter({
           : tier === "weak"
             ? "bg-amber-600/85 dark:bg-amber-600/80"
             : "bg-zinc-300 dark:bg-zinc-600";
+
+  if (!showChecklist) {
+    return (
+      <div className={cx("mt-1.5 w-full", className)}>
+        <p className="sr-only" aria-live="polite">
+          Password strength: {label}
+        </p>
+        <div
+          className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700"
+          aria-hidden
+        >
+          <div
+            className={cx("h-full rounded-full transition-all duration-300 ease-out", barClass)}
+            style={{ width: `${scorePercent}%` }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   const labelClass =
     meetsPolicy || tier === "strong"
@@ -53,10 +77,7 @@ export function PasswordStrengthMeter({
           <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
             Password strength
           </p>
-          <p
-            className={cx("mt-0.5 text-sm font-medium", labelClass)}
-            aria-live="polite"
-          >
+          <p className={cx("mt-0.5 text-sm font-medium", labelClass)} aria-live="polite">
             {label}
           </p>
         </div>

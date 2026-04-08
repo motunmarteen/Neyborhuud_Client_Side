@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { PremiumInput } from '@/components/ui/PremiumInput';
@@ -8,7 +8,11 @@ import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { fetchAPI } from '@/lib/api';
 import apiClient from '@/lib/api-client';
-import { persistAuthSessionPayload } from '@/lib/communityContext';
+import {
+    persistAuthSessionPayload,
+    getNeedsCommunitySelection,
+    getNeedsGpsLocationVerification,
+} from '@/lib/communityContext';
 
 function friendlyLoginMessage(raw: string): string {
     const m = raw.toLowerCase();
@@ -30,6 +34,19 @@ function friendlyLoginMessage(raw: string): string {
 export default function LoginPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!apiClient.isAuthenticated()) return;
+        if (getNeedsCommunitySelection()) {
+            router.replace('/pick-community');
+            return;
+        }
+        if (getNeedsGpsLocationVerification()) {
+            router.replace('/verify-location');
+            return;
+        }
+        router.replace('/feed');
+    }, [router]);
     const [formError, setFormError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         email: '',
@@ -76,12 +93,21 @@ export default function LoginPage() {
                     user,
                     community: data?.community,
                     assignedCommunityId: data?.assignedCommunityId,
+                    needsCommunitySelection: data?.needsCommunitySelection,
+                    needsGpsLocationVerification: data?.needsGpsLocationVerification,
+                    pickerContext: data?.pickerContext ?? null,
                 });
                 apiClient.setToken(accessToken);
                 console.log('✅ Login successful, tokens stored');
             }
 
-            router.push('/feed');
+            if (getNeedsCommunitySelection()) {
+                router.push('/pick-community');
+            } else if (getNeedsGpsLocationVerification()) {
+                router.push('/verify-location');
+            } else {
+                router.push('/feed');
+            }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
 

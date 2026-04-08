@@ -6,10 +6,7 @@ import { PremiumInput } from '@/components/ui/PremiumInput';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
-import {
-    evaluatePasswordPolicy,
-    PASSWORD_REQUIREMENTS_HINT,
-} from '@/lib/passwordPolicy';
+import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
 
 type Step = 'form' | 'success' | 'error' | 'expired';
 
@@ -202,9 +199,6 @@ function ResetPasswordContent() {
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                     />
-                    <p className="text-[10px] leading-relaxed px-1" style={{ color: 'var(--neu-text-muted)' }}>
-                        {PASSWORD_REQUIREMENTS_HINT}
-                    </p>
                     <PasswordStrengthMeter password={password} />
                 </div>
 

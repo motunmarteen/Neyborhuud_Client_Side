@@ -15,6 +15,7 @@ import { useUserPosts, usePostMutations } from '@/hooks/usePosts';
 import { XPostCard } from '@/components/feed/XPostCard';
 import { PostSkeleton } from '@/components/feed/PostSkeleton';
 import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
+import { MiniMap } from '@/components/ui/InteractiveMap';
 import { Post } from '@/types/api';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -249,6 +250,23 @@ export default function ProfilePage() {
 
   const userInitial = displayName[0]?.toUpperCase() || 'U';
 
+  const hist = profile as {
+    usernameHistory?: Array<{
+      previousUsername: string | null;
+      newUsername?: string;
+      changedAt: string | null;
+    }>;
+    usernameTimeline?: Array<{
+      username: string;
+      effectiveFrom: string;
+      effectiveTo: string | null;
+    }>;
+  };
+  const renameAudit = (hist.usernameHistory || []).filter((h) => h.previousUsername);
+  const showHandleHistory =
+    renameAudit.length > 0 ||
+    (Array.isArray(hist.usernameTimeline) && hist.usernameTimeline.length > 1);
+
   return (
     <div className="min-h-screen neu-base">
       {/* Header */}
@@ -358,6 +376,47 @@ export default function ProfilePage() {
               </p>
             </div>
 
+            {showHandleHistory ? (
+              <div
+                className="rounded-2xl border border-charcoal/10 dark:border-white/10 px-3 py-3 text-left"
+                style={{ background: 'var(--neu-bg-elevated, rgba(0,0,0,0.03))' }}
+              >
+                <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--neu-text-muted)' }}>
+                  Handle history
+                </h3>
+                {renameAudit.length > 0 ? (
+                  <ul className="space-y-2 text-xs" style={{ color: 'var(--neu-text)' }}>
+                    {renameAudit.map((row, idx) => (
+                      <li key={`${row.previousUsername}-${row.newUsername}-${idx}`}>
+                        <span className="font-mono text-primary">@{row.previousUsername}</span>
+                        {' → '}
+                        <span className="font-mono">@{row.newUsername}</span>
+                        {row.changedAt ? (
+                          <span className="block text-[10px] opacity-70">
+                            {new Date(row.changedAt).toLocaleString()}
+                          </span>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : hist.usernameTimeline && hist.usernameTimeline.length > 0 ? (
+                  <ul className="space-y-1.5 text-xs" style={{ color: 'var(--neu-text)' }}>
+                    {hist.usernameTimeline.map((row, idx) => (
+                      <li key={`${row.username}-${idx}`}>
+                        <span className="font-mono font-semibold">@{row.username}</span>
+                        <span className="text-[10px] opacity-70 block">
+                          {new Date(row.effectiveFrom).toLocaleDateString()}
+                          {row.effectiveTo
+                            ? ` – ${new Date(row.effectiveTo).toLocaleDateString()}`
+                            : ' – current'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
+
             {/* Bio */}
             {profile.bio && (
               <p className="whitespace-pre-wrap" style={{ color: 'var(--neu-text)' }}>
@@ -397,6 +456,20 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
+
+            {/* Mini Map showing user's location */}
+            {profile.location?.latitude && profile.location?.longitude && (
+              <div className="mt-4">
+                <MiniMap
+                  center={{
+                    lat: profile.location.latitude,
+                    lng: profile.location.longitude,
+                  }}
+                  height="120px"
+                  className="rounded-2xl overflow-hidden shadow-lg"
+                />
+              </div>
+            )}
 
             {/* Follow Status Badges */}
             {!isOwnProfile && (followsYou || isMutual) && (

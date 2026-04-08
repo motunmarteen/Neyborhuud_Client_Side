@@ -7,6 +7,9 @@ export interface LocationAddress {
     country?: string;
     formatted?: string;
     source?: 'backend' | 'osm' | 'google';
+    /** Backend /geo/preview: google | mapbox | openstreetmap | centroid */
+    resolutionSource?: string;
+    geocoderDisagreement?: boolean;
 }
 
 /**
@@ -62,6 +65,16 @@ async function reverseGeocodeBackend(lat: number, lng: number): Promise<Location
     });
 
     const data = response.data || response;
+    
+    // Debug: log what we got from the backend
+    console.log('🗺️ Backend /geo/preview response:', {
+        formattedAddress: data.formattedAddress,
+        neighborhood: data.neighborhood,
+        area: data.area,
+        communityName: data.communityName,
+        lga: data.lga,
+        state: data.state
+    });
 
     // ✅ CRITICAL: Log if backend is still returning communityId (should not happen)
     if (data.communityId || data.assignedCommunityId) {
@@ -75,15 +88,58 @@ async function reverseGeocodeBackend(lat: number, lng: number): Promise<Location
     // ✅ Only extract allowed fields: state, lga, ward, communityName
     // ❌ Explicitly ignore communityId - backend no longer returns it
     if (data.state && data.lga) {
+        // Check for Plus Codes (e.g., "C9WR+X4") and filter them out
+        const plusCodePattern = /^[A-Z0-9]{4,8}\+[A-Z0-9]{2,3},?\s*/i;
+        let formattedFromApi =
+            typeof data.formattedAddress === 'string' && data.formattedAddress.trim()
+                ? data.formattedAddress.trim()
+                : null;
+        
+        // Remove Plus Code from formatted address if present
+        if (formattedFromApi && plusCodePattern.test(formattedFromApi)) {
+            formattedFromApi = formattedFromApi.replace(plusCodePattern, '').trim();
+            // Remove leading comma if any
+            formattedFromApi = formattedFromApi.replace(/^,\s*/, '').trim();
+        }
+        
+        // Check if formattedAddress is too generic (e.g., "Lagos, Lagos" or just state/country)
+        // In these cases, prefer constructing from communityName/lga/state
+        const isGenericAddress = !formattedFromApi || 
+            formattedFromApi === data.country || 
+            formattedFromApi === 'Nigeria' ||
+            formattedFromApi === data.state ||
+            formattedFromApi === `${data.state}, ${data.country}` ||
+            formattedFromApi === `${data.state}, Nigeria` ||
+            formattedFromApi === `${data.lga}, ${data.state}` ||
+            // Also detect "City, City" or "State, State" patterns
+            /^(\w+),\s*\1$/i.test(formattedFromApi);
+        
+        // Build a rich formatted address from components if we have good data
+        let formatted: string;
+        if (!isGenericAddress && formattedFromApi) {
+            formatted = formattedFromApi;
+        } else if (data.communityName || data.neighborhood) {
+            // Use communityName for more specific location
+            formatted = `${data.communityName || data.neighborhood}, ${data.lga}, ${data.state}`;
+        } else {
+            formatted = `${data.lga}, ${data.state}`;
+        }
+
         const result = {
             lga: data.lga,
             state: data.state,
             neighborhood: data.neighborhood || data.area || data.communityName,
             country: data.country || 'Nigeria',
-            formatted: data.neighborhood || data.communityName
-                ? `${data.neighborhood || data.communityName}, ${data.lga}, ${data.state}`
-                : `${data.lga}, ${data.state}`,
-            source: 'backend' as const
+            formatted,
+            source: 'backend' as const,
+            resolutionSource:
+                typeof data.resolutionSource === 'string'
+                    ? data.resolutionSource
+                    : undefined,
+            geocoderDisagreement:
+                typeof data.geocoderDisagreement === 'boolean'
+                    ? data.geocoderDisagreement
+                    : undefined,
             // ❌ DO NOT include communityId or assignedCommunityId
         };
         

@@ -6,7 +6,27 @@
 import apiClient from "@/lib/api-client";
 import { LocationData, User, Post, Event } from "@/types/api";
 
+export type VerifyLocationResult = {
+  distanceKm?: number;
+  allowedRadiusKm?: number;
+  targetSource?: string;
+  alreadyVerified?: boolean;
+};
+
 export const geoService = {
+  /**
+   * GPS check: user must be within server-defined radius of community reference (LGA centroid / stored center).
+   */
+  async verifyAssignedCommunityLocation(
+    communityId: string,
+    body: { lat: number; lng: number; accuracyMeters: number },
+  ) {
+    return await apiClient.post<VerifyLocationResult>(
+      `/geo/communities/${encodeURIComponent(communityId)}/verify`,
+      body,
+    );
+  },
+
   /**
    * Reverse geocode coordinates to location data
    */

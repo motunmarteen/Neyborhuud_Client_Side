@@ -184,8 +184,8 @@ export function useUsernameValidation(options: UseEmailValidationOptions = {}) {
                 method: 'GET',
             });
             return response.data?.available ?? response.available ?? true;
-        } catch (error) {
-            return true; // Assume available if check fails
+        } catch {
+            return true;
         }
     }, []);
 

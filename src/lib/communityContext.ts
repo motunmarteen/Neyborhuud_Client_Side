@@ -5,6 +5,19 @@
 
 const COMMUNITY_KEY = "neyborhuud_community";
 const USER_KEY = "neyborhuud_user";
+const NEEDS_COMMUNITY_KEY = "neyborhuud_needs_community";
+const PICKER_CONTEXT_KEY = "neyborhuud_picker_context";
+const NEEDS_GPS_VERIFY_KEY = "neyborhuud_needs_gps_verify";
+
+export type PickerContext = {
+  state: string;
+  lga: string;
+  locationKey?: string;
+  hint?: string;
+  resolutionSource?: string;
+  formattedAddress?: string | null;
+  geocoderDisagreement?: boolean;
+};
 
 const OBJECT_ID_RE = /^[0-9a-fA-F]{24}$/;
 
@@ -63,6 +76,9 @@ export function persistAuthSessionPayload(data: {
   user?: unknown;
   community?: unknown;
   assignedCommunityId?: string | null;
+  needsCommunitySelection?: boolean;
+  needsGpsLocationVerification?: boolean;
+  pickerContext?: PickerContext | null;
 }): void {
   if (typeof window === "undefined") return;
 
@@ -75,6 +91,19 @@ export function persistAuthSessionPayload(data: {
 
   if (comm) {
     localStorage.setItem(COMMUNITY_KEY, JSON.stringify(comm));
+  }
+
+  if (data.needsCommunitySelection === true) {
+    localStorage.setItem(NEEDS_COMMUNITY_KEY, "1");
+    if (data.pickerContext?.state && data.pickerContext?.lga) {
+      localStorage.setItem(
+        PICKER_CONTEXT_KEY,
+        JSON.stringify(data.pickerContext),
+      );
+    }
+  } else if (data.needsCommunitySelection === false) {
+    localStorage.removeItem(NEEDS_COMMUNITY_KEY);
+    localStorage.removeItem(PICKER_CONTEXT_KEY);
   }
 
   if (data.user && typeof data.user === "object") {
@@ -93,6 +122,9 @@ export function persistAuthSessionPayload(data: {
 export function applyProfileMeCommunity(data: {
   assignedCommunityId?: string | null;
   community?: unknown;
+  needsCommunitySelection?: boolean;
+  needsGpsLocationVerification?: boolean;
+  pickerContext?: PickerContext | null;
 }): void {
   if (typeof window === "undefined") return;
   patchStoredUserCommunity(
@@ -101,6 +133,24 @@ export function applyProfileMeCommunity(data: {
       : undefined,
     data.community,
   );
+  if (data.needsCommunitySelection === true) {
+    localStorage.setItem(NEEDS_COMMUNITY_KEY, "1");
+    if (data.pickerContext?.state && data.pickerContext?.lga) {
+      localStorage.setItem(
+        PICKER_CONTEXT_KEY,
+        JSON.stringify(data.pickerContext),
+      );
+    }
+  } else if (data.needsCommunitySelection === false) {
+    localStorage.removeItem(NEEDS_COMMUNITY_KEY);
+    localStorage.removeItem(PICKER_CONTEXT_KEY);
+  }
+
+  if (data.needsGpsLocationVerification === true) {
+    localStorage.setItem(NEEDS_GPS_VERIFY_KEY, "1");
+  } else if (data.needsGpsLocationVerification === false) {
+    localStorage.removeItem(NEEDS_GPS_VERIFY_KEY);
+  }
 }
 
 export function patchStoredUserCommunity(
@@ -144,7 +194,43 @@ export function getStoredCommunity(): StoredCommunity | null {
 }
 
 /** Use for /geo/communities/:communityId/... */
+export function getNeedsCommunitySelection(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(NEEDS_COMMUNITY_KEY) === "1";
+}
+
+/** After picking a community: server requires GPS check within neighborhood radius. */
+export function getNeedsGpsLocationVerification(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(NEEDS_GPS_VERIFY_KEY) === "1";
+}
+
+export function getStoredPickerContext(): PickerContext | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(PICKER_CONTEXT_KEY);
+  if (!raw) return null;
+  try {
+    const o = JSON.parse(raw) as PickerContext;
+    if (o?.state && o?.lga) return o;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearCommunitySelectionGate(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(NEEDS_COMMUNITY_KEY);
+  localStorage.removeItem(PICKER_CONTEXT_KEY);
+}
+
+export function clearGpsVerificationGate(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(NEEDS_GPS_VERIFY_KEY);
+}
+
 export function getCommunityIdForApi(): string | null {
+  if (typeof window === "undefined") return null;
   const c = getStoredCommunity();
   if (c?.id) return c.id;
   const raw = localStorage.getItem(USER_KEY);

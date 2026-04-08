@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import apiClient from '@/lib/api-client';
 
 const slides = [
     {
@@ -31,6 +32,13 @@ const slides = [
 export default function Home() {
     const router = useRouter();
     const [currentSlide, setCurrentSlide] = useState(0);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        if (apiClient.isAuthenticated()) {
+            router.replace('/feed');
+        }
+    }, [router]);
     const [isAnimating, setIsAnimating] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
 

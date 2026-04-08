@@ -161,13 +161,14 @@ export const OTPInput: React.FC<OTPInputProps> = ({
                         w-11 h-14 sm:w-12 sm:h-16
                         text-center text-2xl font-bold
                         rounded-xl transition-all duration-200
-                        focus:outline-none focus:ring-2
+                        border-2 bg-transparent
+                        focus:outline-none
                         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
                         ${error 
-                            ? 'neu-socket ring-2 ring-brand-red/50 text-brand-red' 
+                            ? 'border-brand-red/60 text-brand-red bg-brand-red/5' 
                             : localValues[index]
-                                ? 'neu-socket ring-2 ring-primary/50'
-                                : 'neu-socket focus:ring-brand-blue/50'
+                                ? 'border-primary/60 bg-primary/5'
+                                : 'border-white/20 focus:border-brand-blue/60 focus:bg-brand-blue/5'
                         }
                     `}
                     style={{ color: error ? undefined : 'var(--neu-text)' }}

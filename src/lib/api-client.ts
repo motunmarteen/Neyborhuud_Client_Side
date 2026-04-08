@@ -57,26 +57,45 @@ class ApiClient {
         }
 
         if (status === 401) {
-          // Check if it's a token validity issue (expired, invalid, malformed)
           const errorMessageLower = (errorMessage || '').toLowerCase();
-          
-          // Only logout for actual token expiry/invalidity issues
-          // Don't logout for "user not active" or other authorization issues
-          const isTokenExpiredError = errorMessageLower.includes('token') &&
-                                     (errorMessageLower.includes('expired') ||
-                                      errorMessageLower.includes('malformed'));
-          
-          const isTokenInvalidError = errorMessageLower.includes('token') &&
-                                     errorMessageLower.includes('invalid') &&
-                                     !errorMessageLower.includes('user not active');
-          
+
+          const isTokenExpiredError =
+            errorMessageLower.includes('token') &&
+            (errorMessageLower.includes('expired') ||
+              errorMessageLower.includes('malformed'));
+
+          const isTokenInvalidError =
+            errorMessageLower.includes('token') &&
+            errorMessageLower.includes('invalid') &&
+            !errorMessageLower.includes('user not active') &&
+            !errorMessageLower.includes('credential') &&
+            !errorMessageLower.includes('password');
+
+          const sessionDead =
+            /\bsession\b[^\n]{0,80}\b(invalid|expired|revoked)\b/i.test(
+              String(errorMessage),
+            ) ||
+            /\b(invalid|expired)\b[^\n]{0,80}\bsession\b/i.test(
+              String(errorMessage),
+            );
+
           const hasToken = !!this.getToken();
-          
-          // Only logout if:
-          // 1. No token exists at all, OR
-          // 2. Token is explicitly expired/malformed, OR
-          // 3. Token is invalid (but not "user not active" errors)
-          if (!hasToken || isTokenExpiredError || isTokenInvalidError) {
+
+          const genericAuthFailure =
+            hasToken &&
+            errorMessageLower.includes('authentication required') &&
+            (errorMessageLower.includes('logged in') ||
+              errorMessageLower.includes('session is valid') ||
+              errorMessageLower.includes('session is invalid'));
+
+          const shouldForceLogout =
+            !hasToken ||
+            isTokenExpiredError ||
+            isTokenInvalidError ||
+            sessionDead ||
+            genericAuthFailure;
+
+          if (shouldForceLogout) {
             // Token is actually invalid/expired OR user has no token - logout
             console.error('❌ Token invalid or expired. Logging out...');
             console.error('   - Has token:', hasToken);
@@ -139,6 +158,10 @@ class ApiClient {
     if (typeof window !== "undefined") {
       localStorage.removeItem("neyborhuud_access_token");
       localStorage.removeItem("neyborhuud_user");
+      localStorage.removeItem("neyborhuud_community");
+      localStorage.removeItem("neyborhuud_needs_community");
+      localStorage.removeItem("neyborhuud_picker_context");
+      localStorage.removeItem("neyborhuud_needs_gps_verify");
     }
   }
 

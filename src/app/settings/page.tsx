@@ -1,11 +1,25 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 import { authService } from '@/services/auth.service';
 import { toast } from 'sonner';
+import type { ConsentType, UserConsentRecord } from '@/types/api';
+
+function latestForType(
+    rows: UserConsentRecord[],
+    type: ConsentType,
+): UserConsentRecord | undefined {
+    const subset = rows.filter((r) => r.consentType === type);
+    if (!subset.length) return undefined;
+    return subset.reduce((a, b) => {
+        const ta = new Date(a.updatedAt || a.createdAt || 0).getTime();
+        const tb = new Date(b.updatedAt || b.createdAt || 0).getTime();
+        return tb >= ta ? b : a;
+    });
+}
 
 interface NotificationSettings {
     email: boolean;
@@ -39,6 +53,38 @@ export default function SettingsPage() {
     const [resendingVerification, setResendingVerification] = useState(false);
     const [resendCooldown, setResendCooldown] = useState(0);
     const [accountActionLoading, setAccountActionLoading] = useState<'export' | 'delete' | null>(null);
+
+    const [consentRows, setConsentRows] = useState<UserConsentRecord[]>([]);
+    const [consentsLoading, setConsentsLoading] = useState(false);
+    const [consentBusy, setConsentBusy] = useState<ConsentType | null>(null);
+    const [accessLogOpen, setAccessLogOpen] = useState(false);
+    const [accessLogLoading, setAccessLogLoading] = useState(false);
+    const [accessLogEntries, setAccessLogEntries] = useState<
+        {
+            id: string;
+            accessType: string;
+            reason?: string;
+            createdAt: string;
+            accessor: {
+                id: string;
+                firstName?: string;
+                lastName?: string;
+                role?: string;
+            } | null;
+        }[]
+    >([]);
+
+    const [usernameChangePolicy, setUsernameChangePolicy] = useState<{
+        cooldownDays: number;
+        canChangeUsername: boolean;
+        nextUsernameChangeAt: string | null;
+        lastUsernameRenameAt: string | null;
+    } | null>(null);
+    const [usernameTimeline, setUsernameTimeline] = useState<
+        Array<{ username: string; effectiveFrom: string; effectiveTo: string | null }>
+    >([]);
+    const [newUsernameDraft, setNewUsernameDraft] = useState('');
+    const [usernameSaving, setUsernameSaving] = useState(false);
 
     const [notifications, setNotifications] = useState<NotificationSettings>({
         email: true,
@@ -82,6 +128,92 @@ export default function SettingsPage() {
             return () => clearTimeout(timer);
         }
     }, [resendCooldown]);
+
+    const loadConsents = useCallback(async () => {
+        if (!authService.isAuthenticated()) return;
+        setConsentsLoading(true);
+        try {
+            const res = await authService.getConsents();
+            if (res.success && res.data?.consents) {
+                setConsentRows(res.data.consents);
+            }
+        } catch (e: unknown) {
+            console.error(e);
+            toast.error('Could not load consent settings.');
+        } finally {
+            setConsentsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (activeTab !== 'privacy') return;
+        void loadConsents();
+    }, [activeTab, loadConsents]);
+
+    const refreshAccountProfile = useCallback(async () => {
+        if (!authService.isAuthenticated()) return;
+        try {
+            const res = await authService.getMyProfileFull();
+            if (!res.success || !res.data?.user) return;
+            const u = res.data.user;
+            setUser(u);
+            localStorage.setItem('neyborhuud_user', JSON.stringify(u));
+            if (res.data.usernameChangePolicy) {
+                setUsernameChangePolicy(res.data.usernameChangePolicy);
+            }
+            const tl = (u as unknown as { usernameTimeline?: unknown }).usernameTimeline;
+            setUsernameTimeline(Array.isArray(tl) ? tl : []);
+        } catch {
+            toast.error('Could not load profile from server.');
+        }
+    }, []);
+
+    useEffect(() => {
+        if (activeTab !== 'account') return;
+        void refreshAccountProfile();
+    }, [activeTab, refreshAccountProfile]);
+
+    const handleConsentToggle = async (type: ConsentType, granted: boolean) => {
+        if (type === 'data_processing' && !granted) {
+            toast.message(
+                'Essential processing cannot be turned off while your account is active.',
+            );
+            return;
+        }
+        setConsentBusy(type);
+        try {
+            const res = await authService.updateConsent(type, granted);
+            if (!res.success) {
+                toast.error(res.message || 'Update failed');
+                return;
+            }
+            await loadConsents();
+            toast.success('Consent updated.');
+        } catch (e: unknown) {
+            const ax = e as { response?: { data?: { message?: string } }; message?: string };
+            toast.error(
+                ax.response?.data?.message || ax.message || 'Could not update consent',
+            );
+        } finally {
+            setConsentBusy(null);
+        }
+    };
+
+    const loadAccessLog = async () => {
+        if (!authService.isAuthenticated()) return;
+        setAccessLogLoading(true);
+        try {
+            const res = await authService.getDataAccessHistory(1, 25);
+            if (res.success && res.data?.accessHistory) {
+                setAccessLogEntries(res.data.accessHistory);
+            }
+        } catch (e: unknown) {
+            console.error(e);
+            toast.error('Could not load access history.');
+        } finally {
+            setAccessLogLoading(false);
+        }
+    };
 
     const handleExportMyData = async () => {
         setAccountActionLoading('export');
@@ -208,16 +340,18 @@ export default function SettingsPage() {
         }
     };
 
-    const ToggleSwitch = ({ 
-        enabled, 
-        onChange, 
-        label, 
-        description 
-    }: { 
-        enabled: boolean; 
+    const ToggleSwitch = ({
+        enabled,
+        onChange,
+        label,
+        description,
+        disabled,
+    }: {
+        enabled: boolean;
         onChange: (val: boolean) => void;
         label: string;
         description?: string;
+        disabled?: boolean;
     }) => (
         <div className="flex items-center justify-between py-4 border-b border-charcoal/5 last:border-0">
             <div className="flex-1 pr-4">
@@ -227,16 +361,21 @@ export default function SettingsPage() {
                 )}
             </div>
             <button
-                onClick={() => onChange(!enabled)}
+                type="button"
+                disabled={disabled}
+                onClick={() => !disabled && onChange(!enabled)}
                 className={`
                     relative w-12 h-7 rounded-full transition-all duration-300
+                    ${disabled ? 'opacity-40 cursor-not-allowed' : ''}
                     ${enabled ? 'bg-primary' : 'bg-charcoal/20'}
                 `}
             >
-                <div className={`
+                <div
+                    className={`
                     absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300
                     ${enabled ? 'left-6' : 'left-1'}
-                `}></div>
+                `}
+                ></div>
             </button>
         </div>
     );
@@ -445,6 +584,138 @@ export default function SettingsPage() {
                             />
                         </div>
 
+                        <div className="neumorphic rounded-2xl p-6 mb-6 border border-primary/15">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-1">
+                                Data &amp; consent (NDPR)
+                            </h2>
+                            <p className="text-[10px] text-charcoal/45 mb-4 leading-relaxed">
+                                Manage optional processing. Essential processing is required to run your account;
+                                you can export or delete your data from Account → Danger zone.
+                            </p>
+                            {consentsLoading ? (
+                                <p className="text-xs text-charcoal/50">Loading consent state…</p>
+                            ) : !authService.isAuthenticated() ? (
+                                <p className="text-xs text-charcoal/45">
+                                    Log in to view and change consent preferences.
+                                </p>
+                            ) : (
+                                <>
+                                    {(() => {
+                                        const dp = latestForType(consentRows, 'data_processing');
+                                        const dpActive = dp?.granted === true;
+                                        return (
+                                            <div className="py-3 border-b border-charcoal/5 mb-2">
+                                                <p className="text-sm font-bold text-charcoal">
+                                                    Essential data processing
+                                                </p>
+                                                <p className="text-[10px] text-charcoal/45 mt-1">
+                                                    {dpActive
+                                                        ? `Active — last recorded ${dp.grantedAt ? new Date(dp.grantedAt).toLocaleString() : ''}`
+                                                        : 'Not on file (e.g. older account). Confirm to align with our Privacy Policy.'}
+                                                </p>
+                                                {!dpActive && (
+                                                    <button
+                                                        type="button"
+                                                        disabled={consentBusy !== null}
+                                                        onClick={() =>
+                                                            void handleConsentToggle('data_processing', true)
+                                                        }
+                                                        className="mt-3 text-xs font-bold text-brand-blue hover:underline disabled:opacity-40"
+                                                    >
+                                                        {consentBusy === 'data_processing'
+                                                            ? 'Saving…'
+                                                            : 'Record essential consent'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
+                                    <ToggleSwitch
+                                        enabled={
+                                            latestForType(consentRows, 'marketing')?.granted === true
+                                        }
+                                        disabled={consentBusy !== null}
+                                        onChange={(val) => {
+                                            void handleConsentToggle('marketing', val);
+                                        }}
+                                        label="Marketing"
+                                        description="News, features, and promotional messages"
+                                    />
+                                    <ToggleSwitch
+                                        enabled={
+                                            latestForType(consentRows, 'analytics')?.granted === true
+                                        }
+                                        disabled={consentBusy !== null}
+                                        onChange={(val) => {
+                                            void handleConsentToggle('analytics', val);
+                                        }}
+                                        label="Analytics"
+                                        description="Help us improve the product with usage insights"
+                                    />
+                                    <ToggleSwitch
+                                        enabled={
+                                            latestForType(consentRows, 'third_party')?.granted === true
+                                        }
+                                        disabled={consentBusy !== null}
+                                        onChange={(val) => {
+                                            void handleConsentToggle('third_party', val);
+                                        }}
+                                        label="Trusted partners"
+                                        description="Limited sharing where described in the Privacy Policy"
+                                    />
+                                    <div className="mt-4 pt-3 border-t border-charcoal/5">
+                                        <button
+                                            type="button"
+                                            className="text-xs font-bold text-brand-blue flex items-center gap-2"
+                                            onClick={() => {
+                                                const next = !accessLogOpen;
+                                                setAccessLogOpen(next);
+                                                if (next) void loadAccessLog();
+                                            }}
+                                        >
+                                            <i
+                                                className={`bi ${accessLogOpen ? 'bi-chevron-up' : 'bi-chevron-down'}`}
+                                            />
+                                            Data access history
+                                        </button>
+                                        {accessLogOpen && (
+                                            <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+                                                {accessLogLoading ? (
+                                                    <p className="text-[10px] text-charcoal/45">Loading…</p>
+                                                ) : accessLogEntries.length === 0 ? (
+                                                    <p className="text-[10px] text-charcoal/45">
+                                                        No access events recorded yet.
+                                                    </p>
+                                                ) : (
+                                                    accessLogEntries.map((row) => (
+                                                        <div
+                                                            key={row.id}
+                                                            className="text-[10px] rounded-lg bg-charcoal/[0.03] px-3 py-2"
+                                                        >
+                                                            <span className="font-bold text-charcoal">
+                                                                {row.accessType}
+                                                            </span>
+                                                            {row.reason && (
+                                                                <span className="text-charcoal/50">
+                                                                    {' '}
+                                                                    — {row.reason}
+                                                                </span>
+                                                            )}
+                                                            <div className="text-charcoal/40 mt-0.5">
+                                                                {new Date(row.createdAt).toLocaleString()}
+                                                                {row.accessor &&
+                                                                    ` · ${row.accessor.firstName || ''} ${row.accessor.lastName || ''}`}
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
                         <button
                             onClick={handleSavePrivacy}
                             disabled={saving}
@@ -476,6 +747,116 @@ export default function SettingsPage() {
                                 <i className="bi bi-chevron-right text-charcoal/40" aria-hidden />
                             </Link>
                         </div>
+
+                        <div className="neumorphic rounded-2xl p-6 mb-6 border border-charcoal/10">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-3">
+                                Username
+                            </h2>
+                            <p className="text-[10px] text-charcoal/45 mb-3 leading-relaxed">
+                                You can change your handle once every{' '}
+                                {usernameChangePolicy?.cooldownDays ?? 90} days after your{' '}
+                                <strong>first</strong> rename. Your current username (and past ones) can work
+                                as referral codes — see Invite neighbors below.
+                            </p>
+                            {usernameChangePolicy && !usernameChangePolicy.canChangeUsername && usernameChangePolicy.nextUsernameChangeAt ? (
+                                <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
+                                    Next change allowed:{' '}
+                                    {new Date(usernameChangePolicy.nextUsernameChangeAt).toLocaleString()}
+                                </p>
+                            ) : null}
+                            <input
+                                type="text"
+                                className="w-full rounded-xl neumorphic-inset px-4 py-3 text-sm text-charcoal mb-3"
+                                placeholder="new_handle"
+                                autoComplete="username"
+                                value={newUsernameDraft}
+                                onChange={(e) => setNewUsernameDraft(e.target.value.replace(/\s/g, ''))}
+                                disabled={usernameSaving || (usernameChangePolicy ? !usernameChangePolicy.canChangeUsername : false)}
+                            />
+                            <button
+                                type="button"
+                                disabled={
+                                    usernameSaving ||
+                                    !newUsernameDraft.trim() ||
+                                    (usernameChangePolicy ? !usernameChangePolicy.canChangeUsername : false)
+                                }
+                                className="neumorphic-btn w-full py-3 rounded-xl text-xs font-black uppercase tracking-widest text-charcoal mb-4 disabled:opacity-40"
+                                onClick={async () => {
+                                    setUsernameSaving(true);
+                                    try {
+                                        const res = await authService.changeUsername(newUsernameDraft.trim());
+                                        if (!res.success) {
+                                            toast.error(res.message || 'Could not update username');
+                                            return;
+                                        }
+                                        toast.success('Username updated');
+                                        setNewUsernameDraft('');
+                                        await refreshAccountProfile();
+                                    } catch (e: unknown) {
+                                        const ax = e as {
+                                            response?: { status?: number; data?: { message?: string } };
+                                        };
+                                        const msg =
+                                            ax.response?.data?.message ||
+                                            (e instanceof Error ? e.message : 'Request failed');
+                                        toast.error(msg);
+                                    } finally {
+                                        setUsernameSaving(false);
+                                    }
+                                }}
+                            >
+                                {usernameSaving ? 'Saving…' : 'Update username'}
+                            </button>
+                            {usernameTimeline.length > 0 ? (
+                                <div className="border-t border-charcoal/10 pt-4">
+                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-charcoal/35 mb-2">
+                                        Handle timeline
+                                    </h3>
+                                    <ul className="space-y-2 text-[11px] text-charcoal/70">
+                                        {usernameTimeline.map((row, i) => (
+                                            <li key={`${row.username}-${row.effectiveFrom}-${i}`}>
+                                                <span className="font-mono font-bold text-charcoal">@{row.username}</span>
+                                                <span className="text-charcoal/40">
+                                                    {' '}
+                                                    — from {new Date(row.effectiveFrom).toLocaleDateString()}
+                                                    {row.effectiveTo
+                                                        ? ` to ${new Date(row.effectiveTo).toLocaleDateString()}`
+                                                        : ' (current)'}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ) : null}
+                        </div>
+
+                        {user?.username ? (
+                            <div className="neumorphic rounded-2xl p-6 mb-6 border border-primary/15">
+                                <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-3">
+                                    Invite neighbors
+                                </h2>
+                                <p className="text-[10px] text-charcoal/45 mb-3 leading-relaxed">
+                                    Your <strong>username</strong> is the referral code on this app. Friends who sign up
+                                    from your link attach you as inviter (HuudCoins may apply per server rules).
+                                </p>
+                                <div className="rounded-xl bg-charcoal/[0.04] px-3 py-2 mb-3 break-all text-[11px] font-mono text-charcoal/80">
+                                    {typeof window !== 'undefined'
+                                        ? `${window.location.origin}/signup?ref=${encodeURIComponent(String(user.username))}`
+                                        : `/signup?ref=${encodeURIComponent(String(user.username))}`}
+                                </div>
+                                <button
+                                    type="button"
+                                    className="neumorphic-btn w-full py-3 rounded-xl text-xs font-black uppercase tracking-widest text-charcoal"
+                                    onClick={() => {
+                                        const url = `${window.location.origin}/signup?ref=${encodeURIComponent(String(user.username))}`;
+                                        void navigator.clipboard.writeText(url);
+                                        toast.success('Invite link copied');
+                                    }}
+                                >
+                                    Copy invite link
+                                </button>
+                            </div>
+                        ) : null}
 
                         {/* Location & Community */}
                         <div className="neumorphic rounded-2xl p-6 mb-6">

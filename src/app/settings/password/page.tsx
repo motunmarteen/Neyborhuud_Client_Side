@@ -7,10 +7,7 @@ import { toast } from 'sonner';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { authService } from '@/services/auth.service';
-import {
-  evaluatePasswordPolicy,
-  PASSWORD_REQUIREMENTS_HINT,
-} from '@/lib/passwordPolicy';
+import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
 
 export default function ChangePasswordPage() {
   const router = useRouter();
@@ -111,9 +108,6 @@ export default function ChangePasswordPage() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
-            <p className="text-[10px] leading-relaxed px-1" style={{ color: 'var(--neu-text-muted)' }}>
-              {PASSWORD_REQUIREMENTS_HINT}
-            </p>
             <PasswordStrengthMeter
               password={newPassword}
               email={email}
