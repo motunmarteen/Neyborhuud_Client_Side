@@ -13,6 +13,7 @@ interface XPostCardProps {
     onComment: () => void;
     onShare: () => void;
     onSave: () => void;
+    onEmergencyAction?: (action: string) => void;
     formatTimeAgo: (date: string) => string;
     onCardClick?: () => void;
 }
@@ -23,6 +24,7 @@ export function XPostCard({
     onComment,
     onShare,
     onSave,
+    onEmergencyAction,
     formatTimeAgo,
     onCardClick,
 }: XPostCardProps) {
@@ -45,8 +47,20 @@ export function XPostCard({
         e.stopPropagation();
     };
 
-    // Determine if safety alert
-    const isSafetyAlert = post.tags?.includes('safety') || post.tags?.includes('SAFETY') || (post as unknown as Record<string, unknown>).category === 'SAFETY';
+    const isSafetyAlert =
+        post.contentType === 'emergency' ||
+        post.contentType === 'alert' ||
+        post.cardStyle === 'emergency_red' ||
+        post.tags?.includes('safety') ||
+        post.tags?.includes('SAFETY') ||
+        (post as unknown as Record<string, unknown>).category === 'SAFETY';
+    const feedLayerLabel =
+        post._feedLayer === 'explore'
+            ? 'Street Radar'
+            : post._feedLayer === 'extended'
+                ? 'Following Places'
+                : 'Your Huud';
+    const severityLabel = post.severity ? post.severity.toUpperCase() : null;
 
     return (
         <article
@@ -95,7 +109,7 @@ export function XPostCard({
                             />
                         </Link>
                         <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 <Link
                                     href={`/profile/${authorUsername}`}
                                     onClick={handleProfileClick}
@@ -104,10 +118,17 @@ export function XPostCard({
                                 >
                                     {authorName}
                                 </Link>
-                                {/* Pinned Badge */}
                                 {post.isPinned && (
                                     <span className="text-xs px-1.5 py-0.5 rounded neu-chip text-brand-blue font-medium">Pinned</span>
                                 )}
+                                {isSafetyAlert && severityLabel && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-500 font-bold tracking-wide">
+                                        {severityLabel}
+                                    </span>
+                                )}
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-bold tracking-wide">
+                                    {feedLayerLabel}
+                                </span>
                             </div>
                             <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
                                 {formatTimeAgo(post.createdAt)} {post.location && 'formattedAddress' in post.location && post.location.formattedAddress ? `• ${post.location.formattedAddress}` : (post.location && 'address' in post.location && (post.location as Record<string, unknown>).address ? `• ${(post.location as Record<string, unknown>).address}` : '')}
@@ -172,6 +193,90 @@ export function XPostCard({
                             </div>
                         ))}
                     </div>
+                </div>
+            )}
+
+            {/* Emergency Action Buttons */}
+            {isSafetyAlert && onEmergencyAction && (
+                <div className="px-4 py-2 flex flex-wrap gap-2 border-t border-orange-500/10">
+                    {(!post.availableActions || post.availableActions.includes('acknowledge')) && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('acknowledge'); }}
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                                post.isAcknowledged
+                                    ? 'bg-blue-500/20 text-blue-400'
+                                    : 'bg-white/5 hover:bg-blue-500/10 text-blue-300/70'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[16px]">visibility</span>
+                            Acknowledge
+                        </button>
+                    )}
+                    {(!post.availableActions || post.availableActions.includes('aware')) && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('aware'); }}
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                                post.isAware
+                                    ? 'bg-amber-500/20 text-amber-400'
+                                    : 'bg-white/5 hover:bg-amber-500/10 text-amber-300/70'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[16px]">notifications_active</span>
+                            I&apos;m Aware
+                        </button>
+                    )}
+                    {(!post.availableActions || post.availableActions.includes('nearby')) && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('nearby'); }}
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                                post.isNearby
+                                    ? 'bg-green-500/20 text-green-400'
+                                    : 'bg-white/5 hover:bg-green-500/10 text-green-300/70'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[16px]">location_on</span>
+                            I&apos;m Nearby
+                        </button>
+                    )}
+                    {(!post.availableActions || post.availableActions.includes('safe')) && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('safe'); }}
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                                post.isSafe
+                                    ? 'bg-emerald-500/20 text-emerald-400'
+                                    : 'bg-white/5 hover:bg-emerald-500/10 text-emerald-300/70'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[16px]">shield</span>
+                            I&apos;m Safe
+                        </button>
+                    )}
+                    {(!post.availableActions || post.availableActions.includes('confirm')) && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('confirm'); }}
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                                post.confirmDisputeAction === 'confirm'
+                                    ? 'bg-teal-500/20 text-teal-400'
+                                    : 'bg-white/5 hover:bg-teal-500/10 text-teal-300/70'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                            Confirm
+                        </button>
+                    )}
+                    {(!post.availableActions || post.availableActions.includes('dispute')) && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('dispute'); }}
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                                post.confirmDisputeAction === 'dispute'
+                                    ? 'bg-red-500/20 text-red-400'
+                                    : 'bg-white/5 hover:bg-red-500/10 text-red-300/70'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[16px]">cancel</span>
+                            Dispute
+                        </button>
+                    )}
                 </div>
             )}
 

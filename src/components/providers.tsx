@@ -7,7 +7,7 @@
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import { queryClient } from '@/lib/query-client';
 import { useEffect } from 'react';
 import socketService from '@/lib/socket';
@@ -99,6 +99,50 @@ export function Providers({ children }: { children: React.ReactNode }) {
         queryClient.invalidateQueries({ queryKey: ['posts'] });
         queryClient.invalidateQueries({ queryKey: ['post', post.id] });
       });
+
+      // Emergency alert real-time listener
+      socketService.on('safety:emergency_post', (data: any) => {
+        // Refresh feed to show the new emergency post
+        queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+
+        // Show urgent toast notification
+        const severity = data?.severity || 'critical';
+        const emergencyType = data?.emergencyType || 'Emergency';
+        const message = data?.preview || data?.content || 'A new emergency alert has been posted nearby.';
+
+        if (severity === 'critical') {
+          toast.error(`🚨 ${emergencyType.toUpperCase()}`, {
+            description: message,
+            duration: 10000,
+          });
+        } else {
+          toast.warning(`⚠️ ${emergencyType}`, {
+            description: message,
+            duration: 7000,
+          });
+        }
+      });
+
+      // Emergency cancellation listener
+      socketService.on('safety:emergency_cancelled', (data: any) => {
+        queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+        toast.info('Emergency alert cancelled', {
+          description: data?.reason || 'An emergency alert in your area has been resolved.',
+          duration: 5000,
+        });
+      });
+
+      // Emergency interaction updates (other users' actions on emergency posts)
+      const emergencyInteractionHandler = (data: any) => {
+        if (data?.contentId) {
+          queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+          queryClient.invalidateQueries({ queryKey: ['post', data.contentId] });
+        }
+      };
+      socketService.on('safety:awareness_update', emergencyInteractionHandler);
+      socketService.on('safety:nearby_update', emergencyInteractionHandler);
+      socketService.on('safety:safe_update', emergencyInteractionHandler);
+      socketService.on('content:verification_update', emergencyInteractionHandler);
 
       return () => {
         socketService.disconnect();

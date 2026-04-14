@@ -26,11 +26,29 @@ export interface PaginatedResponse<T> {
 }
 
 /** Feed metadata returned by backend */
+export type FeedTab = "your_huud" | "street_radar" | "following_places";
+
 export interface FeedMeta {
-  feedType: "chronological" | "ranked";
+  feedType: "chronological" | "ranked" | "smart" | "trending";
   boostedCategories: string[];
   hasPinnedBulletins?: boolean;
   pinnedCount?: number;
+  feedTab?: FeedTab;
+  localLgas?: string[];
+  blendRatio?: {
+    local: number;
+    extended: number;
+    explore: number;
+  };
+  hasExtendedContent?: boolean;
+  hasExploreContent?: boolean;
+  missedAlerts?: {
+    count: number;
+    highestSeverity: "low" | "medium" | "critical";
+    latestCreatedAt: string;
+    lgas: string[];
+    reminderSent: boolean;
+  } | null;
 }
 
 /** Feed/list response from GET /feed or GET /content/posts – use response.data.content */
@@ -160,6 +178,23 @@ export interface Post {
   /** Backend returns author with id, name, username, avatarUrl (same shape for feed and create-post) */
   author: (User & { name?: string; avatarUrl?: string | null }) | PostAuthor;
   type?: "text" | "image" | "video" | "poll" | "event" | "article";
+  contentType?:
+    | "post"
+    | "fyi"
+    | "gossip"
+    | "alert"
+    | "help_request"
+    | "job"
+    | "echo"
+    | "emergency"
+    | "owambeh";
+  severity?: "low" | "medium" | "critical";
+  emergencyType?: string;
+  verificationStatus?: "unverified" | "verified" | "community_confirmed" | "disputed";
+  cardStyle?: "default" | "emergency_red" | "fyi_blue" | "gossip_neutral" | "owambeh_green";
+  _feedLayer?: "local" | "extended" | "explore";
+  availableActions?: string[];
+  savedCollection?: string | null;
   /** Post body – prefer content; backend sends both (GET /feed, GET /content/posts) */
   content: string;
   body?: string;
@@ -175,6 +210,11 @@ export interface Post {
   views: number;
   isLiked?: boolean;
   isSaved?: boolean;
+  isAcknowledged?: boolean;
+  isAware?: boolean;
+  isNearby?: boolean;
+  isSafe?: boolean;
+  confirmDisputeAction?: 'confirm' | 'dispute' | null;
   isPinned?: boolean;
   isReported?: boolean;
   status?: "active" | "pending" | "removed" | "archived";

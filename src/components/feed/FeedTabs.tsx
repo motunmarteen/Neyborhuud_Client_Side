@@ -1,45 +1,40 @@
 /**
- * Feed Tabs Component - Stitch Design
- * Tabs for switching between "For You" and "Following" feeds
+ * Feed Tabs Component
+ * Tabs for switching between the three backend feed layers.
  */
 
+import { FeedTab } from '@/types/api';
+
 interface FeedTabsProps {
-    activeTab: 'for-you' | 'following';
-    onTabChange: (tab: 'for-you' | 'following') => void;
+    activeTab: FeedTab;
+    onTabChange: (tab: FeedTab) => void;
 }
+
+const TAB_CONFIG: Array<{ key: FeedTab; label: string }> = [
+    { key: 'your_huud', label: 'Your Huud' },
+    { key: 'street_radar', label: 'Street Radar' },
+    { key: 'following_places', label: 'Following Places' },
+];
 
 export function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
     return (
         <div className="neu-socket rounded-2xl overflow-hidden">
-            <div className="flex">
-                <button
-                    onClick={() => onTabChange('for-you')}
-                    className={`flex-1 py-3 text-sm font-medium transition-all relative ${
-                        activeTab === 'for-you'
-                            ? 'font-bold neu-card-sm m-1 rounded-xl'
-                            : ''
-                    }`}
-                    style={{ color: activeTab === 'for-you' ? 'var(--neu-text)' : 'var(--neu-text-muted)' }}
-                >
-                    For you
-                    {activeTab === 'for-you' && (
-                        <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
-                    )}
-                </button>
-                <button
-                    onClick={() => onTabChange('following')}
-                    className={`flex-1 py-3 text-sm font-medium transition-all relative ${
-                        activeTab === 'following'
-                            ? 'font-bold neu-card-sm m-1 rounded-xl'
-                            : ''
-                    }`}
-                    style={{ color: activeTab === 'following' ? 'var(--neu-text)' : 'var(--neu-text-muted)' }}
-                >
-                    Following
-                    {activeTab === 'following' && (
-                        <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
-                    )}
-                </button>
+            <div className="grid grid-cols-3 gap-1 p-1">
+                {TAB_CONFIG.map((tab) => (
+                    <button
+                        key={tab.key}
+                        onClick={() => onTabChange(tab.key)}
+                        className={`py-3 px-2 text-xs md:text-sm font-medium transition-all relative rounded-xl ${
+                            activeTab === tab.key ? 'font-bold neu-card-sm' : ''
+                        }`}
+                        style={{ color: activeTab === tab.key ? 'var(--neu-text)' : 'var(--neu-text-muted)' }}
+                    >
+                        {tab.label}
+                        {activeTab === tab.key && (
+                            <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
+                        )}
+                    </button>
+                ))}
             </div>
         </div>
     );

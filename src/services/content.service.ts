@@ -11,6 +11,7 @@ import {
   PaginatedResponse,
   FeedResponse,
   CreatePostPayload,
+  FeedTab,
 } from "@/types/api";
 
 /**
@@ -44,12 +45,26 @@ function normalizeFeedItem(item: any): Post {
     views: item?.viewsCount ?? item?.views ?? 0,
     isLiked: item?.isLiked,
     isSaved: item?.isSaved,
+    isAcknowledged: item?.isAcknowledged,
+    isAware: item?.isAware,
+    isNearby: item?.isNearby,
+    isSafe: item?.isSafe,
+    confirmDisputeAction: item?.confirmDisputeAction ?? null,
+    contentType: item?.contentType,
+    severity: item?.severity,
+    emergencyType: item?.emergencyType,
+    verificationStatus: item?.verificationStatus,
+    cardStyle: item?.cardStyle,
+    _feedLayer: item?._feedLayer,
+    availableActions: item?.availableActions,
+    savedCollection: item?.savedCollection ?? null,
     createdAt: item?.createdAt ?? "",
     updatedAt: item?.updatedAt,
     location: item?.location,
     tags: item?.tags,
     type: item?.type,
     visibility: item?.visibility,
+    isPinned: item?.isPinned,
   };
 }
 
@@ -131,6 +146,7 @@ export const contentService = {
       page?: number;
       limit?: number;
       ranked?: boolean;
+      feedTab?: FeedTab;
     },
   ): Promise<FeedResponse<Post>> {
     try {
@@ -143,6 +159,7 @@ export const contentService = {
           page: options?.page || 1,
           limit: options?.limit || 20,
           ranked: options?.ranked || undefined,
+          feedTab: options?.feedTab,
         },
       });
       return normalizeFeedResponse<Post>(res);
@@ -440,6 +457,35 @@ export const contentService = {
     return await apiClient.post(`/content/comments/${commentId}/report`, {
       reason,
       description,
+    });
+  },
+
+  // ==================== Emergency Actions ====================
+
+  /** Toggle "I acknowledge this alert" */
+  async acknowledgePost(postId: string) {
+    return await apiClient.post(`/content/posts/${postId}/acknowledge`);
+  },
+
+  /** Toggle "I'm Aware" of this emergency */
+  async toggleImAware(postId: string) {
+    return await apiClient.post(`/content/posts/${postId}/aware`);
+  },
+
+  /** Toggle "I'm Nearby" — contributes to community verification */
+  async toggleImNearby(postId: string) {
+    return await apiClient.post(`/content/posts/${postId}/nearby`);
+  },
+
+  /** Toggle "I'm Safe" — mark yourself as safe */
+  async toggleSafeMark(postId: string) {
+    return await apiClient.post(`/content/posts/${postId}/safe`);
+  },
+
+  /** Confirm or dispute an emergency post */
+  async confirmOrDispute(postId: string, action: "confirm" | "dispute") {
+    return await apiClient.post(`/content/posts/${postId}/confirm-dispute`, {
+      action,
     });
   },
 };

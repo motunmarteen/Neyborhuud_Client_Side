@@ -3,16 +3,16 @@
  * Used by API (Joi) and mirrored on the web signup form (Zod via client import).
  */
 
-export const PASSWORD_MIN_LENGTH = 12;
+export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 128;
 
 /** Short copy for forms and docs */
 export const PASSWORD_REQUIREMENTS_HINT =
-  "At least 12 characters with upper & lower case, a number, a symbol, and not your username/email or an obvious pattern.";
+  "At least 8 characters with upper & lower case, a number, and not your username/email.";
 
-/** At least one lowercase, uppercase, digit, and one non-alphanumeric (symbols / punctuation; not whitespace). */
+/** At least one lowercase, uppercase, and digit. */
 const COMPLEXITY_RE =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9\s]).+$/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).+$/;
 
 /** Four or more of the same character in a row */
 const RUN_OF_SAME = /(.)\1{3,}/;
@@ -197,7 +197,7 @@ const MSG = {
   minLen: `Password must be at least ${PASSWORD_MIN_LENGTH} characters long`,
   maxLen: `Password cannot exceed ${PASSWORD_MAX_LENGTH} characters`,
   complexity:
-    "Use at least one uppercase letter, one lowercase letter, one number, and one symbol (for example ! @ # $ % ^ & * . , ?)",
+    "Use at least one uppercase letter, one lowercase letter, and one number",
   runSame:
     "Avoid four or more identical characters in a row (e.g. “aaaa”)",
   common:
@@ -316,10 +316,6 @@ export function evaluatePasswordPolicy(
   if (!r.ok) return r;
   r = checkNotCommon(lower);
   if (!r.ok) return r;
-  r = checkPatterns(normalized, lower);
-  if (!r.ok) return r;
-  r = checkDistinct(normalized);
-  if (!r.ok) return r;
   r = checkNoUsername(lower, context);
   if (!r.ok) return r;
   r = checkNoEmailLocal(lower, context);
@@ -381,11 +377,9 @@ export function getPasswordStrengthChecklist(
         MSG.minLen,
         false,
       ),
-      pendingRow("complexity", "Uppercase, lowercase, number, and symbol", MSG.complexity, false),
+      pendingRow("complexity", "Uppercase, lowercase, and number", MSG.complexity, false),
       pendingRow("run", "No four identical characters in a row", MSG.runSame, false),
       pendingRow("common", "Not an easily guessed password", MSG.common, false),
-      pendingRow("patterns", "No simple keyboard or counting patterns", MSG.patterns, false),
-      pendingRow("distinct", "At least 6 different characters", MSG.distinct, false),
       pendingRow("username", "Does not contain your username", MSG.username, !usernameRuleApplicable),
       pendingRow("email", "Does not contain your email before @", MSG.emailLocal, !emailRuleApplicable),
     ];
@@ -416,7 +410,7 @@ export function getPasswordStrengthChecklist(
       },
       {
         id: "complexity",
-        label: "Uppercase, lowercase, number, and symbol",
+        label: "Uppercase, lowercase, and number",
         failMessage: MSG.complexity,
         ok: false,
         pending: restPending,
@@ -434,22 +428,6 @@ export function getPasswordStrengthChecklist(
         id: "common",
         label: "Not an easily guessed password",
         failMessage: MSG.common,
-        ok: false,
-        pending: restPending,
-        skipped: false,
-      },
-      {
-        id: "patterns",
-        label: "No simple keyboard or counting patterns",
-        failMessage: MSG.patterns,
-        ok: false,
-        pending: restPending,
-        skipped: false,
-      },
-      {
-        id: "distinct",
-        label: "At least 6 different characters",
-        failMessage: MSG.distinct,
         ok: false,
         pending: restPending,
         skipped: false,
@@ -481,8 +459,6 @@ export function getPasswordStrengthChecklist(
   const complexityOk = checkComplexity(normalized).ok;
   const runOk = checkRunOfSame(normalized).ok;
   const commonOk = checkNotCommon(lower).ok;
-  const patternsOk = checkPatterns(normalized, lower).ok;
-  const distinctOk = checkDistinct(normalized).ok;
   const usernameOk =
     !usernameRuleApplicable || checkNoUsername(lower, context).ok;
   const emailOk =
@@ -507,7 +483,7 @@ export function getPasswordStrengthChecklist(
     },
     {
       id: "complexity",
-      label: "Uppercase, lowercase, number, and symbol",
+      label: "Uppercase, lowercase, and number",
       failMessage: MSG.complexity,
       ok: complexityOk,
       pending: false,
@@ -526,22 +502,6 @@ export function getPasswordStrengthChecklist(
       label: "Not an easily guessed password",
       failMessage: MSG.common,
       ok: commonOk,
-      pending: false,
-      skipped: false,
-    },
-    {
-      id: "patterns",
-      label: "No simple keyboard or counting patterns",
-      failMessage: MSG.patterns,
-      ok: patternsOk,
-      pending: false,
-      skipped: false,
-    },
-    {
-      id: "distinct",
-      label: "At least 6 different characters",
-      failMessage: MSG.distinct,
-      ok: distinctOk,
       pending: false,
       skipped: false,
     },

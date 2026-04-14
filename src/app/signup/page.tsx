@@ -631,7 +631,7 @@ function SignupPageContent() {
                         label="Secure Password"
                         type="password"
                         icon="bi-lock"
-                        placeholder="12+ chars, mixed case, number, symbol"
+                        placeholder="8+ chars, mixed case, number"
                         className="py-1"
                         value={formData.password}
                         onChange={e => setFormData({ ...formData, password: e.target.value })}
@@ -640,7 +640,13 @@ function SignupPageContent() {
                         password={formData.password}
                         email={formData.email}
                         username={formData.username}
+                        showChecklist={false}
                     />
+                    {!isPassValid && formData.password.length > 0 && (
+                        <p className="text-[10px] px-1 -mt-1" style={{ color: 'var(--neu-text-muted)' }}>
+                            {passwordPolicy.ok ? '' : passwordPolicy.message}
+                        </p>
+                    )}
                 </div>
 
                 <PremiumInput
@@ -708,6 +714,7 @@ function SignupPageContent() {
                 </div>
 
                 <button
+                    type="submit"
                     disabled={
                         loading || 
                         !isPassValid || 
@@ -725,7 +732,8 @@ function SignupPageContent() {
                         py-4.5 rounded-2xl mt-2 transition-all duration-200 cursor-pointer
                         ${(loading || !isPassValid || !formData.username || !formData.email || 
                           !formData.acceptTermsAndPrivacy ||
-                          emailValidation.status === 'checking' || usernameValidation.status === 'checking') 
+                          emailValidation.status === 'invalid' || emailValidation.status === 'taken' || emailValidation.status === 'checking' ||
+                          usernameValidation.status === 'invalid' || usernameValidation.status === 'taken' || usernameValidation.status === 'checking') 
                             ? 'neu-btn opacity-40 cursor-not-allowed' 
                             : 'neu-btn active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]'}
                     `}

@@ -93,10 +93,15 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Focus Rings */
+/* Focus Rings — exclude inputs inside neumorphic containers (they use the glow line) */
 *:focus-visible {
   outline: 2px solid #11d473;
   outline-offset: 2px;
+}
+
+.neu-input:focus-visible,
+.neu-input *:focus-visible {
+  outline: none !important;
 }
 
 /* Mobile-first: safe area for notched devices */
@@ -335,11 +340,55 @@ html {
   transition: all 0.2s ease;
 }
 
-.neu-input:focus {
+.neu-input:focus,
+.neu-input:focus-within {
   box-shadow:
     inset 4px 4px 8px var(--neu-shadow-dark),
-    inset -4px -4px 8px var(--neu-shadow-light),
-    0 0 0 2px var(--neon-green);
+    inset -4px -4px 8px var(--neu-shadow-light);
+  outline: none !important;
+  border: none !important;
+}
+
+.neu-input:focus-within input,
+.neu-input:focus-within textarea,
+.neu-input input:focus,
+.neu-input textarea:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Animated bottom-line glow for wrapper divs using neu-input (e.g. PremiumInput) */
+.neu-input:focus-within::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-green, #22c55e), transparent);
+  opacity: 0.6;
+  pointer-events: none;
+  animation: focus-line-in 0.3s ease-out;
+}
+
+/* Native inputs/textareas using neu-input directly get a bottom-border glow instead */
+input.neu-input:focus,
+textarea.neu-input:focus {
+  border-bottom: 2px solid color-mix(in srgb, var(--neon-green, #22c55e) 50%, transparent) !important;
+}
+
+input.neu-input:focus::after,
+textarea.neu-input:focus::after,
+input.neu-input:focus-within::after,
+textarea.neu-input:focus-within::after {
+  display: none;
+}
+
+@keyframes focus-line-in {
+  from { left: 45%; right: 45%; opacity: 0; }
+  to   { left: 12%; right: 12%; opacity: 0.6; }
 }
 
 .neu-input::placeholder {

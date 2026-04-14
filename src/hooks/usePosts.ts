@@ -10,7 +10,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { contentService } from "@/services/content.service";
-import { CreatePostPayload } from "@/types/api";
+import { CreatePostPayload, FeedTab } from "@/types/api";
 import { handleApiError } from "@/lib/error-handler";
 
 /**
@@ -23,6 +23,7 @@ export function useLocationFeed(
     radius?: number;
     category?: string;
     ranked?: boolean;
+    feedTab?: FeedTab;
   },
 ) {
   return useInfiniteQuery({
@@ -33,6 +34,7 @@ export function useLocationFeed(
       options?.category,
       options?.radius,
       options?.ranked,
+      options?.feedTab,
     ],
     queryFn: ({ pageParam = 1 }) => {
       if (!latitude || !longitude) {

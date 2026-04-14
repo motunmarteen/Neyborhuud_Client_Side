@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import apiClient from '@/lib/api-client';
@@ -30,9 +30,27 @@ function PickCommunityContent() {
   const [seedRequired, setSeedRequired] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userLocation, setUserLocation] = useState<{ state: string; lga: string } | null>(null);
+  const comboRef = useRef<HTMLDivElement>(null);
 
-  const ctx = useMemo(() => getStoredPickerContext(), []);
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (comboRef.current && !comboRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const [ctx, setCtx] = useState<ReturnType<typeof getStoredPickerContext>>(null);
+
+  // Defer localStorage read to after hydration to avoid SSR mismatch
+  useEffect(() => {
+    setCtx(getStoredPickerContext());
+  }, []);
 
   useEffect(() => {
     const token =
@@ -224,22 +242,112 @@ function PickCommunityContent() {
           </p>
         )}
 
-        <div className="neu-card-sm rounded-2xl p-3 mb-4">
-          <input
-            type="search"
-            placeholder="Search this list…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent border-0 outline-none text-sm px-2 py-2"
-            style={{ color: 'var(--neu-text)' }}
-          />
-        </div>
+        {/* Combobox dropdown */}
+        <div ref={comboRef} className="relative mb-4">
+          <button
+            type="button"
+            onClick={() => { if (!loading) setDropdownOpen((v) => !v); }}
+            className="neu-card-sm rounded-2xl w-full flex items-center gap-2 px-4 py-3 transition-all cursor-pointer outline-none focus:outline-none focus-visible:outline-none"
+            style={
+              selectedId
+                ? { borderBottom: '2px solid var(--neon-green, #11d473)', boxShadow: '0 2px 6px rgba(17,212,115,0.10)', outline: 'none' }
+                : { outline: 'none' }
+            }
+          >
+            {selectedId ? (
+              <span className="flex-1 text-sm font-semibold text-left" style={{ color: 'var(--neon-green, #11d473)' }}>
+                <i className="bi bi-check-circle-fill mr-2 text-xs" />
+                {options.find((o) => o.id === selectedId)?.name}
+              </span>
+            ) : (
+              <span className="flex-1 text-sm text-left" style={{ color: 'var(--neu-text-muted)' }}>
+                {loading ? 'Loading areas…' : 'Select your area'}
+              </span>
+            )}
+            <i
+              className={`bi bi-chevron-down text-xs transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
+              style={{ color: 'var(--neu-text-muted)' }}
+            />
+          </button>
 
-        {loading && (
-          <p className="text-sm text-center py-8" style={{ color: 'var(--neu-text-muted)' }}>
-            Loading areas…
-          </p>
-        )}
+          {dropdownOpen && (
+            <div
+              className="absolute z-50 left-0 right-0 mt-2 rounded-2xl overflow-hidden"
+              style={{
+                background: 'var(--neu-card-bg, #1a2c1a)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+              }}
+            >
+              {/* Search input inside dropdown */}
+              <div className="px-3 pt-3 pb-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <i className="bi bi-search text-xs" style={{ color: 'var(--neu-text-muted)' }} />
+                  <input
+                    type="text"
+                    placeholder="Search areas…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    autoFocus
+                    className="w-full bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none text-sm"
+                    style={{ color: 'var(--neu-text)', outline: 'none' }}
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch('')}
+                      className="text-xs p-0.5"
+                      style={{ color: 'var(--neu-text-muted)' }}
+                    >
+                      <i className="bi bi-x-lg" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Scrollable options list */}
+              <ul className="max-h-64 overflow-y-auto py-1" style={{ scrollbarWidth: 'thin' }}>
+                {filtered.length === 0 ? (
+                  <li className="px-4 py-6 text-center text-sm" style={{ color: 'var(--neu-text-muted)' }}>
+                    No areas match &ldquo;{search}&rdquo;
+                  </li>
+                ) : (
+                  filtered.map((o) => {
+                    const isSelected = selectedId === o.id;
+                    return (
+                      <li key={o.id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedId(o.id);
+                            setSearch('');
+                            setDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors"
+                          style={{
+                            background: isSelected ? 'rgba(17,212,115,0.08)' : 'transparent',
+                            color: isSelected ? 'var(--neon-green, #11d473)' : 'var(--neu-text)',
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = isSelected ? 'rgba(17,212,115,0.08)' : 'transparent';
+                          }}
+                        >
+                          <span className="text-sm font-medium flex-1">{o.name}</span>
+                          {isSelected && (
+                            <i className="bi bi-check-lg text-sm" style={{ color: 'var(--neon-green, #11d473)' }} />
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })
+                )}
+              </ul>
+            </div>
+          )}
+        </div>
 
         {seedRequired && !loading && (
           <div className="neu-socket rounded-2xl p-4 text-sm" style={{ color: 'var(--neu-text-secondary)' }}>
@@ -258,39 +366,6 @@ function PickCommunityContent() {
           <div className="rounded-2xl p-4 mb-4 text-sm" style={{ border: '1px solid rgba(255,107,107,0.35)', color: 'var(--neu-text)' }}>
             {error}
           </div>
-        )}
-
-        {!loading && !seedRequired && (
-          <ul className="flex flex-col gap-2">
-            {filtered.map((o) => (
-              <li key={o.id}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedId(o.id)}
-                  className={`w-full text-left neu-card-sm rounded-2xl px-4 py-3 transition-all ${
-                    selectedId === o.id ? 'ring-2 ring-primary' : ''
-                  }`}
-                >
-                  <span className="text-sm font-medium block" style={{ color: 'var(--neu-text)' }}>
-                    {o.name}
-                  </span>
-                  <span className="text-[10px] uppercase tracking-widest mt-1 block" style={{ color: 'var(--neu-text-muted)' }}>
-                    {o.kind === 'lga_general'
-                      ? 'Whole LGA'
-                      : o.kind === 'lcda'
-                        ? 'Lagos LCDA'
-                        : 'Ward / area'}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {!loading && !seedRequired && filtered.length === 0 && !error && (
-          <p className="text-sm text-center py-6" style={{ color: 'var(--neu-text-muted)' }}>
-            No matches. Try clearing the search or contact support if your LGA looks wrong.
-          </p>
         )}
 
         <p className="text-xs mt-8 leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>

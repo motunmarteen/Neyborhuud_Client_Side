@@ -60,7 +60,7 @@ export const notificationsService = {
    * Update notification settings
    */
   async updateSettings(settings: any) {
-    return await apiClient.put("/notifications/settings", settings);
+    return await apiClient.put("/notifications/settings", { settings });
   },
 
   /**
@@ -73,10 +73,15 @@ export const notificationsService = {
   /**
    * Register push notification token
    */
-  async registerPushToken(token: string, platform: "web" | "ios" | "android") {
-    return await apiClient.post("/notifications/push-token", {
+  async registerPushToken(
+    token: string,
+    platform: "web" | "ios" | "android",
+    deviceId?: string,
+  ) {
+    return await apiClient.post("/auth/device/register", {
       token,
       platform,
+      deviceId,
     });
   },
 
@@ -84,8 +89,8 @@ export const notificationsService = {
    * Unregister push notification token
    */
   async unregisterPushToken(token: string) {
-    return await apiClient.delete("/notifications/push-token", {
-      data: { token },
+    return await apiClient.post("/auth/device/remove", {
+      token,
     });
   },
 

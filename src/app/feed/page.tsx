@@ -17,8 +17,9 @@ import { BottomNav } from '@/components/feed/BottomNav';
 import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
 import { useLocationFeed, usePostMutations } from '@/hooks/usePosts';
 import { authService } from '@/services/auth.service';
+import { contentService } from '@/services/content.service';
 import { getCurrentLocation } from '@/lib/geolocation';
-import { Post } from '@/types/api';
+import { FeedTab, Post } from '@/types/api';
 import { useInView } from 'react-intersection-observer';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -71,7 +72,7 @@ function XFeedInner() {
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
-    const [feedTab, setFeedTab] = useState<'for-you' | 'following'>('following');
+    const [feedTab, setFeedTab] = useState<FeedTab>('your_huud');
     const locationFetched = useRef(false);
     const queryClient = useQueryClient();
 
@@ -111,7 +112,7 @@ function XFeedInner() {
         fetchLocation();
     }, []);
 
-    // Fetch feed with location - tab determines ranked mode
+    // Fetch feed with location - tab maps directly to the backend feed layers
     const {
         data: feedData,
         isLoading,
@@ -124,7 +125,7 @@ function XFeedInner() {
         isFetchingNextPage,
     } = useLocationFeed(location?.lat || null, location?.lng || null, {
         radius: 5000,
-        ranked: feedTab === 'for-you',
+        feedTab,
     });
 
     // Post mutations
@@ -133,6 +134,7 @@ function XFeedInner() {
     // Flatten posts from all pages
     const posts: Post[] =
         feedData?.pages.flatMap((page: any) => page.content ?? page.data?.content ?? []) ?? [];
+    const missedAlerts = feedData?.pages?.[0]?.meta?.missedAlerts ?? null;
 
     // Infinite scroll
     const { ref: loadMoreRef, inView } = useInView({
@@ -169,6 +171,76 @@ function XFeedInner() {
             }
         } catch (error) {
             console.error('Save error:', error);
+        }
+    };
+
+    // Handle emergency actions (Acknowledge, Aware, Nearby, Safe, Confirm, Dispute)
+    const handleEmergencyAction = async (post: Post, action: string) => {
+        // Optimistic update helper: instantly toggle the button state in the cache
+        const optimisticUpdate = (updater: (p: Post) => Partial<Post>) => {
+            queryClient.setQueriesData<any>({ queryKey: ['locationFeed'] }, (old: any) => {
+                if (!old?.pages) return old;
+                return {
+                    ...old,
+                    pages: old.pages.map((page: any) => ({
+                        ...page,
+                        content: (page.content ?? []).map((p: Post) =>
+                            p.id === post.id ? { ...p, ...updater(p) } : p
+                        ),
+                    })),
+                };
+            });
+        };
+
+        // Apply optimistic state immediately
+        switch (action) {
+            case 'acknowledge':
+                optimisticUpdate((p) => ({ isAcknowledged: !p.isAcknowledged }));
+                break;
+            case 'aware':
+                optimisticUpdate((p) => ({ isAware: !p.isAware }));
+                break;
+            case 'nearby':
+                optimisticUpdate((p) => ({ isNearby: !p.isNearby }));
+                break;
+            case 'safe':
+                optimisticUpdate((p) => ({ isSafe: !p.isSafe }));
+                break;
+            case 'confirm':
+                optimisticUpdate(() => ({ confirmDisputeAction: post.confirmDisputeAction === 'confirm' ? null : 'confirm' as const }));
+                break;
+            case 'dispute':
+                optimisticUpdate(() => ({ confirmDisputeAction: post.confirmDisputeAction === 'dispute' ? null : 'dispute' as const }));
+                break;
+        }
+
+        try {
+            switch (action) {
+                case 'acknowledge':
+                    await contentService.acknowledgePost(post.id);
+                    break;
+                case 'aware':
+                    await contentService.toggleImAware(post.id);
+                    break;
+                case 'nearby':
+                    await contentService.toggleImNearby(post.id);
+                    break;
+                case 'safe':
+                    await contentService.toggleSafeMark(post.id);
+                    break;
+                case 'confirm':
+                    await contentService.confirmOrDispute(post.id, 'confirm');
+                    break;
+                case 'dispute':
+                    await contentService.confirmOrDispute(post.id, 'dispute');
+                    break;
+            }
+            // Background revalidate to sync with server state
+            queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+        } catch (error) {
+            // Revert optimistic update on error
+            queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+            console.error(`Emergency action '${action}' error:`, error);
         }
     };
 
@@ -213,6 +285,26 @@ function XFeedInner() {
                             activeTab={feedTab}
                             onTabChange={(tab) => setFeedTab(tab)}
                         />
+
+                        {missedAlerts && missedAlerts.count > 0 && (
+                            <div className="neu-card-sm rounded-2xl px-4 py-3 border border-orange-500/15">
+                                <div className="flex items-start gap-3">
+                                    <div className="neu-socket rounded-xl size-10 shrink-0 flex items-center justify-center text-orange-500">
+                                        <span className="material-symbols-outlined text-xl">warning</span>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+                                            {missedAlerts.count === 1
+                                                ? 'You missed 1 nearby alert'
+                                                : `You missed ${missedAlerts.count} nearby alerts`}
+                                        </p>
+                                        <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
+                                            Highest severity: {missedAlerts.highestSeverity}. Areas: {missedAlerts.lgas.join(', ')}.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Loading State */}
                         {isLoading && <FeedSkeleton count={5} />}
@@ -274,6 +366,7 @@ function XFeedInner() {
                                     onComment={() => openPostDetails(post.id)}
                                     onShare={() => { }}
                                     onSave={() => handleSave(post)}
+                                    onEmergencyAction={(action) => handleEmergencyAction(post, action)}
                                     formatTimeAgo={formatTimeAgo}
                                     onCardClick={() => openPostDetails(post.id)}
                                 />
