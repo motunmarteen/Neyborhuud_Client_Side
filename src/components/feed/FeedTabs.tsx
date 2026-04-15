@@ -18,21 +18,17 @@ const TAB_CONFIG: Array<{ key: FeedTab; label: string }> = [
 
 export function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
     return (
-        <div className="neu-socket rounded-2xl overflow-hidden">
-            <div className="grid grid-cols-3 gap-1 p-1">
+        <div className="bg-white border-b border-black/[0.06]">
+            <div className="grid grid-cols-3">
                 {TAB_CONFIG.map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => onTabChange(tab.key)}
-                        className={`py-3 px-2 text-xs md:text-sm font-medium transition-all relative rounded-xl ${
-                            activeTab === tab.key ? 'font-bold neu-card-sm' : ''
+                        className={`py-3 px-2 text-xs md:text-sm font-medium transition-all ${
+                            activeTab === tab.key ? 'font-bold text-[var(--neu-text)]' : 'text-[var(--neu-text-muted)] hover:text-[var(--neu-text-secondary)]'
                         }`}
-                        style={{ color: activeTab === tab.key ? 'var(--neu-text)' : 'var(--neu-text-muted)' }}
                     >
                         {tab.label}
-                        {activeTab === tab.key && (
-                            <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
-                        )}
                     </button>
                 ))}
             </div>

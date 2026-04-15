@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import socketService from '@/lib/socket';
 import apiClient from '@/lib/api-client';
 import { authService } from '@/services/auth.service';
+import { I18nProvider } from '@/lib/i18n';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
 
@@ -170,6 +171,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
+    <I18nProvider>
     <QueryClientProvider client={queryClient}>
       {children}
       <Toaster 
@@ -189,5 +191,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <ReactQueryDevtools initialIsOpen={false} />
       )}
     </QueryClientProvider>
+    </I18nProvider>
   );
 }

@@ -10,71 +10,78 @@ import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { FeedTabs } from '@/components/feed/FeedTabs';
+import { FeedSkyHero } from '@/components/feed/FeedSkyHero';
 import { XPostCard } from '@/components/feed/XPostCard';
+import { ReportModal } from '@/components/feed/ReportModal';
 import { FeedSkeleton } from '@/components/feed/PostSkeleton';
 import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
 import { useLocationFeed, usePostMutations } from '@/hooks/usePosts';
+import { useDepartments } from '@/hooks/useDepartments';
 import { authService } from '@/services/auth.service';
+import { useAuth } from '@/hooks/useAuth';
 import { contentService } from '@/services/content.service';
+import { fyiService } from '@/services/fyi.service';
 import { getCurrentLocation } from '@/lib/geolocation';
-import { FeedTab, Post } from '@/types/api';
+import { isUserInNigeria } from '@/lib/nigeriaCheck';
+import { useTranslation } from '@/lib/i18n';
+import { FeedTab, Post, ContentType } from '@/types/api';
 import { useInView } from 'react-intersection-observer';
 import { useQueryClient } from '@tanstack/react-query';
 
-function Composer({ onOpenCreate }: { onOpenCreate: () => void }) {
-    return (
-        <div className="flex flex-col neu-card-sm rounded-2xl p-4">
-            <div className="flex gap-4">
-                <div className="neu-socket rounded-full size-12 shrink-0 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-2xl">person</span>
-                </div>
-                <div className="flex-1 flex flex-col gap-3">
-                    <button
-                        onClick={onOpenCreate}
-                        className="w-full text-left resize-none overflow-hidden bg-transparent border-0 focus:ring-0 p-0 text-base cursor-pointer transition-colors pt-2"
-                        style={{ color: 'var(--neu-text-muted)' }}
-                    >
-                        What&apos;s happening in your neighborhood?
-                    </button>
-                </div>
-            </div>
-            <div className="flex items-center justify-between mt-4 pt-3">
-                <div className="neu-divider absolute left-0 right-0" style={{ top: 0 }} />
-                <div className="flex items-center gap-2">
-                    <button onClick={onOpenCreate} className="flex items-center justify-center p-2 rounded-xl neu-btn transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)] text-primary" title="Add Image">
-                        <span className="material-symbols-outlined text-[20px]">image</span>
-                    </button>
-                    <button onClick={onOpenCreate} className="flex items-center justify-center p-2 rounded-xl neu-btn transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)] text-primary" title="Add Video">
-                        <span className="material-symbols-outlined text-[20px]">videocam</span>
-                    </button>
-                    <button onClick={onOpenCreate} className="flex items-center justify-center p-2 rounded-xl neu-btn transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)] text-primary" title="Add Location">
-                        <span className="material-symbols-outlined text-[20px]">location_on</span>
-                    </button>
-                </div>
-                <button
-                    onClick={onOpenCreate}
-                    className="neu-btn rounded-xl py-2 px-6 text-sm font-bold transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
-                    style={{ color: 'var(--neu-text)' }}
-                >
-                    POST
-                </button>
-            </div>
-        </div>
-    );
-}
-
 function XFeedInner() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const { t } = useTranslation();
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [locationError, setLocationError] = useState<string | null>(null);
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
     const [feedTab, setFeedTab] = useState<FeedTab>('your_huud');
+    const [departmentFilter, setDepartmentFilter] = useState<string | undefined>(undefined);
+    const [fyiSubtypeFilter, setFyiSubtypeFilter] = useState<string>('');
+    const [priorityFilter, setPriorityFilter] = useState<string>('');
     const locationFetched = useRef(false);
     const queryClient = useQueryClient();
+    const canPost = isUserInNigeria();
+    const mainRef = useRef<HTMLElement>(null);
+    const lastScrollY = useRef(0);
+    const [navHidden, setNavHidden] = useState(false);
+
+    // Derive contentTypeFilter from URL search params (set by sidebar / search overlay)
+    const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'gossip', 'help_request', 'job', 'event', 'marketplace', 'emergency'];
+    const typeParam = searchParams.get('type') || '';
+    const contentTypeFilter: ContentType | undefined = CONTENT_TYPE_TABS.includes(typeParam) ? (typeParam as ContentType) : undefined;
+
+    // Listen for create-post event from TopNav
+    useEffect(() => {
+        const handler = () => setIsCreatePostOpen(true);
+        window.addEventListener('open-create-post', handler);
+        return () => window.removeEventListener('open-create-post', handler);
+    }, []);
+
+    // Auto-hide navs on scroll down, show on scroll up
+    useEffect(() => {
+        const el = mainRef.current;
+        if (!el) return;
+        const THRESHOLD = 10;
+        const handleScroll = () => {
+            const y = el.scrollTop;
+            if (y - lastScrollY.current > THRESHOLD) {
+                setNavHidden(true);
+            } else if (lastScrollY.current - y > THRESHOLD) {
+                setNavHidden(false);
+            }
+            lastScrollY.current = y;
+        };
+        el.addEventListener('scroll', handleScroll, { passive: true });
+        return () => el.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Fetch departments for filter dropdown
+    const { data: departments = [] } = useDepartments();
 
     useEffect(() => {
         const token = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
@@ -126,10 +133,21 @@ function XFeedInner() {
     } = useLocationFeed(location?.lat || null, location?.lng || null, {
         radius: 5000,
         feedTab,
+        contentType: contentTypeFilter,
+        departmentId: departmentFilter,
+        priority: priorityFilter || undefined,
+        fyiSubtype: contentTypeFilter === 'fyi' ? (fyiSubtypeFilter || undefined) : undefined,
     });
 
     // Post mutations
-    const { likePost, unlikePost, savePost, unsavePost } = usePostMutations();
+    const { likePost, unlikePost, savePost, unsavePost, deletePost } = usePostMutations();
+
+    // Current user ID for ownership checks
+    const { user: currentAuthUser } = useAuth();
+    const currentUserId = currentAuthUser?.id || null;
+    const [editingPost, setEditingPost] = useState<Post | null>(null);
+    const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+    const [reportingPostId, setReportingPostId] = useState<string | null>(null);
 
     // Flatten posts from all pages
     const posts: Post[] =
@@ -171,6 +189,30 @@ function XFeedInner() {
             }
         } catch (error) {
             console.error('Save error:', error);
+        }
+    };
+
+    // Handle helpful for FYI bulletins
+    const handleHelpful = async (postId: string) => {
+        try {
+            await fyiService.markHelpful(postId);
+            queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+        } catch (error) {
+            console.error('Helpful error:', error);
+        }
+    };
+
+    // Handle share via Web Share API
+    const handleShare = async (post: Post) => {
+        const shareData = {
+            title: post.content?.substring(0, 50) || 'NeyborHuud Post',
+            text: post.content || '',
+            url: `${window.location.origin}/post/${post.id}`,
+        };
+        if (navigator.share) {
+            try { await navigator.share(shareData); } catch { /* user cancelled */ }
+        } else {
+            await navigator.clipboard.writeText(shareData.url);
         }
     };
 
@@ -249,6 +291,20 @@ function XFeedInner() {
         setIsPostDetailsOpen(true);
     };
 
+    const handleDeletePost = async () => {
+        if (!deletingPostId) return;
+        try {
+            await deletePost(deletingPostId);
+            setDeletingPostId(null);
+        } catch (error) {
+            console.error('Delete post error:', error);
+        }
+    };
+
+    const handleEditPost = (post: Post) => {
+        setEditingPost(post);
+    };
+
     // Helper to format time ago
     const formatTimeAgo = (dateString: string): string => {
         const date = new Date(dateString);
@@ -268,28 +324,59 @@ function XFeedInner() {
     return (
         <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
             {/* Top Navigation */}
-            <TopNav />
+            <div className={`z-50 transition-all duration-300 ease-in-out overflow-hidden ${navHidden ? 'max-h-0' : 'max-h-24'}`}>
+                <TopNav />
+            </div>
 
             <div className="flex flex-1 overflow-hidden">
                 {/* Left Sidebar */}
                 <LeftSidebar />
 
                 {/* Main Feed */}
-                <main className="flex-1 overflow-y-auto px-4 py-6">
-                    <div className="max-w-[680px] mx-auto flex flex-col gap-6 pb-20">
-                        {/* Composer */}
-                        <Composer onOpenCreate={() => setIsCreatePostOpen(true)} />
+                <main ref={mainRef} className="flex-1 overflow-y-auto">
+                    <div className="flex flex-col pb-20">
+                        {/* Full-width ambient sky hero — weather + exchange rate */}
+                        <FeedSkyHero />
 
-                        {/* Feed Tabs */}
-                        <FeedTabs
-                            activeTab={feedTab}
-                            onTabChange={(tab) => setFeedTab(tab)}
-                        />
+                        <div className="px-4 flex flex-col gap-4 pt-3">
+                            {/* Active content-type filter chip */}
+                            {contentTypeFilter && (
+                                <div className="flex items-center gap-2">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold mod-btn-active text-primary">
+                                        {t(`contentType.${contentTypeFilter}`)}
+                                        <button
+                                            onClick={() => router.replace('/feed')}
+                                            className="ml-1 hover:opacity-70 transition-opacity"
+                                            aria-label="Clear filter"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">close</span>
+                                        </button>
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Feed Layer Selector */}
+                            <FeedTabs
+                                activeTab={feedTab}
+                                onTabChange={(tab) => setFeedTab(tab)}
+                            />
+
+                            {/* FYI Subtype Filter — only when FYI type active */}
+                            {contentTypeFilter === 'fyi' && (
+                                <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                                    {['all', 'safety_notice', 'lost_found', 'community_announcement', 'local_news', 'alert'].map(st => (
+                                        <button key={st} onClick={() => setFyiSubtypeFilter(st === 'all' ? '' : st)}
+                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${fyiSubtypeFilter === (st === 'all' ? '' : st) ? 'mod-btn-active text-primary' : 'mod-btn'}`}>
+                                            {st === 'all' ? 'All' : st.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
 
                         {missedAlerts && missedAlerts.count > 0 && (
-                            <div className="neu-card-sm rounded-2xl px-4 py-3 border border-orange-500/15">
+                            <div className="mod-card rounded-2xl px-4 py-3 border border-orange-500/15">
                                 <div className="flex items-start gap-3">
-                                    <div className="neu-socket rounded-xl size-10 shrink-0 flex items-center justify-center text-orange-500">
+                                    <div className="mod-inset rounded-xl size-10 shrink-0 flex items-center justify-center text-orange-500">
                                         <span className="material-symbols-outlined text-xl">warning</span>
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -311,12 +398,12 @@ function XFeedInner() {
 
                         {/* Error State */}
                         {isError && (
-                            <div className="flex flex-col items-center justify-center py-12 px-5 neu-card-sm rounded-2xl">
-                                <div className="w-16 h-16 rounded-full neu-socket flex items-center justify-center mb-4">
+                            <div className="flex flex-col items-center justify-center py-12 px-5 mod-card rounded-2xl">
+                                <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
                                     <span className="material-symbols-outlined text-3xl text-brand-red">warning</span>
                                 </div>
                                 <p className="text-sm text-center mb-2" style={{ color: 'var(--neu-text)' }}>
-                                    {locationError || 'Failed to load feed'}
+                                    {locationError || t('feed.failedToLoad')}
                                 </p>
                                 {error && (
                                     <p className="text-xs text-center mb-2" style={{ color: 'var(--neu-text-muted)' }}>
@@ -326,16 +413,16 @@ function XFeedInner() {
                                 <button
                                     onClick={() => refetchFeed()}
                                     disabled={isRefetching}
-                                    className="mt-2 px-6 py-2.5 neu-btn rounded-xl text-sm font-bold disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+                                    className="mt-2 px-6 py-2.5 mod-btn rounded-xl text-sm font-bold disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
                                     style={{ color: 'var(--neu-text)' }}
                                 >
                                     {isRefetching ? (
                                         <>
                                             <div className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-                                            Retrying…
+                                            {t('feed.retrying')}
                                         </>
                                     ) : (
-                                        'Retry'
+                                        t('feed.retry')
                                     )}
                                 </button>
                             </div>
@@ -343,32 +430,38 @@ function XFeedInner() {
 
                         {/* Empty State */}
                         {!isLoading && !isError && posts.length === 0 && (
-                            <div className="flex flex-col items-center justify-center py-12 px-5 neu-card-sm rounded-2xl">
-                                <div className="w-16 h-16 rounded-full neu-socket flex items-center justify-center mb-4">
+                            <div className="flex flex-col items-center justify-center py-12 px-5 mod-card rounded-2xl">
+                                <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
                                     <span className="material-symbols-outlined text-3xl" style={{ color: 'var(--neu-text-muted)' }}>inbox</span>
                                 </div>
                                 <p className="text-sm text-center" style={{ color: 'var(--neu-text-secondary)' }}>
-                                    No posts found in your area
+                                    {t('feed.noPostsTitle')}
                                 </p>
                                 <p className="text-xs text-center mt-2" style={{ color: 'var(--neu-text-muted)' }}>
-                                    Be the first to post something!
+                                    {t('feed.noPostsSubtitle')}
                                 </p>
                             </div>
                         )}
+                        </div>
 
-                        {/* Posts Feed */}
-                        <div className="flex flex-col gap-4">
+                        {/* Posts Feed — full width, outside px-4 container */}
+                        <div className="flex flex-col gap-2 bg-black/[0.03] mt-3">
                             {posts.map((post) => (
                                 <XPostCard
                                     key={post.id}
                                     post={post}
+                                    currentUserId={currentUserId || undefined}
                                     onLike={() => handleLike(post)}
                                     onComment={() => openPostDetails(post.id)}
-                                    onShare={() => { }}
+                                    onShare={() => handleShare(post)}
                                     onSave={() => handleSave(post)}
+                                    onEdit={() => handleEditPost(post)}
+                                    onDelete={() => setDeletingPostId(post.id)}
+                                    onReport={(id) => setReportingPostId(id)}
                                     onEmergencyAction={(action) => handleEmergencyAction(post, action)}
                                     formatTimeAgo={formatTimeAgo}
                                     onCardClick={() => openPostDetails(post.id)}
+                                    onHelpful={post.contentType === 'fyi' ? () => handleHelpful(post.id) : undefined}
                                 />
                             ))}
                         </div>
@@ -388,18 +481,9 @@ function XFeedInner() {
                 <RightSidebar />
             </div>
 
-            {/* Floating Action Button */}
-            <button
-                onClick={() => setIsCreatePostOpen(true)}
-                className="fixed bottom-8 right-8 md:bottom-10 md:right-10 z-40 neu-fab rounded-2xl p-4 flex items-center justify-center transition-all hover:scale-105 active:scale-95 group"
-            >
-                <span className="material-symbols-outlined text-2xl text-primary">edit_square</span>
-                <span className="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-2 transition-all duration-300 ease-in-out whitespace-nowrap font-bold text-sm uppercase tracking-wider" style={{ color: 'var(--neu-text)' }}>New Post</span>
-            </button>
-
             {/* Mobile Bottom Navigation */}
             <div className="md:hidden">
-                <BottomNav onCreatePost={() => setIsCreatePostOpen(true)} />
+                <BottomNav hidden={navHidden} />
             </div>
 
             {/* Create Post Modal */}
@@ -417,6 +501,44 @@ function XFeedInner() {
                 isOpen={isPostDetailsOpen}
                 onClose={() => setIsPostDetailsOpen(false)}
             />
+
+            {/* Report Modal */}
+            {reportingPostId && (
+                <ReportModal
+                    postId={reportingPostId}
+                    onClose={() => setReportingPostId(null)}
+                    onSubmit={async (postId, reason, description) => {
+                        await contentService.reportPost(postId, reason, description);
+                    }}
+                />
+            )}
+
+            {/* Delete Confirmation Dialog */}
+            {deletingPostId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setDeletingPostId(null)}>
+                    <div className="mod-modal rounded-2xl p-6 mx-4 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--neu-text)' }}>Delete Post</h3>
+                        <p className="text-sm mb-6" style={{ color: 'var(--neu-text-muted)' }}>
+                            Are you sure you want to delete this post? This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setDeletingPostId(null)}
+                                className="px-4 py-2 rounded-xl text-sm font-bold mod-btn"
+                                style={{ color: 'var(--neu-text-muted)' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeletePost}
+                                className="px-4 py-2 rounded-xl text-sm font-bold bg-red-500/20 text-red-400 mod-btn hover:bg-red-500/30 transition-colors"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

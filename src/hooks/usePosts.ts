@@ -10,7 +10,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { contentService } from "@/services/content.service";
-import { CreatePostPayload, FeedTab } from "@/types/api";
+import { CreatePostPayload, FeedTab, ContentType } from "@/types/api";
 import { handleApiError } from "@/lib/error-handler";
 
 /**
@@ -24,6 +24,10 @@ export function useLocationFeed(
     category?: string;
     ranked?: boolean;
     feedTab?: FeedTab;
+    contentType?: ContentType;
+    departmentId?: string;
+    priority?: string;
+    fyiSubtype?: string;
   },
 ) {
   return useInfiniteQuery({
@@ -35,6 +39,10 @@ export function useLocationFeed(
       options?.radius,
       options?.ranked,
       options?.feedTab,
+      options?.contentType,
+      options?.departmentId,
+      options?.priority,
+      options?.fyiSubtype,
     ],
     queryFn: ({ pageParam = 1 }) => {
       if (!latitude || !longitude) {

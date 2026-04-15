@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 import { authService } from '@/services/auth.service';
 import { toast } from 'sonner';
-import type { ConsentType, UserConsentRecord } from '@/types/api';
+import type { ConsentType, UserConsentRecord, AppLanguage } from '@/types/api';
+import { useTranslation } from '@/lib/i18n';
 
 function latestForType(
     rows: UserConsentRecord[],
@@ -45,7 +46,8 @@ interface UserSettings {
 
 export default function SettingsPage() {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'notifications' | 'privacy' | 'account'>('notifications');
+    const { t, language: currentLanguage, setLanguage, languageNames, availableLanguages } = useTranslation();
+    const [activeTab, setActiveTab] = useState<'notifications' | 'privacy' | 'account' | 'language'>('notifications');
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [user, setUser] = useState<any>(null);
@@ -433,6 +435,7 @@ export default function SettingsPage() {
                         { id: 'notifications', label: 'Notifications', icon: 'bi-bell' },
                         { id: 'privacy', label: 'Privacy', icon: 'bi-shield' },
                         { id: 'account', label: 'Account', icon: 'bi-person' },
+                        { id: 'language', label: t('settings.language'), icon: 'bi-translate' },
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -1025,6 +1028,49 @@ export default function SettingsPage() {
                                         : 'Delete account'}
                                 </span>
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Language Tab */}
+                {activeTab === 'language' && (
+                    <div className="animate-in fade-in duration-300">
+                        <div className="neumorphic rounded-2xl p-6 mb-6">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-2">
+                                {t('settings.language')}
+                            </h2>
+                            <p className="text-xs text-charcoal/50 mb-6">
+                                {t('settings.languageDesc')}
+                            </p>
+                            <div className="flex flex-col gap-3">
+                                {availableLanguages.map((lang) => (
+                                    <button
+                                        key={lang}
+                                        onClick={() => {
+                                            setLanguage(lang);
+                                            toast.success(t('settings.languageSaved'));
+                                        }}
+                                        className={`
+                                            flex items-center justify-between py-4 px-5 rounded-xl transition-all min-h-[44px] touch-manipulation
+                                            ${currentLanguage === lang
+                                                ? 'neumorphic-inset border border-primary/30'
+                                                : 'neumorphic hover:scale-[1.01] active:scale-[0.99]'}
+                                        `}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-lg">
+                                                {lang === 'en' ? '🇬🇧' : lang === 'ha' ? '🇳🇬' : lang === 'yo' ? '🇳🇬' : lang === 'ig' ? '🇳🇬' : '🇳🇬'}
+                                            </span>
+                                            <span className={`text-sm font-bold ${currentLanguage === lang ? 'text-primary' : 'text-charcoal/70'}`}>
+                                                {languageNames[lang]}
+                                            </span>
+                                        </div>
+                                        {currentLanguage === lang && (
+                                            <i className="bi bi-check-circle-fill text-primary"></i>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 )}

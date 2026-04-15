@@ -13,10 +13,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFollow, useFollowers, useFollowing } from '@/hooks/useFollow';
 import { useUserPosts, usePostMutations } from '@/hooks/usePosts';
 import { XPostCard } from '@/components/feed/XPostCard';
+import { ReportModal } from '@/components/feed/ReportModal';
 import { PostSkeleton } from '@/components/feed/PostSkeleton';
 import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
 import { MiniMap } from '@/components/ui/InteractiveMap';
 import { Post } from '@/types/api';
+import { contentService } from '@/services/content.service';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -28,6 +30,7 @@ export default function ProfilePage() {
   const { user: currentUser } = useAuth();
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
+  const [reportingPostId, setReportingPostId] = useState<string | null>(null);
 
   // Fetch user profile by username
   const {
@@ -737,10 +740,12 @@ export default function ProfilePage() {
                 <XPostCard
                   key={post.id}
                   post={post}
+                  currentUserId={currentUser?.id}
                   onLike={() => handleLike(post)}
                   onComment={() => openPostDetails(post.id)}
                   onShare={() => {}}
                   onSave={() => handleSave(post)}
+                  onReport={(id) => setReportingPostId(id)}
                   formatTimeAgo={formatTimeAgo}
                   onCardClick={() => openPostDetails(post.id)}
                 />
@@ -774,6 +779,17 @@ export default function ProfilePage() {
         {/* end Two-Column Layout */}
 
       </div>
+
+      {/* Report Modal */}
+      {reportingPostId && (
+        <ReportModal
+          postId={reportingPostId}
+          onClose={() => setReportingPostId(null)}
+          onSubmit={async (postId, reason, description) => {
+            await contentService.reportPost(postId, reason, description);
+          }}
+        />
+      )}
 
       {/* Post Details Modal */}
       {selectedPostId && (

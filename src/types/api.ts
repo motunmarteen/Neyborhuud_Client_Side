@@ -28,6 +28,12 @@ export interface PaginatedResponse<T> {
 /** Feed metadata returned by backend */
 export type FeedTab = "your_huud" | "street_radar" | "following_places";
 
+/** Content type for filtering posts in the feed */
+export type ContentType = "post" | "fyi" | "gossip" | "help_request" | "job" | "emergency" | "event" | "marketplace";
+
+/** Supported languages */
+export type AppLanguage = "en" | "ha" | "yo" | "ig" | "pcm";
+
 export interface FeedMeta {
   feedType: "chronological" | "ranked" | "smart" | "trending";
   boostedCategories: string[];
@@ -182,16 +188,16 @@ export interface Post {
     | "post"
     | "fyi"
     | "gossip"
-    | "alert"
     | "help_request"
     | "job"
-    | "echo"
     | "emergency"
-    | "owambeh";
+    | "event"
+    | "marketplace";
+  mood?: string;
   severity?: "low" | "medium" | "critical";
   emergencyType?: string;
   verificationStatus?: "unverified" | "verified" | "community_confirmed" | "disputed";
-  cardStyle?: "default" | "emergency_red" | "fyi_blue" | "gossip_neutral" | "owambeh_green";
+  cardStyle?: "default" | "emergency_red" | "fyi_blue" | "gossip_neutral" | "marketplace_green" | "event_purple";
   _feedLayer?: "local" | "extended" | "explore";
   availableActions?: string[];
   savedCollection?: string | null;
@@ -204,6 +210,34 @@ export interface Post {
   visibility?: "public" | "friends" | "neighborhood" | "ward" | "lga" | "state";
   tags?: string[];
   mentions?: string[];
+  priority?: "low" | "normal" | "high" | "critical";
+  culturalContext?: string[];
+  targetAudience?: { ageRange?: { min?: number; max?: number }; gender?: string; interests?: string[] };
+  helpfulCount?: number;
+  isHelpful?: boolean;
+  fyiSubtype?: "safety_notice" | "lost_found" | "community_announcement" | "local_news" | "alert";
+  fyiStatus?: "active" | "found" | "returned" | "resolved" | "expired" | "outdated" | "closed";
+  expiresAt?: string;
+  endorsements?: Array<{ endorserId: string; authorityTitle: string; note?: string; createdAt: string }>;
+  metadata?: Record<string, any>;
+  // Marketplace fields
+  price?: number;
+  currency?: string;
+  itemCondition?: "new" | "used" | "refurbished" | "free";
+  isNegotiable?: boolean;
+  deliveryOption?: "pickup" | "delivery" | "both";
+  availability?: "available" | "sold" | "reserved";
+  itemCategory?: string;
+  contactMethod?: string;
+  // Event fields (in metadata)
+  eventDate?: string;
+  eventTime?: string;
+  venue?: { name: string; address?: string; lat?: number; lng?: number };
+  ticketInfo?: "free" | "paid";
+  capacity?: number;
+  rsvpEnabled?: boolean;
+  organizer?: string;
+  eventCategory?: string;
   likes: number;
   comments: number;
   shares: number;
@@ -627,15 +661,39 @@ export interface LoginPayload {
 
 export interface CreatePostPayload {
   type: "text" | "image" | "video" | "poll" | "article";
+  contentType?: "post" | "fyi" | "gossip" | "help_request" | "job" | "emergency" | "event" | "marketplace";
   content: string;
+  mood?: string;
   media?: File[];
   visibility: "public" | "friends" | "neighborhood" | "ward" | "lga" | "state";
   tags?: string[];
   mentions?: string[];
+  language?: "en" | "ha" | "yo" | "ig" | "pcm";
+  priority?: "low" | "normal" | "high" | "critical";
+  culturalContext?: string[];
+  targetAudience?: { ageRange?: { min?: number; max?: number }; gender?: string; interests?: string[] };
   location?: {
     latitude: number;
     longitude: number;
   };
+  // Event fields
+  eventDate?: string;
+  eventTime?: string;
+  venue?: { name: string; address?: string; lat?: number; lng?: number };
+  ticketInfo?: "free" | "paid";
+  ticketPrice?: number;
+  capacity?: number;
+  rsvpEnabled?: boolean;
+  organizer?: string;
+  eventCategory?: string;
+  // Marketplace fields
+  price?: number;
+  currency?: "NGN" | "USD";
+  itemCondition?: "new" | "used" | "refurbished" | "free";
+  isNegotiable?: boolean;
+  deliveryOption?: "pickup" | "delivery" | "both";
+  itemCategory?: string;
+  contactMethod?: string;
 }
 
 export interface CreateEventPayload {

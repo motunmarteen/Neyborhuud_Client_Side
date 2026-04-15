@@ -12,6 +12,7 @@ import {
   FeedResponse,
   CreatePostPayload,
   FeedTab,
+  ContentType,
 } from "@/types/api";
 
 /**
@@ -65,6 +66,16 @@ function normalizeFeedItem(item: any): Post {
     type: item?.type,
     visibility: item?.visibility,
     isPinned: item?.isPinned,
+    priority: item?.priority,
+    culturalContext: item?.culturalContext,
+    targetAudience: item?.targetAudience,
+    helpfulCount: item?.helpfulCount ?? 0,
+    isHelpful: !!item?.isHelpful,
+    fyiSubtype: item?.metadata?.fyiType ?? item?.fyiSubtype,
+    fyiStatus: item?.metadata?.status ?? item?.fyiStatus,
+    expiresAt: item?.expiresAt ?? item?.metadata?.expiryDate,
+    endorsements: item?.endorsements,
+    metadata: item?.metadata,
   };
 }
 
@@ -120,17 +131,22 @@ export const contentService = {
         payload.media,
         {
           type: payload.type,
+          contentType: payload.contentType || "post",
           content: payload.content,
           visibility: payload.visibility,
           tags: payload.tags,
           mentions: payload.mentions,
           location: payload.location,
+          language: payload.language,
         },
         onProgress,
       );
     }
 
-    return await apiClient.post<Post>("/content/posts", payload);
+    return await apiClient.post<Post>("/content/posts", {
+      ...payload,
+      contentType: payload.contentType || "post",
+    });
   },
 
   /**
@@ -147,6 +163,10 @@ export const contentService = {
       limit?: number;
       ranked?: boolean;
       feedTab?: FeedTab;
+      contentType?: ContentType;
+      departmentId?: string;
+      priority?: string;
+      fyiSubtype?: string;
     },
   ): Promise<FeedResponse<Post>> {
     try {
@@ -160,6 +180,10 @@ export const contentService = {
           limit: options?.limit || 20,
           ranked: options?.ranked || undefined,
           feedTab: options?.feedTab,
+          contentType: options?.contentType || undefined,
+          departmentId: options?.departmentId || undefined,
+          priority: options?.priority || undefined,
+          fyiSubtype: options?.fyiSubtype || undefined,
         },
       });
       return normalizeFeedResponse<Post>(res);
@@ -234,15 +258,22 @@ export const contentService = {
   /**
    * Update a post
    */
-  async updatePost(postId: string, data: Partial<CreatePostPayload>) {
-    return await apiClient.put<Post>(`/content/posts/${postId}`, data);
+  async updatePost(postId: string, data: Partial<CreatePostPayload> & { editReason?: string }) {
+    return await apiClient.patch<Post>(`/content/${postId}`, data);
   },
 
   /**
-   * Delete a post
+   * Delete a post (soft delete)
    */
   async deletePost(postId: string) {
-    return await apiClient.delete(`/content/posts/${postId}`);
+    return await apiClient.delete(`/content/${postId}`);
+  },
+
+  /**
+   * Get edit history for a post
+   */
+  async getEditHistory(postId: string) {
+    return await apiClient.get<{ history: Array<{ _id: string; title: string; body: string; editReason: string; versionNumber: number; createdAt: string }> }>(`/content/${postId}/history`);
   },
 
   /**

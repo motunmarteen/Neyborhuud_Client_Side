@@ -171,7 +171,7 @@ function GossipPageInner() {
 
             {/* Mobile Bottom Navigation */}
             <div className="md:hidden">
-                <BottomNav onCreatePost={() => setIsCreateModalOpen(true)} />
+                <BottomNav />
             </div>
 
             {/* Create Gossip Modal */}
