@@ -26,7 +26,14 @@ export const gamificationService = {
    * Get my stats
    */
   async getMyStats() {
-    return await apiClient.get("/gamification/my-stats");
+    return await apiClient.get("/gamification/stats");
+  },
+
+  /**
+   * Get hero stats (trust score + HuudCoins) — lightweight endpoint for the sky hero status bar
+   */
+  async getHeroStats() {
+    return await apiClient.get<{ trustScore: number; totalHuudCoins: number }>("/gamification/hero-stats");
   },
 
   /**

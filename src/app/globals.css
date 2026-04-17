@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+/* ── Leaflet Map — fix Tailwind reset breaking tiles ── */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+.leaflet-container img.leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+}
+.leaflet-container img {
+  max-width: none !important;
+}
+
+/* ── NeyborHuud Doodle Background Pattern ──
+   500×500 SVG tile with neighbourhood-themed icons:
+   shield, SOS, marketplace, megaphone, chat, location pin,
+   star, house, naira, helping hand, community, search, etc.
+   Served as static files for reliability (no encoding issues). */
+
 :root {
   /* NeyborHuud — Nigeria Incident Map Palette */
   --neon-green: #008751;
@@ -77,6 +96,9 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   color: #1A1A2E;
   background-color: #FFFFFF;
+  background-image: url('/doodle-pattern.svg');
+  background-repeat: repeat;
+  background-size: 500px 500px;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   font-weight: 400;
@@ -88,6 +110,7 @@ body {
 html.dark body {
   color: #F5F0ED;
   background-color: #141420;
+  background-image: url('/doodle-pattern-dark.svg');
 }
 
 /* Smooth Scrolling */
@@ -243,7 +266,7 @@ html {
 
 /* ── Base Surface ── */
 .neu-base {
-  background: var(--neu-bg);
+  background: transparent;
 }
 
 /* ── Raised Card ── */

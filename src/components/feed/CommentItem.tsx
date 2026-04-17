@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Comment } from '@/types/api';
+import { formatTimeAgo } from '@/utils/timeAgo';
 import { useAuth } from '@/hooks/useAuth';
 import { useCommentMutations } from '@/hooks/useComments';
 import { CommentForm } from './CommentForm';
 import Link from 'next/link';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 interface CommentItemProps {
     comment: Comment;
@@ -38,21 +40,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
         }
     };
 
-    const formatTimeAgo = (dateString: string): string => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
 
-        if (diffMins < 1) return 'now';
-        if (diffMins < 60) return `${diffMins}m`;
-        if (diffHours < 24) return `${diffHours}h`;
-        if (diffDays < 7) return `${diffDays}d`;
-        return date.toLocaleDateString();
-    };
 
     return (
         <div className={`flex gap-3 ${isReply ? 'mt-3 pl-2 sm:pl-4' : 'py-4'}`} style={isReply ? { borderLeft: '2px solid var(--neu-shadow-dark)' } : {}}>
@@ -61,13 +49,10 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                 href={`/profile/${username}`} 
                 className="flex flex-col items-center flex-shrink-0"
             >
-                <img
+                <MapPinAvatar
                     src={avatarUrl}
                     alt={username}
-                    className={`${isReply ? 'w-8 h-8' : 'w-10 h-10'} rounded-full object-cover transition-opacity hover:opacity-80 cursor-pointer neu-avatar`}
-                    onError={(e) => {
-                        e.currentTarget.src = 'https://i.pravatar.cc/100?u=' + username;
-                    }}
+                    size={isReply ? 'xs' : 'sm'}
                 />
             </Link>
 

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useFollow } from '@/hooks/useFollow';
 import type { FollowerUser } from '@/types/follow';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 interface UserListItemProps {
   user: FollowerUser;
@@ -42,17 +43,12 @@ export function UserListItem({ user }: UserListItemProps) {
         className="flex items-center gap-3 flex-1 min-w-0"
       >
         {/* Profile Picture */}
-        <div className="w-12 h-12 rounded-full bg-linear-to-br from-primary to-brand-blue flex items-center justify-center text-white font-bold text-lg overflow-hidden shrink-0">
-          {user.profilePicture || user.avatarUrl ? (
-            <img
-              src={user.profilePicture || user.avatarUrl || ''}
-              alt={displayName}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            userInitial
-          )}
-        </div>
+        <MapPinAvatar
+          src={user.profilePicture || user.avatarUrl}
+          alt={displayName}
+          fallbackInitial={userInitial}
+          size="md"
+        />
 
         {/* Name and Username */}
         <div className="flex-1 min-w-0">
@@ -100,16 +96,16 @@ export function UserListItem({ user }: UserListItemProps) {
                 <span className="inline-flex items-center gap-1.5">
                   <i className="bi bi-hourglass-split animate-spin text-xs" />
                   <span className="hidden sm:inline">
-                    {isFollowing ? 'Unfollowing...' : 'Following...'}
+                    {isFollowing ? 'Unlinking...' : 'Linking...'}
                   </span>
                 </span>
               ) : (
                 <>
                   <span className="hidden group-hover:inline">
-                    {isFollowing ? 'Unfollow' : 'Follow'}
+                    {isFollowing ? 'Unlink' : 'HuudLink'}
                   </span>
                   <span className="group-hover:hidden">
-                    {isFollowing ? 'Following' : 'Follow'}
+                    {isFollowing ? 'HuudLinked' : 'HuudLink'}
                   </span>
                 </>
               )}

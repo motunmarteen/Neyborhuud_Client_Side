@@ -210,3 +210,16 @@ export function useFollowing(
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
 }
+
+/**
+ * Hook for fetching lightweight follow counts
+ */
+export function useFollowCounts(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["follow-counts", userId],
+    queryFn: () => followService.getFollowCounts(userId!),
+    enabled: !!userId,
+    refetchOnWindowFocus: true,
+    staleTime: 15000,
+  });
+}

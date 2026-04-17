@@ -85,13 +85,13 @@ export default function FollowingPage() {
             className="flex-1 py-4 text-center font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
             type="button"
           >
-            Followers
+            Linkers
           </button>
           <button
             className="flex-1 py-4 text-center font-semibold text-gray-900 dark:text-white border-b-4 border-primary"
             type="button"
           >
-            Following
+            Linking
           </button>
         </div>
       </div>

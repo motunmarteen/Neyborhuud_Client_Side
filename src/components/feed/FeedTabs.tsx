@@ -24,7 +24,7 @@ export function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
                     <button
                         key={tab.key}
                         onClick={() => onTabChange(tab.key)}
-                        className={`py-3 px-2 text-xs md:text-sm font-medium transition-all ${
+                        className={`py-1.5 px-2 text-xs md:text-sm font-medium transition-all ${
                             activeTab === tab.key ? 'font-bold text-[var(--neu-text)]' : 'text-[var(--neu-text-muted)] hover:text-[var(--neu-text-secondary)]'
                         }`}
                     >

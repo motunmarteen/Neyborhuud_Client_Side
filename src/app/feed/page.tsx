@@ -306,38 +306,23 @@ function XFeedInner() {
     };
 
     // Helper to format time ago
-    const formatTimeAgo = (dateString: string): string => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
 
-        if (diffMins < 1) return 'now';
-        if (diffMins < 60) return `${diffMins}m`;
-        if (diffHours < 24) return `${diffHours}h`;
-        if (diffDays < 7) return `${diffDays}d`;
-        return date.toLocaleDateString();
-    };
 
     return (
-        <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
-            {/* Top Navigation */}
-            <div className={`z-50 transition-all duration-300 ease-in-out overflow-hidden ${navHidden ? 'max-h-0' : 'max-h-24'}`}>
+        <div className="relative flex h-screen w-full overflow-hidden neu-base">
+            {/* Left Sidebar */}
+            <LeftSidebar />
+
+            {/* Main scroll area: TopNav + Feed */}
+            <main ref={mainRef} className="flex flex-col flex-1 overflow-y-auto">
+                {/* Top Navigation — scrolls with content */}
                 <TopNav />
-            </div>
 
-            <div className="flex flex-1 overflow-hidden">
-                {/* Left Sidebar */}
-                <LeftSidebar />
-
-                {/* Main Feed */}
-                <main ref={mainRef} className="flex-1 overflow-y-auto">
-                    <div className="flex flex-col pb-20">
-                        {/* Full-width ambient sky hero — weather + exchange rate */}
-                        <FeedSkyHero />
-
+                <div className="flex flex-col pb-20">
+                        {/* Full-width ambient sky hero — pulled up behind the transparent TopNav */}
+                        <div className="-mt-[60px]">
+                          <FeedSkyHero />
+                        </div>
                         <div className="px-4 flex flex-col gap-4 pt-3">
                             {/* Active content-type filter chip */}
                             {contentTypeFilter && (
@@ -451,6 +436,7 @@ function XFeedInner() {
                                     key={post.id}
                                     post={post}
                                     currentUserId={currentUserId || undefined}
+                                    userLocation={location}
                                     onLike={() => handleLike(post)}
                                     onComment={() => openPostDetails(post.id)}
                                     onShare={() => handleShare(post)}
@@ -459,7 +445,7 @@ function XFeedInner() {
                                     onDelete={() => setDeletingPostId(post.id)}
                                     onReport={(id) => setReportingPostId(id)}
                                     onEmergencyAction={(action) => handleEmergencyAction(post, action)}
-                                    formatTimeAgo={formatTimeAgo}
+
                                     onCardClick={() => openPostDetails(post.id)}
                                     onHelpful={post.contentType === 'fyi' ? () => handleHelpful(post.id) : undefined}
                                 />
@@ -479,7 +465,6 @@ function XFeedInner() {
 
                 {/* Right Sidebar */}
                 <RightSidebar />
-            </div>
 
             {/* Mobile Bottom Navigation */}
             <div className="md:hidden">

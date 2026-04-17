@@ -84,14 +84,14 @@ export default function FollowersPage() {
             className="flex-1 py-4 text-center font-semibold text-gray-900 dark:text-white border-b-4 border-primary"
             type="button"
           >
-            Followers
+            Linkers
           </button>
           <button
             onClick={() => router.push(`/profile/${username}/following`)}
             className="flex-1 py-4 text-center font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
             type="button"
           >
-            Following
+            Linking
           </button>
         </div>
       </div>

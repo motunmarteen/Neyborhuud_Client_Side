@@ -59,4 +59,13 @@ export const followService = {
       },
     );
   },
+
+  /**
+   * Get follow counts for a user (lightweight)
+   */
+  async getFollowCounts(userId: string) {
+    return await apiClient.get<{ followerCount: number; followingCount: number }>(
+      `/follow/counts/${userId}`,
+    );
+  },
 };

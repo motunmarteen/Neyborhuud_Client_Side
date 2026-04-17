@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useCommentMutations } from '@/hooks/useComments';
 import { useAuth } from '@/hooks/useAuth';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 interface CommentFormProps {
     postId: string;
@@ -58,10 +59,10 @@ export const CommentForm: React.FC<CommentFormProps> = ({
     return (
         <form onSubmit={handleSubmit} className="w-full">
             <div className="flex gap-3">
-                <img
-                    src={user?.avatarUrl || user?.profilePicture || 'https://i.pravatar.cc/100?u=user'}
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 neu-avatar"
+                <MapPinAvatar
+                    src={user?.avatarUrl || user?.profilePicture}
                     alt="Current user"
+                    size="xs"
                 />
                 <div className="flex-1 min-w-0">
                     <textarea

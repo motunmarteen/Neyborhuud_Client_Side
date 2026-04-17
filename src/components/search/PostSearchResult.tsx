@@ -7,6 +7,8 @@
 import { SearchPost } from '@/types/search';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { formatTimeAgo } from '@/utils/timeAgo';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 interface Props {
   post: SearchPost;
@@ -27,17 +29,7 @@ export const PostSearchResult = ({ post, onClose }: Props) => {
     return null;
   }
 
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (seconds < 60) return 'just now';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
-    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
-    return date.toLocaleDateString();
-  };
 
   return (
     <button
@@ -46,20 +38,12 @@ export const PostSearchResult = ({ post, onClose }: Props) => {
     >
       <div className="flex items-start gap-3">
         {/* Author Avatar */}
-        <div className="relative h-10 w-10 shrink-0">
-          {post.author?.avatarUrl ? (
-            <Image
-              src={post.author.avatarUrl}
-              alt={post.author.name}
-              fill
-              className="rounded-full object-cover"
-            />
-          ) : (
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-semibold text-sm">
-              {post.author.name.charAt(0).toUpperCase()}
-            </div>
-          )}
-        </div>
+        <MapPinAvatar
+          src={post.author?.avatarUrl}
+          alt={post.author.name}
+          fallbackInitial={post.author.name.charAt(0).toUpperCase()}
+          size="sm"
+        />
 
         {/* Post Content */}
         <div className="flex-1 min-w-0">

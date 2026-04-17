@@ -6,8 +6,10 @@ import { usePost } from '@/hooks/usePosts';
 import { CommentItem } from './CommentItem';
 import { CommentForm } from './CommentForm';
 import { PostAuthor } from '@/types/api';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import { contentService } from '@/services/content.service';
 import { fyiService } from '@/services/fyi.service';
+import { formatTimeAgo } from '@/utils/timeAgo';
 
 interface PostDetailsModalProps {
     postId: string | null;
@@ -77,22 +79,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
         }
     };
 
-    const formatTimeAgo = (dateString: string): string => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
 
-        if (diffHours < 24) {
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-        if (diffDays < 7) {
-            return date.toLocaleDateString([], { weekday: 'short' }) + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-        return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-    };
 
     return (
         <div
@@ -144,10 +131,10 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                             {/* Main Post Section */}
                             <div className="px-4 py-4">
                                 <div className="flex gap-3 mb-4">
-                                    <img
-                                        src={(details.content.author as PostAuthor)?.avatarUrl || 'https://i.pravatar.cc/100?u=author'}
-                                        className="w-12 h-12 rounded-full object-cover neu-avatar"
+                                    <MapPinAvatar
+                                        src={(details.content.author as PostAuthor)?.avatarUrl}
                                         alt="Author"
+                                        size="md"
                                     />
                                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                                         <div className="font-bold text-[16px] hover:underline cursor-pointer" style={{ color: 'var(--neu-text)' }}>

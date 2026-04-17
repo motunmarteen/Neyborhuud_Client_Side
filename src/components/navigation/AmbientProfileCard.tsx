@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import type L from 'leaflet';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 export type TimePeriod = 'night' | 'dawn' | 'morning' | 'afternoon' | 'sunset' | 'evening';
 export type WeatherCondition = 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'snow';
@@ -153,264 +155,26 @@ export function getSkyTheme(time: TimePeriod, weather: WeatherCondition): SkyThe
   return theme;
 }
 
-// --- Sky Scene Elements ---
-
-function Stars() {
-  const stars = useMemo(() =>
-    Array.from({ length: 35 }).map((_, i) => ({
-      id: i,
-      w: 1 + (i * 7 + 3) % 3,
-      top: (i * 17 + 5) % 80,
-      left: (i * 23 + 11) % 100,
-      opacity: 0.2 + ((i * 13) % 8) / 10,
-      dur: 2 + ((i * 11) % 4),
-      delay: ((i * 7) % 30) / 10,
-    })), []);
-
-  return (
-    <>
-      {stars.map((s) => (
-        <div
-          key={s.id}
-          className="absolute rounded-full bg-white"
-          style={{
-            width: `${s.w}px`,
-            height: `${s.w}px`,
-            top: `${s.top}%`,
-            left: `${s.left}%`,
-            opacity: s.opacity,
-            animation: `ambient-twinkle ${s.dur}s ease-in-out infinite`,
-            animationDelay: `${s.delay}s`,
-          }}
-        />
-      ))}
-    </>
-  );
+/* ── Leaflet CSS (loaded once) ── */
+let leafletCssLoaded = false;
+function ensureLeafletCss() {
+  if (leafletCssLoaded || typeof document === 'undefined') return;
+  leafletCssLoaded = true;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  document.head.appendChild(link);
 }
 
-function CelestialBody({ theme }: { theme: SkyTheme }) {
-  if (theme.isMoon) {
-    return (
-      <div className="absolute transition-all duration-[2000ms]" style={{ top: theme.celestialTop, right: theme.celestialRight }}>
-        {/* Glow */}
-        <div
-          className="absolute rounded-full"
-          style={{
-            width: theme.celestialSize * 2.5,
-            height: theme.celestialSize * 2.5,
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: `radial-gradient(circle, ${theme.celestialGlow} 0%, transparent 70%)`,
-            animation: 'ambient-pulse 6s ease-in-out infinite',
-          }}
-        />
-        {/* Moon body */}
-        <div
-          className="relative rounded-full"
-          style={{
-            width: theme.celestialSize,
-            height: theme.celestialSize,
-            background: `radial-gradient(circle at 35% 35%, ${theme.celestialColor} 0%, #c8cce0 100%)`,
-            boxShadow: `0 0 15px ${theme.celestialGlow}, 0 0 40px ${theme.celestialGlow}`,
-          }}
-        >
-          {/* Craters */}
-          <div className="absolute rounded-full" style={{ width: 5, height: 5, top: '25%', left: '55%', background: 'rgba(0,0,0,0.08)' }} />
-          <div className="absolute rounded-full" style={{ width: 3, height: 3, top: '55%', left: '30%', background: 'rgba(0,0,0,0.06)' }} />
-          <div className="absolute rounded-full" style={{ width: 4, height: 4, top: '45%', left: '60%', background: 'rgba(0,0,0,0.05)' }} />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="absolute transition-all duration-[2000ms]" style={{ top: theme.celestialTop, right: theme.celestialRight }}>
-      {/* Outer glow */}
-      <div
-        className="absolute rounded-full"
-        style={{
-          width: theme.celestialSize * 3.5,
-          height: theme.celestialSize * 3.5,
-          top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
-          background: `radial-gradient(circle, ${theme.celestialGlow} 0%, transparent 70%)`,
-          animation: 'ambient-pulse 5s ease-in-out infinite',
-        }}
-      />
-      {/* Mid glow */}
-      <div
-        className="absolute rounded-full"
-        style={{
-          width: theme.celestialSize * 2,
-          height: theme.celestialSize * 2,
-          top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
-          background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%)',
-          animation: 'ambient-pulse 3s ease-in-out infinite',
-          animationDelay: '1s',
-        }}
-      />
-      {/* Sun body */}
-      <div
-        className="relative rounded-full"
-        style={{
-          width: theme.celestialSize,
-          height: theme.celestialSize,
-          background: `radial-gradient(circle at 40% 40%, #fff8e8 0%, ${theme.celestialColor} 60%, ${theme.celestialGlow} 100%)`,
-          boxShadow: `0 0 20px ${theme.celestialGlow}, 0 0 60px ${theme.celestialGlow}`,
-        }}
-      />
-    </div>
-  );
-}
-
-function CloudShape({ x, y, scale, color, speed }: { x: number; y: number; scale: number; color: string; speed: number }) {
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: `${x}%`,
-        top: `${y}%`,
-        transform: `scale(${scale})`,
-        animation: `ambient-float ${speed}s ease-in-out infinite`,
-        animationDelay: `${speed * 0.3}s`,
-      }}
-    >
-      <div className="relative" style={{ width: 70, height: 28 }}>
-        <div className="absolute rounded-full" style={{ width: 28, height: 20, bottom: 0, left: 4, background: color, filter: 'blur(1px)' }} />
-        <div className="absolute rounded-full" style={{ width: 24, height: 24, bottom: 4, left: 16, background: color, filter: 'blur(1px)' }} />
-        <div className="absolute rounded-full" style={{ width: 32, height: 26, bottom: 2, left: 26, background: color, filter: 'blur(1px)' }} />
-        <div className="absolute rounded-full" style={{ width: 22, height: 18, bottom: 0, left: 44, background: color, filter: 'blur(1px)' }} />
-      </div>
-    </div>
-  );
-}
-
-function AnimatedClouds({ color }: { color: string }) {
-  return (
-    <>
-      <CloudShape x={-8} y={12} scale={1} color={color} speed={14} />
-      <CloudShape x={50} y={6} scale={0.75} color={color} speed={18} />
-      <CloudShape x={20} y={25} scale={0.6} color={color} speed={10} />
-    </>
-  );
-}
-
-function RainDrops({ isDark }: { isDark: boolean }) {
-  const drops = useMemo(() =>
-    Array.from({ length: 30 }).map((_, i) => ({
-      id: i,
-      left: (i * 13 + 5) % 100,
-      height: 10 + (i * 7 + 3) % 18,
-      dur: 0.35 + ((i * 11) % 4) / 15,
-      delay: ((i * 7) % 25) / 10,
-      angle: -10 + ((i * 3) % 8),
-    })), []);
-
-  return (
-    <>
-      {drops.map((d) => (
-        <div
-          key={d.id}
-          className="absolute"
-          style={{
-            left: `${d.left}%`,
-            top: '-12px',
-            width: '1.5px',
-            height: `${d.height}px`,
-            transform: `rotate(${d.angle}deg)`,
-            background: isDark
-              ? 'linear-gradient(180deg, transparent, rgba(150,180,255,0.5), transparent)'
-              : 'linear-gradient(180deg, transparent, rgba(255,255,255,0.5), transparent)',
-            borderRadius: '1px',
-            animation: `ambient-rain ${d.dur}s linear infinite`,
-            animationDelay: `${d.delay}s`,
-          }}
-        />
-      ))}
-    </>
-  );
-}
-
-function CitySilhouette({ color }: { color: string }) {
-  return (
-    <svg
-      className="absolute bottom-0 left-0 w-full"
-      viewBox="0 0 300 45"
-      preserveAspectRatio="none"
-      style={{ height: '32px' }}
-    >
-      <path
-        d={`M0,45 L0,30 L8,30 L8,24 L12,24 L12,30 L18,30 L18,20 L22,20 L22,16 L26,16 L26,20 L30,20 L30,30 
-            L38,30 L38,26 L42,26 L42,30 L50,30 L50,22 L54,22 L54,18 L58,18 L58,14 L62,14 L62,18 L66,18 L66,22 L70,22 L70,30 
-            L78,30 L78,24 L82,24 L82,30 L90,30 L90,12 L93,12 L93,9 L97,9 L97,12 L100,12 L100,30 
-            L108,30 L108,26 L112,26 L112,22 L116,22 L116,30 L124,30 L124,28 L128,28 L128,30 
-            L136,30 L136,16 L138,16 L138,11 L142,11 L142,7 L146,7 L146,11 L148,11 L148,16 L150,16 L150,30 
-            L158,30 L158,24 L162,24 L162,20 L166,20 L166,24 L170,24 L170,30 
-            L178,30 L178,22 L182,22 L182,30 L190,30 L190,18 L194,18 L194,14 L198,14 L198,18 L202,18 L202,30 
-            L210,30 L210,26 L214,26 L214,30 L222,30 L222,20 L225,20 L225,15 L228,15 L228,11 L232,11 L232,15 L235,15 L235,20 L238,20 L238,30 
-            L246,30 L246,24 L250,24 L250,30 L258,30 L258,28 L262,28 L262,30 
-            L270,30 L270,22 L274,22 L274,18 L278,18 L278,22 L282,22 L282,30 L290,30 L290,26 L294,26 L294,30 L300,30 L300,45 Z`}
-        fill={color}
-      />
-      {/* Lit windows */}
-      <rect x="60" y="16" width="2" height="2" fill="rgba(255,220,100,0.7)" rx="0.3">
-        <animate attributeName="opacity" values="0.7;0.3;0.7" dur="3s" repeatCount="indefinite" />
-      </rect>
-      <rect x="93" y="11" width="2" height="2" fill="rgba(255,220,100,0.6)" rx="0.3" />
-      <rect x="143" y="9" width="2" height="2" fill="rgba(255,220,100,0.8)" rx="0.3">
-        <animate attributeName="opacity" values="0.8;0.4;0.8" dur="4s" repeatCount="indefinite" />
-      </rect>
-      <rect x="145" y="13" width="2" height="2" fill="rgba(255,220,100,0.5)" rx="0.3" />
-      <rect x="195" y="16" width="2" height="2" fill="rgba(255,220,100,0.6)" rx="0.3">
-        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="5s" repeatCount="indefinite" />
-      </rect>
-      <rect x="229" y="13" width="2" height="2" fill="rgba(255,220,100,0.7)" rx="0.3" />
-      <rect x="231" y="17" width="2" height="2" fill="rgba(255,220,100,0.4)" rx="0.3">
-        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3.5s" repeatCount="indefinite" />
-      </rect>
-      <rect x="275" y="20" width="2" height="2" fill="rgba(255,220,100,0.5)" rx="0.3" />
-      <rect x="22" y="18" width="2" height="2" fill="rgba(255,220,100,0.5)" rx="0.3">
-        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="4.5s" repeatCount="indefinite" />
-      </rect>
-      <rect x="54" y="20" width="2" height="2" fill="rgba(255,220,100,0.6)" rx="0.3" />
-      <rect x="113" y="24" width="2" height="2" fill="rgba(255,220,100,0.7)" rx="0.3" />
-      <rect x="163" y="22" width="2" height="2" fill="rgba(255,220,100,0.5)" rx="0.3">
-        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="6s" repeatCount="indefinite" />
-      </rect>
-    </svg>
-  );
-}
-
-async function fetchWeather(lat: number, lng: number): Promise<WeatherCondition> {
-  try {
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=weather_code&timezone=auto`
-    );
-    if (!res.ok) return 'clear';
-    const data = await res.json();
-    const code = data?.current?.weather_code ?? 0;
-    if (code === 0 || code === 1) return 'clear';
-    if (code === 2 || code === 3) return 'cloudy';
-    if (code >= 45 && code <= 48) return 'fog';
-    if (code >= 51 && code <= 67) return 'rain';
-    if (code >= 71 && code <= 77) return 'snow';
-    if (code >= 80 && code <= 82) return 'rain';
-    if (code >= 95 && code <= 99) return 'storm';
-    return 'clear';
-  } catch {
-    return 'clear';
-  }
-}
-
-function getGreeting(time: TimePeriod): string {
+function getGreeting(time: TimePeriod, firstName?: string): string {
+  const name = firstName ? `, ${firstName}` : '';
   switch (time) {
-    case 'dawn': return 'Good morning';
-    case 'morning': return 'Good morning';
-    case 'afternoon': return 'Good afternoon';
-    case 'sunset': return 'Good evening';
-    case 'evening': return 'Good evening';
-    case 'night': return 'Good night';
+    case 'dawn': return `Good morning${name}`;
+    case 'morning': return `Good morning${name}`;
+    case 'afternoon': return `Good afternoon${name}`;
+    case 'sunset': return `Good evening${name}`;
+    case 'evening': return `Good evening${name}`;
+    case 'night': return `Good night${name}`;
   }
 }
 
@@ -420,21 +184,23 @@ interface AmbientProfileCardProps {
   initial: string;
   username: string;
   location: string;
-  followerCount: number;
-  followingCount: number;
   lat?: number;
   lng?: number;
   profileHref: string;
   onNavigate?: () => void;
+  /** Optional: pass user object so we can detect auth and fetch hero stats */
+  userId?: string;
 }
 
 export default function AmbientProfileCard({
   avatarUrl, displayName, initial, username, location,
-  followerCount, followingCount, lat, lng, profileHref, onNavigate,
+  lat, lng, profileHref, onNavigate, userId,
 }: AmbientProfileCardProps) {
-  const [weather, setWeather] = useState<WeatherCondition>('clear');
   const [mounted, setMounted] = useState(false);
-  const [currentHour, setCurrentHour] = useState(12); // stable SSR default
+  const [currentHour, setCurrentHour] = useState(12);
+  const [heroStats, setHeroStats] = useState<{ trustScore: number; totalHuudCoins: number } | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
     setCurrentHour(new Date().getHours());
@@ -443,106 +209,270 @@ export default function AmbientProfileCard({
     return () => clearInterval(interval);
   }, []);
 
+  // Initialize Leaflet map
   useEffect(() => {
-    if (lat && lng) {
-      fetchWeather(lat, lng).then(setWeather);
-      const interval = setInterval(() => fetchWeather(lat, lng).then(setWeather), 30 * 60_000);
-      return () => clearInterval(interval);
+    console.log('🗺️ Map init check:', { mounted, lat, lng, hasContainer: !!mapContainerRef.current });
+    if (!mounted || !lat || !lng || !mapContainerRef.current) return;
+    // Prevent double-init
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setView([lat, lng], 15);
+      return;
     }
-  }, [lat, lng]);
+
+    ensureLeafletCss();
+    let map: L.Map | null = null;
+
+    import('leaflet').then((Leaflet) => {
+      if (!mapContainerRef.current) {
+        console.log('🗺️ Map container gone after import');
+        return;
+      }
+      console.log('🗺️ Leaflet loaded, container size:', 
+        mapContainerRef.current.offsetWidth, 'x', mapContainerRef.current.offsetHeight);
+
+      // Fix default marker icons (webpack/next breaks the asset paths)
+      delete (Leaflet.Icon.Default.prototype as unknown as Record<string, unknown>)['_getIconUrl'];
+      Leaflet.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      });
+
+      map = Leaflet.map(mapContainerRef.current, {
+        zoomControl: false,
+        attributionControl: false,
+        dragging: true,
+        scrollWheelZoom: false,
+        doubleClickZoom: true,
+        touchZoom: true,
+      }).setView([lat, lng], 15);
+
+      // CartoDB Voyager — clean, modern, colorful tile style
+      Leaflet.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        { maxZoom: 19 },
+      ).addTo(map);
+
+      // Custom NeyborHuud green marker
+      const markerIcon = Leaflet.divIcon({
+        html: `<div style="
+          width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+          background:#008751;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+          border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);
+        "><div style="
+          width:10px;height:10px;background:#fff;border-radius:50%;
+        "></div></div>`,
+        className: '',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+      });
+
+      Leaflet.marker([lat, lng], { icon: markerIcon }).addTo(map);
+      mapInstanceRef.current = map;
+
+      // Invalidate size after a tick (container might not be fully painted)
+      setTimeout(() => map?.invalidateSize(), 100);
+      setTimeout(() => map?.invalidateSize(), 500);
+    });
+
+    return () => {
+      if (map) {
+        map.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [mounted, lat, lng]);
+
+  // Fetch hero stats (Neybor Score + HuudCoins)
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    import('@/services/gamification.service').then(({ gamificationService }) => {
+      gamificationService.getHeroStats().then((res) => {
+        if (!cancelled && res.data) setHeroStats(res.data);
+      }).catch(() => {});
+    });
+    return () => { cancelled = true; };
+  }, [userId]);
 
   const timePeriod = getTimePeriod(currentHour);
-  const theme = useMemo(() => getSkyTheme(timePeriod, weather), [timePeriod, weather]);
-  const greeting = getGreeting(timePeriod);
-  const isDark = timePeriod === 'night' || timePeriod === 'evening';
+  const firstName = displayName.split(' ')[0];
+  const greeting = getGreeting(timePeriod, firstName);
 
   return (
-    <div
-      className="relative overflow-hidden transition-all duration-[2000ms]"
-      style={{ background: theme.skyGradient, minHeight: 190 }}
-    >
-      {/* Horizon glow */}
-      <div className="absolute inset-0 pointer-events-none transition-all duration-[2000ms]" style={{ background: theme.horizonGlow }} />
+    <div className="overflow-hidden relative group/card" style={{
+      borderRadius: '0 0 24px 24px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
+    }}>
+      {/* ─── Full-bleed map background ─── */}
+      <div className="absolute inset-0 z-0" style={{ width: '100%', height: '100%' }}>
+        {lat && lng ? (
+          <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
+        ) : (
+          <div className="absolute inset-0"
+            style={{ background: 'linear-gradient(145deg, #00a86b 0%, #006d3f 40%, #004028 100%)' }}
+          />
+        )}
+      </div>
 
-      {/* Stars */}
-      {theme.showStars && <Stars />}
+      {/* ─── Multi-layer overlay for depth & readability ─── */}
+      <div className="absolute inset-0 z-[1] pointer-events-none"
+        style={{
+          background: `
+            linear-gradient(180deg,
+              rgba(0,0,0,0.05) 0%,
+              rgba(0,0,0,0.08) 20%,
+              rgba(0,0,0,0.22) 40%,
+              rgba(0,0,0,0.52) 65%,
+              rgba(0,20,10,0.82) 100%
+            )
+          `,
+        }}
+      />
+      {/* Subtle vignette edges */}
+      <div className="absolute inset-0 z-[1] pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 50%, rgba(0,0,0,0.2) 100%)',
+        }}
+      />
 
-      {/* Sun or Moon */}
-      <CelestialBody theme={theme} />
+      {/* Fallback watermark when no coordinates */}
+      {!lat && !lng && (
+        <div className="absolute inset-0 z-[1] flex items-center justify-center pointer-events-none">
+          <span className="material-symbols-outlined" style={{ fontSize: 80, color: 'rgba(255,255,255,0.06)' }}>
+            explore
+          </span>
+        </div>
+      )}
 
-      {/* Clouds */}
-      {theme.showClouds && <AnimatedClouds color={theme.cloudColor} />}
+      {/* ─── Profile content, overlaid on map ─── */}
+      <div className="relative z-[2] px-4 pt-4 pb-4 flex flex-col justify-end h-full" style={{ minHeight: '260px' }}>
 
-      {/* Rain */}
-      {theme.showRain && <RainDrops isDark={isDark} />}
-
-      {/* City silhouette at bottom */}
-      <CitySilhouette color={theme.silhouetteColor} />
-
-      {/* Content */}
-      <div className="relative z-10 px-4 pt-4 pb-12">
-        {/* Greeting */}
-        <p
-          className="text-xs font-medium tracking-wide mb-3"
-          style={{ color: theme.mutedColor, textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}
-        >
-          {greeting}
-        </p>
-
-        {/* Profile */}
-        <a href={profileHref} onClick={onNavigate} className="flex items-center gap-3 min-w-0">
+        {/* ── Greeting pill — top-left ── */}
+        <div className="mb-auto flex items-center">
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center font-bold overflow-hidden shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-lg"
             style={{
-              background: 'rgba(255,255,255,0.15)',
-              border: '2px solid rgba(255,255,255,0.3)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.18)',
             }}
           >
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-base" style={{ color: theme.textColor }}>{initial}</span>
-            )}
+            <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>
+              {timePeriod === 'night' || timePeriod === 'evening' ? 'dark_mode' : timePeriod === 'dawn' || timePeriod === 'sunset' ? 'routine' : 'light_mode'}
+            </span>
+            <span className="text-[11px] font-semibold text-white/80" style={{ letterSpacing: '0.04em' }}>
+              {greeting}
+            </span>
           </div>
+        </div>
+
+        {/* ── Avatar + Identity block ── */}
+        <a href={profileHref} onClick={onNavigate} className="flex items-center gap-3 min-w-0 group/profile mt-2">
+          {/* Avatar with glow ring + online pulse */}
+          <div className="relative shrink-0">
+            <MapPinAvatar
+              src={avatarUrl}
+              alt={displayName}
+              fallbackInitial={initial}
+              size="lg"
+            />
+            {/* Online indicator dot */}
+            <div
+              className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full"
+              style={{
+                background: '#22c55e',
+                border: '2.5px solid rgba(0,20,10,0.8)',
+                boxShadow: '0 0 8px rgba(34,197,94,0.5)',
+              }}
+            />
+          </div>
+
+          {/* Name + handle + location */}
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold truncate" style={{ color: theme.textColor, textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
-              {displayName}
-            </p>
-            <p className="text-xs truncate" style={{ color: theme.mutedColor, textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[14px] font-extrabold truncate leading-tight text-white" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
+                {displayName}
+              </p>
+              <span className="material-symbols-outlined shrink-0" style={{ fontSize: '15px', color: '#34d399' }}>
+                verified
+              </span>
+            </div>
+            <p className="text-[12px] font-medium truncate mt-0.5 text-white/60">
               @{username}
             </p>
+            {location && (
+              <div className="flex items-center gap-1 mt-1.5">
+                <span className="material-symbols-outlined shrink-0" style={{ fontSize: '13px', color: '#34d399' }}>
+                  location_on
+                </span>
+                <p className="text-[11px] font-medium truncate text-white/70">
+                  {location}
+                </p>
+              </div>
+            )}
           </div>
         </a>
 
-        {/* Location */}
-        {location && (
-          <div className="flex items-center gap-1 mt-2.5">
-            <span className="material-symbols-outlined text-sm" style={{ color: theme.mutedColor, textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
-              location_on
-            </span>
-            <p className="text-xs truncate" style={{ color: theme.mutedColor, textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
-              {location}
-            </p>
+        {/* ── Stats row — Neybor Score + HuudCoins ── */}
+        {heroStats && (
+          <div className="flex gap-2 mt-3">
+            {/* Neybor Score */}
+            <div
+              className="flex-1 flex flex-col items-center justify-center py-2.5 rounded-2xl backdrop-blur-xl transition-all duration-200 hover:scale-[1.02]"
+              style={{
+                background: 'rgba(0,135,81,0.2)',
+                border: '1px solid rgba(52,211,153,0.2)',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
+              }}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#6ee7b7' }}>
+                  verified_user
+                </span>
+                <p className="text-xl font-black leading-none tabular-nums text-white" style={{ letterSpacing: '-0.02em' }}>
+                  {heroStats.trustScore}
+                </p>
+              </div>
+              <p className="text-[9px] font-bold uppercase mt-1.5 text-emerald-300/60 text-center" style={{ letterSpacing: '0.08em' }}>
+                Neybor Score
+              </p>
+            </div>
+            {/* HuudCoins */}
+            <div
+              className="flex-1 flex flex-col items-center justify-center py-2.5 rounded-2xl backdrop-blur-xl transition-all duration-200 hover:scale-[1.02]"
+              style={{
+                background: 'rgba(245,166,35,0.15)',
+                border: '1px solid rgba(251,191,36,0.2)',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
+              }}
+            >
+              <div className="flex items-center gap-1.5">
+                <span style={{ fontSize: '15px', lineHeight: 1 }} aria-hidden>⭐</span>
+                <p className="text-xl font-black leading-none tabular-nums text-white" style={{ letterSpacing: '-0.02em' }}>
+                  {heroStats.totalHuudCoins.toLocaleString()}
+                </p>
+              </div>
+              <p className="text-[9px] font-bold uppercase mt-1.5 text-amber-300/60 text-center" style={{ letterSpacing: '0.08em' }}>
+                HuudCoins
+              </p>
+            </div>
           </div>
         )}
 
-        {/* Follower stats */}
-        <div className="flex items-center gap-4 mt-2.5">
-          <a href={`${profileHref}?tab=following`} onClick={onNavigate} className="flex items-center gap-1">
-            <span className="text-sm font-bold" style={{ color: theme.textColor, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
-              {followingCount.toLocaleString()}
-            </span>
-            <span className="text-xs" style={{ color: theme.mutedColor }}>Following</span>
-          </a>
-          <a href={`${profileHref}?tab=followers`} onClick={onNavigate} className="flex items-center gap-1">
-            <span className="text-sm font-bold" style={{ color: theme.textColor, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
-              {followerCount.toLocaleString()}
-            </span>
-            <span className="text-xs" style={{ color: theme.mutedColor }}>Followers</span>
-          </a>
-        </div>
+        {/* Fallback stats when data hasn't loaded yet */}
+        {!heroStats && (
+          <div className="flex gap-2 mt-3">
+            <div
+              className="flex-1 h-[48px] rounded-2xl backdrop-blur-xl animate-pulse"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+            />
+            <div
+              className="flex-1 h-[48px] rounded-2xl backdrop-blur-xl animate-pulse"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+            />
+          </div>
+        )}
+
       </div>
     </div>
   );

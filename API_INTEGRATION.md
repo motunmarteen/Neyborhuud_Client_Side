@@ -15,7 +15,8 @@ pnpm install
 Copy `.env.example` to `.env.local`:
 
 ```bash
-cp .env.example .env.local
+cp .env.exampidebar should also have the doodles
+le .env.local
 ```
 
 Update the API URL if needed:

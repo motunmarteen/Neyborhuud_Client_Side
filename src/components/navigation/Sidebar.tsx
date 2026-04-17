@@ -11,6 +11,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { GlobalSearch } from '@/components/GlobalSearch';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 interface SidebarProps {
     onCreatePost?: () => void;
@@ -221,13 +222,12 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                             onClick={() => setShowUserMenu(!showUserMenu)}
                             className="flex items-center gap-3 p-3 w-full rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
                         >
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-brand-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
-                                {user?.avatarUrl ? (
-                                    <img src={user.avatarUrl} alt={userDisplayName} className="w-full h-full object-cover" />
-                                ) : (
-                                    userInitial
-                                )}
-                            </div>
+                            <MapPinAvatar
+                                src={user?.avatarUrl}
+                                alt={userDisplayName}
+                                fallbackInitial={userInitial}
+                                size="md"
+                            />
                             <div className="flex-1 min-w-0">
                                 <p className="font-bold text-base truncate text-gray-900 dark:text-gray-100">{userDisplayName}</p>
                                 <p className="text-sm text-gray-500 truncate">{userHandle}</p>
@@ -308,13 +308,12 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                         }`}
                     title={isCollapsed ? 'Profile' : undefined}
                 >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-brand-blue flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden">
-                        {user?.avatarUrl ? (
-                            <img src={user.avatarUrl} alt={userDisplayName} className="w-full h-full object-cover" />
-                        ) : (
-                            userInitial
-                        )}
-                    </div>
+                    <MapPinAvatar
+                        src={user?.avatarUrl}
+                        alt={userDisplayName}
+                        fallbackInitial={userInitial}
+                        size="sm"
+                    />
                     {!isCollapsed && (
                         <>
                             <div className="flex-1 min-w-0 text-left">

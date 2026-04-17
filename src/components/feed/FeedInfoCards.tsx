@@ -12,6 +12,7 @@ import {
   type SkyTheme,
   type WeatherCondition as AmbientWeather,
 } from '@/components/navigation/AmbientProfileCard';
+import { API_BASE_URL } from '@/lib/api';
 
 interface WeatherData {
   temp: number;
@@ -29,14 +30,15 @@ interface ExchangeRate {
 /** Map Open-Meteo WMO weather codes → human label */
 function interpretWeatherCode(code: number): string {
   if (code === 0) return 'Clear Sky';
-  if (code <= 3) return 'Partly Cloudy';
-  if (code <= 49) return 'Foggy';
-  if (code <= 59) return 'Drizzle';
-  if (code <= 69) return 'Rain';
-  if (code <= 79) return 'Snow';
-  if (code <= 84) return 'Showers';
-  if (code <= 94) return 'Snow Showers';
-  if (code <= 99) return 'Thunderstorm';
+  if (code <= 2) return 'Partly Cloudy';
+  if (code === 3) return 'Overcast';
+  if (code >= 45 && code <= 48) return 'Foggy';
+  if (code >= 51 && code <= 57) return 'Drizzle';
+  if (code >= 61 && code <= 67) return 'Rainy';
+  if (code >= 71 && code <= 77) return 'Snowy';
+  if (code >= 80 && code <= 82) return 'Showers';
+  if (code >= 85 && code <= 86) return 'Snow Showers';
+  if (code >= 95 && code <= 99) return 'Thunderstorm';
   return 'Partly Cloudy';
 }
 
@@ -48,8 +50,30 @@ function wmoToAmbient(code: number): AmbientWeather {
   if (code >= 51 && code <= 67) return 'rain';
   if (code >= 71 && code <= 77) return 'snow';
   if (code >= 80 && code <= 82) return 'rain';
+  if (code >= 85 && code <= 86) return 'snow';
   if (code >= 95 && code <= 99) return 'storm';
   return 'clear';
+}
+
+/** Map OWM condition id → WMO-equivalent code */
+function owmIdToWmo(id: number): number {
+  if (id >= 200 && id <= 232) return 95;
+  if (id >= 300 && id <= 321) return 51;
+  if (id >= 500 && id <= 504) return 61;
+  if (id === 511) return 66;
+  if (id >= 520 && id <= 531) return 80;
+  if (id >= 600 && id <= 622) return 71;
+  if (id >= 701 && id <= 781) return 45;
+  if (id === 800) return 0;
+  if (id === 801) return 1;
+  if (id === 802) return 2;
+  if (id >= 803) return 3;
+  return 2;
+}
+
+function owmIdToCondition(id: number, description: string): string {
+  if (description) return description.charAt(0).toUpperCase() + description.slice(1);
+  return interpretWeatherCode(owmIdToWmo(id));
 }
 
 /* ── Mini Sky Scene Components (compact for small card) ── */
@@ -242,44 +266,98 @@ export function FeedInfoCards() {
     let lastLat = 0;
     let lastLon = 0;
 
-    const updateWeather = async (latitude: number, longitude: number) => {
-      // Skip if location hasn't moved significantly (~500m)
+    const updateWeather = async (latitude: number, longitude: number, force = false) => {
       const moved = Math.abs(latitude - lastLat) > 0.005 || Math.abs(longitude - lastLon) > 0.005;
-      if (lastLat !== 0 && !moved) return;
+      if (!force && lastLat !== 0 && !moved) return;
       lastLat = latitude;
       lastLon = longitude;
 
       try {
-        // Fetch weather + geocoding in parallel
-        const [weatherRes, geoRes] = await Promise.all([
-          fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`),
-          fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=12`, {
-            headers: { 'User-Agent': 'NeyborHuud/1.0' },
-          }),
-        ]);
-
+        // Reverse-geocode for city name
         let cityName = 'Your Area';
-        if (geoRes.ok) {
-          const geoData = await geoRes.json();
-          const a = geoData?.address;
-          // Prefer city_district (maps to LGA in Nigeria), then broader names
-          cityName = a?.city_district
-            || a?.town
-            || a?.city
-            || a?.suburb
-            || a?.neighbourhood
-            || a?.village
-            || a?.county
-            || a?.state
-            || 'Your Area';
+        try {
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=12`,
+            { headers: { 'User-Agent': 'NeyborHuud/1.0' }, signal: AbortSignal.timeout(5000) },
+          );
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            const a = geoData?.address;
+            cityName = a?.city_district || a?.town || a?.city || a?.suburb
+              || a?.neighbourhood || a?.village || a?.county || a?.state || 'Your Area';
+          }
+        } catch {
+          // geocode failed — cityName stays as default
         }
 
-        if (weatherRes.ok) {
-          const wData = await weatherRes.json();
-          const temp = Math.round(wData.current?.temperature_2m || 31);
-          const code = wData.current?.weather_code || 0;
-          const condition = interpretWeatherCode(code);
-          setWeather({ temp, condition, city: cityName, wmoCode: code });
+        // Strategy 1: Backend (OpenWeatherMap)
+        const apiBase = API_BASE_URL;
+        if (apiBase) {
+          try {
+            const backendRes = await fetch(
+              `${apiBase}/weather/current?lat=${latitude}&lon=${longitude}`,
+              { signal: AbortSignal.timeout(6000) },
+            );
+            if (backendRes.ok) {
+              const json = await backendRes.json();
+              const w = json?.data?.weather;
+              if (w) {
+                const owmCondition = w.conditions?.[0];
+                const owmId = owmCondition?.id ?? 800;
+                const desc = owmCondition?.description ?? '';
+                let wmoCode = owmIdToWmo(owmId);
+                let condition = owmIdToCondition(owmId, desc);
+
+                // Backend cross-references multiple weather models;
+                // trust isRaining/isShowering even if the OWM id looks benign
+                if (w.isRaining && wmoCode < 50) {
+                  wmoCode = w.isShowering ? 80 : 61;
+                  condition = w.isShowering ? 'Rain Showers' : 'Rain';
+                }
+
+                const city = cityName !== 'Your Area' ? cityName : (w.location?.name || cityName);
+                setWeather({ temp: w.temperature?.current ?? 28, condition, city, wmoCode });
+                return;
+              }
+            }
+          } catch {
+            // fall through to Open-Meteo
+          }
+        }
+
+        // Strategy 2: Open-Meteo multi-model (free, no key) — fallback
+        const [defaultRes, ukmoRes] = await Promise.all([
+          fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,rain,showers,precipitation&timezone=auto`,
+            { signal: AbortSignal.timeout(6000) },
+          ).then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,rain,showers,precipitation&models=ukmo_seamless&timezone=auto`,
+            { signal: AbortSignal.timeout(6000) },
+          ).then(r => r.ok ? r.json() : null).catch(() => null),
+        ]);
+
+        const defaultCur = defaultRes?.current;
+        const ukmoCur = ukmoRes?.current;
+        if (defaultCur) {
+          const temp = Math.round(defaultCur.temperature_2m || 31);
+          let code = defaultCur.weather_code || 0;
+          const rain = defaultCur.rain ?? 0;
+          const showers = defaultCur.showers ?? 0;
+
+          // Cross-reference UKMO model — if it detects rain/storm, override
+          const ukmoCode = ukmoCur?.weather_code ?? 0;
+          const ukmoRain = (ukmoCur?.rain ?? 0) + (ukmoCur?.showers ?? 0) + (ukmoCur?.precipitation ?? 0);
+          if (ukmoCode >= 50 && code < 50) {
+            code = ukmoCode;
+          }
+
+          // Correct WMO code if rain/showers fields disagree
+          if ((rain > 0 || showers > 0 || ukmoRain > 0) && code < 50) {
+            code = showers > 0 ? 80 : 61;
+          }
+
+          setWeather({ temp, condition: interpretWeatherCode(code), city: cityName, wmoCode: code });
         } else {
           setWeather({ temp: 31, condition: 'Partly Cloudy', city: cityName, wmoCode: 2 });
         }
@@ -299,7 +377,15 @@ export function FeedInfoCards() {
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
     );
 
-    return () => navigator.geolocation.clearWatch(watchId);
+    // Refresh weather every 10 minutes so conditions update when rain stops/starts
+    const refreshInterval = setInterval(() => {
+      if (lastLat !== 0) updateWeather(lastLat, lastLon, true);
+    }, 10 * 60_000);
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+      clearInterval(refreshInterval);
+    };
   }, []);
 
   // Fetch exchange rates

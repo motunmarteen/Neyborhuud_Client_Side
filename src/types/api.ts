@@ -94,6 +94,7 @@ export interface LocationData {
 export interface GamificationData {
   level: number;
   points: number;
+  trustScore: number;
   badges: Badge[];
   achievements: Achievement[];
   streak: number;
@@ -156,6 +157,7 @@ export interface User {
   identityVerified: boolean;
   isAdmin: boolean;
   role: "user" | "moderator" | "admin" | "super_admin";
+  trustScore?: number;
   gamification: GamificationData;
   settings: UserSettings;
   createdAt: string;

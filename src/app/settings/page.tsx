@@ -587,6 +587,25 @@ export default function SettingsPage() {
                             />
                         </div>
 
+                        <div className="neumorphic rounded-2xl p-6 mb-6">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
+                                Blocked Neighbors
+                            </h2>
+                            <a
+                                href="/settings/blocked"
+                                className="flex items-center justify-between p-3 rounded-xl hover:bg-charcoal/5 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-[20px] text-red-500">block</span>
+                                    <div>
+                                        <span className="text-sm font-bold text-charcoal block">Manage Blocked Users</span>
+                                        <span className="text-[10px] text-charcoal/50">View and unblock neighbors you&apos;ve blocked</span>
+                                    </div>
+                                </div>
+                                <i className="bi bi-chevron-right text-charcoal/30" />
+                            </a>
+                        </div>
+
                         <div className="neumorphic rounded-2xl p-6 mb-6 border border-primary/15">
                             <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-1">
                                 Data &amp; consent (NDPR)

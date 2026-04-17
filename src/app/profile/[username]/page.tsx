@@ -10,7 +10,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { socialService } from '@/services/social.service';
 import { useAuth } from '@/hooks/useAuth';
-import { useFollow, useFollowers, useFollowing } from '@/hooks/useFollow';
+import { useFollow, useFollowers, useFollowing, useFollowCounts } from '@/hooks/useFollow';
+import { useBlock } from '@/hooks/useBlock';
 import { useUserPosts, usePostMutations } from '@/hooks/usePosts';
 import { XPostCard } from '@/components/feed/XPostCard';
 import { ReportModal } from '@/components/feed/ReportModal';
@@ -22,6 +23,7 @@ import { contentService } from '@/services/content.service';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -59,12 +61,21 @@ export default function ProfilePage() {
     _rawData,
   } = useFollow(profile?.id, { enabled: shouldEnableFollow });
 
-  // Get follower/following counts
-  const { data: followersData } = useFollowers(profile?.id, 1, 1);
-  const { data: followingData } = useFollowing(profile?.id, 1, 1);
+  // Get follower/following counts (lightweight)
+  const { data: countsData } = useFollowCounts(profile?.id);
+  const followerCount = countsData?.data?.followerCount ?? 0;
+  const followingCount = countsData?.data?.followingCount ?? 0;
 
-  const followerCount = (followersData as any)?.data?.pagination?.total ?? 0;
-  const followingCount = (followingData as any)?.data?.pagination?.total ?? 0;
+  // Block functionality
+  const {
+    isBlocked,
+    isBlockedByThem,
+    isEitherBlocked,
+    toggleBlock,
+    isPending: isBlockPending,
+  } = useBlock(profile?.id, { enabled: shouldEnableFollow });
+
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   // Debug profile data
   useEffect(() => {
@@ -158,20 +169,7 @@ export default function ProfilePage() {
   };
 
   // Helper to format time ago
-  const formatTimeAgo = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'now';
-    if (diffMins < 60) return `${diffMins}m`;
-    if (diffHours < 24) return `${diffHours}h`;
-    if (diffDays < 7) return `${diffDays}d`;
-    return date.toLocaleDateString();
-  };
 
   // Debug: Log follow status when it changes
   if (typeof window !== 'undefined' && profile?.id) {
@@ -305,20 +303,17 @@ export default function ProfilePage() {
         <div className="px-4 -mt-16 pb-4">
           <div className="flex items-start justify-between mb-4">
             {/* Profile Picture */}
-            <div className="w-32 h-32 rounded-full neu-avatar border-4 bg-gradient-to-br from-primary to-brand-blue flex items-center justify-center text-white font-bold text-4xl overflow-hidden" style={{ borderColor: 'var(--neu-bg)' }}>
-              {profile.profilePicture || profile.avatarUrl ? (
-                <img
-                  src={profile.profilePicture || profile.avatarUrl || ''}
-                  alt={displayName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                userInitial
-              )}
+            <div className="-mt-16">
+              <MapPinAvatar
+                src={profile.profilePicture || profile.avatarUrl}
+                alt={displayName}
+                fallbackInitial={userInitial}
+                size="2xl"
+              />
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-3">
+            <div className="pt-3 flex items-center gap-2">
               {isOwnProfile ? (
                 <Link
                   href="/settings"
@@ -330,6 +325,21 @@ export default function ProfilePage() {
               ) : isLoadingStatus ? (
                 <div className="neu-btn px-5 py-2 rounded-2xl font-semibold text-sm inline-flex items-center gap-2 animate-pulse">
                   <div className="w-16 h-4 neu-socket rounded-xl" />
+                </div>
+              ) : isBlocked ? (
+                <button
+                  onClick={() => toggleBlock()}
+                  disabled={isBlockPending}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-all bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-950/50 disabled:opacity-50"
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-[16px]">block</span>
+                  {isBlockPending ? 'Unblocking...' : 'Blocked'}
+                </button>
+              ) : isBlockedByThem ? (
+                <div className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm neu-btn opacity-60 cursor-not-allowed">
+                  <span className="material-symbols-outlined text-[16px]">block</span>
+                  Unavailable
                 </div>
               ) : (
                 <button
@@ -346,24 +356,58 @@ export default function ProfilePage() {
                     <>
                       <i className="bi bi-hourglass-split animate-spin text-sm" />
                       <span className="hidden group-hover:inline">
-                        {isFollowing ? 'Unfollowing...' : 'Following...'}
+                        {isFollowing ? 'Unlinking...' : 'Linking...'}
                       </span>
                       <span className="group-hover:hidden">
-                        {isFollowing ? 'Following' : 'Follow'}
+                        {isFollowing ? 'HuudLinked' : 'HuudLink'}
                       </span>
                     </>
                   ) : (
                     <>
                       <span className="hidden group-hover:inline">
-                        {isFollowing ? 'Unfollow' : 'Follow'}
+                        {isFollowing ? 'Unlink' : 'HuudLink'}
                       </span>
                       <span className="group-hover:hidden">
-                        {isFollowing ? 'Following' : 'Follow'}
+                        {isFollowing ? 'HuudLinked' : 'HuudLink'}
                         {followsYou && !isFollowing && ' Back'}
                       </span>
                     </>
                   )}
                 </button>
+              )}
+
+              {/* More Actions Menu (for non-own profiles) */}
+              {!isOwnProfile && !isBlockedByThem && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowMoreMenu(!showMoreMenu)}
+                    className="neu-btn p-2 rounded-full transition-colors"
+                    type="button"
+                    aria-label="More actions"
+                  >
+                    <span className="material-symbols-outlined text-[20px]" style={{ color: 'var(--neu-text)' }}>more_horiz</span>
+                  </button>
+                  {showMoreMenu && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
+                      <div className="absolute right-0 top-full mt-1 z-50 w-48 rounded-xl shadow-lg overflow-hidden border" style={{ background: 'var(--neu-card-bg)', borderColor: 'var(--neu-shadow-dark)' }}>
+                        <button
+                          onClick={() => {
+                            toggleBlock();
+                            setShowMoreMenu(false);
+                          }}
+                          disabled={isBlockPending}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            {isBlocked ? 'lock_open' : 'block'}
+                          </span>
+                          {isBlocked ? 'Unblock Neighbor' : 'Block Neighbor'}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -474,24 +518,24 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Follow Status Badges */}
+            {/* HuudLink Status Badges */}
             {!isOwnProfile && (followsYou || isMutual) && (
               <div className="flex flex-wrap gap-2">
                 {isMutual ? (
                   <span className="neu-chip inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full" style={{ color: 'var(--neu-text-secondary)' }}>
-                    <i className="bi bi-arrow-left-right" />
-                    You follow each other
+                    <span className="material-symbols-outlined text-[14px]">link</span>
+                    Mutual HuudLink
                   </span>
                 ) : followsYou ? (
                   <span className="neu-chip inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full" style={{ color: 'var(--neu-text-secondary)' }}>
-                    <i className="bi bi-person-check" />
-                    Follows you
+                    <span className="material-symbols-outlined text-[14px]">person_check</span>
+                    HuudLinks you
                   </span>
                 ) : null}
               </div>
             )}
 
-            {/* Stats - Real follower/following counts */}
+            {/* Stats - HuudLink counts */}
             <div className="flex gap-6 text-sm pt-2">
               <button
                 className="hover:underline"
@@ -501,7 +545,7 @@ export default function ProfilePage() {
                 <span className="font-bold" style={{ color: 'var(--neu-text)' }}>
                   {followingCount.toLocaleString()}
                 </span>{' '}
-                <span style={{ color: 'var(--neu-text-muted)' }}>Following</span>
+                <span style={{ color: 'var(--neu-text-muted)' }}>Linking</span>
               </button>
               <button
                 className="hover:underline"
@@ -511,7 +555,7 @@ export default function ProfilePage() {
                 <span className="font-bold" style={{ color: 'var(--neu-text)' }}>
                   {followerCount.toLocaleString()}
                 </span>{' '}
-                <span style={{ color: 'var(--neu-text-muted)' }}>Followers</span>
+                <span style={{ color: 'var(--neu-text-muted)' }}>Linkers</span>
               </button>
             </div>
           </div>
@@ -746,7 +790,7 @@ export default function ProfilePage() {
                   onShare={() => {}}
                   onSave={() => handleSave(post)}
                   onReport={(id) => setReportingPostId(id)}
-                  formatTimeAgo={formatTimeAgo}
+
                   onCardClick={() => openPostDetails(post.id)}
                 />
               ))}

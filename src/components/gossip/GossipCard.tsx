@@ -4,7 +4,9 @@
  */
 
 import { GossipPost } from '@/types/gossip';
+import { formatTimeAgo } from '@/utils/timeAgo';
 import Link from 'next/link';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 interface GossipCardProps {
     post: GossipPost;
@@ -12,20 +14,7 @@ interface GossipCardProps {
 }
 
 export function GossipCard({ post, onClick }: GossipCardProps) {
-    const formatTimeAgo = (dateString: string): string => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
 
-        if (diffMins < 1) return 'now';
-        if (diffMins < 60) return `${diffMins}m`;
-        if (diffHours < 24) return `${diffHours}h`;
-        if (diffDays < 7) return `${diffDays}d`;
-        return date.toLocaleDateString();
-    };
 
     const getDiscussionTypeColor = (type: string) => {
         switch (type) {
@@ -64,24 +53,19 @@ export function GossipCard({ post, onClick }: GossipCardProps) {
                         onClick={handleProfileClick}
                         aria-label={`View ${post.author.name}'s profile`}
                     >
-                        <img
-                            src={post.author.avatarUrl || '/default-avatar.png'}
+                        <MapPinAvatar
+                            src={post.author.avatarUrl}
                             alt={post.author.name}
-                            className="w-10 h-10 rounded-full object-cover group-hover:opacity-80 transition-opacity neu-avatar"
-                            onError={(e) => {
-                                e.currentTarget.src = 'https://ui-avatars.com/api/?name=Anonymous&background=11d473&color=102219';
-                            }}
+                            size="sm"
                         />
                     </Link>
                 ) : (
                     <div className="flex-shrink-0">
-                        <img
-                            src={post.author.avatarUrl || '/default-avatar.png'}
+                        <MapPinAvatar
+                            src={post.author.avatarUrl}
                             alt={post.author.name}
-                            className="w-10 h-10 rounded-full object-cover neu-avatar"
-                            onError={(e) => {
-                                e.currentTarget.src = 'https://ui-avatars.com/api/?name=AN&background=11d473&color=102219';
-                            }}
+                            size="sm"
+                            fallbackInitial="?"
                         />
                     </div>
                 )}

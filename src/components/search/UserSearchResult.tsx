@@ -6,7 +6,7 @@
 'use client';
 import { SearchUser } from '@/types/search';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 interface Props {
   user: SearchUser;
@@ -32,20 +32,12 @@ export const UserSearchResult = ({ user, onClose }: Props) => {
       className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-surface-base-dark rounded-lg transition-colors text-left"
     >
       {/* Avatar */}
-      <div className="relative h-12 w-12 shrink-0">
-        {user.avatarUrl ? (
-          <Image
-            src={user.avatarUrl}
-            alt={user.name}
-            fill
-            className="rounded-full object-cover"
-          />
-        ) : (
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-semibold">
-            {user.name.charAt(0).toUpperCase()}
-          </div>
-        )}
-      </div>
+      <MapPinAvatar
+        src={user.avatarUrl}
+        alt={user.name}
+        fallbackInitial={user.name.charAt(0).toUpperCase()}
+        size="md"
+      />
 
       {/* User Info */}
       <div className="flex-1 min-w-0">
