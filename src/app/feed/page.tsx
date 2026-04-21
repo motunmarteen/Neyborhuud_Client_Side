@@ -51,9 +51,16 @@ function XFeedInner() {
     const [navHidden, setNavHidden] = useState(false);
 
     // Derive contentTypeFilter from URL search params (set by sidebar / search overlay)
-    const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'gossip', 'help_request', 'job', 'event', 'marketplace', 'emergency'];
+    const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'help_request', 'job', 'event', 'marketplace', 'emergency'];
     const typeParam = searchParams.get('type') || '';
     const contentTypeFilter: ContentType | undefined = CONTENT_TYPE_TABS.includes(typeParam) ? (typeParam as ContentType) : undefined;
+
+    // Gossip has its own dedicated page — redirect when ?type=gossip is set
+    useEffect(() => {
+        if (typeParam === 'gossip') {
+            router.replace('/gossip');
+        }
+    }, [typeParam, router]);
 
     // Listen for create-post event from TopNav
     useEffect(() => {

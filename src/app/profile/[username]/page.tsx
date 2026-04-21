@@ -7,7 +7,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { socialService } from '@/services/social.service';
 import { useAuth } from '@/hooks/useAuth';
 import { useFollow, useFollowers, useFollowing, useFollowCounts } from '@/hooks/useFollow';
@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
+import apiClient from '@/lib/api-client';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -33,6 +34,37 @@ export default function ProfilePage() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
   const [reportingPostId, setReportingPostId] = useState<string | null>(null);
+  const [isSettingLocation, setIsSettingLocation] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleSetLocation = async () => {
+    if (!navigator.geolocation) return;
+    setIsSettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          await apiClient.put('/auth/location/update', {
+            type: 'current',
+            location: {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            },
+          });
+          queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
+          queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+        } catch (err) {
+          console.error('Failed to update location:', err);
+        } finally {
+          setIsSettingLocation(false);
+        }
+      },
+      (err) => {
+        console.error('GPS error:', err.message);
+        setIsSettingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
 
   // Fetch user profile by username
   const {
@@ -315,13 +347,15 @@ export default function ProfilePage() {
             {/* Action Buttons */}
             <div className="pt-3 flex items-center gap-2">
               {isOwnProfile ? (
-                <Link
-                  href="/settings"
-                  className="neu-btn inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-colors"
-                >
-                  <i className="bi bi-pencil text-sm" />
-                  Edit Profile
-                </Link>
+                <>
+                  <Link
+                    href="/settings"
+                    className="neu-btn inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-colors"
+                  >
+                    <i className="bi bi-pencil text-sm" />
+                    Edit Profile
+                  </Link>
+                </>
               ) : isLoadingStatus ? (
                 <div className="neu-btn px-5 py-2 rounded-2xl font-semibold text-sm inline-flex items-center gap-2 animate-pulse">
                   <div className="w-16 h-4 neu-socket rounded-xl" />
@@ -505,18 +539,44 @@ export default function ProfilePage() {
             </div>
 
             {/* Mini Map showing user's location */}
-            {profile.location?.latitude && profile.location?.longitude && (
-              <div className="mt-4">
-                <MiniMap
-                  center={{
-                    lat: profile.location.latitude,
-                    lng: profile.location.longitude,
-                  }}
-                  height="120px"
-                  className="rounded-2xl overflow-hidden shadow-lg"
-                />
-              </div>
-            )}
+            {(profile.location?.latitude && profile.location?.longitude) || isOwnProfile ? (
+              <>
+                <div className="mt-4 relative">
+                  {profile.location?.latitude && profile.location?.longitude ? (
+                    <MiniMap
+                      center={{
+                        lat: profile.location.latitude,
+                        lng: profile.location.longitude,
+                      }}
+                      height="120px"
+                      className="rounded-2xl overflow-hidden shadow-lg"
+                    />
+                  ) : (
+                    <div className="rounded-2xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center" style={{ height: '120px' }}>
+                      <span className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>No location set</span>
+                    </div>
+                  )}
+                  {isOwnProfile && (
+                    <button
+                      onClick={handleSetLocation}
+                      disabled={isSettingLocation}
+                      className="absolute bottom-2 right-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold bg-white/90 dark:bg-gray-900/90 shadow-md backdrop-blur-sm hover:bg-white dark:hover:bg-gray-900 transition-colors border border-black/10 dark:border-white/10 disabled:opacity-50"
+                      type="button"
+                      style={{ color: 'var(--neu-text)' }}
+                    >
+                      <span className="material-symbols-outlined text-[14px]">{isSettingLocation ? 'hourglass_top' : 'my_location'}</span>
+                      {isSettingLocation ? 'Updating...' : 'Set Location'}
+                    </button>
+                  )}
+                </div>
+                {profile.location?.latitude && profile.location?.longitude ? (
+                  <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono" style={{ color: 'var(--neu-text-muted)' }}>
+                    <i className="bi bi-pin-map text-[10px]" />
+                    <span>{profile.location.latitude.toFixed(6)}, {profile.location.longitude.toFixed(6)}</span>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
 
             {/* HuudLink Status Badges */}
             {!isOwnProfile && (followsYou || isMutual) && (
@@ -846,6 +906,8 @@ export default function ProfilePage() {
           }}
         />
       )}
+
+
     </div>
   );
 }

@@ -102,8 +102,10 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
       fallback: fallbackCoords,
       location: user?.location,
       flatFields: { lga: u?.lga, state: u?.state },
+      userId: user?.id,
+      fullUser: user,
     });
-  }, [userLat, userLng, resolvedLat, resolvedLng, user?.location, fallbackCoords, u?.lga, u?.state]);
+  }, [userLat, userLng, resolvedLat, resolvedLng, user?.location, fallbackCoords, u?.lga, u?.state, user?.id, user]);
 
   return (
     <div className="flex flex-col h-full">

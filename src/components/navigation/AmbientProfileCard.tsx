@@ -285,12 +285,24 @@ export default function AmbientProfileCard({
 
   // Fetch hero stats (Neybor Score + HuudCoins)
   useEffect(() => {
+    console.log('🎯 Hero stats fetch check:', { userId, hasUser: !!userId });
     if (!userId) return;
     let cancelled = false;
     import('@/services/gamification.service').then(({ gamificationService }) => {
+      console.log('🎯 Fetching hero stats for user:', userId);
       gamificationService.getHeroStats().then((res) => {
-        if (!cancelled && res.data) setHeroStats(res.data);
-      }).catch(() => {});
+        console.log('🎯 Hero stats response:', res);
+        if (!cancelled && res.data) {
+          console.log('🎯 Setting hero stats:', res.data);
+          setHeroStats(res.data);
+        }
+      }).catch((err) => {
+        console.error('🎯 Hero stats fetch failed:', err);
+        // Use zero values if API fails or user has no stats
+        if (!cancelled) {
+          setHeroStats({ trustScore: 0, totalHuudCoins: 0 });
+        }
+      });
     });
     return () => { cancelled = true; };
   }, [userId]);
