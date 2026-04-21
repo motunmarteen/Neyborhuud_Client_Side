@@ -132,7 +132,7 @@ export function XPostCard({
     if (hasMedia) {
         return (
             <article
-                className={`relative overflow-hidden cursor-pointer rounded-2xl ${
+                className={`relative overflow-hidden cursor-pointer rounded-2xl bg-gray-900 ${
                     isSafetyAlert ? 'ring-2 ring-orange-500/50' : ''
                 }`}
                 style={{ minHeight: '78vh' }}

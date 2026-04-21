@@ -267,6 +267,12 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                 ? ['active', 'found', 'returned', 'closed']
                                                 : details.content.fyiSubtype === 'safety_notice'
                                                 ? ['active', 'resolved', 'expired', 'closed']
+                                                : details.content.fyiSubtype === 'community_announcement'
+                                                ? ['active', 'expired', 'closed']
+                                                : details.content.fyiSubtype === 'local_news'
+                                                ? ['active', 'outdated', 'closed']
+                                                : details.content.fyiSubtype === 'alert'
+                                                ? ['active', 'resolved', 'expired', 'closed']
                                                 : ['active', 'closed']
                                             ).map((s) => (
                                                 <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
@@ -413,7 +419,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                         )}
 
                                         {/* View Status History */}
-                                        {details.content.fyiStatus && details.content.fyiStatus !== 'active' && (
+                                        {details.content.contentType === 'fyi' && (
                                             <button
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-500/10 text-gray-400 border border-gray-500/20 hover:bg-gray-500/20 transition-colors"
                                                 onClick={async () => {

@@ -768,3 +768,49 @@ export interface CreateMarketplaceItemPayload {
   negotiable: boolean;
   quantity: number;
 }
+
+// ==================== Department Types ====================
+
+export interface HuudCoinReward {
+  action: string;
+  amount: number;
+  description: string;
+  dailyCap?: number;
+}
+
+export interface DepartmentMetadata {
+  huudcoinRewards: HuudCoinReward[];
+  recommendedServiceCategories: string[];
+  useCases: string[];
+  featuredActions: string[];
+  analyticsDimensions: string[];
+  contentTypes: string[];
+}
+
+export interface Department {
+  _id: string;
+  departmentId: string;
+  label: string;
+  description: string;
+  tagline?: string;
+  aliases: string[];
+  iconUrl?: string;
+  color?: string;
+  isSafetyCritical: boolean;
+  isActive: boolean;
+  sortOrder: number;
+  metadata: DepartmentMetadata;
+  serviceCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DepartmentServicesResponse {
+  services: Service[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}

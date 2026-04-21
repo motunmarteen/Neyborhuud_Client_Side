@@ -25,3 +25,9 @@ export {
   useUsernameValidation,
 } from "./useEmailValidation";
 export { useSearch } from "./useSearch";
+export {
+  useDepartments,
+  useDepartment,
+  useDepartmentServices,
+  useDepartmentRewards,
+} from "./useDepartments";

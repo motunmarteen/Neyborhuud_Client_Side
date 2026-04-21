@@ -18,3 +18,4 @@ export { gamificationService } from "./gamification.service";
 export { socialService } from "./social.service";
 export { paymentsService } from "./payments.service";
 export { adminService } from "./admin.service";
+export { departmentService } from "./departments.service";

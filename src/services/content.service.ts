@@ -126,19 +126,29 @@ export const contentService = {
     onProgress?: (progress: number) => void,
   ) {
     if (payload.media && payload.media.length > 0) {
+      // Build all non-file fields for the FormData upload.
+      // Objects must be JSON-stringified so multer sends them as single
+      // string values that the backend's normalizeFormData can parse.
+      const { media: _files, ...rest } = payload;
+      const additionalData: Record<string, unknown> = {
+        ...rest,
+        contentType: payload.contentType || "post",
+        // Serialize objects as JSON strings so multer doesn't split them
+        // into bracket-notation keys (location[latitude]) which get lost.
+        location: payload.location
+          ? JSON.stringify(payload.location)
+          : undefined,
+        targetAudience: payload.targetAudience
+          ? JSON.stringify(payload.targetAudience)
+          : undefined,
+        venue: (payload as any).venue
+          ? JSON.stringify((payload as any).venue)
+          : undefined,
+      };
       return await apiClient.uploadFiles<Post>(
         "/content/posts",
         payload.media,
-        {
-          type: payload.type,
-          contentType: payload.contentType || "post",
-          content: payload.content,
-          visibility: payload.visibility,
-          tags: payload.tags,
-          mentions: payload.mentions,
-          location: payload.location,
-          language: payload.language,
-        },
+        additionalData,
         onProgress,
       );
     }

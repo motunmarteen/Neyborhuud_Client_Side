@@ -353,6 +353,42 @@ function XFeedInner() {
                                 onTabChange={(tab) => setFeedTab(tab)}
                             />
 
+                            {/* Department Filter */}
+                            {departments.length > 0 && (
+                                <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                                    <button
+                                        onClick={() => setDepartmentFilter(undefined)}
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                                            !departmentFilter ? 'mod-btn-active text-primary' : 'mod-btn'
+                                        }`}
+                                    >
+                                        {t('feed.allDepartments')}
+                                    </button>
+                                    {departments.map((dept) => (
+                                        <button
+                                            key={dept._id}
+                                            onClick={() =>
+                                                setDepartmentFilter(
+                                                    departmentFilter === dept.departmentId ? undefined : dept.departmentId
+                                                )
+                                            }
+                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                                                departmentFilter === dept.departmentId
+                                                    ? 'mod-btn-active text-primary'
+                                                    : 'mod-btn'
+                                            }`}
+                                            style={
+                                                departmentFilter === dept.departmentId && dept.color
+                                                    ? { borderColor: dept.color }
+                                                    : undefined
+                                            }
+                                        >
+                                            {dept.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
                             {/* FYI Subtype Filter — only when FYI type active */}
                             {contentTypeFilter === 'fyi' && (
                                 <div className="flex gap-2 overflow-x-auto no-scrollbar">
