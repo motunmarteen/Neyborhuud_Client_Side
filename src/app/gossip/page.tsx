@@ -5,43 +5,57 @@
 
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useCallback, useRef, Suspense } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { GossipCard } from '@/components/gossip/GossipCard';
 import { CreateGossipModal } from '@/components/gossip/CreateGossipModal';
-import { gossipService } from '@/services/gossip.service';
+import { useGossipList } from '@/hooks/useGossip';
+import { useAuth } from '@/hooks/useAuth';
 import { GossipPost } from '@/types/gossip';
 
 function GossipPageInner() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [filterType, setFilterType] = useState<string>('all');
     const queryClient = useQueryClient();
+    const { user } = useAuth();
+    const observerRef = useRef<IntersectionObserver | null>(null);
 
-    // Fetch gossip posts
+    const filters = filterType !== 'all' ? { type: filterType } : undefined;
     const {
-        data: gossipData,
+        data,
         isLoading,
         isError,
         error,
         refetch,
-    } = useQuery({
-        queryKey: ['gossip', filterType],
-        queryFn: async () => {
-            const filters = filterType !== 'all' ? { type: filterType } : {};
-            const response = await gossipService.listGossip(filters);
-            return response.data?.gossip || [];
-        },
-    });
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useGossipList(filters);
 
-    const posts: GossipPost[] = gossipData || [];
+    const posts: GossipPost[] = data?.pages?.flatMap((page) => page?.gossip || []) || [];
 
     const handleCreateSuccess = () => {
         queryClient.invalidateQueries({ queryKey: ['gossip'] });
     };
+
+    // Infinite scroll sentinel
+    const lastPostRef = useCallback(
+        (node: HTMLElement | null) => {
+            if (isFetchingNextPage) return;
+            if (observerRef.current) observerRef.current.disconnect();
+            observerRef.current = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasNextPage) {
+                    fetchNextPage();
+                }
+            });
+            if (node) observerRef.current.observe(node);
+        },
+        [isFetchingNextPage, hasNextPage, fetchNextPage],
+    );
 
     const filterTabs = [
         { value: 'all', label: 'All' },
@@ -56,14 +70,11 @@ function GossipPageInner() {
 
     return (
         <div className="relative flex h-screen w-full flex-col overflow-hidden">
-            {/* Top Navigation */}
             <TopNav />
 
             <div className="flex flex-1 overflow-hidden">
-                {/* Left Sidebar */}
                 <LeftSidebar />
 
-                {/* Main Content */}
                 <main className="flex-1 overflow-y-auto px-4 py-6">
                     <div className="max-w-[680px] mx-auto flex flex-col gap-4 pb-20">
                         {/* Page Header */}
@@ -152,33 +163,41 @@ function GossipPageInner() {
 
                         {/* Gossip Feed */}
                         <div className="flex flex-col gap-4">
-                            {posts.map((post) => (
-                                <GossipCard
-                                    key={post.id}
-                                    post={post}
-                                    onClick={() => {
-                                        console.log('Open gossip:', post.id);
-                                    }}
-                                />
-                            ))}
+                            {posts.map((post, index) => {
+                                const postId = post.id || post._id || `${index}`;
+                                const isLast = index === posts.length - 1;
+                                return (
+                                    <div key={postId} ref={isLast ? lastPostRef : undefined}>
+                                        <GossipCard
+                                            post={post}
+                                            currentUserId={user?.id}
+                                        />
+                                    </div>
+                                );
+                            })}
                         </div>
+
+                        {/* Loading more indicator */}
+                        {isFetchingNextPage && (
+                            <div className="flex justify-center py-4">
+                                <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+                            </div>
+                        )}
                     </div>
                 </main>
 
-                {/* Right Sidebar */}
                 <RightSidebar />
             </div>
 
-            {/* Mobile Bottom Navigation */}
             <div className="md:hidden">
                 <BottomNav />
             </div>
 
-            {/* Create Gossip Modal */}
             <CreateGossipModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSuccess={handleCreateSuccess}
+                defaultDiscussionType={filterType !== 'all' ? (filterType as any) : undefined}
             />
         </div>
     );
