@@ -31,3 +31,5 @@ export {
   useDepartmentServices,
   useDepartmentRewards,
 } from "./useDepartments";
+export { useTripMonitor } from "./useTripMonitor";
+export type { UseTripMonitor, TripMonitorState } from "./useTripMonitor";
