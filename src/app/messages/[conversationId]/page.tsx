@@ -319,7 +319,14 @@ export default function ConversationPage() {
     } catch (err: any) {
       const serverMsg = err?.response?.data?.message || err?.message || 'Failed to send message';
       toast.error(serverMsg);
+      // Remove the optimistic bubble and restore the text so the user doesn't lose their message
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setInputText(content);
+      // Restore textarea height
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+      }
     } finally {
       setSending(false);
       textareaRef.current?.focus();
