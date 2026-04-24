@@ -264,7 +264,7 @@ function GuardianTripViewPageInner({ userId }: { userId: string }) {
           <div className="mx-auto flex w-full max-w-[680px] flex-col gap-4 pb-24">
             <div
               className="neu-card-sm rounded-2xl p-4 flex items-center justify-between gap-3"
-              style={{ backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '400px 400px' }}
+              style={{ backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '500px 500px' }}
             >
               <div>
                 <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Guardian Trip View</h1>

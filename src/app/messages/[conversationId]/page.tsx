@@ -11,9 +11,11 @@ import { BottomNav } from '@/components/feed/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { chatService } from '@/services/chat.service';
 import { e2eeService } from '@/services/e2ee.service';
-import { ChatMessage, Conversation } from '@/types/api';
+import { ChatMessage, ChatMessageType, Conversation } from '@/types/api';
 import socketService from '@/lib/socket';
 import { toast } from 'sonner';
+import ChatActionMenu, { ActionResult } from '@/components/chat/ChatActionMenu';
+import ChatMessageCard from '@/components/chat/ChatMessageCard';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -171,13 +173,10 @@ export default function ConversationPage() {
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
   const [showKeyPanel, setShowKeyPanel] = useState(false);
-  const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   const lastMsgRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const attachMenuRef = useRef<HTMLDivElement>(null);
 
   // Load conversation detail (name, participants) - falls back to cache
   const { data: detailData } = useQuery({
@@ -365,60 +364,53 @@ export default function ConversationPage() {
     }
   };
 
-  // ── Attachment upload ─────────────────────────────────────────────────────
-  const ATTACH_TYPES: { label: string; icon: string; accept: string; mediaType: ChatMessage['type'] }[] = [
-    { label: 'Image',    icon: '🖼️',  accept: 'image/*',                                              mediaType: 'image' },
-    { label: 'Video',    icon: '🎥',  accept: 'video/*',                                              mediaType: 'video' },
-    { label: 'Audio',    icon: '🎵',  accept: 'audio/*',                                              mediaType: 'audio' },
-    { label: 'Document', icon: '📄',  accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv',      mediaType: 'file' },
-    { label: 'File',     icon: '📎',  accept: '*/*',                                                  mediaType: 'file' },
-  ];
-
-  const [pendingAccept, setPendingAccept] = useState<string>('*/*');
-  const [pendingMediaType, setPendingMediaType] = useState<ChatMessage['type']>('file');
-
-  const openFilePicker = (accept: string, mediaType: ChatMessage['type']) => {
-    setPendingAccept(accept);
-    setPendingMediaType(mediaType);
-    setShowAttachMenu(false);
-    setTimeout(() => fileInputRef.current?.click(), 50);
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    // Reset so the same file can be reselected
-    e.target.value = '';
-
+  // ── Action menu handler ─────────────────────────────────────────────────────
+  const handleActionResult = async (result: ActionResult) => {
     setSending(true);
-    setUploadProgress(0);
-    try {
-      const uploadRes = await chatService.uploadChatMedia(file, (pct) => setUploadProgress(pct));
-      const mediaUrl = uploadRes.data?.mediaUrl;
-      if (!mediaUrl) throw new Error('Upload failed — no URL returned');
+    setUploadProgress(null);
 
-      const tempId = `temp-${Date.now()}`;
-      const optimistic: ChatMessage = {
-        id: tempId,
-        conversationId,
-        senderId: user?.id ?? '',
-        content: file.name,
-        type: pendingMediaType,
-        mediaUrl,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        status: 'sent',
-        priority: 'normal',
-        isDeleted: false,
-        isEdited: false,
-      };
-      setMessages((prev) => [...prev, optimistic]);
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: ChatMessage = {
+      id: tempId,
+      conversationId,
+      senderId: user?.id ?? '',
+      content: result.content,
+      type: result.type,
+      mediaUrl: result.mediaUrl,
+      locationSnapshot: result.locationSnapshot,
+      emergencyRef: result.emergencyRef,
+      trackingSessionRef: result.trackingSessionRef,
+      meta: result.meta,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'sent',
+      priority: 'normal',
+      isDeleted: false,
+      isEdited: false,
+    };
+    setMessages((prev) => [...prev, optimistic]);
+
+    try {
+      let mediaUrl = result.mediaUrl;
+
+      // Upload file if we have a raw file
+      if (result.mediaFile) {
+        setUploadProgress(0);
+        const uploadRes = await chatService.uploadChatMedia(result.mediaFile, (pct) => setUploadProgress(pct));
+        mediaUrl = uploadRes.data?.mediaUrl ?? uploadRes.data?.url;
+        if (!mediaUrl) throw new Error('Upload failed — no URL returned');
+        // Update optimistic with real URL
+        setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, mediaUrl } : m));
+      }
 
       const res = await chatService.sendMessage({
         conversationId,
-        content: file.name,
-        type: pendingMediaType,
+        content: result.content,
+        type: result.type as any,
         mediaUrl,
+        locationSnapshot: result.locationSnapshot,
+        emergencyRef: result.emergencyRef,
+        trackingSessionRef: result.trackingSessionRef,
       });
       const payload = res.data as any;
       const sent: ChatMessage | undefined = payload?.message ?? (payload?.duplicate ? undefined : payload);
@@ -426,30 +418,20 @@ export default function ConversationPage() {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === tempId
-              ? { ...sent, id: sent.id || (sent as any)._id || tempId, senderId: user?.id ?? sent.senderId }
+              ? { ...sent, id: sent.id || (sent as any)._id || tempId, senderId: user?.id ?? sent.senderId, meta: optimistic.meta }
               : m,
           ),
         );
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || 'Upload failed');
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to send');
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
     } finally {
       setSending(false);
       setUploadProgress(null);
       textareaRef.current?.focus();
     }
   };
-
-  // Close attach menu on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (attachMenuRef.current && !attachMenuRef.current.contains(e.target as Node)) {
-        setShowAttachMenu(false);
-      }
-    };
-    if (showAttachMenu) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showAttachMenu]);
 
   // ── Groups ────────────────────────────────────────────────────────────────
   const groups = groupByDate(messages);
@@ -543,7 +525,6 @@ export default function ConversationPage() {
 
                     {msgs.map((msg, msgIdx) => {
                       const mine = msg.senderId === user?.id;
-                      const isPriority = msg.priority === 'emergency';
                       const id = msgId(msg);
                       const isLastOverall =
                         msgIdx === msgs.length - 1 &&
@@ -555,71 +536,7 @@ export default function ConversationPage() {
                           ref={isLastOverall ? lastMsgRef : undefined}
                           className={`mb-1 flex ${mine ? 'justify-end' : 'justify-start'}`}
                         >
-                          <div
-                            className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
-                              isPriority
-                                ? 'border-2 border-red-600 bg-red-900/40'
-                                : mine
-                                ? 'bg-blue-700 text-white'
-                                : 'bg-gray-800 text-gray-100'
-                            }`}
-                          >
-                            {isPriority && (
-                              <p className="mb-1 text-[10px] font-bold uppercase text-red-300">
-                                🚨 Priority
-                              </p>
-                            )}
-                            {msg.isDeleted ? (
-                              <p className="italic text-gray-400 text-sm">[deleted]</p>
-                            ) : msg.type === 'image' && msg.mediaUrl ? (
-                              <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={msg.mediaUrl}
-                                  alt={msg.content || 'image'}
-                                  className="max-w-full rounded-lg"
-                                  style={{ maxHeight: 240 }}
-                                />
-                              </a>
-                            ) : msg.type === 'video' && msg.mediaUrl ? (
-                              <video
-                                src={msg.mediaUrl}
-                                controls
-                                className="max-w-full rounded-lg"
-                                style={{ maxHeight: 240 }}
-                              />
-                            ) : msg.type === 'audio' && msg.mediaUrl ? (
-                              <audio src={msg.mediaUrl} controls className="w-full" />
-                            ) : msg.type === 'file' && msg.mediaUrl ? (
-                              <a
-                                href={msg.mediaUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-sm underline"
-                              >
-                                <span>📎</span>
-                                <span className="truncate max-w-[180px]">{msg.content}</span>
-                              </a>
-                            ) : (
-                              <p className="text-sm leading-relaxed">{msg.content}</p>
-                            )}
-                            <div
-                              className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${
-                                mine ? 'text-blue-200' : 'text-gray-500'
-                              }`}
-                            >
-                              <span>{timeStr(msg.createdAt)}</span>
-                              {mine && (
-                                <span>
-                                  {msg.status === 'read'
-                                    ? '✓✓'
-                                    : msg.status === 'delivered'
-                                    ? '✓✓'
-                                    : '✓'}
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                          <ChatMessageCard msg={msg} mine={mine} />
                         </div>
                       );
                     })}
@@ -642,42 +559,8 @@ export default function ConversationPage() {
               </div>
             )}
             <div className="flex items-end gap-2">
-              {/* Attachment button */}
-              <div className="relative" ref={attachMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setShowAttachMenu((s) => !s)}
-                  disabled={sending}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-700 text-lg text-gray-300 transition-colors hover:bg-gray-600 disabled:opacity-50"
-                  aria-label="Attach file"
-                >
-                  📎
-                </button>
-                {showAttachMenu && (
-                  <div className="absolute bottom-12 left-0 z-50 w-44 overflow-hidden rounded-xl border border-gray-600 bg-gray-800 shadow-xl">
-                    {ATTACH_TYPES.map((a) => (
-                      <button
-                        key={a.label}
-                        type="button"
-                        onClick={() => openFilePicker(a.accept, a.mediaType)}
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-200 transition-colors hover:bg-gray-700"
-                      >
-                        <span>{a.icon}</span>
-                        <span>{a.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={pendingAccept}
-                className="hidden"
-                onChange={handleFileChange}
-              />
+              {/* ⮕ Action menu (+ button) */}
+              <ChatActionMenu disabled={sending} onAction={handleActionResult} />
 
               <div className="relative flex-1">
                 <textarea
@@ -687,7 +570,6 @@ export default function ConversationPage() {
                   maxLength={10000}
                   onChange={(e) => {
                     setInputText(e.target.value);
-                    // Auto-resize
                     e.target.style.height = 'auto';
                     e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
                   }}

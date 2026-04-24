@@ -288,6 +288,51 @@ export interface PostDetails {
 
 // ==================== Chat Types ====================
 
+/** All possible chat message content types */
+export type ChatMessageType =
+  | "text"
+  | "image"
+  | "video"
+  | "audio"
+  | "file"
+  | "location"
+  | "event"
+  | "marketplace"
+  | "contact"
+  | "poll"
+  | "kidnapping_info"
+  | "tracking"
+  | "sos";
+
+/** Rich metadata carried by non-text message types */
+export interface ChatMessageMeta {
+  // location
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  // event
+  eventId?: string;
+  title?: string;
+  time?: string;
+  // marketplace
+  itemId?: string;
+  price?: number;
+  // contact
+  name?: string;
+  phone?: string;
+  // poll
+  question?: string;
+  options?: string[];
+  votes?: Record<string, string[]>; // optionIndex → userIds
+  // kidnapping_info
+  lastKnownLocation?: { latitude: number; longitude: number; address?: string };
+  status?: string;
+  // tracking
+  live?: boolean;
+  // sos
+  severity?: string;
+}
+
 export interface ChatMessage {
   id: string;
   _id?: string;
@@ -302,10 +347,12 @@ export interface ChatMessage {
     avatarUrl?: string | null;
   };
   content: string;
-  type: "text" | "image" | "video" | "audio" | "file" | "location";
+  type: ChatMessageType;
   mediaUrl?: string;
   thumbnailUrl?: string;
   locationSnapshot?: { latitude: number; longitude: number; address?: string };
+  /** Rich metadata for non-text message types */
+  meta?: ChatMessageMeta;
   media?: MediaItem[];
   replyTo?: string;
   readBy?: string[];

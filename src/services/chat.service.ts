@@ -105,12 +105,13 @@ export const chatService = {
   async sendMessage(params: {
     conversationId: string;
     content: string;
-    type?: "text" | "image" | "video" | "audio" | "file" | "location";
+    type?: string;
     mediaUrl?: string;
     replyTo?: string;
     locationSnapshot?: { latitude: number; longitude: number; address?: string };
     emergencyRef?: string;
     trackingSessionRef?: string;
+    meta?: Record<string, any>;
   }) {
     const clientMessageId = newClientMessageId();
     return await apiClient.post<ChatMessage | { duplicate: boolean }>("/chat/send", {
@@ -149,7 +150,8 @@ export const chatService = {
   /** Upload a media file for use in a chat message. Returns mediaUrl + thumbnailUrl. */
   async uploadChatMedia(file: File, onProgress?: (percent: number) => void) {
     return await apiClient.uploadFile<{
-      mediaUrl: string;
+      url: string;
+      mediaUrl?: string; // alias, may also be present
       thumbnailUrl?: string;
       mediaType: string;
     }>("/chat/upload", file, undefined, onProgress);
