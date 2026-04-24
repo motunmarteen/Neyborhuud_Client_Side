@@ -472,8 +472,8 @@ function XFeedInner() {
                         )}
                         </div>
 
-                        {/* Posts Feed — full width, outside px-4 container */}
-                        <div className="flex flex-col gap-2 bg-black/[0.03] mt-3">
+                        {/* Posts Feed */}
+                        <div className="flex flex-col gap-2 bg-black/[0.03] mt-3 px-4">
                             {posts.map((post) => (
                                 <XPostCard
                                     key={post.id}

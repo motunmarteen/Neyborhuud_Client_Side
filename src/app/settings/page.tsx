@@ -105,6 +105,10 @@ export default function SettingsPage() {
         showEmail: false,
     });
 
+    // Per-user safety settings
+    const [emergencyServicesEnabled, setEmergencyServicesEnabled] = useState(false);
+    const [savingSafety, setSavingSafety] = useState(false);
+
     // Load user data from localStorage
     useEffect(() => {
         const userData = localStorage.getItem('neyborhuud_user');
@@ -120,6 +124,17 @@ export default function SettingsPage() {
             if (parsed.settings?.privacy) {
                 setPrivacy(prev => ({ ...prev, ...parsed.settings.privacy }));
             }
+        }
+
+        // Load per-user safety settings from backend
+        if (authService.isAuthenticated()) {
+            fetchAPI('/safety/settings')
+                .then((res: any) => {
+                    if (res?.data?.safetySettings?.emergencyServicesEnabled !== undefined) {
+                        setEmergencyServicesEnabled(!!res.data.safetySettings.emergencyServicesEnabled);
+                    }
+                })
+                .catch(() => {}); // non-fatal
         }
     }, []);
 
@@ -298,6 +313,23 @@ export default function SettingsPage() {
             alert('Failed to save settings. Please try again.');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleSaveEmergencyConsent = async (newValue: boolean) => {
+        setSavingSafety(true);
+        try {
+            await fetchAPI('/safety/settings', {
+                method: 'PATCH',
+                body: JSON.stringify({ emergencyServicesEnabled: newValue }),
+            });
+            setEmergencyServicesEnabled(newValue);
+            toast.success(newValue ? 'Emergency services contact enabled.' : 'Emergency services contact disabled.');
+        } catch (err: any) {
+            console.error('Failed to save safety settings:', err);
+            toast.error('Could not save safety settings. Please try again.');
+        } finally {
+            setSavingSafety(false);
         }
     };
 
@@ -521,6 +553,24 @@ export default function SettingsPage() {
                                 {saving ? 'Saving...' : 'Save Notification Settings'}
                             </span>
                         </button>
+
+                        {/* Emergency Services Consent */}
+                        <div className="neumorphic rounded-2xl p-6 mt-4">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-1">
+                                Emergency Services
+                            </h2>
+                            <p className="text-xs text-charcoal/50 mb-4">
+                                Allow NeyborHuud to contact emergency services (Police, DSS, NEMA) on your behalf
+                                when an SOS is auto-escalated and you do not respond.
+                                This requires your explicit consent and can be withdrawn at any time.
+                            </p>
+                            <ToggleSwitch
+                                enabled={emergencyServicesEnabled}
+                                onChange={(val) => void handleSaveEmergencyConsent(val)}
+                                label={savingSafety ? 'Saving…' : 'Contact Emergency Services for Me'}
+                                description="Auto-dispatches authorities during an unresponsive SOS escalation"
+                            />
+                        </div>
                     </div>
                 )}
 

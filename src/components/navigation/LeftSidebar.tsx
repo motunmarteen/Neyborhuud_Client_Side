@@ -10,7 +10,11 @@ import AmbientProfileCard from './AmbientProfileCard';
 
 const quickActions = [
   { icon: 'sos', label: 'SOS', href: '/safety', accent: '#ef4444' },
+  { icon: 'route', label: 'Safe Trip', href: '/safety/trips', accent: '#008751' },
+  { icon: 'fence', label: 'Safety Zones', href: '/safety/geofences', accent: '#f59e0b' },
+  { icon: 'crisis_alert', label: 'Emergency', href: '/safety/emergency', accent: '#dc2626' },
   { icon: 'shield', label: 'Sentinel AI', href: '/sentinel', accent: '#8b5cf6' },
+  { icon: 'chat', label: 'Messages', href: '/messages', accent: '#3b82f6' },
 ];
 
 const mainNav = [
@@ -102,10 +106,8 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
       fallback: fallbackCoords,
       location: user?.location,
       flatFields: { lga: u?.lga, state: u?.state },
-      userId: user?.id,
-      fullUser: user,
     });
-  }, [userLat, userLng, resolvedLat, resolvedLng, user?.location, fallbackCoords, u?.lga, u?.state, user?.id, user]);
+  }, [userLat, userLng, resolvedLat, resolvedLng, user?.location, fallbackCoords, u?.lga, u?.state]);
 
   return (
     <div className="flex flex-col h-full">
@@ -128,8 +130,8 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
 
       <div className="px-3 pt-3 pb-3 flex flex-col gap-0.5 flex-1 min-h-0">
 
-      {/* Quick Actions — SOS + Sentinel AI */}
-      <div className="flex gap-2 mb-3">
+      {/* Quick Actions — SOS + Safe Trip + Sentinel AI */}
+      <div className="grid grid-cols-3 gap-1.5 mb-3">
         {quickActions.map((item) => {
           const active = isActive(item.href);
           return (
@@ -137,7 +139,7 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className={`flex items-center gap-1.5 px-2.5 py-2 rounded-full text-[12px] font-bold transition-all flex-1 justify-center whitespace-nowrap ${
+              className={`flex items-center gap-1 px-2 py-2 rounded-full text-[11px] font-bold transition-all justify-center whitespace-nowrap ${
                 active
                   ? 'text-white shadow-md'
                   : 'hover:opacity-80'

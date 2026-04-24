@@ -9,13 +9,33 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster, toast } from 'sonner';
 import { queryClient } from '@/lib/query-client';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import socketService from '@/lib/socket';
 import apiClient from '@/lib/api-client';
 import { authService } from '@/services/auth.service';
+import { e2eeService } from '@/services/e2ee.service';
 import { I18nProvider } from '@/lib/i18n';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
+
+/**
+ * Mounts once after auth to register Web Push subscriptions.
+ * Silently attempts subscription — never blocks the UI.
+ */
+function PushRegistrar() {
+  const { permission, requestPermissionAndSubscribe } = usePushNotifications();
+
+  useEffect(() => {
+    if (!apiClient.isAuthenticated()) return;
+    if (permission === 'denied' || permission === 'unsupported') return;
+    // Attempt subscription silently; the hook will skip if already subscribed
+    void requestPermissionAndSubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return null;
+}
 
 function isMetaMaskExtensionNoise(reason: unknown): boolean {
   const details =
@@ -145,6 +165,53 @@ export function Providers({ children }: { children: React.ReactNode }) {
       socketService.on('safety:safe_update', emergencyInteractionHandler);
       socketService.on('content:verification_update', emergencyInteractionHandler);
 
+      // ── Chat: new message → refresh conversation list ─────────────────────
+      socketService.on('message:new', () => {
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      });
+
+      // ── Chat: priority/emergency message → loud toast + refresh ──────────
+      socketService.on('message:priority', (data: any) => {
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        queryClient.invalidateQueries({ queryKey: ['messages', data?.conversationId] });
+        toast.error('🚨 Priority Message', {
+          description: data?.content ?? 'An emergency message was sent in a conversation.',
+          duration: 10000,
+        });
+      });
+
+      // ── Chat: delivery / read receipts → refresh message cache ───────────
+      socketService.on('message:delivered', (data: any) => {
+        queryClient.invalidateQueries({ queryKey: ['messages', data?.conversationId] });
+      });
+
+      socketService.on('message:read', (data: any) => {
+        queryClient.invalidateQueries({ queryKey: ['messages', data?.conversationId] });
+      });
+
+      // ── E2EE: contact rotated key → warn + invalidate verification cache ──
+      socketService.on('key:rotated', (data: any) => {
+        queryClient.invalidateQueries({ queryKey: ['keyVerification'] });
+        toast.warning('🔐 Encryption key changed', {
+          description:
+            'A contact rotated their encryption key. Re-verify their safety number to ensure the conversation is still secure.',
+          duration: 8000,
+        });
+      });
+
+      // ── E2EE: someone verified your key → acknowledge ─────────────────────
+      socketService.on('key:verified', () => {
+        toast.success('✅ Key verified', {
+          description: 'A contact verified your encryption key.',
+          duration: 5000,
+        });
+      });
+
+      // ── E2EE: register key on startup (once per auth session) ────────────
+      e2eeService.registerKey().catch(() => {
+        // Silent fail — key registration is best-effort at startup
+      });
+
       return () => {
         socketService.disconnect();
       };
@@ -173,6 +240,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
     <QueryClientProvider client={queryClient}>
+      <PushRegistrar />
       {children}
       <Toaster 
         position="top-right" 
