@@ -172,7 +172,7 @@ export default function ConversationPage() {
   const [sending, setSending] = useState(false);
   const [showKeyPanel, setShowKeyPanel] = useState(false);
 
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const lastMsgRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Load conversation detail (name, participants) - falls back to cache
@@ -218,7 +218,7 @@ export default function ConversationPage() {
 
   // ── Auto-scroll ───────────────────────────────────────────────────────────
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    lastMsgRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [messages]);
 
   // ── Socket listeners ──────────────────────────────────────────────────────
@@ -451,14 +451,18 @@ export default function ConversationPage() {
                       <div className="h-px flex-1 bg-gray-700" />
                     </div>
 
-                    {msgs.map((msg) => {
+                    {msgs.map((msg, msgIdx) => {
                       const mine = msg.senderId === user?.id;
                       const isPriority = msg.priority === 'emergency';
                       const id = msgId(msg);
+                      const isLastOverall =
+                        msgIdx === msgs.length - 1 &&
+                        groups[groups.length - 1]?.date === date;
 
                       return (
                         <div
                           key={id}
+                          ref={isLastOverall ? lastMsgRef : undefined}
                           className={`mb-1 flex ${mine ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
@@ -504,8 +508,7 @@ export default function ConversationPage() {
                 ))}
               </div>
             )}
-            {/* Auto-scroll anchor */}
-            <div ref={bottomRef} />
+
           </div>
 
           {/* Input */}
