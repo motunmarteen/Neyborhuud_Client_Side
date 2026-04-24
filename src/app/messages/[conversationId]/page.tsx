@@ -43,12 +43,21 @@ function timeStr(dateStr: string): string {
   return new Date(dateStr).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
 }
 
-function convDisplayName(c: Conversation | undefined): string {
+function convDisplayName(c: Conversation | undefined, currentUserId?: string): string {
   if (!c) return 'Chat';
   if (c.type === 'incident') return '🚨 Emergency Chat';
   if (c.type === 'community') return '🏘️ Community Chat';
   if (c.type === 'group') return c.name || c.groupName || 'Group Chat';
-  if (c.otherParticipant) return c.otherParticipant.name || c.otherParticipant.username || 'Direct Message';
+  // Try otherParticipant first
+  if (c.otherParticipant?.name) return c.otherParticipant.name;
+  if (c.otherParticipant?.username) return c.otherParticipant.username;
+  // Fall back to participants array
+  const participants: any[] = (c as any).participants ?? [];
+  const other = participants.find(
+    (p: any) => p && (p.id ?? p._id?.toString() ?? p.userId?.toString()) !== currentUserId,
+  );
+  if (other?.name) return other.name;
+  if (other?.username) return other.username;
   return 'Direct Message';
 }
 
@@ -316,12 +325,12 @@ export default function ConversationPage() {
   const groups = groupByDate(messages);
 
   const isIncident = conv?.type === 'incident';
-  const displayName = convDisplayName(conv);
+  const displayName = convDisplayName(conv, user?.id);
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <TopNav />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden pb-14">
         <LeftSidebar />
 
         {/* Chat main — flex-col layout */}
