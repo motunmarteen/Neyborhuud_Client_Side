@@ -25,11 +25,10 @@ function groupByDate(messages: ChatMessage[]): { date: string; msgs: ChatMessage
   const groups: { date: string; msgs: ChatMessage[] }[] = [];
   let curDate = '';
   for (const m of messages) {
-    const d = new Date(m.createdAt).toLocaleDateString('en-NG', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    const dt = m.createdAt ? new Date(m.createdAt) : null;
+    const d = dt && !isNaN(dt.getTime())
+      ? dt.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'Today';
     if (d !== curDate) {
       curDate = d;
       groups.push({ date: d, msgs: [] });
@@ -39,8 +38,11 @@ function groupByDate(messages: ChatMessage[]): { date: string; msgs: ChatMessage
   return groups;
 }
 
-function timeStr(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
+function timeStr(dateStr: string | undefined): string {
+  if (!dateStr) return '';
+  const dt = new Date(dateStr);
+  if (isNaN(dt.getTime())) return '';
+  return dt.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
 }
 
 function convDisplayName(c: Conversation | undefined, currentUserId?: string): string {
@@ -221,22 +223,27 @@ export default function ConversationPage() {
 
   // ── Socket listeners ──────────────────────────────────────────────────────
   useEffect(() => {
+    // Backend emits socket events as { message: { ...chatData } } — unwrap it
+    const extractMsg = (data: any): ChatMessage => data?.message ?? data;
+
     const onNew = (data: any) => {
-      if (data.conversationId !== conversationId) return;
+      const msg = extractMsg(data);
+      if (msg.conversationId !== conversationId) return;
       setMessages((prev) => {
-        const id = (data as any)._id ?? data.id ?? data.clientMessageId;
+        const id = (msg as any)._id ?? msg.id ?? msg.clientMessageId;
         if (prev.some((m) => msgId(m) === id)) return prev;
-        return [...prev, data as ChatMessage];
+        return [...prev, msg];
       });
       chatService.markAsRead(conversationId).catch(() => {});
     };
 
     const onPriority = (data: any) => {
-      if (data.conversationId !== conversationId) return;
+      const msg = extractMsg(data);
+      if (msg.conversationId !== conversationId) return;
       setMessages((prev) => {
-        const id = (data as any)._id ?? data.id ?? data.clientMessageId;
+        const id = (msg as any)._id ?? msg.id ?? msg.clientMessageId;
         if (prev.some((m) => msgId(m) === id)) return prev;
-        return [...prev, data as ChatMessage];
+        return [...prev, msg];
       });
       chatService.markAsRead(conversationId).catch(() => {});
     };
@@ -298,12 +305,16 @@ export default function ConversationPage() {
 
     try {
       const res = await chatService.sendMessage({ conversationId, content });
-      const sent = res.data as ChatMessage | undefined;
+      // Backend wraps the message: { success, message, data: { message: {...} } }
+      // So res.data = { message: {...} } — must unwrap one level
+      const payload = res.data as any;
+      const sent: ChatMessage | undefined = payload?.message ?? (payload?.duplicate ? undefined : payload);
       if (sent && !(sent as any).duplicate) {
-        setMessages((prev) => prev.map((m) => (m.id === tempId ? sent : m)));
+        setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...sent, id: sent.id || (sent as any)._id || tempId } : m)));
+      } else if ((payload as any)?.duplicate) {
+        // Server already has this message — keep optimistic until socket/reload syncs it
       } else {
-        // duplicate or no data: remove optimistic
-        setMessages((prev) => prev.filter((m) => m.id !== tempId));
+        // Unknown response — keep the optimistic message as a fallback
       }
     } catch (err: any) {
       toast.error('Failed to send message');
