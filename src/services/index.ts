@@ -19,3 +19,22 @@ export { socialService } from "./social.service";
 export { paymentsService } from "./payments.service";
 export { adminService } from "./admin.service";
 export { departmentService } from "./departments.service";
+export { safetyService } from "./safety.service";
+export type {
+  GuardianRelationship,
+  GuardianStatus,
+  SosEvent,
+  UserStatus,
+  Geofence,
+  GeofenceType,
+  GeofenceAlertEvent,
+  CreateGeofencePayload,
+  Emergency,
+  EmergencyType,
+  EmergencySource,
+  DispatchStatus,
+  ReportEmergencyPayload,
+  AgencyName,
+} from "./safety.service";
+export { tripService } from "./trip.service";
+export type { Trip, TripStatus, TripLocation, RoutePoint, StartTripPayload, TripListResult, LocationUpdateResult } from "./trip.service";
