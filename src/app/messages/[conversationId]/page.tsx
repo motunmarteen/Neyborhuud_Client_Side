@@ -317,7 +317,8 @@ export default function ConversationPage() {
         // Unknown response — keep the optimistic message as a fallback
       }
     } catch (err: any) {
-      toast.error('Failed to send message');
+      const serverMsg = err?.response?.data?.message || err?.message || 'Failed to send message';
+      toast.error(serverMsg);
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
     } finally {
       setSending(false);
