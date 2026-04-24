@@ -232,6 +232,17 @@ export default function ConversationPage() {
       setMessages((prev) => {
         const id = (msg as any)._id ?? msg.id ?? msg.clientMessageId;
         if (prev.some((m) => msgId(m) === id)) return prev;
+        // If a pending optimistic message has the same content, replace it instead of appending.
+        // This prevents duplicates when the socket event arrives before the HTTP response.
+        const tempIdx = prev.findIndex(
+          (m) => String(m.id ?? '').startsWith('temp-') && m.content === msg.content,
+        );
+        if (tempIdx !== -1) {
+          const next = [...prev];
+          // Preserve senderId as user's local id so 'mine' stays correct
+          next[tempIdx] = { ...msg, senderId: prev[tempIdx].senderId };
+          return next;
+        }
         return [...prev, msg];
       });
       chatService.markAsRead(conversationId).catch(() => {});
@@ -243,6 +254,14 @@ export default function ConversationPage() {
       setMessages((prev) => {
         const id = (msg as any)._id ?? msg.id ?? msg.clientMessageId;
         if (prev.some((m) => msgId(m) === id)) return prev;
+        const tempIdx = prev.findIndex(
+          (m) => String(m.id ?? '').startsWith('temp-') && m.content === msg.content,
+        );
+        if (tempIdx !== -1) {
+          const next = [...prev];
+          next[tempIdx] = { ...msg, senderId: prev[tempIdx].senderId };
+          return next;
+        }
         return [...prev, msg];
       });
       chatService.markAsRead(conversationId).catch(() => {});
@@ -310,7 +329,9 @@ export default function ConversationPage() {
       const payload = res.data as any;
       const sent: ChatMessage | undefined = payload?.message ?? (payload?.duplicate ? undefined : payload);
       if (sent && !(sent as any).duplicate) {
-        setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...sent, id: sent.id || (sent as any)._id || tempId } : m)));
+        // Override senderId with user?.id so the 'mine' comparison always works,
+        // regardless of ObjectId vs string ID format differences between server and client.
+        setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...sent, id: sent.id || (sent as any)._id || tempId, senderId: user?.id ?? sent.senderId } : m)));
       } else if ((payload as any)?.duplicate) {
         // Server already has this message — keep optimistic until socket/reload syncs it
       } else {
