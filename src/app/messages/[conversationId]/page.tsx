@@ -199,8 +199,8 @@ export default function ConversationPage() {
     try {
       const res = await chatService.getMessages(conversationId);
       const raw = res.data?.messages ?? [];
-      // Backend returns newest-first → reverse for chronological display
-      setMessages([...raw].reverse());
+      // Backend already reverses to oldest-first before responding
+      setMessages([...raw]);
     } catch {
       setMessages([]);
     } finally {
