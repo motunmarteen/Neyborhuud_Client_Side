@@ -483,20 +483,32 @@ export default function ConversationPage() {
           {/* Input */}
           <div className="shrink-0 border-t border-gray-700 bg-gray-900 px-4 py-3">
             <div className="flex items-end gap-2">
-              <textarea
-                ref={textareaRef}
-                rows={1}
-                value={inputText}
-                onChange={(e) => {
-                  setInputText(e.target.value);
-                  // Auto-resize
-                  e.target.style.height = 'auto';
-                  e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
-                }}
-                onKeyDown={handleKeyDown}
-                placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
-                className="max-h-[120px] flex-1 resize-none rounded-xl border border-gray-600 bg-gray-800 px-4 py-2.5 text-sm text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
+              <div className="relative flex-1">
+                <textarea
+                  ref={textareaRef}
+                  rows={1}
+                  value={inputText}
+                  maxLength={10000}
+                  onChange={(e) => {
+                    setInputText(e.target.value);
+                    // Auto-resize
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
+                  className="max-h-[200px] w-full resize-none rounded-xl border border-gray-600 bg-gray-800 px-4 py-2.5 text-sm text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                />
+                {inputText.length > 8000 && (
+                  <span
+                    className={`absolute bottom-2 right-3 text-[10px] ${
+                      inputText.length >= 10000 ? 'text-red-400' : 'text-orange-400'
+                    }`}
+                  >
+                    {10000 - inputText.length} left
+                  </span>
+                )}
+              </div>
               <button
                 onClick={handleSend}
                 disabled={!inputText.trim() || sending}
