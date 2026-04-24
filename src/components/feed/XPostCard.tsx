@@ -4,12 +4,14 @@
  */
 
 import { Post, PostAuthor } from '@/types/api';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { haversineDistance, formatDistance } from '@/utils/distance';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { useFollow } from '@/hooks/useFollow';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
+import { chatService } from '@/services/chat.service';
 
 interface XPostCardProps {
     post: Post;
@@ -44,6 +46,7 @@ export function XPostCard({
 }: XPostCardProps) {
     const [imageError, setImageError] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
+    const router = useRouter();
 
     // Get author info
     const author = post.author as PostAuthor;
@@ -54,6 +57,20 @@ export function XPostCard({
     // Follow state — only for posts not by the current user and not anonymous
     const isAnonymousAuthor = !author?.id || author.id === 'anonymous';
     const isOwnerPost = currentUserId && (author?.id === currentUserId || (post as any).authorId === currentUserId);
+
+    const handleMessageAuthor = useCallback(async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowMenu(false);
+        const authorId = author?.id;
+        if (!authorId || isAnonymousAuthor) return;
+        try {
+            const res = await chatService.getOrCreateDirectConversation(authorId);
+            const conv = (res.data as any)?.conversation ?? (res.data as any);
+            const convId = conv?._id ?? conv?.conversationId ?? conv?.id;
+            if (convId) router.push(`/messages/${convId}`);
+        } catch { /* silent */ }
+    }, [author?.id, isAnonymousAuthor, router]);
+
     const canFollow = !isOwnerPost && !isAnonymousAuthor;
     const { isFollowing, toggleFollow, isPending: isFollowPending } = useFollow(
         canFollow ? author?.id : undefined,
@@ -106,11 +123,11 @@ export function XPostCard({
 
     const hasMedia = mediaUrls.length > 0;
 
-    // Determine if this is a "quote card" — short casual text, no media, not safety-critical
+    // Determine if this is a "quote card" — all text-only posts use the gradient quote style
     const textContent = post.content || post.body || '';
     const wordCount = textContent.trim().split(/\s+/).length;
-    const isCasualType = !isSafetyAlert && post.contentType !== 'help_request' && post.contentType !== 'fyi';
-    const isQuoteCard = !hasMedia && isCasualType && wordCount <= 35 && textContent.trim().length > 0;
+    const isCasualType = !isSafetyAlert;
+    const isQuoteCard = !hasMedia && isCasualType && textContent.trim().length > 0;
 
     // Rotating gradient backgrounds for quote cards (content-type aware)
     const quoteGradients: Record<string, string> = {
@@ -255,6 +272,11 @@ export function XPostCard({
                                             {isOwner && onDelete && (
                                                 <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-red-400">
                                                     <span className="material-symbols-outlined text-[18px]">delete</span> Delete
+                                                </button>
+                                            )}
+                                            {!isOwner && !isAnonymousAuthor && (
+                                                <button onClick={handleMessageAuthor} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white">
+                                                    <span className="material-symbols-outlined text-[18px]">chat</span> Message
                                                 </button>
                                             )}
                                             {!isOwner && (
@@ -511,7 +533,68 @@ export function XPostCard({
                     }
                 }}
             >
-                <div className="flex flex-col justify-between" style={{ minHeight: '70vh' }}>
+                {/* ── RIGHT SIDE: Vertical action rail ── */}
+                <div className="absolute right-3 top-2/3 -translate-y-1/2 z-20 flex flex-col items-center gap-4">
+                    {/* Like */}
+                    <button onClick={(e) => { e.stopPropagation(); onLike(); }} className="flex flex-col items-center gap-0.5 group">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                            post.isLiked ? 'bg-pink-500/30 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
+                        }`}>
+                            <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
+                                post.isLiked ? 'text-pink-400 fill-1' : 'text-white'
+                            }`}>favorite</span>
+                        </div>
+                        {post.likes > 0 && <span className="text-[11px] font-bold text-white drop-shadow-md">{post.likes}</span>}
+                    </button>
+                    {/* Comment */}
+                    <button onClick={(e) => { e.stopPropagation(); onComment(); }} className="flex flex-col items-center gap-0.5 group">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md hover:bg-black/50 transition-all">
+                            <span className="material-symbols-outlined text-[22px] text-white group-hover:scale-110 transition-transform">chat_bubble</span>
+                        </div>
+                        {post.comments > 0 && <span className="text-[11px] font-bold text-white drop-shadow-md">{post.comments}</span>}
+                    </button>
+                    {/* Share */}
+                    <button onClick={(e) => { e.stopPropagation(); onShare(); }} className="flex flex-col items-center gap-0.5 group">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md hover:bg-black/50 transition-all">
+                            <span className="material-symbols-outlined text-[22px] text-white group-hover:scale-110 transition-transform">send</span>
+                        </div>
+                    </button>
+                    {/* Save */}
+                    <button onClick={(e) => { e.stopPropagation(); onSave(); }} className="flex flex-col items-center gap-0.5 group">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                            post.isSaved ? 'bg-white/25 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
+                        }`}>
+                            <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
+                                post.isSaved ? 'text-white fill-1' : 'text-white'
+                            }`}>bookmark</span>
+                        </div>
+                        {post.isSaved && <span className="text-[10px] font-bold text-white">Saved</span>}
+                    </button>
+                    {/* Helpful (FYI only) */}
+                    {post.contentType === 'fyi' && onHelpful && (
+                        <button onClick={(e) => { e.stopPropagation(); onHelpful(); }} className="flex flex-col items-center gap-0.5 group">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                                post.isHelpful ? 'bg-emerald-500/30 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
+                            }`}>
+                                <span className={`material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform ${
+                                    post.isHelpful ? 'text-emerald-300 fill-1' : 'text-white'
+                                }`}>thumb_up</span>
+                            </div>
+                            {(post.helpfulCount || 0) > 0 && <span className="text-[11px] font-bold text-white">{post.helpfulCount}</span>}
+                        </button>
+                    )}
+                    {/* Views */}
+                    {post.views > 0 && (
+                        <div className="flex flex-col items-center gap-0.5">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-transparent">
+                                <span className="material-symbols-outlined text-[20px] text-white/40">visibility</span>
+                            </div>
+                            <span className="text-[11px] text-white/40">{post.views}</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex flex-col" style={{ minHeight: '70vh' }}>
 
                     {/* Safety Alert Banner */}
                     {isSafetyAlert && (
@@ -607,6 +690,11 @@ export function XPostCard({
                                                     <span className="material-symbols-outlined text-[18px]">delete</span> Delete
                                                 </button>
                                             )}
+                                            {!isOwner && !isAnonymousAuthor && (
+                                                <button onClick={handleMessageAuthor} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white">
+                                                    <span className="material-symbols-outlined text-[18px]">chat</span> Message
+                                                </button>
+                                            )}
                                             {!isOwner && (
                                                 <button onClick={() => { setShowMenu(false); onReport?.(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white/60">
                                                     <span className="material-symbols-outlined text-[18px]">flag</span> Report
@@ -620,13 +708,13 @@ export function XPostCard({
                     </div>
 
                     {/* ── CENTER: Big quote text ── */}
-                    <div className="px-8 py-6 flex-1 flex flex-col justify-center items-center">
+                    <div className="px-8 pr-14 py-6 flex-1 flex flex-col justify-center items-center">
                         <span className="text-5xl leading-none mb-3 font-serif self-start opacity-20" style={{ color: accentColor }}>&ldquo;</span>
                         <p
                             className="font-extrabold leading-snug whitespace-pre-wrap break-words text-center"
                             style={{
                                 color: accentColor,
-                                fontSize: wordCount <= 10 ? '28px' : wordCount <= 20 ? '22px' : '18px',
+                                fontSize: wordCount <= 10 ? '28px' : wordCount <= 20 ? '22px' : wordCount <= 50 ? '17px' : '14px',
                             }}
                         >
                             {textContent}
@@ -657,57 +745,16 @@ export function XPostCard({
                         </div>
                     )}
 
-                    {/* ── BOTTOM: Actions — pill-style row ── */}
-                    <div className="px-4 py-3.5">
-                        <div className="flex items-center justify-between px-3 py-2 rounded-2xl bg-black/15 backdrop-blur-md border border-white/[0.06]">
-                            <div className="flex items-center gap-4">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); onLike(); }}
-                                    className={`flex items-center gap-1.5 transition-colors group ${post.isLiked ? 'text-pink-400' : 'text-white/50 hover:text-white'}`}
-                                >
-                                    <span className={`material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform ${post.isLiked ? 'fill-1' : ''}`}>favorite</span>
-                                    {post.likes > 0 && <span className="text-[12px] font-bold">{post.likes}</span>}
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); onComment(); }}
-                                    className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors group"
-                                >
-                                    <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">chat_bubble</span>
-                                    {post.comments > 0 && <span className="text-[12px] font-bold">{post.comments}</span>}
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); onShare(); }}
-                                    className="text-white/50 hover:text-white transition-colors group"
-                                >
-                                    <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">send</span>
-                                </button>
-                                {post.views > 0 && (
-                                    <span className="flex items-center gap-1 text-white/30">
-                                        <span className="material-symbols-outlined text-[18px]">visibility</span>
-                                        <span className="text-[11px]">{post.views}</span>
-                                    </span>
-                                )}
-                            </div>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onSave(); }}
-                                className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[12px] font-bold transition-all ${
-                                    post.isSaved ? 'bg-white/15 text-white' : 'text-white/40 hover:text-white hover:bg-white/10'
-                                }`}
-                            >
-                                <span className={`material-symbols-outlined text-[18px] ${post.isSaved ? 'fill-1' : ''}`}>bookmark</span>
-                                {post.isSaved ? 'Saved' : 'Save'}
-                            </button>
-                        </div>
-                    </div>
+                    {/* Bottom padding */}
+                    <div className="pb-4" />
                 </div>
             </article>
         );
     }
 
-    // ── CLASSIC CARD (no media — clean card layout) ──
     return (
         <article
-            className={`bg-white overflow-hidden cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow ${
+            className={`relative bg-white overflow-hidden cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow ${
                 isSafetyAlert ? 'ring-1 ring-orange-400/40' : ''
             }`}
             onClick={(e) => {
@@ -717,6 +764,66 @@ export function XPostCard({
                 }
             }}
         >
+            {/* ── RIGHT SIDE: Vertical action rail ── */}
+            <div className="absolute right-3 top-2/3 -translate-y-1/2 z-20 flex flex-col items-center gap-4">
+                {/* Like */}
+                <button onClick={(e) => { e.stopPropagation(); onLike(); }} className="flex flex-col items-center gap-0.5 group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                        post.isLiked ? 'bg-pink-500/15' : 'bg-black/5 hover:bg-black/10'
+                    }`}>
+                        <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
+                            post.isLiked ? 'text-pink-500 fill-1' : 'text-gray-400'
+                        }`}>favorite</span>
+                    </div>
+                    {post.likes > 0 && <span className="text-[11px] font-bold text-gray-500">{post.likes}</span>}
+                </button>
+                {/* Comment */}
+                <button onClick={(e) => { e.stopPropagation(); onComment(); }} className="flex flex-col items-center gap-0.5 group">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/5 hover:bg-black/10 transition-all">
+                        <span className="material-symbols-outlined text-[22px] text-gray-400 group-hover:scale-110 transition-transform">chat_bubble</span>
+                    </div>
+                    {post.comments > 0 && <span className="text-[11px] font-bold text-gray-500">{post.comments}</span>}
+                </button>
+                {/* Share */}
+                <button onClick={(e) => { e.stopPropagation(); onShare(); }} className="flex flex-col items-center gap-0.5 group">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/5 hover:bg-black/10 transition-all">
+                        <span className="material-symbols-outlined text-[22px] text-gray-400 group-hover:scale-110 transition-transform">send</span>
+                    </div>
+                </button>
+                {/* Save */}
+                <button onClick={(e) => { e.stopPropagation(); onSave(); }} className="flex flex-col items-center gap-0.5 group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                        post.isSaved ? 'bg-primary/15' : 'bg-black/5 hover:bg-black/10'
+                    }`}>
+                        <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
+                            post.isSaved ? 'text-primary fill-1' : 'text-gray-400'
+                        }`}>bookmark</span>
+                    </div>
+                    {post.isSaved && <span className="text-[10px] font-bold text-primary">Saved</span>}
+                </button>
+                {/* Helpful (FYI only) */}
+                {post.contentType === 'fyi' && onHelpful && (
+                    <button onClick={(e) => { e.stopPropagation(); onHelpful(); }} className="flex flex-col items-center gap-0.5 group">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                            post.isHelpful ? 'bg-emerald-500/15' : 'bg-black/5 hover:bg-black/10'
+                        }`}>
+                            <span className={`material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform ${
+                                post.isHelpful ? 'text-emerald-500 fill-1' : 'text-gray-400'
+                            }`}>thumb_up</span>
+                        </div>
+                        {(post.helpfulCount || 0) > 0 && <span className="text-[11px] font-bold text-emerald-500">{post.helpfulCount}</span>}
+                    </button>
+                )}
+                {/* Views */}
+                {post.views > 0 && (
+                    <div className="flex flex-col items-center gap-0.5">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[20px] text-gray-300">visibility</span>
+                        </div>
+                        <span className="text-[11px] text-gray-400">{post.views}</span>
+                    </div>
+                )}
+            </div>
             {/* Content Type Accent Line */}
             <div className={`h-[3px] w-full accent-line-${post.contentType || 'post'} opacity-50 rounded-t-2xl`} />
 
@@ -731,7 +838,7 @@ export function XPostCard({
                 </div>
             )}
 
-            <div className="p-4">
+            <div className="p-4 pr-14">
                 {/* ── Author Header ── */}
                 <div className="flex items-center gap-3 mb-3">
                     <div className="relative flex-shrink-0">
@@ -810,6 +917,11 @@ export function XPostCard({
                                     {isOwner && onDelete && (
                                         <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors text-red-500">
                                             <span className="material-symbols-outlined text-[18px]">delete</span> Delete
+                                        </button>
+                                    )}
+                                    {!isOwner && !isAnonymousAuthor && (
+                                        <button onClick={handleMessageAuthor} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors" style={{ color: 'var(--neu-text)' }}>
+                                            <span className="material-symbols-outlined text-[18px]">chat</span> Message
                                         </button>
                                     )}
                                     {!isOwner && (
@@ -1052,68 +1164,6 @@ export function XPostCard({
                 </div>
             )}
 
-            {/* ── Action Bar — clean pill container ── */}
-            <div className="px-4 py-3 border-t border-gray-100">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onLike(); }}
-                            className={`flex items-center gap-1.5 transition-colors group ${
-                                post.isLiked ? 'text-pink-500' : 'hover:text-pink-500'
-                            }`}
-                            style={!post.isLiked ? { color: 'var(--neu-text-muted)' } : undefined}
-                        >
-                            <span className={`material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform ${post.isLiked ? 'fill-1' : ''}`}>favorite</span>
-                            {post.likes > 0 && <span className="text-[12px] font-bold">{post.likes}</span>}
-                        </button>
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onComment(); }}
-                            className="flex items-center gap-1.5 hover:text-primary transition-colors group"
-                            style={{ color: 'var(--neu-text-muted)' }}
-                        >
-                            <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">chat_bubble</span>
-                            {post.comments > 0 && <span className="text-[12px] font-bold">{post.comments}</span>}
-                        </button>
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onShare(); }}
-                            className="hover:text-primary transition-colors group"
-                            style={{ color: 'var(--neu-text-muted)' }}
-                        >
-                            <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">send</span>
-                        </button>
-                        {post.views > 0 && (
-                            <span className="flex items-center gap-1" style={{ color: 'var(--neu-text-muted)', opacity: 0.6 }}>
-                                <span className="material-symbols-outlined text-[18px]">visibility</span>
-                                <span className="text-[11px]">{post.views}</span>
-                            </span>
-                        )}
-                        {post.contentType === 'fyi' && onHelpful && (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onHelpful(); }}
-                                className={`flex items-center gap-1 transition-colors group ${
-                                    post.isHelpful ? 'text-emerald-500' : 'hover:text-emerald-500'
-                                }`}
-                                style={!post.isHelpful ? { color: 'var(--neu-text-muted)' } : undefined}
-                            >
-                                <span className={`material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform ${post.isHelpful ? 'fill-1' : ''}`}>thumb_up</span>
-                                {(post.helpfulCount || 0) > 0 && <span className="text-[12px] font-bold">{post.helpfulCount}</span>}
-                            </button>
-                        )}
-                    </div>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onSave(); }}
-                        className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[12px] font-bold transition-all border ${
-                            post.isSaved
-                                ? 'bg-primary/10 text-primary border-primary/20'
-                                : 'bg-gray-50 hover:bg-gray-100 border-gray-100'
-                        }`}
-                        style={!post.isSaved ? { color: 'var(--neu-text-muted)' } : undefined}
-                    >
-                        <span className={`material-symbols-outlined text-[18px] ${post.isSaved ? 'fill-1' : ''}`}>bookmark</span>
-                        {post.isSaved ? 'Saved' : 'Save'}
-                    </button>
-                </div>
-            </div>
         </article>
     );
 }

@@ -20,6 +20,7 @@ import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
 import { MiniMap } from '@/components/ui/InteractiveMap';
 import { Post } from '@/types/api';
 import { contentService } from '@/services/content.service';
+import { chatService } from '@/services/chat.service';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -108,6 +109,23 @@ export default function ProfilePage() {
   } = useBlock(profile?.id, { enabled: shouldEnableFollow });
 
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [startingChat, setStartingChat] = useState(false);
+
+  const handleStartChat = async () => {
+    if (!userId) return;
+    setStartingChat(true);
+    try {
+      const res = await chatService.getOrCreateDirectConversation(userId);
+      // Backend wraps in { conversation: { _id, ... } }
+      const conv = (res.data as any)?.conversation ?? (res.data as any);
+      const convId = conv?._id ?? conv?.conversationId ?? conv?.id;
+      if (convId) router.push(`/messages/${convId}`);
+    } catch {
+      // fallback
+    } finally {
+      setStartingChat(false);
+    }
+  };
 
   // Debug profile data
   useEffect(() => {
@@ -376,38 +394,56 @@ export default function ProfilePage() {
                   Unavailable
                 </div>
               ) : (
-                <button
-                  onClick={toggleFollow}
-                  disabled={isFollowPending}
-                  className={`inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-all ${
-                    isFollowing
-                      ? 'neu-btn hover:text-red-500 group'
-                      : 'neu-btn-active text-primary'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  type="button"
-                >
-                  {isFollowPending ? (
-                    <>
-                      <i className="bi bi-hourglass-split animate-spin text-sm" />
-                      <span className="hidden group-hover:inline">
-                        {isFollowing ? 'Unlinking...' : 'Linking...'}
-                      </span>
-                      <span className="group-hover:hidden">
-                        {isFollowing ? 'HuudLinked' : 'HuudLink'}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="hidden group-hover:inline">
-                        {isFollowing ? 'Unlink' : 'HuudLink'}
-                      </span>
-                      <span className="group-hover:hidden">
-                        {isFollowing ? 'HuudLinked' : 'HuudLink'}
-                        {followsYou && !isFollowing && ' Back'}
-                      </span>
-                    </>
-                  )}
-                </button>
+                <>
+                  <button
+                    onClick={toggleFollow}
+                    disabled={isFollowPending}
+                    className={`inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-all ${
+                      isFollowing
+                        ? 'neu-btn hover:text-red-500 group'
+                        : 'neu-btn-active text-primary'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    type="button"
+                  >
+                    {isFollowPending ? (
+                      <>
+                        <i className="bi bi-hourglass-split animate-spin text-sm" />
+                        <span className="hidden group-hover:inline">
+                          {isFollowing ? 'Unlinking...' : 'Linking...'}
+                        </span>
+                        <span className="group-hover:hidden">
+                          {isFollowing ? 'HuudLinked' : 'HuudLink'}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="hidden group-hover:inline">
+                          {isFollowing ? 'Unlink' : 'HuudLink'}
+                        </span>
+                        <span className="group-hover:hidden">
+                          {isFollowing ? 'HuudLinked' : 'HuudLink'}
+                          {followsYou && !isFollowing && ' Back'}
+                        </span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Message Button */}
+                  <button
+                    onClick={handleStartChat}
+                    disabled={startingChat}
+                    className="neu-btn inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-semibold text-sm transition-all disabled:opacity-50"
+                    type="button"
+                    title="Send message"
+                  >
+                    {startingChat ? (
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                      <span className="material-symbols-outlined text-[18px]">chat</span>
+                    )}
+                    <span className="hidden sm:inline">{startingChat ? 'Opening...' : 'Message'}</span>
+                  </button>
+                </>
               )}
 
               {/* More Actions Menu (for non-own profiles) */}
