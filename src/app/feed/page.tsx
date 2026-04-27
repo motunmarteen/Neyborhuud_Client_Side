@@ -18,6 +18,11 @@ import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
 import { useLocationFeed, usePostMutations } from '@/hooks/usePosts';
+import { useGossipList } from '@/hooks/useGossip';
+import { GossipCard } from '@/components/gossip/GossipCard';
+import { GossipPost } from '@/types/gossip';
+import { FYICard } from '@/components/fyi/FYICard';
+import { HelpRequestCard } from '@/components/help-request/HelpRequestCard';
 import { useDepartments } from '@/hooks/useDepartments';
 import { authService } from '@/services/auth.service';
 import { useAuth } from '@/hooks/useAuth';
@@ -159,6 +164,21 @@ function XFeedInner() {
     // Flatten posts from all pages
     const posts: Post[] =
         feedData?.pages.flatMap((page: any) => page.content ?? page.data?.content ?? []) ?? [];
+
+    // Fetch gossip posts for the same feed tab and merge into timeline
+    const { data: gossipData } = useGossipList({ feedTab });
+    const gossipPosts: GossipPost[] = gossipData?.pages?.flatMap((page) => page?.gossip || []) ?? [];
+
+    // Merge and sort by createdAt descending
+    type FeedItem = { _type: 'post'; data: Post } | { _type: 'gossip'; data: GossipPost };
+    const mergedFeed: FeedItem[] = [
+        ...posts.map((p): FeedItem => ({ _type: 'post', data: p })),
+        ...gossipPosts.map((g): FeedItem => ({ _type: 'gossip', data: g })),
+    ].sort((a, b) => {
+        const dateA = new Date(a.data.createdAt || 0).getTime();
+        const dateB = new Date(b.data.createdAt || 0).getTime();
+        return dateB - dateA;
+    });
     const missedAlerts = feedData?.pages?.[0]?.meta?.missedAlerts ?? null;
 
     // Infinite scroll
@@ -318,7 +338,9 @@ function XFeedInner() {
     return (
         <div className="relative flex h-screen w-full overflow-hidden neu-base">
             {/* Left Sidebar */}
-            <LeftSidebar />
+            <Suspense fallback={<div className="w-64" />}>
+                <LeftSidebar />
+            </Suspense>
 
             {/* Main scroll area: TopNav + Feed */}
             <main ref={mainRef} className="flex flex-col flex-1 overflow-y-auto">
@@ -352,42 +374,6 @@ function XFeedInner() {
                                 activeTab={feedTab}
                                 onTabChange={(tab) => setFeedTab(tab)}
                             />
-
-                            {/* Department Filter */}
-                            {departments.length > 0 && (
-                                <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                                    <button
-                                        onClick={() => setDepartmentFilter(undefined)}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                                            !departmentFilter ? 'mod-btn-active text-primary' : 'mod-btn'
-                                        }`}
-                                    >
-                                        {t('feed.allDepartments')}
-                                    </button>
-                                    {departments.map((dept) => (
-                                        <button
-                                            key={dept._id}
-                                            onClick={() =>
-                                                setDepartmentFilter(
-                                                    departmentFilter === dept.departmentId ? undefined : dept.departmentId
-                                                )
-                                            }
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                                                departmentFilter === dept.departmentId
-                                                    ? 'mod-btn-active text-primary'
-                                                    : 'mod-btn'
-                                            }`}
-                                            style={
-                                                departmentFilter === dept.departmentId && dept.color
-                                                    ? { borderColor: dept.color }
-                                                    : undefined
-                                            }
-                                        >
-                                            {dept.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
 
                             {/* FYI Subtype Filter — only when FYI type active */}
                             {contentTypeFilter === 'fyi' && (
@@ -457,7 +443,7 @@ function XFeedInner() {
                         )}
 
                         {/* Empty State */}
-                        {!isLoading && !isError && posts.length === 0 && (
+                        {!isLoading && !isError && mergedFeed.length === 0 && (
                             <div className="flex flex-col items-center justify-center py-12 px-5 mod-card rounded-2xl">
                                 <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
                                     <span className="material-symbols-outlined text-3xl" style={{ color: 'var(--neu-text-muted)' }}>inbox</span>
@@ -472,27 +458,49 @@ function XFeedInner() {
                         )}
                         </div>
 
-                        {/* Posts Feed */}
-                        <div className="flex flex-col gap-2 bg-black/[0.03] mt-3 px-4">
-                            {posts.map((post) => (
-                                <XPostCard
-                                    key={post.id}
-                                    post={post}
-                                    currentUserId={currentUserId || undefined}
-                                    userLocation={location}
-                                    onLike={() => handleLike(post)}
-                                    onComment={() => openPostDetails(post.id)}
-                                    onShare={() => handleShare(post)}
-                                    onSave={() => handleSave(post)}
-                                    onEdit={() => handleEditPost(post)}
-                                    onDelete={() => setDeletingPostId(post.id)}
-                                    onReport={(id) => setReportingPostId(id)}
-                                    onEmergencyAction={(action) => handleEmergencyAction(post, action)}
-
-                                    onCardClick={() => openPostDetails(post.id)}
-                                    onHelpful={post.contentType === 'fyi' ? () => handleHelpful(post.id) : undefined}
-                                />
-                            ))}
+                        {/* Posts Feed — full width, outside px-4 container */}
+                        <div className="flex flex-col gap-2 bg-black/[0.03] mt-3">
+                            {mergedFeed.map((item) => {
+                                if (item._type === 'gossip') {
+                                    return (
+                                        <div key={`gossip-${item.data.id || item.data._id}`} className="px-4">
+                                            <GossipCard post={item.data} />
+                                        </div>
+                                    );
+                                }
+                                const post = item.data;
+                                if (post.contentType === 'fyi') {
+                                    return (
+                                        <div key={post.id} className="px-4">
+                                            <FYICard post={post} currentUserId={currentUserId || undefined} />
+                                        </div>
+                                    );
+                                }
+                                if (post.contentType === 'help_request') {
+                                    return (
+                                        <div key={post.id} className="px-4">
+                                            <HelpRequestCard post={post} />
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <XPostCard
+                                        key={post.id}
+                                        post={post}
+                                        currentUserId={currentUserId || undefined}
+                                        userLocation={location}
+                                        onLike={() => handleLike(post)}
+                                        onComment={() => openPostDetails(post.id)}
+                                        onShare={() => handleShare(post)}
+                                        onSave={() => handleSave(post)}
+                                        onEdit={() => handleEditPost(post)}
+                                        onDelete={() => setDeletingPostId(post.id)}
+                                        onReport={(id) => setReportingPostId(id)}
+                                        onEmergencyAction={(action) => handleEmergencyAction(post, action)}
+                                        onCardClick={() => openPostDetails(post.id)}
+                                    />
+                                );
+                            })}
                         </div>
 
                         {/* Load More Trigger */}
@@ -511,7 +519,9 @@ function XFeedInner() {
 
             {/* Mobile Bottom Navigation */}
             <div className="md:hidden">
-                <BottomNav hidden={navHidden} />
+                <Suspense fallback={<div className="h-16" />}>
+                    <BottomNav hidden={navHidden} />
+                </Suspense>
             </div>
 
             {/* Create Post Modal */}
@@ -520,6 +530,9 @@ function XFeedInner() {
                 onClose={() => setIsCreatePostOpen(false)}
                 onSuccess={() => {
                     queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+                    queryClient.invalidateQueries({ queryKey: ['gossip'] });
+                    queryClient.invalidateQueries({ queryKey: ['fyi'] });
+                    queryClient.invalidateQueries({ queryKey: ['helpRequest'] });
                 }}
             />
 

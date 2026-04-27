@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -207,7 +207,9 @@ export default function MessagesPage() {
       <div className="relative flex h-screen w-full flex-col overflow-hidden">
         <TopNav />
         <div className="flex flex-1 overflow-hidden">
-          <LeftSidebar />
+          <Suspense fallback={<div className="w-64" />}>
+            <LeftSidebar />
+          </Suspense>
 
           <main className="flex-1 overflow-y-auto px-4 py-6">
             <div className="mx-auto flex w-full max-w-[680px] flex-col gap-4 pb-24">
@@ -320,7 +322,9 @@ export default function MessagesPage() {
 
           <RightSidebar />
         </div>
-        <BottomNav />
+        <Suspense fallback={<div className="h-16" />}>
+          <BottomNav />
+        </Suspense>
       </div>
     </>
   );

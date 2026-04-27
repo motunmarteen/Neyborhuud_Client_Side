@@ -231,6 +231,11 @@ export interface Post {
   availability?: "available" | "sold" | "reserved";
   itemCategory?: string;
   contactMethod?: string;
+  // Help Request fields
+  targetAmount?: number;
+  amountReceived?: number;
+  helpRequestPayment?: { accountName: string; accountNumber: string; bankName: string };
+  helpCategory?: string;
   // Event fields (in metadata)
   eventDate?: string;
   eventTime?: string;
@@ -773,6 +778,10 @@ export interface CreatePostPayload {
   deliveryOption?: "pickup" | "delivery" | "both";
   itemCategory?: string;
   contactMethod?: string;
+  // Help Request fields
+  targetAmount?: number;
+  helpRequestPayment?: { accountName?: string; accountNumber?: string; bankName?: string };
+  helpCategory?: string;
 }
 
 export interface CreateEventPayload {

@@ -6,11 +6,20 @@ import { getCurrentLocation } from '@/lib/geolocation';
 import { isUserInNigeria } from '@/lib/nigeriaCheck';
 import { useTranslation } from '@/lib/i18n';
 import { CreatePostPayload, ContentType, AppLanguage } from '@/types/api';
+import { gossipService } from '@/services/gossip.service';
+import { fyiService } from '@/services/fyi.service';
+import apiClient from '@/lib/api-client';
 
 interface CreatePostModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void;
+    /** Pre-select a content type when the modal opens */
+    defaultContentType?: ContentType;
+    /** When true, hides the content type selector (modal is locked to defaultContentType) */
+    lockContentType?: boolean;
+    /** Pre-select and lock FYI subtype (hides the subtype selector) */
+    defaultFyiSubtype?: string;
 }
 
 const CONTENT_TYPES: { value: ContentType; labelKey: string; icon: string }[] = [
@@ -25,12 +34,12 @@ const CONTENT_TYPES: { value: ContentType; labelKey: string; icon: string }[] = 
 
 const SUCCESS_DISPLAY_MS = 1400;
 
-export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalProps) {
+export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType, lockContentType, defaultFyiSubtype }: CreatePostModalProps) {
     const { t, language: appLanguage } = useTranslation();
     const [content, setContent] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [postType, setPostType] = useState<'text' | 'image'>('text');
-    const [contentType, setContentType] = useState<ContentType>('post');
+    const [contentType, setContentType] = useState<ContentType>(defaultContentType || 'post');
     const [postLanguage, setPostLanguage] = useState<AppLanguage>(appLanguage);
     const [category, setCategory] = useState<string>('');
     const [visibility, setVisibility] = useState<'public' | 'neighborhood' | 'ward'>('public');
@@ -40,7 +49,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
     const [taAgeMax, setTaAgeMax] = useState<string>('');
     const [taGender, setTaGender] = useState<string>('all');
     const [taInterests, setTaInterests] = useState<string>('');
-    const [fyiSubtype, setFyiSubtype] = useState<string>('community_announcement');
+    const [fyiSubtype, setFyiSubtype] = useState<string>(defaultFyiSubtype || 'community_announcement');
     const [expiryDate, setExpiryDate] = useState<string>('');
     const [contactInfo, setContactInfo] = useState<string>('');
     // Event fields
@@ -60,6 +69,14 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
     const [deliveryOption, setDeliveryOption] = useState<'pickup' | 'delivery' | 'both'>('pickup');
     const [itemCategory, setItemCategory] = useState<string>('electronics');
     const [contactMethod, setContactMethod] = useState<string>('');
+    // Help Request fields
+    const [hrStep, setHrStep] = useState<1 | 2 | 3>(1);
+    const [helpCategory, setHelpCategory] = useState<string>('financial');
+    const [targetAmount, setTargetAmount] = useState<string>('');
+    const [bankName, setBankName] = useState<string>('');
+    const [accountName, setAccountName] = useState<string>('');
+    const [accountNumber, setAccountNumber] = useState<string>('');
+
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -78,6 +95,14 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
         }, SUCCESS_DISPLAY_MS);
         return () => clearTimeout(t);
     }, [showSuccess, onSuccess, onClose]);
+
+    // Sync contentType and fyiSubtype to defaults whenever the modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setContentType(defaultContentType || 'post');
+            if (defaultFyiSubtype) setFyiSubtype(defaultFyiSubtype);
+        }
+    }, [isOpen, defaultContentType, defaultFyiSubtype]);
 
     if (!isOpen) return null;
 
@@ -129,7 +154,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
         setIsSubmitting(true);
         setUploadProgress(0);
 
-        // Extract tags from content (hashtags) - moved outside try for error logging
+        // Extract tags from content (hashtags)
         const hashtags = content.match(/#\w+/g) || [];
         const extractedTags = hashtags.map((tag) => tag.substring(1));
         if (category) {
@@ -137,66 +162,148 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
         }
 
         try {
-            // Get user location
-            const userLocation = await getCurrentLocation();
+            // ── Local News path: route to the dedicated gossip endpoint ──
+            if (contentType === 'gossip') {
+                // Always include #localnews tag
+                if (!extractedTags.includes('localnews')) extractedTags.push('localnews');
 
-            const payload: CreatePostPayload = {
-                type: postType === 'image' && selectedFiles.length > 0 ? 'image' : 'text',
-                contentType,
-                content: content.trim(),
-                visibility,
-                tags: extractedTags.length > 0 ? extractedTags : undefined,
-                media: selectedFiles.length > 0 ? selectedFiles : undefined,
-                language: postLanguage,
-                priority: priority !== 'normal' ? priority : undefined,
-                culturalContext: culturalContext.trim() ? culturalContext.split(',').map(s => s.trim()).filter(Boolean) : undefined,
-                targetAudience: (taAgeMin || taAgeMax || taGender !== 'all' || taInterests.trim()) ? {
-                    ageRange: (taAgeMin || taAgeMax) ? { min: taAgeMin ? Number(taAgeMin) : undefined, max: taAgeMax ? Number(taAgeMax) : undefined } : undefined,
-                    gender: taGender !== 'all' ? taGender : undefined,
-                    interests: taInterests.trim() ? taInterests.split(',').map(s => s.trim()).filter(Boolean) : undefined,
-                } : undefined,
-                ...(contentType === 'fyi' ? {
-                    fyiType: fyiSubtype,
-                    eventDetails: { expiryDate: expiryDate || undefined },
-                    contactInfo: contactInfo || undefined,
-                } as any : {}),
-                ...(contentType === 'event' ? {
-                    eventDate: eventDate || undefined,
-                    eventTime: eventTime || undefined,
-                    venue: venueName ? { name: venueName, address: venueAddress || undefined } : undefined,
-                    ticketInfo,
-                    ticketPrice: ticketInfo === 'paid' ? Number(ticketPrice) : undefined,
-                    capacity: capacity ? Number(capacity) : undefined,
-                    organizer: organizer || undefined,
-                    eventCategory,
-                } as any : {}),
-                ...(contentType === 'marketplace' ? {
-                    price: price ? Number(price) : undefined,
-                    currency: 'NGN' as const,
-                    itemCondition,
-                    isNegotiable,
-                    deliveryOption,
-                    itemCategory: itemCategory || undefined,
-                    contactMethod: contactMethod || undefined,
-                } as any : {}),
-                location: userLocation
-                    ? {
-                          latitude: userLocation.lat,
-                          longitude: userLocation.lng,
-                      }
-                    : undefined,
-            };
+                let mediaUrls: string[] = [];
+                if (selectedFiles.length > 0) {
+                    setUploadProgress(10);
+                    const uploadRes = await apiClient.uploadFiles<{ files: { url: string }[] }>(
+                        '/media/upload',
+                        selectedFiles,
+                        undefined,
+                        (p) => setUploadProgress(10 + Math.round(p * 0.8)),
+                    );
+                    mediaUrls = (uploadRes.data?.files || []).map((f) => f.url);
+                    setUploadProgress(90);
+                }
 
-            await createPost({
-                payload,
-                onProgress: setUploadProgress,
-            });
+                await gossipService.createGossip({
+                    title: content.trim().substring(0, 100),
+                    body: content.trim(),
+                    anonymous: false,
+                    discussion_type: 'general',
+                    tags: extractedTags,
+                    mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
+                });
 
-            // Reset form
+                setUploadProgress(100);
+            } else if (contentType === 'fyi' && lockContentType) {
+                // ── FYI page path: route to dedicated FYI endpoint ──
+                // Always include #fyi tag
+                if (!extractedTags.includes('fyi')) extractedTags.push('fyi');
+
+                let mediaUrls: string[] = [];
+                if (selectedFiles.length > 0) {
+                    setUploadProgress(10);
+                    const uploadRes = await apiClient.uploadFiles<{ files: { url: string }[] }>(
+                        '/media/upload',
+                        selectedFiles,
+                        undefined,
+                        (p) => setUploadProgress(10 + Math.round(p * 0.8)),
+                    );
+                    mediaUrls = (uploadRes.data?.files || []).map((f) => f.url);
+                    setUploadProgress(90);
+                }
+
+                const userLocation = await getCurrentLocation();
+                await fyiService.createBulletin({
+                    title: content.trim().substring(0, 100),
+                    body: content.trim(),
+                    fyiType: 'community_announcement',
+                    tags: extractedTags,
+                    mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
+                    location: userLocation
+                        ? { latitude: userLocation.lat, longitude: userLocation.lng }
+                        : undefined,
+                });
+
+                setUploadProgress(100);
+            } else {
+                // ── Standard content-posts path ──
+                if (contentType === 'fyi') {
+                    // Always #fyi + subtype hashtag
+                    if (!extractedTags.includes('fyi')) extractedTags.push('fyi');
+                    const subtypeHashMap: Record<string, string> = {
+                        safety_notice: 'safetynotice',
+                        lost_found: 'lostandfound',
+                        community_announcement: 'announcement',
+                        local_news: 'localnews',
+                        alert: 'alert',
+                    };
+                    const subtypeHash = subtypeHashMap[fyiSubtype];
+                    if (subtypeHash && !extractedTags.includes(subtypeHash)) extractedTags.push(subtypeHash);
+                }
+
+                if (contentType === 'help_request') {
+                    if (!extractedTags.includes('helprequest')) extractedTags.push('helprequest');
+                    if (helpCategory && !extractedTags.includes(helpCategory)) extractedTags.push(helpCategory);
+                }
+
+                const userLocation = await getCurrentLocation();
+
+                const payload: CreatePostPayload = {
+                    type: postType === 'image' && selectedFiles.length > 0 ? 'image' : 'text',
+                    contentType,
+                    content: content.trim(),
+                    visibility: contentType === 'fyi' ? 'public' : visibility,
+                    tags: extractedTags.length > 0 ? extractedTags : undefined,
+                    media: selectedFiles.length > 0 ? selectedFiles : undefined,
+                    language: postLanguage,
+                    priority: contentType === 'fyi' ? 'high' : (priority !== 'normal' ? priority : undefined),
+                    ...(contentType === 'fyi' ? {
+                        fyiType: fyiSubtype,
+                        contactInfo: contactInfo || undefined,
+                    } as any : {}),
+                    ...(contentType === 'help_request' ? {
+                        helpCategory: helpCategory || undefined,
+                        targetAmount: targetAmount ? Number(targetAmount) : undefined,
+                        helpRequestPayment: (bankName || accountName || accountNumber) ? {
+                            bankName: bankName || undefined,
+                            accountName: accountName || undefined,
+                            accountNumber: accountNumber || undefined,
+                        } : undefined,
+                    } as any : {}),
+                    ...(contentType === 'event' ? {
+                        eventDate: eventDate || undefined,
+                        eventTime: eventTime || undefined,
+                        venue: venueName ? { name: venueName, address: venueAddress || undefined } : undefined,
+                        ticketInfo,
+                        ticketPrice: ticketInfo === 'paid' ? Number(ticketPrice) : undefined,
+                        capacity: capacity ? Number(capacity) : undefined,
+                        organizer: organizer || undefined,
+                        eventCategory,
+                    } as any : {}),
+                    ...(contentType === 'marketplace' ? {
+                        price: price ? Number(price) : undefined,
+                        currency: 'NGN' as const,
+                        itemCondition,
+                        isNegotiable,
+                        deliveryOption,
+                        itemCategory: itemCategory || undefined,
+                        contactMethod: contactMethod || undefined,
+                    } as any : {}),
+                    location: userLocation
+                        ? {
+                              latitude: userLocation.lat,
+                              longitude: userLocation.lng,
+                          }
+                        : undefined,
+                };
+
+                await createPost({
+                    payload,
+                    onProgress: setUploadProgress,
+                });
+            }
+
+            // Reset shared form state
             setContent('');
             setSelectedFiles([]);
             setPostType('text');
-            setContentType('post');
+            setContentType(defaultContentType || 'post');
             setPostLanguage(appLanguage);
             setCategory('');
             setVisibility('public');
@@ -206,10 +313,9 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
             setTaAgeMax('');
             setTaGender('all');
             setTaInterests('');
-            setFyiSubtype('community_announcement');
+            setFyiSubtype(defaultFyiSubtype || 'community_announcement');
             setExpiryDate('');
             setContactInfo('');
-            // Reset event fields
             setEventDate('');
             setEventTime('');
             setVenueName('');
@@ -219,13 +325,18 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
             setCapacity('');
             setOrganizer('');
             setEventCategory('meetup');
-            // Reset marketplace fields
             setPrice('');
             setItemCondition('used');
             setIsNegotiable(false);
             setDeliveryOption('pickup');
             setItemCategory('electronics');
             setContactMethod('');
+            setHrStep(1);
+            setHelpCategory('financial');
+            setTargetAmount('');
+            setBankName('');
+            setAccountName('');
+            setAccountNumber('');
             setUploadProgress(0);
 
             // Show success state briefly, then close (handled by useEffect)
@@ -264,11 +375,17 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
             setContent('');
             setSelectedFiles([]);
             setPostType('text');
-            setContentType('post');
+            setContentType(defaultContentType || 'post');
             setPostLanguage(appLanguage);
             setCategory('');
             setVisibility('public');
             setUploadProgress(0);
+            setHrStep(1);
+            setHelpCategory('financial');
+            setTargetAmount('');
+            setBankName('');
+            setAccountName('');
+            setAccountNumber('');
             onClose();
         }
     };
@@ -308,7 +425,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
-                                placeholder={t('feed.composerPlaceholder')}
+                                placeholder={contentType === 'gossip' ? 'Share the details…' : t('feed.composerPlaceholder')}
                                 className="w-full p-3 rounded-xl resize-none focus:outline-none text-sm min-h-[120px] neu-input"
                                 rows={5}
                                 disabled={isSubmitting}
@@ -341,7 +458,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                             </div>
                         )}
 
-                        {/* Content Type Selection */}
+                        {/* Content Type Selection — hidden when locked to a specific type */}
+                        {!lockContentType && (
                         <div>
                             <label className="block text-xs font-bold uppercase mb-2" style={{ color: 'var(--neu-text-muted)' }}>
                                 {t('createPost.postType')}
@@ -365,36 +483,30 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                                 ))}
                             </div>
                         </div>
+                        )}
 
-                        {/* FYI-Specific Fields */}
+                        {/* FYI-Specific Fields — shown whenever FYI is selected */}
                         {contentType === 'fyi' && (
                             <div className="flex flex-col gap-3 p-3 rounded-xl" style={{ background: 'var(--neu-bg-offset, rgba(255,255,255,0.03))' }}>
-                                <label className="block text-xs font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>
-                                    FYI Subtype
-                                </label>
-                                <select
-                                    value={fyiSubtype}
-                                    onChange={(e) => setFyiSubtype(e.target.value)}
-                                    disabled={isSubmitting}
-                                    className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
-                                >
-                                    <option value="safety_notice">Safety Notice</option>
-                                    <option value="lost_found">Lost &amp; Found</option>
-                                    <option value="community_announcement">Community Announcement</option>
-                                    <option value="local_news">Local News</option>
-                                    <option value="alert">Alert</option>
-                                </select>
-                                <label className="block text-xs font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>
-                                    Expiry Date
-                                </label>
-                                <input
-                                    type="datetime-local"
-                                    value={expiryDate}
-                                    onChange={(e) => setExpiryDate(e.target.value)}
-                                    disabled={isSubmitting}
-                                    className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
-                                    defaultValue={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
-                                />
+                                {/* Subtype selector — hidden when a specific tab pre-selects the subtype */}
+                                {!defaultFyiSubtype && (
+                                    <>
+                                        <label className="block text-xs font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>
+                                            FYI Subtype
+                                        </label>
+                                        <select
+                                            value={fyiSubtype}
+                                            onChange={(e) => setFyiSubtype(e.target.value)}
+                                            disabled={isSubmitting}
+                                            className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
+                                        >
+                                            <option value="safety_notice">Safety Notice</option>
+                                            <option value="lost_found">Lost &amp; Found</option>
+                                            <option value="community_announcement">Community Announcement</option>
+                                            <option value="alert">Alert</option>
+                                        </select>
+                                    </>
+                                )}
                                 <label className="block text-xs font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>
                                     Contact Info (optional)
                                 </label>
@@ -647,7 +759,170 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                             </div>
                         )}
 
-                        {/* Language Selection */}
+                        {/* Help Request — multi-step form */}
+                        {contentType === 'help_request' && (
+                            <div className="flex flex-col gap-3 p-3 rounded-xl" style={{ background: 'var(--neu-bg-offset, rgba(255,255,255,0.03))' }}>
+                                {/* Step indicator */}
+                                <div className="flex items-center gap-2 mb-1">
+                                    {([1, 2, 3] as const).map((s) => (
+                                        <div key={s} className="flex items-center gap-1.5">
+                                            <button
+                                                type="button"
+                                                onClick={() => setHrStep(s)}
+                                                className={`w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center transition-all ${
+                                                    hrStep === s ? 'neu-btn-active text-primary' : 'neu-btn'
+                                                }`}
+                                                style={hrStep !== s ? { color: 'var(--neu-text-muted)' } : undefined}
+                                            >
+                                                {s}
+                                            </button>
+                                            {s < 3 && <div className="w-6 h-px" style={{ background: 'var(--neu-shadow-light)' }} />}
+                                        </div>
+                                    ))}
+                                    <span className="text-[11px] ml-1" style={{ color: 'var(--neu-text-muted)' }}>
+                                        {hrStep === 1 ? 'Your situation' : hrStep === 2 ? 'Your goal' : 'Payment details'}
+                                    </span>
+                                </div>
+
+                                {/* Step 1: Category */}
+                                {hrStep === 1 && (
+                                    <>
+                                        <label className="block text-xs font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>
+                                            Category
+                                        </label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {([
+                                                { value: 'financial', label: '💰 Financial', },
+                                                { value: 'medical',   label: '🏥 Medical', },
+                                                { value: 'food',      label: '🍲 Food', },
+                                                { value: 'shelter',   label: '🏠 Shelter', },
+                                                { value: 'emergency', label: '🆘 Emergency', },
+                                            ] as const).map((opt) => (
+                                                <button
+                                                    key={opt.value}
+                                                    type="button"
+                                                    onClick={() => setHelpCategory(opt.value)}
+                                                    disabled={isSubmitting}
+                                                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                                                        helpCategory === opt.value ? 'neu-btn-active text-primary' : 'neu-btn'
+                                                    }`}
+                                                    style={helpCategory !== opt.value ? { color: 'var(--neu-text-muted)' } : undefined}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setHrStep(2)}
+                                            className="mt-1 self-end px-4 py-1.5 rounded-xl text-xs font-bold text-primary neu-btn-active transition-all"
+                                        >
+                                            Next →
+                                        </button>
+                                    </>
+                                )}
+
+                                {/* Step 2: Target amount */}
+                                {hrStep === 2 && (
+                                    <>
+                                        <label className="block text-xs font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>
+                                            Target Amount (₦)
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold" style={{ color: 'var(--neu-text-muted)' }}>₦</span>
+                                            <input
+                                                type="number"
+                                                value={targetAmount}
+                                                onChange={(e) => setTargetAmount(e.target.value)}
+                                                disabled={isSubmitting}
+                                                min="0"
+                                                step="100"
+                                                placeholder="e.g. 50000"
+                                                className="w-full pl-7 pr-3 p-2 rounded-xl text-sm focus:outline-none neu-input"
+                                            />
+                                        </div>
+                                        <p className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>
+                                            Leave blank if you prefer not to specify a goal amount.
+                                        </p>
+                                        <div className="flex gap-2 mt-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setHrStep(1)}
+                                                className="px-4 py-1.5 rounded-xl text-xs font-bold neu-btn transition-all"
+                                                style={{ color: 'var(--neu-text-muted)' }}
+                                            >
+                                                ← Back
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setHrStep(3)}
+                                                className="ml-auto px-4 py-1.5 rounded-xl text-xs font-bold text-primary neu-btn-active transition-all"
+                                            >
+                                                Next →
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Step 3: Payment details */}
+                                {hrStep === 3 && (
+                                    <>
+                                        <label className="block text-xs font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>
+                                            Bank / Account Details
+                                        </label>
+                                        <p className="text-[11px] -mt-1" style={{ color: 'var(--neu-text-muted)' }}>
+                                            Help people know where to send support. Leave blank if you prefer to share privately.
+                                        </p>
+                                        <div>
+                                            <label className="block text-xs mb-1" style={{ color: 'var(--neu-text-muted)' }}>Bank Name</label>
+                                            <input
+                                                type="text"
+                                                value={bankName}
+                                                onChange={(e) => setBankName(e.target.value)}
+                                                disabled={isSubmitting}
+                                                placeholder="e.g. GTBank, Access, First Bank"
+                                                className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs mb-1" style={{ color: 'var(--neu-text-muted)' }}>Account Name</label>
+                                            <input
+                                                type="text"
+                                                value={accountName}
+                                                onChange={(e) => setAccountName(e.target.value)}
+                                                disabled={isSubmitting}
+                                                placeholder="Name on the account"
+                                                className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs mb-1" style={{ color: 'var(--neu-text-muted)' }}>Account Number</label>
+                                            <input
+                                                type="text"
+                                                value={accountNumber}
+                                                onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                                disabled={isSubmitting}
+                                                placeholder="10-digit NUBAN"
+                                                maxLength={10}
+                                                inputMode="numeric"
+                                                className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input font-mono"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setHrStep(2)}
+                                            className="mt-1 self-start px-4 py-1.5 rounded-xl text-xs font-bold neu-btn transition-all"
+                                            style={{ color: 'var(--neu-text-muted)' }}
+                                        >
+                                            ← Back
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Language Selection — hidden for fyi, gossip, and help_request */}
+                        {contentType !== 'fyi' && contentType !== 'gossip' && contentType !== 'help_request' && (
                         <div>
                             <label className="block text-xs font-bold uppercase mb-2" style={{ color: 'var(--neu-text-muted)' }}>
                                 {t('createPost.language')}
@@ -665,7 +940,10 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                                 <option value="pcm">Pidgin</option>
                             </select>
                         </div>
+                        )}
 
+                        {/* Category, Visibility, Priority — hidden for fyi, locked mode, gossip, and help_request */}
+                        {!lockContentType && contentType !== 'gossip' && contentType !== 'fyi' && contentType !== 'help_request' && (<>
                         {/* Category Selection */}
                         <div>
                             <label className="block text-xs font-bold uppercase mb-2" style={{ color: 'var(--neu-text-muted)' }}>
@@ -735,69 +1013,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                             </div>
                         </div>
 
-                        {/* Cultural Context */}
-                        <div>
-                            <label className="block text-xs font-bold uppercase mb-2" style={{ color: 'var(--neu-text-muted)' }}>
-                                Cultural Context <span className="normal-case font-normal">(comma-separated)</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={culturalContext}
-                                onChange={(e) => setCulturalContext(e.target.value)}
-                                disabled={isSubmitting}
-                                placeholder="e.g. yoruba, lagos-island, owambe"
-                                className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
-                            />
-                        </div>
-
-                        {/* Target Audience */}
-                        <div>
-                            <label className="block text-xs font-bold uppercase mb-2" style={{ color: 'var(--neu-text-muted)' }}>
-                                Target Audience <span className="normal-case font-normal">(optional)</span>
-                            </label>
-                            <div className="space-y-2">
-                                <div className="flex gap-2">
-                                    <input
-                                        type="number"
-                                        value={taAgeMin}
-                                        onChange={(e) => setTaAgeMin(e.target.value)}
-                                        disabled={isSubmitting}
-                                        placeholder="Min age"
-                                        min="0"
-                                        max="120"
-                                        className="w-1/2 p-2 rounded-xl text-sm focus:outline-none neu-input"
-                                    />
-                                    <input
-                                        type="number"
-                                        value={taAgeMax}
-                                        onChange={(e) => setTaAgeMax(e.target.value)}
-                                        disabled={isSubmitting}
-                                        placeholder="Max age"
-                                        min="0"
-                                        max="120"
-                                        className="w-1/2 p-2 rounded-xl text-sm focus:outline-none neu-input"
-                                    />
-                                </div>
-                                <select
-                                    value={taGender}
-                                    onChange={(e) => setTaGender(e.target.value)}
-                                    disabled={isSubmitting}
-                                    className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
-                                >
-                                    <option value="all">All Genders</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                </select>
-                                <input
-                                    type="text"
-                                    value={taInterests}
-                                    onChange={(e) => setTaInterests(e.target.value)}
-                                    disabled={isSubmitting}
-                                    placeholder="Interests (comma-separated, e.g. tech, sports)"
-                                    className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
-                                />
-                            </div>
-                        </div>
+                        </>)}
 
                         {/* Upload Progress */}
                         {uploadProgress > 0 && uploadProgress < 100 && (
@@ -851,7 +1067,10 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: CreatePostModalP
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={isSubmitting || (!content.trim() && selectedFiles.length === 0)}
+                            disabled={
+                                isSubmitting ||
+                                (!content.trim() && selectedFiles.length === 0)
+                            }
                             className="px-6 py-2 neu-btn rounded-xl text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
                             style={{ color: 'var(--neu-text)' }}
                         >

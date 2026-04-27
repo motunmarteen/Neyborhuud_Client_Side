@@ -529,4 +529,11 @@ export const contentService = {
       action,
     });
   },
+
+  /** Update help request received amount */
+  async updateHelpRequestAmount(postId: string, amountReceived: number) {
+    return await apiClient.patch(`/content/posts/${postId}/amount`, {
+      amountReceived,
+    });
+  },
 };
