@@ -12,11 +12,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   turbopack: {},
-  // Skip static generation for problematic pages
-  experimental: {
-    skipTrailingSlashRedirect: true,
-  },
-  // Disable static optimization to avoid pre-rendering errors
+  // Disable static optimization to avoid pre-rendering errors  
   output: 'standalone',
 };
 
