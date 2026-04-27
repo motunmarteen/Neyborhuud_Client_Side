@@ -48,7 +48,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
-          {children}
+          <div className="mx-auto w-full max-w-[1400px] relative">
+            {children}
+          </div>
         </Providers>
       </body>
     </html>

@@ -46,7 +46,7 @@ export default function RightSidebar() {
     ];
 
     return (
-        <aside className="hidden xl:flex w-80 flex-col gap-6 p-6 neu-base overflow-y-auto shrink-0" style={{ boxShadow: '-4px 0 12px var(--neu-shadow-dark)' }}>
+        <aside className="hidden xl:flex w-[480px] flex-col gap-6 p-6 neu-base overflow-y-auto shrink-0" style={{ boxShadow: '-4px 0 12px var(--neu-shadow-dark)' }}>
             {/* Weather Widget */}
             <SidebarWeatherWidget />
 

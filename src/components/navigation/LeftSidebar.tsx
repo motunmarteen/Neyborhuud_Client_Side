@@ -111,9 +111,8 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
 
   return (
     <div className="flex flex-col h-full">
-      {/* Ambient Profile Card — full width, edge-to-edge */}
-      {/* Ambient Profile Card — full width, edge-to-edge */}
-      <div>
+      {/* Ambient Profile Card — floats within sidebar padding like weather widget on right */}
+      <div className="pl-4 pr-6 pt-4">
         <AmbientProfileCard
           avatarUrl={user?.avatarUrl}
           displayName={userDisplayName}
@@ -128,110 +127,105 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
         />
       </div>
 
-      <div className="px-3 pt-3 pb-3 flex flex-col gap-0.5 flex-1 min-h-0">
+      <div className="pl-4 pr-6 pt-4 pb-6 flex flex-col gap-5 flex-1 min-h-0 overflow-y-auto">
 
-      {/* Quick Actions — SOS + Safe Trip + Sentinel AI */}
-      <div className="grid grid-cols-3 gap-1.5 mb-3">
-        {quickActions.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              className={`flex items-center gap-1 px-2 py-2 rounded-full text-[11px] font-bold transition-all justify-center whitespace-nowrap ${
-                active
-                  ? 'text-white shadow-md'
-                  : 'hover:opacity-80'
-              }`}
-              style={active
-                ? { background: item.accent, color: '#fff', boxShadow: `0 4px 16px ${item.accent}55` }
-                : { color: item.accent, background: `${item.accent}14` }
-              }
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-                {item.icon}
-              </span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </div>
+        {/* Quick Actions */}
+        <div className="flex flex-col gap-3">
+          <h2 className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Quick Actions</h2>
+          <div className="grid grid-cols-3 gap-1.5">
+            {quickActions.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={`flex items-center gap-1 px-2 py-2 rounded-full text-[11px] font-bold transition-all justify-center whitespace-nowrap ${
+                    active ? 'text-white shadow-md' : 'hover:opacity-80'
+                  }`}
+                  style={active
+                    ? { background: item.accent, color: '#fff', boxShadow: `0 4px 16px ${item.accent}55` }
+                    : { color: item.accent, background: `${item.accent}14` }
+                  }
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{item.icon}</span>
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
 
-      {/* Main Navigation */}
-      <div className="flex flex-col gap-0">
-        {mainNav.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer transition-all ${
-                active
-                  ? 'bg-primary/[0.08] text-primary'
-                  : 'hover:bg-black/[0.04]'
-              }`}
-              style={!active ? { color: 'var(--neu-text)' } : undefined}
-            >
-              <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors`} style={{ fontSize: '20px' }}>
-                {item.icon}
-              </span>
-              <p className={`text-[13px] ${active ? 'font-bold' : 'font-medium'} leading-normal tracking-tight`}>
-                {item.label}
-              </p>
-            </Link>
-          );
-        })}
-      </div>
+        {/* Main Navigation */}
+        <div className="flex flex-col gap-3">
+          <div className="neu-divider" />
+          <h2 className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Navigation</h2>
+          <div className="flex flex-col gap-2">
+            {mainNav.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={`neu-card-sm flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all hover:scale-[1.01] ${
+                    active ? 'text-primary' : ''
+                  }`}
+                  style={!active ? { color: 'var(--neu-text)' } : undefined}
+                >
+                  <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors`} style={{ fontSize: '20px' }}>
+                    {item.icon}
+                  </span>
+                  <p className={`text-[13px] ${active ? 'font-bold' : 'font-medium'} leading-normal tracking-tight`}>
+                    {item.label}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
 
-      {/* Divider + Section label */}
-      <div className="mt-2 mb-0">
-        <div className="border-t border-black/[0.06]" />
-        <p className="text-[10px] font-bold uppercase mt-2 mb-1 px-1" style={{ color: 'var(--neu-text-muted)', opacity: 0.55, letterSpacing: '0.14em' }}>
-          Browse Feed
-        </p>
-      </div>
+        {/* Browse Feed */}
+        <div className="flex flex-col gap-3">
+          <div className="neu-divider" />
+          <h2 className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Browse Feed</h2>
+          <div className="grid grid-cols-2 gap-2">
+            {browseTypes.map((item) => {
+              const active = activeType === item.type;
+              return (
+                <Link
+                  key={item.type}
+                  href={`/feed?type=${item.type}`}
+                  onClick={onNavigate}
+                  className={`neu-card-sm flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all hover:scale-[1.01] ${
+                    active ? 'text-primary' : ''
+                  }`}
+                  style={!active ? { color: 'var(--neu-text)' } : undefined}
+                >
+                  <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors shrink-0`} style={{ fontSize: '16px' }}>
+                    {item.icon}
+                  </span>
+                  <p className={`text-[11px] ${active ? 'font-bold' : 'font-medium'} leading-snug`}>
+                    {item.label}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
 
-      {/* Feed Filters — 2-col grid */}
-      <div className="grid grid-cols-2 gap-1.5">
-        {browseTypes.map((item) => {
-          const active = activeType === item.type;
-          return (
-            <Link
-              key={item.type}
-              href={`/feed?type=${item.type}`}
-              onClick={onNavigate}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all ${
-                active
-                  ? 'bg-primary/[0.08] text-primary'
-                  : 'hover:bg-black/[0.05] bg-black/[0.025]'
-              }`}
-              style={!active ? { color: 'var(--neu-text)' } : undefined}
-            >
-              <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors shrink-0`} style={{ fontSize: '16px' }}>
-                {item.icon}
-              </span>
-              <p className={`text-[11px] ${active ? 'font-bold' : 'font-medium'} leading-snug`}>
-                {item.label}
-              </p>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Mobile-only: Settings at bottom */}
-      <div className="md:hidden mt-auto pt-4 border-t border-black/[0.06]">
-        <Link
-          href="/settings"
-          onClick={onNavigate}
-          className="flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-black/[0.04] cursor-pointer transition-all"
-          style={{ color: 'var(--neu-text)' }}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>settings</span>
-          <p className="text-[14.5px] font-medium leading-normal tracking-tight">Settings &amp; Privacy</p>
-        </Link>
-      </div>
+        {/* Mobile-only: Settings at bottom */}
+        <div className="md:hidden mt-auto pt-4 border-t border-black/[0.06]">
+          <Link
+            href="/settings"
+            onClick={onNavigate}
+            className="flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-black/[0.04] cursor-pointer transition-all"
+            style={{ color: 'var(--neu-text)' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>settings</span>
+            <p className="text-[14.5px] font-medium leading-normal tracking-tight">Settings &amp; Privacy</p>
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -260,7 +254,7 @@ export default function LeftSidebar() {
   return (
     <>
       {/* Desktop sidebar – hidden on mobile */}
-      <aside className="hidden md:flex w-64 flex-col overflow-hidden shrink-0 border-r border-black/[0.06]" style={{ backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '500px 500px' }}>
+      <aside className="hidden md:flex w-96 flex-col overflow-hidden shrink-0 neu-panel" style={{ backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '500px 500px' }}>
         <SidebarContent />
       </aside>
 
