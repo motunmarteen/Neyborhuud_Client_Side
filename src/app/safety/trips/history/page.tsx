@@ -154,7 +154,9 @@ function TripHistoryInner() {
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
+        <Suspense fallback={<div className="w-64" />}>
+          <LeftSidebar />
+        </Suspense>
         <main className="flex-1 overflow-y-auto px-4 py-6">
           <div className="mx-auto flex w-full max-w-[680px] flex-col gap-4 pb-24">
 
@@ -246,7 +248,9 @@ function TripHistoryInner() {
         </main>
         <RightSidebar />
       </div>
-      <BottomNav />
+      <Suspense fallback={<div className="h-16" />}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }

@@ -63,7 +63,9 @@ function FYIPageInner() {
             <TopNav />
 
             <div className="flex flex-1 overflow-hidden">
-                <LeftSidebar />
+                <Suspense fallback={<div className="w-64" />}>
+                    <LeftSidebar />
+                </Suspense>
 
                 <main className="flex-1 overflow-y-auto">
                     <div className="max-w-[680px] mx-auto flex flex-col pb-20">
@@ -167,7 +169,9 @@ function FYIPageInner() {
             </div>
 
             <div className="md:hidden">
-                <BottomNav />
+                <Suspense fallback={<div className="h-16" />}>
+                    <BottomNav />
+                </Suspense>
             </div>
 
             {/* FYI post creation modal — locked to FYI type, subtype follows active tab */}

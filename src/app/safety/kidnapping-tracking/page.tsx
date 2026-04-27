@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { io, type Socket } from 'socket.io-client';
 import TopNav from '@/components/navigation/TopNav';
@@ -235,7 +235,9 @@ export default function KidnappingTrackingPage() {
     <div className="min-h-screen bg-black text-white">
       <TopNav />
       <div className="flex max-w-7xl mx-auto">
-        <LeftSidebar />
+        <Suspense fallback={<div className="w-64" />}>
+          <LeftSidebar />
+        </Suspense>
 
         {/* ── Main Content ── */}
         <main className="flex-1 min-w-0 border-x border-gray-800 px-4 py-6 space-y-6">
@@ -523,7 +525,9 @@ export default function KidnappingTrackingPage() {
 
         <RightSidebar />
       </div>
-      <BottomNav />
+      <Suspense fallback={<div className="h-16" />}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }

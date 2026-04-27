@@ -13,6 +13,7 @@
  */
 
 import {
+  Suspense,
   useState,
   useEffect,
   useCallback,
@@ -237,7 +238,9 @@ export default function GeofencesPage() {
     <div className="min-h-screen bg-black text-white">
       <TopNav />
       <div className="flex pt-16 pb-16">
-        <LeftSidebar />
+        <Suspense fallback={<div className="w-64" />}>
+          <LeftSidebar />
+        </Suspense>
 
         <main className="flex-1 max-w-2xl mx-auto px-3 py-6 space-y-6">
           {/* Header */}
@@ -517,7 +520,9 @@ export default function GeofencesPage() {
 
         <RightSidebar />
       </div>
-      <BottomNav />
+      <Suspense fallback={<div className="h-16" />}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }

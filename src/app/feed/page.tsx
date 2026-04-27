@@ -338,7 +338,9 @@ function XFeedInner() {
     return (
         <div className="relative flex h-screen w-full overflow-hidden neu-base">
             {/* Left Sidebar */}
-            <LeftSidebar />
+            <Suspense fallback={<div className="w-64" />}>
+                <LeftSidebar />
+            </Suspense>
 
             {/* Main scroll area: TopNav + Feed */}
             <main ref={mainRef} className="flex flex-col flex-1 overflow-y-auto">
@@ -517,7 +519,9 @@ function XFeedInner() {
 
             {/* Mobile Bottom Navigation */}
             <div className="md:hidden">
-                <BottomNav hidden={navHidden} />
+                <Suspense fallback={<div className="h-16" />}>
+                    <BottomNav hidden={navHidden} />
+                </Suspense>
             </div>
 
             {/* Create Post Modal */}
