@@ -7,6 +7,9 @@ import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function CommunitiesPage() {
   const { user } = useAuth();
   const assignedCommunity = (user as any)?.assignedCommunityId ?? (user as any)?.communityId;

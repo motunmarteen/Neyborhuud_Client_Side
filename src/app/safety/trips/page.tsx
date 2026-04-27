@@ -3,6 +3,9 @@
 import { Suspense, useState, useCallback, type FormEvent } from 'react';
 import Link from 'next/link';
 import TopNav from '@/components/navigation/TopNav';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';

@@ -16,6 +16,9 @@ import {
 } from '@/services/safety.service';
 import type { IncidentReplay } from '@/types/api';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const EMERGENCY_TYPES: Array<{ value: EmergencyType; label: string; icon: string; agency: AgencyName }> = [

@@ -6,6 +6,9 @@ import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 import { tripService, type Trip, type TripListResult } from '@/services/trip.service';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────

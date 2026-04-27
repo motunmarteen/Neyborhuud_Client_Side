@@ -6,6 +6,9 @@ import { io, type Socket } from 'socket.io-client';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { useKidnappingTracking } from '@/hooks/useKidnappingTracking';

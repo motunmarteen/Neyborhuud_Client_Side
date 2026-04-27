@@ -3,6 +3,9 @@
 import { Suspense, useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { io, type Socket } from 'socket.io-client';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';

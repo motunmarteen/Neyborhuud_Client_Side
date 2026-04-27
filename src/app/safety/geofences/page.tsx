@@ -19,12 +19,15 @@ import {
   useRef,
   type FormEvent,
 } from 'react';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
+
+// Force dynamic rendering to avoid pre-rendering issues
+export const dynamic = 'force-dynamic';
 import { useAuth } from '@/hooks/useAuth';
 import {
   safetyService,
@@ -36,7 +39,7 @@ import {
 import { io, type Socket } from 'socket.io-client';
 
 // ─── Lazy-load map (SSR-incompatible) ─────────────────────────────────────────
-const GeofenceMap = dynamic(() => import('@/components/safety/GeofenceMap'), {
+const GeofenceMap = dynamicImport(() => import('@/components/safety/GeofenceMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-72 rounded-xl bg-gray-800 animate-pulse flex items-center justify-center text-gray-400 text-sm">

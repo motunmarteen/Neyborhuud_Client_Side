@@ -10,6 +10,9 @@ import { BottomNav } from '@/components/feed/BottomNav';
 import { XPostCard } from '@/components/feed/XPostCard';
 import { useAuth } from '@/hooks/useAuth';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function PopularPage() {
   const { user } = useAuth();
   const [coords] = useState<{ lat: number; lng: number } | null>(null);
