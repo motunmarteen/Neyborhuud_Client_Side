@@ -27,6 +27,7 @@ export const gossipService = {
     state?: string;
     tag?: string;
     language?: string;
+    feedTab?: string;
     page?: number;
     limit?: number;
   }) {
@@ -79,9 +80,7 @@ export const gossipService = {
   },
 
   async deleteComment(gossipId: string, commentId: string) {
-    return await apiClient.delete(
-      `/gossip/${gossipId}/comments/${commentId}`,
-    );
+    return await apiClient.delete(`/gossip/${gossipId}/comments/${commentId}`);
   },
 
   async getUserGossips(options?: { page?: number; limit?: number }) {

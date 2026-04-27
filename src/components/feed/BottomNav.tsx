@@ -15,7 +15,7 @@ export function BottomNav({ hidden }: BottomNavProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const isFeed = pathname === '/feed';
-  const isGossip = pathname === '/gossip';
+  const isGossip = pathname === '/local-news';
   const profileHref = user?.username ? `/profile/${user.username}` : '/settings';
 
   const { data: convData } = useQuery({
@@ -52,12 +52,12 @@ export function BottomNav({ hidden }: BottomNavProps) {
           <span className={`material-symbols-outlined text-[30px] ${isFeed ? 'fill-1' : ''}`}>home</span>
         </Link>
 
-        {/* Gossip */}
+        {/* Local News */}
         <Link
-          href="/gossip"
+          href="/local-news"
           className={navItemClass(isGossip)}
           aria-current={isGossip ? 'page' : undefined}
-          aria-label="Gossip"
+          aria-label="Local News"
         >
           <span className={`material-symbols-outlined text-[30px] ${isGossip ? 'fill-1' : ''}`}>chat_bubble</span>
         </Link>
@@ -108,3 +108,4 @@ export function BottomNav({ hidden }: BottomNavProps) {
     </nav>
   );
 }
+

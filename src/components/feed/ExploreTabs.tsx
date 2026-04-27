@@ -16,7 +16,7 @@ const TABS: { key: ExploreTab; labelKey: string; fallback: string }[] = [
     { key: 'news', labelKey: 'explore.news', fallback: 'News' },
     { key: 'post', labelKey: 'contentType.post', fallback: 'Posts' },
     { key: 'fyi', labelKey: 'contentType.fyi', fallback: 'FYI' },
-    { key: 'gossip', labelKey: 'contentType.gossip', fallback: 'Gossip' },
+    { key: 'gossip', labelKey: 'contentType.gossip', fallback: 'Local News' },
     { key: 'help_request', labelKey: 'contentType.help_request', fallback: 'Help' },
     { key: 'job', labelKey: 'contentType.job', fallback: 'Jobs' },
     { key: 'event', labelKey: 'contentType.event', fallback: 'Events' },

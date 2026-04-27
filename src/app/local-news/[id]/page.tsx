@@ -50,7 +50,7 @@ function GossipDetailInner() {
 
     const handleDelete = async () => {
         await mutations.deleteGossip();
-        router.push('/gossip');
+        router.push('/local-news');
     };
 
     const handleComment = async (body: string, anonymous: boolean, parentId?: string) => {
@@ -104,10 +104,10 @@ function GossipDetailInner() {
                                     {error instanceof Error ? error.message : 'Discussion not found'}
                                 </p>
                                 <button
-                                    onClick={() => router.push('/gossip')}
+                                    onClick={() => router.push('/local-news')}
                                     className="mt-4 px-6 py-2.5 neu-btn rounded-2xl text-sm font-bold text-primary"
                                 >
-                                    Back to Gossip
+                                    Back to Local News
                                 </button>
                             </div>
                         </div>
@@ -129,7 +129,7 @@ function GossipDetailInner() {
                     <div className="max-w-[680px] mx-auto flex flex-col gap-4 pb-20">
                         {/* Back button */}
                         <button
-                            onClick={() => router.push('/gossip')}
+                            onClick={() => router.push('/local-news')}
                             className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors self-start"
                             style={{ color: 'var(--neu-text-muted)' }}
                         >

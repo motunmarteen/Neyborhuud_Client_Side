@@ -96,7 +96,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
 
     const navItems = [
         { icon: 'bi-house-fill', iconOutline: 'bi-house', label: 'Home', href: '/feed', active: pathname === '/feed' },
-        { icon: 'bi-chat-dots-fill', iconOutline: 'bi-chat-dots', label: 'Gossip', href: '/gossip', active: pathname === '/gossip' },
+        { icon: 'bi-chat-dots-fill', iconOutline: 'bi-chat-dots', label: 'Gossip', href: '/gossip', active: pathname === '/local-news' },
         { icon: 'bi-search', iconOutline: 'bi-search', label: 'Explore', href: '/feed?search=1', active: false },
         { icon: 'bi-bell-fill', iconOutline: 'bi-bell', label: 'Notifications', href: '/feed', active: false },
         { icon: 'bi-envelope-fill', iconOutline: 'bi-envelope', label: 'Messages', href: '/feed', active: false },
@@ -335,4 +335,5 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
         </>
     );
 }
+
 

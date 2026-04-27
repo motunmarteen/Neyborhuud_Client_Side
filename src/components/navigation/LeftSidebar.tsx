@@ -25,9 +25,9 @@ const mainNav = [
 ];
 
 const browseTypes = [
-  { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi' },
-  { icon: 'forum', label: 'Gossip', type: 'gossip' },
-  { icon: 'help', label: 'Help Requests', type: 'help_request' },
+  { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi', href: '/fyi' },
+  { icon: 'forum', label: 'Local News', type: 'gossip', href: '/local-news' },
+  { icon: 'help', label: 'Help Requests', type: 'help_request', href: '/help-request' },
   { icon: 'work', label: 'Jobs', type: 'job' },
   { icon: 'event', label: 'Events', type: 'event' },
   { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace' },
@@ -196,11 +196,11 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
       {/* Feed Filters — 2-col grid */}
       <div className="grid grid-cols-2 gap-1.5">
         {browseTypes.map((item) => {
-          const active = activeType === item.type;
+          const active = item.href ? pathname === item.href : activeType === item.type;
           return (
             <Link
               key={item.type}
-              href={`/feed?type=${item.type}`}
+              href={item.href || `/feed?type=${item.type}`}
               onClick={onNavigate}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all ${
                 active
