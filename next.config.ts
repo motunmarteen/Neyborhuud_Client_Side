@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   turbopack: {},
+  // Disable static optimization to avoid pre-rendering errors  
+  output: 'standalone',
 };
 
 export default withPWA(nextConfig as any);

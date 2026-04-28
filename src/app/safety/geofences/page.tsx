@@ -13,18 +13,22 @@
  */
 
 import {
+  Suspense,
   useState,
   useEffect,
   useCallback,
   useRef,
   type FormEvent,
 } from 'react';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
+
+// Force dynamic rendering to avoid pre-rendering issues
+export const dynamic = 'force-dynamic';
 import { useAuth } from '@/hooks/useAuth';
 import {
   safetyService,
@@ -36,7 +40,7 @@ import {
 import { io, type Socket } from 'socket.io-client';
 
 // ─── Lazy-load map (SSR-incompatible) ─────────────────────────────────────────
-const GeofenceMap = dynamic(() => import('@/components/safety/GeofenceMap'), {
+const GeofenceMap = dynamicImport(() => import('@/components/safety/GeofenceMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-72 rounded-xl bg-gray-800 animate-pulse flex items-center justify-center text-gray-400 text-sm">
@@ -234,7 +238,9 @@ export default function GeofencesPage() {
     <div className="min-h-screen bg-black text-white">
       <TopNav />
       <div className="flex pt-16 pb-16">
-        <LeftSidebar />
+        <Suspense fallback={<div className="w-64" />}>
+          <LeftSidebar />
+        </Suspense>
 
         <main className="flex-1 max-w-2xl mx-auto px-3 py-6 space-y-6">
           {/* Header */}
@@ -514,7 +520,9 @@ export default function GeofencesPage() {
 
         <RightSidebar />
       </div>
-      <BottomNav />
+      <Suspense fallback={<div className="h-16" />}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }

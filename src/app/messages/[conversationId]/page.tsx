@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -443,7 +443,9 @@ export default function ConversationPage() {
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <TopNav />
       <div className="flex flex-1 overflow-hidden pb-14">
-        <LeftSidebar />
+        <Suspense fallback={<div className="w-64" />}>
+          <LeftSidebar />
+        </Suspense>
 
         {/* Chat main — flex-col layout */}
         <main className="flex flex-1 flex-col overflow-hidden">
@@ -605,7 +607,9 @@ export default function ConversationPage() {
 
         <RightSidebar />
       </div>
-      <BottomNav />
+      <Suspense fallback={<div className="h-16" />}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }

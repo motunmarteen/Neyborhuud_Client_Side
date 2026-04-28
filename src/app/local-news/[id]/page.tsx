@@ -50,7 +50,7 @@ function GossipDetailInner() {
 
     const handleDelete = async () => {
         await mutations.deleteGossip();
-        router.push('/gossip');
+        router.push('/local-news');
     };
 
     const handleComment = async (body: string, anonymous: boolean, parentId?: string) => {
@@ -79,13 +79,19 @@ function GossipDetailInner() {
             <div className="relative flex h-screen w-full flex-col overflow-hidden">
                 <TopNav />
                 <div className="flex flex-1 overflow-hidden">
-                    <LeftSidebar />
+                    <Suspense fallback={<div className="w-64" />}>
+                        <LeftSidebar />
+                    </Suspense>
                     <main className="flex-1 overflow-y-auto flex items-center justify-center">
                         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                     </main>
                     <RightSidebar />
                 </div>
-                <div className="md:hidden"><BottomNav /></div>
+                <div className="md:hidden">
+                    <Suspense fallback={<div className="h-16" />}>
+                        <BottomNav />
+                    </Suspense>
+                </div>
             </div>
         );
     }
@@ -95,7 +101,9 @@ function GossipDetailInner() {
             <div className="relative flex h-screen w-full flex-col overflow-hidden">
                 <TopNav />
                 <div className="flex flex-1 overflow-hidden">
-                    <LeftSidebar />
+                    <Suspense fallback={<div className="w-64" />}>
+                        <LeftSidebar />
+                    </Suspense>
                     <main className="flex-1 overflow-y-auto px-4 py-6">
                         <div className="max-w-[680px] mx-auto">
                             <div className="neu-card-sm rounded-2xl p-8 text-center">
@@ -104,17 +112,21 @@ function GossipDetailInner() {
                                     {error instanceof Error ? error.message : 'Discussion not found'}
                                 </p>
                                 <button
-                                    onClick={() => router.push('/gossip')}
+                                    onClick={() => router.push('/local-news')}
                                     className="mt-4 px-6 py-2.5 neu-btn rounded-2xl text-sm font-bold text-primary"
                                 >
-                                    Back to Gossip
+                                    Back to Local News
                                 </button>
                             </div>
                         </div>
                     </main>
                     <RightSidebar />
                 </div>
-                <div className="md:hidden"><BottomNav /></div>
+                <div className="md:hidden">
+                    <Suspense fallback={<div className="h-16" />}>
+                        <BottomNav />
+                    </Suspense>
+                </div>
             </div>
         );
     }
@@ -123,13 +135,15 @@ function GossipDetailInner() {
         <div className="relative flex h-screen w-full flex-col overflow-hidden">
             <TopNav />
             <div className="flex flex-1 overflow-hidden">
-                <LeftSidebar />
+                <Suspense fallback={<div className="w-64" />}>
+                    <LeftSidebar />
+                </Suspense>
 
                 <main className="flex-1 overflow-y-auto px-4 py-6">
                     <div className="max-w-[680px] mx-auto flex flex-col gap-4 pb-20">
                         {/* Back button */}
                         <button
-                            onClick={() => router.push('/gossip')}
+                            onClick={() => router.push('/local-news')}
                             className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors self-start"
                             style={{ color: 'var(--neu-text-muted)' }}
                         >
@@ -380,7 +394,11 @@ function GossipDetailInner() {
                 <RightSidebar />
             </div>
 
-            <div className="md:hidden"><BottomNav /></div>
+            <div className="md:hidden">
+                <Suspense fallback={<div className="h-16" />}>
+                    <BottomNav />
+                </Suspense>
+            </div>
 
             {/* Edit Modal */}
             {showEditModal && gossip && (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { contentService } from '@/services/content.service';
 import TopNav from '@/components/navigation/TopNav';
@@ -9,6 +9,9 @@ import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { XPostCard } from '@/components/feed/XPostCard';
 import { useAuth } from '@/hooks/useAuth';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 export default function PopularPage() {
   const { user } = useAuth();
@@ -30,7 +33,9 @@ export default function PopularPage() {
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
+        <Suspense fallback={<div className="w-64" />}>
+          <LeftSidebar />
+        </Suspense>
         <main className="flex-1 overflow-y-auto px-4 py-6">
           <div className="mx-auto flex w-full max-w-[920px] flex-col gap-6 pb-24">
             <div className="flex items-center gap-3">
@@ -78,7 +83,9 @@ export default function PopularPage() {
         </main>
         <RightSidebar />
       </div>
-      <BottomNav />
+      <Suspense fallback={<div className="h-16" />}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }

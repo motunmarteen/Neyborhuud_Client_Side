@@ -28,6 +28,7 @@ export function useGossipList(filters?: {
   state?: string;
   tag?: string;
   language?: string;
+  feedTab?: string;
 }) {
   return useInfiniteQuery({
     queryKey: ["gossip", filters],

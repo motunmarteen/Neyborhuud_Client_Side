@@ -25,9 +25,9 @@ const mainNav = [
 ];
 
 const browseTypes = [
-  { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi' },
-  { icon: 'forum', label: 'Gossip', type: 'gossip' },
-  { icon: 'help', label: 'Help Requests', type: 'help_request' },
+  { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi', href: '/fyi' },
+  { icon: 'forum', label: 'Local News', type: 'gossip', href: '/local-news' },
+  { icon: 'help', label: 'Help Requests', type: 'help_request', href: '/help-request' },
   { icon: 'work', label: 'Jobs', type: 'job' },
   { icon: 'event', label: 'Events', type: 'event' },
   { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace' },
@@ -214,18 +214,45 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
           </div>
         </div>
 
-        {/* Mobile-only: Settings at bottom */}
-        <div className="md:hidden mt-auto pt-4 border-t border-black/[0.06]">
-          <Link
-            href="/settings"
-            onClick={onNavigate}
-            className="flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-black/[0.04] cursor-pointer transition-all"
-            style={{ color: 'var(--neu-text)' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>settings</span>
-            <p className="text-[14.5px] font-medium leading-normal tracking-tight">Settings &amp; Privacy</p>
-          </Link>
-        </div>
+      {/* Feed Filters — 2-col grid */}
+      <div className="grid grid-cols-2 gap-1.5">
+        {browseTypes.map((item) => {
+          const active = item.href ? pathname === item.href : activeType === item.type;
+          return (
+            <Link
+              key={item.type}
+              href={item.href || `/feed?type=${item.type}`}
+              onClick={onNavigate}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all ${
+                active
+                  ? 'bg-primary/[0.08] text-primary'
+                  : 'hover:bg-black/[0.05] bg-black/[0.025]'
+              }`}
+              style={!active ? { color: 'var(--neu-text)' } : undefined}
+            >
+              <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors shrink-0`} style={{ fontSize: '16px' }}>
+                {item.icon}
+              </span>
+              <p className={`text-[11px] ${active ? 'font-bold' : 'font-medium'} leading-snug`}>
+                {item.label}
+              </p>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Mobile-only: Settings at bottom */}
+      <div className="md:hidden mt-auto pt-4 border-t border-black/[0.06]">
+        <Link
+          href="/settings"
+          onClick={onNavigate}
+          className="flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-black/[0.04] cursor-pointer transition-all"
+          style={{ color: 'var(--neu-text)' }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>settings</span>
+          <p className="text-[14.5px] font-medium leading-normal tracking-tight">Settings &amp; Privacy</p>
+        </Link>
+      </div>
       </div>
     </div>
   );

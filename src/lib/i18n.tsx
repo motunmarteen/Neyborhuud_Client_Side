@@ -30,7 +30,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     // Content types
     'contentType.post': 'Post',
     'contentType.fyi': 'FYI',
-    'contentType.gossip': 'Gossip',
+    'contentType.gossip': 'Local News',
     'contentType.help_request': 'Help Request',
     'contentType.job': 'Job',
     'contentType.event': 'Event',
@@ -89,7 +89,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     'explore.news': 'Labari',
     'contentType.post': 'Sakwanni',
     'contentType.fyi': 'FYI',
-    'contentType.gossip': 'Tsegumi',
+    'contentType.gossip': 'Local News',
     'contentType.help_request': 'Neman Taimako',
     'contentType.job': 'Aiki',
     'contentType.event': 'Taro',
@@ -142,7 +142,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     'explore.news': 'Ìròyìn',
     'contentType.post': 'Ìfiránṣẹ́',
     'contentType.fyi': 'FYI',
-    'contentType.gossip': 'Ọ̀rọ̀ Àsírí',
+    'contentType.gossip': 'Local News',
     'contentType.help_request': 'Ìbéèrè Ìrànwọ́',
     'contentType.job': 'Iṣẹ́',
     'contentType.event': 'Àjọ',
@@ -195,7 +195,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     'explore.news': 'Akụkọ',
     'contentType.post': 'Post',
     'contentType.fyi': 'FYI',
-    'contentType.gossip': 'Asịrị',
+    'contentType.gossip': 'Local News',
     'contentType.help_request': 'Arịrịọ Enyemaka',
     'contentType.job': 'Ọrụ',
     'contentType.event': 'Mmemme',
@@ -248,7 +248,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     'explore.news': 'News',
     'contentType.post': 'Post',
     'contentType.fyi': 'FYI',
-    'contentType.gossip': 'Gist',
+    'contentType.gossip': 'Local News',
     'contentType.help_request': 'Help Request',
     'contentType.job': 'Job',
     'contentType.event': 'Event',
@@ -374,3 +374,4 @@ export function useTranslation() {
   }
   return context;
 }
+

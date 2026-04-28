@@ -3,6 +3,9 @@
 import { Suspense, useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { io, type Socket } from 'socket.io-client';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
@@ -403,7 +406,9 @@ function SafetyPageInner() {
       <TopNav />
 
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
+        <Suspense fallback={<div className="w-64" />}>
+          <LeftSidebar />
+        </Suspense>
 
         <main className="flex-1 overflow-y-auto px-4 py-6">
           <div className="mx-auto flex w-full max-w-[920px] flex-col gap-4 pb-24">
@@ -927,7 +932,9 @@ function SafetyPageInner() {
       </div>
 
       <div className="md:hidden">
-        <BottomNav />
+        <Suspense fallback={<div className="h-16" />}>
+          <BottomNav />
+        </Suspense>
       </div>
     </div>
   );

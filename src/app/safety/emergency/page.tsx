@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
@@ -15,6 +15,9 @@ import {
   type DispatchStatus,
 } from '@/services/safety.service';
 import type { IncidentReplay } from '@/types/api';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -204,7 +207,9 @@ export default function EmergencyPage() {
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
+        <Suspense fallback={<div className="w-64" />}>
+          <LeftSidebar />
+        </Suspense>
 
         <main className="flex-1 overflow-y-auto px-4 py-6">
           <div className="mx-auto flex w-full max-w-[920px] flex-col gap-6 pb-24">
@@ -570,7 +575,9 @@ export default function EmergencyPage() {
 
         <RightSidebar />
       </div>
-      <BottomNav />
+      <Suspense fallback={<div className="h-16" />}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }

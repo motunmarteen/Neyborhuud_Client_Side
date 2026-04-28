@@ -136,7 +136,7 @@ export default function Home() {
           </Link>
 
           {/* Center Call to Action */}
-          <Link href="/gossip" className="w-14 h-14 rounded-full bg-brand-red flex items-center justify-center text-white shadow-xl -translate-y-6 border-[6px] border-background active:scale-90 transition-all">
+          <Link href="/local-news" className="w-14 h-14 rounded-full bg-brand-red flex items-center justify-center text-white shadow-xl -translate-y-6 border-[6px] border-background active:scale-90 transition-all">
             <i className="bi bi-megaphone-fill text-xl"></i>
           </Link>
 
@@ -148,3 +148,4 @@ export default function Home() {
     </div>
   );
 }
+

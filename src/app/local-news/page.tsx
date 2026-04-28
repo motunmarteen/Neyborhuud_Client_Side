@@ -1,6 +1,6 @@
 /**
  * Gossip Page
- * Anonymous community discussions with Stitch dark-green layout
+ * Anonymous community discussions with unified feed tab layout
  */
 
 'use client';
@@ -11,20 +11,21 @@ import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
+import { FeedTabs } from '@/components/feed/FeedTabs';
+import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { GossipCard } from '@/components/gossip/GossipCard';
-import { CreateGossipModal } from '@/components/gossip/CreateGossipModal';
 import { useGossipList } from '@/hooks/useGossip';
 import { useAuth } from '@/hooks/useAuth';
 import { GossipPost } from '@/types/gossip';
+import { FeedTab } from '@/types/api';
 
 function GossipPageInner() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [filterType, setFilterType] = useState<string>('all');
+    const [feedTab, setFeedTab] = useState<FeedTab>('your_huud');
     const queryClient = useQueryClient();
     const { user } = useAuth();
     const observerRef = useRef<IntersectionObserver | null>(null);
 
-    const filters = filterType !== 'all' ? { type: filterType } : undefined;
     const {
         data,
         isLoading,
@@ -34,7 +35,7 @@ function GossipPageInner() {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-    } = useGossipList(filters);
+    } = useGossipList({ feedTab });
 
     const posts: GossipPost[] = data?.pages?.flatMap((page) => page?.gossip || []) || [];
 
@@ -57,30 +58,21 @@ function GossipPageInner() {
         [isFetchingNextPage, hasNextPage, fetchNextPage],
     );
 
-    const filterTabs = [
-        { value: 'all', label: 'All' },
-        { value: 'general', label: 'General' },
-        { value: 'local_gist', label: 'Local Gist' },
-        { value: 'recommendation_request', label: 'Requests' },
-        { value: 'community_question', label: 'Questions' },
-        { value: 'cultural_discussion', label: 'Cultural' },
-        { value: 'business_inquiry', label: 'Business' },
-        { value: 'social_update', label: 'Social' },
-    ];
-
     return (
         <div className="relative flex h-screen w-full flex-col overflow-hidden">
             <TopNav />
 
             <div className="flex flex-1 overflow-hidden">
-                <LeftSidebar />
+                <Suspense fallback={<div className="w-64" />}>
+                    <LeftSidebar />
+                </Suspense>
 
-                <main className="flex-1 overflow-y-auto px-4 py-6">
-                    <div className="max-w-[680px] mx-auto flex flex-col gap-4 pb-20">
+                <main className="flex-1 overflow-y-auto">
+                    <div className="max-w-[680px] mx-auto flex flex-col pb-20">
                         {/* Page Header */}
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between px-4 pt-6 pb-3">
                             <div>
-                                <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Gossip</h1>
+                                <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Local News</h1>
                                 <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>Anonymous community discussions</p>
                             </div>
                             <button
@@ -91,24 +83,10 @@ function GossipPageInner() {
                             </button>
                         </div>
 
-                        {/* Filter Tabs */}
-                        <div className="neu-socket rounded-2xl p-1.5 flex gap-1 overflow-x-auto no-scrollbar">
-                            {filterTabs.map((type) => (
-                                <button
-                                    key={type.value}
-                                    onClick={() => setFilterType(type.value)}
-                                    className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
-                                        filterType === type.value
-                                            ? 'neu-card-sm text-primary'
-                                            : ''
-                                    }`}
-                                    style={filterType !== type.value ? { color: 'var(--neu-text-muted)' } : undefined}
-                                >
-                                    {type.label}
-                                </button>
-                            ))}
-                        </div>
+                        {/* Feed Tabs — same as main Feed page */}
+                        <FeedTabs activeTab={feedTab} onTabChange={setFeedTab} />
 
+                        <div className="px-4 pt-4 flex flex-col gap-4">
                         {/* Loading State */}
                         {isLoading && (
                             <div className="flex flex-col items-center justify-center py-12">
@@ -183,6 +161,7 @@ function GossipPageInner() {
                                 <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
                             </div>
                         )}
+                        </div>
                     </div>
                 </main>
 
@@ -190,14 +169,18 @@ function GossipPageInner() {
             </div>
 
             <div className="md:hidden">
-                <BottomNav />
+                <Suspense fallback={<div className="h-16" />}>
+                    <BottomNav />
+                </Suspense>
             </div>
 
-            <CreateGossipModal
+            {/* Gossip-locked post creation modal */}
+            <CreatePostModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSuccess={handleCreateSuccess}
-                defaultDiscussionType={filterType !== 'all' ? (filterType as any) : undefined}
+                defaultContentType="gossip"
+                lockContentType={true}
             />
         </div>
     );
