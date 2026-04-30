@@ -272,6 +272,25 @@ export interface Comment {
     _id?: string;
     username: string;
     avatarUrl?: string | null;
+    avatar?: string | null;
+    firstName?: string;
+    lastName?: string;
+  };
+  user?: {
+    id?: string;
+    _id?: string;
+    username: string;
+    avatarUrl?: string | null;
+    avatar?: string | null;
+    firstName?: string;
+    lastName?: string;
+  };
+  author?: {
+    id?: string;
+    _id?: string;
+    username: string;
+    avatarUrl?: string | null;
+    avatar?: string | null;
     firstName?: string;
     lastName?: string;
   };
@@ -281,6 +300,7 @@ export interface Comment {
   parentId?: string;
   replies?: Comment[];
   likes: number;
+  likesCount?: number; // Marketplace comments use likesCount
   isLiked?: boolean;
   createdAt: string;
   updatedAt?: string;
@@ -289,6 +309,58 @@ export interface Comment {
 export interface PostDetails {
   content: Post;
   comments: Comment[];
+}
+
+// ==================== Marketplace Types ====================
+
+export interface Order {
+  id: string;
+  _id?: string;
+  buyerId: string;
+  buyer?: User;
+  sellerId: string;
+  seller?: User;
+  productId: string;
+  product?: MarketplaceItem;
+  amount: number;
+  status: "pending" | "accepted" | "payment_pending" | "paid" | "in_transit" | "delivered" | "completed" | "cancelled";
+  offerId?: string;
+  offer?: MarketplaceOffer;
+  conversationId?: string;
+  paymentMethod?: string;
+  paymentProofUrl?: string;
+  paymentConfirmedAt?: string;
+  deliveryMethod?: string;
+  deliveryAddress?: string;
+  deliveryFee?: number;
+  trackingNumber?: string;
+  buyerConfirmedAt?: string;
+  sellerConfirmedAt?: string;
+  completedAt?: string;
+  cancelledAt?: string;
+  cancelReason?: string;
+  cancelledBy?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface MarketplaceOffer {
+  id: string;
+  _id?: string;
+  productId: string;
+  product?: MarketplaceItem;
+  buyerId: string;
+  buyer?: User;
+  sellerId: string;
+  seller?: User;
+  offerAmount: number;
+  counterOfferAmount?: number;
+  status: "pending" | "accepted" | "rejected" | "countered" | "expired" | "cancelled";
+  orderId?: string;
+  acceptedAt?: string;
+  expiresAt?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 // ==================== Chat Types ====================
@@ -405,7 +477,7 @@ export interface IncidentReplay {
 export interface Event {
   id: string;
   organizerId: string;
-  organizer: User;
+  organizer?: User;
   title: string;
   description: string;
   type:
@@ -422,15 +494,15 @@ export interface Event {
   endDate: string;
   coverImage?: string;
   capacity?: number;
-  attendees: number;
+  attendees?: number;
   isAttending?: boolean;
   isFree: boolean;
   ticketPrice?: number;
-  tags: string[];
-  status: "upcoming" | "ongoing" | "completed" | "cancelled";
+  tags?: string[];
+  status?: "upcoming" | "ongoing" | "completed" | "cancelled";
   visibility: "public" | "private" | "neighborhood";
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 // ==================== Jobs Types ====================
@@ -438,7 +510,7 @@ export interface Event {
 export interface Job {
   id: string;
   employerId: string;
-  employer: User;
+  employer?: User;
   title: string;
   description: string;
   type: "full-time" | "part-time" | "contract" | "freelance" | "internship";
@@ -453,12 +525,12 @@ export interface Job {
   };
   requirements: string[];
   skills: string[];
-  applications: number;
+  applications?: number;
   hasApplied?: boolean;
-  status: "active" | "filled" | "closed";
+  status?: "active" | "filled" | "closed";
   expiresAt?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface JobApplication {
@@ -477,30 +549,36 @@ export interface JobApplication {
 
 export interface MarketplaceItem {
   id: string;
+  _id?: string;
   sellerId: string;
-  seller: User;
+  seller?: User;
   title: string;
   description: string;
   category: string;
   price: number;
-  currency: string;
-  condition: "new" | "like-new" | "good" | "fair" | "poor";
+  currency?: string;
+  condition?: "new" | "like-new" | "good" | "fair" | "poor";
   images: string[];
-  location: LocationData;
-  delivery: {
+  location?: LocationData;
+  delivery?: {
     available: boolean;
     fee?: number;
     methods: string[];
   };
   negotiable: boolean;
-  quantity: number;
-  views: number;
-  likes: number;
+  quantity?: number;
+  views?: number;
+  likes?: number;
+  engagement?: {
+    likesCount: number;
+    commentsCount: number;
+    isLiked?: boolean;
+  };
   isLiked?: boolean;
   isSaved?: boolean;
-  status: "available" | "sold" | "reserved" | "removed";
+  status: "available" | "sold" | "reserved" | "removed" | "active" | "pending";
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 // ==================== Services Types ====================

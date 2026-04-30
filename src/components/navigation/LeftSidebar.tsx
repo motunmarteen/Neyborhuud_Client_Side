@@ -30,7 +30,7 @@ const browseTypes = [
   { icon: 'help', label: 'Help Requests', type: 'help_request', href: '/help-request' },
   { icon: 'work', label: 'Jobs', type: 'job' },
   { icon: 'event', label: 'Events', type: 'event' },
-  { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace' },
+  { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace', href: '/marketplace' },
 ];
 
 
