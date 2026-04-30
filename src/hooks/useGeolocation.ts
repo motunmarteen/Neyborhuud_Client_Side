@@ -13,6 +13,10 @@ interface GeolocationState {
   error: string | null;
 }
 
+// Module-level flag: once the reverse-geocode endpoint returns 404, stop
+// calling it for the rest of the session to avoid console noise.
+let reverseGeocodeUnavailable = false;
+
 export function useGeolocation() {
   const [state, setState] = useState<GeolocationState>({
     location: null,
@@ -27,15 +31,37 @@ export function useGeolocation() {
       const position = await geoService.getCurrentPosition();
       const { latitude, longitude } = position.coords;
 
-      // Reverse geocode to get location details
-      const response = await geoService.reverseGeocode(latitude, longitude);
+      // Reverse geocode is best-effort. Skip entirely if we already learned
+      // the endpoint is unavailable on this backend.
+      let resolved: LocationData = {
+        latitude,
+        longitude,
+        resolutionSource: "gps",
+      };
+
+      if (!reverseGeocodeUnavailable) {
+        try {
+          const response = await geoService.reverseGeocode(latitude, longitude);
+          if (response?.data) {
+            resolved = response.data;
+          }
+        } catch (geocodeError: any) {
+          if (geocodeError?.response?.status === 404) {
+            reverseGeocodeUnavailable = true;
+            console.warn(
+              "[useGeolocation] /geo/reverse-geocode is not implemented on the backend; using raw GPS coords for the rest of the session.",
+            );
+          } else {
+            console.warn(
+              "[useGeolocation] reverse geocode failed, using raw GPS coords",
+              geocodeError,
+            );
+          }
+        }
+      }
 
       setState({
-        location: response.data || {
-          latitude,
-          longitude,
-          resolutionSource: "gps",
-        },
+        location: resolved,
         isLoading: false,
         error: null,
       });
