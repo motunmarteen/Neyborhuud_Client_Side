@@ -33,3 +33,19 @@ export {
 } from "./useDepartments";
 export { useTripMonitor } from "./useTripMonitor";
 export type { UseTripMonitor, TripMonitorState } from "./useTripMonitor";
+export {
+  useProduct,
+  useMarketplaceProducts,
+  useNearbyProducts,
+  useMyListings,
+  useSavedProducts,
+  useProductMutations,
+  useProductLike,
+  useProductComments,
+  useProductCommentMutations,
+  useSaveProduct,
+} from "./useMarketplace";
+export {
+  useMarketplaceSocket,
+  useProductRoom,
+} from "./useMarketplaceSocket";
