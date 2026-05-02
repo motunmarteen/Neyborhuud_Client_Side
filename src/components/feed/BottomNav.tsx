@@ -18,7 +18,7 @@ export function BottomNav({ hidden }: BottomNavProps) {
   const { user } = useAuth();
   const sos = useSos();
   const isFeed = pathname === '/feed';
-  const isGossip = pathname === '/local-news';
+  const isSentinel = pathname.startsWith('/safety');
   const profileHref = user?.username ? `/profile/${user.username}` : '/settings';
 
   // Long-press → silent SOS. ≥600 ms hold fires silently in the background.
@@ -92,14 +92,14 @@ export function BottomNav({ hidden }: BottomNavProps) {
           <span className={`material-symbols-outlined text-[30px] ${isFeed ? 'fill-1' : ''}`}>home</span>
         </Link>
 
-        {/* Local News */}
+        {/* Sentinel */}
         <Link
-          href="/local-news"
-          className={navItemClass(isGossip)}
-          aria-current={isGossip ? 'page' : undefined}
-          aria-label="Local News"
+          href="/safety"
+          className={navItemClass(isSentinel)}
+          aria-current={isSentinel ? 'page' : undefined}
+          aria-label="Sentinel"
         >
-          <span className={`material-symbols-outlined text-[30px] ${isGossip ? 'fill-1' : ''}`}>chat_bubble</span>
+          <span className={`material-symbols-outlined text-[30px] ${isSentinel ? 'fill-1' : ''}`}>shield</span>
         </Link>
 
         {/* SOS / Safety — tap navigates; long-press fires SILENT SOS */}

@@ -113,6 +113,34 @@ html.dark body {
   background-image: url('/doodle-pattern-dark.svg');
 }
 
+/* ── Doodle on all page-level wrapper backgrounds ──
+   Page wrappers set a solid background-color that covers the body doodle.
+   We re-inject the doodle as background-image here (CSS renders image over color). */
+
+/* Light page wrappers */
+.min-h-screen.bg-background,
+.min-h-screen.bg-white,
+.min-h-screen.bg-soft-bg {
+  background-image: url('/doodle-pattern.svg');
+  background-repeat: repeat;
+  background-size: 500px 500px;
+}
+
+/* Dark mode: swap to dark doodle */
+.dark .min-h-screen.bg-background,
+.dark .min-h-screen.bg-white,
+.dark .min-h-screen.bg-soft-bg {
+  background-image: url('/doodle-pattern-dark.svg');
+}
+
+/* Dark page wrappers (marketplace, safety dark pages) */
+.min-h-screen.bg-black,
+.min-h-screen.bg-\[\#0f0f1e\] {
+  background-image: url('/doodle-pattern-dark.svg');
+  background-repeat: repeat;
+  background-size: 500px 500px;
+}
+
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
