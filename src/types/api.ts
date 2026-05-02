@@ -499,6 +499,50 @@ export interface TimelineEntry {
   clockDriftFlagged?: boolean;
 }
 
+export interface IncidentSummary {
+  sosEventId: string;
+  status: "pending" | "triggered" | "active" | "resolved" | "cancelled";
+  visibilityMode: "normal" | "silent";
+  cancelledDuringPending: boolean;
+  cancelReason: string | null;
+  startedAt: string;
+  resolvedAt: string | null;
+  durationMs: number;
+  location: { lat: number; lng: number; address?: string; lga?: string; state?: string };
+  guardians: {
+    total: number;
+    notifiedCount: number;
+    acknowledgedCount: number;
+    fastestResponseMs: number | null;
+    details: Array<{
+      guardianId: string;
+      notifiedAt: string | null;
+      acknowledgedAt: string | null;
+      responseMs: number | null;
+    }>;
+  };
+  tracking: { pingsLogged: number };
+  agencyDispatch: {
+    agency: string | null;
+    status: "pending" | "sent" | "failed" | "not_required";
+    dispatchedAt: string | null;
+  };
+  timeline: Array<{
+    at: string;
+    event:
+      | "sos_created"
+      | "countdown_ended"
+      | "guardian_notified"
+      | "guardian_acknowledged_alert"
+      | "guardian_viewed_location"
+      | "guardian_ignored_alert"
+      | "agency_dispatched"
+      | "sos_resolved"
+      | "sos_cancelled";
+    meta?: Record<string, unknown>;
+  }>;
+}
+
 export interface IncidentReplay {
   emergencyId: string;
   emergencyType: string;

@@ -198,6 +198,7 @@ class ApiClient {
     console.log('URL:', fullUrl);
     console.log('Method: POST');
     console.log('Headers:', {
+      'Content-Type': 'application/json', // Axios default for POST; overridden by config if set
       ...this.client.defaults.headers.common,
       ...config?.headers,
     });

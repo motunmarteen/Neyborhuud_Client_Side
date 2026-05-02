@@ -9,11 +9,11 @@ import { getStoredCommunity } from '@/lib/communityContext';
 import AmbientProfileCard from './AmbientProfileCard';
 
 const quickActions = [
-  { icon: 'sos', label: 'SOS', href: '/safety', accent: '#ef4444' },
+  { icon: 'shield', label: 'Sentinel', href: '/safety', accent: '#8b5cf6' },
   { icon: 'route', label: 'Safe Trip', href: '/safety/trips', accent: '#008751' },
   { icon: 'fence', label: 'Safety Zones', href: '/safety/geofences', accent: '#f59e0b' },
-  { icon: 'crisis_alert', label: 'Emergency', href: '/safety/emergency', accent: '#dc2626' },
-  { icon: 'shield', label: 'Sentinel AI', href: '/sentinel', accent: '#8b5cf6' },
+  { icon: 'phone_in_talk', label: 'Fake Call', href: '/safety/fake-call', accent: '#22c55e' },
+  { icon: 'pin', label: 'Panic PIN', href: '/safety/panic-pin', accent: '#ef4444' },
   { icon: 'chat', label: 'Messages', href: '/messages', accent: '#3b82f6' },
 ];
 
