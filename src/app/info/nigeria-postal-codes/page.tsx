@@ -3,6 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getApiUrl } from '@/lib/api';
+import TopNav from '@/components/navigation/TopNav';
+import LeftSidebar from '@/components/navigation/LeftSidebar';
+import RightSidebar from '@/components/navigation/RightSidebar';
+import { BottomNav } from '@/components/feed/BottomNav';
 
 type PostalRow = { state: string; postalHead: string; notes?: string };
 
@@ -28,7 +32,11 @@ export default function NigeriaPostalInfoPage() {
   }, []);
 
   return (
-    <div className="min-h-[100dvh] neu-base">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
+      <TopNav />
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <div className="flex-1 overflow-y-auto">
       <div className="max-w-2xl mx-auto px-5 py-10 pb-16">
         <Link
           href="/signup"
@@ -108,6 +116,10 @@ export default function NigeriaPostalInfoPage() {
           </p>
         )}
       </div>
+        </div>
+        <RightSidebar />
+      </div>
+      <BottomNav />
     </div>
   );
 }

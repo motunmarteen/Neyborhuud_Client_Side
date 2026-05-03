@@ -9,6 +9,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useRef } from "react";
 import { marketplaceService, Product } from "@/services/marketplace.service";
 import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "sonner";
@@ -295,7 +296,7 @@ export function useProductComments(productId: string | null) {
  */
 export function useProductCommentMutations(productId: string) {
   const queryClient = useQueryClient();
-  let lastCommentTime = 0;
+  const lastCommentTimeRef = useRef(0);
   const RATE_LIMIT_MS = 20000; // 20 seconds between comments
 
   const addComment = useMutation({
@@ -306,8 +307,8 @@ export function useProductCommentMutations(productId: string) {
     }) => {
       // Check rate limit
       const now = Date.now();
-      if (now - lastCommentTime < RATE_LIMIT_MS) {
-        const remainingSeconds = Math.ceil((RATE_LIMIT_MS - (now - lastCommentTime)) / 1000);
+      if (now - lastCommentTimeRef.current < RATE_LIMIT_MS) {
+        const remainingSeconds = Math.ceil((RATE_LIMIT_MS - (now - lastCommentTimeRef.current)) / 1000);
         throw new Error(
           `You're commenting too fast. Please wait ${remainingSeconds} seconds.`,
         );
@@ -421,7 +422,7 @@ export function useProductCommentMutations(productId: string) {
       toast.error(getErrorMessage(error) || "Failed to post comment");
     },
     onSuccess: () => {
-      lastCommentTime = Date.now();
+      lastCommentTimeRef.current = Date.now();
       // Refetch to get real data from server
       queryClient.invalidateQueries({
         queryKey: ["marketplace", "product", productId],

@@ -11,6 +11,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import TopNav from '@/components/navigation/TopNav';
+import LeftSidebar from '@/components/navigation/LeftSidebar';
+import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { safetyService } from '@/services/safety.service';
 import type { IncidentSummary } from '@/types/api';
@@ -102,9 +104,12 @@ export default function IncidentRecapPage() {
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-background text-foreground">
       <TopNav />
-      <main className="max-w-2xl mx-auto px-4 pt-4 pb-20">
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-2xl mx-auto px-4 pt-4 pb-20">
         <button
           type="button"
           onClick={() => router.push('/safety')}
@@ -251,7 +256,10 @@ export default function IncidentRecapPage() {
             </div>
           </>
         )}
-      </main>
+          </div>
+        </main>
+        <RightSidebar />
+      </div>
       <BottomNav />
     </div>
   );

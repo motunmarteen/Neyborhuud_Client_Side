@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
 import { getStoredCommunity } from '@/lib/communityContext';
@@ -282,7 +282,9 @@ export default function LeftSidebar() {
     <>
       {/* Desktop sidebar – hidden on mobile */}
       <aside className="hidden md:flex w-96 flex-col overflow-hidden shrink-0 neu-panel" style={{ backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '500px 500px' }}>
-        <SidebarContent />
+        <Suspense fallback={<div className="flex-1" />}>
+          <SidebarContent />
+        </Suspense>
       </aside>
 
       {/* Mobile drawer overlay */}
@@ -295,7 +297,9 @@ export default function LeftSidebar() {
           />
           {/* Drawer */}
           <aside className="absolute top-0 left-0 bottom-0 w-72 overflow-y-auto animate-in slide-in-from-left duration-300 flex flex-col" style={{ boxShadow: '8px 0 24px rgba(0,0,0,0.08)', backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '500px 500px' }}>
-            <SidebarContent onNavigate={() => setMobileOpen(false)} onClose={() => setMobileOpen(false)} />
+            <Suspense fallback={<div className="flex-1" />}>
+              <SidebarContent onNavigate={() => setMobileOpen(false)} onClose={() => setMobileOpen(false)} />
+            </Suspense>
           </aside>
         </div>
       )}

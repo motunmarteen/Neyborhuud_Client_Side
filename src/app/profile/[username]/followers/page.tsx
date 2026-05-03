@@ -12,6 +12,10 @@ import { socialService } from '@/services/social.service';
 import { useFollowers } from '@/hooks/useFollow';
 import { UserListItem } from '@/components/profile/UserListItem';
 import { useState } from 'react';
+import TopNav from '@/components/navigation/TopNav';
+import LeftSidebar from '@/components/navigation/LeftSidebar';
+import RightSidebar from '@/components/navigation/RightSidebar';
+import { BottomNav } from '@/components/feed/BottomNav';
 
 export default function FollowersPage() {
   const params = useParams();
@@ -54,7 +58,11 @@ export default function FollowersPage() {
       : profile?.firstName || profile?.username || username;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-white dark:bg-black">
+      <TopNav />
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <div className="flex-1 overflow-y-auto">
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md z-10">
         <div className="flex items-center gap-4 px-4 h-14">
@@ -194,6 +202,10 @@ export default function FollowersPage() {
           </>
         )}
       </div>
+        </div>
+        <RightSidebar />
+      </div>
+      <BottomNav />
     </div>
   );
 }

@@ -12,6 +12,9 @@ import { UserSearchResult } from '@/components/search/UserSearchResult';
 import { PostSearchResult } from '@/components/search/PostSearchResult';
 import { LocationSearchResult } from '@/components/search/LocationSearchResult';
 import { BottomNav } from '@/components/feed/BottomNav';
+import LeftSidebar from '@/components/navigation/LeftSidebar';
+import RightSidebar from '@/components/navigation/RightSidebar';
+import TopNav from '@/components/navigation/TopNav';
 import { searchService } from '@/services/search.service';
 
 // ── Explore Tabs ──────────────────────────────────────────────
@@ -229,6 +232,7 @@ function ExplorePageInner() {
 
   return (
     <div className="flex flex-col h-screen neu-base">
+      <TopNav />
       {/* ── Top Bar: Back + Search Input ── */}
       <div className="sticky top-0 z-50 neu-base" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 px-3 py-2.5">
@@ -323,7 +327,9 @@ function ExplorePageInner() {
       </div>
 
       {/* ── Content Area ── */}
-      <div className="flex-1 overflow-y-auto pb-20">
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <div className="flex-1 overflow-y-auto pb-20">
         {isSearching ? (
           /* ═══ Search Results ═══ */
           <div className="max-w-[680px] mx-auto">
@@ -655,6 +661,8 @@ function ExplorePageInner() {
             )}
           </div>
         )}
+        </div>
+        <RightSidebar />
       </div>
 
       {/* Bottom Navigation */}

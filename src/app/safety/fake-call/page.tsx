@@ -15,6 +15,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import TopNav from '@/components/navigation/TopNav';
+import LeftSidebar from '@/components/navigation/LeftSidebar';
+import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 export const dynamic = 'force-dynamic';
@@ -221,9 +223,12 @@ export default function FakeCallPage() {
 
   // ── Setup screen ──────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-background text-foreground">
       <TopNav />
-      <main className="max-w-md mx-auto px-4 pt-4 pb-20">
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-2xl mx-auto px-4 pt-4 pb-20">
         <button
           type="button"
           onClick={() => router.push('/safety')}
@@ -321,7 +326,10 @@ export default function FakeCallPage() {
           The fake call runs only on this device. No data is sent. If your phone is on silent,
           the visual call screen still appears.
         </p>
-      </main>
+          </div>
+        </main>
+        <RightSidebar />
+      </div>
       <BottomNav />
     </div>
   );

@@ -8,6 +8,10 @@
 import { useMySales } from "@/hooks/useMarketplace";
 import { useRouter } from "next/navigation";
 import { Order } from "@/types/api";
+import TopNav from "@/components/navigation/TopNav";
+import LeftSidebar from "@/components/navigation/LeftSidebar";
+import RightSidebar from "@/components/navigation/RightSidebar";
+import { BottomNav } from "@/components/feed/BottomNav";
 
 export default function MySalesPage() {
   const router = useRouter();
@@ -19,14 +23,22 @@ export default function MySalesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0f0f1e] text-white p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-800 rounded-lg" />
-            ))}
+      <div className="relative flex h-screen w-full flex-col overflow-hidden">
+        <TopNav />
+        <div className="flex flex-1 overflow-hidden">
+          <LeftSidebar />
+          <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white p-6">
+            <div className="max-w-4xl mx-auto">
+              <div className="animate-pulse space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-32 bg-gray-800 rounded-lg" />
+                ))}
+              </div>
+            </div>
           </div>
+          <RightSidebar />
         </div>
+        <BottomNav />
       </div>
     );
   }
@@ -46,7 +58,11 @@ export default function MySalesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f1e] text-white">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden">
+      <TopNav />
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
@@ -178,6 +194,10 @@ export default function MySalesPage() {
           </div>
         )}
       </div>
+        </div>
+        <RightSidebar />
+      </div>
+      <BottomNav />
     </div>
   );
 }
