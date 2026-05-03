@@ -9,6 +9,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Product } from "@/services/marketplace.service";
 import { useMakeOffer, useCreateOrder } from "@/hooks/useMarketplace";
+import { chatService } from "@/services/chat.service";
+import { toast } from "sonner";
+import { formatNGN, getOfferToast } from "@/lib/marketplaceMessages";
 
 interface BuyerIntentActionsProps {
   product: Product;
@@ -24,9 +27,69 @@ export function BuyerIntentActions({
   const router = useRouter();
   const [showOfferDialog, setShowOfferDialog] = useState(false);
   const [offerAmount, setOfferAmount] = useState("");
+  const [contactingSeller, setContactingSeller] = useState(false);
   
   const makeOffer = useMakeOffer(product.id);
   const createOrder = useCreateOrder();
+
+  const handleContactSeller = async () => {
+    if (!product.id || contactingSeller) return;
+    setContactingSeller(true);
+
+    const navigateToConv = (res: any) => {
+      const payload = (res as any)?.data ?? res;
+      const conv =
+        payload?.data?.conversation ??
+        payload?.conversation ??
+        payload;
+      const convId = conv?._id ?? conv?.id ?? conv?.conversationId;
+      if (!convId) {
+        toast.error("Could not start conversation with seller");
+        return false;
+      }
+      router.push(`/messages/${convId}`);
+      return true;
+    };
+
+    try {
+      // Try the new marketplace-aware endpoint first.
+      // Falls back to plain DM if the backend hasn't deployed it yet (404).
+      try {
+        const res = await chatService.startMarketplaceConversation(product.id);
+        if (navigateToConv(res)) return;
+      } catch (firstErr: any) {
+        const status = firstErr?.response?.status;
+        // 404 here means the route isn't deployed yet — fall back gracefully.
+        // Any other status is a real error (400 = own product, 410 = unavailable).
+        if (status === 400) {
+          toast.error("You can't message yourself about your own listing.");
+          return;
+        }
+        if (status === 410) {
+          toast.error("This product is no longer available.");
+          return;
+        }
+        if (status !== 404 && status !== undefined) {
+          toast.error(
+            firstErr?.response?.data?.message || firstErr?.message || "Could not contact seller"
+          );
+          return;
+        }
+        // 404 (route not yet on backend) → fall through to legacy DM flow
+      }
+
+      if (!product.sellerId) {
+        toast.error("Seller information is unavailable.");
+        return;
+      }
+      const res = await chatService.getOrCreateDirectConversation(product.sellerId);
+      navigateToConv(res);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || "Could not contact seller");
+    } finally {
+      setContactingSeller(false);
+    }
+  };
 
   // Don't show if user is the owner or product is sold
   if (isOwner || product.status === "sold") {
@@ -75,9 +138,28 @@ export function BuyerIntentActions({
     }
 
     try {
-      await makeOffer.mutateAsync(amount);
+      const res = await makeOffer.mutateAsync(amount);
       setShowOfferDialog(false);
       setOfferAmount("");
+
+      // Navigate to the unified chat thread if the backend returned a conversationId
+      const payload = (res as any)?.data ?? (res as any);
+      const conversationId =
+        payload?.data?.conversationId ??
+        payload?.conversationId ??
+        payload?.data?.conversation?._id ??
+        payload?.conversation?._id;
+
+      if (conversationId) {
+        toast.success(
+          `${getOfferToast({ action: 'new', amount, actorRole: 'buyer' }, 'buyer')} You are awaiting the seller's response.`,
+        );
+        router.push(`/messages/${conversationId}`);
+      } else {
+        toast.success(
+          `You placed an offer of ${formatNGN(amount)} and are awaiting the seller's response.`,
+        );
+      }
     } catch (error) {
       // Error toast shown by hook
     }
@@ -128,13 +210,14 @@ export function BuyerIntentActions({
 
       {/* Contact Seller Button */}
       <button
-        onClick={() => router.push(`/messages/new?sellerId=${product.sellerId}`)}
-        className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+        onClick={handleContactSeller}
+        disabled={contactingSeller}
+        className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
-        Contact Seller
+        {contactingSeller ? "Opening chat..." : "Contact Seller"}
       </button>
 
       {/* View My Orders/Offers */}
@@ -175,7 +258,7 @@ export function BuyerIntentActions({
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Seller will be notified and can accept, reject, or counter
+                The seller will be notified and can accept, reject, or counter your offer.
               </p>
             </div>
 

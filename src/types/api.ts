@@ -29,7 +29,15 @@ export interface PaginatedResponse<T> {
 export type FeedTab = "your_huud" | "street_radar" | "following_places";
 
 /** Content type for filtering posts in the feed */
-export type ContentType = "post" | "fyi" | "gossip" | "help_request" | "job" | "emergency" | "event" | "marketplace";
+export type ContentType =
+  | "post"
+  | "fyi"
+  | "gossip"
+  | "help_request"
+  | "job"
+  | "emergency"
+  | "event"
+  | "marketplace";
 
 /** Supported languages */
 export type AppLanguage = "en" | "ha" | "yo" | "ig" | "pcm";
@@ -198,8 +206,18 @@ export interface Post {
   mood?: string;
   severity?: "low" | "medium" | "critical";
   emergencyType?: string;
-  verificationStatus?: "unverified" | "verified" | "community_confirmed" | "disputed";
-  cardStyle?: "default" | "emergency_red" | "fyi_blue" | "gossip_neutral" | "marketplace_green" | "event_purple";
+  verificationStatus?:
+    | "unverified"
+    | "verified"
+    | "community_confirmed"
+    | "disputed";
+  cardStyle?:
+    | "default"
+    | "emergency_red"
+    | "fyi_blue"
+    | "gossip_neutral"
+    | "marketplace_green"
+    | "event_purple";
   _feedLayer?: "local" | "extended" | "explore";
   availableActions?: string[];
   savedCollection?: string | null;
@@ -208,19 +226,42 @@ export interface Post {
   body?: string;
   /** Backend returns mediaUrls (array of URLs) or media (array of items); normalized to media */
   media?: (MediaItem | string)[];
-  location?: LocationData | { lat?: number; lng?: number; lga?: string; [k: string]: unknown };
+  location?:
+    | LocationData
+    | { lat?: number; lng?: number; lga?: string; [k: string]: unknown };
   visibility?: "public" | "friends" | "neighborhood" | "ward" | "lga" | "state";
   tags?: string[];
   mentions?: string[];
   priority?: "low" | "normal" | "high" | "critical";
   culturalContext?: string[];
-  targetAudience?: { ageRange?: { min?: number; max?: number }; gender?: string; interests?: string[] };
+  targetAudience?: {
+    ageRange?: { min?: number; max?: number };
+    gender?: string;
+    interests?: string[];
+  };
   helpfulCount?: number;
   isHelpful?: boolean;
-  fyiSubtype?: "safety_notice" | "lost_found" | "community_announcement" | "local_news" | "alert";
-  fyiStatus?: "active" | "found" | "returned" | "resolved" | "expired" | "outdated" | "closed";
+  fyiSubtype?:
+    | "safety_notice"
+    | "lost_found"
+    | "community_announcement"
+    | "local_news"
+    | "alert";
+  fyiStatus?:
+    | "active"
+    | "found"
+    | "returned"
+    | "resolved"
+    | "expired"
+    | "outdated"
+    | "closed";
   expiresAt?: string;
-  endorsements?: Array<{ endorserId: string; authorityTitle: string; note?: string; createdAt: string }>;
+  endorsements?: Array<{
+    endorserId: string;
+    authorityTitle: string;
+    note?: string;
+    createdAt: string;
+  }>;
   metadata?: Record<string, any>;
   // Marketplace fields
   price?: number;
@@ -234,7 +275,11 @@ export interface Post {
   // Help Request fields
   targetAmount?: number;
   amountReceived?: number;
-  helpRequestPayment?: { accountName: string; accountNumber: string; bankName: string };
+  helpRequestPayment?: {
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
+  };
   helpCategory?: string;
   // Event fields (in metadata)
   eventDate?: string;
@@ -255,7 +300,7 @@ export interface Post {
   isAware?: boolean;
   isNearby?: boolean;
   isSafe?: boolean;
-  confirmDisputeAction?: 'confirm' | 'dispute' | null;
+  confirmDisputeAction?: "confirm" | "dispute" | null;
   isPinned?: boolean;
   isReported?: boolean;
   status?: "active" | "pending" | "removed" | "archived";
@@ -267,15 +312,17 @@ export interface Comment {
   id: string;
   _id?: string; // Support for MongoDB _id
   postId?: string;
-  userId: string | {
-    id?: string;
-    _id?: string;
-    username: string;
-    avatarUrl?: string | null;
-    avatar?: string | null;
-    firstName?: string;
-    lastName?: string;
-  };
+  userId:
+    | string
+    | {
+        id?: string;
+        _id?: string;
+        username: string;
+        avatarUrl?: string | null;
+        avatar?: string | null;
+        firstName?: string;
+        lastName?: string;
+      };
   user?: {
     id?: string;
     _id?: string;
@@ -323,7 +370,15 @@ export interface Order {
   productId: string;
   product?: MarketplaceItem;
   amount: number;
-  status: "pending" | "accepted" | "payment_pending" | "paid" | "in_transit" | "delivered" | "completed" | "cancelled";
+  status:
+    | "pending"
+    | "accepted"
+    | "payment_pending"
+    | "paid"
+    | "in_transit"
+    | "delivered"
+    | "completed"
+    | "cancelled";
   offerId?: string;
   offer?: MarketplaceOffer;
   conversationId?: string;
@@ -355,8 +410,16 @@ export interface MarketplaceOffer {
   seller?: User;
   offerAmount: number;
   counterOfferAmount?: number;
-  status: "pending" | "accepted" | "rejected" | "countered" | "expired" | "cancelled";
+  status:
+    | "pending"
+    | "accepted"
+    | "rejected"
+    | "countered"
+    | "expired"
+    | "cancelled";
   orderId?: string;
+  /** Chat thread shared between buyer and seller for this product. */
+  conversationId?: string;
   acceptedAt?: string;
   expiresAt?: string;
   createdAt: string;
@@ -379,7 +442,7 @@ export interface ChatMessage {
     avatarUrl?: string | null;
   };
   content: string;
-  type: "text" | "image" | "video" | "audio" | "file" | "location";
+  type: "text" | "image" | "video" | "audio" | "file" | "location" | "system";
   mediaUrl?: string;
   thumbnailUrl?: string;
   locationSnapshot?: { latitude: number; longitude: number; address?: string };
@@ -392,6 +455,15 @@ export interface ChatMessage {
   /** Server-set from conversation type. "emergency" for incident conversations. */
   priority: "normal" | "emergency";
   status: "sent" | "delivered" | "read";
+  /** Structured metadata attached to system messages (e.g. offer events). */
+  meta?: {
+    offerAction?: "accept" | "reject" | "counter";
+    actorRole?: "buyer" | "seller";
+    offerAmount?: number;
+    counterAmount?: number | null;
+    offerId?: string;
+    [key: string]: unknown;
+  };
   /** UUID v4 idempotency key generated by client for dedup. */
   clientMessageId?: string;
   emergencyRef?: string;
@@ -399,6 +471,24 @@ export interface ChatMessage {
   createdAt: string;
   updatedAt?: string;
 }
+
+export interface ConversationContext {
+  productId?: string;
+  orderId?: string;
+  transactionId?: string;
+  productTitle?: string;
+  productPrice?: number;
+  productCurrency?: string;
+  productThumbnail?: string;
+  origin?: string;
+  label?: string;
+}
+
+export type ConversationContextType =
+  | "general"
+  | "marketplace"
+  | "incident"
+  | "community";
 
 export interface Conversation {
   id: string;
@@ -425,6 +515,12 @@ export interface Conversation {
   isMuted: boolean;
   participantRole?: "admin" | "member" | "moderator";
   isActive?: boolean;
+  /** Origin/topic of the conversation. "marketplace" chats carry product context. */
+  contextType?: ConversationContextType;
+  /** Structured metadata describing what the conversation is about. */
+  context?: ConversationContext | null;
+  /** Pre-rendered label like "Marketplace • iPhone 13" for chat list rows. */
+  contextLabel?: string | null;
   createdAt: string;
   updatedAt?: string;
 }
@@ -823,7 +919,15 @@ export interface LoginPayload {
 
 export interface CreatePostPayload {
   type: "text" | "image" | "video" | "poll" | "article";
-  contentType?: "post" | "fyi" | "gossip" | "help_request" | "job" | "emergency" | "event" | "marketplace";
+  contentType?:
+    | "post"
+    | "fyi"
+    | "gossip"
+    | "help_request"
+    | "job"
+    | "emergency"
+    | "event"
+    | "marketplace";
   content: string;
   mood?: string;
   media?: File[];
@@ -833,7 +937,11 @@ export interface CreatePostPayload {
   language?: "en" | "ha" | "yo" | "ig" | "pcm";
   priority?: "low" | "normal" | "high" | "critical";
   culturalContext?: string[];
-  targetAudience?: { ageRange?: { min?: number; max?: number }; gender?: string; interests?: string[] };
+  targetAudience?: {
+    ageRange?: { min?: number; max?: number };
+    gender?: string;
+    interests?: string[];
+  };
   location?: {
     latitude: number;
     longitude: number;
@@ -858,7 +966,11 @@ export interface CreatePostPayload {
   contactMethod?: string;
   // Help Request fields
   targetAmount?: number;
-  helpRequestPayment?: { accountName?: string; accountNumber?: string; bankName?: string };
+  helpRequestPayment?: {
+    accountName?: string;
+    accountNumber?: string;
+    bankName?: string;
+  };
   helpCategory?: string;
 }
 

@@ -441,6 +441,37 @@ export const marketplaceService = {
   },
 
   /**
+   * Accept an offer (shorthand — no body needed)
+   * PATCH /api/v1/marketplace/offers/:offerId/accept
+   */
+  async acceptOffer(offerId: string) {
+    return await apiClient.patch(`/marketplace/offers/${offerId}/accept`);
+  },
+
+  /**
+   * Reject an offer (shorthand — no body needed)
+   * PATCH /api/v1/marketplace/offers/:offerId/reject
+   */
+  async rejectOffer(offerId: string) {
+    return await apiClient.patch(`/marketplace/offers/${offerId}/reject`);
+  },
+
+  /**
+   * Get all offers on a specific product (seller view)
+   * GET /api/v1/marketplace/products/:productId/offers
+   */
+  async getProductOffers(
+    productId: string,
+    status?: string,
+    page = 1,
+    limit = 20,
+  ) {
+    return await apiClient.get(`/marketplace/products/${productId}/offers`, {
+      params: { ...(status ? { status } : {}), page, limit },
+    });
+  },
+
+  /**
    * Create an order (request to buy)
    * POST /api/v1/marketplace/orders
    */

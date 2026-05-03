@@ -22,6 +22,16 @@ function getCid(c: Conversation): string {
 function getDisplayName(c: Conversation): string {
   if (c.type === 'incident') return '🚨 Emergency Chat';
   if (c.type === 'community') return '🏘️ Community Chat';
+  // Marketplace chats: show product title (or label) so users can tell threads apart
+  if (c.contextType === 'marketplace') {
+    return (
+      c.context?.productTitle ||
+      c.contextLabel ||
+      c.otherParticipant?.name ||
+      c.otherParticipant?.username ||
+      'Marketplace Chat'
+    );
+  }
   if (c.type === 'group') return c.name || c.groupName || 'Group Chat';
   if (c.otherParticipant) {
     return c.otherParticipant.name || c.otherParticipant.username || 'Direct Message';
@@ -30,6 +40,9 @@ function getDisplayName(c: Conversation): string {
 }
 
 function getAvatarUrl(c: Conversation): string | null {
+  if (c.contextType === 'marketplace' && c.context?.productThumbnail) {
+    return c.context.productThumbnail;
+  }
   if (c.type === 'direct' && c.otherParticipant?.avatarUrl) return c.otherParticipant.avatarUrl;
   return null;
 }
@@ -37,6 +50,7 @@ function getAvatarUrl(c: Conversation): string | null {
 function getInitials(c: Conversation): string {
   if (c.type === 'incident') return '🚨';
   if (c.type === 'community') return '🏘️';
+  if (c.contextType === 'marketplace') return '🛍️';
   if (c.type === 'group') return '👥';
   if (c.otherParticipant) {
     const n = c.otherParticipant.name || c.otherParticipant.username || '?';
@@ -188,9 +202,14 @@ export default function MessagesPage() {
     };
   }, [queryClient]);
 
-  const filtered = conversations.filter((c) =>
-    getDisplayName(c).toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = conversations.filter((c) => {
+    const q = search.toLowerCase();
+    return (
+      getDisplayName(c).toLowerCase().includes(q) ||
+      (c.contextLabel ?? '').toLowerCase().includes(q) ||
+      (c.context?.productTitle ?? '').toLowerCase().includes(q)
+    );
+  });
 
   const sorted = [...filtered].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
@@ -290,6 +309,23 @@ export default function MessagesPage() {
                               <span className="shrink-0 text-xs text-[var(--neu-text-muted)]">{timeAgo(lastTime)}</span>
                             )}
                           </div>
+
+                          {/* Context badge — e.g. "Marketplace • iPhone 13" */}
+                          {conv.contextType === 'marketplace' && (conv.contextLabel || conv.context?.productTitle) && (
+                            <div className="mt-0.5 flex items-center gap-1.5">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-teal-900/40 px-2 py-0.5 text-[10px] font-medium text-teal-200">
+                                <span>🛍️</span>
+                                <span className="truncate max-w-[200px]">
+                                  {conv.contextLabel ?? `Marketplace • ${conv.context?.productTitle}`}
+                                </span>
+                              </span>
+                              {conv.context?.productPrice != null && (
+                                <span className="text-[10px] text-[var(--neu-text-muted)]">
+                                  {conv.context.productCurrency ?? 'NGN'} {conv.context.productPrice.toLocaleString()}
+                                </span>
+                              )}
+                            </div>
+                          )}
 
                           <div className="mt-0.5 flex items-center justify-between gap-2">
                             <p className="truncate text-xs text-[var(--neu-text-muted)]">

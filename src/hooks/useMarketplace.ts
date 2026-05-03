@@ -9,9 +9,11 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useRef } from "react";
 import { marketplaceService, Product } from "@/services/marketplace.service";
 import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "sonner";
+import { getOfferToast, type OfferRole } from "@/lib/marketplaceMessages";
 
 /**
  * Hook for fetching a single product with engagement data
@@ -49,7 +51,8 @@ export function useMarketplaceProducts(filter?: {
     queryFn: ({ pageParam = 1 }) =>
       marketplaceService.getItems(pageParam, 20, filter),
     getNextPageParam: (lastPage) => {
-      const pagination = (lastPage as any).pagination || lastPage?.data?.pagination;
+      const pagination =
+        (lastPage as any).pagination || lastPage?.data?.pagination;
       return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
     },
     initialPageParam: 1,
@@ -80,7 +83,8 @@ export function useNearbyProducts(
       );
     },
     getNextPageParam: (lastPage) => {
-      const pagination = (lastPage as any).pagination || lastPage?.data?.pagination;
+      const pagination =
+        (lastPage as any).pagination || lastPage?.data?.pagination;
       return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
     },
     initialPageParam: 1,
@@ -97,7 +101,8 @@ export function useMyListings() {
     queryFn: ({ pageParam = 1 }) =>
       marketplaceService.getMyListings(pageParam, 20),
     getNextPageParam: (lastPage) => {
-      const pagination = (lastPage as any).pagination || lastPage?.data?.pagination;
+      const pagination =
+        (lastPage as any).pagination || lastPage?.data?.pagination;
       return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
     },
     initialPageParam: 1,
@@ -113,7 +118,8 @@ export function useSavedProducts() {
     queryFn: ({ pageParam = 1 }) =>
       marketplaceService.getSavedItems(pageParam, 20),
     getNextPageParam: (lastPage) => {
-      const pagination = (lastPage as any).pagination || lastPage?.data?.pagination;
+      const pagination =
+        (lastPage as any).pagination || lastPage?.data?.pagination;
       return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
     },
     initialPageParam: 1,
@@ -227,7 +233,9 @@ export function useProductLike(productId: string) {
               engagement: {
                 ...old.engagement,
                 isLiked: !currentIsLiked,
-                likesCount: currentIsLiked ? currentLikes - 1 : currentLikes + 1,
+                likesCount: currentIsLiked
+                  ? currentLikes - 1
+                  : currentLikes + 1,
                 commentsCount: old.engagement?.commentsCount ?? 0,
               },
             };
@@ -280,7 +288,8 @@ export function useProductComments(productId: string | null) {
       return marketplaceService.getComments(productId, pageParam, 20);
     },
     getNextPageParam: (lastPage) => {
-      const pagination = (lastPage as any).pagination || (lastPage as any).data?.pagination;
+      const pagination =
+        (lastPage as any).pagination || (lastPage as any).data?.pagination;
       return pagination && pagination.page < pagination.pages
         ? pagination.page + 1
         : undefined;
@@ -295,7 +304,7 @@ export function useProductComments(productId: string | null) {
  */
 export function useProductCommentMutations(productId: string) {
   const queryClient = useQueryClient();
-  let lastCommentTime = 0;
+  const lastCommentTimeRef = useRef(0);
   const RATE_LIMIT_MS = 20000; // 20 seconds between comments
 
   const addComment = useMutation({
@@ -306,8 +315,10 @@ export function useProductCommentMutations(productId: string) {
     }) => {
       // Check rate limit
       const now = Date.now();
-      if (now - lastCommentTime < RATE_LIMIT_MS) {
-        const remainingSeconds = Math.ceil((RATE_LIMIT_MS - (now - lastCommentTime)) / 1000);
+      if (now - lastCommentTimeRef.current < RATE_LIMIT_MS) {
+        const remainingSeconds = Math.ceil(
+          (RATE_LIMIT_MS - (now - lastCommentTimeRef.current)) / 1000,
+        );
         throw new Error(
           `You're commenting too fast. Please wait ${remainingSeconds} seconds.`,
         );
@@ -377,23 +388,26 @@ export function useProductCommentMutations(productId: string) {
         (old: any) => {
           if (!old) return old;
           const firstPage = old.pages[0];
-          
+
           // Safely get existing comments (handle both wrapped and unwrapped responses)
-          const existingComments = firstPage?.data?.comments || firstPage?.comments || [];
-          
+          const existingComments =
+            firstPage?.data?.comments || firstPage?.comments || [];
+
           return {
             ...old,
             pages: [
               {
                 ...firstPage,
-                ...(firstPage?.data ? {
-                  data: {
-                    ...firstPage.data,
-                    comments: [optimisticComment, ...existingComments],
-                  }
-                } : {
-                  comments: [optimisticComment, ...existingComments],
-                }),
+                ...(firstPage?.data
+                  ? {
+                      data: {
+                        ...firstPage.data,
+                        comments: [optimisticComment, ...existingComments],
+                      },
+                    }
+                  : {
+                      comments: [optimisticComment, ...existingComments],
+                    }),
               },
               ...old.pages.slice(1),
             ],
@@ -421,7 +435,7 @@ export function useProductCommentMutations(productId: string) {
       toast.error(getErrorMessage(error) || "Failed to post comment");
     },
     onSuccess: () => {
-      lastCommentTime = Date.now();
+      lastCommentTimeRef.current = Date.now();
       // Refetch to get real data from server
       queryClient.invalidateQueries({
         queryKey: ["marketplace", "product", productId],
@@ -476,7 +490,9 @@ export function useSaveProduct(productId: string) {
 // ==================== Buyer Intent & Transactions Hooks ====================
 
 /**
- * Hook for making an offer on a negotiable product
+ * Hook for making an offer on a negotiable product.
+ * The caller is always the buyer in this flow (initial offer or accepting a
+ * seller's counter by re-submitting at the counter price).
  */
 export function useMakeOffer(productId: string) {
   const queryClient = useQueryClient();
@@ -491,7 +507,8 @@ export function useMakeOffer(productId: string) {
       queryClient.invalidateQueries({
         queryKey: ["marketplace", "offers"],
       });
-      toast.success("Offer sent to seller!");
+      // Toast is shown by the caller so it can include the offer amount and
+      // tailor the perspective (e.g. accepting a counter vs. fresh offer).
     },
     onError: (error) => {
       toast.error(getErrorMessage(error) || "Failed to send offer");
@@ -500,9 +517,16 @@ export function useMakeOffer(productId: string) {
 }
 
 /**
- * Hook for responding to an offer (seller)
+ * Hook for responding to an offer.
+ * In the current product, only the seller invokes this hook (the seller
+ * accepts, rejects, or counters a buyer's offer). `viewerRole` defaults to
+ * `'seller'` for that reason — pass `'buyer'` explicitly if a future flow
+ * lets buyers respond directly.
  */
-export function useRespondToOffer(offerId: string) {
+export function useRespondToOffer(
+  offerId: string,
+  viewerRole: OfferRole = "seller",
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -513,18 +537,104 @@ export function useRespondToOffer(offerId: string) {
       action: "accept" | "reject" | "counter";
       counterAmount?: number;
     }) => marketplaceService.respondToOffer(offerId, action, counterAmount),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["marketplace", "offers"],
-      });
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "offers"] });
       queryClient.invalidateQueries({
         queryKey: ["marketplace", "offer", offerId],
       });
-      toast.success("Response sent!");
+      queryClient.invalidateQueries({
+        queryKey: ["marketplace", "product-offers"],
+      });
+
+      const amount = variables.counterAmount ?? 0;
+      toast.success(
+        getOfferToast(
+          { action: variables.action, amount, actorRole: viewerRole },
+          viewerRole,
+        ),
+      );
     },
     onError: (error) => {
       toast.error(getErrorMessage(error) || "Failed to respond to offer");
     },
+  });
+}
+
+/**
+ * Hook for accepting an offer via the shorthand endpoint (no body needed).
+ * Always invoked by the seller in the current product.
+ */
+export function useAcceptOffer(viewerRole: OfferRole = "seller") {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (offerId: string) => marketplaceService.acceptOffer(offerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "offers"] });
+      queryClient.invalidateQueries({
+        queryKey: ["marketplace", "product-offers"],
+      });
+      toast.success(
+        getOfferToast(
+          { action: "accept", amount: 0, actorRole: viewerRole },
+          viewerRole,
+        ),
+      );
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to accept offer");
+    },
+  });
+}
+
+/**
+ * Hook for rejecting an offer via the shorthand endpoint (no body needed).
+ * Always invoked by the seller in the current product.
+ */
+export function useRejectOffer(viewerRole: OfferRole = "seller") {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (offerId: string) => marketplaceService.rejectOffer(offerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "offers"] });
+      queryClient.invalidateQueries({
+        queryKey: ["marketplace", "product-offers"],
+      });
+      toast.success(
+        getOfferToast(
+          { action: "reject", amount: 0, actorRole: viewerRole },
+          viewerRole,
+        ),
+      );
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to reject offer");
+    },
+  });
+}
+
+/**
+ * Hook for fetching all offers on a specific product (seller view).
+ * GET /api/v1/marketplace/products/:productId/offers
+ */
+export function useProductOffers(productId: string | null, status?: string) {
+  return useQuery({
+    queryKey: ["marketplace", "product-offers", productId, status],
+    queryFn: async () => {
+      if (!productId) return null;
+      const res = await marketplaceService.getProductOffers(productId, status);
+      const payload = (res as any)?.data ?? res;
+      return {
+        product: payload?.data?.product ?? payload?.product ?? null,
+        offers: (payload?.data?.offers ??
+          payload?.offers ??
+          []) as import("@/types/api").MarketplaceOffer[],
+        pagination: payload?.data?.pagination ?? payload?.pagination ?? null,
+      };
+    },
+    enabled: !!productId,
+    staleTime: 30_000,
   });
 }
 
@@ -555,7 +665,8 @@ export function useCreateOrder() {
 export function useMyOrders() {
   return useInfiniteQuery({
     queryKey: ["marketplace", "orders", "my-orders"],
-    queryFn: ({ pageParam = 1 }) => marketplaceService.getMyOrders(pageParam, 20),
+    queryFn: ({ pageParam = 1 }) =>
+      marketplaceService.getMyOrders(pageParam, 20),
     getNextPageParam: (lastPage: any) => {
       const pagination = lastPage?.pagination || lastPage?.data?.pagination;
       if (!pagination) return undefined;
@@ -573,7 +684,8 @@ export function useMyOrders() {
 export function useMySales() {
   return useInfiniteQuery({
     queryKey: ["marketplace", "orders", "my-sales"],
-    queryFn: ({ pageParam = 1 }) => marketplaceService.getMySales(pageParam, 20),
+    queryFn: ({ pageParam = 1 }) =>
+      marketplaceService.getMySales(pageParam, 20),
     getNextPageParam: (lastPage: any) => {
       const pagination = lastPage?.pagination || lastPage?.data?.pagination;
       if (!pagination) return undefined;
@@ -594,7 +706,9 @@ export function useOrder(orderId: string | null) {
     queryFn: async () => {
       if (!orderId) return null;
       const response = await marketplaceService.getOrder(orderId);
-      return (response as any)?.data?.order || (response as any)?.order || response;
+      return (
+        (response as any)?.data?.order || (response as any)?.order || response
+      );
     },
     enabled: !!orderId,
   });
@@ -628,7 +742,9 @@ export function useOffer(offerId: string | null) {
     queryFn: async () => {
       if (!offerId) return null;
       const response = await marketplaceService.getOffer(offerId);
-      return (response as any)?.data?.offer || (response as any)?.offer || response;
+      return (
+        (response as any)?.data?.offer || (response as any)?.offer || response
+      );
     },
     enabled: !!offerId,
   });
@@ -698,4 +814,3 @@ export function useConfirmReceipt(orderId: string) {
     },
   });
 }
-

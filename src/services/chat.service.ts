@@ -44,6 +44,24 @@ export const chatService = {
   },
 
   /**
+   * Start (or resume) a marketplace-tagged conversation about a specific product.
+   * Call this instead of getOrCreateDirectConversation when the user taps
+   * "Message Seller" / "Contact Seller" on a product listing.
+   *
+   * POST /chat/conversations/marketplace/:productId
+   *
+   * Error codes to handle:
+   *   400 — Cannot message yourself about your own product
+   *   404 — Product not found
+   *   410 — Product is no longer active/available
+   */
+  async startMarketplaceConversation(productId: string) {
+    return await apiClient.post<{ conversation: Conversation }>(
+      `/chat/conversations/marketplace/${productId}`,
+    );
+  },
+
+  /**
    * Get conversation detail by conversation ID — returns metadata + participants.
    */
   async getConversationDetail(conversationId: string) {
