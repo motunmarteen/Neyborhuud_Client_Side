@@ -68,7 +68,7 @@ export function TrendingPanel() {
                 <span className="material-symbols-outlined text-4xl mb-3" style={{ color: 'var(--neu-text-muted)' }}>trending_up</span>
                 <p className="text-sm font-medium mb-1" style={{ color: 'var(--neu-text)' }}>Nothing trending yet</p>
                 <p className="text-xs text-center" style={{ color: 'var(--neu-text-muted)' }}>
-                    Trending topics from your neighborhood and Nigeria will appear here as community activity grows.
+                    Trending topics from your neyborhuud and Nigeria will appear here as community activity grows.
                 </p>
             </div>
         );

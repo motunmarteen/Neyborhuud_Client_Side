@@ -332,7 +332,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
                                     <span>Post anonymously</span>
                                 </div>
                                 <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
-                                    Your identity will be completely hidden. You&apos;ll appear as &quot;Anonymous Neighbor&quot;
+                                    Your identity will be completely hidden. You&apos;ll appear as &quot;Anonymous NeyburH&quot;
                                 </p>
                             </div>
                         </label>

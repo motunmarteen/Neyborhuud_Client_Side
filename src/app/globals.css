@@ -96,9 +96,9 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   color: #1A1A2E;
   background-color: #FFFFFF;
-  background-image: url('/doodle-pattern.svg');
+  background-image: url('/doodle-pattern.svg?v=2');
   background-repeat: repeat;
-  background-size: 500px 500px;
+  background-size: 360px 360px;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   font-weight: 400;
@@ -110,7 +110,7 @@ body {
 html.dark body {
   color: #F5F0ED;
   background-color: #141420;
-  background-image: url('/doodle-pattern-dark.svg');
+  background-image: url('/doodle-pattern-dark.svg?v=2');
 }
 
 /* ── Doodle on all page-level wrapper backgrounds ──
@@ -121,24 +121,44 @@ html.dark body {
 .min-h-screen.bg-background,
 .min-h-screen.bg-white,
 .min-h-screen.bg-soft-bg {
-  background-image: url('/doodle-pattern.svg');
+  background-image: url('/doodle-pattern.svg?v=2');
   background-repeat: repeat;
-  background-size: 500px 500px;
+  background-size: 360px 360px;
 }
 
 /* Dark mode: swap to dark doodle */
 .dark .min-h-screen.bg-background,
 .dark .min-h-screen.bg-white,
 .dark .min-h-screen.bg-soft-bg {
-  background-image: url('/doodle-pattern-dark.svg');
+  background-image: url('/doodle-pattern-dark.svg?v=2');
 }
 
 /* Dark page wrappers (marketplace, safety dark pages) */
 .min-h-screen.bg-black,
 .min-h-screen.bg-\[\#0f0f1e\] {
-  background-image: url('/doodle-pattern-dark.svg');
+  background-image: url('/doodle-pattern-dark.svg?v=2');
   background-repeat: repeat;
-  background-size: 500px 500px;
+  background-size: 360px 360px;
+}
+
+.doodle-surface {
+  background-color: #FFFFFF;
+  background-image: url('/doodle-pattern.svg?v=2');
+  background-repeat: repeat;
+  background-size: 360px 360px;
+}
+
+.doodle-surface-muted {
+  background-color: #F8FAFC;
+  background-image: url('/doodle-pattern.svg?v=2');
+  background-repeat: repeat;
+  background-size: 360px 360px;
+}
+
+.dark .doodle-surface,
+.dark .doodle-surface-muted {
+  background-color: #141420;
+  background-image: url('/doodle-pattern-dark.svg?v=2');
 }
 
 /* Smooth Scrolling */

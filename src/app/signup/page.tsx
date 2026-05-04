@@ -652,7 +652,7 @@ function SignupPageContent() {
                 <PremiumInput
                     label="Invite (optional)"
                     icon="bi-gift"
-                    placeholder="Neighbor's username or invite code"
+                    placeholder="NeyburH's username or invite code"
                     className="py-1"
                     value={referralCodeInput}
                     onChange={(e) => setReferralCodeInput(e.target.value)}

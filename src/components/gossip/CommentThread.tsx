@@ -96,7 +96,7 @@ export function CommentThread({
                                 </Link>
                             ) : (
                                 <span className="font-bold text-[13px]" style={{ color: 'var(--neu-text)' }}>
-                                    Anonymous Neighbor
+                                    Anonymous NeyburH
                                 </span>
                             )}
                             {comment.anonymous && (

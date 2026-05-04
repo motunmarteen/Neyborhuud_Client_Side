@@ -282,7 +282,7 @@ const NEWS_FEEDS = [
 ];
 
 const FALLBACK_NEWS: NewsItem[] = [
-  { title: 'Stay updated with the latest from your neighbourhood', source: 'NeyborHuud' },
+  { title: 'Stay updated with the latest from your neyborhuud', source: 'NeyborHuud' },
 ];
 
 async function fetchFeedWithFallback(feedUrl: string, source: string): Promise<NewsItem[]> {

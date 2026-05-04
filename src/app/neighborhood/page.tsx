@@ -52,7 +52,7 @@ export default function NeighborhoodPage() {
               <h1 className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>My Huud</h1>
             </div>
             <p className="text-sm -mt-4" style={{ color: 'var(--neu-text-muted)' }}>
-              Posts from your immediate neighborhood
+              Posts from your neyborhuud
             </p>
 
             {isLoading || !coords ? (
@@ -66,7 +66,7 @@ export default function NeighborhoodPage() {
                 <span className="material-symbols-outlined text-[64px] text-gray-300">home_pin</span>
                 <p className="text-lg font-medium" style={{ color: 'var(--neu-text-muted)' }}>Nothing in your area yet</p>
                 <p className="text-sm text-center max-w-xs" style={{ color: 'var(--neu-text-muted)' }}>
-                  Be the first to share something in your neighborhood
+                  Be the first to share something in your neyborhuud
                 </p>
               </div>
             ) : (

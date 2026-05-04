@@ -214,33 +214,6 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
           </div>
         </div>
 
-      {/* Feed Filters — 2-col grid */}
-      <div className="grid grid-cols-2 gap-1.5">
-        {browseTypes.map((item) => {
-          const active = item.href ? pathname === item.href : activeType === item.type;
-          return (
-            <Link
-              key={item.type}
-              href={item.href || `/feed?type=${item.type}`}
-              onClick={onNavigate}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all ${
-                active
-                  ? 'bg-primary/[0.08] text-primary'
-                  : 'hover:bg-black/[0.05] bg-black/[0.025]'
-              }`}
-              style={!active ? { color: 'var(--neu-text)' } : undefined}
-            >
-              <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors shrink-0`} style={{ fontSize: '16px' }}>
-                {item.icon}
-              </span>
-              <p className={`text-[11px] ${active ? 'font-bold' : 'font-medium'} leading-snug`}>
-                {item.label}
-              </p>
-            </Link>
-          );
-        })}
-      </div>
-
       {/* Mobile-only: Settings at bottom */}
       <div className="md:hidden mt-auto pt-4 border-t border-black/[0.06]">
         <Link
@@ -281,7 +254,7 @@ export default function LeftSidebar() {
   return (
     <>
       {/* Desktop sidebar – hidden on mobile */}
-      <aside className="hidden md:flex w-96 flex-col overflow-hidden shrink-0 neu-panel" style={{ backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '500px 500px' }}>
+      <aside className="hidden md:flex w-96 flex-col overflow-hidden shrink-0 neu-panel" style={{ backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg?v=2')", backgroundRepeat: 'repeat', backgroundSize: '360px 360px' }}>
         <Suspense fallback={<div className="flex-1" />}>
           <SidebarContent />
         </Suspense>
@@ -296,7 +269,7 @@ export default function LeftSidebar() {
             onClick={() => setMobileOpen(false)}
           />
           {/* Drawer */}
-          <aside className="absolute top-0 left-0 bottom-0 w-72 overflow-y-auto animate-in slide-in-from-left duration-300 flex flex-col" style={{ boxShadow: '8px 0 24px rgba(0,0,0,0.08)', backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '500px 500px' }}>
+          <aside className="absolute top-0 left-0 bottom-0 w-72 overflow-y-auto animate-in slide-in-from-left duration-300 flex flex-col" style={{ boxShadow: '8px 0 24px rgba(0,0,0,0.08)', backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg?v=2')", backgroundRepeat: 'repeat', backgroundSize: '360px 360px' }}>
             <Suspense fallback={<div className="flex-1" />}>
               <SidebarContent onNavigate={() => setMobileOpen(false)} onClose={() => setMobileOpen(false)} />
             </Suspense>

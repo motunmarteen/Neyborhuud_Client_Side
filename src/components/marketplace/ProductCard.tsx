@@ -50,7 +50,7 @@ export function ProductCard({ product, userLocation, currentUserId }: ProductCar
 
   // Get seller info
   const sellerName = product.seller?.username || product.seller?.firstName || "Seller";
-  const sellerAvatar = (product.seller as any)?.avatarUrl || (product.seller as any)?.profilePicture || 'https://i.pravatar.cc/100?u=seller';
+  const sellerAvatar = (product.seller as any)?.avatarUrl || (product.seller as any)?.profilePicture || null;
 
   const isLiked = product.engagement?.isLiked;
   const likesCount = product.engagement?.likesCount || 0;

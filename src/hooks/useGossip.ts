@@ -197,8 +197,8 @@ export function useGossipMutations(gossipId: string) {
             ? {
                 id: "anonymous",
                 firstName: "Anonymous",
-                lastName: "Neighbor",
-                name: "Anonymous Neighbor",
+                lastName: "NeyburH",
+                name: "Anonymous NeyburH",
                 avatarUrl: null,
                 username: "anonymous",
               }

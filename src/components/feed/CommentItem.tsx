@@ -21,7 +21,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
     const author = typeof comment.userId === 'object' ? comment.userId : null;
     const authorId = author?.id || author?._id || (typeof comment.userId === 'string' ? comment.userId : '');
     const username = author?.username || 'user';
-    const avatarUrl = author?.avatarUrl || 'https://i.pravatar.cc/100?u=' + username;
+    const avatarUrl = author?.avatarUrl || null;
     const displayName = [author?.firstName, author?.lastName].filter(Boolean).join(' ') || username;
 
     const isAuthor = user?.id === authorId;

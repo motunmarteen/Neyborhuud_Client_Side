@@ -212,7 +212,7 @@ function PickCommunityContent() {
           </p>
         )}
         <h1 className="text-2xl font-semibold tracking-tight mb-2" style={{ color: 'var(--neu-text)' }}>
-          {isChangingCommunity ? 'Change your community' : 'Choose your neighborhood'}
+          {isChangingCommunity ? 'Change your community' : 'Choose your neyborhuud'}
         </h1>
         <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
           {isChangingCommunity ? (

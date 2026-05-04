@@ -146,7 +146,7 @@ export function GossipCard({ post }: GossipCardProps) {
                         <div className="flex-1 min-w-0">
                             {post.anonymous ? (
                                 <div className="flex items-center gap-1.5">
-                                    <span className="font-bold text-[14px] text-white">Anonymous Neighbor</span>
+                                    <span className="font-bold text-[14px] text-white">Anonymous NeyburH</span>
                                     <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-medium">hidden</span>
                                 </div>
                             ) : (

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, OverlayView } from '@react-google-maps/api';
 
 interface MapLocation {
     lat: number;
@@ -25,6 +25,12 @@ interface InteractiveMapProps {
     className?: string;
     /** Show accuracy circle */
     accuracyRadius?: number;
+    /** Optional React node to render on the map at `center` instead of the default blue-dot marker */
+    customMarkerNode?: React.ReactNode;
+    /** When true, the customMarkerNode receives pointer events (clickable). Default false. */
+    markerInteractive?: boolean;
+    /** Hint label shown at the bottom of the map when draggable. Default: 'Tap or drag to adjust' */
+    dragHintLabel?: string;
 }
 
 const containerStyle = {
@@ -70,6 +76,9 @@ export function InteractiveMap({
     showSkeleton = true,
     className = '',
     accuracyRadius,
+    customMarkerNode,
+    markerInteractive = false,
+    dragHintLabel = 'Tap or drag to adjust',
 }: InteractiveMapProps) {
     const [markerPosition, setMarkerPosition] = useState<MapLocation>(center);
     const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
@@ -200,20 +209,32 @@ export function InteractiveMap({
                     clickableIcons: false,
                 }}
             >
-                <Marker
-                    position={markerPosition}
-                    draggable={draggable}
-                    onDragEnd={onMarkerDragEnd}
-                    animation={google.maps.Animation.DROP}
-                    icon={{
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 12,
-                        fillColor: '#6B9FED',
-                        fillOpacity: 1,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 3,
-                    }}
-                />
+                {customMarkerNode ? (
+                    <OverlayView
+                        position={markerPosition}
+                        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                        getPixelPositionOffset={(w, h) => ({ x: -(w / 2), y: -h })}
+                    >
+                        <div style={{ pointerEvents: markerInteractive ? 'auto' : 'none' }}>
+                            {customMarkerNode}
+                        </div>
+                    </OverlayView>
+                ) : (
+                    <Marker
+                        position={markerPosition}
+                        draggable={draggable}
+                        onDragEnd={onMarkerDragEnd}
+                        animation={google.maps.Animation.DROP}
+                        icon={{
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 12,
+                            fillColor: '#6B9FED',
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 3,
+                        }}
+                    />
+                )}
             </GoogleMap>
 
             {/* Drag hint overlay */}
@@ -221,7 +242,7 @@ export function InteractiveMap({
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg pointer-events-none">
                     <span className="text-[9px] font-bold text-charcoal/60 uppercase tracking-wider flex items-center gap-1.5">
                         <i className="bi bi-hand-index-thumb text-brand-blue"></i>
-                        Tap or drag to adjust
+                        {dragHintLabel}
                     </span>
                 </div>
             )}
@@ -234,19 +255,35 @@ export function MiniMap({
     center,
     height = '120px',
     className = '',
+    customMarkerNode,
+    draggable = false,
+    onLocationChange,
+    markerInteractive = false,
+    zoom = 14,
+    dragHintLabel,
 }: {
     center: MapLocation;
     height?: string;
     className?: string;
+    customMarkerNode?: React.ReactNode;
+    draggable?: boolean;
+    onLocationChange?: (location: MapLocation) => void;
+    markerInteractive?: boolean;
+    zoom?: number;
+    dragHintLabel?: string;
 }) {
     return (
         <InteractiveMap
             center={center}
-            draggable={false}
+            draggable={draggable}
+            onLocationChange={onLocationChange}
             height={height}
-            zoom={14}
+            zoom={zoom}
             showSkeleton={true}
             className={className}
+            customMarkerNode={customMarkerNode}
+            markerInteractive={markerInteractive}
+            dragHintLabel={dragHintLabel}
         />
     );
 }

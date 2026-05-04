@@ -179,7 +179,7 @@ function GossipDetailInner() {
                                             </Link>
                                         ) : (
                                             <span className="font-bold text-[16px]" style={{ color: 'var(--neu-text)' }}>
-                                                Anonymous Neighbor
+                                                Anonymous NeyburH
                                             </span>
                                         )}
                                         {gossip.anonymous && (

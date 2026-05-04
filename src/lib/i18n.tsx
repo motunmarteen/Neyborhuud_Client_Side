@@ -10,7 +10,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     'feed.yourHuud': 'Your Huud',
     'feed.streetRadar': 'Street Radar',
     'feed.followingPlaces': 'Following Places',
-    'feed.composerPlaceholder': "What's happening in your neighborhood?",
+    'feed.composerPlaceholder': "What's happening in your neyborhuud?",
     'feed.newPost': 'New Post',
     'feed.noPostsTitle': 'No posts found in your area',
     'feed.noPostsSubtitle': 'Be the first to post something!',
@@ -66,7 +66,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     'common.close': 'Close',
     'common.loading': 'Loading...',
     'common.public': 'Public',
-    'common.neighborhood': 'Neighborhood',
+    'common.neighborhood': 'Neyborhuud',
     'common.ward': 'Ward',
   },
   ha: {
@@ -278,7 +278,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     'common.close': 'Close',
     'common.loading': 'Dey load...',
     'common.public': 'Everybody',
-    'common.neighborhood': 'Neighborhood',
+    'common.neighborhood': 'Neyborhuud',
     'common.ward': 'Ward',
   },
 };

@@ -530,7 +530,7 @@ export default function SettingsPage() {
                                 enabled={notifications.chat}
                                 onChange={(val) => setNotifications({ ...notifications, chat: val })}
                                 label="Chat Messages"
-                                description="New messages from neighbors"
+                                description="New messages from NeyburHs"
                             />
                             <ToggleSwitch
                                 enabled={notifications.mentions}
@@ -629,7 +629,7 @@ export default function SettingsPage() {
                                 enabled={privacy.showLocation}
                                 onChange={(val) => setPrivacy({ ...privacy, showLocation: val })}
                                 label="Show Location"
-                                description="Display your neighborhood on profile"
+                                description="Display your neyborhuud on profile"
                             />
                             <ToggleSwitch
                                 enabled={privacy.showPhone}
@@ -647,7 +647,7 @@ export default function SettingsPage() {
 
                         <div className="neumorphic rounded-2xl p-6 mb-6">
                             <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
-                                Blocked Neighbors
+                                Blocked NeyburHs
                             </h2>
                             <a
                                 href="/settings/blocked"
@@ -657,7 +657,7 @@ export default function SettingsPage() {
                                     <span className="material-symbols-outlined text-[20px] text-red-500">block</span>
                                     <div>
                                         <span className="text-sm font-bold text-charcoal block">Manage Blocked Users</span>
-                                        <span className="text-[10px] text-charcoal/50">View and unblock neighbors you&apos;ve blocked</span>
+                                        <span className="text-[10px] text-charcoal/50">View and unblock NeyburHs you&apos;ve blocked</span>
                                     </div>
                                 </div>
                                 <i className="bi bi-chevron-right text-charcoal/30" />
@@ -836,7 +836,7 @@ export default function SettingsPage() {
                                 You can change your handle once every{' '}
                                 {usernameChangePolicy?.cooldownDays ?? 90} days after your{' '}
                                 <strong>first</strong> rename. Your current username (and past ones) can work
-                                as referral codes — see Invite neighbors below.
+                                as referral codes — see Invite NeyburHs below.
                             </p>
                             {usernameChangePolicy && !usernameChangePolicy.canChangeUsername && usernameChangePolicy.nextUsernameChangeAt ? (
                                 <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
@@ -913,7 +913,7 @@ export default function SettingsPage() {
                         {user?.username ? (
                             <div className="neumorphic rounded-2xl p-6 mb-6 border border-primary/15">
                                 <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-3">
-                                    Invite neighbors
+                                    Invite NeyburHs
                                 </h2>
                                 <p className="text-[10px] text-charcoal/45 mb-3 leading-relaxed">
                                     Your <strong>username</strong> is the referral code on this app. Friends who sign up

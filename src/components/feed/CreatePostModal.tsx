@@ -981,7 +981,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                 className="w-full p-2 rounded-xl text-sm focus:outline-none neu-input"
                             >
                                 <option value="public">Public</option>
-                                <option value="neighborhood">Neighborhood</option>
+                                <option value="neighborhood">Neyborhuud</option>
                                 <option value="ward">Ward</option>
                             </select>
                         </div>

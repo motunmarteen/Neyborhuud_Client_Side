@@ -10,7 +10,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { socialService } from '@/services/social.service';
 import { useAuth } from '@/hooks/useAuth';
-import { useFollow, useFollowers, useFollowing, useFollowCounts } from '@/hooks/useFollow';
+import { useFollow, useFollowCounts } from '@/hooks/useFollow';
 import { useBlock } from '@/hooks/useBlock';
 import { useUserPosts, usePostMutations } from '@/hooks/usePosts';
 import { XPostCard } from '@/components/feed/XPostCard';
@@ -22,7 +22,7 @@ import { Post } from '@/types/api';
 import { contentService } from '@/services/content.service';
 import { chatService } from '@/services/chat.service';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import apiClient from '@/lib/api-client';
@@ -35,12 +35,68 @@ export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
   const username = params.username as string;
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, uploadProfilePicture } = useAuth();
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
   const [reportingPostId, setReportingPostId] = useState<string | null>(null);
   const [isSettingLocation, setIsSettingLocation] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isSavingDraggedLocation, setIsSavingDraggedLocation] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+
+  const handleAvatarClick = () => {
+    // Only allow upload on own profile
+    if (currentUser?.username === username) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset the input so selecting the same file again still triggers onChange
+    e.target.value = '';
+
+    // Basic client-side validation
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be smaller than 5MB');
+      return;
+    }
+
+    try {
+      setIsUploadingAvatar(true);
+      await uploadProfilePicture({ file });
+      queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    } catch (err) {
+      console.error('Failed to upload profile picture:', err);
+      alert('Could not upload image. Please try again.');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleMapLocationChange = async (loc: { lat: number; lng: number }) => {
+    if (currentUser?.username !== username) return;
+    try {
+      setIsSavingDraggedLocation(true);
+      await apiClient.put('/auth/location/update', {
+        type: 'current',
+        location: { latitude: loc.lat, longitude: loc.lng },
+      });
+      queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    } catch (err) {
+      console.error('Failed to update location:', err);
+    } finally {
+      setIsSavingDraggedLocation(false);
+    }
+  };
 
   const handleSetLocation = async () => {
     if (!navigator.geolocation) return;
@@ -94,8 +150,6 @@ export default function ProfilePage() {
     toggleFollow,
     isPending: isFollowPending,
     isLoadingStatus,
-    statusError,
-    _rawData,
   } = useFollow(profile?.id, { enabled: shouldEnableFollow });
 
   // Get follower/following counts (lightweight)
@@ -107,7 +161,6 @@ export default function ProfilePage() {
   const {
     isBlocked,
     isBlockedByThem,
-    isEitherBlocked,
     toggleBlock,
     isPending: isBlockPending,
   } = useBlock(profile?.id, { enabled: shouldEnableFollow });
@@ -131,16 +184,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Debug profile data
-  useEffect(() => {
-    if (profile) {
-      console.log('👤 Profile Data:', profile);
-      console.log('🆔 Profile ID:', profile.id);
-      console.log('🆔 Profile _id:', (profile as unknown as Record<string, unknown>)._id);
-      console.log('👤 Username:', profile.username);
-    }
-  }, [profile]);
-
   // Get the correct user ID - backend might use _id or id
   const userId = profile?.id || (profile as any)?._id || null;
 
@@ -154,23 +197,6 @@ export default function ProfilePage() {
     hasNextPage,
     isFetchingNextPage,
   } = useUserPosts(userId);
-
-  // Debug posts data
-  useEffect(() => {
-    console.log('📝 Posts Query State:', {
-      userId: userId,
-      isLoading: isLoadingPosts,
-      isError: isErrorPosts,
-      error: postsError,
-      postsData,
-      hasData: !!postsData,
-      pageCount: postsData?.pages?.length,
-    });
-    
-    if (postsError) {
-      console.error('❌ Posts Error Details:', postsError);
-    }
-  }, [postsData, isLoadingPosts, isErrorPosts, postsError, userId]);
 
   // Post mutations
   const { likePost, unlikePost, savePost, unsavePost } = usePostMutations();
@@ -222,36 +248,16 @@ export default function ProfilePage() {
     setIsPostDetailsOpen(true);
   };
 
-  // Helper to format time ago
-
-
-  // Debug: Log follow status when it changes
-  if (typeof window !== 'undefined' && profile?.id) {
-    console.group('📊 Follow Status Debug');
-    console.log('User ID:', profile.id);
-    console.log('Username:', profile.username);
-    console.log('Should Enable Follow:', shouldEnableFollow);
-    console.log('Is Loading:', isLoadingStatus);
-    console.log('Status Error:', statusError);
-    console.log('Is Following:', isFollowing);
-    console.log('Follows You:', followsYou);
-    console.log('Is Mutual:', isMutual);
-    console.log('Follower Count:', followerCount);
-    console.log('Following Count:', followingCount);
-    console.log('Raw Data:', _rawData);
-    console.groupEnd();
-  }
-
   // Loading state
   if (isLoading) {
     return (
       <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
-        <TopNav />
+        <div className="absolute inset-x-0 top-0 z-30 pointer-events-none"><div className="pointer-events-auto"><TopNav /></div></div>
         <div className="flex flex-1 overflow-hidden">
           <LeftSidebar />
           <div className="flex-1 overflow-y-auto">
         {/* Header Skeleton */}
-        <div className="neu-base sticky top-0 z-10" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
+        <div className="neu-base sticky top-0 z-10 shadow-[0_2px_8px_var(--neu-shadow-dark)]">
           <div className="flex items-center gap-8 px-4 h-14">
             <div className="w-8 h-8 rounded-full neu-socket animate-pulse" />
             <div className="w-32 h-6 neu-socket rounded-xl animate-pulse" />
@@ -284,18 +290,18 @@ export default function ProfilePage() {
   if (error || !profile) {
     return (
       <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
-        <TopNav />
+        <div className="absolute inset-x-0 top-0 z-30 pointer-events-none"><div className="pointer-events-auto"><TopNav /></div></div>
         <div className="flex flex-1 overflow-hidden">
           <LeftSidebar />
           <div className="flex-1 overflow-y-auto flex items-center justify-center">
         <div className="text-center px-4">
           <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mx-auto mb-6">
-            <i className="bi bi-person-x text-5xl" style={{ color: 'var(--neu-text-muted)' }} />
+            <i className="bi bi-person-x text-5xl text-slate-400" />
           </div>
-          <h1 className="text-3xl font-bold mb-3" style={{ color: 'var(--neu-text)' }}>
+          <h1 className="text-3xl font-bold mb-3 text-slate-900">
             User Not Found
           </h1>
-          <p className="mb-6 max-w-md" style={{ color: 'var(--neu-text-muted)' }}>
+          <p className="mb-6 max-w-md text-slate-500">
             The user @{username} doesn't exist or their profile is unavailable.
           </p>
           <button
@@ -338,195 +344,330 @@ export default function ProfilePage() {
     renameAudit.length > 0 ||
     (Array.isArray(hist.usernameTimeline) && hist.usernameTimeline.length > 1);
 
+  const locationLabel = [profile.location?.lga, profile.location?.state].filter(Boolean).join(', ');
+  const trustScore = profile.trustScore ?? profile.gamification?.trustScore ?? 0;
+  const huudCoins =
+    (profile as any).totalHuudCoins ??
+    (profile as any).huudCoins ??
+    profile.gamification?.points ??
+    0;
+  const level = profile.gamification?.level ?? 1;
+  const profilePoints = profile.gamification?.points ?? huudCoins;
+  const scorePercent = Math.min(100, Math.max(0, Math.round((trustScore / 1000) * 100)));
+  const joinedLabel = profile.createdAt
+    ? new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    : 'Recently';
+  const primaryStatCards = [
+    { label: 'Linkers', value: followerCount.toLocaleString(), icon: 'group', tone: 'from-emerald-500/15 to-emerald-500/5 text-emerald-700' },
+    { label: 'Linking', value: followingCount.toLocaleString(), icon: 'share', tone: 'from-sky-500/15 to-sky-500/5 text-sky-700' },
+    { label: 'NeyburH Score', value: trustScore.toLocaleString(), icon: 'verified_user', tone: 'from-lime-500/15 to-lime-500/5 text-lime-700' },
+    { label: 'HuudCoins', value: Number(huudCoins).toLocaleString(), icon: 'stars', tone: 'from-amber-500/20 to-amber-500/5 text-amber-700' },
+  ];
+  const profileFacts = [
+    { label: 'Location', value: locationLabel || 'Neyborhuud pending', icon: 'location_on' },
+    { label: 'Joined', value: joinedLabel, icon: 'calendar_month' },
+    { label: 'Identity', value: profile.identityVerified ? 'Verified' : 'Pending', icon: profile.identityVerified ? 'verified' : 'shield' },
+    { label: 'Role', value: profile.role?.replace('_', ' ') || 'user', icon: 'badge' },
+  ];
+
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
-      <TopNav />
+      {/* TopNav floats over the map cover */}
+      <div className="absolute inset-x-0 top-0 z-30 pointer-events-none">
+        <div className="pointer-events-auto">
+          <TopNav />
+        </div>
+      </div>
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
         <div className="flex-1 overflow-y-auto">
-      {/* Header */}
-      <div className="neu-base sticky top-0 z-10" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
-        <div className="flex items-center gap-4 px-4 h-14">
+      {/* Profile Content — map fills from the very top, TopNav overlays it */}
+      <div className="w-full">
+
+        <section className="relative min-h-[430px] overflow-hidden border-b border-emerald-950/10 bg-emerald-50">
+          <div className="absolute inset-0 overflow-hidden">
+            {profile.location?.latitude && profile.location?.longitude ? (
+              <MiniMap
+                center={{ lat: profile.location.latitude, lng: profile.location.longitude }}
+                height="430px"
+                className="w-full"
+                draggable={isOwnProfile}
+                markerInteractive={isOwnProfile}
+                onLocationChange={handleMapLocationChange}
+                dragHintLabel={isSavingDraggedLocation ? 'Saving location…' : 'Tap map to move pin · Tap pin to change photo'}
+                customMarkerNode={
+                  <MapPinAvatar
+                    src={profile.profilePicture || profile.avatarUrl}
+                    alt={displayName}
+                    fallbackInitial={userInitial}
+                    size="marker"
+                    onClick={isOwnProfile ? (e) => { e.stopPropagation(); handleAvatarClick(); } : undefined}
+                    className={isOwnProfile ? 'cursor-pointer' : ''}
+                  />
+                }
+              />
+            ) : (
+              <div className="h-full bg-[radial-gradient(circle_at_top_left,rgba(0,135,81,0.22),transparent_34%),linear-gradient(135deg,rgba(240,253,244,1),rgba(219,234,254,1))]" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-slate-950/70 pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-transparent pointer-events-none" />
+          </div>
+
           <button
             onClick={() => router.back()}
-            className="neu-btn w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
+            className="absolute top-16 left-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/85 text-emerald-700 shadow-lg backdrop-blur-md transition hover:bg-white"
             aria-label="Go back"
             type="button"
           >
-            <i className="bi bi-arrow-left text-xl" />
+            <i className="bi bi-arrow-left text-lg" />
           </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-xl truncate" style={{ color: 'var(--neu-text)' }}>
-              {displayName}
-            </h1>
-            {profile.location?.lga && (
-              <p className="text-xs truncate" style={{ color: 'var(--neu-text-muted)' }}>
-                {profile.location.lga}, {profile.location.state}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
 
-      {/* Profile Content */}
-      <div className="max-w-5xl mx-auto">
-        {/* Cover Photo Area (placeholder for future) */}
-        <div className="h-48 bg-gradient-to-br from-primary/20 to-brand-blue/20 dark:from-primary/10 dark:to-brand-blue/10" />
+          {isOwnProfile && (
+            <button
+              onClick={handleSetLocation}
+              disabled={isSettingLocation}
+              className="absolute top-16 right-4 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/85 px-3.5 py-2 text-xs font-bold text-emerald-700 shadow-lg backdrop-blur-md transition hover:bg-white disabled:opacity-50"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[15px]">
+                {isSettingLocation ? 'hourglass_top' : 'my_location'}
+              </span>
+              {isSettingLocation ? 'Updating...' : 'Set Location'}
+            </button>
+          )}
 
-        {/* Profile Info Section */}
-        <div className="px-4 -mt-16 pb-4">
-          <div className="flex items-start justify-between mb-4">
-            {/* Profile Picture */}
-            <div className="-mt-16">
+          <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-5 sm:px-6 lg:px-8">
+            <div className="mx-auto flex max-w-5xl flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="flex min-w-0 items-end gap-3 sm:gap-4">
+                <div className="relative shrink-0">
               <MapPinAvatar
                 src={profile.profilePicture || profile.avatarUrl}
                 alt={displayName}
                 fallbackInitial={userInitial}
                 size="2xl"
+                onClick={isOwnProfile ? handleAvatarClick : undefined}
+                    className={isOwnProfile ? 'cursor-pointer drop-shadow-2xl' : 'drop-shadow-2xl'}
               />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="pt-3 flex items-center gap-2">
-              {isOwnProfile ? (
-                <>
-                  <Link
-                    href="/settings"
-                    className="neu-btn inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-colors"
-                  >
-                    <i className="bi bi-pencil text-sm" />
-                    Edit Profile
-                  </Link>
-                </>
-              ) : isLoadingStatus ? (
-                <div className="neu-btn px-5 py-2 rounded-2xl font-semibold text-sm inline-flex items-center gap-2 animate-pulse">
-                  <div className="w-16 h-4 neu-socket rounded-xl" />
-                </div>
-              ) : isBlocked ? (
-                <button
-                  onClick={() => toggleBlock()}
-                  disabled={isBlockPending}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-all bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-950/50 disabled:opacity-50"
-                  type="button"
-                >
-                  <span className="material-symbols-outlined text-[16px]">block</span>
-                  {isBlockPending ? 'Unblocking...' : 'Blocked'}
-                </button>
-              ) : isBlockedByThem ? (
-                <div className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm neu-btn opacity-60 cursor-not-allowed">
-                  <span className="material-symbols-outlined text-[16px]">block</span>
-                  Unavailable
-                </div>
-              ) : (
-                <>
-                  <button
-                    onClick={toggleFollow}
-                    disabled={isFollowPending}
-                    className={`inline-flex items-center gap-2 px-5 py-2 rounded-2xl font-semibold text-sm transition-all ${
-                      isFollowing
-                        ? 'neu-btn hover:text-red-500 group'
-                        : 'neu-btn-active text-primary'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    type="button"
-                  >
-                    {isFollowPending ? (
-                      <>
-                        <i className="bi bi-hourglass-split animate-spin text-sm" />
-                        <span className="hidden group-hover:inline">
-                          {isFollowing ? 'Unlinking...' : 'Linking...'}
-                        </span>
-                        <span className="group-hover:hidden">
-                          {isFollowing ? 'HuudLinked' : 'HuudLink'}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="hidden group-hover:inline">
-                          {isFollowing ? 'Unlink' : 'HuudLink'}
-                        </span>
-                        <span className="group-hover:hidden">
-                          {isFollowing ? 'HuudLinked' : 'HuudLink'}
-                          {followsYou && !isFollowing && ' Back'}
-                        </span>
-                      </>
-                    )}
-                  </button>
-
-                  {/* Message Button */}
-                  <button
-                    onClick={handleStartChat}
-                    disabled={startingChat}
-                    className="neu-btn inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-semibold text-sm transition-all disabled:opacity-50"
-                    type="button"
-                    title="Send message"
-                  >
-                    {startingChat ? (
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    ) : (
-                      <span className="material-symbols-outlined text-[18px]">chat</span>
-                    )}
-                    <span className="hidden sm:inline">{startingChat ? 'Opening...' : 'Message'}</span>
-                  </button>
-                </>
-              )}
-
-              {/* More Actions Menu (for non-own profiles) */}
-              {!isOwnProfile && !isBlockedByThem && (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowMoreMenu(!showMoreMenu)}
-                    className="neu-btn p-2 rounded-full transition-colors"
-                    type="button"
-                    aria-label="More actions"
-                  >
-                    <span className="material-symbols-outlined text-[20px]" style={{ color: 'var(--neu-text)' }}>more_horiz</span>
-                  </button>
-                  {showMoreMenu && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
-                      <div className="absolute right-0 top-full mt-1 z-50 w-48 rounded-xl shadow-lg overflow-hidden border" style={{ background: 'var(--neu-card-bg)', borderColor: 'var(--neu-shadow-dark)' }}>
-                        <button
-                          onClick={() => {
-                            toggleBlock();
-                            setShowMoreMenu(false);
-                          }}
-                          disabled={isBlockPending}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">
-                            {isBlocked ? 'lock_open' : 'block'}
-                          </span>
-                          {isBlocked ? 'Unblock Neighbor' : 'Block Neighbor'}
-                        </button>
-                      </div>
-                    </>
+                  {isOwnProfile && (
+                    <button
+                      onClick={handleAvatarClick}
+                      className="absolute -right-1 bottom-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-emerald-600 text-white shadow-lg"
+                      type="button"
+                      aria-label="Upload profile photo"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">photo_camera</span>
+                    </button>
                   )}
                 </div>
-              )}
+                <div className="min-w-0 pb-2 text-white">
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    {profile.identityVerified && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/20 px-2 py-1 text-[11px] font-bold text-emerald-100 ring-1 ring-emerald-200/30 backdrop-blur">
+                        <span className="material-symbols-outlined text-[13px]">verified</span>
+                        Verified
+                      </span>
+                    )}
+                    <span className="rounded-full bg-white/15 px-2 py-1 text-[11px] font-bold text-white/90 ring-1 ring-white/15 backdrop-blur">
+                      Level {level}
+                    </span>
+                  </div>
+                  <h1 className="truncate text-2xl font-black leading-tight sm:text-4xl">{displayName}</h1>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-white/80 sm:text-sm">
+                    <span>@{profile.username}</span>
+                    {locationLabel && (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">location_on</span>
+                        {locationLabel}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+                {primaryStatCards.map((stat) => (
+                  <div key={stat.label} className="min-w-[98px] rounded-2xl border border-white/15 bg-white/15 px-3 py-2 text-white shadow-lg backdrop-blur-md">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-white/70">
+                      <span className="material-symbols-outlined text-[14px]">{stat.icon}</span>
+                      {stat.label}
+                    </div>
+                    <p className="mt-1 text-lg font-black leading-none tabular-nums">{stat.value}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* User Info */}
-          <div className="space-y-3">
-            <div>
-              <h2 className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>
-                {displayName}
-              </h2>
-              <p style={{ color: 'var(--neu-text-muted)' }}>
-                @{profile.username}
-              </p>
+          {isOwnProfile && (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+              disabled={isUploadingAvatar}
+              aria-label="Upload profile photo"
+            />
+          )}
+
+          {isUploadingAvatar && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 pointer-events-none">
+              <div className="px-4 py-2 rounded-full bg-white/95 text-xs font-semibold text-charcoal shadow-lg flex items-center gap-2">
+                <i className="bi bi-arrow-repeat animate-spin"></i>
+                Uploading photo…
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="doodle-surface px-0 py-5">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            {isOwnProfile ? (
+              <>
+                <Link
+                  href="/settings"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+                >
+                  <i className="bi bi-pencil text-sm" />
+                  Edit Profile
+                </Link>
+                <button
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-[16px]">share</span>
+                  Share Profile
+                </button>
+              </>
+            ) : isLoadingStatus ? (
+              <div className="inline-flex flex-1 animate-pulse items-center justify-center rounded-2xl bg-slate-100 px-4 py-3">
+                <div className="h-4 w-24 rounded-full bg-slate-200" />
+              </div>
+            ) : isBlocked ? (
+              <button
+                onClick={() => toggleBlock()}
+                disabled={isBlockPending}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-red-100 px-5 py-3 text-sm font-black text-red-600 transition hover:bg-red-200 disabled:opacity-50"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">block</span>
+                {isBlockPending ? 'Unblocking...' : 'Blocked'}
+              </button>
+            ) : isBlockedByThem ? (
+              <div className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-black text-slate-500">
+                <span className="material-symbols-outlined text-[16px]">block</span>
+                Unavailable
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={toggleFollow}
+                  disabled={isFollowPending}
+                  className={`group inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+                    isFollowing ? 'border border-slate-200 bg-white text-slate-700 hover:border-red-200 hover:bg-red-50 hover:text-red-600' : 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  type="button"
+                >
+                  {isFollowPending ? (
+                    <>
+                      <i className="bi bi-hourglass-split animate-spin text-sm" />
+                      <span className="hidden group-hover:inline">{isFollowing ? 'Unlinking...' : 'Linking...'}</span>
+                      <span className="group-hover:hidden">{isFollowing ? 'HuudLinked' : 'HuudLink'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden group-hover:inline">{isFollowing ? 'Unlink' : 'HuudLink'}</span>
+                      <span className="group-hover:hidden">
+                        {isFollowing ? 'HuudLinked' : 'HuudLink'}
+                        {followsYou && !isFollowing && ' Back'}
+                      </span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleStartChat}
+                  disabled={startingChat}
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-black text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-50"
+                  type="button"
+                >
+                  {startingChat ? (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  ) : (
+                    <span className="material-symbols-outlined text-[18px]">chat</span>
+                  )}
+                  {startingChat ? 'Opening...' : 'Message'}
+                </button>
+                {/* More Actions */}
+                {!isBlockedByThem && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowMoreMenu(!showMoreMenu)}
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                      type="button"
+                      aria-label="More actions"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">more_horiz</span>
+                    </button>
+                    {showMoreMenu && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
+                        <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                          <button
+                            onClick={() => { toggleBlock(); setShowMoreMenu(false); }}
+                            disabled={isBlockPending}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">{isBlocked ? 'lock_open' : 'block'}</span>
+                            {isBlocked ? 'Unblock NeyburH' : 'Block NeyburH'}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                  <span className="material-symbols-outlined text-[20px]">person_pin_circle</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">About this NeyburH</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    {profile.bio || `${displayName} is part of the ${locationLabel || 'NeyborHuud'} community.`}
+                  </p>
+                </div>
+              </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-2">
+              {profileFacts.map((fact) => (
+                <div key={fact.label} className="rounded-2xl border border-slate-200 bg-white p-3">
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                    <span className="material-symbols-outlined text-[14px] text-emerald-600">{fact.icon}</span>
+                    {fact.label}
+                  </div>
+                  <p className="mt-1 truncate text-sm font-bold capitalize text-slate-800">{fact.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-3">
             {showHandleHistory ? (
               <div
-                className="rounded-2xl border border-charcoal/10 dark:border-white/10 px-3 py-3 text-left"
-                style={{ background: 'var(--neu-bg-elevated, rgba(0,0,0,0.03))' }}
+                className="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-left"
               >
-                <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--neu-text-muted)' }}>
+                <h3 className="mb-2 text-[11px] font-black uppercase tracking-wider text-slate-400">
                   Handle history
                 </h3>
                 {renameAudit.length > 0 ? (
-                  <ul className="space-y-2 text-xs" style={{ color: 'var(--neu-text)' }}>
+                  <ul className="space-y-2 text-xs text-slate-700">
                     {renameAudit.map((row, idx) => (
                       <li key={`${row.previousUsername}-${row.newUsername}-${idx}`}>
                         <span className="font-mono text-primary">@{row.previousUsername}</span>
@@ -541,7 +682,7 @@ export default function ProfilePage() {
                     ))}
                   </ul>
                 ) : hist.usernameTimeline && hist.usernameTimeline.length > 0 ? (
-                  <ul className="space-y-1.5 text-xs" style={{ color: 'var(--neu-text)' }}>
+                  <ul className="space-y-1.5 text-xs text-slate-700">
                     {hist.usernameTimeline.map((row, idx) => (
                       <li key={`${row.username}-${idx}`}>
                         <span className="font-mono font-semibold">@{row.username}</span>
@@ -558,96 +699,15 @@ export default function ProfilePage() {
               </div>
             ) : null}
 
-            {/* Bio */}
-            {profile.bio && (
-              <p className="whitespace-pre-wrap" style={{ color: 'var(--neu-text)' }}>
-                {profile.bio}
-              </p>
-            )}
-
-            {/* Additional Info */}
-            <div className="flex flex-wrap gap-4 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-              {/* Location */}
-              {profile.location?.lga && (
-                <div className="flex items-center gap-1.5">
-                  <i className="bi bi-geo-alt" />
-                  <span>{profile.location.lga}</span>
-                  {profile.location.state && <span>, {profile.location.state}</span>}
-                </div>
-              )}
-
-              {/* Joined Date */}
-              {profile.createdAt && (
-                <div className="flex items-center gap-1.5">
-                  <i className="bi bi-calendar" />
-                  <span>
-                    Joined {new Date(profile.createdAt).toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </span>
-                </div>
-              )}
-
-              {/* Verification Badge */}
-              {profile.identityVerified && (
-                <div className="flex items-center gap-1.5 text-primary">
-                  <i className="bi bi-patch-check-fill" />
-                  <span>Verified</span>
-                </div>
-              )}
-            </div>
-
-            {/* Mini Map showing user's location */}
-            {(profile.location?.latitude && profile.location?.longitude) || isOwnProfile ? (
-              <>
-                <div className="mt-4 relative">
-                  {profile.location?.latitude && profile.location?.longitude ? (
-                    <MiniMap
-                      center={{
-                        lat: profile.location.latitude,
-                        lng: profile.location.longitude,
-                      }}
-                      height="120px"
-                      className="rounded-2xl overflow-hidden shadow-lg"
-                    />
-                  ) : (
-                    <div className="rounded-2xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center" style={{ height: '120px' }}>
-                      <span className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>No location set</span>
-                    </div>
-                  )}
-                  {isOwnProfile && (
-                    <button
-                      onClick={handleSetLocation}
-                      disabled={isSettingLocation}
-                      className="absolute bottom-2 right-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold bg-white/90 dark:bg-gray-900/90 shadow-md backdrop-blur-sm hover:bg-white dark:hover:bg-gray-900 transition-colors border border-black/10 dark:border-white/10 disabled:opacity-50"
-                      type="button"
-                      style={{ color: 'var(--neu-text)' }}
-                    >
-                      <span className="material-symbols-outlined text-[14px]">{isSettingLocation ? 'hourglass_top' : 'my_location'}</span>
-                      {isSettingLocation ? 'Updating...' : 'Set Location'}
-                    </button>
-                  )}
-                </div>
-                {profile.location?.latitude && profile.location?.longitude ? (
-                  <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono" style={{ color: 'var(--neu-text-muted)' }}>
-                    <i className="bi bi-pin-map text-[10px]" />
-                    <span>{profile.location.latitude.toFixed(6)}, {profile.location.longitude.toFixed(6)}</span>
-                  </div>
-                ) : null}
-              </>
-            ) : null}
-
-            {/* HuudLink Status Badges */}
             {!isOwnProfile && (followsYou || isMutual) && (
               <div className="flex flex-wrap gap-2">
                 {isMutual ? (
-                  <span className="neu-chip inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full" style={{ color: 'var(--neu-text-secondary)' }}>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">
                     <span className="material-symbols-outlined text-[14px]">link</span>
                     Mutual HuudLink
                   </span>
                 ) : followsYou ? (
-                  <span className="neu-chip inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full" style={{ color: 'var(--neu-text-secondary)' }}>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">
                     <span className="material-symbols-outlined text-[14px]">person_check</span>
                     HuudLinks you
                   </span>
@@ -655,160 +715,122 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Stats - HuudLink counts */}
-            <div className="flex gap-6 text-sm pt-2">
-              <button
-                className="hover:underline"
-                onClick={() => router.push(`/profile/${username}/following`)}
-                type="button"
-              >
-                <span className="font-bold" style={{ color: 'var(--neu-text)' }}>
-                  {followingCount.toLocaleString()}
-                </span>{' '}
-                <span style={{ color: 'var(--neu-text-muted)' }}>Linking</span>
-              </button>
-              <button
-                className="hover:underline"
-                onClick={() => router.push(`/profile/${username}/followers`)}
-                type="button"
-              >
-                <span className="font-bold" style={{ color: 'var(--neu-text)' }}>
-                  {followerCount.toLocaleString()}
-                </span>{' '}
-                <span style={{ color: 'var(--neu-text-muted)' }}>Linkers</span>
-              </button>
-            </div>
           </div>
-        </div>
-        <div className="neu-divider" />
+          </div>
+        </section>
 
         {/* ══════ Two-Column Layout ══════ */}
-        <div className="flex flex-col lg:flex-row gap-6 px-4 py-6">
+        <div className="doodle-surface-muted flex flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:px-8">
 
-          {/* ── Left Sidebar ── */}
-          <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
-
-            {/* Neybor Score */}
-            <div className="neu-card-sm rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: 'var(--neu-text-muted)' }}>
-                  Neybor Score
-                </p>
-                <i className="bi bi-info-circle text-primary text-sm" />
+          <aside className="w-full flex-shrink-0 space-y-4 lg:w-80">
+            <div className="overflow-hidden rounded-[28px] border border-emerald-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+              <div className="bg-gradient-to-br from-emerald-600 to-teal-500 p-5 text-white">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/70">TrustOS</p>
+                  <span className="material-symbols-outlined text-[20px]">verified_user</span>
+                </div>
+                <p className="mt-5 text-5xl font-black leading-none tabular-nums">{trustScore}</p>
+                <p className="mt-1 text-sm font-semibold text-white/75">NeyburH Score</p>
               </div>
-
-              <div className="flex justify-center mb-4">
-                <div className="score-ring" style={{ '--score-pct': 74 } as React.CSSProperties}>
-                  <svg viewBox="0 0 140 140" width="160" height="160">
-                    <circle className="ring-bg" cx="70" cy="70" r="65" />
-                    <circle className="ring-fg" cx="70" cy="70" r="65" />
-                  </svg>
-                  <div className="ring-label">
-                    <span className="text-4xl font-bold" style={{ color: 'var(--neu-text)' }}>742</span>
-                    <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-primary">Trusted</span>
+              <div className="p-5">
+                <div className="mb-2 flex items-center justify-between text-xs font-bold text-slate-500">
+                  <span>Community trust</span>
+                  <span>{scorePercent}%</span>
+                </div>
+                <progress
+                  className="h-2 w-full overflow-hidden rounded-full accent-emerald-500"
+                  value={scorePercent}
+                  max={100}
+                  aria-label="Community trust progress"
+                />
+                <div className="mt-5 grid grid-cols-2 gap-2">
+                  <div className="rounded-2xl bg-emerald-50 p-3 text-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700/60">Level</p>
+                    <p className="mt-1 text-xl font-black text-emerald-700">{level}</p>
+                  </div>
+                  <div className="rounded-2xl bg-amber-50 p-3 text-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-amber-700/60">Coins</p>
+                    <p className="mt-1 text-xl font-black text-amber-700">{Number(huudCoins).toLocaleString()}</p>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="text-center">
-                <p className="font-bold text-sm" style={{ color: 'var(--neu-text)' }}>Top 5% Neighbor</p>
-                <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>Consistency Score: 98%</p>
+            <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Profile Snapshot</p>
+              <div className="mt-4 space-y-3">
+                {profileFacts.map((fact) => (
+                  <div key={`side-${fact.label}`} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-600 shadow-sm">
+                      <span className="material-symbols-outlined text-[18px]">{fact.icon}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{fact.label}</p>
+                      <p className="truncate text-sm font-bold capitalize text-slate-800">{fact.value}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Reputation Stats */}
-            <div className="neu-card-sm rounded-2xl p-6">
-              <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-4" style={{ color: 'var(--neu-text-muted)' }}>
-                Reputation Stats
-              </p>
-
-              <div className="flex items-baseline gap-3 mb-3">
-                <span className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>Level 24</span>
-                <span className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>14.2k XP</span>
-              </div>
-
-              <div className="xp-bar mb-6">
-                <div className="xp-bar-fill" style={{ width: '68%' }} />
-              </div>
-
-              <div className="neu-socket rounded-2xl p-4 flex">
-                <div className="flex-1 text-center">
-                  <p className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: 'var(--neu-text-muted)' }}>Total Points</p>
-                  <p className="text-xl font-bold text-primary">84.9k</p>
-                </div>
-                <div className="w-px" style={{ background: 'var(--neu-shadow-dark)' }} />
-                <div className="flex-1 text-center">
-                  <p className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: 'var(--neu-text-muted)' }}>Helpful Acts</p>
-                  <p className="text-xl font-bold text-primary">142</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Verification Status */}
-            <div className="neu-card-sm rounded-2xl p-6">
-              <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-5" style={{ color: 'var(--neu-text-muted)' }}>
-                Verification Status
-              </p>
-              <div className="space-y-4">
+            <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Verification</p>
+              <div className="mt-4 space-y-3">
                 {[
-                  { label: 'Home Address', icon: 'bi-house-door' },
-                  { label: 'Identity Document', icon: 'bi-person-badge' },
-                  { label: 'Neighborhood Vouch', icon: 'bi-people' },
+                  { label: 'Location anchored', done: !!profile.location?.latitude },
+                  { label: 'Identity confirmed', done: !!profile.identityVerified },
+                  { label: 'Community ready', done: !!profile.assignedCommunityId || !!locationLabel },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
-                      <i className="bi bi-check-circle-fill text-primary text-sm" />
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-full ${item.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>
+                      <span className="material-symbols-outlined text-[17px]">{item.done ? 'check' : 'pending'}</span>
                     </div>
-                    <span className="text-sm font-medium" style={{ color: 'var(--neu-text)' }}>{item.label}</span>
+                    <span className="text-sm font-bold text-slate-700">{item.label}</span>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
+          </aside>
 
-          {/* ── Right Content Area ── */}
-          <div className="flex-1 min-w-0 space-y-6">
-
-            {/* Achievements */}
-            <div className="neu-card-sm rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--neu-text)' }}>
-                  <span>🏆</span> Achievements
-                </h3>
-                <button className="text-xs font-bold text-primary uppercase tracking-wider" type="button">View All</button>
+          <main className="min-w-0 flex-1 space-y-6">
+            <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Badges</p>
+                  <h2 className="mt-1 text-xl font-black text-slate-900">Neyborhuud credibility</h2>
+                </div>
+                <button className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-emerald-700" type="button">View All</button>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
-                  { name: 'Good Samaritan', tier: 'Gold', icon: 'bi-heart-pulse-fill', color: '#22c55e' },
-                  { name: 'Watch Leader', tier: 'Diamond', icon: 'bi-star-fill', color: '#f59e0b' },
-                  { name: 'Top Seller', tier: 'Silver', icon: 'bi-shop', color: '#3b82f6' },
-                  { name: 'First Responder', tier: 'Verified', icon: 'bi-asterisk', color: '#ec4899' },
+                  { name: 'Good Samaritan', tier: 'Gold', icon: 'volunteer_activism', tone: 'bg-emerald-50 text-emerald-700 ring-emerald-100' },
+                  { name: 'Watch Leader', tier: 'Diamond', icon: 'shield_person', tone: 'bg-sky-50 text-sky-700 ring-sky-100' },
+                  { name: 'Top Seller', tier: 'Silver', icon: 'storefront', tone: 'bg-violet-50 text-violet-700 ring-violet-100' },
+                  { name: 'First Responder', tier: 'Verified', icon: 'emergency_home', tone: 'bg-rose-50 text-rose-700 ring-rose-100' },
                 ].map((badge) => (
-                  <div key={badge.name} className="text-center">
-                    <div className="neu-socket w-14 h-14 mx-auto rounded-2xl flex items-center justify-center mb-2">
-                      <i className={`bi ${badge.icon} text-xl`} style={{ color: badge.color }} />
+                  <div key={badge.name} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                    <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-2xl ring-1 ${badge.tone}`}>
+                      <span className="material-symbols-outlined text-[22px]">{badge.icon}</span>
                     </div>
-                    <p className="text-xs font-semibold leading-tight" style={{ color: 'var(--neu-text)' }}>{badge.name}</p>
-                    <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>{badge.tier}</p>
+                    <p className="text-sm font-black leading-tight text-slate-800">{badge.name}</p>
+                    <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{badge.tier}</p>
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
 
-            {/* Recent Activity */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--neu-text)' }}>
-                  <i className="bi bi-clock-history" /> Recent Activity
-                </h3>
-              </div>
-
-              {/* Activity Tabs */}
-              <div className="neu-socket rounded-2xl p-1 flex mb-6">
-                <button className="neu-card-sm flex-1 py-2 rounded-xl text-sm font-semibold text-primary" type="button">All</button>
-                <button className="flex-1 py-2 rounded-xl text-sm font-semibold" style={{ color: 'var(--neu-text-muted)' }} type="button">Alerts</button>
-                <button className="flex-1 py-2 rounded-xl text-sm font-semibold" style={{ color: 'var(--neu-text-muted)' }} type="button">Market</button>
+            <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Activity</p>
+                  <h2 className="mt-1 text-xl font-black text-slate-900">Recent neyborhuud posts</h2>
+                </div>
+                <div className="grid grid-cols-3 rounded-2xl bg-slate-100 p-1 text-sm font-black text-slate-500">
+                  <button className="rounded-xl bg-white px-4 py-2 text-emerald-700 shadow-sm" type="button">All</button>
+                  <button className="rounded-xl px-4 py-2 transition hover:text-emerald-700" type="button">Alerts</button>
+                  <button className="rounded-xl px-4 py-2 transition hover:text-emerald-700" type="button">Market</button>
+                </div>
               </div>
 
               {/* Activity Feed (Posts) */}
@@ -824,27 +846,19 @@ export default function ProfilePage() {
 
           {/* Error State */}
           {isErrorPosts && !isLoadingPosts && (
-            <div className="text-center py-16 px-4">
-              <div className="w-16 h-16 rounded-full neu-socket flex items-center justify-center mx-auto mb-4">
-                <i className="bi bi-exclamation-triangle text-3xl text-red-500" />
+            <div className="rounded-3xl border border-red-100 bg-red-50/60 px-4 py-12 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-red-500 shadow-sm">
+                <span className="material-symbols-outlined text-[34px]">error</span>
               </div>
-              <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--neu-text)' }}>
+              <h2 className="mb-2 text-xl font-black text-slate-900">
                 Failed to load posts
               </h2>
-              <p className="mb-4" style={{ color: 'var(--neu-text-muted)' }}>
+              <p className="mx-auto mb-4 max-w-md text-sm text-slate-500">
                 {postsError?.message || 'Something went wrong. Please try again.'}
               </p>
-              <details className="text-left max-w-md mx-auto mb-4">
-                <summary className="text-sm cursor-pointer" style={{ color: 'var(--neu-text-muted)' }}>
-                  Debug Info
-                </summary>
-                <pre className="text-xs mt-2 p-2 neu-socket rounded-xl overflow-auto">
-                  {JSON.stringify({ userId, isErrorPosts, error: postsError }, null, 2)}
-                </pre>
-              </details>
               <button
                 onClick={() => window.location.reload()}
-                className="neu-btn rounded-2xl px-6 py-2.5 font-semibold text-primary transition-colors"
+                className="rounded-2xl bg-emerald-600 px-6 py-2.5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
                 type="button"
               >
                 Retry
@@ -854,44 +868,24 @@ export default function ProfilePage() {
 
           {/* Empty State */}
           {!isLoadingPosts && !isErrorPosts && posts.length === 0 && (
-            <div className="p-8 text-center py-16" style={{ color: 'var(--neu-text-muted)' }}>
-              <div className="max-w-md mx-auto">
-                <i className="bi bi-inbox text-6xl mb-4 block opacity-50" />
-                <p className="text-xl font-semibold mb-2" style={{ color: 'var(--neu-text-secondary)' }}>
+            <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-8 py-16 text-center">
+              <div className="mx-auto max-w-md">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm">
+                  <span className="material-symbols-outlined text-[34px]">dynamic_feed</span>
+                </div>
+                <p className="mb-2 text-xl font-black text-slate-900">
                   No posts yet
                 </p>
-                <p className="text-base">
+                <p className="text-sm leading-6 text-slate-500">
                   When {isOwnProfile ? 'you post' : `@${profile.username} posts`}, they'll show up here.
                 </p>
                 {isOwnProfile && (
                   <Link
                     href="/feed"
-                    className="neu-btn-active inline-block mt-6 px-6 py-2.5 text-primary font-semibold rounded-2xl transition-colors"
+                    className="mt-6 inline-flex rounded-2xl bg-emerald-600 px-6 py-2.5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
                   >
                     Create Your First Post
                   </Link>
-                )}
-                {/* Backend notification */}
-                {typeof window !== 'undefined' && (
-                  <details className="mt-6 text-left">
-                    <summary className="text-sm cursor-pointer" style={{ color: 'var(--neu-text-muted)' }}>
-                      Developer Info
-                    </summary>
-                    <div className="mt-2 p-3 neu-socket rounded-xl text-xs text-left">
-                      <p className="font-semibold text-yellow-600 mb-1">
-                        ⚠️ Backend Endpoint Missing
-                      </p>
-                      <p className="text-yellow-600 mb-2">
-                        The backend endpoint for user posts is not implemented yet.
-                      </p>
-                      <code className="block neu-card-sm p-2 rounded-xl" style={{ color: 'var(--neu-text-secondary)' }}>
-                        GET /api/v1/content/users/:userId/posts
-                      </code>
-                      <p className="mt-2 text-yellow-600">
-                        Once this endpoint is implemented, user posts will appear here.
-                      </p>
-                    </div>
-                  </details>
                 )}
               </div>
             </div>
@@ -919,7 +913,7 @@ export default function ProfilePage() {
               {hasNextPage && (
                 <div ref={loadMoreRef} className="py-8 flex items-center justify-center">
                   {isFetchingNextPage ? (
-                    <div className="flex items-center gap-2" style={{ color: 'var(--neu-text-muted)' }}>
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
                       <i className="bi bi-hourglass-split animate-spin" />
                       <span>Loading more posts...</span>
                     </div>
@@ -930,17 +924,10 @@ export default function ProfilePage() {
               )}
             </div>
           )}
+              </div>
+            </section>
+          </main>
         </div>
-        {/* end space-y-4 activity feed */}
-
-            </div>
-            {/* end Recent Activity */}
-
-          </div>
-          {/* end Right Content Area */}
-
-        </div>
-        {/* end Two-Column Layout */}
 
       </div>
 

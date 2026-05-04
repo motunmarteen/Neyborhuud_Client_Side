@@ -163,7 +163,7 @@ function TripHistoryInner() {
             {/* Header */}
             <div
               className="neu-card-sm rounded-2xl p-4 flex items-center justify-between gap-3"
-              style={{ backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '500px 500px' }}
+              style={{ backgroundImage: "url('/doodle-pattern.svg?v=2')", backgroundRepeat: 'repeat', backgroundSize: '360px 360px' }}
             >
               <div>
                 <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Trip History</h1>

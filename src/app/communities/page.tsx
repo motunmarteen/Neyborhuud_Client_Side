@@ -45,7 +45,7 @@ export default function CommunitiesPage() {
               <h2 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Community Browser</h2>
               <p className="text-sm max-w-sm leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
                 Discover and join communities near you. This feature is coming soon — you&apos;ll be able to browse,
-                join, and participate in neighborhood communities around your area.
+                join, and participate in neyborhuud communities around your area.
               </p>
               <div className="mt-2 px-4 py-2 rounded-full text-sm font-medium text-purple-500" style={{ background: 'var(--neu-card)', border: '1px solid var(--neu-border)' }}>
                 Coming Soon

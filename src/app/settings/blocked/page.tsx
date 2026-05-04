@@ -30,7 +30,7 @@ export default function BlockedUsersPage() {
                     <span className="material-symbols-outlined text-[22px]" style={{ color: 'var(--neu-text)' }}>arrow_back</span>
                 </button>
                 <div>
-                    <h1 className="font-bold text-[17px]" style={{ color: 'var(--neu-text)' }}>Blocked Neighbors</h1>
+                    <h1 className="font-bold text-[17px]" style={{ color: 'var(--neu-text)' }}>Blocked NeyburHs</h1>
                     <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
                         {pagination?.total ?? 0} blocked
                     </p>
@@ -54,7 +54,7 @@ export default function BlockedUsersPage() {
                 ) : blockedUsers.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                         <span className="material-symbols-outlined text-[48px] mb-3" style={{ color: 'var(--neu-text-muted)' }}>shield_person</span>
-                        <h3 className="font-semibold text-[15px] mb-1" style={{ color: 'var(--neu-text)' }}>No blocked neighbors</h3>
+                        <h3 className="font-semibold text-[15px] mb-1" style={{ color: 'var(--neu-text)' }}>No blocked NeyburHs</h3>
                         <p className="text-sm max-w-[260px]" style={{ color: 'var(--neu-text-muted)' }}>
                             When you block someone, they won&apos;t be able to see your posts or interact with you.
                         </p>

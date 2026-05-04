@@ -54,7 +54,7 @@ export default function CreateProductPage() {
           </button>
           <h1 className="text-3xl font-bold">Create New Listing</h1>
           <p className="text-gray-400 mt-2">
-            List your item for sale in your neighborhood
+            List your item for sale in your neyborhuud
           </p>
         </div>
 

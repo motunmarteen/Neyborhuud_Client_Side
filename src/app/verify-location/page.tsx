@@ -50,7 +50,7 @@ export default function VerifyLocationPage() {
         return;
       }
       if (!getCommunityIdForApi()) {
-        setError('No assigned neighborhood found. Pick your area first.');
+        setError('No assigned neyborhuud found. Pick your area first.');
         setLoading(false);
         return;
       }
@@ -69,7 +69,7 @@ export default function VerifyLocationPage() {
     try {
       const loc = await getCurrentLocation();
       if (!loc) {
-        setError('Location permission is required to verify you are in your neighborhood.');
+        setError('Location permission is required to verify you are in your neyborhuud.');
         return;
       }
       if (
@@ -141,7 +141,7 @@ export default function VerifyLocationPage() {
           className="text-sm mb-6 leading-relaxed"
           style={{ color: 'var(--neu-text-secondary)' }}
         >
-          We use a quick GPS check so your account matches the neighborhood you chose
+          We use a quick GPS check so your account matches the neyborhuud you chose
           {comm?.name ? (
             <>
               : <strong style={{ color: 'var(--neu-text)' }}>{comm.name}</strong>

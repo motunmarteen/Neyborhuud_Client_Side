@@ -52,7 +52,7 @@ export function XPostCard({
     const author = post.author as PostAuthor;
     const authorName = author?.name || 'Anonymous';
     const authorUsername = author?.username || 'user';
-    const authorAvatar = author?.avatarUrl || (author as any)?.profilePicture || 'https://i.pravatar.cc/100?u=user';
+    const authorAvatar = author?.avatarUrl || (author as any)?.profilePicture || null;
 
     // Follow state — only for posts not by the current user and not anonymous
     const isAnonymousAuthor = !author?.id || author.id === 'anonymous';

@@ -216,7 +216,7 @@ export default function MyListingsPage() {
               No listings yet
             </h3>
             <p className="text-gray-500 mb-6">
-              Start selling items in your neighborhood
+              Start selling items in your neyborhuud
             </p>
             <Link
               href="/marketplace/create"
