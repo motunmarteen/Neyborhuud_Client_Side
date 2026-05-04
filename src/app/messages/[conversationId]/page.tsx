@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import TopNav from '@/components/navigation/TopNav';
@@ -11,11 +11,21 @@ import { BottomNav } from '@/components/feed/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { chatService } from '@/services/chat.service';
 import { e2eeService } from '@/services/e2ee.service';
-import { ChatMessage, ChatMessageType, Conversation } from '@/types/api';
+import { ChatMessage, ChatMessageType, Conversation, MarketplaceOffer } from '@/types/api';
 import socketService from '@/lib/socket';
 import { toast } from 'sonner';
 import ChatActionMenu, { ActionResult } from '@/components/chat/ChatActionMenu';
 import ChatMessageCard from '@/components/chat/ChatMessageCard';
+import { useProductOffers, useAcceptOffer, useRejectOffer, useRespondToOffer, useProduct } from '@/hooks/useMarketplace';
+import {
+  formatNGN,
+  getOfferPillClass,
+  getOfferSystemMessage,
+  getOfferToast,
+  parseLegacyOfferMessage,
+  resolveOfferRole,
+  type OfferRole,
+} from '@/lib/marketplaceMessages';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -51,6 +61,12 @@ function convDisplayName(c: Conversation | undefined, currentUserId?: string): s
   if (!c) return 'Chat';
   if (c.type === 'incident') return '🚨 Emergency Chat';
   if (c.type === 'community') return '🏘️ Community Chat';
+  // Marketplace chats: lead with the product so users can tell threads apart
+  if (c.contextType === 'marketplace') {
+    const title = c.context?.productTitle;
+    if (title) return title;
+    if (c.contextLabel) return c.contextLabel;
+  }
   if (c.type === 'group') return c.name || c.groupName || 'Group Chat';
   // Try otherParticipant first
   if (c.otherParticipant?.name) return c.otherParticipant.name;
@@ -63,6 +79,18 @@ function convDisplayName(c: Conversation | undefined, currentUserId?: string): s
   if (other?.name) return other.name;
   if (other?.username) return other.username;
   return 'Direct Message';
+}
+
+function convSubtitle(c: Conversation | undefined): string {
+  if (!c) return '';
+  if (c.contextType === 'marketplace') {
+    if (c.context?.productPrice != null) {
+      const cur = c.context.productCurrency ?? 'NGN';
+      return `Marketplace • ${cur} ${c.context.productPrice.toLocaleString()}`;
+    }
+    return c.contextLabel ?? 'Marketplace';
+  }
+  return `${c.type} conversation`;
 }
 
 // ─── E2EE Key Bundle Panel ────────────────────────────────────────────────────
@@ -159,14 +187,233 @@ function KeyBundlePanel({ conversationId, onClose }: KeyBundlePanelProps) {
   );
 }
 
+// ─── Inline Offer Action Bar (seller view) ───────────────────────────────────
+//
+// Shown inside a marketplace chat thread when the current user is the seller
+// and there is at least one pending offer. Fetching product offers with a
+// 403 response means the viewer is the buyer — the bar is simply not rendered.
+
+interface InlineOfferBarProps {
+  productId: string;
+  currentUserId?: string;
+  onActionComplete?: () => void;
+}
+
+function InlineOfferBar({ productId, currentUserId, onActionComplete }: InlineOfferBarProps) {
+  const router = useRouter();
+  const [showCounter, setShowCounter] = useState(false);
+  const [counterAmount, setCounterAmount] = useState('');
+
+  // This component only renders when viewerRole === 'seller' (guarded by parent),
+  // so we always fetch pending offers — no isMaybeSeller heuristic needed.
+  const { data } = useProductOffers(productId, 'pending');
+  const pendingOffers: MarketplaceOffer[] = data?.offers ?? [];
+
+  // Nothing to show if no pending offers or if fetch returned nothing (buyer / no access)
+  if (pendingOffers.length === 0) return null;
+
+  // Show action bar for the most-recent pending offer
+  const latestOffer = pendingOffers[pendingOffers.length - 1];
+  const offerId = latestOffer._id ?? latestOffer.id;
+
+  return (
+    <OfferActionBar
+      offer={latestOffer}
+      offerId={offerId}
+      pendingCount={pendingOffers.length}
+      productId={productId}
+      showCounter={showCounter}
+      setShowCounter={setShowCounter}
+      counterAmount={counterAmount}
+      setCounterAmount={setCounterAmount}
+      router={router}
+      onActionComplete={onActionComplete}
+    />
+  );
+}
+
+interface OfferActionBarProps {
+  offer: MarketplaceOffer;
+  offerId: string;
+  pendingCount: number;
+  productId: string;
+  showCounter: boolean;
+  setShowCounter: (v: boolean) => void;
+  counterAmount: string;
+  setCounterAmount: (v: string) => void;
+  router: ReturnType<typeof useRouter>;
+  onActionComplete?: () => void;
+}
+
+function OfferActionBar({
+  offer,
+  offerId,
+  pendingCount,
+  productId,
+  showCounter,
+  setShowCounter,
+  counterAmount,
+  setCounterAmount,
+  router,
+  onActionComplete,
+}: OfferActionBarProps) {
+  const accept  = useAcceptOffer();
+  const reject  = useRejectOffer();
+  const respond = useRespondToOffer(offerId);
+
+  const handleAccept = async () => {
+    try {
+      await accept.mutateAsync(offerId);
+    } finally {
+      onActionComplete?.();
+    }
+  };
+  const handleReject = async () => {
+    try {
+      await reject.mutateAsync(offerId);
+    } finally {
+      onActionComplete?.();
+    }
+  };
+
+  const handleCounter = async () => {
+    const amount = parseFloat(counterAmount);
+    if (isNaN(amount) || amount <= 0) return;
+    try {
+      await respond.mutateAsync({ action: 'counter', counterAmount: amount });
+    } finally {
+      setShowCounter(false);
+      setCounterAmount('');
+      onActionComplete?.();
+    }
+  };
+
+  const buyer = offer.buyer as any;
+  const buyerName =
+    buyer?.firstName && buyer?.lastName
+      ? `${buyer.firstName} ${buyer.lastName}`
+      : buyer?.username ?? 'Buyer';
+
+  return (
+    <div className="shrink-0 border-b border-amber-900/40 bg-amber-950/20 px-4 py-3">
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <p className="text-xs font-semibold text-amber-200">
+          You received an offer of {formatNGN(offer.offerAmount)} from {buyerName}.
+          {offer.counterOfferAmount != null && (
+            <span className="ml-2 text-purple-300">
+              You countered with {formatNGN(offer.counterOfferAmount)}.
+            </span>
+          )}
+        </p>
+        {pendingCount > 1 && (
+          <button
+            onClick={() => router.push(`/marketplace/${productId}/offers`)}
+            className="shrink-0 rounded-full bg-amber-800/40 px-2 py-0.5 text-[10px] font-semibold text-amber-200 hover:bg-amber-800/60 transition-colors"
+          >
+            +{pendingCount - 1} more
+          </button>
+        )}
+      </div>
+
+      {!showCounter ? (
+        <div className="flex gap-2">
+          <button
+            onClick={handleAccept}
+            disabled={accept.isPending || reject.isPending}
+            className="flex-1 rounded-full bg-green-700 py-1.5 text-xs font-semibold text-white hover:bg-green-600 disabled:opacity-50 transition-colors"
+          >
+            {accept.isPending ? '…' : 'Accept'}
+          </button>
+          <button
+            onClick={() => setShowCounter(true)}
+            className="flex-1 rounded-full bg-purple-800 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 transition-colors"
+          >
+            Counter
+          </button>
+          <button
+            onClick={handleReject}
+            disabled={reject.isPending || accept.isPending}
+            className="flex-1 rounded-full bg-red-800 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+          >
+            {reject.isPending ? '…' : 'Decline'}
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">₦</span>
+            <input
+              type="number"
+              value={counterAmount}
+              onChange={(e) => setCounterAmount(e.target.value)}
+              placeholder="Counter amount"
+              min="0"
+              step="1000"
+              className="w-full rounded-lg border border-gray-600 bg-gray-800 py-1.5 pl-5 pr-2 text-xs text-white focus:border-purple-500 focus:outline-none"
+            />
+          </div>
+          <button
+            onClick={() => { setShowCounter(false); setCounterAmount(''); }}
+            className="rounded-full bg-gray-700 px-3 py-1.5 text-xs font-semibold hover:bg-gray-600 transition-colors"
+          >
+            ✕
+          </button>
+          <button
+            onClick={handleCounter}
+            disabled={respond.isPending || !counterAmount}
+            className="rounded-full bg-purple-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-600 disabled:opacity-50 transition-colors"
+          >
+            {respond.isPending ? '…' : 'Send'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Chat Page ───────────────────────────────────────────────────────────
 
 export default function ConversationPage() {
   const params = useParams<{ conversationId: string }>();
   const conversationId = params.conversationId;
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Handle legacy/invalid `/messages/new?sellerId=xxx` links by resolving to a
+  // real conversationId on the fly, then redirecting. Without this guard we'd
+  // send literal "new" to the API and trigger 400/500 responses.
+  useEffect(() => {
+    if (conversationId !== 'new') return;
+    const sellerId =
+      searchParams?.get('sellerId') ||
+      searchParams?.get('userId') ||
+      searchParams?.get('recipientId');
+    if (!sellerId) {
+      router.replace('/messages');
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await chatService.getOrCreateDirectConversation(sellerId);
+        const payload = (res as any)?.data ?? res;
+        const conv = payload?.conversation ?? payload?.data?.conversation ?? payload;
+        const convId = conv?._id ?? conv?.id ?? conv?.conversationId;
+        if (cancelled) return;
+        if (convId) router.replace(`/messages/${convId}`);
+        else router.replace('/messages');
+      } catch {
+        if (!cancelled) router.replace('/messages');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [conversationId, searchParams, router]);
+
+  const isPlaceholder = conversationId === 'new' || !conversationId;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -183,7 +430,7 @@ export default function ConversationPage() {
     queryKey: ['conversation-detail', conversationId],
     queryFn: () => chatService.getConversationDetail(conversationId),
     staleTime: 60_000,
-    enabled: !!conversationId,
+    enabled: !!conversationId && !isPlaceholder,
   });
 
   const conv: Conversation | undefined = (() => {
@@ -196,9 +443,28 @@ export default function ConversationPage() {
     return list.find((c) => ((c as any).conversationId ?? (c as any)._id ?? c.id) === conversationId);
   })();
 
+  // ── Marketplace viewer role ───────────────────────────────────────────────
+  // For marketplace conversations we resolve buyer vs seller perspective by
+  // comparing the current user with the product's sellerId. The result is
+  // null for non-marketplace threads.
+  const marketplaceProductId = conv?.contextType === 'marketplace'
+    ? conv?.context?.productId ?? null
+    : null;
+  const { data: marketplaceProduct } = useProduct(marketplaceProductId);
+  // The backend populates sellerId as a User object in the product response,
+  // so we must extract the plain string ID from either form.
+  const resolvedSellerId: string | null = (() => {
+    const raw = (marketplaceProduct as any)?.sellerId;
+    if (!raw) return null;
+    if (typeof raw === 'string') return raw;
+    // Populated user object — pick .id first, then ._id
+    return (raw as any)?.id ?? (raw as any)?._id?.toString() ?? null;
+  })();
+  const viewerRole: OfferRole | null = resolveOfferRole(user?.id, resolvedSellerId);
+
   // ── Load messages ────────────────────────────────────────────────────────
   const loadMessages = useCallback(async () => {
-    if (!conversationId) return;
+    if (!conversationId || isPlaceholder) return;
     try {
       const res = await chatService.getMessages(conversationId);
       const raw = res.data?.messages ?? [];
@@ -209,15 +475,19 @@ export default function ConversationPage() {
     } finally {
       setLoading(false);
     }
-  }, [conversationId]);
+  }, [conversationId, isPlaceholder]);
 
   useEffect(() => {
+    if (isPlaceholder) {
+      setLoading(false);
+      return;
+    }
     loadMessages();
     // Mark as read and delivered on open
     chatService.markAsRead(conversationId).catch(() => {});
     chatService.markAsDelivered(conversationId).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadMessages]);
+  }, [loadMessages, isPlaceholder]);
 
   // ── Auto-scroll ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -226,6 +496,11 @@ export default function ConversationPage() {
 
   // ── Socket listeners ──────────────────────────────────────────────────────
   useEffect(() => {
+    // Ensure this user is registered in their socket room so `emitToUser` works.
+    // The global SocketAuthenticator in providers.tsx also does this, but we
+    // re-emit here to guarantee it's registered before we start listening.
+    if (user?.id) socketService.emit('authenticate', user.id);
+
     // Backend emits socket events as { message: { ...chatData } } — unwrap it
     const extractMsg = (data: any): ChatMessage => data?.message ?? data;
 
@@ -288,18 +563,67 @@ export default function ConversationPage() {
       );
     };
 
+    const onOfferUpdated = (payload: any) => {
+      if (payload?.conversationId && payload.conversationId !== conversationId) return;
+      // Refresh any offer-related queries so InlineOfferBar / OfferActionBar
+      // reflect the new status (accepted / rejected / countered) instantly.
+      queryClient.invalidateQueries({ queryKey: ['marketplace', 'offers'] });
+      queryClient.invalidateQueries({ queryKey: ['marketplace', 'product-offers'] });
+      if (payload?.offerId) {
+        queryClient.invalidateQueries({ queryKey: ['marketplace', 'offer', payload.offerId] });
+      }
+      // The server also persists a system message describing this action.
+      // Reload messages so it appears even if the message:new socket event
+      // was dropped (e.g. authenticate handshake not yet complete).
+      loadMessages();
+
+      // Role-aware toast. The seller is always the actor on `offer:updated`
+      // (accept / reject / counter) in the current product.
+      const action = payload?.action as 'accept' | 'reject' | 'counter' | undefined;
+      if (!action || !viewerRole) return;
+      const amount = Number(
+        payload?.counterAmount ?? payload?.offerAmount ?? 0,
+      );
+      const text = getOfferToast(
+        { action, amount, actorRole: 'seller' },
+        viewerRole,
+      );
+      if (action === 'accept') toast.success(text);
+      else toast.message(text);
+    };
+
+    const onOfferNew = (payload: any) => {
+      if (payload?.conversationId && payload.conversationId !== conversationId) return;
+      queryClient.invalidateQueries({ queryKey: ['marketplace', 'product-offers'] });
+      queryClient.invalidateQueries({ queryKey: ['marketplace', 'offers'] });
+      // Pull the new "💰 Offer placed" system message into the chat view
+      loadMessages();
+      if (!viewerRole) return;
+      const amount = Number(payload?.offerAmount ?? 0);
+      toast.message(
+        getOfferToast(
+          { action: 'new', amount, actorRole: 'buyer' },
+          viewerRole,
+        ),
+      );
+    };
+
     socketService.on('message:new', onNew);
     socketService.on('message:priority', onPriority);
     socketService.on('message:delivered', onDelivered);
     socketService.on('message:read', onRead);
+    socketService.on('offer:updated', onOfferUpdated);
+    socketService.on('offer:new', onOfferNew);
 
     return () => {
       socketService.off('message:new', onNew);
       socketService.off('message:priority', onPriority);
       socketService.off('message:delivered', onDelivered);
       socketService.off('message:read', onRead);
+      socketService.off('offer:updated', onOfferUpdated);
+      socketService.off('offer:new', onOfferNew);
     };
-  }, [conversationId]);
+  }, [conversationId, viewerRole, queryClient, user?.id, loadMessages]);
 
   // ── Send ──────────────────────────────────────────────────────────────────
   const handleSend = async () => {
@@ -471,7 +795,7 @@ export default function ConversationPage() {
                   {displayName}
                 </p>
                 {conv && (
-                  <p className="text-xs capitalize text-gray-500">{conv.type} conversation</p>
+                  <p className="text-xs capitalize text-gray-500">{convSubtitle(conv)}</p>
                 )}
               </div>
             </div>
@@ -487,11 +811,60 @@ export default function ConversationPage() {
             </button>
           </div>
 
+          {/* Marketplace context banner — shows the product this chat is about */}
+          {conv?.contextType === 'marketplace' && conv.context && (
+            <div className="flex shrink-0 items-center gap-3 border-b border-blue-900/40 bg-blue-950/20 px-4 py-2.5">
+              {conv.context.productThumbnail ? (
+                <img
+                  src={conv.context.productThumbnail}
+                  alt={conv.context.productTitle ?? 'Product'}
+                  className="h-10 w-10 shrink-0 rounded-md object-cover"
+                />
+              ) : (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-900/50 text-lg">
+                  🛍️
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-blue-200">
+                  🛍️ Marketplace
+                </p>
+                <p className="truncate text-sm font-medium text-gray-100">
+                  {conv.context.productTitle ?? 'Product'}
+                </p>
+              </div>
+              {conv.context.productPrice != null && (
+                <span className="shrink-0 rounded-full bg-blue-900/40 px-2.5 py-1 text-xs font-semibold text-blue-100">
+                  {conv.context.productCurrency ?? 'NGN'} {conv.context.productPrice.toLocaleString()}
+                </span>
+              )}
+              {conv.context.productId && (
+                <Link
+                  href={`/marketplace/${conv.context.productId}`}
+                  className="shrink-0 rounded-full border border-blue-500/60 px-3 py-1 text-xs font-medium text-blue-200 hover:bg-blue-900/40"
+                >
+                  View
+                </Link>
+              )}
+            </div>
+          )}
+
           {/* E2EE Key Panel (collapsible) */}
           {showKeyPanel && (
             <KeyBundlePanel
               conversationId={conversationId}
               onClose={() => setShowKeyPanel(false)}
+            />
+          )}
+
+          {/* Inline offer action bar — shown only to the seller when there's a pending offer.
+              viewerRole must be 'seller' (resolved from product.sellerId) to prevent the
+              buyer from seeing Accept/Counter/Decline buttons and getting a 403. */}
+          {conv?.contextType === 'marketplace' && conv.context?.productId && viewerRole === 'seller' && (
+            <InlineOfferBar
+              productId={conv.context.productId}
+              currentUserId={user?.id}
+              onActionComplete={loadMessages}
             />
           )}
 
@@ -531,6 +904,54 @@ export default function ConversationPage() {
                       const isLastOverall =
                         msgIdx === msgs.length - 1 &&
                         groups[groups.length - 1]?.date === date;
+
+                      // System messages (e.g. "🛒 Inquiry about: iPhone 13 — ₦250,000")
+                      // Detected by sentinel senderId or type === 'system'
+                      const isSystem =
+                        msg.type === 'system' ||
+                        msg.senderId === '000000000000000000000000';
+
+                      if (isSystem) {
+                        // Resolve an OfferEvent from the message.
+                        // Priority 1: structured meta added by postSystemMessage (new messages)
+                        // Priority 2: legacy emoji-prefix parsing (old persisted messages)
+                        const c = msg.content ?? '';
+                        const msgMeta = (msg as any).meta;
+                        const structuredEvent =
+                          msgMeta?.offerAction && msgMeta?.actorRole
+                            ? {
+                                action: msgMeta.offerAction as import('@/lib/marketplaceMessages').OfferAction,
+                                amount: Number(msgMeta.offerAmount ?? 0),
+                                actorRole: msgMeta.actorRole as import('@/lib/marketplaceMessages').OfferRole,
+                              }
+                            : null;
+                        const parsed = structuredEvent ?? parseLegacyOfferMessage(c);
+                        let display = c;
+                        let pillClass = 'bg-blue-900/40 text-blue-200';
+
+                        if (parsed) {
+                          pillClass = getOfferPillClass(parsed.action);
+                          if (viewerRole) {
+                            display = getOfferSystemMessage(parsed, viewerRole);
+                          } else {
+                            // viewerRole not yet resolved (product still loading) —
+                            // strip the leading emoji so legacy format doesn't show raw.
+                            display = c.replace(/^\s*(💰|✅|❌|↩️|↩\uFE0F?)\s*/u, '').trim();
+                          }
+                        }
+
+                        return (
+                          <div
+                            key={id}
+                            ref={isLastOverall ? lastMsgRef : undefined}
+                            className="my-3 flex justify-center"
+                          >
+                            <span className={`rounded-full px-4 py-1.5 text-[11px] ${pillClass}`}>
+                              {display}
+                            </span>
+                          </div>
+                        );
+                      }
 
                       return (
                         <div

@@ -16,8 +16,29 @@ import { authService } from '@/services/auth.service';
 import { e2eeService } from '@/services/e2ee.service';
 import { I18nProvider } from '@/lib/i18n';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useAuth } from '@/hooks/useAuth';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
+
+/**
+ * Emits the socket `authenticate` event whenever the current user changes
+ * (login, page load, reconnect). This is required so the backend's
+ * `emitToUser(userId, ...)` can deliver real-time events (message:new, etc.)
+ * to the right socket room. Must be rendered inside QueryClientProvider.
+ */
+function SocketAuthenticator() {
+  const { user } = useAuth();
+  useEffect(() => {
+    if (!user?.id) return;
+    // Register with backend so emitToUser reaches this socket
+    socketService.emit('authenticate', user.id);
+    // Re-authenticate after any reconnect (e.g. server restart)
+    const onConnect = () => socketService.emit('authenticate', user.id);
+    socketService.on('connect', onConnect);
+    return () => socketService.off('connect', onConnect);
+  }, [user?.id]);
+  return null;
+}
 
 /**
  * Mounts once after auth to register Web Push subscriptions.
@@ -240,6 +261,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
     <QueryClientProvider client={queryClient}>
+      <SocketAuthenticator />
       <PushRegistrar />
       {children}
       <Toaster 

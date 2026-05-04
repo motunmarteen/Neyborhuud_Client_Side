@@ -5,14 +5,58 @@
  * View and manage user's own marketplace listings
  */
 
-import { useMyListings } from "@/hooks/useMarketplace";
+import { useMyListings, useProductOffers } from "@/hooks/useMarketplace";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { ProductCard } from "@/components/marketplace";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Product } from "@/services/marketplace.service";
 import TopNav from "@/components/navigation/TopNav";
 import LeftSidebar from "@/components/navigation/LeftSidebar";
 import RightSidebar from "@/components/navigation/RightSidebar";
 import { BottomNav } from "@/components/feed/BottomNav";
+
+// ─── Per-listing pending offer badge ─────────────────────────────────────────
+
+function PendingOffersBadge({ product }: { product: Product }) {
+  const router = useRouter();
+  const productId = (product as any)._id ?? product.id;
+  const { data } = useProductOffers(productId, "pending");
+  const count = data?.offers?.length ?? 0;
+
+  if (count === 0) return null;
+
+  return (
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        router.push(`/marketplace/${productId}/offers`);
+      }}
+      className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-300 hover:bg-amber-500/30 transition-colors"
+    >
+      <span>💰</span>
+      {count} pending {count === 1 ? "offer" : "offers"}
+    </button>
+  );
+}
+
+// ─── Listing card wrapper ─────────────────────────────────────────────────────
+
+function ListingWithOffers({
+  product,
+  userLocation,
+}: {
+  product: Product;
+  userLocation: { lat: number; lng: number } | null;
+}) {
+  return (
+    <div className="flex flex-col">
+      <ProductCard product={product} userLocation={userLocation} />
+      <PendingOffersBadge product={product} />
+    </div>
+  );
+}
 
 export default function MyListingsPage() {
   const { location } = useGeolocation();
@@ -121,7 +165,7 @@ export default function MyListingsPage() {
                 // Unwrap product if it's wrapped in an API response
                 const productData = (product as any).data || product;
                 return (
-                  <ProductCard
+                  <ListingWithOffers
                     key={productData.id || productData._id || `product-${index}`}
                     product={productData}
                     userLocation={

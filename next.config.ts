@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 import withPWAInit from "next-pwa";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -11,7 +15,12 @@ const withPWA = withPWAInit({
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
-  turbopack: {},
+  // Allow running multiple dev servers by isolating cache/output directories.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
+  turbopack: {
+    root: projectRoot,
+  },
+  outputFileTracingRoot: projectRoot,
   // Disable static optimization to avoid pre-rendering errors  
   output: 'standalone',
 };

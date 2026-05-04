@@ -4,6 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:port": "node start-dev.js",
+    "dev:3000": "set NEXT_DIST_DIR=.next-3000&& set PORT=3000&& next dev --turbopack --port 3000",
+    "dev:3001": "set NEXT_DIST_DIR=.next-3001&& set PORT=3001&& next dev --turbopack --port 3001",
+    "dev:3002": "set NEXT_DIST_DIR=.next-3002&& set PORT=3002&& next dev --turbopack --port 3002",
+    "dev:3003": "set NEXT_DIST_DIR=.next-3003&& set PORT=3003&& next dev --turbopack --port 3003",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "node run-lint.mjs",
