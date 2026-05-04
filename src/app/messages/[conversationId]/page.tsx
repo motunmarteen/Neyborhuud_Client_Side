@@ -11,10 +11,11 @@ import { BottomNav } from '@/components/feed/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { chatService } from '@/services/chat.service';
 import { e2eeService } from '@/services/e2ee.service';
-<<<<<<< HEAD
-import { ChatMessage, Conversation, MarketplaceOffer } from '@/types/api';
+import { ChatMessage, ChatMessageType, Conversation, MarketplaceOffer } from '@/types/api';
 import socketService from '@/lib/socket';
 import { toast } from 'sonner';
+import ChatActionMenu, { ActionResult } from '@/components/chat/ChatActionMenu';
+import ChatMessageCard from '@/components/chat/ChatMessageCard';
 import { useProductOffers, useAcceptOffer, useRejectOffer, useRespondToOffer, useProduct } from '@/hooks/useMarketplace';
 import {
   formatNGN,
@@ -25,13 +26,6 @@ import {
   resolveOfferRole,
   type OfferRole,
 } from '@/lib/marketplaceMessages';
-=======
-import { ChatMessage, ChatMessageType, Conversation } from '@/types/api';
-import socketService from '@/lib/socket';
-import { toast } from 'sonner';
-import ChatActionMenu, { ActionResult } from '@/components/chat/ChatActionMenu';
-import ChatMessageCard from '@/components/chat/ChatMessageCard';
->>>>>>> origin/main
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -735,13 +729,8 @@ export default function ConversationPage() {
 
       const res = await chatService.sendMessage({
         conversationId,
-<<<<<<< HEAD
-        content: file.name,
-        type: pendingMediaType as "image" | "video" | "audio" | "text" | "file" | "location",
-=======
         content: result.content,
         type: result.type as any,
->>>>>>> origin/main
         mediaUrl,
         locationSnapshot: result.locationSnapshot,
         emergencyRef: result.emergencyRef,
