@@ -26,6 +26,10 @@ import { useState, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import apiClient from '@/lib/api-client';
+import TopNav from '@/components/navigation/TopNav';
+import LeftSidebar from '@/components/navigation/LeftSidebar';
+import RightSidebar from '@/components/navigation/RightSidebar';
+import { BottomNav } from '@/components/feed/BottomNav';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -241,7 +245,11 @@ export default function ProfilePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen neu-base">
+      <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
+        <TopNav />
+        <div className="flex flex-1 overflow-hidden">
+          <LeftSidebar />
+          <div className="flex-1 overflow-y-auto">
         {/* Header Skeleton */}
         <div className="neu-base sticky top-0 z-10" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
           <div className="flex items-center gap-8 px-4 h-14">
@@ -264,6 +272,10 @@ export default function ProfilePage() {
             <div className="w-3/4 h-4 neu-socket rounded-xl animate-pulse" />
           </div>
         </div>
+          </div>
+          <RightSidebar />
+        </div>
+        <BottomNav />
       </div>
     );
   }
@@ -271,7 +283,11 @@ export default function ProfilePage() {
   // Error state
   if (error || !profile) {
     return (
-      <div className="min-h-screen neu-base flex items-center justify-center">
+      <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
+        <TopNav />
+        <div className="flex flex-1 overflow-hidden">
+          <LeftSidebar />
+          <div className="flex-1 overflow-y-auto flex items-center justify-center">
         <div className="text-center px-4">
           <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mx-auto mb-6">
             <i className="bi bi-person-x text-5xl" style={{ color: 'var(--neu-text-muted)' }} />
@@ -289,6 +305,10 @@ export default function ProfilePage() {
             Go Back
           </button>
         </div>
+          </div>
+          <RightSidebar />
+        </div>
+        <BottomNav />
       </div>
     );
   }
@@ -319,7 +339,11 @@ export default function ProfilePage() {
     (Array.isArray(hist.usernameTimeline) && hist.usernameTimeline.length > 1);
 
   return (
-    <div className="min-h-screen neu-base">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
+      <TopNav />
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <div className="flex-1 overflow-y-auto">
       {/* Header */}
       <div className="neu-base sticky top-0 z-10" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
         <div className="flex items-center gap-4 px-4 h-14">
@@ -944,6 +968,10 @@ export default function ProfilePage() {
       )}
 
 
+        </div>
+        <RightSidebar />
+      </div>
+      <BottomNav />
     </div>
   );
 }

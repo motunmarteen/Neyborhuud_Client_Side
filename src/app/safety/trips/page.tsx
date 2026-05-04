@@ -641,7 +641,7 @@ function SafeTripsInner() {
             {/* Header */}
             <div
               className="neu-card-sm rounded-2xl p-4 flex items-center justify-between gap-3"
-              style={{ backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '400px 400px' }}
+              style={{ backgroundImage: "url('/doodle-pattern.svg')", backgroundRepeat: 'repeat', backgroundSize: '500px 500px' }}
             >
               <div>
                 <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Safe Trips</h1>

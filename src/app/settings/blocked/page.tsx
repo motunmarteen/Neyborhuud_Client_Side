@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useBlockedUsers, useBlock } from '@/hooks/useBlock';
 import Link from 'next/link';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
+import TopNav from '@/components/navigation/TopNav';
+import LeftSidebar from '@/components/navigation/LeftSidebar';
+import RightSidebar from '@/components/navigation/RightSidebar';
+import { BottomNav } from '@/components/feed/BottomNav';
 
 export default function BlockedUsersPage() {
     const router = useRouter();
@@ -15,7 +19,11 @@ export default function BlockedUsersPage() {
     const pagination = blockedData?.data?.pagination;
 
     return (
-        <div className="min-h-screen neu-base">
+        <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
+            <TopNav />
+            <div className="flex flex-1 overflow-hidden">
+                <LeftSidebar />
+                <div className="flex-1 overflow-y-auto">
             {/* Header */}
             <header className="sticky top-0 z-30 backdrop-blur-xl border-b px-4 py-3 flex items-center gap-3" style={{ borderColor: 'var(--neu-shadow-dark)', background: 'var(--neu-bg)' }}>
                 <button onClick={() => router.back()} className="p-1.5 rounded-full hover:opacity-70 transition-opacity">
@@ -84,6 +92,10 @@ export default function BlockedUsersPage() {
                     </div>
                 )}
             </div>
+                </div>
+                <RightSidebar />
+            </div>
+            <BottomNav />
         </div>
     );
 }

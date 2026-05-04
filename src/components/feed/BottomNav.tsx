@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { chatService } from '@/services/chat.service';
+import { useSos } from '@/hooks/useSos';
 
 interface BottomNavProps {
   hidden?: boolean;
@@ -13,10 +14,49 @@ interface BottomNavProps {
 
 export function BottomNav({ hidden }: BottomNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
+  const sos = useSos();
   const isFeed = pathname === '/feed';
-  const isGossip = pathname === '/local-news';
+  const isSentinel = pathname.startsWith('/safety');
   const profileHref = user?.username ? `/profile/${user.username}` : '/settings';
+
+  // Long-press → silent SOS. ≥600 ms hold fires silently in the background.
+  // Tap → /sos (the dedicated emergency command center, where the user can
+  // pick visibility mode, run a drill, see active SOS state, etc.). The
+  // /safety hub remains for browsing the broader safety toolkit.
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressFired = useRef(false);
+  const SOS_HREF = '/sos';
+
+  const startSosPress = () => {
+    longPressFired.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressFired.current = true;
+      // Silent SOS — no UI feedback, by design. If the backend rejects (e.g. missing
+      // profile fields), useSos surfaces the error; we do NOT pre-empt with a redirect
+      // because a safety control must not silently navigate users away from the action.
+      void sos.triggerSos({ silent: true });
+    }, 600);
+  };
+
+  const cancelSosPress = (e: React.SyntheticEvent) => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    if (longPressFired.current) {
+      // Suppress the navigation that would otherwise follow a click after long-press.
+      e.preventDefault();
+      e.stopPropagation();
+      longPressFired.current = false;
+      return;
+    }
+    // Short tap → navigate to the dedicated SOS command center.
+    if (e.type === 'pointerup' || e.type === 'touchend' || e.type === 'mouseup') {
+      router.push(SOS_HREF);
+    }
+  };
 
   const { data: convData } = useQuery({
     queryKey: ['conversations'],
@@ -52,31 +92,37 @@ export function BottomNav({ hidden }: BottomNavProps) {
           <span className={`material-symbols-outlined text-[30px] ${isFeed ? 'fill-1' : ''}`}>home</span>
         </Link>
 
-        {/* Local News */}
-        <Link
-          href="/local-news"
-          className={navItemClass(isGossip)}
-          aria-current={isGossip ? 'page' : undefined}
-          aria-label="Local News"
-        >
-          <span className={`material-symbols-outlined text-[30px] ${isGossip ? 'fill-1' : ''}`}>chat_bubble</span>
-        </Link>
-
-        {/* SOS / Safety */}
+        {/* Sentinel */}
         <Link
           href="/safety"
-          className="relative min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
-          aria-current={pathname.startsWith('/safety') ? 'page' : undefined}
-          aria-label="Safety"
+          className={navItemClass(isSentinel)}
+          aria-current={isSentinel ? 'page' : undefined}
+          aria-label="Sentinel"
         >
-          {/* Pulsing ring when active */}
-          {pathname.startsWith('/safety') && (
+          <span className={`material-symbols-outlined text-[30px] ${isSentinel ? 'fill-1' : ''}`}>shield</span>
+        </Link>
+
+        {/* SOS / Safety — tap navigates; long-press fires SILENT SOS */}
+        <button
+          type="button"
+          onPointerDown={startSosPress}
+          onPointerUp={cancelSosPress}
+          onPointerLeave={() => {
+            if (longPressTimer.current) clearTimeout(longPressTimer.current);
+          }}
+          onContextMenu={(e) => e.preventDefault()}
+          className="relative min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation select-none"
+          aria-current={pathname.startsWith('/sos') || pathname.startsWith('/safety') ? 'page' : undefined}
+          aria-label="SOS — tap to open command center, long-press for silent SOS"
+        >
+          {/* Pulsing ring when active or pending */}
+          {(pathname.startsWith('/sos') || pathname.startsWith('/safety') || sos.phase !== 'idle') && (
             <span className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-red-500/20 animate-ping" />
           )}
           {/* Steady glow backdrop */}
           <span className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-red-500/10" />
-          <span className={`material-symbols-outlined text-[30px] text-red-500 relative z-10 ${pathname.startsWith('/safety') ? 'fill-1' : ''}`}>sos</span>
-        </Link>
+          <span className={`material-symbols-outlined text-[30px] text-red-500 relative z-10 ${pathname.startsWith('/sos') || pathname.startsWith('/safety') ? 'fill-1' : ''}`}>sos</span>
+        </button>
 
         {/* Messages */}
         <Link

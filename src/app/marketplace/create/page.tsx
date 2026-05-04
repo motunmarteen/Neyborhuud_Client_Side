@@ -8,6 +8,10 @@
 import { useRouter } from "next/navigation";
 import { ProductForm } from "@/components/marketplace";
 import { Product } from "@/services/marketplace.service";
+import TopNav from "@/components/navigation/TopNav";
+import LeftSidebar from "@/components/navigation/LeftSidebar";
+import RightSidebar from "@/components/navigation/RightSidebar";
+import { BottomNav } from "@/components/feed/BottomNav";
 
 export default function CreateProductPage() {
   const router = useRouter();
@@ -21,7 +25,11 @@ export default function CreateProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f1e] text-white py-8">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden">
+      <TopNav />
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white py-8">
       <div className="max-w-3xl mx-auto px-4">
         {/* Header */}
         <div className="mb-6">
@@ -53,6 +61,10 @@ export default function CreateProductPage() {
         {/* Form */}
         <ProductForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </div>
+        </div>
+        <RightSidebar />
+      </div>
+      <BottomNav />
     </div>
   );
 }

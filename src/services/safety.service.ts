@@ -70,9 +70,13 @@ export interface GuardianRelationship {
 export interface SosEvent {
   _id: string;
   userId: string;
-  status: "triggered" | "active" | "resolved" | "cancelled";
+  status: "pending" | "triggered" | "active" | "resolved" | "cancelled";
   visibilityMode: "normal" | "silent";
   escalationLevel: number;
+  countdownSeconds?: number;
+  pendingUntil?: string | null;
+  cancelReason?: string | null;
+  cancelledDuringPending?: boolean;
   emergencyServicesEnabled?: boolean;
   emergencyServicesDispatchedAt?: string;
   emergencyServicesDispatch?: Record<string, any>;
@@ -218,15 +222,22 @@ export const safetyService = {
     state?: string;
     visibilityMode?: "normal" | "silent";
     emergencyServicesEnabled?: boolean;
+    /** 0..30. Defaults to 5 server-side. Forced to 0 when visibilityMode='silent'. */
+    countdownSeconds?: number;
     deviceInfo?: Record<string, any>;
   }) {
     return apiClient.post<{
+      status: "pending" | "active" | "already_active";
       sosEventId: string;
-      emergencyId: string;
+      emergencyId: string | null;
       conversationId: string | null;
       guardiansTotal: number;
       escalationQueued: boolean;
       visibilityMode: "normal" | "silent";
+      emergencyServicesEnabled?: boolean;
+      countdownSeconds?: number;
+      pendingUntil?: string | null;
+      preSosContext?: SosEvent["preSosContext"] | null;
     }>("/safety/sos/trigger", payload);
   },
 
@@ -235,11 +246,46 @@ export const safetyService = {
   },
 
   async resolveSos(sosEventId: string) {
-    return apiClient.post<{ sosEvent: SosEvent }>(`/safety/sos/${sosEventId}/resolve`);
+    return apiClient.post<{ sosEvent: SosEvent; summary?: import("@/types/api").IncidentSummary }>(
+      `/safety/sos/${sosEventId}/resolve`,
+    );
   },
 
   async cancelSos(sosEventId: string, reason?: string) {
     return apiClient.post<{ sosEvent: SosEvent }>(`/safety/sos/${sosEventId}/cancel`, { reason });
+  },
+
+  async getSosSummary(sosEventId: string) {
+    return apiClient.get<{ summary: import("@/types/api").IncidentSummary }>(
+      `/safety/sos/${sosEventId}/summary`,
+    );
+  },
+
+  // ─── Panic PIN (duress code) ─────────────────────────────────────────────
+
+  async getPanicPinStatus() {
+    return apiClient.get<{ panicPinSet: boolean; panicPinUpdatedAt: string | null }>(
+      "/safety/panic-pin/status",
+    );
+  },
+
+  async setPanicPin(payload: { pin: string; currentPin?: string }) {
+    return apiClient.post<{ panicPinSet: true }>("/safety/panic-pin", payload);
+  },
+
+  async removePanicPin(currentPin: string) {
+    return apiClient.delete<{ panicPinSet: false }>("/safety/panic-pin", {
+      data: { currentPin },
+    });
+  },
+
+  async verifyPanicPin(payload: {
+    pin: string;
+    latitude?: number;
+    longitude?: number;
+    address?: string;
+  }) {
+    return apiClient.post<{ matched: boolean }>("/safety/panic-pin/verify", payload);
   },
 
   async getActiveSos() {

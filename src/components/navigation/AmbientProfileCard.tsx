@@ -312,8 +312,7 @@ export default function AmbientProfileCard({
   const greeting = getGreeting(timePeriod, firstName);
 
   return (
-    <div className="overflow-hidden relative group/card" style={{
-      borderRadius: '0 0 24px 24px',
+    <div className="overflow-hidden relative group/card rounded-2xl" style={{
       boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
     }}>
       {/* ─── Full-bleed map background ─── */}

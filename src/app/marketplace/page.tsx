@@ -11,6 +11,10 @@ import { useMarketplaceSocket } from "@/hooks/useMarketplaceSocket";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { ProductCard } from "@/components/marketplace";
 import Link from "next/link";
+import TopNav from "@/components/navigation/TopNav";
+import LeftSidebar from "@/components/navigation/LeftSidebar";
+import RightSidebar from "@/components/navigation/RightSidebar";
+import { BottomNav } from "@/components/feed/BottomNav";
 
 const CATEGORIES = [
   "All",
@@ -46,7 +50,11 @@ export default function MarketplacePage() {
   const products = data?.pages.flatMap((page) => page.data || []) ?? [];
 
   return (
-    <div className="min-h-screen bg-[#0f0f1e] text-white">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden">
+      <TopNav />
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800 backdrop-blur-md bg-opacity-95">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -222,6 +230,10 @@ export default function MarketplacePage() {
           </div>
         )}
       </div>
+        </div>
+        <RightSidebar />
+      </div>
+      <BottomNav />
     </div>
   );
 }

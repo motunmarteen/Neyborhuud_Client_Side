@@ -428,6 +428,52 @@ export interface MarketplaceOffer {
 
 // ==================== Chat Types ====================
 
+/** All possible chat message content types */
+export type ChatMessageType =
+  | "text"
+  | "image"
+  | "video"
+  | "audio"
+  | "file"
+  | "location"
+  | "system"
+  | "event"
+  | "marketplace"
+  | "contact"
+  | "poll"
+  | "kidnapping_info"
+  | "tracking"
+  | "sos";
+
+/** Rich metadata carried by non-text message types */
+export interface ChatMessageMeta {
+  // location
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  // event
+  eventId?: string;
+  title?: string;
+  time?: string;
+  // marketplace
+  itemId?: string;
+  price?: number;
+  // contact
+  name?: string;
+  phone?: string;
+  // poll
+  question?: string;
+  options?: string[];
+  votes?: Record<string, string[]>; // optionIndex → userIds
+  // kidnapping_info
+  lastKnownLocation?: { latitude: number; longitude: number; address?: string };
+  status?: string;
+  // tracking
+  live?: boolean;
+  // sos
+  severity?: string;
+}
+
 export interface ChatMessage {
   id: string;
   _id?: string;
@@ -442,10 +488,12 @@ export interface ChatMessage {
     avatarUrl?: string | null;
   };
   content: string;
-  type: "text" | "image" | "video" | "audio" | "file" | "location" | "system";
+  type: ChatMessageType;
   mediaUrl?: string;
   thumbnailUrl?: string;
   locationSnapshot?: { latitude: number; longitude: number; address?: string };
+  /** Rich metadata for non-text message types */
+  meta?: ChatMessageMeta;
   media?: MediaItem[];
   replyTo?: string;
   readBy?: string[];
@@ -546,6 +594,50 @@ export interface TimelineEntry {
   source: string;
   data: Record<string, any>;
   clockDriftFlagged?: boolean;
+}
+
+export interface IncidentSummary {
+  sosEventId: string;
+  status: "pending" | "triggered" | "active" | "resolved" | "cancelled";
+  visibilityMode: "normal" | "silent";
+  cancelledDuringPending: boolean;
+  cancelReason: string | null;
+  startedAt: string;
+  resolvedAt: string | null;
+  durationMs: number;
+  location: { lat: number; lng: number; address?: string; lga?: string; state?: string };
+  guardians: {
+    total: number;
+    notifiedCount: number;
+    acknowledgedCount: number;
+    fastestResponseMs: number | null;
+    details: Array<{
+      guardianId: string;
+      notifiedAt: string | null;
+      acknowledgedAt: string | null;
+      responseMs: number | null;
+    }>;
+  };
+  tracking: { pingsLogged: number };
+  agencyDispatch: {
+    agency: string | null;
+    status: "pending" | "sent" | "failed" | "not_required";
+    dispatchedAt: string | null;
+  };
+  timeline: Array<{
+    at: string;
+    event:
+      | "sos_created"
+      | "countdown_ended"
+      | "guardian_notified"
+      | "guardian_acknowledged_alert"
+      | "guardian_viewed_location"
+      | "guardian_ignored_alert"
+      | "agency_dispatched"
+      | "sos_resolved"
+      | "sos_cancelled";
+    meta?: Record<string, unknown>;
+  }>;
 }
 
 export interface IncidentReplay {

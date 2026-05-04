@@ -7,11 +7,25 @@ import apiClient from '@/lib/api-client';
 
 const slides = [
     {
-        id: 'safety',
-        title: 'Zero-Lag Safety',
-        subtitle: 'Trigger an SOS in 2 seconds. Sentinel AI watches over your street.',
-        icon: 'bi-shield-check',
-        accentColor: '#11d473',
+        id: 'sos',
+        title: 'One-Tap SOS',
+        subtitle: 'Trigger an emergency alert in 2 seconds. Trusted guardians and responders are notified instantly.',
+        icon: 'bi-exclamation-octagon-fill',
+        accentColor: '#FF4444',
+    },
+    {
+        id: 'sentinel',
+        title: 'Sentinel AI',
+        subtitle: 'Your street\'s always-on intelligence. Sentinel AI detects threats, monitors safety patterns, and keeps you ahead of danger.',
+        icon: 'bi-cpu-fill',
+        accentColor: '#00C2FF',
+    },
+    {
+        id: 'feed',
+        title: 'Hyperlocal Feed',
+        subtitle: 'Posts, FYI alerts, local jobs, events & marketplace — everything happening on your street, in real time.',
+        icon: 'bi-newspaper',
+        accentColor: '#FF9F43',
     },
     {
         id: 'community',
@@ -78,24 +92,39 @@ export default function Home() {
             {/* ── Main Content ── */}
             <div className="grow flex flex-col items-center justify-center w-full max-w-md z-10 gap-10">
                 {/* Raised Icon Container */}
-                <div
-                    className={`
-                        neu-card-raised rounded-[2.5rem] w-56 h-56 flex items-center justify-center
-                        animate-neu-float transition-all duration-500
-                        ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}
-                    `}
-                >
-                    {/* Inset Icon Socket */}
+                <div className="relative flex items-center justify-center">
+                    {/* SOS pulse rings */}
+                    {activeSlide.id === 'sos' && !isAnimating && (
+                        <>
+                            <span
+                                className="absolute rounded-full animate-ping"
+                                style={{ width: '17rem', height: '17rem', backgroundColor: activeSlide.accentColor, opacity: 0.08 }}
+                            />
+                            <span
+                                className="absolute rounded-full animate-ping"
+                                style={{ width: '14rem', height: '14rem', backgroundColor: activeSlide.accentColor, opacity: 0.12, animationDelay: '0.4s' }}
+                            />
+                        </>
+                    )}
                     <div
-                        className="neu-socket rounded-full w-36 h-36 flex items-center justify-center transition-shadow duration-700"
-                        style={{
-                            boxShadow: `inset 6px 6px 14px var(--neu-shadow-dark), inset -6px -6px 14px var(--neu-shadow-light), 0 0 25px ${activeSlide.accentColor}12`,
-                        }}
+                        className={`
+                            neu-card-raised rounded-[2.5rem] w-56 h-56 flex items-center justify-center
+                            animate-neu-float transition-all duration-500
+                            ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}
+                        `}
                     >
-                        <i
-                            className={`bi ${activeSlide.icon} text-7xl drop-shadow-sm transition-colors duration-500`}
-                            style={{ color: activeSlide.accentColor }}
-                        />
+                        {/* Inset Icon Socket */}
+                        <div
+                            className="neu-socket rounded-full w-36 h-36 flex items-center justify-center transition-shadow duration-700"
+                            style={{
+                                boxShadow: `inset 6px 6px 14px var(--neu-shadow-dark), inset -6px -6px 14px var(--neu-shadow-light), 0 0 25px ${activeSlide.accentColor}${activeSlide.id === 'sos' ? '40' : '12'}`,
+                            }}
+                        >
+                            <i
+                                className={`bi ${activeSlide.icon} drop-shadow-sm transition-colors duration-500 ${activeSlide.id === 'sos' ? 'text-8xl' : 'text-7xl'}`}
+                                style={{ color: activeSlide.accentColor }}
+                            />
+                        </div>
                     </div>
                 </div>
 

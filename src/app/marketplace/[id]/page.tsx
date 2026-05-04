@@ -12,6 +12,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { ProductDetails } from "@/components/marketplace";
 import { useProductMutations } from "@/hooks/useMarketplace";
 import { toast } from "sonner";
+import TopNav from "@/components/navigation/TopNav";
+import LeftSidebar from "@/components/navigation/LeftSidebar";
+import RightSidebar from "@/components/navigation/RightSidebar";
+import { BottomNav } from "@/components/feed/BottomNav";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -43,19 +47,29 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <ProductDetails
-      productId={productId}
-      currentUserId={user?.id}
-      userLocation={
-        location
+    <div className="relative flex h-screen w-full flex-col overflow-hidden">
+      <TopNav />
+      <div className="flex flex-1 overflow-hidden">
+        <LeftSidebar />
+        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+          <ProductDetails
+            productId={productId}
+            currentUserId={user?.id}
+            userLocation={
+              location
           ? {
               lat: location.latitude,
               lng: location.longitude,
             }
           : null
       }
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-    />
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
+        <RightSidebar />
+      </div>
+      <BottomNav />
+    </div>
   );
 }

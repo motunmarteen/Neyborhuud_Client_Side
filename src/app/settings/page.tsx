@@ -8,6 +8,10 @@ import { authService } from '@/services/auth.service';
 import { toast } from 'sonner';
 import type { ConsentType, UserConsentRecord, AppLanguage } from '@/types/api';
 import { useTranslation } from '@/lib/i18n';
+import TopNav from '@/components/navigation/TopNav';
+import LeftSidebar from '@/components/navigation/LeftSidebar';
+import RightSidebar from '@/components/navigation/RightSidebar';
+import { BottomNav } from '@/components/feed/BottomNav';
 
 function latestForType(
     rows: UserConsentRecord[],
@@ -415,7 +419,11 @@ export default function SettingsPage() {
     );
 
     return (
-        <div className="min-h-screen bg-soft-bg pb-24">
+        <div className="relative flex h-screen w-full flex-col overflow-hidden">
+            <TopNav />
+            <div className="flex flex-1 overflow-hidden">
+                <LeftSidebar />
+                <div className="flex-1 overflow-y-auto bg-soft-bg pb-24">
             {/* Header */}
             <div className="bg-white/60 dark:bg-surface-dark/60 backdrop-blur-xl sticky top-0 z-50 border-b border-charcoal/5">
                 <div className="max-w-md mx-auto px-6 py-4 flex items-center gap-4">
@@ -1144,6 +1152,10 @@ export default function SettingsPage() {
                     </div>
                 )}
             </div>
+                </div>
+                <RightSidebar />
+            </div>
+            <BottomNav />
         </div>
     );
 }
