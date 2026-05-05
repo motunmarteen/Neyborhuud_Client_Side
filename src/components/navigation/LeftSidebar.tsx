@@ -28,9 +28,10 @@ const browseTypes = [
   { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi', href: '/fyi' },
   { icon: 'forum', label: 'Local News', type: 'gossip', href: '/local-news' },
   { icon: 'help', label: 'Help Requests', type: 'help_request', href: '/help-request' },
-  { icon: 'work', label: 'Jobs', type: 'job' },
-  { icon: 'event', label: 'Events', type: 'event' },
+  { icon: 'work', label: 'Jobs', type: 'job', href: '/jobs' },
+  { icon: 'event', label: 'Events', type: 'event', href: '/events' },
   { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace', href: '/marketplace' },
+  { icon: 'handyman', label: 'Services', type: 'services', href: '/services' },
 ];
 
 
@@ -188,7 +189,7 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
         {/* Feed Filters — 2-col grid */}
         <div className="grid grid-cols-2 gap-1.5">
           {browseTypes.map((item) => {
-            const active = item.href ? pathname === item.href : activeType === item.type;
+            const active = item.href ? pathname?.startsWith(item.href) : activeType === item.type;
             return (
               <Link
                 key={item.type}
