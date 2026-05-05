@@ -34,7 +34,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
         if (saved) {
             setIsCollapsed(saved === 'true');
         }
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
     }, []);
 
     // Prevent body scroll when mobile drawer is open

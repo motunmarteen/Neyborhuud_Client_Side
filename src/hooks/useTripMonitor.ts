@@ -281,7 +281,7 @@ export function useTripMonitor(): UseTripMonitor {
     document.addEventListener('visibilitychange', onVisibilityChange);
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   // Intentionally no state in deps — handler reads latest state via setState updater
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, []);
 
   // ── WebSocket ────────────────────────────────────────────────────────────────

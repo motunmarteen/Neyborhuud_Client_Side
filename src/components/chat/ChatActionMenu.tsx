@@ -90,7 +90,7 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
     );
   };
 
-  useEffect(() => { detect(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { detect(); }, []);  
 
   return (
     <Modal title="📍 Send Location" onClose={onClose}>
