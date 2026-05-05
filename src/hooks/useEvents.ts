@@ -13,6 +13,7 @@ import { eventsService } from "@/services/events.service";
 import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useAwardCoins } from "@/hooks/useGamification";
 
 export interface EventsFilter {
   type?: string;
@@ -89,6 +90,7 @@ export function useEventAttendees(eventId: string | null) {
 /** RSVP to an event or un-RSVP */
 export function useAttendEvent() {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   return useMutation({
     mutationFn: ({ eventId, attending }: { eventId: string; attending: boolean }) =>
@@ -100,6 +102,7 @@ export function useAttendEvent() {
         queryKey: ["events", "detail", variables.eventId],
       });
       queryClient.invalidateQueries({ queryKey: ["events", "my-events"] });
+      if (!variables.attending) awardCoins("event_attended");
       toast.success(variables.attending ? "RSVP removed" : "You're going!");
     },
     onError: (error) => {
@@ -112,6 +115,7 @@ export function useAttendEvent() {
 export function useCreateEvent() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const awardCoins = useAwardCoins();
 
   return useMutation({
     mutationFn: ({
@@ -124,6 +128,7 @@ export function useCreateEvent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events", "list"] });
       queryClient.invalidateQueries({ queryKey: ["events", "organized"] });
+      awardCoins("event_created");
       toast.success("Event created!");
       router.push("/events");
     },

@@ -50,6 +50,21 @@ function formatDate(iso: string) {
   }
 }
 
+function EarnRow({ icon, label, amount }: { icon: string; label: string; amount: string }) {
+  return (
+    <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2">
+      <span
+        className="material-symbols-outlined text-[16px] text-purple-400 shrink-0"
+        style={{ fontVariationSettings: "'FILL' 1" }}
+      >
+        {icon}
+      </span>
+      <p className="flex-1 text-xs text-gray-300 truncate">{label}</p>
+      <span className="text-xs font-bold text-yellow-400 shrink-0">{amount}</span>
+    </div>
+  );
+}
+
 export default function WalletPage() {
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<TxType>("all");
@@ -138,36 +153,77 @@ export default function WalletPage() {
 
             {/* How to earn */}
             <div className="bg-[#1a1a2e] border border-gray-800 rounded-xl p-4">
-              <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px] text-purple-400" style={{ fontVariationSettings: "'FILL' 1" }}>
                   tips_and_updates
                 </span>
                 Ways to Earn HuudCoins
               </h2>
-              <div className="grid grid-cols-2 gap-2">
+
+              {/* Category: Daily & Social */}
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Daily &amp; Social</p>
+              <div className="grid grid-cols-2 gap-2 mb-4">
                 {[
                   { icon: "today", label: "Daily check-in", amount: "+10 HC" },
                   { icon: "edit_note", label: "Create a post", amount: "+5 HC" },
-                  { icon: "comment", label: "Comment", amount: "+2 HC" },
-                  { icon: "volunteer_activism", label: "Help a neighbor", amount: "+20 HC" },
-                  { icon: "military_tech", label: "Earn a badge", amount: "+50 HC" },
-                  { icon: "emoji_events", label: "Achievement", amount: "+100 HC" },
+                  { icon: "campaign", label: "Post an FYI", amount: "+8 HC" },
+                  { icon: "forum", label: "Start a discussion", amount: "+3 HC" },
+                  { icon: "comment", label: "Comment on post", amount: "+2 HC" },
+                  { icon: "record_voice_over", label: "Comment on gossip", amount: "+2 HC" },
+                  { icon: "share", label: "Share a post", amount: "+3 HC" },
+                  { icon: "group_add", label: "Follow a neighbor", amount: "+2 HC" },
                 ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2"
-                  >
-                    <span
-                      className="material-symbols-outlined text-[16px] text-purple-400"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      {item.icon}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-300 truncate">{item.label}</p>
-                    </div>
-                    <span className="text-xs font-bold text-yellow-400 shrink-0">{item.amount}</span>
-                  </div>
+                  <EarnRow key={item.label} {...item} />
+                ))}
+              </div>
+
+              {/* Category: Marketplace */}
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Marketplace</p>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {[
+                  { icon: "storefront", label: "List an item", amount: "+10 HC" },
+                  { icon: "local_offer", label: "Make an offer", amount: "+2 HC" },
+                  { icon: "shopping_bag", label: "Complete a purchase", amount: "+20 HC" },
+                ].map((item) => (
+                  <EarnRow key={item.label} {...item} />
+                ))}
+              </div>
+
+              {/* Category: Events & Jobs */}
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Events &amp; Jobs</p>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {[
+                  { icon: "event", label: "Create an event", amount: "+15 HC" },
+                  { icon: "event_available", label: "RSVP to event", amount: "+5 HC" },
+                  { icon: "work", label: "Post a job", amount: "+10 HC" },
+                  { icon: "send", label: "Apply for a job", amount: "+5 HC" },
+                ].map((item) => (
+                  <EarnRow key={item.label} {...item} />
+                ))}
+              </div>
+
+              {/* Category: Services */}
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Services</p>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {[
+                  { icon: "handyman", label: "Book a service", amount: "+10 HC" },
+                  { icon: "star", label: "Rate a service", amount: "+8 HC" },
+                ].map((item) => (
+                  <EarnRow key={item.label} {...item} />
+                ))}
+              </div>
+
+              {/* Category: Achievements */}
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Achievements</p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { icon: "military_tech", label: "Earn a badge", amount: "+50 HC" },
+                  { icon: "emoji_events", label: "Claim achievement", amount: "+100 HC" },
+                  { icon: "volunteer_activism", label: "Help a neighbor", amount: "+20 HC" },
+                  { icon: "verified_user", label: "Verify identity", amount: "+30 HC" },
+                  { icon: "manage_accounts", label: "Complete profile", amount: "+50 HC" },
+                ].map((item) => (
+                  <EarnRow key={item.label} {...item} />
                 ))}
               </div>
             </div>

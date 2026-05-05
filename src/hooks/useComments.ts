@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-query";
 import { contentService } from "@/services/content.service";
 import { handleApiError } from "@/lib/error-handler";
+import { useAwardCoins } from "@/hooks/useGamification";
 
 /**
  * Hook for post comments
@@ -37,6 +38,7 @@ export function useComments(postId: string | null) {
  */
 export function useCommentMutations(postId: string) {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   const createCommentMutation = useMutation({
     mutationFn: (payload: {
@@ -109,6 +111,7 @@ export function useCommentMutations(postId: string) {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
       // Invalidate feed to update comment count on post cards
       queryClient.invalidateQueries({ queryKey: ["locationFeed"] });
+      awardCoins("comment_posted");
     },
     onError: (err, _, context) => {
       if (context?.previousPostDetails) {

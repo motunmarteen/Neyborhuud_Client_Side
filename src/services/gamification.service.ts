@@ -97,6 +97,17 @@ export const gamificationService = {
   },
 
   /**
+   * Award HuudCoins for a user action (fire-and-forget from frontend;
+   * backend should also award server-side for security)
+   */
+  async awardCoins(
+    action: string,
+    metadata?: Record<string, unknown>,
+  ) {
+    return await apiClient.post("/gamification/earn", { action, metadata });
+  },
+
+  /**
    * Get HuudCoins wallet balance and summary
    */
   async getWallet() {

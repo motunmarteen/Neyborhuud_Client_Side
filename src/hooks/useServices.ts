@@ -12,6 +12,7 @@ import {
 import { servicesService } from "@/services/services.service";
 import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "sonner";
+import { useAwardCoins } from "@/hooks/useGamification";
 
 export interface ServicesFilter {
   category?: string;
@@ -79,6 +80,7 @@ export function useMyBookings() {
 /** Book a service */
 export function useBookService() {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   return useMutation({
     mutationFn: ({
@@ -92,6 +94,7 @@ export function useBookService() {
     }) => servicesService.bookService(serviceId, date, notes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services", "my-bookings"] });
+      awardCoins("service_booked");
       toast.success("Booking submitted! Awaiting confirmation.");
     },
     onError: (error) => {
@@ -120,6 +123,7 @@ export function useCancelBooking() {
 /** Rate a service */
 export function useRateService() {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   return useMutation({
     mutationFn: ({
@@ -138,6 +142,7 @@ export function useRateService() {
       queryClient.invalidateQueries({
         queryKey: ["services", "reviews", variables.serviceId],
       });
+      awardCoins("service_rated");
       toast.success("Review submitted!");
     },
     onError: (error) => {

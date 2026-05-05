@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 import { gossipService } from '@/services/gossip.service';
 import { DiscussionType } from '@/types/gossip';
 import apiClient from '@/lib/api-client';
+import { useAwardCoins } from '@/hooks/useGamification';
 
 interface CreateGossipModalProps {
     isOpen: boolean;
@@ -28,6 +29,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const awardCoins = useAwardCoins();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Sync discussion type whenever the modal opens or the locked type changes
@@ -94,6 +96,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
                 mediaUrls,
             });
 
+            awardCoins('gossip_created');
             onSuccess();
             onClose();
 

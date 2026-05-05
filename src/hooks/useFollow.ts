@@ -6,12 +6,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { followService } from "@/services/follow.service";
 import { handleApiError } from "@/lib/error-handler";
+import { useAwardCoins } from "@/hooks/useGamification";
 
 /**
  * Hook for managing follow/unfollow state for a specific user
  */
 export function useFollow(userId: string | undefined, options?: { enabled?: boolean }) {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   // Get follow status - only if explicitly enabled and userId exists
   const {
@@ -69,6 +71,7 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
       queryClient.invalidateQueries({ queryKey: ["followers", userId] });
       queryClient.invalidateQueries({ queryKey: ["following"] });
       queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
+      awardCoins("user_followed");
     },
     onError: (error: any) => {
       console.error('❌ Follow error:', error);

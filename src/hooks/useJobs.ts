@@ -12,6 +12,7 @@ import {
 import { jobsService } from "@/services/jobs.service";
 import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "sonner";
+import { useAwardCoins } from "@/hooks/useGamification";
 
 export interface JobsFilter {
   type?: string;
@@ -81,6 +82,7 @@ export function useSavedJobs() {
 /** Apply for a job — supports optional cover letter + resume file */
 export function useApplyForJob() {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   return useMutation({
     mutationFn: ({
@@ -97,6 +99,7 @@ export function useApplyForJob() {
         queryKey: ["jobs", "detail", variables.jobId],
       });
       queryClient.invalidateQueries({ queryKey: ["jobs", "my-applications"] });
+      awardCoins("job_applied");
       toast.success("Application submitted successfully!");
     },
     onError: (error) => {
@@ -108,12 +111,14 @@ export function useApplyForJob() {
 /** Create a new job posting */
 export function useCreateJob() {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   return useMutation({
     mutationFn: (payload: Parameters<typeof jobsService.createJob>[0]) =>
       jobsService.createJob(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs", "list"] });
+      awardCoins("job_posted");
       toast.success("Job posted successfully!");
     },
     onError: (error) => {

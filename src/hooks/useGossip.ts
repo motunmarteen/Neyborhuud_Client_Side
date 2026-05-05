@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-query";
 import { gossipService } from "@/services/gossip.service";
 import { handleApiError } from "@/lib/error-handler";
+import { useAwardCoins } from "@/hooks/useGamification";
 import type {
   GossipPost,
   GossipComment,
@@ -94,6 +95,7 @@ export function useGossipComments(gossipId: string | null, parentId?: string) {
  */
 export function useGossipMutations(gossipId: string) {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   const likeMutation = useMutation({
     mutationFn: () => gossipService.likeGossip(gossipId),
@@ -237,6 +239,9 @@ export function useGossipMutations(gossipId: string) {
         queryClient.setQueryData(["gossip-detail", gossipId], context.previous);
       }
       handleApiError(_err);
+    },
+    onSuccess: () => {
+      awardCoins("gossip_commented");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["gossip-detail", gossipId] });

@@ -9,6 +9,7 @@ import { CreatePostPayload, ContentType, AppLanguage } from '@/types/api';
 import { gossipService } from '@/services/gossip.service';
 import { fyiService } from '@/services/fyi.service';
 import apiClient from '@/lib/api-client';
+import { useAwardCoins } from '@/hooks/useGamification';
 
 interface CreatePostModalProps {
     isOpen: boolean;
@@ -36,6 +37,7 @@ const SUCCESS_DISPLAY_MS = 1400;
 
 export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType, lockContentType, defaultFyiSubtype }: CreatePostModalProps) {
     const { t, language: appLanguage } = useTranslation();
+    const awardCoins = useAwardCoins();
     const [content, setContent] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [postType, setPostType] = useState<'text' | 'image'>('text');
@@ -188,6 +190,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                     tags: extractedTags,
                     mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
                 });
+                awardCoins('gossip_created');
 
                 setUploadProgress(100);
             } else if (contentType === 'fyi' && lockContentType) {
@@ -219,6 +222,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                         ? { latitude: userLocation.lat, longitude: userLocation.lng }
                         : undefined,
                 });
+                awardCoins('fyi_created');
 
                 setUploadProgress(100);
             } else {

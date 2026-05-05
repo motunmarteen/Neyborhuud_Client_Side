@@ -14,6 +14,7 @@ import { marketplaceService, Product } from "@/services/marketplace.service";
 import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "sonner";
 import { getOfferToast, type OfferRole } from "@/lib/marketplaceMessages";
+import { useAwardCoins } from "@/hooks/useGamification";
 
 /**
  * Hook for fetching a single product with engagement data
@@ -131,6 +132,7 @@ export function useSavedProducts() {
  */
 export function useProductMutations() {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   const createProduct = useMutation({
     mutationFn: (
@@ -143,6 +145,7 @@ export function useProductMutations() {
         queryKey: ["marketplace", "my-listings"],
       });
       queryClient.invalidateQueries({ queryKey: ["marketplace", "nearby"] });
+      awardCoins("listing_created");
       toast.success("Product listed successfully!");
     },
     onError: (error) => {
@@ -496,6 +499,7 @@ export function useSaveProduct(productId: string) {
  */
 export function useMakeOffer(productId: string) {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   return useMutation({
     mutationFn: (amount: number) =>
@@ -507,6 +511,7 @@ export function useMakeOffer(productId: string) {
       queryClient.invalidateQueries({
         queryKey: ["marketplace", "offers"],
       });
+      awardCoins("offer_made");
       // Toast is shown by the caller so it can include the offer amount and
       // tailor the perspective (e.g. accepting a counter vs. fresh offer).
     },

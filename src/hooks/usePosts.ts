@@ -12,6 +12,7 @@ import {
 import { contentService } from "@/services/content.service";
 import { CreatePostPayload, FeedTab, ContentType } from "@/types/api";
 import { handleApiError } from "@/lib/error-handler";
+import { useAwardCoins } from "@/hooks/useGamification";
 
 /**
  * Hook for location-based feed (primary feed endpoint)
@@ -149,6 +150,7 @@ export function useSavedPosts() {
  */
 export function usePostMutations() {
   const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
 
   const createPostMutation = useMutation({
     mutationFn: ({
@@ -181,6 +183,7 @@ export function usePostMutations() {
       // Invalidate so next load gets fresh data from server
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["locationFeed"] });
+      awardCoins("post_created");
     },
     onError: handleApiError,
   });
@@ -428,6 +431,9 @@ export function usePostMutations() {
   const sharePostMutation = useMutation({
     mutationFn: ({ postId, message }: { postId: string; message?: string }) =>
       contentService.sharePost(postId, message),
+    onSuccess: () => {
+      awardCoins("post_shared");
+    },
     onError: handleApiError,
   });
 
