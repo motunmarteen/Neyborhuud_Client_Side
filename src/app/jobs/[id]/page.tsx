@@ -156,10 +156,10 @@ export default function JobDetailPage() {
                 <span
                   className={`text-xs px-3 py-1 rounded-full capitalize ${TYPE_COLORS[job.type] ?? "bg-gray-700 text-gray-300"}`}
                 >
-                  {job.type.replace("-", " ")}
+                  {(job.type ?? "").replace("-", " ")}
                 </span>
                 <span className="text-xs px-3 py-1 rounded-full capitalize bg-indigo-500/20 text-indigo-400">
-                  {job.workMode.replace("-", " ")}
+                  {(job.workMode ?? "").replace("-", " ")}
                 </span>
                 {job.status && job.status !== "active" && (
                   <span className="text-xs px-3 py-1 rounded-full bg-red-500/20 text-red-400 capitalize">
@@ -175,7 +175,7 @@ export default function JobDetailPage() {
                   <div>
                     <p className="text-xs text-gray-500">Location</p>
                     <p className="text-sm text-white">
-                      {[job.location.lga, job.location.state].filter(Boolean).join(", ") || "Nigeria"}
+                      {[job.location?.lga, job.location?.state].filter(Boolean).join(", ") || "Nigeria"}
                     </p>
                   </div>
                 </div>

@@ -79,12 +79,12 @@ export default function JobCard({ job, onApply }: JobCardProps) {
         <span
           className={`text-xs border rounded-full px-2 py-0.5 capitalize ${TYPE_COLORS[job.type] ?? "bg-gray-700 text-gray-300"}`}
         >
-          {job.type.replace("-", " ")}
+          {(job.type ?? "").replace("-", " ")}
         </span>
         <span
           className={`text-xs rounded-full px-2 py-0.5 capitalize ${WORKMODE_COLORS[job.workMode] ?? "bg-gray-700 text-gray-300"}`}
         >
-          {job.workMode.replace("-", " ")}
+          {(job.workMode ?? "").replace("-", " ")}
         </span>
       </div>
 
@@ -92,7 +92,7 @@ export default function JobCard({ job, onApply }: JobCardProps) {
       <div className="flex items-center gap-1 text-gray-400 text-sm mb-2">
         <span className="material-symbols-outlined text-[14px]">location_on</span>
         <span className="truncate">
-          {[job.location.lga, job.location.state].filter(Boolean).join(", ") ||
+          {[job.location?.lga, job.location?.state].filter(Boolean).join(", ") ||
             "Nigeria"}
         </span>
       </div>

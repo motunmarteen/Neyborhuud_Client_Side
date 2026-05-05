@@ -11,7 +11,7 @@ interface Props {
 }
 
 function formatPrice(service: Service) {
-  if (!service.pricing.amount) return "Price on request";
+  if (!service.pricing?.amount) return "Price on request";
   const symbol = service.pricing.currency === "NGN" ? "₦" : service.pricing.currency;
   const amount = `${symbol}${service.pricing.amount.toLocaleString()}`;
   if (service.pricing.type === "hourly") return `${amount}/hr`;
@@ -78,7 +78,7 @@ export default function ServiceCard({ service, onFavorite, favoriting }: Props) 
         <div className="flex items-center gap-3 mt-3">
           <StarRating value={service.rating} size="sm" />
           <span className="text-xs text-gray-500">
-            {service.rating.toFixed(1)} · {service.reviews} reviews · {service.completedJobs} jobs
+            {(service.rating ?? 0).toFixed(1)} · {service.reviews ?? 0} reviews · {service.completedJobs ?? 0} jobs
           </span>
         </div>
 

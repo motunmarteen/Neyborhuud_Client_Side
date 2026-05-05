@@ -17,9 +17,11 @@ export function BottomNav({ hidden }: BottomNavProps) {
   const router = useRouter();
   const { user } = useAuth();
   const sos = useSos();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
   const isFeed = pathname === '/feed';
   const isSentinel = pathname.startsWith('/safety');
-  const profileHref = user?.username ? `/profile/${user.username}` : '/settings';
+  const profileHref = mounted && user?.username ? `/profile/${user.username}` : '/settings';
 
   // Long-press → silent SOS. ≥600 ms hold fires silently in the background.
   // Tap → /sos (the dedicated emergency command center, where the user can

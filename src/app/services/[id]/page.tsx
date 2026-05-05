@@ -81,7 +81,7 @@ export default function ServiceDetailPage() {
     : "Provider";
 
   function formatPrice() {
-    if (!service.pricing.amount) return "Price on request";
+    if (!service.pricing?.amount) return "Price on request";
     const symbol = service.pricing.currency === "NGN" ? "₦" : service.pricing.currency;
     const amount = `${symbol}${service.pricing.amount.toLocaleString()}`;
     if (service.pricing.type === "hourly") return `${amount}/hr`;
@@ -202,8 +202,8 @@ export default function ServiceDetailPage() {
               <div className="flex items-center gap-2 mt-3">
                 <StarRating value={service.rating} size="md" />
                 <span className="text-sm text-gray-400">
-                  {service.rating.toFixed(1)} · {service.reviews} reviews ·{" "}
-                  {service.completedJobs} jobs done
+                  {(service.rating ?? 0).toFixed(1)} · {service.reviews ?? 0} reviews ·{" "}
+                  {service.completedJobs ?? 0} jobs done
                 </span>
               </div>
 
@@ -271,7 +271,7 @@ export default function ServiceDetailPage() {
             {/* Reviews */}
             <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6">
               <h2 className="text-lg font-bold text-white mb-1">
-                Reviews ({service.reviews})
+                Reviews ({service.reviews ?? 0})
               </h2>
               {reviews.isLoading && (
                 <div className="space-y-3 mt-3">

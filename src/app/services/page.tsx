@@ -144,9 +144,9 @@ export default function ServicesPage() {
             {!isLoading && services.length > 0 && (
               <>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {services.map((service: any) => (
+                  {services.map((service: any, i: number) => (
                     <ServiceCard
-                      key={service.id}
+                      key={service.id ?? service._id ?? i}
                       service={service}
                       onFavorite={(serviceId, favorited) =>
                         favoriteService.mutate({ serviceId, favorited })

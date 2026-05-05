@@ -368,10 +368,10 @@ export default function AmbientProfileCard({
               border: '1px solid rgba(255,255,255,0.18)',
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)' }} suppressHydrationWarning>
               {timePeriod === 'night' || timePeriod === 'evening' ? 'dark_mode' : timePeriod === 'dawn' || timePeriod === 'sunset' ? 'routine' : 'light_mode'}
             </span>
-            <span className="text-[11px] font-semibold text-white/80" style={{ letterSpacing: '0.04em' }}>
+            <span className="text-[11px] font-semibold text-white/80" style={{ letterSpacing: '0.04em' }} suppressHydrationWarning>
               {greeting}
             </span>
           </div>
