@@ -43,15 +43,20 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
   const { user } = useAuth();
   const activeType = pathname === '/feed' ? searchParams.get('type') : null;
 
+  // Defer auth-dependent rendering until after mount to prevent SSR/client hydration mismatch
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const authUser = mounted ? user : null;
+
   const isActive = (href: string) => {
     if (href === '/feed') return pathname === '/feed' || pathname === '/';
     return pathname?.startsWith(href);
   };
 
-  const userDisplayName = user
-    ? user.firstName && user.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : user.firstName || user.username
+  const userDisplayName = authUser
+    ? authUser.firstName && authUser.lastName
+      ? `${authUser.firstName} ${authUser.lastName}`
+      : authUser.firstName || authUser.username
     : 'User';
   const userInitial = userDisplayName[0]?.toUpperCase() || 'U';
 
@@ -116,16 +121,16 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
       {/* Ambient Profile Card — floats within sidebar padding like weather widget on right */}
       <div className="pl-4 pr-6 pt-4">
         <AmbientProfileCard
-          avatarUrl={user?.avatarUrl}
+          avatarUrl={authUser?.avatarUrl}
           displayName={userDisplayName}
           initial={userInitial}
-          username={user?.username || 'user'}
+          username={authUser?.username || 'user'}
           location={userLocation}
           lat={userLat}
           lng={userLng}
-          profileHref={user ? `/profile/${user.username}` : '/settings'}
+          profileHref={authUser ? `/profile/${authUser.username}` : '/settings'}
           onNavigate={onNavigate}
-          userId={user?.id}
+          userId={authUser?.id}
         />
       </div>
 

@@ -280,9 +280,9 @@ export default function GamificationPage() {
                     </div>
                   ) : (
                     <div className="space-y-1">
-                      {leaderboardList.slice(0, 3).map((entry: any) => (
+                      {leaderboardList.slice(0, 3).map((entry: any, i: number) => (
                         <LeaderboardRow
-                          key={entry.userId}
+                          key={entry.userId ?? entry.id ?? i}
                           entry={entry}
                           currentUserId={user?.id ?? ""}
                         />
@@ -396,9 +396,9 @@ export default function GamificationPage() {
                   </div>
                 ) : (
                   <div className="bg-[#1a1a2e] border border-gray-800 rounded-xl divide-y divide-gray-800/50 overflow-hidden">
-                    {leaderboardList.map((entry: any) => (
+                    {leaderboardList.map((entry: any, i: number) => (
                       <LeaderboardRow
-                        key={entry.userId}
+                        key={entry.userId ?? entry.id ?? i}
                         entry={entry}
                         currentUserId={user?.id ?? ""}
                       />
