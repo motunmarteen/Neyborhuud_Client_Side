@@ -1,15 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import dynamic from "next/dynamic";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-
-const DailyCheckInModal = dynamic(
-  () => import("@/components/gamification/DailyCheckInModal"),
-  { ssr: false }
-);
+import DailyCheckInModal from "@/components/gamification/DailyCheckInModalLoader";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
