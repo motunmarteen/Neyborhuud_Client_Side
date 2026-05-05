@@ -24,7 +24,7 @@ export default function EventsPage() {
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useEvents(apiFilter);
 
-  const events = data?.pages.flatMap((page) => (page as any).data ?? []) ?? [];
+  const events = data?.pages.flatMap((page) => (page as any)?.data?.events ?? []) ?? [];
 
   function handleFilterChange(key: keyof EventsFilterState, value: string) {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -33,15 +33,24 @@ export default function EventsPage() {
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <TopNav />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         <LeftSidebar />
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+        <div className="flex-1 min-h-0 overflow-y-auto pb-20 bg-[#0f0f1e] text-white">
           {/* Header */}
           <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800 backdrop-blur-md bg-opacity-95">
             <div className="max-w-3xl mx-auto px-4 py-4">
               <div className="flex items-center justify-between mb-3">
                 <h1 className="text-xl font-bold">Events</h1>
                 <div className="flex gap-2">
+                  <Link
+                    href="/events/nearby"
+                    className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300"
+                  >
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">near_me</span>
+                      Nearby
+                    </span>
+                  </Link>
                   <Link
                     href="/events/my-events"
                     className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300"
