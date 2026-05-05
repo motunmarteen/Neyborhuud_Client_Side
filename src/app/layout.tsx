@@ -1,9 +1,15 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import dynamic from "next/dynamic";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+
+const DailyCheckInModal = dynamic(
+  () => import("@/components/gamification/DailyCheckInModal"),
+  { ssr: false }
+);
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -48,6 +54,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
+          <DailyCheckInModal />
           <div className="mx-auto w-full max-w-[1400px] relative">
             {children}
           </div>
