@@ -185,33 +185,31 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
           </div>
         </div>
 
-        {/* Browse Feed */}
-        <div className="flex flex-col gap-3">
-          <div className="neu-divider" />
-          <h2 className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Browse Feed</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {browseTypes.map((item) => {
-              const active = activeType === item.type;
-              return (
-                <Link
-                  key={item.type}
-                  href={`/feed?type=${item.type}`}
-                  onClick={onNavigate}
-                  className={`neu-card-sm flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all hover:scale-[1.01] ${
-                    active ? 'text-primary' : ''
-                  }`}
-                  style={!active ? { color: 'var(--neu-text)' } : undefined}
-                >
-                  <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors shrink-0`} style={{ fontSize: '16px' }}>
-                    {item.icon}
-                  </span>
-                  <p className={`text-[11px] ${active ? 'font-bold' : 'font-medium'} leading-snug`}>
-                    {item.label}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
+        {/* Feed Filters — 2-col grid */}
+        <div className="grid grid-cols-2 gap-1.5">
+          {browseTypes.map((item) => {
+            const active = item.href ? pathname === item.href : activeType === item.type;
+            return (
+              <Link
+                key={item.type}
+                href={item.href || `/feed?type=${item.type}`}
+                onClick={onNavigate}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all ${
+                  active
+                    ? 'bg-primary/[0.08] text-primary'
+                    : 'hover:bg-black/[0.05] bg-black/[0.025]'
+                }`}
+                style={!active ? { color: 'var(--neu-text)' } : undefined}
+              >
+                <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors shrink-0`} style={{ fontSize: '16px' }}>
+                  {item.icon}
+                </span>
+                <p className={`text-[11px] ${active ? 'font-bold' : 'font-medium'} leading-snug`}>
+                  {item.label}
+                </p>
+              </Link>
+            );
+          })}
         </div>
 
       {/* Mobile-only: Settings at bottom */}
