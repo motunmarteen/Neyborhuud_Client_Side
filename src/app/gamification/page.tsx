@@ -80,15 +80,36 @@ export default function GamificationPage() {
   const streak = useMyStreak();
   const checkIn = useCheckIn();
 
-  const statsData = stats.data as any;
-  const streakData = streak.data as any;
+  // Safely extract an array from any API response shape:
+  // raw array, { data: [] }, { data: { items: [] } }, { leaderboard: [] }, etc.
+  function toArray(val: unknown): any[] {
+    if (Array.isArray(val)) return val;
+    if (val && typeof val === "object") {
+      const v = val as Record<string, unknown>;
+      // common envelope keys
+      for (const key of ["data", "items", "results", "leaderboard", "badges", "achievements", "entries"]) {
+        if (Array.isArray(v[key])) return v[key] as any[];
+      }
+      // one more level deep: { data: { leaderboard: [] } }
+      if (v.data && typeof v.data === "object") {
+        const inner = v.data as Record<string, unknown>;
+        for (const key of ["items", "results", "leaderboard", "badges", "achievements", "entries"]) {
+          if (Array.isArray(inner[key])) return inner[key] as any[];
+        }
+      }
+    }
+    return [];
+  }
+
+  const statsData = (stats.data as any)?.data ?? stats.data as any;
+  const streakData = (streak.data as any)?.data ?? streak.data as any;
   const earnedBadgeIds = new Set<string>(
-    ((myBadges.data as any[]) ?? []).map((b: Badge) => b.id)
+    toArray(myBadges.data).map((b: Badge) => b.id)
   );
-  const allBadgeList: Badge[] = (allBadges.data as any[]) ?? [];
-  const myBadgeList: Badge[] = (myBadges.data as any[]) ?? [];
-  const achievementList = (achievements.data as any[]) ?? [];
-  const leaderboardList = (leaderboard.data as any[]) ?? [];
+  const allBadgeList: Badge[] = toArray(allBadges.data);
+  const myBadgeList: Badge[] = toArray(myBadges.data);
+  const achievementList = toArray(achievements.data);
+  const leaderboardList = toArray(leaderboard.data);
 
   const filteredBadges =
     badgeFilter === "earned"
