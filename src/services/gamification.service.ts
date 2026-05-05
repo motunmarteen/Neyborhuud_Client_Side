@@ -95,4 +95,20 @@ export const gamificationService = {
   async checkIn() {
     return await apiClient.post("/gamification/check-in");
   },
+
+  /**
+   * Get HuudCoins wallet balance and summary
+   */
+  async getWallet() {
+    return await apiClient.get("/gamification/wallet");
+  },
+
+  /**
+   * Get HuudCoins transaction history
+   */
+  async getTransactions(page = 1, limit = 20) {
+    return await apiClient.get("/gamification/wallet/transactions", {
+      params: { page, limit },
+    });
+  },
 };

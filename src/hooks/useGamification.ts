@@ -15,6 +15,7 @@ export function useMyGamificationStats() {
       return (res as any)?.data ?? res;
     },
     staleTime: 60_000,
+    retry: false,
   });
 }
 
@@ -28,6 +29,7 @@ export function useLeaderboard(
       return (res as any)?.data ?? res ?? [];
     },
     staleTime: 30_000,
+    retry: false,
   });
 }
 
@@ -38,6 +40,7 @@ export function useMyBadges() {
       const res = await gamificationService.getMyBadges();
       return (res as any)?.data ?? res ?? [];
     },
+    retry: false,
   });
 }
 
@@ -49,6 +52,7 @@ export function useAllBadges() {
       return (res as any)?.data ?? res ?? [];
     },
     staleTime: 5 * 60_000,
+    retry: false,
   });
 }
 
@@ -59,6 +63,7 @@ export function useMyAchievements() {
       const res = await gamificationService.getMyAchievements();
       return (res as any)?.data ?? res ?? [];
     },
+    retry: false,
   });
 }
 
@@ -70,6 +75,7 @@ export function useMyStreak() {
       return (res as any)?.data ?? res;
     },
     staleTime: 60_000,
+    retry: false,
   });
 }
 
@@ -112,5 +118,37 @@ export function useClaimAchievement() {
     onError: (err) => {
       toast.error(getErrorMessage(err));
     },
+  });
+}
+
+// ── Wallet ─────────────────────────────────────────────────────
+
+export function useWallet() {
+  return useQuery({
+    queryKey: ["gamification", "wallet"],
+    queryFn: async () => {
+      const res = await gamificationService.getWallet();
+      return (res as any)?.data ?? res;
+    },
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+export function useTransactions(page = 1) {
+  return useQuery({
+    queryKey: ["gamification", "transactions", page],
+    queryFn: async () => {
+      const res = await gamificationService.getTransactions(page);
+      const raw = (res as any)?.data ?? res;
+      return {
+        transactions: Array.isArray(raw?.transactions) ? raw.transactions : Array.isArray(raw) ? raw : [],
+        total: raw?.total ?? 0,
+        page: raw?.page ?? page,
+        totalPages: raw?.totalPages ?? 1,
+      };
+    },
+    staleTime: 30_000,
+    retry: false,
   });
 }
