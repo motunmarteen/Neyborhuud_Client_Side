@@ -30,6 +30,11 @@ import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
+import { useMyBadges } from '@/hooks/useGamification';
+import { useUserJobs } from '@/hooks/useJobs';
+import { useUserEvents } from '@/hooks/useEvents';
+import { useUserServices } from '@/hooks/useServices';
+import { useVouchStatus, useVouchUser, useRevokeVouch, getTrustTier } from '@/hooks/useTrust';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -165,6 +170,14 @@ export default function ProfilePage() {
     isPending: isBlockPending,
   } = useBlock(profile?.id, { enabled: shouldEnableFollow });
 
+  // Vouching — use profile?.id directly (userId is declared later but same value)
+  const profileId = (profile as any)?.id || (profile as any)?._id || null;
+  const shouldEnableVouch = !isOwnProfile && !!currentUser && !!profileId && !isBlocked && !isBlockedByThem;
+  const { data: vouchStatus } = useVouchStatus(profileId, { enabled: shouldEnableVouch });
+  const vouchMutation = useVouchUser(profileId);
+  const revokeMutation = useRevokeVouch(profileId);
+  const isVouchPending = vouchMutation.isPending || revokeMutation.isPending;
+
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
 
@@ -186,6 +199,24 @@ export default function ProfilePage() {
 
   // Get the correct user ID - backend might use _id or id
   const userId = profile?.id || (profile as any)?._id || null;
+
+  // ── Phase 1–3 profile data ────────────────────────────────────────────────
+  // Badges: only fetch for own profile (useMyBadges returns current user's badges)
+  const { data: myBadgesRaw } = useMyBadges();
+  const myBadges: any[] = (() => {
+    const b = (myBadgesRaw as any)?.data ?? myBadgesRaw ?? [];
+    return Array.isArray(b) ? b : [];
+  })();
+
+  // Jobs / Events / Services posted by this profile's user
+  const { data: userJobsRaw } = useUserJobs(userId, 3);
+  const userJobs: any[] = Array.isArray(userJobsRaw) ? userJobsRaw : [];
+
+  const { data: userEventsRaw } = useUserEvents(userId, 3);
+  const userEvents: any[] = Array.isArray(userEventsRaw) ? userEventsRaw : [];
+
+  const { data: userServicesRaw } = useUserServices(userId, 3);
+  const userServices: any[] = Array.isArray(userServicesRaw) ? userServicesRaw : [];
 
   // Fetch user posts
   const {
@@ -346,6 +377,7 @@ export default function ProfilePage() {
 
   const locationLabel = [profile.location?.lga, profile.location?.state].filter(Boolean).join(', ');
   const trustScore = profile.trustScore ?? profile.gamification?.trustScore ?? 0;
+  const profileTrustTier = getTrustTier(trustScore);
   const huudCoins =
     (profile as any).totalHuudCoins ??
     (profile as any).huudCoins ??
@@ -470,6 +502,16 @@ export default function ProfilePage() {
                     <span className="rounded-full bg-white/15 px-2 py-1 text-[11px] font-bold text-white/90 ring-1 ring-white/15 backdrop-blur">
                       Level {level}
                     </span>
+                    {/* Trust tier badge */}
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[11px] font-bold text-white/90 ring-1 ring-white/15 backdrop-blur">
+                      {profileTrustTier.icon} {profileTrustTier.label}
+                    </span>
+                    {/* Vouch count chip — shown when there are vouches */}
+                    {(vouchStatus?.vouchCount ?? 0) > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 px-2 py-1 text-[11px] font-bold text-amber-100 ring-1 ring-amber-200/30 backdrop-blur">
+                        🤜 {vouchStatus!.vouchCount} {vouchStatus!.vouchCount === 1 ? 'vouch' : 'vouches'}
+                      </span>
+                    )}
                   </div>
                   <h1 className="truncate text-2xl font-black leading-tight sm:text-4xl">{displayName}</h1>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-white/80 sm:text-sm">
@@ -629,6 +671,77 @@ export default function ProfilePage() {
               </>
             )}
           </div>
+
+          {/* ── Vouch Card ──────────────────────────────────────────── */}
+          {!isOwnProfile && !isBlocked && !isBlockedByThem && currentUser && (
+            <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-700">
+                    Community Trust
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold text-slate-800">
+                    {(vouchStatus?.vouchCount ?? 0) > 0
+                      ? `${vouchStatus!.vouchCount} NeyburH${vouchStatus!.vouchCount === 1 ? '' : 's'} vouch for @${profile.username}`
+                      : `@${profile.username} has no vouches yet`}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    {vouchStatus?.hasVouched
+                      ? 'You have vouched for this NeyburH. Their actions reflect on your trust.'
+                      : vouchStatus?.canVouch === false
+                      ? 'Reach Tree 🌳 tier to unlock vouching.'
+                      : 'Vouching puts your own NeyburH Score at stake.'}
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  {vouchStatus?.hasVouched ? (
+                    <button
+                      onClick={() => revokeMutation.mutate()}
+                      disabled={isVouchPending}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-100 px-3.5 py-2 text-sm font-black text-amber-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                      type="button"
+                      title="Revoke your vouch"
+                    >
+                      {isVouchPending ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : (
+                        <>🤜 Vouched</>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => vouchMutation.mutate()}
+                      disabled={isVouchPending || vouchStatus?.canVouch === false}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-2 text-sm font-black text-white shadow-md shadow-amber-500/25 transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      type="button"
+                      title={vouchStatus?.canVouch === false ? 'Reach Tree 🌳 tier to unlock vouching' : 'Vouch for this NeyburH'}
+                    >
+                      {isVouchPending ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : (
+                        <>🤜 Vouch</>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+              {/* Trust tier progress bar */}
+              {(vouchStatus?.vouchesNeeded ?? 0) > 0 && !vouchStatus?.hasVouched && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-[10px] font-bold text-amber-600 mb-1">
+                    <span>Progress to Tree 🌳 tier</span>
+                    <span>{vouchStatus?.vouchCount ?? 0} / 3 vouches</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-amber-200">
+                    <div
+                      className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                      style={{ width: `${Math.min(100, ((vouchStatus?.vouchCount ?? 0) / 3) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
             <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
@@ -799,26 +912,218 @@ export default function ProfilePage() {
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Badges</p>
                   <h2 className="mt-1 text-xl font-black text-slate-900">Neyborhuud credibility</h2>
                 </div>
-                <button className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-emerald-700" type="button">View All</button>
+                <Link
+                  href={isOwnProfile ? "/gamification?tab=badges" : `/gamification`}
+                  className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-emerald-700 hover:bg-emerald-100 transition-colors"
+                >
+                  View All
+                </Link>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {[
-                  { name: 'Good Samaritan', tier: 'Gold', icon: 'volunteer_activism', tone: 'bg-emerald-50 text-emerald-700 ring-emerald-100' },
-                  { name: 'Watch Leader', tier: 'Diamond', icon: 'shield_person', tone: 'bg-sky-50 text-sky-700 ring-sky-100' },
-                  { name: 'Top Seller', tier: 'Silver', icon: 'storefront', tone: 'bg-violet-50 text-violet-700 ring-violet-100' },
-                  { name: 'First Responder', tier: 'Verified', icon: 'emergency_home', tone: 'bg-rose-50 text-rose-700 ring-rose-100' },
-                ].map((badge) => (
-                  <div key={badge.name} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                    <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-2xl ring-1 ${badge.tone}`}>
-                      <span className="material-symbols-outlined text-[22px]">{badge.icon}</span>
-                    </div>
-                    <p className="text-sm font-black leading-tight text-slate-800">{badge.name}</p>
-                    <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{badge.tier}</p>
+              {isOwnProfile ? (
+                myBadges.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {myBadges.slice(0, 4).map((badge: any, i: number) => (
+                      <div key={badge.id ?? badge._id ?? i} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                        <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 ring-1 ring-amber-100 text-amber-700">
+                          <span className="material-symbols-outlined text-[22px]">{badge.icon ?? "military_tech"}</span>
+                        </div>
+                        <p className="text-sm font-black leading-tight text-slate-800">{badge.name ?? badge.title ?? "Badge"}</p>
+                        <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{badge.tier ?? badge.category ?? "Earned"}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                ) : (
+                  <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-200 px-4 py-8 text-center">
+                    <span className="material-symbols-outlined text-[36px] text-slate-300">military_tech</span>
+                    <p className="mt-2 text-sm font-bold text-slate-500">No badges earned yet</p>
+                    <Link href="/gamification" className="mt-3 inline-block text-xs font-black text-emerald-600 hover:underline">
+                      Go earn your first badge →
+                    </Link>
+                  </div>
+                )
+              ) : (() => {
+                // Use real badges from profile.gamification.badges (sent by backend in public profile response)
+                const publicBadges: any[] = (() => {
+                  const b = profile.gamification?.badges;
+                  return Array.isArray(b) ? b : [];
+                })();
+                const rarityTone: Record<string, string> = {
+                  common:    'bg-slate-50    text-slate-600  ring-slate-100',
+                  uncommon:  'bg-emerald-50  text-emerald-700 ring-emerald-100',
+                  rare:      'bg-sky-50      text-sky-700    ring-sky-100',
+                  epic:      'bg-violet-50   text-violet-700 ring-violet-100',
+                  legendary: 'bg-amber-50    text-amber-700  ring-amber-100',
+                };
+                if (publicBadges.length === 0) {
+                  return (
+                    <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-200 px-4 py-8 text-center">
+                      <span className="material-symbols-outlined text-[36px] text-slate-300">military_tech</span>
+                      <p className="mt-2 text-sm font-bold text-slate-500">
+                        @{profile.username} hasn&apos;t earned any badges yet
+                      </p>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {publicBadges.slice(0, 4).map((badge: any, i: number) => {
+                      const tone = rarityTone[badge.rarity ?? badge.tier ?? 'common'] ?? rarityTone.common;
+                      return (
+                        <div key={badge.id ?? badge._id ?? i} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                          <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-2xl ring-1 ${tone}`}>
+                            <span className="material-symbols-outlined text-[22px]">{badge.icon ?? 'military_tech'}</span>
+                          </div>
+                          <p className="text-sm font-black leading-tight text-slate-800">{badge.name ?? badge.title ?? 'Badge'}</p>
+                          <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+                            {badge.rarity ?? badge.tier ?? badge.category ?? 'Earned'}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </section>
+
+            {/* ── Gamification Quick Links (own profile only) ── */}
+            {isOwnProfile && (
+              <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 mb-4">Your HuudCoins Activity</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href="/gamification"
+                    className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-100 p-4 hover:from-amber-100 hover:to-yellow-100 transition-colors group"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 group-hover:bg-amber-200 transition-colors">
+                      <span className="material-symbols-outlined text-[22px]">emoji_events</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-slate-800">Gamification Hub</p>
+                      <p className="text-[11px] text-slate-500">Badges · Leaderboard</p>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/gamification/wallet"
+                    className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-4 hover:from-emerald-100 hover:to-teal-100 transition-colors group"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 group-hover:bg-emerald-200 transition-colors">
+                      <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-slate-800">HuudCoins Wallet</p>
+                      <p className="text-[11px] text-slate-500">Balance · Transactions</p>
+                    </div>
+                  </Link>
+                </div>
+              </section>
+            )}
+
+            {/* ── Jobs posted by this user ── */}
+            {userJobs.length > 0 && (
+              <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Jobs</p>
+                    <h2 className="mt-1 text-xl font-black text-slate-900">Posted by {isOwnProfile ? "you" : profile.firstName ?? profile.username}</h2>
+                  </div>
+                  <Link href="/jobs" className="text-xs font-black text-emerald-600 hover:underline">See all →</Link>
+                </div>
+                <div className="space-y-2">
+                  {userJobs.map((job: any, i: number) => (
+                    <Link
+                      key={job.id ?? job._id ?? i}
+                      href={`/jobs/${job.id ?? job._id}`}
+                      className="flex items-start gap-3 rounded-2xl bg-slate-50 border border-slate-100 p-3 hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                        <span className="material-symbols-outlined text-[18px]">work</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-slate-800 truncate">{job.title ?? "Job listing"}</p>
+                        <p className="text-[11px] text-slate-500">
+                          {job.type?.replace("-", " ")} · {job.workMode ?? "—"} · {job.location?.lga ?? job.location?.state ?? ""}
+                        </p>
+                      </div>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${job.status === "open" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                        {job.status ?? "open"}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── Events organised by this user ── */}
+            {userEvents.length > 0 && (
+              <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Events</p>
+                    <h2 className="mt-1 text-xl font-black text-slate-900">Organised by {isOwnProfile ? "you" : profile.firstName ?? profile.username}</h2>
+                  </div>
+                  <Link href="/events" className="text-xs font-black text-emerald-600 hover:underline">See all →</Link>
+                </div>
+                <div className="space-y-2">
+                  {userEvents.map((event: any, i: number) => (
+                    <Link
+                      key={event.id ?? event._id ?? i}
+                      href={`/events/${event.id ?? event._id}`}
+                      className="flex items-start gap-3 rounded-2xl bg-slate-50 border border-slate-100 p-3 hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-700">
+                        <span className="material-symbols-outlined text-[18px]">event</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-black text-slate-800 truncate">{event.title ?? "Event"}</p>
+                        <p className="text-[11px] text-slate-500">
+                          {event.date ? new Date(event.date).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" }) : "Date TBC"}
+                          {event.location?.lga ? ` · ${event.location.lga}` : ""}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-[11px] font-bold text-slate-400">{event.attendees ?? 0} going</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── Services offered by this user ── */}
+            {userServices.length > 0 && (
+              <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Services</p>
+                    <h2 className="mt-1 text-xl font-black text-slate-900">{isOwnProfile ? "Your" : `${profile.firstName ?? profile.username}'s`} service offerings</h2>
+                  </div>
+                  <Link href="/services" className="text-xs font-black text-emerald-600 hover:underline">See all →</Link>
+                </div>
+                <div className="space-y-2">
+                  {userServices.map((service: any, i: number) => (
+                    <Link
+                      key={service.id ?? service._id ?? i}
+                      href={`/services/${service.id ?? service._id}`}
+                      className="flex items-start gap-3 rounded-2xl bg-slate-50 border border-slate-100 p-3 hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-700">
+                        <span className="material-symbols-outlined text-[18px]">home_repair_service</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-black text-slate-800 truncate">{service.title ?? "Service"}</p>
+                        <p className="text-[11px] text-slate-500 capitalize">
+                          {service.category ?? "—"}
+                          {service.pricing?.amount ? ` · ₦${Number(service.pricing.amount).toLocaleString()}` : service.pricing?.type === "custom" ? " · Custom price" : ""}
+                        </p>
+                      </div>
+                      <div className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-amber-600">
+                        <span className="material-symbols-outlined text-[13px]">star</span>
+                        {service.rating ? service.rating.toFixed(1) : "New"}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

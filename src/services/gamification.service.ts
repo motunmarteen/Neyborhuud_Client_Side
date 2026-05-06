@@ -4,7 +4,7 @@
  */
 
 import apiClient from "@/lib/api-client";
-import { Badge, Achievement, LeaderboardEntry } from "@/types/api";
+import { Badge, Achievement, LeaderboardEntry, HuudCoinWallet, HuudCoinTransaction, PaginatedResponse } from "@/types/api";
 
 export const gamificationService = {
   /**
@@ -111,14 +111,14 @@ export const gamificationService = {
    * Get HuudCoins wallet balance and summary
    */
   async getWallet() {
-    return await apiClient.get("/gamification/wallet");
+    return await apiClient.get<HuudCoinWallet>("/gamification/wallet");
   },
 
   /**
    * Get HuudCoins transaction history
    */
   async getTransactions(page = 1, limit = 20) {
-    return await apiClient.get("/gamification/wallet/transactions", {
+    return await apiClient.get<PaginatedResponse<HuudCoinTransaction>>("/gamification/wallet/transactions", {
       params: { page, limit },
     });
   },

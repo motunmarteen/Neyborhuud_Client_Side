@@ -43,6 +43,7 @@ export const eventsService = {
       date?: string;
       location?: string;
       status?: string;
+      organizerId?: string;
     },
   ) {
     return await apiClient.get<PaginatedResponse<Event>>("/events", {

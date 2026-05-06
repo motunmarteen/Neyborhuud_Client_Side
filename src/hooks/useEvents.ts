@@ -38,6 +38,22 @@ export function useEvents(filter?: EventsFilter) {
   });
 }
 
+/** Events organized by a specific user (for profile pages) */
+export function useUserEvents(userId: string | null, limit = 6) {
+  return useQuery({
+    queryKey: ["events", "user", userId, limit],
+    queryFn: async () => {
+      const res = await eventsService.getEvents(1, limit, { organizerId: userId! });
+      const data = (res as any)?.data?.data ?? (res as any)?.data ?? res;
+      const items = data?.content ?? data?.events ?? data?.data ?? data ?? [];
+      return Array.isArray(items) ? items : [];
+    },
+    enabled: !!userId,
+    staleTime: 60000,
+    retry: false,
+  });
+}
+
 /** Single event by id */
 export function useEvent(eventId: string | null) {
   return useQuery({

@@ -22,7 +22,7 @@ const mainNav = [
   { icon: 'groups', label: 'Communities', href: '/communities' },
   { icon: 'bookmark', label: 'Saved', href: '/saved' },
   { icon: 'local_fire_department', label: 'Popular Nearby', href: '/popular' },
-  { icon: 'emoji_events', label: 'Gamification', href: '/gamification' },
+  { icon: 'military_tech', label: 'My Huud Score', href: '/gamification' },
 ];
 
 const browseTypes = [

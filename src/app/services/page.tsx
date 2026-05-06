@@ -58,12 +58,21 @@ export default function ServicesPage() {
             <div className="max-w-3xl mx-auto px-4 py-4">
               <div className="flex items-center justify-between mb-3">
                 <h1 className="text-xl font-bold">Services</h1>
-                <Link
-                  href="/services/my-bookings"
-                  className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300"
-                >
-                  My Bookings
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/services/my-bookings"
+                    className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300"
+                  >
+                    My Bookings
+                  </Link>
+                  <Link
+                    href="/services/create"
+                    className="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-500 rounded-lg transition-colors text-white font-medium flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">add</span>
+                    Offer a Service
+                  </Link>
+                </div>
               </div>
 
               {/* Category chips */}

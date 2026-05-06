@@ -12,6 +12,7 @@ import { formatTimeAgo } from '@/utils/timeAgo';
 import { useFollow } from '@/hooks/useFollow';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import { chatService } from '@/services/chat.service';
+import ShareModal from './ShareModal';
 
 interface XPostCardProps {
     post: Post;
@@ -46,6 +47,7 @@ export function XPostCard({
 }: XPostCardProps) {
     const [imageError, setImageError] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
+    const [showShare, setShowShare] = useState(false);
     const router = useRouter();
 
     // Get author info
@@ -322,7 +324,7 @@ export function XPostCard({
                         </button>
                         {/* Share */}
                         <button
-                            onClick={(e) => { e.stopPropagation(); onShare(); }}
+                            onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
                             className="flex flex-col items-center gap-0.5 group"
                         >
                             <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md hover:bg-black/50 transition-all">
@@ -554,7 +556,7 @@ export function XPostCard({
                         {post.comments > 0 && <span className="text-[11px] font-bold text-white drop-shadow-md">{post.comments}</span>}
                     </button>
                     {/* Share */}
-                    <button onClick={(e) => { e.stopPropagation(); onShare(); }} className="flex flex-col items-center gap-0.5 group">
+                    <button onClick={(e) => { e.stopPropagation(); setShowShare(true); }} className="flex flex-col items-center gap-0.5 group">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md hover:bg-black/50 transition-all">
                             <span className="material-symbols-outlined text-[22px] text-white group-hover:scale-110 transition-transform">send</span>
                         </div>
@@ -753,6 +755,7 @@ export function XPostCard({
     }
 
     return (
+        <>
         <article
             className={`relative bg-white overflow-hidden cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow ${
                 isSafetyAlert ? 'ring-1 ring-orange-400/40' : ''
@@ -785,7 +788,7 @@ export function XPostCard({
                     {post.comments > 0 && <span className="text-[11px] font-bold text-gray-500">{post.comments}</span>}
                 </button>
                 {/* Share */}
-                <button onClick={(e) => { e.stopPropagation(); onShare(); }} className="flex flex-col items-center gap-0.5 group">
+                <button onClick={(e) => { e.stopPropagation(); setShowShare(true); }} className="flex flex-col items-center gap-0.5 group">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/5 hover:bg-black/10 transition-all">
                         <span className="material-symbols-outlined text-[22px] text-gray-400 group-hover:scale-110 transition-transform">send</span>
                     </div>
@@ -1165,5 +1168,15 @@ export function XPostCard({
             )}
 
         </article>
+
+        {/* Share Modal */}
+        {showShare && (
+            <ShareModal
+                postId={post.id ?? (post as any)._id ?? ''}
+                postContent={post.content ?? ''}
+                onClose={() => setShowShare(false)}
+            />
+        )}
+        </>
     );
 }

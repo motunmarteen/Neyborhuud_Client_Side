@@ -5,9 +5,11 @@
  * View and manage user's own marketplace listings
  */
 
+import { useState } from "react";
 import { useMyListings, useProductOffers } from "@/hooks/useMarketplace";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { ProductCard } from "@/components/marketplace";
+import { BoostModal } from "@/components/marketplace/BoostModal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Product } from "@/services/marketplace.service";
@@ -46,20 +48,46 @@ function PendingOffersBadge({ product }: { product: Product }) {
 function ListingWithOffers({
   product,
   userLocation,
+  onBoost,
 }: {
   product: Product;
   userLocation: { lat: number; lng: number } | null;
+  onBoost: (id: string, title: string) => void;
 }) {
+  const productId = (product as any)._id ?? product.id;
+  const productTitle = (product as any).title ?? (product as any).name ?? "Listing";
+
   return (
     <div className="flex flex-col">
       <ProductCard product={product} userLocation={userLocation} />
       <PendingOffersBadge product={product} />
+      {/* Owner actions: Edit + Boost */}
+      <div className="mt-2 flex gap-2">
+        <Link
+          href={`/marketplace/${productId}/edit`}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-gray-700/50 px-3 py-1 text-xs font-semibold text-gray-300 hover:bg-gray-700 transition-colors"
+        >
+          <span className="material-symbols-outlined text-sm">edit</span>
+          Edit
+        </Link>
+        <button
+          onClick={() => onBoost(productId, productTitle)}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400 hover:bg-amber-500/25 transition-colors"
+        >
+          <span className="material-symbols-outlined text-sm">rocket_launch</span>
+          Boost
+        </button>
+      </div>
     </div>
   );
 }
 
 export default function MyListingsPage() {
   const { location } = useGeolocation();
+  const [
+    boostProduct,
+    setBoostProduct,
+  ] = useState<{ id: string; title: string } | null>(null);
   const {
     data,
     fetchNextPage,
@@ -73,6 +101,13 @@ export default function MyListingsPage() {
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
+      {boostProduct && (
+        <BoostModal
+          productId={boostProduct.id}
+          productTitle={boostProduct.title}
+          onClose={() => setBoostProduct(null)}
+        />
+      )}
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
@@ -176,6 +211,7 @@ export default function MyListingsPage() {
                           }
                         : null
                     }
+                    onBoost={(id, title) => setBoostProduct({ id, title })}
                   />
                 );
               })}

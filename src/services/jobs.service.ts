@@ -31,6 +31,7 @@ export const jobsService = {
       workMode?: string;
       minSalary?: number;
       maxSalary?: number;
+      employerId?: string;
     },
   ) {
     return await apiClient.get<PaginatedResponse<Job>>("/jobs", {

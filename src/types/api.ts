@@ -119,7 +119,13 @@ export interface UserSettings {
     mentions: boolean;
     likes: boolean;
     comments: boolean;
+    follows?: boolean;
+    events?: boolean;
+    jobs?: boolean;
+    safety?: boolean;
+    gamification?: boolean;
   };
+  contentRadius?: number;
   privacy: {
     profileVisibility: "public" | "friends" | "private";
     showLocation: boolean;
@@ -1191,3 +1197,22 @@ export interface DepartmentServicesResponse {
   };
 }
 
+export interface HuudCoinTransaction {
+  id: string;
+  userId: string;
+  type: "earn" | "spend" | "transfer" | "bonus";
+  amount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  description: string;
+  referenceType?: "check_in" | "boost" | "achievement" | "post" | "review" | "tip";
+  referenceId?: string;
+  createdAt: string;
+}
+
+export interface HuudCoinWallet {
+  balance: number;
+  lifetimeEarned: number;
+  lifetimeSpent: number;
+  transactions: HuudCoinTransaction[];
+}

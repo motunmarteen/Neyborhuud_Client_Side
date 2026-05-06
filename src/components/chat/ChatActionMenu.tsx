@@ -15,6 +15,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ChatMessage, ChatMessageMeta, ChatMessageType } from '@/types/api';
+import VoiceRecorder from './VoiceRecorder';
 
 // ─── MIME Whitelist (single source of truth for frontend validation) ──────────
 export const ALLOWED_MIME: Record<string, string[]> = {
@@ -358,7 +359,7 @@ function MarketplaceModal({ onDone, onClose }: { onDone: (r: ActionResult) => vo
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-type ActiveModal = 'location' | 'poll' | 'contact' | 'sos' | 'tracking' | 'kidnapping_info' | 'event' | 'marketplace' | null;
+type ActiveModal = 'location' | 'poll' | 'contact' | 'sos' | 'tracking' | 'kidnapping_info' | 'event' | 'marketplace' | 'voice' | null;
 
 const MEDIA_ACTIONS = [
   { key: 'image',  label: 'Image',    icon: '🖼️',  accept: acceptAttr('image') },
@@ -458,6 +459,7 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
       {activeModal === 'kidnapping_info' && <KidnappingModal  onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
       {activeModal === 'event'           && <EventModal       onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
       {activeModal === 'marketplace'     && <MarketplaceModal onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'voice'            && <VoiceRecorder    onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
 
       <div className="relative" ref={menuRef}>
         {/* "+" button */}
@@ -494,6 +496,15 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
                     <span className="text-[10px] text-gray-400">{a.label}</span>
                   </button>
                 ))}
+                {/* Voice note */}
+                <button
+                  type="button"
+                  onClick={() => { setOpen(false); setActiveModal('voice'); }}
+                  className="flex flex-col items-center gap-1 rounded-xl bg-gray-800 p-3 text-center transition-colors hover:bg-gray-700"
+                >
+                  <span className="text-2xl">🎤</span>
+                  <span className="text-[10px] text-gray-400">Voice</span>
+                </button>
               </div>
             </div>
 

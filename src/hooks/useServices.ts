@@ -177,3 +177,37 @@ export function useFavoriteService() {
     },
   });
 }
+
+/** Fetch up to `limit` services offered by a specific user (for profile pages) */
+export function useUserServices(userId: string | null, limit = 3) {
+  return useQuery({
+    queryKey: ["services", "by-user", userId, limit],
+    queryFn: async () => {
+      const res = await servicesService.getServices(1, limit, { providerId: userId! });
+      const items = (res as any)?.data ?? (res as any)?.services ?? (res as any) ?? [];
+      return Array.isArray(items) ? items : (items?.data ?? []);
+    },
+    enabled: !!userId,
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+/** Create a new service listing */
+export function useCreateService() {
+  const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
+
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof servicesService.createService>[0]) =>
+      servicesService.createService(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services", "list"] });
+      awardCoins("service_created");
+      toast.success("Service listed successfully!");
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to create service");
+    },
+  });
+}

@@ -17,6 +17,7 @@ export const servicesService = {
       category?: string;
       subcategory?: string;
       minRating?: number;
+      providerId?: string;
     },
   ) {
     return await apiClient.get<PaginatedResponse<Service>>("/services", {
@@ -170,6 +171,28 @@ export const servicesService = {
       reason,
       description,
     });
+  },
+
+  /**
+   * Create a new service listing
+   */
+  async createService(payload: {
+    title: string;
+    description: string;
+    category: string;
+    subcategory?: string;
+    pricing: {
+      type: "fixed" | "hourly" | "custom";
+      amount?: number;
+      currency: string;
+    };
+    availability: {
+      days: string[];
+      hours: string;
+    };
+    images?: string[];
+  }) {
+    return await apiClient.post<Service>("/services", payload);
   },
 
   /**

@@ -21,6 +21,7 @@ import {
 } from "@/hooks/useGamification";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/types/api";
+import { STATIC_BADGES, STATIC_ACHIEVEMENTS } from "@/lib/gamification-catalogue";
 
 type Tab = "overview" | "badges" | "achievements" | "leaderboard";
 type BadgeFilter = "all" | "earned" | "not-earned";
@@ -106,9 +107,17 @@ export default function GamificationPage() {
   const earnedBadgeIds = new Set<string>(
     toArray(myBadges.data).map((b: Badge) => b.id)
   );
-  const allBadgeList: Badge[] = toArray(allBadges.data);
+  // If the API is not yet live (returns empty), fall back to the full static catalogue
+  // so users always see all available badges and achievements.
+  const allBadgeList: Badge[] = toArray(allBadges.data).length > 0
+    ? toArray(allBadges.data)
+    : STATIC_BADGES;
   const myBadgeList: Badge[] = toArray(myBadges.data);
-  const achievementList = toArray(achievements.data);
+  // Merge static achievements with real progress when available
+  const rawAchievements = toArray(achievements.data);
+  const achievementList = rawAchievements.length > 0
+    ? rawAchievements
+    : STATIC_ACHIEVEMENTS;
   const leaderboardList = toArray(leaderboard.data);
 
   const filteredBadges =
@@ -296,6 +305,17 @@ export default function GamificationPage() {
             {/* ── BADGES TAB ── */}
             {tab === "badges" && (
               <>
+                {/* Summary row */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-400">
+                    <span className="font-bold text-white">{earnedBadgeIds.size}</span>
+                    {" / "}{allBadgeList.length} earned
+                  </span>
+                  <span className="text-xs text-gray-600">
+                    {allBadgeList.length - earnedBadgeIds.size} still locked
+                  </span>
+                </div>
+
                 {/* Filter */}
                 <div className="flex gap-2">
                   {(["all", "earned", "not-earned"] as BadgeFilter[]).map((f) => (
@@ -322,7 +342,7 @@ export default function GamificationPage() {
                 ) : filteredBadges.length === 0 ? (
                   <div className="text-center py-12">
                     <span className="text-4xl">🏅</span>
-                    <p className="text-gray-400 mt-3">No badges to show</p>
+                    <p className="text-gray-400 mt-3">No badges match this filter</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
@@ -341,6 +361,21 @@ export default function GamificationPage() {
             {/* ── ACHIEVEMENTS TAB ── */}
             {tab === "achievements" && (
               <>
+                {/* Summary row */}
+                {!achievements.isLoading && achievementList.length > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">
+                      <span className="font-bold text-white">
+                        {achievementList.filter((a: any) => a.completed).length}
+                      </span>
+                      {" / "}{achievementList.length} completed
+                    </span>
+                    <span className="text-xs text-gray-600">
+                      {achievementList.reduce((s: number, a: any) => s + (a.reward?.points ?? 0), 0).toLocaleString()} pts total available
+                    </span>
+                  </div>
+                )}
+
                 {achievements.isLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
@@ -350,7 +385,7 @@ export default function GamificationPage() {
                 ) : achievementList.length === 0 ? (
                   <div className="text-center py-12">
                     <span className="text-4xl">🏆</span>
-                    <p className="text-gray-400 mt-3">No achievements yet</p>
+                    <p className="text-gray-400 mt-3">No achievements found</p>
                     <p className="text-xs text-gray-600 mt-1">Keep using the app to unlock achievements</p>
                   </div>
                 ) : (

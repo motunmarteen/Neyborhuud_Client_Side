@@ -268,3 +268,18 @@ export function useNearbyJobs(latitude: number | null, longitude: number | null)
     staleTime: 60000,
   });
 }
+
+/** Fetch up to `limit` jobs posted by a specific user (for profile pages) */
+export function useUserJobs(userId: string | null, limit = 3) {
+  return useQuery({
+    queryKey: ["jobs", "by-user", userId, limit],
+    queryFn: async () => {
+      const res = await jobsService.getJobs(1, limit, { employerId: userId! });
+      const items = (res as any)?.data ?? (res as any)?.jobs ?? (res as any) ?? [];
+      return Array.isArray(items) ? items : (items?.data ?? []);
+    },
+    enabled: !!userId,
+    staleTime: 60_000,
+    retry: false,
+  });
+}
