@@ -721,7 +721,9 @@ export default function ConversationPage() {
       if (result.mediaFile) {
         setUploadProgress(0);
         const uploadRes = await chatService.uploadChatMedia(result.mediaFile, (pct) => setUploadProgress(pct));
-        mediaUrl = uploadRes.data?.mediaUrl ?? uploadRes.data?.url;
+        // Backend wraps response: { data: { success, data: { url, ... } } }
+        const payload = (uploadRes as any)?.data?.data ?? (uploadRes as any)?.data ?? {};
+        mediaUrl = payload?.mediaUrl ?? payload?.url ?? payload?.secure_url;
         if (!mediaUrl) throw new Error('Upload failed — no URL returned');
         // Update optimistic with real URL
         setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, mediaUrl } : m));
@@ -748,7 +750,9 @@ export default function ConversationPage() {
         );
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || 'Failed to send');
+      const errMsg = err?.response?.data?.message || err?.message || 'Failed to send';
+      const status = err?.response?.status;
+      toast.error(status ? `${errMsg} (HTTP ${status})` : errMsg);
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
     } finally {
       setSending(false);
