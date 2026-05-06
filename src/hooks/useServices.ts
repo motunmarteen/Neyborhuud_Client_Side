@@ -177,3 +177,22 @@ export function useFavoriteService() {
     },
   });
 }
+
+/** Create a new service listing */
+export function useCreateService() {
+  const queryClient = useQueryClient();
+  const awardCoins = useAwardCoins();
+
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof servicesService.createService>[0]) =>
+      servicesService.createService(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services", "list"] });
+      awardCoins("service_created");
+      toast.success("Service listed successfully!");
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to create service");
+    },
+  });
+}
