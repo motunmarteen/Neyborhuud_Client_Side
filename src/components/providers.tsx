@@ -15,8 +15,8 @@ import apiClient from '@/lib/api-client';
 import { authService } from '@/services/auth.service';
 import { e2eeService } from '@/services/e2ee.service';
 import { I18nProvider } from '@/lib/i18n';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useAuth } from '@/hooks/useAuth';
+import NotificationPermissionPrompt from '@/components/NotificationPermissionPrompt';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
 
@@ -37,24 +37,6 @@ function SocketAuthenticator() {
     socketService.on('connect', onConnect);
     return () => socketService.off('connect', onConnect);
   }, [user?.id]);
-  return null;
-}
-
-/**
- * Mounts once after auth to register Web Push subscriptions.
- * Silently attempts subscription — never blocks the UI.
- */
-function PushRegistrar() {
-  const { permission, requestPermissionAndSubscribe } = usePushNotifications();
-
-  useEffect(() => {
-    if (!apiClient.isAuthenticated()) return;
-    if (permission === 'denied' || permission === 'unsupported') return;
-    // Attempt subscription silently; the hook will skip if already subscribed
-    void requestPermissionAndSubscribe();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return null;
 }
 
@@ -262,7 +244,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <I18nProvider>
     <QueryClientProvider client={queryClient}>
       <SocketAuthenticator />
-      <PushRegistrar />
+      <NotificationPermissionPrompt />
       {children}
       <Toaster 
         position="top-right" 

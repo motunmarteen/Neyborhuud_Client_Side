@@ -10,6 +10,8 @@ const withPWA = withPWAInit({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+  // Bundle service_worker/index.js into the Workbox-generated sw.js
+  customWorkerDir: "service_worker",
 });
 
 const nextConfig: NextConfig = {
