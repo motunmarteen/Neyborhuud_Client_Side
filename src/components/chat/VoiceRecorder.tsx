@@ -140,6 +140,7 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
       type: 'audio',
       content: `🎤 Voice note (${fmt(elapsed)})`,
       mediaFile: file,
+      mediaUrl: audioUrl ?? undefined, // local blob URL for immediate playback while uploading
     });
   };
 
