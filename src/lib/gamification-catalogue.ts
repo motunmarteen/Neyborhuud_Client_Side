@@ -16,7 +16,7 @@ export const STATIC_BADGES: Badge[] = [
   // ── Onboarding ──
   {
     id: "badge_welcome",
-    name: "Welcome Neighbour",
+    name: "Welcome NeyburH",
     icon: "👋",
     rarity: "common",
     description: "Joined NeyborHuud and completed your profile.",
@@ -55,15 +55,15 @@ export const STATIC_BADGES: Badge[] = [
     name: "Content Creator",
     icon: "🎨",
     rarity: "rare",
-    description: "Published 100 posts — a true voice of the neighbourhood.",
+    description: "Published 100 posts — a true voice of the Huud.",
   },
   // ── Social ──
   {
     id: "badge_good_neighbour",
-    name: "Good Neighbour",
+    name: "Good NeyburH",
     icon: "🤝",
     rarity: "uncommon",
-    description: "Helped 5 neighbours by responding to help requests.",
+    description: "Helped 5 NeyburHs by responding to help requests.",
   },
   {
     id: "badge_community_pillar",
@@ -77,14 +77,14 @@ export const STATIC_BADGES: Badge[] = [
     name: "Super Connector",
     icon: "🔗",
     rarity: "epic",
-    description: "Connected with 50 neighbours on NeyborHuud.",
+    description: "Connected with 50 NeyburHs on NeyborHuud.",
   },
   {
     id: "badge_community_hero",
     name: "Community Hero",
     icon: "🦸",
     rarity: "epic",
-    description: "Helped 20 neighbours — your community counts on you.",
+    description: "Helped 20 NeyburHs — your community counts on you.",
   },
   // ── Marketplace ──
   {
@@ -166,7 +166,7 @@ export const STATIC_BADGES: Badge[] = [
     name: "SOS Responder",
     icon: "🚨",
     rarity: "rare",
-    description: "Responded to a neighbour's SOS distress alert.",
+    description: "Responded to a NeyburH's SOS distress alert.",
   },
   // ── Streaks / Gamification ──
   {
@@ -203,7 +203,7 @@ export const STATIC_BADGES: Badge[] = [
     name: "Public Announcer",
     icon: "📢",
     rarity: "uncommon",
-    description: "Published 10 FYI bulletins that kept your neighbourhood informed.",
+    description: "Published 10 FYI bulletins that kept your Huud informed.",
   },
   // ── Gossip Locale ──
   {
@@ -218,7 +218,7 @@ export const STATIC_BADGES: Badge[] = [
     name: "Social Influencer",
     icon: "🎤",
     rarity: "epic",
-    description: "Your posts consistently generate the most engagement in the neighbourhood.",
+    description: "Your posts consistently generate the most engagement in the Huud.",
   },
   // ── Messages / Chat ──
   {
@@ -226,14 +226,14 @@ export const STATIC_BADGES: Badge[] = [
     name: "First Hello",
     icon: "✉️",
     rarity: "common",
-    description: "Sent your first direct message to a neighbour.",
+    description: "Sent your first direct message to a NeyburH.",
   },
   {
     id: "badge_connector",
     name: "Always Online",
     icon: "📱",
     rarity: "uncommon",
-    description: "Exchanged 100 messages with neighbours on the platform.",
+    description: "Exchanged 100 messages with NeyburHs on the platform.",
   },
   // ── Local News ──
   {
@@ -270,14 +270,14 @@ export const STATIC_BADGES: Badge[] = [
     name: "Tree",
     icon: "🌳",
     rarity: "rare",
-    description: "Community vouched — your neighbours trust you.",
+    description: "Community vouched — your NeyburHs trust you.",
   },
   {
     id: "badge_baobab",
     name: "Baobab",
     icon: "🌲",
     rarity: "epic",
-    description: "Reached the highest trust level — a permanent pillar of the hood.",
+    description: "Reached the highest trust level — a permanent pillar of the Huud.",
   },
   // ── TrustOS — Vouching ──
   {
@@ -285,14 +285,14 @@ export const STATIC_BADGES: Badge[] = [
     name: "Community Voucher",
     icon: "🤜",
     rarity: "uncommon",
-    description: "Vouched for 3 neighbours — helping them build their trust profile.",
+    description: "Vouched for 3 NeyburHs — helping them build their trust profile.",
   },
   {
     id: "badge_trusted_neighbour",
-    name: "Trusted Neighbour",
+    name: "Trusted NeyburH",
     icon: "🫱",
     rarity: "rare",
-    description: "Received 5 community vouches from verified neighbours.",
+    description: "Received 5 community vouches from verified NeyburHs.",
   },
   // ── Referrals ──
   {
@@ -307,7 +307,7 @@ export const STATIC_BADGES: Badge[] = [
     name: "Community Recruiter",
     icon: "🏘️",
     rarity: "rare",
-    description: "Referred 10 active neighbours — your neighbourhood is growing.",
+    description: "Referred 10 active NeyburHs — your Huud is growing.",
   },
   // ── Engagement (Comments & Reactions) ──
   {
@@ -322,29 +322,29 @@ export const STATIC_BADGES: Badge[] = [
     name: "Good Vibes",
     icon: "❤️",
     rarity: "common",
-    description: "Liked 10 posts — spreading positivity in the neighbourhood.",
+    description: "Liked 10 posts — spreading positivity in the Huud.",
   },
   // ── Level Milestones ──
   {
     id: "badge_level_5",
-    name: "Rising Neighbour",
+    name: "Rising NeyburH",
     icon: "⬆️",
     rarity: "uncommon",
     description: "Reached Level 5 on NeyborHuud.",
   },
   {
     id: "badge_level_10",
-    name: "Neighbourhood Regular",
+    name: "Huud Regular",
     icon: "🏅",
     rarity: "rare",
-    description: "Reached Level 10 — a respected face in the community.",
+    description: "Reached Level 10 — a respected face in the Huud.",
   },
   {
     id: "badge_level_15",
     name: "Community Elder",
     icon: "🎖️",
     rarity: "epic",
-    description: "Reached Level 15 — your wisdom shapes the neighbourhood.",
+    description: "Reached Level 15 — your wisdom shapes the Huud.",
   },
   // ── Guardian of the Ward (Safety + SOS) ──
   {
@@ -352,7 +352,7 @@ export const STATIC_BADGES: Badge[] = [
     name: "Guardian of the Ward",
     icon: "⚔️",
     rarity: "epic",
-    description: "Responded to and resolved a neighbour's SOS emergency alert.",
+    description: "Responded to and resolved a NeyburH's SOS emergency alert.",
   },
   // ── Legendary ──
   {
@@ -367,11 +367,11 @@ export const STATIC_BADGES: Badge[] = [
     name: "Community Legend",
     icon: "👑",
     rarity: "legendary",
-    description: "Reached Level 20 — a true pillar of the neighbourhood.",
+    description: "Reached Level 20 — a true pillar of the Huud.",
   },
   {
     id: "badge_platinum",
-    name: "Platinum Neighbour",
+    name: "Platinum NeyburH",
     icon: "💜",
     rarity: "legendary",
     description: "Reached the Platinum subscription tier.",
@@ -405,7 +405,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_25_posts",
     name: "Prolific Poster",
-    description: "Post 25 times — your neighbours know your name.",
+    description: "Post 25 times — your NeyburHs know your name.",
     progress: 0,
     goal: 25,
     completed: false,
@@ -476,11 +476,11 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
     completed: false,
     reward: { points: 300 },
   },
-  // ── Helping neighbours ──
+  // ── Helping NeyburHs ──
   {
     id: "ach_help_5",
-    name: "Helpful Neighbour",
-    description: "Help 5 neighbours by responding to help requests.",
+    name: "Helpful NeyburH",
+    description: "Help 5 NeyburHs by responding to help requests.",
     progress: 0,
     goal: 5,
     completed: false,
@@ -489,7 +489,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_help_20",
     name: "Community Champion",
-    description: "Help 20 neighbours — you are the backbone of the hood.",
+    description: "Help 20 NeyburHs — you are the backbone of the Huud.",
     progress: 0,
     goal: 20,
     completed: false,
@@ -547,7 +547,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_connect_10",
     name: "Social Butterfly",
-    description: "Connect with 10 neighbours on NeyborHuud.",
+    description: "Connect with 10 NeyburHs on NeyborHuud.",
     progress: 0,
     goal: 10,
     completed: false,
@@ -556,7 +556,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_connect_50",
     name: "Mega Connector",
-    description: "Connect with 50 neighbours.",
+    description: "Connect with 50 NeyburHs.",
     progress: 0,
     goal: 50,
     completed: false,
@@ -623,7 +623,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_10_bulletins",
     name: "Information Hub",
-    description: "Share 10 FYI bulletins that keep your neighbourhood informed.",
+    description: "Share 10 FYI bulletins that keep your Huud informed.",
     progress: 0,
     goal: 10,
     completed: false,
@@ -652,7 +652,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_first_message",
     name: "First Hello",
-    description: "Send your first direct message to a neighbour.",
+    description: "Send your first direct message to a NeyburH.",
     progress: 0,
     goal: 1,
     completed: false,
@@ -660,8 +660,8 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "ach_100_messages",
-    name: "Chatty Neighbour",
-    description: "Exchange 100 direct messages with neighbours.",
+    name: "Chatty NeyburH",
+    description: "Exchange 100 direct messages with NeyburHs.",
     progress: 0,
     goal: 100,
     completed: false,
@@ -671,7 +671,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_vouch_3",
     name: "Community Voucher",
-    description: "Vouch for 3 neighbours in your community.",
+    description: "Vouch for 3 NeyburHs in your community.",
     progress: 0,
     goal: 3,
     completed: false,
@@ -689,7 +689,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   // ── Referrals ──
   {
     id: "ach_refer_3",
-    name: "Recruit 3 Neighbours",
+    name: "Recruit 3 NeyburHs",
     description: "Refer 3 friends who join and verify their accounts.",
     progress: 0,
     goal: 3,
@@ -699,7 +699,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_refer_10",
     name: "Community Builder",
-    description: "Refer 10 active neighbours to NeyborHuud.",
+    description: "Refer 10 active NeyburHs to NeyborHuud.",
     progress: 0,
     goal: 10,
     completed: false,
@@ -708,7 +708,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   // ── Level Milestones ──
   {
     id: "ach_level_5",
-    name: "Rising Neighbour",
+    name: "Rising NeyburH",
     description: "Reach Level 5 on NeyborHuud.",
     progress: 0,
     goal: 5,
@@ -717,8 +717,8 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "ach_level_10",
-    name: "Neighbourhood Regular",
-    description: "Reach Level 10 — a respected face in the community.",
+    name: "Huud Regular",
+    description: "Reach Level 10 — a respected face in the Huud.",
     progress: 0,
     goal: 10,
     completed: false,
