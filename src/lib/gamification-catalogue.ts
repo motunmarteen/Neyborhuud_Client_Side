@@ -263,7 +263,7 @@ export const STATIC_BADGES: Badge[] = [
     name: "Sapling",
     icon: "🌿",
     rarity: "uncommon",
-    description: "NIN or BVN verified — your trust in the community is growing.",
+    description: "Profile completed with photo, display name, and pinned home location.",
   },
   {
     id: "badge_tree",
@@ -603,8 +603,8 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "ach_verify_identity",
-    name: "Identity Verified",
-    description: "Verify your identity with NIN or BVN.",
+    name: "Face of the Huud",
+    description: "Complete your profile — add a photo, display name, and pin your home location.",
     progress: 0,
     goal: 1,
     completed: false,
