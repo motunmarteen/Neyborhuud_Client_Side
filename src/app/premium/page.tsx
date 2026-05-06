@@ -50,7 +50,10 @@ export default function PremiumPage() {
           </div>
 
           <div className="max-w-5xl mx-auto px-4 py-8 space-y-10">
-            {/* Current plan banner */}
+            {/* Tier cards */}
+            <PremiumCards currentTier={currentTier} />
+
+            {/* Current plan card — shown below tier grid per spec */}
             <div className="rounded-2xl border border-gray-700 bg-[#1a1a2e] px-6 py-4 flex items-center gap-4">
               <span className="material-symbols-outlined text-3xl text-yellow-400">
                 workspace_premium
@@ -61,10 +64,10 @@ export default function PremiumPage() {
                   {currentTier}
                 </p>
               </div>
+              <div className="ml-auto text-sm text-gray-500">
+                Tier updates after successful payment
+              </div>
             </div>
-
-            {/* Tier cards */}
-            <PremiumCards currentTier={currentTier} />
 
             {/* Payment history */}
             <div>

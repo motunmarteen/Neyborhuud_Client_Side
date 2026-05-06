@@ -61,13 +61,23 @@ function ListingWithOffers({
     <div className="flex flex-col">
       <ProductCard product={product} userLocation={userLocation} />
       <PendingOffersBadge product={product} />
-      <button
-        onClick={() => onBoost(productId, productTitle)}
-        className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400 hover:bg-amber-500/25 transition-colors"
-      >
-        <span className="material-symbols-outlined text-sm">rocket_launch</span>
-        Boost Listing
-      </button>
+      {/* Owner actions: Edit + Boost */}
+      <div className="mt-2 flex gap-2">
+        <Link
+          href={`/marketplace/${productId}/edit`}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-gray-700/50 px-3 py-1 text-xs font-semibold text-gray-300 hover:bg-gray-700 transition-colors"
+        >
+          <span className="material-symbols-outlined text-sm">edit</span>
+          Edit
+        </Link>
+        <button
+          onClick={() => onBoost(productId, productTitle)}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400 hover:bg-amber-500/25 transition-colors"
+        >
+          <span className="material-symbols-outlined text-sm">rocket_launch</span>
+          Boost
+        </button>
+      </div>
     </div>
   );
 }
