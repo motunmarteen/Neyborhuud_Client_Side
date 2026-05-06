@@ -422,7 +422,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+                <form onSubmit={handleSubmit} className="flex-1 min-h-0 overflow-y-auto">
                     <div className="p-4 space-y-4">
                         {/* Content Textarea */}
                         <div>

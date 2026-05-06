@@ -27,9 +27,9 @@ export default function MyEventsPage() {
   const organizing = useMyOrganizedEvents();
 
   const attendingList =
-    attending.data?.pages.flatMap((page) => (page as any).data ?? []) ?? [];
+    attending.data?.pages.flatMap((page) => (page as any)?.data?.events ?? []) ?? [];
   const organizingList =
-    organizing.data?.pages.flatMap((page) => (page as any).data ?? []) ?? [];
+    organizing.data?.pages.flatMap((page) => (page as any)?.data?.events ?? []) ?? [];
 
   const activeQuery = tab === "attending" ? attending : organizing;
   const activeList = tab === "attending" ? attendingList : organizingList;
@@ -39,9 +39,9 @@ export default function MyEventsPage() {
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <TopNav />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         <LeftSidebar />
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+        <div className="flex-1 min-h-0 overflow-y-auto pb-20 bg-[#0f0f1e] text-white">
           {/* Header */}
           <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800">
             <div className="max-w-3xl mx-auto px-4 py-4">

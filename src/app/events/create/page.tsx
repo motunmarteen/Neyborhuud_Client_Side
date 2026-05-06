@@ -22,9 +22,9 @@ export default function CreateEventPage() {
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <TopNav />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         <LeftSidebar />
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+        <div className="flex-1 min-h-0 overflow-y-auto pb-20 bg-[#0f0f1e] text-white">
           {/* Header */}
           <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800">
             <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">

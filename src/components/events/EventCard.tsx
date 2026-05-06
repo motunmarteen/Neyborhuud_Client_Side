@@ -36,6 +36,9 @@ interface Props {
 
 export default function EventCard({ event, onAttend, attendPending }: Props) {
   const isCancelled = event.status === "cancelled";
+  const isCompleted = event.status === "completed";
+  const attendeeCount = event.attendeesCount ?? event.attendees;
+  const eventId = event.id ?? (event as any)._id;
 
   return (
     <div
@@ -62,8 +65,8 @@ export default function EventCard({ event, onAttend, attendPending }: Props) {
       )}
 
       <div className="p-4">
-        {/* Type + status */}
-        <div className="flex items-center gap-2 mb-2">
+        {/* Type + status + pricing */}
+        <div className="flex items-center flex-wrap gap-2 mb-2">
           <span
             className={`text-xs px-2.5 py-0.5 rounded-full capitalize ${TYPE_COLORS[event.type]}`}
           >
@@ -83,7 +86,7 @@ export default function EventCard({ event, onAttend, attendPending }: Props) {
 
         {/* Title */}
         <Link
-          href={`/events/${event.id}`}
+          href={`/events/${eventId}`}
           className="text-base font-semibold text-white hover:text-blue-400 transition-colors line-clamp-2"
         >
           {event.title}
@@ -107,18 +110,18 @@ export default function EventCard({ event, onAttend, attendPending }: Props) {
 
         {/* Footer: attendees + RSVP */}
         <div className="flex items-center justify-between mt-3">
-          {typeof event.attendees === "number" && (
+          {typeof attendeeCount === "number" && (
             <div className="flex items-center gap-1 text-sm text-gray-400">
               <span className="material-symbols-outlined text-[16px]">group</span>
               <span>
-                {event.attendees}
+                {attendeeCount}
                 {event.capacity ? ` / ${event.capacity}` : ""} going
               </span>
             </div>
           )}
-          {!isCancelled && (
+          {!isCancelled && !isCompleted && (
             <button
-              onClick={() => onAttend(event.id)}
+              onClick={() => onAttend(eventId)}
               disabled={attendPending}
               className={`ml-auto px-4 py-1.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 ${
                 event.isAttending
@@ -134,3 +137,4 @@ export default function EventCard({ event, onAttend, attendPending }: Props) {
     </div>
   );
 }
+

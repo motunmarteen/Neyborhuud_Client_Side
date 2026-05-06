@@ -28,9 +28,10 @@ export function useEvents(filter?: EventsFilter) {
     queryFn: ({ pageParam = 1 }) =>
       eventsService.getEvents(pageParam as number, 20, filter),
     getNextPageParam: (lastPage) => {
-      const pagination =
-        (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
-      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+      const pagination = (lastPage as any)?.data?.pagination ?? (lastPage as any)?.pagination;
+      if (!pagination) return undefined;
+      const { page, pages } = pagination;
+      return page < pages ? page + 1 : undefined;
     },
     initialPageParam: 1,
     staleTime: 60000,
@@ -54,9 +55,10 @@ export function useMyEvents() {
     queryFn: ({ pageParam = 1 }) =>
       eventsService.getMyEvents(pageParam as number, 20),
     getNextPageParam: (lastPage) => {
-      const pagination =
-        (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
-      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+      const pagination = (lastPage as any)?.data?.pagination ?? (lastPage as any)?.pagination;
+      if (!pagination) return undefined;
+      const { page, pages } = pagination;
+      return page < pages ? page + 1 : undefined;
     },
     initialPageParam: 1,
   });
@@ -69,9 +71,10 @@ export function useMyOrganizedEvents() {
     queryFn: ({ pageParam = 1 }) =>
       eventsService.getMyOrganizedEvents(pageParam as number, 20),
     getNextPageParam: (lastPage) => {
-      const pagination =
-        (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
-      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+      const pagination = (lastPage as any)?.data?.pagination ?? (lastPage as any)?.pagination;
+      if (!pagination) return undefined;
+      const { page, pages } = pagination;
+      return page < pages ? page + 1 : undefined;
     },
     initialPageParam: 1,
   });
@@ -101,12 +104,26 @@ export function useAttendEvent() {
       queryClient.invalidateQueries({
         queryKey: ["events", "detail", variables.eventId],
       });
+      queryClient.invalidateQueries({ queryKey: ["events", "list"] });
       queryClient.invalidateQueries({ queryKey: ["events", "my-events"] });
       if (!variables.attending) awardCoins("event_attended");
       toast.success(variables.attending ? "RSVP removed" : "You're going!");
     },
-    onError: (error) => {
-      toast.error(getErrorMessage(error) || "Failed to update RSVP");
+    onError: (error, variables) => {
+      const msg = getErrorMessage(error);
+      // 409 – already attending (treat as no-op / silently refresh)
+      if (msg?.toLowerCase().includes("already")) {
+        queryClient.invalidateQueries({
+          queryKey: ["events", "detail", variables.eventId],
+        });
+        return;
+      }
+      // 400 – at full capacity
+      if (msg?.toLowerCase().includes("capacity") || msg?.toLowerCase().includes("full")) {
+        toast.error("This event is at full capacity.");
+        return;
+      }
+      toast.error(msg || "Failed to update RSVP");
     },
   });
 }
@@ -138,18 +155,19 @@ export function useCreateEvent() {
   });
 }
 
-/** Cancel an event */
+/** Cancel an event — reason is required by the backend (min 5 chars) */
 export function useCancelEvent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ eventId, reason }: { eventId: string; reason?: string }) =>
+    mutationFn: ({ eventId, reason }: { eventId: string; reason: string }) =>
       eventsService.cancelEvent(eventId, reason),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["events", "detail", variables.eventId],
       });
       queryClient.invalidateQueries({ queryKey: ["events", "organized"] });
+      queryClient.invalidateQueries({ queryKey: ["events", "list"] });
       toast.success("Event cancelled.");
     },
     onError: (error) => {
@@ -178,17 +196,86 @@ export function useDeleteEvent() {
   });
 }
 
-/** Fetch up to `limit` events organized by a specific user (for profile pages) */
-export function useUserEvents(userId: string | null, limit = 3) {
-  return useQuery({
-    queryKey: ["events", "by-user", userId, limit],
-    queryFn: async () => {
-      const res = await eventsService.getEvents(1, limit, { organizerId: userId! });
-      const items = (res as any)?.data ?? (res as any)?.events ?? (res as any) ?? [];
-      return Array.isArray(items) ? items : (items?.data ?? []);
+/** Update an existing event */
+export function useUpdateEvent(eventId: string) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (data: Parameters<typeof eventsService.updateEvent>[1]) =>
+      eventsService.updateEvent(eventId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["events", "detail", eventId] });
+      queryClient.invalidateQueries({ queryKey: ["events", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["events", "organized"] });
+      toast.success("Event updated!");
+      router.push(`/events/${eventId}`);
     },
-    enabled: !!userId,
-    staleTime: 60_000,
-    retry: false,
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to update event");
+    },
+  });
+}
+
+/** Nearby events by lat/lng */
+export function useNearbyEvents(
+  lat: number | null,
+  lng: number | null,
+  radius = 10,
+) {
+  return useInfiniteQuery({
+    queryKey: ["events", "nearby", lat, lng, radius],
+    queryFn: ({ pageParam = 1 }) =>
+      eventsService.getNearbyEvents(lat!, lng!, radius, pageParam as number, 20),
+    getNextPageParam: (lastPage) => {
+      const pagination =
+        (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
+      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+    },
+    initialPageParam: 1,
+    enabled: lat !== null && lng !== null,
+    staleTime: 60000,
+  });
+}
+
+/** Share an event */
+export function useShareEvent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (eventId: string) => eventsService.shareEvent(eventId),
+    onSuccess: (_data, eventId) => {
+      queryClient.invalidateQueries({ queryKey: ["events", "detail", eventId] });
+      toast.success("Event shared!");
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to share event");
+    },
+  });
+}
+
+/** Report an event */
+export function useReportEvent() {
+  return useMutation({
+    mutationFn: ({
+      eventId,
+      reason,
+      description,
+    }: {
+      eventId: string;
+      reason: string;
+      description?: string;
+    }) => eventsService.reportEvent(eventId, reason, description),
+    onSuccess: () => {
+      toast.success("Event reported. Thank you.");
+    },
+    onError: (error) => {
+      const msg = getErrorMessage(error);
+      if (msg?.includes("already")) {
+        toast.error("You have already reported this event.");
+      } else {
+        toast.error(msg || "Failed to report event");
+      }
+    },
   });
 }

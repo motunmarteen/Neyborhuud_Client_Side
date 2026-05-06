@@ -668,6 +668,7 @@ export interface IncidentReplay {
 
 export interface Event {
   id: string;
+  _id?: string;
   organizerId: string;
   organizer?: User;
   title: string;
@@ -683,15 +684,20 @@ export interface Event {
   location: LocationData;
   venue?: string;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   coverImage?: string;
   capacity?: number;
+  /** @deprecated use attendeesCount */
   attendees?: number;
+  attendeesCount?: number;
+  sharesCount?: number;
   isAttending?: boolean;
   isFree: boolean;
   ticketPrice?: number;
   tags?: string[];
-  status?: "upcoming" | "ongoing" | "completed" | "cancelled";
+  status?: "active" | "completed" | "cancelled";
+  cancelReason?: string;
+  communityId?: string;
   visibility: "public" | "private" | "neighborhood";
   createdAt: string;
   updatedAt?: string;

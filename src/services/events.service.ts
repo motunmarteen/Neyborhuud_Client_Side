@@ -117,7 +117,7 @@ export const eventsService = {
    * Get events I'm attending
    */
   async getMyEvents(page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<Event>>("/events/my-events", {
+    return await apiClient.get<PaginatedResponse<Event>>("/events/my/attending", {
       params: { page, limit },
     });
   },
@@ -126,7 +126,7 @@ export const eventsService = {
    * Get events I organized
    */
   async getMyOrganizedEvents(page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<Event>>("/events/organized", {
+    return await apiClient.get<PaginatedResponse<Event>>("/events/my/organized", {
       params: { page, limit },
     });
   },
@@ -134,7 +134,7 @@ export const eventsService = {
   /**
    * Cancel an event
    */
-  async cancelEvent(eventId: string, reason?: string) {
+  async cancelEvent(eventId: string, reason: string) {
     return await apiClient.post(`/events/${eventId}/cancel`, { reason });
   },
 
