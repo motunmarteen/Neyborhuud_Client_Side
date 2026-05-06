@@ -5,6 +5,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import DailyCheckInModal from "@/components/gamification/DailyCheckInModalLoader";
+import TextSizeApplier from "@/components/TextSizeApplier";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -49,6 +50,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
+          <TextSizeApplier />
           <DailyCheckInModal />
           <div className="mx-auto w-full max-w-[1400px] relative">
             {children}

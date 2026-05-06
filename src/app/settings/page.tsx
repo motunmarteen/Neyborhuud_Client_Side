@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
@@ -34,6 +34,11 @@ interface NotificationSettings {
     mentions: boolean;
     likes: boolean;
     comments: boolean;
+    follows: boolean;
+    events: boolean;
+    jobs: boolean;
+    safety: boolean;
+    gamification: boolean;
 }
 
 interface PrivacySettings {
@@ -100,6 +105,11 @@ export default function SettingsPage() {
         mentions: true,
         likes: true,
         comments: true,
+        follows: true,
+        events: true,
+        jobs: true,
+        safety: true,
+        gamification: true,
     });
 
     const [privacy, setPrivacy] = useState<PrivacySettings>({
@@ -112,6 +122,39 @@ export default function SettingsPage() {
     // Per-user safety settings
     const [emergencyServicesEnabled, setEmergencyServicesEnabled] = useState(false);
     const [savingSafety, setSavingSafety] = useState(false);
+
+    // Accessibility
+    const [textSize, setTextSize] = useState<'small' | 'medium' | 'large'>('medium');
+    const SIZE_CLASS: Record<string, string> = { small: 'text-size-sm', medium: '', large: 'text-size-lg' };
+    const applyTextSize = (size: 'small' | 'medium' | 'large') => {
+        setTextSize(size);
+        document.body.classList.remove('text-size-sm', 'text-size-lg');
+        const cls = SIZE_CLASS[size];
+        if (cls) document.body.classList.add(cls);
+        // persist
+        fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ accessibility: { textSize: size } }) }).catch(() => {});
+        const stored = localStorage.getItem('neyborhuud_user');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), textSize: size } } }));
+        }
+    };
+
+    // Debounced notification save ref
+    const notifSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const debouncedSaveNotifications = useCallback((updated: NotificationSettings) => {
+        if (notifSaveTimer.current) clearTimeout(notifSaveTimer.current);
+        notifSaveTimer.current = setTimeout(async () => {
+            try {
+                await fetchAPI('/auth/settings/notifications', { method: 'PUT', body: JSON.stringify(updated) });
+                const stored = localStorage.getItem('neyborhuud_user');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, notifications: updated } }));
+                }
+            } catch { /* silent */ }
+        }, 500);
+    }, []);
 
     // Load user data from localStorage
     useEffect(() => {
@@ -127,6 +170,9 @@ export default function SettingsPage() {
             }
             if (parsed.settings?.privacy) {
                 setPrivacy(prev => ({ ...prev, ...parsed.settings.privacy }));
+            }
+            if (parsed.settings?.accessibility?.textSize) {
+                setTextSize(parsed.settings.accessibility.textSize);
             }
         }
 
@@ -528,27 +574,63 @@ export default function SettingsPage() {
                             
                             <ToggleSwitch
                                 enabled={notifications.chat}
-                                onChange={(val) => setNotifications({ ...notifications, chat: val })}
+                                onChange={(val) => { const u = { ...notifications, chat: val }; setNotifications(u); debouncedSaveNotifications(u); }}
                                 label="Chat Messages"
                                 description="New messages from NeyburHs"
                             />
                             <ToggleSwitch
                                 enabled={notifications.mentions}
-                                onChange={(val) => setNotifications({ ...notifications, mentions: val })}
+                                onChange={(val) => { const u = { ...notifications, mentions: val }; setNotifications(u); debouncedSaveNotifications(u); }}
                                 label="Mentions"
                                 description="When someone tags you"
                             />
                             <ToggleSwitch
                                 enabled={notifications.likes}
-                                onChange={(val) => setNotifications({ ...notifications, likes: val })}
+                                onChange={(val) => { const u = { ...notifications, likes: val }; setNotifications(u); debouncedSaveNotifications(u); }}
                                 label="Likes"
                                 description="When someone likes your post"
                             />
                             <ToggleSwitch
                                 enabled={notifications.comments}
-                                onChange={(val) => setNotifications({ ...notifications, comments: val })}
+                                onChange={(val) => { const u = { ...notifications, comments: val }; setNotifications(u); debouncedSaveNotifications(u); }}
                                 label="Comments"
                                 description="Replies to your posts"
+                            />
+                        </div>
+
+                        <div className="neumorphic rounded-2xl p-6 mb-6">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
+                                What You&apos;re Notified About
+                            </h2>
+                            <ToggleSwitch
+                                enabled={notifications.follows}
+                                onChange={(val) => { const u = { ...notifications, follows: val }; setNotifications(u); debouncedSaveNotifications(u); }}
+                                label="New Followers"
+                                description="When someone follows you"
+                            />
+                            <ToggleSwitch
+                                enabled={notifications.events}
+                                onChange={(val) => { const u = { ...notifications, events: val }; setNotifications(u); debouncedSaveNotifications(u); }}
+                                label="Events in Your Area"
+                                description="New events near your location"
+                            />
+                            <ToggleSwitch
+                                enabled={notifications.jobs}
+                                onChange={(val) => { const u = { ...notifications, jobs: val }; setNotifications(u); debouncedSaveNotifications(u); }}
+                                label="Job Postings"
+                                description="New jobs matching your area"
+                            />
+                            <ToggleSwitch
+                                enabled={notifications.safety}
+                                onChange={(val) => { const u = { ...notifications, safety: val }; setNotifications(u); debouncedSaveNotifications(u); }}
+                                label="Safety Alerts"
+                                description="Urgent safety notices from your neighbourhood"
+                            />
+                            <ToggleSwitch
+                                enabled={notifications.gamification}
+                                onChange={(val) => { const u = { ...notifications, gamification: val }; setNotifications(u); debouncedSaveNotifications(u); }}
+                                label="Gamification Rewards"
+                                description="Badges, achievements, and HuudCoin updates"
                             />
                         </div>
 
@@ -1030,6 +1112,43 @@ export default function SettingsPage() {
                                 </div>
                             </div>
                         )}
+
+                        {/* Location & Accessibility */}
+                        <div className="neumorphic rounded-2xl p-6 mb-6">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
+                                Location &amp; Accessibility
+                            </h2>
+                            <Link
+                                href="/settings/location"
+                                className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-[18px] text-charcoal/40 group-hover:text-brand-blue transition-colors">location_on</span>
+                                    <span className="text-sm font-bold text-charcoal">Location &amp; Radius</span>
+                                </div>
+                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                            </Link>
+
+                            {/* Font size */}
+                            <div className="pt-4">
+                                <p className="text-xs font-black uppercase tracking-widest text-charcoal/40 mb-3">Font Size</p>
+                                <div className="flex gap-2">
+                                    {(['small', 'medium', 'large'] as const).map(size => (
+                                        <button
+                                            key={size}
+                                            onClick={() => applyTextSize(size)}
+                                            className={`flex-1 rounded-xl py-2.5 text-xs font-black uppercase tracking-wider transition-all capitalize ${
+                                                textSize === size
+                                                    ? 'bg-primary text-white'
+                                                    : 'neumorphic-inset text-charcoal/50 hover:text-charcoal'
+                                            }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
 
                         {/* Account Actions */}
                         <div className="neumorphic rounded-2xl p-6 mb-6">

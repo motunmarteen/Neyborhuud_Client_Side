@@ -119,7 +119,13 @@ export interface UserSettings {
     mentions: boolean;
     likes: boolean;
     comments: boolean;
+    follows?: boolean;
+    events?: boolean;
+    jobs?: boolean;
+    safety?: boolean;
+    gamification?: boolean;
   };
+  contentRadius?: number;
   privacy: {
     profileVisibility: "public" | "friends" | "private";
     showLocation: boolean;

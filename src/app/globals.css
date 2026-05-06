@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* ── Accessibility — font size tiers ── */
+.text-size-sm { font-size: 14px; }
+.text-size-lg { font-size: 18px; }
+
 /* ── Leaflet Map — fix Tailwind reset breaking tiles ── */
 .leaflet-container {
   width: 100% !important;
