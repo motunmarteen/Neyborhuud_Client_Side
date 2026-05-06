@@ -177,3 +177,18 @@ export function useDeleteEvent() {
     },
   });
 }
+
+/** Fetch up to `limit` events organized by a specific user (for profile pages) */
+export function useUserEvents(userId: string | null, limit = 3) {
+  return useQuery({
+    queryKey: ["events", "by-user", userId, limit],
+    queryFn: async () => {
+      const res = await eventsService.getEvents(1, limit, { organizerId: userId! });
+      const items = (res as any)?.data ?? (res as any)?.events ?? (res as any) ?? [];
+      return Array.isArray(items) ? items : (items?.data ?? []);
+    },
+    enabled: !!userId,
+    staleTime: 60_000,
+    retry: false,
+  });
+}

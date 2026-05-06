@@ -17,6 +17,7 @@ export const servicesService = {
       category?: string;
       subcategory?: string;
       minRating?: number;
+      providerId?: string;
     },
   ) {
     return await apiClient.get<PaginatedResponse<Service>>("/services", {
