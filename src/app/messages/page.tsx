@@ -32,6 +32,16 @@ function getDisplayName(c: Conversation): string {
       'Marketplace Chat'
     );
   }
+  // Jobs chats: show the job title so applicant + employer can tell threads apart
+  if (c.contextType === 'jobs') {
+    return (
+      c.context?.jobTitle ||
+      c.contextLabel ||
+      c.otherParticipant?.name ||
+      c.otherParticipant?.username ||
+      'Job Chat'
+    );
+  }
   if (c.type === 'group') return c.name || c.groupName || 'Group Chat';
   if (c.otherParticipant) {
     return c.otherParticipant.name || c.otherParticipant.username || 'Direct Message';
@@ -51,6 +61,7 @@ function getInitials(c: Conversation): string {
   if (c.type === 'incident') return '🚨';
   if (c.type === 'community') return '🏘️';
   if (c.contextType === 'marketplace') return '🛍️';
+  if (c.contextType === 'jobs') return '💼';
   if (c.type === 'group') return '👥';
   if (c.otherParticipant) {
     const n = c.otherParticipant.name || c.otherParticipant.username || '?';
@@ -324,6 +335,18 @@ export default function MessagesPage() {
                                   {conv.context.productCurrency ?? 'NGN'} {conv.context.productPrice.toLocaleString()}
                                 </span>
                               )}
+                            </div>
+                          )}
+
+                          {/* Jobs context badge — e.g. "Job • Frontend Developer" */}
+                          {conv.contextType === 'jobs' && (conv.contextLabel || conv.context?.jobTitle) && (
+                            <div className="mt-0.5 flex items-center gap-1.5">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-900/40 px-2 py-0.5 text-[10px] font-medium text-emerald-200">
+                                <span>💼</span>
+                                <span className="truncate max-w-[200px]">
+                                  {conv.contextLabel ?? `Job • ${conv.context?.jobTitle}`}
+                                </span>
+                              </span>
                             </div>
                           )}
 

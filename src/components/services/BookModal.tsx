@@ -29,21 +29,23 @@ export default function BookModal({ serviceId, serviceTitle, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.7)" }}
       onClick={onClose}
     >
       <div
-        className="bg-[#1a1a2e] border border-gray-800 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6"
+        className="mod-card w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="text-lg font-bold text-white">Book Service</h2>
-            <p className="text-sm text-gray-400 mt-0.5">{serviceTitle}</p>
+            <h2 className="text-lg font-bold" style={{ color: "var(--neu-text)" }}>Book Service</h2>
+            <p className="text-sm mt-0.5" style={{ color: "var(--neu-text-muted)" }}>{serviceTitle}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-800 transition-colors text-gray-400"
+            className="p-2 rounded-full mod-btn transition-all"
+            style={{ color: "var(--neu-text-muted)" }}
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
@@ -51,34 +53,40 @@ export default function BookModal({ serviceId, serviceTitle, onClose }: Props) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Date & Time *</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+              Date &amp; Time <span style={{ color: "var(--brand-red)" }}>*</span>
+            </label>
             <input
               required
               type="datetime-local"
               value={date}
               min={minDateStr}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+              style={{ color: "var(--neu-text)" }}
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Notes (optional)</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+              Notes (optional)
+            </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any specific requirements or instructions..."
               rows={3}
               maxLength={500}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none text-sm"
+              className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all resize-none text-sm"
+              style={{ color: "var(--neu-text)" }}
             />
-            <p className="text-right text-xs text-gray-600 mt-1">{notes.length}/500</p>
+            <p className="text-right text-xs mt-1" style={{ color: "var(--neu-text-muted)" }}>{notes.length}/500</p>
           </div>
 
           <button
             type="submit"
             disabled={book.isPending || !date}
-            className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 rounded-xl font-bold text-white transition-colors"
+            className="w-full py-3.5 mod-btn-active text-primary disabled:opacity-50 rounded-xl font-bold transition-all"
           >
             {book.isPending ? "Booking…" : "Confirm Booking"}
           </button>

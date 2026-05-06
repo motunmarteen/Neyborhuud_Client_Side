@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import TopNav from "@/components/navigation/TopNav";
 import LeftSidebar from "@/components/navigation/LeftSidebar";
 import RightSidebar from "@/components/navigation/RightSidebar";
 import { BottomNav } from "@/components/feed/BottomNav";
 import CreateJobForm from "@/components/jobs/CreateJobForm";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
 
 export default function CreateJobPage() {
   const { user, isLoading } = useAuth();
@@ -20,30 +20,35 @@ export default function CreateJobPage() {
   if (isLoading || !user) return null;
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
-          <div className="max-w-4xl mx-auto px-4 py-6">
-            {/* Page Header */}
-            <div className="flex items-center gap-3 mb-6">
-              <button
-                onClick={() => router.back()}
-                className="p-2 rounded-full hover:bg-gray-800 transition-colors text-gray-400"
-              >
-                <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-white">Post a Job</h1>
-                <p className="text-sm text-gray-400">Fill in the details to list a job opening</p>
-              </div>
+    <div className="relative flex h-screen w-full overflow-hidden neu-base">
+      <LeftSidebar />
+
+      <main className="flex flex-col flex-1 overflow-y-auto">
+        <TopNav />
+
+        <div className="px-4 pt-5 pb-20">
+          {/* Back header */}
+          <div className="flex items-center gap-3 mb-6">
+            <button
+              onClick={() => router.back()}
+              className="p-2 rounded-xl mod-btn transition-all"
+              style={{ color: "var(--neu-text-muted)" }}
+            >
+              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+            </button>
+            <div>
+              <h1 className="text-xl font-bold" style={{ color: "var(--neu-text)" }}>Post a Job</h1>
+              <p className="text-xs" style={{ color: "var(--neu-text-muted)" }}>
+                Fill in the details to list a job opening
+              </p>
             </div>
-            <CreateJobForm />
           </div>
+
+          <CreateJobForm />
         </div>
-        <RightSidebar />
-      </div>
+      </main>
+
+      <RightSidebar />
       <BottomNav />
     </div>
   );

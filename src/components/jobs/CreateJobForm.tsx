@@ -14,6 +14,18 @@ const CATEGORIES = [
 const CURRENCIES = ["NGN", "USD", "GBP"];
 const PERIODS = ["hourly", "daily", "weekly", "monthly", "yearly"] as const;
 
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--neu-text-secondary)" }}>
+      {children}
+    </label>
+  );
+}
+
+function inputCls() {
+  return "w-full bg-transparent px-4 py-3 text-sm focus:outline-none rounded-xl";
+}
+
 export default function CreateJobForm() {
   const router = useRouter();
   const { location } = useGeolocation();
@@ -22,13 +34,13 @@ export default function CreateJobForm() {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    type: "full-time" as typeof JOB_TYPES[number],
+    type: "full-time" as (typeof JOB_TYPES)[number],
     category: "Tech",
-    workMode: "on-site" as typeof WORK_MODES[number],
+    workMode: "on-site" as (typeof WORK_MODES)[number],
     salaryMin: "",
     salaryMax: "",
     salaryCurrency: "NGN",
-    salaryPeriod: "monthly" as typeof PERIODS[number],
+    salaryPeriod: "monthly" as (typeof PERIODS)[number],
     expiresAt: "",
   });
   const [requirements, setRequirements] = useState<string[]>([""]);
@@ -38,12 +50,7 @@ export default function CreateJobForm() {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function updateList(
-    list: string[],
-    setList: (v: string[]) => void,
-    idx: number,
-    value: string,
-  ) {
+  function updateList(list: string[], setList: (v: string[]) => void, idx: number, value: string) {
     const next = [...list];
     next[idx] = value;
     setList(next);
@@ -71,8 +78,8 @@ export default function CreateJobForm() {
       location: {
         latitude: location?.latitude ?? 0,
         longitude: location?.longitude ?? 0,
-        lga: location?.lga,
-        state: location?.state,
+        lga: (location as any)?.lga,
+        state: (location as any)?.state,
       },
     };
 
@@ -92,156 +99,236 @@ export default function CreateJobForm() {
     });
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 pb-20">
-      <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6 space-y-5">
-        <h2 className="text-lg font-bold text-white">Job Details</h2>
+  const sectionCls = "mod-card rounded-2xl p-5 space-y-5";
+  const neuInputCls = "neu-input rounded-xl";
 
-        {/* Title */}
+  return (
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-5 pb-20">
+      {/* Basic Details */}
+      <div className={sectionCls}>
+        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>
+          Job Details
+        </h2>
+
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Job Title <span className="text-red-400">*</span>
-          </label>
-          <input
-            value={form.title}
-            onChange={(e) => set("title", e.target.value)}
-            required
-            placeholder="e.g. Frontend Developer"
-            className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-          />
+          <Label>Job Title <span style={{ color: "var(--brand-red)" }}>*</span></Label>
+          <div className={neuInputCls}>
+            <input
+              value={form.title}
+              onChange={(e) => set("title", e.target.value)}
+              required
+              placeholder="e.g. Frontend Developer"
+              className={inputCls()}
+              style={{ color: "var(--neu-text)" }}
+            />
+          </div>
         </div>
 
-        {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Description <span className="text-red-400">*</span>
-          </label>
-          <textarea
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-            required
-            rows={5}
-            placeholder="Describe the role, responsibilities, and what you're looking for..."
-            className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 resize-none focus:outline-none focus:border-blue-500 transition-colors"
-          />
+          <Label>Description <span style={{ color: "var(--brand-red)" }}>*</span></Label>
+          <div className={neuInputCls}>
+            <textarea
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+              required
+              rows={5}
+              placeholder="Describe the role, responsibilities, and what you are looking for…"
+              className={`${inputCls()} resize-none`}
+              style={{ color: "var(--neu-text)" }}
+            />
+          </div>
         </div>
 
         {/* Type + Work Mode */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              Job Type <span className="text-red-400">*</span>
-            </label>
-            <select
-              value={form.type}
-              onChange={(e) => set("type", e.target.value)}
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors capitalize"
-            >
-              {JOB_TYPES.map((t) => (
-                <option key={t} value={t}>{t.replace("-", " ")}</option>
-              ))}
-            </select>
+            <Label>Job Type <span style={{ color: "var(--brand-red)" }}>*</span></Label>
+            <div className={neuInputCls}>
+              <select
+                value={form.type}
+                onChange={(e) => set("type", e.target.value)}
+                className={`${inputCls()} cursor-pointer`}
+                style={{ color: "var(--neu-text)", background: "transparent" }}
+              >
+                {JOB_TYPES.map((t) => (
+                  <option key={t} value={t} style={{ background: "var(--neu-bg)" }}>
+                    {t.replace("-", " ")}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              Work Mode <span className="text-red-400">*</span>
-            </label>
-            <select
-              value={form.workMode}
-              onChange={(e) => set("workMode", e.target.value)}
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors capitalize"
-            >
-              {WORK_MODES.map((m) => (
-                <option key={m} value={m}>{m.replace("-", " ")}</option>
-              ))}
-            </select>
+            <Label>Work Mode <span style={{ color: "var(--brand-red)" }}>*</span></Label>
+            <div className={neuInputCls}>
+              <select
+                value={form.workMode}
+                onChange={(e) => set("workMode", e.target.value)}
+                className={`${inputCls()} cursor-pointer`}
+                style={{ color: "var(--neu-text)", background: "transparent" }}
+              >
+                {WORK_MODES.map((m) => (
+                  <option key={m} value={m} style={{ background: "var(--neu-bg)" }}>
+                    {m.replace("-", " ")}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
         {/* Category */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">Category</label>
-          <select
-            value={form.category}
-            onChange={(e) => set("category", e.target.value)}
-            className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+          <Label>Category <span style={{ color: "var(--brand-red)" }}>*</span></Label>
+          <div className={neuInputCls}>
+            <select
+              value={form.category}
+              onChange={(e) => set("category", e.target.value)}
+              className={`${inputCls()} cursor-pointer`}
+              style={{ color: "var(--neu-text)", background: "transparent" }}
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c} style={{ background: "var(--neu-bg)" }}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Salary */}
-      <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6 space-y-4">
-        <h2 className="text-lg font-bold text-white">
-          Salary <span className="text-gray-500 font-normal text-sm">(optional)</span>
+      <div className={sectionCls}>
+        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>
+          Salary <span className="text-sm font-normal" style={{ color: "var(--neu-text-muted)" }}>(optional)</span>
         </h2>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Min</label>
-            <input
-              type="number"
-              value={form.salaryMin}
-              onChange={(e) => set("salaryMin", e.target.value)}
-              placeholder="50000"
-              min={0}
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-            />
+            <Label>Min</Label>
+            <div className={neuInputCls}>
+              <input
+                type="number"
+                value={form.salaryMin}
+                onChange={(e) => set("salaryMin", e.target.value)}
+                placeholder="e.g. 150000"
+                min={0}
+                className={inputCls()}
+                style={{ color: "var(--neu-text)" }}
+              />
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Max</label>
-            <input
-              type="number"
-              value={form.salaryMax}
-              onChange={(e) => set("salaryMax", e.target.value)}
-              placeholder="150000"
-              min={0}
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-            />
+            <Label>Max</Label>
+            <div className={neuInputCls}>
+              <input
+                type="number"
+                value={form.salaryMax}
+                onChange={(e) => set("salaryMax", e.target.value)}
+                placeholder="e.g. 300000"
+                min={0}
+                className={inputCls()}
+                style={{ color: "var(--neu-text)" }}
+              />
+            </div>
           </div>
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Currency</label>
-            <select
-              value={form.salaryCurrency}
-              onChange={(e) => set("salaryCurrency", e.target.value)}
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
-            >
-              {CURRENCIES.map((c) => <option key={c}>{c}</option>)}
-            </select>
+            <Label>Currency</Label>
+            <div className={neuInputCls}>
+              <select
+                value={form.salaryCurrency}
+                onChange={(e) => set("salaryCurrency", e.target.value)}
+                className={`${inputCls()} cursor-pointer`}
+                style={{ color: "var(--neu-text)", background: "transparent" }}
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c} value={c} style={{ background: "var(--neu-bg)" }}>{c}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Per</label>
-            <select
-              value={form.salaryPeriod}
-              onChange={(e) => set("salaryPeriod", e.target.value as any)}
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors capitalize"
-            >
-              {PERIODS.map((p) => <option key={p}>{p}</option>)}
-            </select>
+            <Label>Period</Label>
+            <div className={neuInputCls}>
+              <select
+                value={form.salaryPeriod}
+                onChange={(e) => set("salaryPeriod", e.target.value)}
+                className={`${inputCls()} cursor-pointer`}
+                style={{ color: "var(--neu-text)", background: "transparent" }}
+              >
+                {PERIODS.map((p) => (
+                  <option key={p} value={p} style={{ background: "var(--neu-bg)" }}>{p}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Skills */}
+      <div className={sectionCls}>
+        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>
+          Skills Required
+        </h2>
+        {skills.map((skill, idx) => (
+          <div key={idx} className="flex gap-2">
+            <div className={`${neuInputCls} flex-1`}>
+              <input
+                value={skill}
+                onChange={(e) => updateList(skills, setSkills, idx, e.target.value)}
+                placeholder={`Skill ${idx + 1}`}
+                className={inputCls()}
+                style={{ color: "var(--neu-text)" }}
+              />
+            </div>
+            {skills.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeFromList(skills, setSkills, idx)}
+                className="p-2 rounded-xl mod-btn shrink-0"
+                style={{ color: "var(--brand-red)" }}
+              >
+                <span className="material-symbols-outlined text-[18px]">remove</span>
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => addToList(skills, setSkills)}
+          className="flex items-center gap-2 text-sm font-semibold transition-all"
+          style={{ color: "var(--primary)" }}
+        >
+          <span className="material-symbols-outlined text-[18px]">add_circle</span>
+          Add Skill
+        </button>
+      </div>
+
       {/* Requirements */}
-      <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6 space-y-3">
-        <h2 className="text-lg font-bold text-white">Requirements</h2>
+      <div className={sectionCls}>
+        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>
+          Requirements <span className="text-sm font-normal" style={{ color: "var(--neu-text-muted)" }}>(optional)</span>
+        </h2>
         {requirements.map((req, idx) => (
           <div key={idx} className="flex gap-2">
-            <input
-              value={req}
-              onChange={(e) => updateList(requirements, setRequirements, idx, e.target.value)}
-              placeholder={`Requirement ${idx + 1}`}
-              className="flex-1 bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors text-sm"
-            />
+            <div className={`${neuInputCls} flex-1`}>
+              <input
+                value={req}
+                onChange={(e) => updateList(requirements, setRequirements, idx, e.target.value)}
+                placeholder={`Requirement ${idx + 1}`}
+                className={inputCls()}
+                style={{ color: "var(--neu-text)" }}
+              />
+            </div>
             {requirements.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeFromList(requirements, setRequirements, idx)}
-                className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+                className="p-2 rounded-xl mod-btn shrink-0"
+                style={{ color: "var(--brand-red)" }}
               >
                 <span className="material-symbols-outlined text-[18px]">remove</span>
               </button>
@@ -251,68 +338,45 @@ export default function CreateJobForm() {
         <button
           type="button"
           onClick={() => addToList(requirements, setRequirements)}
-          className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-sm transition-colors"
+          className="flex items-center gap-2 text-sm font-semibold"
+          style={{ color: "var(--primary)" }}
         >
-          <span className="material-symbols-outlined text-[16px]">add</span>
-          Add requirement
+          <span className="material-symbols-outlined text-[18px]">add_circle</span>
+          Add Requirement
         </button>
       </div>
 
-      {/* Skills */}
-      <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6 space-y-3">
-        <h2 className="text-lg font-bold text-white">Skills</h2>
-        <div className="flex flex-wrap gap-2">
-          {skills.map((skill, idx) => (
-            <div key={idx} className="flex items-center gap-1 bg-gray-800 rounded-full px-3 py-1.5">
-              <input
-                value={skill}
-                onChange={(e) => updateList(skills, setSkills, idx, e.target.value)}
-                placeholder="Skill"
-                className="bg-transparent text-white text-sm focus:outline-none w-24"
-              />
-              {skills.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeFromList(skills, setSkills, idx)}
-                  className="text-gray-500 hover:text-red-400 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[14px]">close</span>
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => addToList(skills, setSkills)}
-            className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm bg-blue-900/20 rounded-full px-3 py-1.5 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[14px]">add</span>
-            Add skill
-          </button>
+      {/* Expiry */}
+      <div className={sectionCls}>
+        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>
+          Expiry Date <span className="text-sm font-normal" style={{ color: "var(--neu-text-muted)" }}>(optional)</span>
+        </h2>
+        <div className={neuInputCls}>
+          <input
+            type="date"
+            value={form.expiresAt}
+            onChange={(e) => set("expiresAt", e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
+            className={inputCls()}
+            style={{ color: "var(--neu-text)" }}
+          />
         </div>
-      </div>
-
-      {/* Expires */}
-      <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6">
-        <label className="block text-sm font-medium text-gray-300 mb-1.5">
-          Closing Date <span className="text-gray-500">(optional)</span>
-        </label>
-        <input
-          type="date"
-          value={form.expiresAt}
-          onChange={(e) => set("expiresAt", e.target.value)}
-          min={new Date().toISOString().split("T")[0]}
-          className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
-        />
       </div>
 
       {/* Submit */}
       <button
         type="submit"
-        disabled={createJob.isPending || !form.title || !form.description}
-        className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-900 disabled:text-blue-400 text-white rounded-2xl font-bold text-base transition-colors"
+        disabled={createJob.isPending}
+        className="w-full py-4 rounded-2xl font-bold text-base transition-all mod-btn-active text-primary disabled:opacity-60"
       >
-        {createJob.isPending ? "Posting…" : "Post Job"}
+        {createJob.isPending ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            Posting Job…
+          </span>
+        ) : (
+          "Post Job"
+        )}
       </button>
     </form>
   );

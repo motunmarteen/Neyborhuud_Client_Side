@@ -534,13 +534,17 @@ export interface ConversationContext {
   productThumbnail?: string;
   origin?: string;
   label?: string;
+  jobId?: string;
+  jobTitle?: string;
+  applicationId?: string;
 }
 
 export type ConversationContextType =
   | "general"
   | "marketplace"
   | "incident"
-  | "community";
+  | "community"
+  | "jobs";
 
 export interface Conversation {
   id: string;
@@ -738,7 +742,7 @@ export interface JobApplication {
   applicant: User;
   coverLetter?: string;
   resumeUrl?: string;
-  status: "pending" | "reviewing" | "shortlisted" | "rejected" | "accepted";
+  status: "pending" | "reviewing" | "accepted" | "rejected" | "withdrawn";
   createdAt: string;
   updatedAt: string;
 }

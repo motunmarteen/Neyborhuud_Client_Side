@@ -29,9 +29,11 @@ export function useJobs(filter?: JobsFilter) {
     queryFn: ({ pageParam = 1 }) =>
       jobsService.getJobs(pageParam as number, 20, filter),
     getNextPageParam: (lastPage) => {
-      const pagination =
-        (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
-      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+      const p =
+        (lastPage as any).pagination ||
+        (lastPage as any)?.data?.pagination;
+      if (!p) return undefined;
+      return p.page < p.pages ? p.page + 1 : undefined;
     },
     initialPageParam: 1,
     staleTime: 60000,
@@ -55,9 +57,11 @@ export function useMyApplications() {
     queryFn: ({ pageParam = 1 }) =>
       jobsService.getMyApplications(pageParam as number, 20),
     getNextPageParam: (lastPage) => {
-      const pagination =
-        (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
-      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+      const p =
+        (lastPage as any).pagination ||
+        (lastPage as any)?.data?.pagination;
+      if (!p) return undefined;
+      return p.page < p.pages ? p.page + 1 : undefined;
     },
     initialPageParam: 1,
     staleTime: 30000,
@@ -71,9 +75,11 @@ export function useSavedJobs() {
     queryFn: ({ pageParam = 1 }) =>
       jobsService.getSavedJobs(pageParam as number, 20),
     getNextPageParam: (lastPage) => {
-      const pagination =
-        (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
-      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+      const p =
+        (lastPage as any).pagination ||
+        (lastPage as any)?.data?.pagination;
+      if (!p) return undefined;
+      return p.page < p.pages ? p.page + 1 : undefined;
     },
     initialPageParam: 1,
   });
@@ -219,6 +225,47 @@ export function useCloseJob() {
     onError: (error) => {
       toast.error(getErrorMessage(error) || "Failed to close job");
     },
+  });
+}
+
+/** Reopen a closed job posting */
+export function useReopenJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (jobId: string) => jobsService.reopenJob(jobId),
+    onSuccess: (_data, jobId) => {
+      queryClient.invalidateQueries({ queryKey: ["jobs", "detail", jobId] });
+      queryClient.invalidateQueries({ queryKey: ["jobs", "list"] });
+      toast.success("Job reopened.");
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to reopen job");
+    },
+  });
+}
+
+/** Report a job */
+export function useReportJob() {
+  return useMutation({
+    mutationFn: ({ jobId, reason, description }: { jobId: string; reason: string; description?: string }) =>
+      jobsService.reportJob(jobId, reason, description),
+    onSuccess: () => {
+      toast.success("Job reported. Thank you.");
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to report job");
+    },
+  });
+}
+
+/** Nearby jobs by coordinates */
+export function useNearbyJobs(latitude: number | null, longitude: number | null) {
+  return useQuery({
+    queryKey: ["jobs", "nearby", latitude, longitude],
+    queryFn: () => jobsService.getNearbyJobs(latitude!, longitude!),
+    enabled: latitude !== null && longitude !== null,
+    staleTime: 60000,
   });
 }
 

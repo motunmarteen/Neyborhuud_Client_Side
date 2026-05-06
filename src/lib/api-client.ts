@@ -307,9 +307,10 @@ class ApiClient {
     file: File,
     additionalData?: Record<string, any>,
     onProgress?: (progress: number) => void,
+    fieldName: string = "file",
   ): Promise<ApiResponse<T>> {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append(fieldName, file);
 
     if (additionalData) {
       Object.keys(additionalData).forEach((key) => {

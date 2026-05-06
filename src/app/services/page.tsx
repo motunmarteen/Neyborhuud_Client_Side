@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 import TopNav from "@/components/navigation/TopNav";
 import LeftSidebar from "@/components/navigation/LeftSidebar";
 import RightSidebar from "@/components/navigation/RightSidebar";
@@ -27,9 +28,9 @@ const CATEGORIES = [
 
 const MIN_RATINGS = [
   { label: "Any Rating", value: undefined },
-  { label: "3+ stars", value: 3 },
-  { label: "4+ stars", value: 4 },
-  { label: "4.5+ stars", value: 4.5 },
+  { label: "3+ ★", value: 3 },
+  { label: "4+ ★", value: 4 },
+  { label: "4.5+ ★", value: 4.5 },
 ];
 
 export default function ServicesPage() {
@@ -45,91 +46,112 @@ export default function ServicesPage() {
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useServices(apiFilter);
 
-  const services = data?.pages.flatMap((page) => (page as any).data ?? []) ?? [];
+  const services = data?.pages.flatMap((page) => {
+    const inner = (page as any)?.data;
+    return Array.isArray(inner) ? inner : (inner?.data ?? inner?.services ?? []);
+  }) ?? [];
+
+  const { ref: loadMoreRef, inView } = useInView({ threshold: 0, rootMargin: "400px" });
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+    <div className="relative flex h-screen w-full overflow-hidden neu-base">
+      <LeftSidebar />
+      <main className="flex flex-col flex-1 overflow-y-auto">
+        <TopNav />
+        <div className="flex flex-col pb-20">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800 backdrop-blur-md bg-opacity-95">
-            <div className="max-w-3xl mx-auto px-4 py-4">
-              <div className="flex items-center justify-between mb-3">
-                <h1 className="text-xl font-bold">Services</h1>
-                <div className="flex items-center gap-2">
-                  <Link
-                    href="/services/my-bookings"
-                    className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300"
-                  >
-                    My Bookings
-                  </Link>
-                  <Link
-                    href="/services/create"
-                    className="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-500 rounded-lg transition-colors text-white font-medium flex items-center gap-1"
-                  >
-                    <span className="material-symbols-outlined text-[14px]">add</span>
-                    Offer a Service
-                  </Link>
+          <div className="px-4 pt-5 pb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="mod-inset rounded-xl size-10 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-xl text-primary">handyman</span>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold" style={{ color: "var(--neu-text)" }}>Services</h1>
+                  <p className="text-xs" style={{ color: "var(--neu-text-muted)" }}>Find help near you</p>
                 </div>
               </div>
+              <Link
+                href="/services/create"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm mod-btn-active text-primary transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px]">add</span>
+                Offer Service
+              </Link>
+            </div>
 
-              {/* Category chips */}
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                {CATEGORIES.map((cat) => {
-                  const active = category === cat;
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => setCategory(cat)}
-                      className={`shrink-0 text-sm px-4 py-1.5 rounded-full transition-colors ${
-                        active
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Quick action links */}
+            <div className="flex gap-2 mb-4">
+              <Link
+                href="/services/my-bookings"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-btn transition-all"
+                style={{ color: "var(--neu-text-muted)" }}
+              >
+                <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                My Bookings
+              </Link>
+              <Link
+                href="/services/my-favorites"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-btn transition-all"
+                style={{ color: "var(--neu-text-muted)" }}
+              >
+                <span className="material-symbols-outlined text-[14px]">favorite</span>
+                Saved
+              </Link>
+            </div>
 
-              {/* Rating filter */}
-              <div className="flex gap-2 mt-2 overflow-x-auto pb-1 scrollbar-none">
-                {MIN_RATINGS.map((r) => {
-                  const active = minRating === r.value;
-                  return (
-                    <button
-                      key={r.label}
-                      onClick={() => setMinRating(r.value)}
-                      className={`shrink-0 text-xs px-3 py-1 rounded-full transition-colors ${
-                        active
-                          ? "bg-yellow-600 text-white"
-                          : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-                      }`}
-                    >
-                      {r.label}
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Category chips */}
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none mb-2">
+              {CATEGORIES.map((cat) => {
+                const active = category === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setCategory(cat)}
+                    className={`shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
+                      active ? "mod-btn-active text-primary" : "mod-btn"
+                    }`}
+                    style={active ? {} : { color: "var(--neu-text-muted)" }}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Rating filter */}
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {MIN_RATINGS.map((r) => {
+                const active = minRating === r.value;
+                return (
+                  <button
+                    key={r.label}
+                    onClick={() => setMinRating(r.value)}
+                    className={`shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
+                      active ? "mod-btn-active text-primary" : "mod-btn"
+                    }`}
+                    style={active ? {} : { color: "var(--neu-text-muted)" }}
+                  >
+                    {r.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="max-w-3xl mx-auto px-4 py-6">
-            {/* Loading */}
+          <div className="px-4">
+            {/* Loading skeletons */}
             {isLoading && (
               <div className="grid sm:grid-cols-2 gap-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="animate-pulse bg-[#1a1a2e] border border-gray-800 rounded-xl overflow-hidden"
-                  >
-                    <div className="h-36 bg-gray-800" />
+                  <div key={i} className="mod-card rounded-2xl overflow-hidden animate-pulse">
+                    <div className="h-36" style={{ background: "var(--neu-shadow-dark)" }} />
                     <div className="p-4 space-y-2">
-                      <div className="h-4 bg-gray-800 rounded w-3/4" />
-                      <div className="h-3 bg-gray-800 rounded w-1/2" />
+                      <div className="h-4 rounded w-3/4" style={{ background: "var(--neu-shadow-dark)" }} />
+                      <div className="h-3 rounded w-1/2" style={{ background: "var(--neu-shadow-dark)" }} />
                     </div>
                   </div>
                 ))}
@@ -139,11 +161,9 @@ export default function ServicesPage() {
             {/* Error */}
             {error && !isLoading && (
               <div className="text-center py-12">
-                <p className="text-red-400 mb-4">Failed to load services</p>
-                <button
-                  onClick={() => refetch()}
-                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                >
+                <span className="material-symbols-outlined text-5xl mb-3" style={{ color: "var(--brand-red)" }}>error</span>
+                <p className="mb-4 font-semibold" style={{ color: "var(--neu-text-muted)" }}>Failed to load services</p>
+                <button onClick={() => refetch()} className="px-6 py-3 mod-btn rounded-xl font-semibold transition-all" style={{ color: "var(--neu-text)" }}>
                   Try Again
                 </button>
               </div>
@@ -151,46 +171,47 @@ export default function ServicesPage() {
 
             {/* Grid */}
             {!isLoading && services.length > 0 && (
-              <>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {services.map((service: any, i: number) => (
-                    <ServiceCard
-                      key={service.id ?? service._id ?? i}
-                      service={service}
-                      onFavorite={(serviceId, favorited) =>
-                        favoriteService.mutate({ serviceId, favorited })
-                      }
-                      favoriting={favoriteService.isPending}
-                    />
-                  ))}
-                </div>
-
-                {hasNextPage && (
-                  <div className="text-center mt-6">
-                    <button
-                      onClick={() => fetchNextPage()}
-                      disabled={isFetchingNextPage}
-                      className="px-8 py-3 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 rounded-lg font-semibold transition-colors"
-                    >
-                      {isFetchingNextPage ? "Loading…" : "Load More"}
-                    </button>
-                  </div>
-                )}
-              </>
+              <div className="grid sm:grid-cols-2 gap-4 pb-6">
+                {services.map((service: any, i: number) => (
+                  <ServiceCard
+                    key={service.id ?? service._id ?? i}
+                    service={service}
+                    onFavorite={(serviceId, favorited) =>
+                      favoriteService.mutate({ serviceId, favorited })
+                    }
+                    favoriting={favoriteService.isPending}
+                  />
+                ))}
+              </div>
             )}
 
             {/* Empty */}
             {!isLoading && !error && services.length === 0 && (
               <div className="text-center py-16">
-                <span className="material-symbols-outlined text-gray-600 text-6xl">handyman</span>
-                <h3 className="text-xl font-semibold text-gray-400 mt-4 mb-2">No services found</h3>
-                <p className="text-gray-500">Try a different category or rating filter</p>
+                <span className="material-symbols-outlined text-6xl mb-4" style={{ color: "var(--neu-text-muted)" }}>handyman</span>
+                <h3 className="text-xl font-semibold mb-2" style={{ color: "var(--neu-text)" }}>No services found</h3>
+                <p style={{ color: "var(--neu-text-muted)" }}>Try a different category or rating filter</p>
+              </div>
+            )}
+
+            {/* Infinite scroll sentinel */}
+            {hasNextPage && (
+              <div ref={loadMoreRef} className="flex justify-center py-6">
+                {isFetchingNextPage && (
+                  <div className="flex items-center gap-2" style={{ color: "var(--neu-text-muted)" }}>
+                    <svg className="animate-spin size-5" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    Loading…
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
-        <RightSidebar />
-      </div>
+      </main>
+      <RightSidebar />
       <BottomNav />
     </div>
   );

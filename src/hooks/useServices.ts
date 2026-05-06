@@ -29,7 +29,8 @@ export function useServices(filter?: ServicesFilter) {
     getNextPageParam: (lastPage) => {
       const pagination =
         (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
-      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+      if (!pagination) return undefined;
+      return pagination.page < pagination.pages ? pagination.page + 1 : undefined;
     },
     initialPageParam: 1,
     staleTime: 60000,
@@ -55,7 +56,8 @@ export function useServiceReviews(serviceId: string | null) {
     getNextPageParam: (lastPage) => {
       const pagination =
         (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
-      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+      if (!pagination) return undefined;
+      return pagination.page < pagination.pages ? pagination.page + 1 : undefined;
     },
     initialPageParam: 1,
     enabled: !!serviceId,
@@ -71,7 +73,24 @@ export function useMyBookings() {
     getNextPageParam: (lastPage) => {
       const pagination =
         (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
-      return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
+      if (!pagination) return undefined;
+      return pagination.page < pagination.pages ? pagination.page + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
+}
+
+/** Current user's favorite services */
+export function useMyFavorites() {
+  return useInfiniteQuery({
+    queryKey: ["services", "my-favorites"],
+    queryFn: ({ pageParam = 1 }) =>
+      servicesService.getMyFavorites(pageParam as number, 20),
+    getNextPageParam: (lastPage) => {
+      const pagination =
+        (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
+      if (!pagination) return undefined;
+      return pagination.page < pagination.pages ? pagination.page + 1 : undefined;
     },
     initialPageParam: 1,
   });
@@ -108,8 +127,8 @@ export function useCancelBooking() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ bookingId, reason }: { bookingId: string; reason?: string }) =>
-      servicesService.cancelBooking(bookingId, reason),
+    mutationFn: ({ bookingId }: { bookingId: string }) =>
+      servicesService.cancelBooking(bookingId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services", "my-bookings"] });
       toast.success("Booking cancelled.");
@@ -200,7 +219,7 @@ export function useCreateService() {
 
   return useMutation({
     mutationFn: (payload: Parameters<typeof servicesService.createService>[0]) =>
-      servicesService.createService(payload),
+      servicesService.createService(payload as any),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services", "list"] });
       awardCoins("service_created");
