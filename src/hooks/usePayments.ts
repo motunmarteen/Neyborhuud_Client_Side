@@ -4,7 +4,6 @@ import {
   useQuery,
   useMutation,
   useInfiniteQuery,
-  useQueryClient,
 } from "@tanstack/react-query";
 import { paymentsService } from "@/services/payments.service";
 
