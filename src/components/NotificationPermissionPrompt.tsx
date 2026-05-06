@@ -3,17 +3,27 @@
 /**
  * NotificationPermissionPrompt
  *
- * A dismissible bottom banner that asks users to enable push notifications.
- * Shows after a 10-second delay once the user is authenticated.
- * Respects a 7-day "snoozed" localStorage flag so it's not annoying.
- * Disappears permanently once the user subscribes.
+ * A FULL-SCREEN blocking modal that appears immediately after login and requires
+ * the user to either enable push notifications or explicitly decline.
+ *
+ * Browser security REQUIRES a user gesture to call Notification.requestPermission(),
+ * so we cannot silently enable notifications for everyone — but we make it
+ * impossible to miss and very hard to skip.
+ *
+ * Strategy:
+ * - Appears immediately (no delay) once the user is logged in
+ * - Full-screen overlay — user must interact with it
+ * - Tapping "Enable" calls requestPermissionAndSubscribe()
+ * - Tapping "Skip for now" dismisses for 3 days (not 7 — safety app urgency)
+ * - If browser permission was already denied, shows instructions to re-enable
+ * - Does NOT show again once subscribed
  */
 
 import { useEffect, useState } from 'react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 const SNOOZE_KEY = 'nh_push_prompt_snoozed_until';
-const SNOOZE_DAYS = 7;
+const SNOOZE_DAYS = 3; // Re-prompt every 3 days since it's a safety app
 
 export default function NotificationPermissionPrompt() {
   const { permission, isSubscribed, isRegistering, requestPermissionAndSubscribe } =
@@ -21,19 +31,21 @@ export default function NotificationPermissionPrompt() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Don't show if already subscribed, denied, or unsupported
-    if (isSubscribed || permission === 'denied' || permission === 'unsupported') return;
+    // Already subscribed — never show
+    if (isSubscribed) return;
+    // Browser denied — show the "how to fix" variant immediately
+    if (permission === 'denied') { setVisible(true); return; }
+    // Not supported (e.g. non-PWA desktop) — skip
+    if (permission === 'unsupported') return;
 
-    // Don't show if snoozed
+    // Check snooze
     const snoozedUntil = localStorage.getItem(SNOOZE_KEY);
     if (snoozedUntil && Date.now() < Number(snoozedUntil)) return;
 
-    // Show after 10 seconds
-    const timer = setTimeout(() => setVisible(true), 10_000);
-    return () => clearTimeout(timer);
+    // Show immediately — no delay for a safety app
+    setVisible(true);
   }, [isSubscribed, permission]);
 
-  // Hide once subscribed
   useEffect(() => {
     if (isSubscribed) setVisible(false);
   }, [isSubscribed]);
@@ -52,63 +64,87 @@ export default function NotificationPermissionPrompt() {
 
   if (!visible) return null;
 
-  // Special message for denied state
+  // ── DENIED STATE ─────────────────────────────────────────────────────────
   if (permission === 'denied') {
     return (
-      <div className="fixed bottom-20 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl bg-red-50 p-4 shadow-lg">
-        <div className="flex items-start gap-3">
-          <span className="material-symbols-outlined text-red-500 text-[22px] mt-0.5">
-            notifications_off
-          </span>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-red-800">Notifications blocked</p>
-            <p className="text-xs text-red-600 mt-0.5">
-              To receive safety alerts, go to your browser settings and allow notifications for
-              NeyborHuud.
-            </p>
+      <div className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/60 backdrop-blur-sm">
+        <div className="w-full max-w-lg rounded-t-3xl bg-white p-6 shadow-2xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-red-500 text-[26px]">notifications_off</span>
+            </div>
+            <div>
+              <p className="font-bold text-gray-900">Notifications are blocked</p>
+              <p className="text-sm text-gray-500">You won't receive SOS and safety alerts</p>
+            </div>
           </div>
+          <p className="text-sm text-gray-600 mb-5 leading-relaxed">
+            To receive life-saving safety alerts, open your browser settings, find
+            NeyborHuud, and change <strong>Notifications</strong> to <strong>Allow</strong>.
+          </p>
           <button
             onClick={handleSnooze}
-            className="shrink-0 text-red-400 hover:text-red-600"
-            aria-label="Dismiss"
+            className="w-full rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            I'll do it later
           </button>
         </div>
       </div>
     );
   }
 
+  // ── DEFAULT STATE ─────────────────────────────────────────────────────────
   return (
-    <div className="fixed bottom-20 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl bg-white p-4 shadow-xl border border-gray-100">
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-          <span className="material-symbols-outlined text-blue-600 text-[22px]">
-            notifications_active
-          </span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900">Stay safe — enable notifications</p>
-          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-            Get instant SOS alerts, safety updates, and messages from your community, even when
-            the app is in the background.
-          </p>
-          <div className="flex gap-2 mt-3">
-            <button
-              onClick={handleEnable}
-              disabled={isRegistering}
-              className="flex-1 rounded-xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
-            >
-              {isRegistering ? 'Enabling…' : 'Enable Notifications'}
-            </button>
-            <button
-              onClick={handleSnooze}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              Not now
-            </button>
+    <div className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/70 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-t-3xl bg-white pb-8 pt-6 px-6 shadow-2xl">
+        {/* Pull bar */}
+        <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-6" />
+
+        {/* Icon */}
+        <div className="flex justify-center mb-5">
+          <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
+            <span className="material-symbols-outlined text-blue-600 text-[44px]">emergency</span>
           </div>
         </div>
+
+        {/* Title & description */}
+        <h2 className="text-xl font-bold text-gray-900 text-center mb-2">
+          Enable Safety Notifications
+        </h2>
+        <p className="text-sm text-gray-500 text-center leading-relaxed mb-2">
+          NeyborHuud is a <strong className="text-gray-700">community safety app</strong>.
+          Push notifications are critical — you'll receive:
+        </p>
+
+        {/* Feature list */}
+        <ul className="text-sm text-gray-600 space-y-2 mb-6 mt-4">
+          {[
+            { icon: 'sos', label: 'Instant SOS alerts from neighbours', color: 'text-red-500' },
+            { icon: 'location_on', label: 'Geofence & safety zone alerts', color: 'text-orange-500' },
+            { icon: 'route', label: 'Trip monitoring & overdue alerts', color: 'text-yellow-600' },
+            { icon: 'chat', label: 'Messages & community updates', color: 'text-blue-500' },
+          ].map(({ icon, label, color }) => (
+            <li key={icon} className="flex items-center gap-3">
+              <span className={`material-symbols-outlined ${color} text-[20px]`}>{icon}</span>
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Buttons */}
+        <button
+          onClick={handleEnable}
+          disabled={isRegistering}
+          className="w-full rounded-2xl bg-blue-600 py-4 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors mb-3"
+        >
+          {isRegistering ? 'Enabling…' : '🔔 Enable Notifications'}
+        </button>
+        <button
+          onClick={handleSnooze}
+          className="w-full rounded-2xl py-3 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          Skip for now (not recommended)
+        </button>
       </div>
     </div>
   );
