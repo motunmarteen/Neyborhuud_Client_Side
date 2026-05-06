@@ -19,17 +19,18 @@ interface Props {
   onClose: () => void;
 }
 
+// Pre-computed heights to avoid calling Math.random() during render
+const WAVEFORM_HEIGHTS = Array.from({ length: 20 }, () => Math.floor(Math.random() * 100));
+
 // Simple pulsing bar waveform (CSS-only, no AudioContext needed)
 function Waveform() {
   return (
     <div className="flex items-end justify-center gap-0.5 h-8">
-      {Array.from({ length: 20 }).map((_, i) => (
+      {WAVEFORM_HEIGHTS.map((height, i) => (
         <div
           key={i}
-          style={{ animationDelay: `${(i * 60) % 400}ms` }}
+          style={{ animationDelay: `${(i * 60) % 400}ms`, height: `${height}%` }}
           className="w-1 rounded-full bg-red-400 animate-bounce"
-          // random heights via inline style to look organic
-          css-ignore={`height: ${Math.floor(Math.random() * 100)}%`}
         />
       ))}
     </div>
