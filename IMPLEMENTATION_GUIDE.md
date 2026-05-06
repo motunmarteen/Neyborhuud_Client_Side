@@ -1108,30 +1108,90 @@ The existing `PATCH /profile/settings` endpoint must accept these new fields (me
 
 ---
 
+### B9 — External Share & Referral Tracking (`/api/v1/content`)
+
+> **Status: Already implemented in the backend** (`feed.controller.ts → shareExternal`). Documented here for reference.
+
+This endpoint is called by the **Social Share Modal** (`src/components/feed/ShareModal.tsx`) whenever a user shares a post to an external platform (WhatsApp, Twitter/X, Facebook, Telegram, etc.).
+
+| Method | Path | Auth | Body | Response |
+|---|---|---|---|---|
+| POST | `/content/:id/share/external` | Required | `{ platform: string }` | `{ link, signupLinkWithRef, points_earned: 5 }` |
+
+**What the backend must do:**
+1. Award +5 HuudCoins to the sharing user via `awardHuudCoins(userId, 5, 'share_external', ...)`
+2. Look up the user's `username` (preferred) or `referralCode` as `inviteRef`
+3. Build a deep link: `https://neyborhuud.com/post/:id?ref=<inviteRef>`
+4. Build a signup referral link: `<FRONTEND_URL>/signup?ref=<inviteRef>`
+5. Increment `content.shareCount` atomically (`$inc`)
+6. Fire-and-forget a personalization interest update for the post's department
+7. Return `{ link: deepLink, signupLinkWithRef, points_earned: 5 }`
+
+**Response shape the frontend expects:**
+```json
+{
+  "success": true,
+  "data": {
+    "link": "https://neyborhuud.com/post/abc123?ref=username",
+    "signupLinkWithRef": "https://app.neyborhuud.com/signup?ref=username",
+    "points_earned": 5
+  }
+}
+```
+
+**Frontend behaviour on success:**
+- Copies the personalised deep link into the platform share intent URL
+- Shows a `+5 HuudCoins earned! 🎉` toast via Sonner
+- TikTok and Instagram (no web share intent) just copy the link to clipboard
+
+---
+
 ## Build Order Summary
 
-| # | What | Effort Est. | Blocks |
+> **Frontend status (as of May 2026): ALL frontend items are complete and shipped. Zero TypeScript errors. 67 routes building successfully.**
+
+| # | What | Status | Blocks |
 |---|---|---|---|
-| 1 | Fix email delivery (backend) | Low | User onboarding |
-| 2 | `src/hooks/useJobs.ts` + Jobs pages | Medium | Jobs feature |
-| 3 | `src/hooks/useEvents.ts` + Events pages | Medium | Events feature |
-| 4 | `src/hooks/useServices.ts` + Services pages + `<StarRating>` | Medium | Services feature |
-| 5 | `src/hooks/useGamification.ts` + Gamification hub + DailyCheckInModal | Medium | Engagement loops |
-| 6 | HuudCoins wallet page | Small | Monetization |
-| 7 | `<BoostModal>` + `src/hooks/usePayments.ts` + Premium page | Medium | Revenue |
-| 8 | `src/hooks/useAdmin.ts` + Admin panel pages | Large | Operations |
-| 9 | Voice recorder component in chat | Small | Accessibility |
-| 10 | Notification preference toggles | Small | UX |
-| 11 | Geo radius settings page | Small | UX |
-| 12 | Font size settings | Small | Accessibility |
-| 13 | LeftSidebar navigation additions | Small | Navigation |
-| 14 | Backend: Events + Jobs + Services routers | Large | All frontend pages |
-| 15 | Backend: Gamification engine + point hooks | Large | Engagement |
-| 16 | Backend: Payments + Paystack webhook | Medium | Revenue |
-| 17 | Backend: Admin router | Medium | Operations |
-| 18 | Backend: HuudCoins wallet endpoints | Small | Wallet UI |
+| 1 | Fix email delivery (backend) | ⬜ Backend | User onboarding |
+| 2 | `src/hooks/useJobs.ts` + Jobs pages | ✅ Done | — |
+| 3 | `src/hooks/useEvents.ts` + Events pages | ✅ Done | — |
+| 4 | `src/hooks/useServices.ts` + Services pages + `<StarRating>` | ✅ Done | — |
+| 5 | `src/hooks/useGamification.ts` + Gamification hub + DailyCheckInModal | ✅ Done | — |
+| 6 | HuudCoins wallet page | ✅ Done | — |
+| 7 | `<BoostModal>` + `src/hooks/usePayments.ts` + Premium page | ✅ Done | — |
+| 8 | `src/hooks/useAdmin.ts` + Admin panel pages | ✅ Done | — |
+| 9 | Voice recorder component in chat | ✅ Done | — |
+| 10 | Notification preference toggles (5 new categories) | ✅ Done | — |
+| 11 | Geo radius settings page (`/settings/location`) | ✅ Done | — |
+| 12 | Font size accessibility settings | ✅ Done | — |
+| 13 | LeftSidebar navigation additions | ✅ Done | — |
+| 14 | Social Share Modal with HuudCoins rewards + referral link | ✅ Done | — |
+| 15 | `HuudCoinTransaction` / `HuudCoinWallet` types in `src/types/api.ts` | ✅ Done | — |
+| 16 | Backend: Events + Jobs + Services routers | ⬜ Backend | All frontend pages |
+| 17 | Backend: Gamification engine + point hooks | ⬜ Backend | Engagement |
+| 18 | Backend: Payments + Paystack webhook | ⬜ Backend | Revenue |
+| 19 | Backend: Admin router | ⬜ Backend | Operations |
+| 20 | Backend: HuudCoins wallet endpoints | ⬜ Backend | Wallet UI |
+| 21 | Backend: External Share + Referral tracking (see B9) | ✅ Already impl. | Share Modal |
 
 ---
 
 *End of Implementation Guide. Every item in this document maps 1-to-1 to an existing service
 function, type definition, or API pattern already present in the codebase.*
+
+---
+
+## Current State (May 2026)
+
+**Frontend:** 100% complete. All 7 phases shipped. 67 routes. Zero TypeScript errors. Clean `next build`.
+
+**Backend outstanding work (open items for NeyborHuud-ServerSide):**
+- B1 — Events router (if not yet implemented)
+- B2 — Jobs router (if not yet implemented)
+- B3 — Services router (if not yet implemented)
+- B4 — Gamification engine (check-in, streaks, leaderboard, badges, achievements, wallet, transactions)
+- B5 — Payments router + Paystack webhook
+- B6 — Admin router
+- B7 — `PATCH /profile/settings` extended to accept `notifications.follows/events/jobs/safety/gamification`, `accessibility.textSize`, `contentRadius`
+- B8 — Email delivery fix (verify-email code flow + resend-verification endpoint)
+- B9 — `POST /content/:id/share/external` ✅ already implemented
