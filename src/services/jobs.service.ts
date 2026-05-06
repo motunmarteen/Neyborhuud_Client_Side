@@ -44,12 +44,10 @@ export const jobsService = {
   async getNearbyJobs(
     latitude: number,
     longitude: number,
-    radius = 10000,
-    page = 1,
-    limit = 20,
+    radius = 10,
   ) {
-    return await apiClient.get<PaginatedResponse<Job>>("/jobs/nearby", {
-      params: { lat: latitude, lng: longitude, radius, page, limit },
+    return await apiClient.get<{ jobs: Job[] }>("/jobs/nearby", {
+      params: { latitude, longitude, radius },
     });
   },
 
@@ -83,6 +81,8 @@ export const jobsService = {
         `/jobs/${jobId}/apply`,
         resume,
         { coverLetter },
+        undefined,
+        "resume",
       );
     }
 
@@ -96,7 +96,7 @@ export const jobsService = {
    */
   async getMyApplications(page = 1, limit = 20) {
     return await apiClient.get<PaginatedResponse<JobApplication>>(
-      "/jobs/applications",
+      "/jobs/my/applications",
       {
         params: { page, limit },
       },
@@ -164,7 +164,7 @@ export const jobsService = {
    * Get saved jobs
    */
   async getSavedJobs(page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<Job>>("/jobs/saved", {
+    return await apiClient.get<PaginatedResponse<Job>>("/jobs/my/saved", {
       params: { page, limit },
     });
   },
@@ -173,14 +173,14 @@ export const jobsService = {
    * Close a job posting
    */
   async closeJob(jobId: string) {
-    return await apiClient.patch(`/jobs/${jobId}/close`);
+    return await apiClient.post(`/jobs/${jobId}/close`);
   },
 
   /**
    * Reopen a job posting
    */
   async reopenJob(jobId: string) {
-    return await apiClient.patch(`/jobs/${jobId}/reopen`);
+    return await apiClient.post(`/jobs/${jobId}/reopen`);
   },
 
   /**

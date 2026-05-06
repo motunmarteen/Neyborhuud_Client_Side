@@ -6,146 +6,210 @@ import { Job } from "@/types/api";
 interface JobCardProps {
   job: Job;
   onApply?: (jobId: string) => void;
+  onSave?: (jobId: string, isSaved: boolean) => void;
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  "full-time": "bg-green-500/20 text-green-400 border-green-500/30",
-  "part-time": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  contract: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  freelance: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  internship: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+const TYPE_LABELS: Record<string, string> = {
+  "full-time": "Full-time",
+  "part-time": "Part-time",
+  contract: "Contract",
+  freelance: "Freelance",
+  internship: "Internship",
 };
 
-const WORKMODE_COLORS: Record<string, string> = {
-  "on-site": "bg-orange-500/20 text-orange-400",
-  remote: "bg-teal-500/20 text-teal-400",
-  hybrid: "bg-indigo-500/20 text-indigo-400",
+const WORKMODE_ICONS: Record<string, string> = {
+  "on-site": "location_city",
+  remote: "home_work",
+  hybrid: "sync_alt",
 };
 
 function formatSalary(job: Job) {
-  if (!job.salary) return null;
+  if (!job.salary || (!job.salary.min && !job.salary.max)) return null;
   const { min, max, currency, period } = job.salary;
+  const sym = currency === "NGN" ? "₦" : currency;
   const fmt = (n: number) =>
-    n >= 1000 ? `${(n / 1000).toFixed(0)}k` : n.toLocaleString();
-  return `${currency === "NGN" ? "₦" : currency}${fmt(min)} – ${fmt(max)} / ${period}`;
+    n >= 1_000_000
+      ? `${(n / 1_000_000).toFixed(1)}M`
+      : n >= 1000
+      ? `${(n / 1000).toFixed(0)}k`
+      : n.toLocaleString();
+  return `${sym}${fmt(min)} – ${fmt(max)} / ${period}`;
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-NG", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export default function JobCard({ job, onApply }: JobCardProps) {
-  const employerName =
-    job.employer
-      ? [job.employer.firstName, job.employer.lastName].filter(Boolean).join(" ") ||
-        job.employer.username
-      : null;
+export default function JobCard({ job, onApply, onSave }: JobCardProps) {
+  const jobId = (job as any)._id ?? job.id;
+  const employerName = job.employer
+    ? [job.employer.firstName, job.employer.lastName].filter(Boolean).join(" ") ||
+      job.employer.username
+    : null;
 
   const salary = formatSalary(job);
+  const isClosed = job.status === "closed" || job.status === "filled";
 
   return (
-    <div className="bg-[#1a1a2e] border border-gray-800 rounded-xl p-4 hover:border-gray-600 transition-all">
+    <div className="mod-card rounded-2xl p-4 hover:shadow-lg transition-all">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <Link
-            href={`/jobs/${job.id}`}
-            className="text-base font-semibold text-white hover:text-blue-400 transition-colors line-clamp-2"
+            href={`/jobs/${jobId}`}
+            className="text-[15px] font-bold leading-snug line-clamp-2 hover:text-primary transition-colors"
+            style={{ color: "var(--neu-text)" }}
           >
             {job.title}
           </Link>
           {employerName && (
-            <p className="text-sm text-gray-400 mt-0.5 truncate">{employerName}</p>
+            <p className="text-xs mt-0.5 truncate" style={{ color: "var(--neu-text-muted)" }}>
+              {employerName}
+            </p>
           )}
         </div>
-        {job.status === "filled" && (
-          <span className="text-xs bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-2 py-0.5 shrink-0">
-            Filled
+
+        {/* Status badge */}
+        {isClosed ? (
+          <span
+            className="text-xs px-2 py-0.5 rounded-full shrink-0 mod-inset font-medium"
+            style={{ color: "var(--neu-text-muted)" }}
+          >
+            {job.status === "filled" ? "Filled" : "Closed"}
           </span>
-        )}
-        {job.status === "closed" && (
-          <span className="text-xs bg-gray-500/20 text-gray-400 border border-gray-500/30 rounded-full px-2 py-0.5 shrink-0">
-            Closed
+        ) : job.hasApplied ? (
+          <span className="text-xs px-2.5 py-0.5 rounded-full shrink-0 font-bold bg-primary/15 text-primary">
+            Applied
           </span>
-        )}
+        ) : null}
       </div>
 
       {/* Badges */}
       <div className="flex flex-wrap gap-1.5 mb-3">
         <span
-          className={`text-xs border rounded-full px-2 py-0.5 capitalize ${TYPE_COLORS[job.type] ?? "bg-gray-700 text-gray-300"}`}
+          className="text-xs px-2.5 py-0.5 rounded-full font-semibold mod-inset"
+          style={{ color: "var(--neu-text-secondary)" }}
         >
-          {(job.type ?? "").replace("-", " ")}
+          {TYPE_LABELS[job.type] ?? job.type}
         </span>
         <span
-          className={`text-xs rounded-full px-2 py-0.5 capitalize ${WORKMODE_COLORS[job.workMode] ?? "bg-gray-700 text-gray-300"}`}
+          className="flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-semibold mod-inset"
+          style={{ color: "var(--neu-text-secondary)" }}
         >
-          {(job.workMode ?? "").replace("-", " ")}
+          <span className="material-symbols-outlined text-[11px]">
+            {WORKMODE_ICONS[job.workMode] ?? "work"}
+          </span>
+          {job.workMode.replace("-", " ")}
         </span>
+        {job.category && (
+          <span
+            className="text-xs px-2.5 py-0.5 rounded-full font-medium"
+            style={{
+              background: "var(--primary)",
+              color: "#fff",
+              opacity: 0.8,
+            }}
+          >
+            {job.category}
+          </span>
+        )}
       </div>
 
-      {/* Location */}
-      <div className="flex items-center gap-1 text-gray-400 text-sm mb-2">
-        <span className="material-symbols-outlined text-[14px]">location_on</span>
-        <span className="truncate">
-          {[job.location?.lga, job.location?.state].filter(Boolean).join(", ") ||
-            "Nigeria"}
-        </span>
+      {/* Location + Salary row */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3">
+        {(job.location?.lga || job.location?.state) && (
+          <div className="flex items-center gap-1 text-xs" style={{ color: "var(--neu-text-muted)" }}>
+            <span className="material-symbols-outlined text-[13px]">location_on</span>
+            <span>{[job.location?.lga, job.location?.state].filter(Boolean).join(", ")}</span>
+          </div>
+        )}
+        {salary && (
+          <div className="flex items-center gap-1 text-xs font-semibold text-primary">
+            <span className="material-symbols-outlined text-[13px]">payments</span>
+            <span>{salary}</span>
+          </div>
+        )}
       </div>
-
-      {/* Salary */}
-      {salary && (
-        <div className="flex items-center gap-1 text-green-400 text-sm mb-3">
-          <span className="material-symbols-outlined text-[14px]">payments</span>
-          <span>{salary}</span>
-        </div>
-      )}
 
       {/* Skills */}
       {job.skills && job.skills.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {job.skills.slice(0, 3).map((skill) => (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {job.skills.slice(0, 4).map((skill) => (
             <span
               key={skill}
-              className="text-xs bg-gray-800 text-gray-300 rounded px-2 py-0.5"
+              className="text-[11px] px-2 py-0.5 rounded-lg mod-btn"
+              style={{ color: "var(--neu-text-secondary)" }}
             >
               {skill}
             </span>
           ))}
-          {job.skills.length > 3 && (
-            <span className="text-xs text-gray-500">+{job.skills.length - 3} more</span>
+          {job.skills.length > 4 && (
+            <span className="text-[11px]" style={{ color: "var(--neu-text-muted)" }}>
+              +{job.skills.length - 4}
+            </span>
           )}
         </div>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-800">
-        <div className="flex items-center gap-3 text-xs text-gray-500">
+      <div
+        className="flex items-center justify-between pt-3 mt-1"
+        style={{ borderTop: "1px solid var(--neu-shadow-dark)" }}
+      >
+        <div className="flex items-center gap-3 text-xs" style={{ color: "var(--neu-text-muted)" }}>
           {typeof job.applications === "number" && (
-            <span>{job.applications} applicant{job.applications !== 1 ? "s" : ""}</span>
+            <span className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[12px]">group</span>
+              {job.applications}
+            </span>
           )}
+          <span>{timeAgo(job.createdAt)}</span>
           {job.expiresAt && (
-            <span>Closes {formatDate(job.expiresAt)}</span>
+            <span>
+              Closes{" "}
+              {new Date(job.expiresAt).toLocaleDateString("en-NG", {
+                day: "numeric",
+                month: "short",
+              })}
+            </span>
           )}
         </div>
 
-        {job.status === "active" && onApply && (
-          <button
-            onClick={() => onApply(job.id)}
-            disabled={job.hasApplied}
-            className={`text-sm px-3 py-1.5 rounded-full font-semibold transition-all ${
-              job.hasApplied
-                ? "bg-gray-700 text-gray-400 cursor-default"
-                : "bg-blue-600 hover:bg-blue-500 text-white"
-            }`}
-          >
-            {job.hasApplied ? "Applied" : "Apply"}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {onSave && (
+            <button
+              onClick={() => onSave(jobId, !!(job as any).isSaved)}
+              className="p-1.5 rounded-lg mod-btn transition-all"
+              aria-label="Save job"
+            >
+              <span
+                className="material-symbols-outlined text-[18px]"
+                style={{ color: (job as any).isSaved ? "var(--primary)" : "var(--neu-text-muted)" }}
+              >
+                {(job as any).isSaved ? "bookmark" : "bookmark_border"}
+              </span>
+            </button>
+          )}
+
+          {!isClosed && onApply && (
+            <button
+              onClick={() => onApply(jobId)}
+              disabled={!!job.hasApplied}
+              className={`text-xs px-4 py-1.5 rounded-xl font-bold transition-all ${
+                job.hasApplied
+                  ? "mod-inset opacity-60"
+                  : "mod-btn-active text-primary"
+              }`}
+            >
+              {job.hasApplied ? "Applied" : "Apply Now"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

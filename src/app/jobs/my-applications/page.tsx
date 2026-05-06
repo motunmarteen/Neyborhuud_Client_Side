@@ -1,170 +1,183 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Link from "next/link";
+import { useInView } from "react-intersection-observer";
 import TopNav from "@/components/navigation/TopNav";
 import LeftSidebar from "@/components/navigation/LeftSidebar";
 import RightSidebar from "@/components/navigation/RightSidebar";
 import { BottomNav } from "@/components/feed/BottomNav";
 import { useMyApplications, useWithdrawApplication } from "@/hooks/useJobs";
-import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
-import { JobApplication } from "@/types/api";
 
-const STATUS_STYLES: Record<JobApplication["status"], string> = {
-  pending: "bg-gray-500/20 text-gray-400",
-  reviewing: "bg-blue-500/20 text-blue-400",
-  shortlisted: "bg-yellow-500/20 text-yellow-400",
-  rejected: "bg-red-500/20 text-red-400",
-  accepted: "bg-green-500/20 text-green-400",
+const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
+  pending:    { bg: "var(--neu-shadow-dark)", color: "var(--neu-text-muted)",   label: "Pending"   },
+  reviewing:  { bg: "#3b82f620",             color: "var(--brand-blue)",        label: "Reviewing" },
+  accepted:   { bg: "#22c55e20",             color: "var(--primary)",           label: "Accepted"  },
+  rejected:   { bg: "#ef444420",             color: "var(--brand-red)",         label: "Rejected"  },
+  withdrawn:  { bg: "#f9731620",             color: "#f97316",                  label: "Withdrawn" },
 };
-
-const STATUS_LABELS: Record<JobApplication["status"], string> = {
-  pending: "Pending",
-  reviewing: "Under Review",
-  shortlisted: "Shortlisted",
-  rejected: "Rejected",
-  accepted: "Accepted",
-};
-
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("en-NG", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 export default function MyApplicationsPage() {
-  const { user, isLoading: authLoading } = useAuth();
-  const router = useRouter();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useMyApplications();
+  const withdrawMutation = useWithdrawApplication();
 
+  const apps = data?.pages.flatMap(
+    (page) => (page as any)?.data?.applications ?? (page as any)?.applications ?? []
+  ) ?? [];
+
+  const { ref, inView } = useInView({ threshold: 0, rootMargin: "300px" });
   useEffect(() => {
-    if (!authLoading && !user) router.replace("/login");
-  }, [user, authLoading, router]);
-
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useMyApplications();
-  const withdraw = useWithdrawApplication();
-
-  const applications = data?.pages.flatMap((page) => (page as any).data ?? []) ?? [];
-
-  if (authLoading || !user) return null;
+    if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+    <div className="relative flex h-screen w-full overflow-hidden neu-base">
+      <LeftSidebar />
+
+      <main className="flex flex-col flex-1 overflow-y-auto">
+        <TopNav />
+
+        <div className="px-4 pt-5 pb-20">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800 backdrop-blur-md bg-opacity-95">
-            <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
-              <button
-                onClick={() => router.back()}
-                className="p-2 rounded-full hover:bg-gray-800 transition-colors text-gray-400"
-              >
-                <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-              </button>
-              <div>
-                <h1 className="text-xl font-bold text-white">My Applications</h1>
-                <p className="text-xs text-gray-400">{applications.length} applications</p>
-              </div>
+          <div className="flex items-center gap-3 mb-6">
+            <Link
+              href="/jobs"
+              className="p-2 rounded-xl mod-btn transition-all"
+              style={{ color: "var(--neu-text-muted)" }}
+            >
+              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+            </Link>
+            <div>
+              <h1 className="text-xl font-bold" style={{ color: "var(--neu-text)" }}>My Applications</h1>
+              <p className="text-xs" style={{ color: "var(--neu-text-muted)" }}>Track your job applications</p>
             </div>
           </div>
 
-          <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
-            {/* Loading */}
-            {isLoading && (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="animate-pulse bg-[#1a1a2e] border border-gray-800 rounded-xl p-4">
-                    <div className="h-5 bg-gray-800 rounded w-2/3 mb-2" />
-                    <div className="h-3 bg-gray-800 rounded w-1/3" />
+          {/* Skeleton */}
+          {isLoading && (
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="animate-pulse mod-card rounded-2xl p-4">
+                  <div className="h-5 rounded-lg w-1/2 mb-3" style={{ background: "var(--neu-shadow-dark)" }} />
+                  <div className="flex gap-2">
+                    <div className="h-5 rounded-full w-24" style={{ background: "var(--neu-shadow-dark)" }} />
+                    <div className="h-5 rounded-full w-16" style={{ background: "var(--neu-shadow-dark)" }} />
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
+          )}
 
-            {/* List */}
-            {!isLoading && applications.length > 0 && (
-              <>
-                {applications.map((app: JobApplication, idx: number) => (
-                  <div
-                    key={app.id || idx}
-                    className="bg-[#1a1a2e] border border-gray-800 rounded-xl p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
+          {/* List */}
+          {!isLoading && apps.length > 0 && (
+            <div className="space-y-3">
+              {apps.map((app: any) => {
+                const style = STATUS_STYLES[app.status] ?? STATUS_STYLES.pending;
+                const job = app.jobId ?? {};
+                return (
+                  <div key={app._id ?? app.id} className="mod-card rounded-2xl p-4">
+                    <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex-1 min-w-0">
                         <Link
-                          href={`/jobs/${app.jobId}`}
-                          className="text-base font-semibold text-white hover:text-blue-400 transition-colors line-clamp-1"
+                          href={`/jobs/${job._id ?? job.id}`}
+                          className="font-bold text-base leading-snug hover:underline line-clamp-1"
+                          style={{ color: "var(--neu-text)" }}
                         >
-                          {(app as any).job?.title ?? "Job"}
+                          {job.title ?? "Job Listing"}
                         </Link>
-                        <p className="text-sm text-gray-400 mt-0.5">
-                          Applied {formatDate(app.createdAt)}
-                        </p>
+                        {(job.location?.lga || job.location?.state) && (
+                          <p className="text-xs mt-0.5" style={{ color: "var(--neu-text-muted)" }}>
+                            {[job.location?.lga, job.location?.state].filter(Boolean).join(", ")}
+                          </p>
+                        )}
                       </div>
                       <span
-                        className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${STATUS_STYLES[app.status]}`}
+                        className="text-xs px-2.5 py-1 rounded-full font-semibold shrink-0"
+                        style={{ background: style.bg, color: style.color }}
                       >
-                        {STATUS_LABELS[app.status]}
+                        {style.label}
                       </span>
                     </div>
 
-                    {app.coverLetter && (
-                      <p className="text-sm text-gray-400 mt-3 line-clamp-2">
-                        {app.coverLetter}
-                      </p>
-                    )}
+                    {/* Applied at */}
+                    <p className="text-xs mb-3" style={{ color: "var(--neu-text-muted)" }}>
+                      Applied {new Date(app.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
 
-                    {app.status === "pending" && (
-                      <div className="mt-3 pt-3 border-t border-gray-800">
-                        <button
-                          onClick={() => withdraw.mutate(app.id)}
-                          disabled={withdraw.isPending}
-                          className="text-sm text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                    {/* Cover letter preview */}
+                    {app.coverLetter && (
+                      <div className="mod-inset rounded-xl px-3 py-2 mb-3">
+                        <p
+                          className="text-xs line-clamp-2"
+                          style={{ color: "var(--neu-text-muted)" }}
                         >
-                          Withdraw Application
-                        </button>
+                          &ldquo;{app.coverLetter}&rdquo;
+                        </p>
                       </div>
                     )}
-                  </div>
-                ))}
 
-                {hasNextPage && (
-                  <div className="text-center pt-2">
-                    <button
-                      onClick={() => fetchNextPage()}
-                      disabled={isFetchingNextPage}
-                      className="px-8 py-3 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 rounded-lg font-semibold transition-colors text-sm"
-                    >
-                      {isFetchingNextPage ? "Loading…" : "Load More"}
-                    </button>
+                    {/* Withdraw + Open Conversation */}
+                    <div className="flex items-center gap-4">
+                      {app.conversationId && (
+                        <Link
+                          href={`/messages/${app.conversationId}`}
+                          className="text-xs font-semibold transition-all flex items-center gap-1"
+                          style={{ color: "var(--primary)" }}
+                        >
+                          <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
+                          Open Conversation
+                        </Link>
+                      )}
+                      {app.status === "pending" && (
+                        <button
+                          onClick={() => withdrawMutation.mutate(app._id ?? app.id)}
+                          disabled={withdrawMutation.isPending}
+                          className="text-xs font-semibold transition-all"
+                          style={{ color: "var(--brand-red)" }}
+                        >
+                          {withdrawMutation.isPending ? "Withdrawing…" : "Withdraw Application"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div ref={ref} className="py-2 flex justify-center">
+                {isFetchingNextPage && (
+                  <div className="flex items-center gap-2 text-sm" style={{ color: "var(--neu-text-muted)" }}>
+                    <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    Loading more…
                   </div>
                 )}
-              </>
-            )}
-
-            {/* Empty */}
-            {!isLoading && applications.length === 0 && (
-              <div className="text-center py-16">
-                <span className="material-symbols-outlined text-gray-600 text-6xl">description</span>
-                <h3 className="text-xl font-semibold text-gray-400 mt-4 mb-2">No applications yet</h3>
-                <p className="text-gray-500 mb-6">Start applying to jobs in your area</p>
-                <Link
-                  href="/jobs"
-                  className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors"
-                >
-                  Browse Jobs
-                </Link>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Empty */}
+          {!isLoading && apps.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 mod-card rounded-2xl">
+              <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-4xl" style={{ color: "var(--neu-text-muted)" }}>
+                  description
+                </span>
+              </div>
+              <p className="text-base font-bold mb-2" style={{ color: "var(--neu-text)" }}>
+                No applications yet
+              </p>
+              <p className="text-sm mb-6" style={{ color: "var(--neu-text-muted)" }}>Browse jobs and apply!</p>
+              <Link
+                href="/jobs"
+                className="px-6 py-2.5 rounded-xl font-bold text-sm mod-btn-active text-primary transition-all"
+              >
+                Browse Jobs
+              </Link>
+            </div>
+          )}
         </div>
-        <RightSidebar />
-      </div>
+      </main>
+
+      <RightSidebar />
       <BottomNav />
     </div>
   );
