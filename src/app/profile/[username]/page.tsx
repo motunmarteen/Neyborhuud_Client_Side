@@ -942,25 +942,48 @@ export default function ProfilePage() {
                     </Link>
                   </div>
                 )
-              ) : (
-                // Other users — we can't fetch their badges without a dedicated endpoint
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {[
-                    { name: 'Good Samaritan', tier: 'Gold', icon: 'volunteer_activism', tone: 'bg-emerald-50 text-emerald-700 ring-emerald-100' },
-                    { name: 'Watch Leader', tier: 'Diamond', icon: 'shield_person', tone: 'bg-sky-50 text-sky-700 ring-sky-100' },
-                    { name: 'Top Seller', tier: 'Silver', icon: 'storefront', tone: 'bg-violet-50 text-violet-700 ring-violet-100' },
-                    { name: 'First Responder', tier: 'Verified', icon: 'emergency_home', tone: 'bg-rose-50 text-rose-700 ring-rose-100' },
-                  ].map((badge) => (
-                    <div key={badge.name} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                      <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-2xl ring-1 ${badge.tone}`}>
-                        <span className="material-symbols-outlined text-[22px]">{badge.icon}</span>
-                      </div>
-                      <p className="text-sm font-black leading-tight text-slate-800">{badge.name}</p>
-                      <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{badge.tier}</p>
+              ) : (() => {
+                // Use real badges from profile.gamification.badges (sent by backend in public profile response)
+                const publicBadges: any[] = (() => {
+                  const b = profile.gamification?.badges;
+                  return Array.isArray(b) ? b : [];
+                })();
+                const rarityTone: Record<string, string> = {
+                  common:    'bg-slate-50    text-slate-600  ring-slate-100',
+                  uncommon:  'bg-emerald-50  text-emerald-700 ring-emerald-100',
+                  rare:      'bg-sky-50      text-sky-700    ring-sky-100',
+                  epic:      'bg-violet-50   text-violet-700 ring-violet-100',
+                  legendary: 'bg-amber-50    text-amber-700  ring-amber-100',
+                };
+                if (publicBadges.length === 0) {
+                  return (
+                    <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-200 px-4 py-8 text-center">
+                      <span className="material-symbols-outlined text-[36px] text-slate-300">military_tech</span>
+                      <p className="mt-2 text-sm font-bold text-slate-500">
+                        @{profile.username} hasn&apos;t earned any badges yet
+                      </p>
                     </div>
-                  ))}
-                </div>
-              )}
+                  );
+                }
+                return (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {publicBadges.slice(0, 4).map((badge: any, i: number) => {
+                      const tone = rarityTone[badge.rarity ?? badge.tier ?? 'common'] ?? rarityTone.common;
+                      return (
+                        <div key={badge.id ?? badge._id ?? i} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                          <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-2xl ring-1 ${tone}`}>
+                            <span className="material-symbols-outlined text-[22px]">{badge.icon ?? 'military_tech'}</span>
+                          </div>
+                          <p className="text-sm font-black leading-tight text-slate-800">{badge.name ?? badge.title ?? 'Badge'}</p>
+                          <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+                            {badge.rarity ?? badge.tier ?? badge.category ?? 'Earned'}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </section>
 
             {/* ── Gamification Quick Links (own profile only) ── */}
