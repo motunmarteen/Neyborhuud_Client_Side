@@ -37,11 +37,10 @@ const SUBCATEGORIES: Record<string, string[]> = {
 const PRICING_TYPES = [
   { value: "fixed", label: "Fixed Price" },
   { value: "hourly", label: "Per Hour" },
-  { value: "custom", label: "Custom / Negotiable" },
+  { value: "custom", label: "Negotiable" },
 ] as const;
 
 const CURRENCIES = ["NGN", "USD", "GBP", "EUR"];
-
 const ALL_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export default function CreateServiceForm() {
@@ -60,15 +59,7 @@ export default function CreateServiceForm() {
     hoursText: "9am – 5pm",
   });
 
-  const [selectedDays, setSelectedDays] = useState<string[]>([
-    "Mon",
-    "Tue",
-    "Wed",
-    "Thu",
-    "Fri",
-  ]);
-
-  // Image previews (base64 data URLs for display; real upload would use a media endpoint)
+  const [selectedDays, setSelectedDays] = useState<string[]>(["Mon", "Tue", "Wed", "Thu", "Fri"]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
@@ -84,12 +75,8 @@ export default function CreateServiceForm() {
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
-    if (files.length + imageFiles.length > 6) {
-      return;
-    }
     const newFiles = files.slice(0, 6 - imageFiles.length);
     setImageFiles((prev) => [...prev, ...newFiles]);
-
     newFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (ev) => {
@@ -97,7 +84,6 @@ export default function CreateServiceForm() {
       };
       reader.readAsDataURL(file);
     });
-    // Reset input so same file can be selected again after removal
     e.target.value = "";
   }
 
@@ -108,78 +94,72 @@ export default function CreateServiceForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (selectedDays.length === 0) return;
 
-    if (selectedDays.length === 0) {
-      return;
-    }
-
-    const payload: Parameters<typeof createService.mutate>[0] = {
-      title: form.title.trim(),
-      description: form.description.trim(),
-      category: form.category.toLowerCase(),
-      subcategory: form.subcategory || undefined,
-      pricing: {
-        type: form.pricingType,
-        currency: form.pricingCurrency,
-        ...(form.pricingType !== "custom" && form.pricingAmount
-          ? { amount: Number(form.pricingAmount) }
-          : {}),
-      },
-      availability: {
-        days: selectedDays,
-        hours: form.hoursText.trim(),
-      },
-      // Images would be uploaded to a media endpoint first; omit if none
-      ...(imagePreviews.length > 0 ? { images: imagePreviews } : {}),
-    };
-
-    createService.mutate(payload, {
-      onSuccess: () => router.push("/services"),
-    });
+    createService.mutate(
+      {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        category: form.category.toLowerCase(),
+        subcategory: form.subcategory || undefined,
+        pricing: {
+          type: form.pricingType,
+          currency: form.pricingCurrency,
+          ...(form.pricingType !== "custom" && form.pricingAmount
+            ? { amount: Number(form.pricingAmount) }
+            : {}),
+        },
+        availability: {
+          days: selectedDays,
+          hours: form.hoursText.trim(),
+        },
+        imageFiles: imageFiles.length > 0 ? imageFiles : undefined,
+      } as any,
+      { onSuccess: () => router.push("/services") },
+    );
   }
 
   const subcategoryOptions = SUBCATEGORIES[form.category] ?? [];
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 pb-20">
-      {/* ── Basic Info ── */}
-      <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6 space-y-5">
-        <h2 className="text-lg font-bold text-white">Service Details</h2>
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-4 px-4 pb-24">
+      {/* ── Service Details ── */}
+      <div className="mod-card rounded-2xl p-5 space-y-5">
+        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>Service Details</h2>
 
-        {/* Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Service Title <span className="text-red-400">*</span>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+            Service Title <span style={{ color: "var(--brand-red)" }}>*</span>
           </label>
           <input
             value={form.title}
             onChange={(e) => set("title", e.target.value)}
             required
             placeholder="e.g. Professional Home Cleaning"
-            className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+            style={{ color: "var(--neu-text)" }}
           />
         </div>
 
-        {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Description <span className="text-red-400">*</span>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+            Description <span style={{ color: "var(--brand-red)" }}>*</span>
           </label>
           <textarea
             value={form.description}
             onChange={(e) => set("description", e.target.value)}
             required
             rows={5}
-            placeholder="Describe what you offer, your experience, tools you use, and what makes you stand out..."
-            className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 resize-none focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="Describe what you offer, your experience, and what makes you stand out..."
+            className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all resize-none"
+            style={{ color: "var(--neu-text)" }}
           />
         </div>
 
-        {/* Category + Subcategory */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              Category <span className="text-red-400">*</span>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+              Category <span style={{ color: "var(--brand-red)" }}>*</span>
             </label>
             <select
               aria-label="Category"
@@ -188,70 +168,56 @@ export default function CreateServiceForm() {
                 set("category", e.target.value as (typeof CATEGORIES)[number]);
                 set("subcategory", "");
               }}
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+              style={{ color: "var(--neu-text)" }}
             >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
+              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              Subcategory{" "}
-              <span className="text-gray-500 font-normal">(optional)</span>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+              Subcategory <span className="font-normal text-xs">(optional)</span>
             </label>
             <select
               aria-label="Subcategory"
               value={form.subcategory}
               onChange={(e) => set("subcategory", e.target.value)}
               disabled={subcategoryOptions.length === 0}
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-40"
+              className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all disabled:opacity-40"
+              style={{ color: "var(--neu-text)" }}
             >
               <option value="">— Select —</option>
-              {subcategoryOptions.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
+              {subcategoryOptions.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
         </div>
       </div>
 
       {/* ── Pricing ── */}
-      <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6 space-y-4">
-        <h2 className="text-lg font-bold text-white">Pricing</h2>
+      <div className="mod-card rounded-2xl p-5 space-y-4">
+        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>Pricing</h2>
 
-        {/* Pricing Type */}
         <div className="flex gap-2">
           {PRICING_TYPES.map(({ value, label }) => (
             <button
               key={value}
               type="button"
               onClick={() => set("pricingType", value)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                form.pricingType === value
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                form.pricingType === value ? "mod-btn-active text-primary" : "mod-btn"
               }`}
+              style={form.pricingType !== value ? { color: "var(--neu-text-muted)" } : {}}
             >
               {label}
             </button>
           ))}
         </div>
 
-        {/* Amount + Currency (hidden for custom) */}
         {form.pricingType !== "custom" && (
           <div className="grid grid-cols-3 gap-4">
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                Amount{" "}
-                {form.pricingType === "hourly" && (
-                  <span className="text-gray-500 font-normal">/ hour</span>
-                )}
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+                Amount{form.pricingType === "hourly" && <span className="font-normal"> / hour</span>}
               </label>
               <input
                 type="number"
@@ -259,44 +225,39 @@ export default function CreateServiceForm() {
                 onChange={(e) => set("pricingAmount", e.target.value)}
                 placeholder="e.g. 5000"
                 min={0}
-                className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+                style={{ color: "var(--neu-text)" }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                Currency
-              </label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>Currency</label>
               <select
                 aria-label="Currency"
                 value={form.pricingCurrency}
                 onChange={(e) => set("pricingCurrency", e.target.value)}
-                className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+                style={{ color: "var(--neu-text)" }}
               >
-                {CURRENCIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
+                {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
           </div>
         )}
 
         {form.pricingType === "custom" && (
-          <p className="text-sm text-gray-400 bg-gray-800/50 rounded-xl px-4 py-3">
+          <p className="text-sm mod-inset rounded-xl px-4 py-3" style={{ color: "var(--neu-text-muted)" }}>
             Clients will contact you to negotiate a price.
           </p>
         )}
       </div>
 
       {/* ── Availability ── */}
-      <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6 space-y-4">
-        <h2 className="text-lg font-bold text-white">Availability</h2>
+      <div className="mod-card rounded-2xl p-5 space-y-4">
+        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>Availability</h2>
 
-        {/* Days */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Working Days <span className="text-red-400">*</span>
+          <label className="block text-sm font-medium mb-2" style={{ color: "var(--neu-text-muted)" }}>
+            Working Days <span style={{ color: "var(--brand-red)" }}>*</span>
           </label>
           <div className="flex gap-2 flex-wrap">
             {ALL_DAYS.map((day) => {
@@ -306,11 +267,10 @@ export default function CreateServiceForm() {
                   key={day}
                   type="button"
                   onClick={() => toggleDay(day)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-green-600 text-white"
-                      : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    active ? "mod-btn-active text-primary" : "mod-btn"
                   }`}
+                  style={!active ? { color: "var(--neu-text-muted)" } : {}}
                 >
                   {day}
                 </button>
@@ -318,38 +278,34 @@ export default function CreateServiceForm() {
             })}
           </div>
           {selectedDays.length === 0 && (
-            <p className="text-xs text-red-400 mt-1.5">
-              Select at least one day.
-            </p>
+            <p className="text-xs mt-1.5" style={{ color: "var(--brand-red)" }}>Select at least one day.</p>
           )}
         </div>
 
-        {/* Hours */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Working Hours
-          </label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>Working Hours</label>
           <input
             value={form.hoursText}
             onChange={(e) => set("hoursText", e.target.value)}
             placeholder="e.g. 8am – 6pm, or Flexible"
-            className="w-full bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+            style={{ color: "var(--neu-text)" }}
           />
         </div>
       </div>
 
-      {/* ── Images ── */}
-      <div className="bg-[#1a1a2e] border border-gray-800 rounded-2xl p-6 space-y-4">
+      {/* ── Photos ── */}
+      <div className="mod-card rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white">
-            Photos{" "}
-            <span className="text-gray-500 font-normal text-sm">(optional, max 6)</span>
+          <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>
+            Photos <span className="text-sm font-normal" style={{ color: "var(--neu-text-muted)" }}>(optional, max 6)</span>
           </h2>
-          {imagePreviews.length < 6 && (
+          {imageFiles.length < 6 && (
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              className="flex items-center gap-1.5 text-sm font-semibold transition-all"
+              style={{ color: "var(--primary)" }}
             >
               <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
               Add Photos
@@ -372,15 +328,12 @@ export default function CreateServiceForm() {
             {imagePreviews.map((src, i) => (
               <div key={i} className="relative group aspect-square rounded-xl overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={src}
-                  alt={`Preview ${i + 1}`}
-                  className="w-full h-full object-cover"
-                />
+                <img src={src} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
-                  className="absolute top-1 right-1 p-1 bg-black/70 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ background: "rgba(0,0,0,0.7)" }}
                 >
                   <span className="material-symbols-outlined text-[16px] text-white">close</span>
                 </button>
@@ -390,7 +343,8 @@ export default function CreateServiceForm() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="aspect-square rounded-xl border-2 border-dashed border-gray-600 flex flex-col items-center justify-center gap-1 text-gray-500 hover:border-gray-400 hover:text-gray-400 transition-colors"
+                className="aspect-square rounded-xl mod-inset flex flex-col items-center justify-center gap-1 transition-all"
+                style={{ color: "var(--neu-text-muted)" }}
               >
                 <span className="material-symbols-outlined text-[28px]">add</span>
                 <span className="text-xs">Add</span>
@@ -401,7 +355,8 @@ export default function CreateServiceForm() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full h-32 rounded-xl border-2 border-dashed border-gray-600 flex flex-col items-center justify-center gap-2 text-gray-500 hover:border-gray-400 hover:text-gray-400 transition-colors"
+            className="w-full h-32 rounded-xl mod-inset flex flex-col items-center justify-center gap-2 transition-all"
+            style={{ color: "var(--neu-text-muted)" }}
           >
             <span className="material-symbols-outlined text-[36px]">add_photo_alternate</span>
             <span className="text-sm">Tap to add photos of your work</span>
@@ -418,28 +373,13 @@ export default function CreateServiceForm() {
           !form.description.trim() ||
           selectedDays.length === 0
         }
-        className="w-full py-4 bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold rounded-2xl transition-colors flex items-center justify-center gap-2"
+        className="w-full py-4 mod-btn-active text-primary disabled:opacity-50 font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
       >
         {createService.isPending ? (
           <>
-            <svg
-              className="animate-spin h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v8H4z"
-              />
+            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
             Listing service…
           </>
@@ -452,4 +392,5 @@ export default function CreateServiceForm() {
       </button>
     </form>
   );
+
 }

@@ -58,12 +58,10 @@ export const servicesService = {
   },
 
   /**
-   * Cancel a booking
+   * Cancel a booking (DELETE)
    */
-  async cancelBooking(bookingId: string, reason?: string) {
-    return await apiClient.post(`/services/bookings/${bookingId}/cancel`, {
-      reason,
-    });
+  async cancelBooking(bookingId: string) {
+    return await apiClient.delete(`/services/bookings/${bookingId}`);
   },
 
   /**
@@ -71,7 +69,7 @@ export const servicesService = {
    */
   async getMyBookings(page = 1, limit = 20) {
     return await apiClient.get<PaginatedResponse<ServiceBooking>>(
-      "/services/bookings",
+      "/services/my/bookings",
       {
         params: { page, limit },
       },
@@ -91,17 +89,10 @@ export const servicesService = {
   },
 
   /**
-   * Confirm a booking (service provider)
+   * Update booking status (provider only: confirmed | completed | cancelled)
    */
-  async confirmBooking(bookingId: string) {
-    return await apiClient.patch(`/services/bookings/${bookingId}/confirm`);
-  },
-
-  /**
-   * Complete a booking
-   */
-  async completeBooking(bookingId: string) {
-    return await apiClient.patch(`/services/bookings/${bookingId}/complete`);
+  async updateBookingStatus(bookingId: string, status: "confirmed" | "completed" | "cancelled") {
+    return await apiClient.patch(`/services/bookings/${bookingId}/status`, { status });
   },
 
   /**
@@ -138,11 +129,11 @@ export const servicesService = {
   },
 
   /**
-   * Get favorite services
+   * Get my favorite services
    */
-  async getFavoriteServices(page = 1, limit = 20) {
+  async getMyFavorites(page = 1, limit = 20) {
     return await apiClient.get<PaginatedResponse<Service>>(
-      "/services/favorites",
+      "/services/my/favorites",
       {
         params: { page, limit },
       },
@@ -174,31 +165,68 @@ export const servicesService = {
   },
 
   /**
-   * Create a new service listing
+   * Create a new service listing (multipart/form-data for images)
    */
   async createService(payload: {
     title: string;
     description: string;
     category: string;
     subcategory?: string;
-    pricing: {
-      type: "fixed" | "hourly" | "custom";
-      amount?: number;
-      currency: string;
-    };
-    availability: {
-      days: string[];
-      hours: string;
-    };
-    images?: string[];
+    pricing: { type: "fixed" | "hourly" | "custom"; amount?: number; currency: string };
+    availability: { days: string[]; hours: string };
+    imageFiles?: File[];
+    latitude?: number;
+    longitude?: number;
+    address?: string;
+    lga?: string;
+    state?: string;
+    phone?: string;
   }) {
-    return await apiClient.post<Service>("/services", payload);
+    const fd = new FormData();
+    fd.append("title", payload.title);
+    fd.append("description", payload.description);
+    fd.append("category", payload.category);
+    if (payload.subcategory) fd.append("subcategory", payload.subcategory);
+    fd.append("pricing.type", payload.pricing.type);
+    if (payload.pricing.amount != null) fd.append("pricing.amount", String(payload.pricing.amount));
+    fd.append("pricing.currency", payload.pricing.currency);
+    fd.append("availability.days", payload.availability.days.join(","));
+    fd.append("availability.hours", payload.availability.hours);
+    if (payload.latitude != null) fd.append("latitude", String(payload.latitude));
+    if (payload.longitude != null) fd.append("longitude", String(payload.longitude));
+    if (payload.address) fd.append("address", payload.address);
+    if (payload.lga) fd.append("lga", payload.lga);
+    if (payload.state) fd.append("state", payload.state);
+    if (payload.phone) fd.append("phone", payload.phone);
+    payload.imageFiles?.forEach((f) => fd.append("images", f));
+    return await apiClient.post<Service>("/services", fd);
   },
 
   /**
-   * Get service categories
+   * Update an existing service (multipart/form-data for images)
    */
-  async getCategories() {
-    return await apiClient.get<string[]>("/services/categories");
+  async updateService(serviceId: string, payload: {
+    title?: string;
+    description?: string;
+    category?: string;
+    subcategory?: string;
+    pricing?: { type?: string; amount?: number; currency?: string };
+    availability?: { days?: string[]; hours?: string };
+    imageFiles?: File[];
+    status?: "active" | "inactive";
+  }) {
+    const fd = new FormData();
+    if (payload.title) fd.append("title", payload.title);
+    if (payload.description != null) fd.append("description", payload.description);
+    if (payload.category) fd.append("category", payload.category);
+    if (payload.subcategory != null) fd.append("subcategory", payload.subcategory);
+    if (payload.pricing?.type) fd.append("pricing.type", payload.pricing.type);
+    if (payload.pricing?.amount != null) fd.append("pricing.amount", String(payload.pricing.amount));
+    if (payload.pricing?.currency) fd.append("pricing.currency", payload.pricing.currency);
+    if (payload.availability?.days) fd.append("availability.days", payload.availability.days.join(","));
+    if (payload.availability?.hours != null) fd.append("availability.hours", payload.availability.hours);
+    if (payload.status) fd.append("status", payload.status);
+    payload.imageFiles?.forEach((f) => fd.append("images", f));
+    return await apiClient.put<Service>(`/services/${serviceId}`, fd);
   },
 };

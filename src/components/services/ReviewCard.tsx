@@ -31,10 +31,11 @@ function StarDisplay({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map((s) => (
         <span
           key={s}
-          className={`material-symbols-outlined text-[14px] ${
-            s <= rating ? "text-yellow-400" : "text-gray-600"
-          }`}
-          style={{ fontVariationSettings: s <= rating ? "'FILL' 1" : "'FILL' 0" }}
+          className="material-symbols-outlined text-[14px]"
+          style={{
+            color: s <= rating ? "#facc15" : "var(--neu-text-muted)",
+            fontVariationSettings: s <= rating ? "'FILL' 1" : "'FILL' 0",
+          }}
         >
           star
         </span>
@@ -51,7 +52,7 @@ export default function ReviewCard({ review }: Props) {
     : "Anonymous";
 
   return (
-    <div className="py-4 border-b border-gray-800 last:border-0">
+    <div className="py-4 last:border-0" style={{ borderBottom: "1px solid var(--neu-shadow-dark)" }}>
       <div className="flex items-start gap-3">
         {review.reviewer?.profilePicture ? (
           <img
@@ -60,18 +61,18 @@ export default function ReviewCard({ review }: Props) {
             className="w-9 h-9 rounded-full object-cover shrink-0"
           />
         ) : (
-          <div className="w-9 h-9 rounded-full bg-gray-700 flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-gray-400 text-[18px]">person</span>
+          <div className="w-9 h-9 rounded-full mod-inset flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]" style={{ color: "var(--neu-text-muted)" }}>person</span>
           </div>
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-white">{name}</p>
-            <p className="text-xs text-gray-500 shrink-0">{formatDate(review.createdAt)}</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--neu-text)" }}>{name}</p>
+            <p className="text-xs shrink-0" style={{ color: "var(--neu-text-muted)" }}>{formatDate(review.createdAt)}</p>
           </div>
           <StarDisplay rating={review.rating} />
           {review.review && (
-            <p className="text-sm text-gray-300 mt-2 leading-relaxed">{review.review}</p>
+            <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--neu-text-muted)" }}>{review.review}</p>
           )}
         </div>
       </div>
