@@ -34,6 +34,7 @@ import { useMyBadges } from '@/hooks/useGamification';
 import { useUserJobs } from '@/hooks/useJobs';
 import { useUserEvents } from '@/hooks/useEvents';
 import { useUserServices } from '@/hooks/useServices';
+import { useVouchStatus, useVouchUser, useRevokeVouch, getTrustTier } from '@/hooks/useTrust';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -168,6 +169,14 @@ export default function ProfilePage() {
     toggleBlock,
     isPending: isBlockPending,
   } = useBlock(profile?.id, { enabled: shouldEnableFollow });
+
+  // Vouching — use profile?.id directly (userId is declared later but same value)
+  const profileId = (profile as any)?.id || (profile as any)?._id || null;
+  const shouldEnableVouch = !isOwnProfile && !!currentUser && !!profileId && !isBlocked && !isBlockedByThem;
+  const { data: vouchStatus } = useVouchStatus(profileId, { enabled: shouldEnableVouch });
+  const vouchMutation = useVouchUser(profileId);
+  const revokeMutation = useRevokeVouch(profileId);
+  const isVouchPending = vouchMutation.isPending || revokeMutation.isPending;
 
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
@@ -368,6 +377,7 @@ export default function ProfilePage() {
 
   const locationLabel = [profile.location?.lga, profile.location?.state].filter(Boolean).join(', ');
   const trustScore = profile.trustScore ?? profile.gamification?.trustScore ?? 0;
+  const profileTrustTier = getTrustTier(trustScore);
   const huudCoins =
     (profile as any).totalHuudCoins ??
     (profile as any).huudCoins ??
@@ -492,6 +502,16 @@ export default function ProfilePage() {
                     <span className="rounded-full bg-white/15 px-2 py-1 text-[11px] font-bold text-white/90 ring-1 ring-white/15 backdrop-blur">
                       Level {level}
                     </span>
+                    {/* Trust tier badge */}
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[11px] font-bold text-white/90 ring-1 ring-white/15 backdrop-blur">
+                      {profileTrustTier.icon} {profileTrustTier.label}
+                    </span>
+                    {/* Vouch count chip — shown when there are vouches */}
+                    {(vouchStatus?.vouchCount ?? 0) > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 px-2 py-1 text-[11px] font-bold text-amber-100 ring-1 ring-amber-200/30 backdrop-blur">
+                        🤜 {vouchStatus!.vouchCount} {vouchStatus!.vouchCount === 1 ? 'vouch' : 'vouches'}
+                      </span>
+                    )}
                   </div>
                   <h1 className="truncate text-2xl font-black leading-tight sm:text-4xl">{displayName}</h1>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-white/80 sm:text-sm">
@@ -651,6 +671,77 @@ export default function ProfilePage() {
               </>
             )}
           </div>
+
+          {/* ── Vouch Card ──────────────────────────────────────────── */}
+          {!isOwnProfile && !isBlocked && !isBlockedByThem && currentUser && (
+            <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-700">
+                    Community Trust
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold text-slate-800">
+                    {(vouchStatus?.vouchCount ?? 0) > 0
+                      ? `${vouchStatus!.vouchCount} NeyburH${vouchStatus!.vouchCount === 1 ? '' : 's'} vouch for @${profile.username}`
+                      : `@${profile.username} has no vouches yet`}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    {vouchStatus?.hasVouched
+                      ? 'You have vouched for this NeyburH. Their actions reflect on your trust.'
+                      : vouchStatus?.canVouch === false
+                      ? 'Reach Tree 🌳 tier to unlock vouching.'
+                      : 'Vouching puts your own NeyburH Score at stake.'}
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  {vouchStatus?.hasVouched ? (
+                    <button
+                      onClick={() => revokeMutation.mutate()}
+                      disabled={isVouchPending}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-100 px-3.5 py-2 text-sm font-black text-amber-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                      type="button"
+                      title="Revoke your vouch"
+                    >
+                      {isVouchPending ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : (
+                        <>🤜 Vouched</>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => vouchMutation.mutate()}
+                      disabled={isVouchPending || vouchStatus?.canVouch === false}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-2 text-sm font-black text-white shadow-md shadow-amber-500/25 transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      type="button"
+                      title={vouchStatus?.canVouch === false ? 'Reach Tree 🌳 tier to unlock vouching' : 'Vouch for this NeyburH'}
+                    >
+                      {isVouchPending ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : (
+                        <>🤜 Vouch</>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+              {/* Trust tier progress bar */}
+              {(vouchStatus?.vouchesNeeded ?? 0) > 0 && !vouchStatus?.hasVouched && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-[10px] font-bold text-amber-600 mb-1">
+                    <span>Progress to Tree 🌳 tier</span>
+                    <span>{vouchStatus?.vouchCount ?? 0} / 3 vouches</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-amber-200">
+                    <div
+                      className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                      style={{ width: `${Math.min(100, ((vouchStatus?.vouchCount ?? 0) / 3) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
             <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
