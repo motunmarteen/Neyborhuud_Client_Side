@@ -8,8 +8,9 @@ import LeftSidebar from "@/components/navigation/LeftSidebar";
 import RightSidebar from "@/components/navigation/RightSidebar";
 import { BottomNav } from "@/components/feed/BottomNav";
 import EventCard from "@/components/events/EventCard";
-import { useMyEvents, useMyOrganizedEvents, useAttendEvent } from "@/hooks/useEvents";
+import { useMyEvents, useMyOrganizedEvents, useAttendEvent, useBoostEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
+import { CoinSpendModal } from "@/components/gamification/CoinSpendModal";
 
 type Tab = "attending" | "organizing";
 
@@ -18,6 +19,8 @@ export default function MyEventsPage() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("attending");
   const attendEvent = useAttendEvent();
+  const boostEvent = useBoostEvent();
+  const [boostingEventId, setBoostingEventId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) router.replace("/login");
@@ -114,17 +117,29 @@ export default function MyEventsPage() {
               <>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {activeList.map((event: any) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onAttend={(eventId) =>
-                        attendEvent.mutate({
-                          eventId,
-                          attending: !!event.isAttending,
-                        })
-                      }
-                      attendPending={attendEvent.isPending}
-                    />
+                    <div key={event.id} className="relative">
+                      <EventCard
+                        event={event}
+                        onAttend={(eventId) =>
+                          attendEvent.mutate({
+                            eventId,
+                            attending: !!event.isAttending,
+                          })
+                        }
+                        attendPending={attendEvent.isPending}
+                      />
+                      {tab === "organizing" && (
+                        <button
+                          onClick={() => setBoostingEventId(event._id ?? event.id)}
+                          className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white shadow-lg hover:bg-amber-600 transition-colors"
+                        >
+                          🚀 Boost
+                          {event.isBoosted && event.boostedUntil && (
+                            <span className="ml-1 opacity-80">· active</span>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
 
@@ -169,6 +184,31 @@ export default function MyEventsPage() {
         <RightSidebar />
       </div>
       <BottomNav />
+
+      {/* Boost event modal */}
+      {boostingEventId && (
+        <CoinSpendModal
+          title="Boost Event"
+          description="Promote your event to more neighbours"
+          options={[
+            { label: "3 Days", value: 3, coins: 150 },
+            { label: "7 Days", value: 7, coins: 300, popular: true },
+          ]}
+          defaultValue={7}
+          isPending={boostEvent.isPending}
+          alreadyActive={
+            organizingList.find((e: any) => (e._id ?? e.id) === boostingEventId)?.isBoosted
+          }
+          activeUntil={
+            organizingList.find((e: any) => (e._id ?? e.id) === boostingEventId)?.boostedUntil
+          }
+          onConfirm={(days) =>
+            boostEvent.mutate({ eventId: boostingEventId, days: days as 3 | 7 })
+          }
+          onClose={() => setBoostingEventId(null)}
+          confirmLabel="Boost Event"
+        />
+      )}
     </div>
   );
 }

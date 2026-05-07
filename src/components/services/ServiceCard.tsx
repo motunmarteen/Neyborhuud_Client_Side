@@ -21,7 +21,14 @@ function formatPrice(service: Service) {
 
 export default function ServiceCard({ service, onFavorite, favoriting }: Props) {
   return (
-    <div className="mod-card rounded-2xl overflow-hidden">
+    <div className="mod-card rounded-2xl overflow-hidden relative">
+      {/* Boosted badge */}
+      {(service as any).isBoosted && (
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 shadow">
+          <span className="text-[11px]">🚀</span>
+          <span className="text-black text-[9px] font-black uppercase tracking-wide">Boosted</span>
+        </div>
+      )}
       {/* Image */}
       {service.images?.[0] && (
         <div className="h-36 overflow-hidden">

@@ -200,4 +200,14 @@ export const jobsService = {
       description,
     });
   },
+
+  /**
+   * Boost a job listing with HuudCoins
+   */
+  async boostJob(jobId: string, days: 3 | 7) {
+    return await apiClient.post<{ deducted: number; days: number; boostedUntil: string }>(
+      `/jobs/${jobId}/boost`,
+      { days },
+    );
+  },
 };

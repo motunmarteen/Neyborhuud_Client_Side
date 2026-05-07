@@ -56,7 +56,14 @@ export default function JobCard({ job, onApply, onSave }: JobCardProps) {
   const isClosed = job.status === "closed" || job.status === "filled";
 
   return (
-    <div className="mod-card rounded-2xl p-4 hover:shadow-lg transition-all">
+    <div className="mod-card rounded-2xl p-4 hover:shadow-lg transition-all relative">
+      {/* Boosted badge */}
+      {(job as any).isBoosted && (
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 shadow">
+          <span className="text-[11px]">🚀</span>
+          <span className="text-black text-[9px] font-black uppercase tracking-wide">Boosted</span>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">

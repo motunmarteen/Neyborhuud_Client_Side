@@ -122,4 +122,24 @@ export const gamificationService = {
       params: { page, limit },
     });
   },
+
+  /**
+   * Send a HuudCoin tip to another user — purely P2P, no platform cut.
+   */
+  async tipUser(recipientId: string, amount: 50 | 100 | 200 | 500) {
+    return await apiClient.post<{ sent: number; recipientId: string }>(
+      `/gamification/users/${recipientId}/tip`,
+      { amount },
+    );
+  },
+
+  /**
+   * Pin your own post to the top of the neighbourhood feed.
+   */
+  async pinPost(postId: string, days: 1 | 7) {
+    return await apiClient.post<{ deducted: number; days: number; pinnedUntil: string }>(
+      `/gamification/feed/${postId}/pin`,
+      { days },
+    );
+  },
 };

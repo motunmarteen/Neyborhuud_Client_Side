@@ -8,8 +8,9 @@ import LeftSidebar from "@/components/navigation/LeftSidebar";
 import RightSidebar from "@/components/navigation/RightSidebar";
 import { BottomNav } from "@/components/feed/BottomNav";
 import ApplyModal from "@/components/jobs/ApplyModal";
-import { useJob, useSaveJob, useCloseJob } from "@/hooks/useJobs";
+import { useJob, useSaveJob, useCloseJob, useBoostJob } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
+import { CoinSpendModal } from "@/components/gamification/CoinSpendModal";
 
 const TYPE_COLORS: Record<string, string> = {
   "full-time": "bg-green-500/20 text-green-400",
@@ -33,10 +34,12 @@ export default function JobDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [showApply, setShowApply] = useState(false);
+  const [showBoost, setShowBoost] = useState(false);
 
   const { data, isLoading, error } = useJob(id);
   const saveJob = useSaveJob();
   const closeJob = useCloseJob();
+  const boostJob = useBoostJob();
 
   const job = (data as any)?.data ?? data;
 
@@ -244,6 +247,12 @@ export default function JobDetailPage() {
                       Close Job
                     </button>
                   )}
+                  <button
+                    onClick={() => setShowBoost(true)}
+                    className="flex items-center gap-2 px-4 py-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-400 rounded-xl font-semibold transition-colors"
+                  >
+                    🚀 {job.isBoosted ? "Extend Boost" : "Boost"}
+                  </button>
                 </div>
               )}
             </div>
@@ -302,6 +311,24 @@ export default function JobDetailPage() {
           jobId={job.id}
           jobTitle={job.title}
           onClose={() => setShowApply(false)}
+        />
+      )}
+
+      {showBoost && (
+        <CoinSpendModal
+          title="Boost Job Posting"
+          description="Get more applicants by featuring your job"
+          options={[
+            { label: "3 Days", value: 3, coins: 200 },
+            { label: "7 Days", value: 7, coins: 400, popular: true },
+          ]}
+          defaultValue={7}
+          isPending={boostJob.isPending}
+          alreadyActive={job.isBoosted}
+          activeUntil={job.boostedUntil}
+          onConfirm={(days) => boostJob.mutate({ jobId: job.id ?? id, days: days as 3 | 7 })}
+          onClose={() => setShowBoost(false)}
+          confirmLabel="Boost Job"
         />
       )}
     </div>

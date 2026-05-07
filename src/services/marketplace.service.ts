@@ -181,6 +181,19 @@ export const marketplaceService = {
    * Delete a product (soft delete to archived status)
    * DELETE /api/v1/marketplace/{productId}
    */
+  /**
+   * Boost a product listing using HuudCoins.
+   * POST /api/v1/marketplace/products/:productId/boost
+   */
+  async boostProduct(productId: string, days: 3 | 7 | 14 | 30) {
+    return await apiClient.post<{
+      deducted: number;
+      days: number;
+      boostedUntil: string;
+      extended: boolean;
+    }>(`/marketplace/products/${productId}/boost`, { days });
+  },
+
   async deleteProduct(productId: string) {
     return await apiClient.delete<{ productId: string }>(
       `/marketplace/${productId}`,

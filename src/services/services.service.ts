@@ -229,4 +229,14 @@ export const servicesService = {
     payload.imageFiles?.forEach((f) => fd.append("images", f));
     return await apiClient.put<Service>(`/services/${serviceId}`, fd);
   },
+
+  /**
+   * Boost a service listing with HuudCoins
+   */
+  async boostService(serviceId: string, days: 3 | 7) {
+    return await apiClient.post<{ deducted: number; days: number; boostedUntil: string }>(
+      `/services/${serviceId}/boost`,
+      { days },
+    );
+  },
 };

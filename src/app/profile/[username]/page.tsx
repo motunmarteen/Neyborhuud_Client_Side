@@ -10,7 +10,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { socialService } from '@/services/social.service';
 import { useAuth } from '@/hooks/useAuth';
-import { useFollow, useFollowCounts } from '@/hooks/useFollow';
+import { useFollow, useFollowCounts, useMyMilestoneStatus, type MilestoneInfo } from '@/hooks/useFollow';
+import type { MilestonePayload } from '@/hooks/useFollow';
+import dynamic from 'next/dynamic';
+
+const FollowerMilestoneCelebration = dynamic(
+  () => import('@/components/follow/FollowerMilestoneCelebration'),
+  { ssr: false },
+);
 import { useBlock } from '@/hooks/useBlock';
 import { useUserPosts, usePostMutations } from '@/hooks/usePosts';
 import { XPostCard } from '@/components/feed/XPostCard';
@@ -23,6 +30,8 @@ import { contentService } from '@/services/content.service';
 import { chatService } from '@/services/chat.service';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
+import { useTipUser } from '@/hooks/useGamification';
+import { CoinSpendModal } from '@/components/gamification/CoinSpendModal';
 import { useInView } from 'react-intersection-observer';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import apiClient from '@/lib/api-client';
@@ -34,7 +43,11 @@ import { useMyBadges } from '@/hooks/useGamification';
 import { useUserJobs } from '@/hooks/useJobs';
 import { useUserEvents } from '@/hooks/useEvents';
 import { useUserServices } from '@/hooks/useServices';
-import { useVouchStatus, useVouchUser, useRevokeVouch, getTrustTier } from '@/hooks/useTrust';
+import { useVouchStatus, useVouchUser, useRevokeVouch, getTrustTier, useVouches, useUserTrustProfile, TRUST_EVENT_META } from '@/hooks/useTrust';
+import { getNextTrustTier, normalizeTrustScore } from '@/lib/trust-economy';
+import { getPrivilegesForTier } from '@/lib/trust-privileges';
+import { formatTimeAgo } from '@/utils/timeAgo';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -155,7 +168,41 @@ export default function ProfilePage() {
     toggleFollow,
     isPending: isFollowPending,
     isLoadingStatus,
+    pendingMilestone,
+    clearMilestone,
   } = useFollow(profile?.id, { enabled: shouldEnableFollow });
+
+  // Profile owner: detect newly-rewarded milestones and trigger confetti
+  const ownerMilestoneStatus = useMyMilestoneStatus(); // always called (hooks must not be conditional)
+  const [ownerMilestone, setOwnerMilestone] = useState<MilestonePayload | null>(null);
+
+  useEffect(() => {
+    if (!isOwnProfile || !ownerMilestoneStatus.data?.milestones) return;
+    const rewardedCounts: number[] = ownerMilestoneStatus.data.milestones
+      .filter((m: MilestoneInfo) => m.rewarded)
+      .map((m: MilestoneInfo) => m.count);
+    if (rewardedCounts.length === 0) return;
+
+    const storageKey = `nh_seen_milestones_${username}`;
+    let stored: number[] = [];
+    try { stored = JSON.parse(localStorage.getItem(storageKey) ?? '[]'); } catch { /* ignore */ }
+
+    const newOnes = rewardedCounts.filter((c) => !stored.includes(c));
+    if (newOnes.length > 0) {
+      const highest = newOnes.sort((a, b) => b - a)[0];
+      const mInfo = ownerMilestoneStatus.data.milestones.find((m: MilestoneInfo) => m.count === highest);
+      if (mInfo) {
+        setOwnerMilestone({
+          count: mInfo.count,
+          label: mInfo.label,
+          emoji: mInfo.emoji,
+          hcAwarded: mInfo.hcReward,
+          celebrationTier: mInfo.celebrationTier,
+        });
+      }
+      localStorage.setItem(storageKey, JSON.stringify(rewardedCounts));
+    }
+  }, [isOwnProfile, ownerMilestoneStatus.data, username]);
 
   // Get follower/following counts (lightweight)
   const { data: countsData } = useFollowCounts(profile?.id);
@@ -178,8 +225,16 @@ export default function ProfilePage() {
   const revokeMutation = useRevokeVouch(profileId);
   const isVouchPending = vouchMutation.isPending || revokeMutation.isPending;
 
+  // Who has vouched for this user — shown in the TrustOS sidebar card
+  const { data: voucherList = [] } = useVouches(profileId, { enabled: !!profileId });
+
+  // Trust activity log for this user's profile (public view)
+  const { data: trustProfileData } = useUserTrustProfile(profileId, { enabled: !!profileId });
+
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const tipUser = useTipUser();
 
   const handleStartChat = async () => {
     if (!userId) return;
@@ -376,8 +431,13 @@ export default function ProfilePage() {
     (Array.isArray(hist.usernameTimeline) && hist.usernameTimeline.length > 1);
 
   const locationLabel = [profile.location?.lga, profile.location?.state].filter(Boolean).join(', ');
-  const trustScore = profile.trustScore ?? profile.gamification?.trustScore ?? 0;
+  const trustScoreRaw = profile.trustScore ?? profile.gamification?.trustScore ?? 0;
+  const normalizedTrust = normalizeTrustScore(Number(trustScoreRaw));
+  const trustScore = normalizedTrust.score1000;
   const profileTrustTier = getTrustTier(trustScore);
+  const nextTrustTier = getNextTrustTier(trustScore);
+  const profilePrivileges = getPrivilegesForTier(profileTrustTier.tier);
+  const trustRecentEvents = trustProfileData?.recentEvents ?? [];
   const huudCoins =
     (profile as any).totalHuudCoins ??
     (profile as any).huudCoins ??
@@ -385,7 +445,7 @@ export default function ProfilePage() {
     0;
   const level = profile.gamification?.level ?? 1;
   const profilePoints = profile.gamification?.points ?? huudCoins;
-  const scorePercent = Math.min(100, Math.max(0, Math.round((trustScore / 1000) * 100)));
+  const scorePercent = normalizedTrust.percent;
   const joinedLabel = profile.createdAt
     ? new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
     : 'Recently';
@@ -404,6 +464,13 @@ export default function ProfilePage() {
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
+      {/* Follower milestone celebration overlay — shown to follower who just followed, OR to profile owner detecting a new reward */}
+      {(ownerMilestone ?? pendingMilestone) && (
+        <FollowerMilestoneCelebration
+          milestone={(ownerMilestone ?? pendingMilestone)!}
+          onDismiss={ownerMilestone ? () => setOwnerMilestone(null) : clearMilestone}
+        />
+      )}
       {/* TopNav floats over the map cover */}
       <div className="absolute inset-x-0 top-0 z-30 pointer-events-none">
         <div className="pointer-events-auto">
@@ -640,6 +707,15 @@ export default function ProfilePage() {
                   )}
                   {startingChat ? 'Opening...' : 'Message'}
                 </button>
+                {/* Tip neighbour with HuudCoins */}
+                <button
+                  onClick={() => setShowTipModal(true)}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-black text-amber-700 transition hover:bg-amber-100"
+                  type="button"
+                  title="Send HuudCoins tip"
+                >
+                  🪙
+                </button>
                 {/* More Actions */}
                 {!isBlockedByThem && (
                   <div className="relative">
@@ -677,9 +753,30 @@ export default function ProfilePage() {
             <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-700">
-                    Community Trust
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-700">
+                      Community Trust
+                    </p>
+                    {/* ── Proximity badge ── */}
+                    {!vouchStatus?.hasVouched && (
+                      vouchStatus?.locationRequired ? (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-100 border border-slate-300 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                          <span className="material-symbols-outlined text-[12px]">location_off</span>
+                          Location needed
+                        </span>
+                      ) : vouchStatus?.withinRange === true ? (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-green-100 border border-green-300 px-2 py-0.5 text-[10px] font-bold text-green-700">
+                          <span className="material-symbols-outlined text-[12px]">my_location</span>
+                          {vouchStatus.distanceMeters}m away ✓
+                        </span>
+                      ) : vouchStatus?.withinRange === false ? (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-red-100 border border-red-300 px-2 py-0.5 text-[10px] font-bold text-red-600">
+                          <span className="material-symbols-outlined text-[12px]">location_off</span>
+                          {vouchStatus.distanceMeters != null ? `${vouchStatus.distanceMeters}m away` : 'Too far'} — 500m limit
+                        </span>
+                      ) : null
+                    )}
+                  </div>
                   <p className="mt-0.5 text-sm font-semibold text-slate-800">
                     {(vouchStatus?.vouchCount ?? 0) > 0
                       ? `${vouchStatus!.vouchCount} NeyburH${vouchStatus!.vouchCount === 1 ? '' : 's'} vouch for @${profile.username}`
@@ -690,6 +787,10 @@ export default function ProfilePage() {
                       ? 'You have vouched for this NeyburH. Their actions reflect on your trust.'
                       : vouchStatus?.canVouch === false
                       ? 'Reach Tree 🌳 tier to unlock vouching.'
+                      : vouchStatus?.locationRequired
+                      ? 'Both you and this NeyburH need location enabled to vouch.'
+                      : vouchStatus?.withinRange === false
+                      ? 'You must be within 500m to vouch — NeyborHuud is hyperlocal. Only vouch for neighbours you know in person.'
                       : 'Vouching puts your own NeyburH Score at stake.'}
                   </p>
                 </div>
@@ -710,14 +811,49 @@ export default function ProfilePage() {
                     </button>
                   ) : (
                     <button
-                      onClick={() => vouchMutation.mutate()}
-                      disabled={isVouchPending || vouchStatus?.canVouch === false}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-2 text-sm font-black text-white shadow-md shadow-amber-500/25 transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={() => {
+                        if (vouchStatus?.canVouch === false) {
+                          toast.error('You need Tree 🌳 tier (300+ NeyburH Score) to vouch for others', {
+                            description: 'Keep contributing, completing jobs, and getting verified to level up.',
+                          });
+                          return;
+                        }
+                        if (vouchStatus?.locationRequired) {
+                          toast.error('Location required to vouch', {
+                            description: 'Both you and this NeyburH need location enabled. Enable it in your profile settings.',
+                          });
+                          return;
+                        }
+                        if (vouchStatus?.withinRange === false) {
+                          toast.error(`You are ${vouchStatus.distanceMeters}m away — vouching requires you to be within 500m`, {
+                            description: 'NeyborHuud is hyperlocal. You can only vouch for genuine neighbours nearby.',
+                          });
+                          return;
+                        }
+                        vouchMutation.mutate();
+                      }}
+                      disabled={isVouchPending}
+                      className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-black text-white shadow-md transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                        vouchStatus?.canVouch === false || vouchStatus?.locationRequired || vouchStatus?.withinRange === false
+                          ? 'bg-gray-400 shadow-gray-400/25 cursor-pointer hover:bg-gray-500'
+                          : 'bg-amber-500 shadow-amber-500/25 hover:bg-amber-600'
+                      }`}
                       type="button"
-                      title={vouchStatus?.canVouch === false ? 'Reach Tree 🌳 tier to unlock vouching' : 'Vouch for this NeyburH'}
+                      title={
+                        vouchStatus?.canVouch === false ? 'Reach Tree 🌳 tier to unlock vouching'
+                        : vouchStatus?.locationRequired ? 'Location required'
+                        : vouchStatus?.withinRange === false ? `Too far away (${vouchStatus.distanceMeters}m — limit is 500m)`
+                        : 'Vouch for this NeyburH'
+                      }
                     >
                       {isVouchPending ? (
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : vouchStatus?.canVouch === false ? (
+                        <><span className="material-symbols-outlined text-[15px]">lock</span> Vouch</>
+                      ) : vouchStatus?.locationRequired ? (
+                        <><span className="material-symbols-outlined text-[15px]">location_off</span> Vouch</>
+                      ) : vouchStatus?.withinRange === false ? (
+                        <><span className="material-symbols-outlined text-[15px]">location_off</span> Vouch</>
                       ) : (
                         <>🤜 Vouch</>
                       )}
@@ -844,6 +980,18 @@ export default function ProfilePage() {
                 </div>
                 <p className="mt-5 text-5xl font-black leading-none tabular-nums">{trustScore}</p>
                 <p className="mt-1 text-sm font-semibold text-white/75">NeyburH Score</p>
+                <p className="mt-2 text-xs font-semibold text-white/80">
+                  {profileTrustTier.icon} {profileTrustTier.label}
+                  {nextTrustTier ? ` · ${Math.max(0, nextTrustTier.minScore - trustScore)} pts to ${nextTrustTier.label}` : ' · Top tier reached'}
+                </p>
+                {/* Marketplace badge */}
+                {profilePrivileges.marketplaceBadge && (
+                  <div className="mt-2">
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black ${profilePrivileges.marketplaceBadgeColor}`}>
+                      {profileTrustTier.icon} {profilePrivileges.marketplaceBadge}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="p-5">
                 <div className="mb-2 flex items-center justify-between text-xs font-bold text-slate-500">
@@ -866,6 +1014,84 @@ export default function ProfilePage() {
                     <p className="mt-1 text-xl font-black text-amber-700">{Number(huudCoins).toLocaleString()}</p>
                   </div>
                 </div>
+
+                {/* Voucher list */}
+                {voucherList.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 mb-2">
+                      Vouched by
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {voucherList.slice(0, 5).map((v) => (
+                        <button
+                          key={v.id}
+                          onClick={() => router.push(`/profile/${v.voucherUsername}`)}
+                          className="flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                          type="button"
+                          title={`View @${v.voucherUsername}`}
+                        >
+                          {v.voucherAvatar ? (
+                            <img src={v.voucherAvatar} alt="" className="h-4 w-4 rounded-full object-cover" />
+                          ) : (
+                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-200 text-[9px] font-black text-emerald-700">
+                              {v.voucherUsername[0]?.toUpperCase()}
+                            </span>
+                          )}
+                          @{v.voucherUsername}
+                        </button>
+                      ))}
+                      {voucherList.length > 5 && (
+                        <span className="flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-500">
+                          +{voucherList.length - 5} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tier Privileges mini-list */}
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 mb-2">Tier Abilities</p>
+                  <div className="space-y-1.5">
+                    {profilePrivileges.privilegeList.slice(0, 4).map((p) => (
+                      <div key={p.label} className={`flex items-center gap-2 text-xs ${p.unlocked ? 'text-slate-700' : 'text-slate-400'}`}>
+                        <span className={`material-symbols-outlined text-[14px] ${p.unlocked ? 'text-emerald-500' : 'text-slate-300'}`}
+                          style={{ fontVariationSettings: "'FILL' 1" }}>
+                          {p.unlocked ? 'check_circle' : 'cancel'}
+                        </span>
+                        {p.label}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[10px] text-slate-400">{profilePrivileges.summary}</p>
+                </div>
+
+                {/* Trust Activity preview (latest 3) */}
+                {trustRecentEvents.length > 0 && (
+                  <div className="mt-4 border-t border-slate-100 pt-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 mb-2">Recent Trust Events</p>
+                    <div className="space-y-1.5">
+                      {trustRecentEvents.slice(0, 3).map((event) => {
+                        const meta = TRUST_EVENT_META[event.eventType as keyof typeof TRUST_EVENT_META] ?? {
+                          label: event.eventType,
+                          icon: 'info',
+                          positive: event.pointsChange >= 0,
+                        };
+                        const isPos = meta.positive && event.pointsChange >= 0;
+                        return (
+                          <div key={event.id} className="flex items-center gap-2">
+                            <span className={`material-symbols-outlined text-[13px] ${isPos ? 'text-emerald-500' : 'text-rose-500'}`}
+                              style={{ fontVariationSettings: "'FILL' 1" }}>{meta.icon}</span>
+                            <span className="min-w-0 flex-1 truncate text-xs text-slate-600">{meta.label}</span>
+                            <span className={`shrink-0 text-[11px] font-black tabular-nums ${isPos ? 'text-emerald-600' : 'text-rose-500'}`}>
+                              {isPos ? '+' : ''}{event.pointsChange}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1264,6 +1490,27 @@ export default function ProfilePage() {
         <RightSidebar />
       </div>
       <BottomNav />
+
+      {/* Tip user modal */}
+      {showTipModal && profile?.id && (
+        <CoinSpendModal
+          title={`Tip ${profile.firstName ?? profile.username ?? "Neighbour"}`}
+          description="Send HuudCoins as a token of appreciation — all coins go directly to them."
+          options={[
+            { label: "50 coins", value: 50, coins: 50 },
+            { label: "100 coins", value: 100, coins: 100, popular: true },
+            { label: "200 coins", value: 200, coins: 200 },
+            { label: "500 coins", value: 500, coins: 500 },
+          ]}
+          defaultValue={100}
+          isPending={tipUser.isPending}
+          onConfirm={(amount) =>
+            tipUser.mutate({ recipientId: profile.id, amount: amount as 50 | 100 | 200 | 500 })
+          }
+          onClose={() => setShowTipModal(false)}
+          confirmLabel="Send Tip"
+        />
+      )}
     </div>
   );
 }

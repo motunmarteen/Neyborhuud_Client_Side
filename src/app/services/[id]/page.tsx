@@ -11,8 +11,9 @@ import StarRating from "@/components/services/StarRating";
 import ReviewCard from "@/components/services/ReviewCard";
 import BookModal from "@/components/services/BookModal";
 import RateServiceModal from "@/components/services/RateServiceModal";
-import { useService, useServiceReviews, useFavoriteService } from "@/hooks/useServices";
+import { useService, useServiceReviews, useFavoriteService, useBoostService } from "@/hooks/useServices";
 import { useAuth } from "@/hooks/useAuth";
+import { CoinSpendModal } from "@/components/gamification/CoinSpendModal";
 
 const DAY_FULL: Record<string, string> = {
   Mon: "Mon", Tue: "Tue", Wed: "Wed", Thu: "Thu",
@@ -26,6 +27,8 @@ export default function ServiceDetailPage() {
   const [showBook, setShowBook] = useState(false);
   const [showRate, setShowRate] = useState(false);
   const [imgIndex, setImgIndex] = useState(0);
+  const [showBoost, setShowBoost] = useState(false);
+  const boostService = useBoostService();
 
   const { data, isLoading, error } = useService(id);
   const reviews = useServiceReviews(id);
@@ -263,6 +266,23 @@ export default function ServiceDetailPage() {
                     </button>
                   </div>
                 )}
+                {/* Owner boost button */}
+                {isOwner && (
+                  <div className="flex gap-3 pt-1">
+                    <button
+                      onClick={() => setShowBoost(true)}
+                      className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold transition-all"
+                      style={{ background: "rgba(245,158,11,0.15)", color: "#d97706", border: "1px solid rgba(245,158,11,0.3)" }}
+                    >
+                      🚀 {service.isBoosted ? "Extend Boost" : "Boost Service"}
+                    </button>
+                    {service.isBoosted && service.boostedUntil && (
+                      <span className="flex items-center text-xs font-semibold" style={{ color: "#d97706" }}>
+                        Active until {new Date(service.boostedUntil).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Provider card */}
@@ -358,6 +378,23 @@ export default function ServiceDetailPage() {
       )}
       {showRate && (
         <RateServiceModal serviceId={service.id} serviceTitle={service.title} onClose={() => setShowRate(false)} />
+      )}
+      {showBoost && (
+        <CoinSpendModal
+          title="Boost Service Listing"
+          description="Reach more customers in your neighbourhood"
+          options={[
+            { label: "3 Days", value: 3, coins: 200 },
+            { label: "7 Days", value: 7, coins: 400, popular: true },
+          ]}
+          defaultValue={7}
+          isPending={boostService.isPending}
+          alreadyActive={service.isBoosted}
+          activeUntil={service.boostedUntil}
+          onConfirm={(days) => boostService.mutate({ serviceId: service.id, days: days as 3 | 7 })}
+          onClose={() => setShowBoost(false)}
+          confirmLabel="Boost Service"
+        />
       )}
     </>
   );

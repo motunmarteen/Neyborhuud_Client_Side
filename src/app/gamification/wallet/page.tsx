@@ -228,6 +228,44 @@ export default function WalletPage() {
               </div>
             </div>
 
+            {/* Ways to Spend */}
+            <div className="bg-[#1a1a2e] border border-amber-500/20 rounded-xl p-4">
+              <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                <span className="text-lg">🪙</span>
+                Ways to Spend HuudCoins
+              </h2>
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Boost &amp; Visibility</p>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {[
+                  { icon: "storefront",   label: "Boost marketplace listing",  amount: "300–1,500 HC" },
+                  { icon: "work",         label: "Boost a job posting",         amount: "200–400 HC"   },
+                  { icon: "handyman",     label: "Boost a service listing",     amount: "200–400 HC"   },
+                  { icon: "event",        label: "Boost an event",              amount: "150–300 HC"   },
+                  { icon: "push_pin",     label: "Pin a post to your feed",     amount: "100–300 HC"   },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-start gap-2 rounded-lg bg-amber-500/10 p-2">
+                    <span className="material-symbols-outlined text-[18px] text-amber-400 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      {item.icon}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-gray-300 leading-tight">{item.label}</p>
+                      <p className="text-[11px] font-bold text-amber-400">{item.amount}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Community</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 p-2">
+                  <span className="text-[18px]">🎁</span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] text-gray-300 leading-tight">Tip a neighbour</p>
+                    <p className="text-[11px] font-bold text-amber-400">50 / 100 / 200 / 500 HC</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Transaction history */}
             <div>
               <div className="flex items-center justify-between mb-3">

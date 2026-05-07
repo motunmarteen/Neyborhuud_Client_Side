@@ -230,3 +230,24 @@ export function useCreateService() {
     },
   });
 }
+
+export function useBoostService() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ serviceId, days }: { serviceId: string; days: 3 | 7 }) =>
+      servicesService.boostService(serviceId, days),
+    onSuccess: (res, { days }) => {
+      const data = (res as any)?.data ?? res;
+      const until = data?.boostedUntil
+        ? new Date(data.boostedUntil).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })
+        : "";
+      toast.success(
+        data?.extended ? `Boost extended! Featured until ${until} 🚀` : `Service boosted for ${days} days! 🚀`,
+        { description: `${data?.deducted ?? "–"} HuudCoins deducted.` },
+      );
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+    },
+    onError: (error) => toast.error(getErrorMessage(error) || "Boost failed. Please try again."),
+  });
+}

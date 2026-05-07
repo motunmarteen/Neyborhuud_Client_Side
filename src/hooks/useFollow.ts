@@ -4,9 +4,40 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useCallback } from "react";
 import { followService } from "@/services/follow.service";
 import { handleApiError } from "@/lib/error-handler";
 import { useAwardCoins } from "@/hooks/useGamification";
+
+export interface MilestonePayload {
+  count: number;
+  label: string;
+  emoji: string;
+  hcAwarded: number;
+  celebrationTier: 1 | 2 | 3 | 4 | 5;
+}
+
+export interface MilestoneInfo {
+  count: number;
+  label: string;
+  emoji: string;
+  hcReward: number;
+  celebrationTier: 1 | 2 | 3 | 4 | 5;
+  achieved: boolean;
+  rewarded: boolean;
+}
+
+export interface MilestoneStatusData {
+  followerCount: number;
+  milestones: MilestoneInfo[];
+  nextMilestone: {
+    count: number;
+    label: string;
+    emoji: string;
+    hcReward: number;
+    progressPercent: number;
+  } | null;
+}
 
 /**
  * Hook for managing follow/unfollow state for a specific user
@@ -14,6 +45,8 @@ import { useAwardCoins } from "@/hooks/useGamification";
 export function useFollow(userId: string | undefined, options?: { enabled?: boolean }) {
   const queryClient = useQueryClient();
   const awardCoins = useAwardCoins();
+  const [pendingMilestone, setPendingMilestone] = useState<MilestonePayload | null>(null);
+  const clearMilestone = useCallback(() => setPendingMilestone(null), []);
 
   // Get follow status - only if explicitly enabled and userId exists
   const {
@@ -55,7 +88,7 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
       console.log('➕ Following user:', userId);
       return followService.followUser(userId!);
     },
-    onSuccess: (response) => {
+    onSuccess: (response: unknown) => {
       console.log('✅ Follow successful:', response);
       // Update follow status cache
       queryClient.setQueryData(["follow-status", userId], {
@@ -71,9 +104,15 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
       queryClient.invalidateQueries({ queryKey: ["followers", userId] });
       queryClient.invalidateQueries({ queryKey: ["following"] });
       queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
+      queryClient.invalidateQueries({ queryKey: ["follow-milestones"] });
       awardCoins("user_followed");
+
+      // If the person we just followed hit a milestone, surface it
+      const r = response as { data?: { milestone?: MilestonePayload }; milestone?: MilestonePayload } | null;
+      const m = r?.data?.milestone ?? r?.milestone ?? null;
+      if (m) setPendingMilestone(m);
     },
-    onError: (error: any) => {
+    onError: (error: { response?: { status?: number } }) => {
       console.error('❌ Follow error:', error);
       // Handle 409 (already following) gracefully
       if (error.response?.status === 409) {
@@ -119,7 +158,7 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
       queryClient.invalidateQueries({ queryKey: ["following"] });
       queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
     },
-    onError: (error: any) => {
+    onError: (error: { response?: { status?: number } }) => {
       console.error('❌ Unfollow error:', error);
       // Handle 404 (not following) gracefully
       if (error.response?.status === 404) {
@@ -173,6 +212,9 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
     isFollowPending: followMutation.isPending,
     isUnfollowPending: unfollowMutation.isPending,
     isPending: followMutation.isPending || unfollowMutation.isPending,
+    // Milestone celebration
+    pendingMilestone,
+    clearMilestone,
     // Debug values
     _rawData: followStatusData,
   };
@@ -224,5 +266,22 @@ export function useFollowCounts(userId: string | undefined) {
     enabled: !!userId,
     refetchOnWindowFocus: true,
     staleTime: 15000,
+  });
+}
+
+/**
+ * Hook for the authenticated user's follower milestone status.
+ * Shows progress toward the next milestone and which ones are already claimed.
+ */
+export function useMyMilestoneStatus() {
+  return useQuery<MilestoneStatusData>({
+    queryKey: ["follow-milestones"],
+    queryFn: async () => {
+      const res = await followService.getMyMilestoneStatus();
+      return ((res as { data?: MilestoneStatusData })?.data ?? res) as MilestoneStatusData;
+    },
+    retry: false,
+    throwOnError: false,
+    staleTime: 60_000,
   });
 }

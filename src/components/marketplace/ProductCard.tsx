@@ -12,6 +12,9 @@ import { formatTimeAgo } from "@/utils/timeAgo";
 import { formatDistance, haversineDistance } from "@/utils/distance";
 import MapPinAvatar from "@/components/ui/MapPinAvatar";
 import { useProductLike } from "@/hooks/useMarketplace";
+import { normalizeTrustScore } from "@/lib/trust-economy";
+import { getMarketplaceBadge } from "@/lib/trust-privileges";
+import { getTrustTier } from "@/hooks/useTrust";
 
 interface ProductCardProps {
   product: Product;
@@ -52,9 +55,25 @@ export function ProductCard({ product, userLocation, currentUserId }: ProductCar
   const sellerName = product.seller?.username || product.seller?.firstName || "Seller";
   const sellerAvatar = (product.seller as any)?.avatarUrl || (product.seller as any)?.profilePicture || null;
 
+  // Derive seller trust badge from any trust score stored on the seller object
+  const sellerTrustRaw = (product.seller as any)?.trustScore ?? (product.seller as any)?.trust_score;
+  const sellerTrustBadge = sellerTrustRaw != null
+    ? (() => {
+        const { score1000 } = normalizeTrustScore(Number(sellerTrustRaw));
+        const tier = getTrustTier(score1000);
+        return getMarketplaceBadge(tier.tier);
+      })()
+    : null;
+
   const isLiked = product.engagement?.isLiked;
   const likesCount = product.engagement?.likesCount || 0;
   const commentsCount = product.engagement?.commentsCount || 0;
+
+  // Boost badge — only shown while the boost is still active
+  const isActiveBoosted =
+    (product as any).isBoosted === true &&
+    (product as any).boostedUntil &&
+    new Date((product as any).boostedUntil) > new Date();
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -86,6 +105,14 @@ export function ProductCard({ product, userLocation, currentUserId }: ProductCar
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
         </div>
+
+        {/* Boosted badge */}
+        {isActiveBoosted && (
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500 shadow-lg">
+            <span className="text-[13px]">🚀</span>
+            <span className="text-black text-[10px] font-black uppercase tracking-wide">Boosted</span>
+          </div>
+        )}
 
         {/* Multi-image indicator */}
         {(product.images?.length || 0) > 1 && (
@@ -124,6 +151,11 @@ export function ProductCard({ product, userLocation, currentUserId }: ProductCar
                     <span className="material-symbols-outlined text-[12px]">location_on</span>
                     {distanceLabel} away
                   </p>
+                )}
+                {sellerTrustBadge && (
+                  <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-black ${sellerTrustBadge.colorClass}`}>
+                    {sellerTrustBadge.label}
+                  </span>
                 )}
               </div>
             </div>
@@ -199,6 +231,14 @@ export function ProductCard({ product, userLocation, currentUserId }: ProductCar
       style={{ minHeight: '70vh' }}
       onClick={handleCardClick}
     >
+      {/* Boosted badge (quote card) */}
+      {isActiveBoosted && (
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500 shadow-lg">
+          <span className="text-[13px]">🚀</span>
+          <span className="text-black text-[10px] font-black uppercase tracking-wide">Boosted</span>
+        </div>
+      )}
+
       {/* Status badge */}
       {product.status === "sold" && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-red-500/90 backdrop-blur-md border border-red-400/30">
@@ -248,7 +288,14 @@ export function ProductCard({ product, userLocation, currentUserId }: ProductCar
           {/* Seller */}
           <div className="flex items-center gap-2">
             <MapPinAvatar src={sellerAvatar} fallbackInitial={sellerName[0]} alt={sellerName} size="sm" />
-            <span className="text-white/80 text-sm font-medium">{sellerName}</span>
+            <div>
+              <span className="text-white/80 text-sm font-medium">{sellerName}</span>
+              {sellerTrustBadge && (
+                <span className={`ml-1.5 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-black ${sellerTrustBadge.colorClass}`}>
+                  {sellerTrustBadge.label}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Time & Location */}

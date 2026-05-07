@@ -343,13 +343,14 @@ export function HelpRequestCard({ post }: HelpRequestCardProps) {
                         <span>{post.likes || 0}</span>
                     </button>
 
-                    <div
+                    <button
+                        onClick={(e) => { e.stopPropagation(); router.push(`/post/${postId}`); }}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-[13px] font-medium hover:bg-white/5 transition-all"
                         style={{ color: 'var(--neu-text-muted)' }}
                     >
                         <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
                         <span>{post.comments || 0}</span>
-                    </div>
+                    </button>
 
                     {(post.views || 0) > 0 && (
                         <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>
@@ -358,10 +359,13 @@ export function HelpRequestCard({ post }: HelpRequestCardProps) {
                         </div>
                     )}
 
-                    <div className="ml-auto flex items-center gap-1 text-[12px] font-bold text-green-400">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); router.push(`/post/${postId}`); }}
+                        className="ml-auto flex items-center gap-1 text-[12px] font-bold text-green-400 hover:text-green-300 transition-colors px-2 py-1 rounded-xl hover:bg-green-400/10"
+                    >
                         <span className="material-symbols-outlined text-[16px]">volunteer_activism</span>
                         <span>Offer Help</span>
-                    </div>
+                    </button>
                 </div>
             </div>
         </article>

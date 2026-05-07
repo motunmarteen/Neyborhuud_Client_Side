@@ -22,13 +22,21 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/types/api";
 import { STATIC_BADGES, STATIC_ACHIEVEMENTS } from "@/lib/gamification-catalogue";
+import {
+  buildTrustEconomyModel,
+  normalizeTrustScore,
+} from "@/lib/trust-economy";
+import { useMyTrustProfile, useTrustPrivileges, useVouches, TRUST_EVENT_META } from "@/hooks/useTrust";
+import { useMyMilestoneStatus, type MilestoneInfo } from "@/hooks/useFollow";
+import { formatTimeAgo } from "@/utils/timeAgo";
 
-type Tab = "overview" | "badges" | "achievements" | "leaderboard";
+type Tab = "overview" | "badges" | "achievements" | "leaderboard" | "trustos";
 type BadgeFilter = "all" | "earned" | "not-earned";
 type Timeframe = "daily" | "weekly" | "monthly" | "all-time";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "dashboard" },
+  { id: "trustos", label: "TrustOS", icon: "verified_user" },
   { id: "badges", label: "Badges", icon: "military_tech" },
   { id: "achievements", label: "Achievements", icon: "emoji_events" },
   { id: "leaderboard", label: "Leaderboard", icon: "leaderboard" },
@@ -80,6 +88,9 @@ export default function GamificationPage() {
   const leaderboard = useLeaderboard(timeframe);
   const streak = useMyStreak();
   const checkIn = useCheckIn();
+  const trustProfile = useMyTrustProfile();
+  const myVouches = useVouches(user?.id);
+  const milestoneStatus = useMyMilestoneStatus();
 
   // Safely extract an array from any API response shape:
   // raw array, { data: [] }, { data: { items: [] } }, { leaderboard: [] }, etc.
@@ -119,6 +130,24 @@ export default function GamificationPage() {
     ? rawAchievements
     : STATIC_ACHIEVEMENTS;
   const leaderboardList = toArray(leaderboard.data);
+  const completedAchievements = achievementList.filter((a: any) => !!a.completed).length;
+
+  const trustInput = normalizeTrustScore(Number(statsData?.trustScore ?? 0));
+  const trustEconomy = buildTrustEconomyModel({
+    trustScoreRaw: trustInput.score1000,
+    streakDays: Number(streakData?.streak ?? 0),
+    badgesCount: earnedBadgeIds.size,
+    completedAchievements,
+    vouchCount: Number((statsData as any)?.vouchCount ?? 0),
+    profileCompleted: Boolean((statsData as any)?.profileCompleted),
+    identityVerified: Boolean((statsData as any)?.identityVerified),
+  });
+
+  // Tier privileges (pure derivation from score, no network call)
+  const privileges = useTrustPrivileges(trustEconomy.score1000);
+
+  // Trust activity events from server (gracefully empty until backend logs fire)
+  const trustEvents = (trustProfile.data?.recentEvents ?? []) as import("@/services/trust.service").TrustActivityEntry[];
 
   const filteredBadges =
     badgeFilter === "earned"
@@ -226,7 +255,7 @@ export default function GamificationPage() {
                     <StatCard
                       icon="verified_user"
                       label="Trust Score"
-                      value={`${statsData.trustScore ?? 0}%`}
+                      value={`${trustEconomy.communityTrustPercent}%`}
                       color="bg-green-500/20 text-green-400"
                     />
                     <StatCard
@@ -237,6 +266,43 @@ export default function GamificationPage() {
                     />
                   </div>
                 ) : null}
+
+                <div className="rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-emerald-300">TrustOS Signal</p>
+                      <p className="mt-1 text-2xl font-black text-white tabular-nums">{trustEconomy.score1000.toLocaleString()}</p>
+                      <p className="text-xs text-emerald-200/90">
+                        {trustEconomy.trustTier.icon} {trustEconomy.trustTier.label} tier · {trustEconomy.communityTrustPercent}% community trust
+                      </p>
+                    </div>
+                    {trustEconomy.nextTier ? (
+                      <div className="rounded-xl border border-white/15 bg-black/20 px-3 py-2 text-right">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-gray-300">Next Tier</p>
+                        <p className="text-sm font-bold text-white">{trustEconomy.nextTier.icon} {trustEconomy.nextTier.label}</p>
+                        <p className="text-xs text-gray-300">{trustEconomy.nextTierDelta} pts to unlock</p>
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-lime-300/35 bg-lime-400/10 px-3 py-2 text-right">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-lime-200">Top Tier</p>
+                        <p className="text-sm font-bold text-lime-100">Baobab unlocked</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 transition-all duration-500"
+                      style={{ width: `${trustEconomy.communityTrustPercent}%` }}
+                    />
+                  </div>
+                  <button
+                    onClick={() => setTab("trustos")}
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-emerald-300/40 px-3 py-1.5 text-xs font-semibold text-emerald-100 hover:bg-emerald-400/10"
+                  >
+                    Open TrustOS Details
+                    <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                  </button>
+                </div>
 
                 {/* Recent badges */}
                 <div>
@@ -299,6 +365,344 @@ export default function GamificationPage() {
                     </div>
                   )}
                 </div>
+              </>
+            )}
+
+            {/* ── TRUSTOS TAB ── */}
+            {tab === "trustos" && (
+              <>
+                {/* ── Core metrics ── */}
+                <section className="rounded-2xl border border-emerald-500/20 bg-[#0f172a] p-5">
+                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-emerald-300">TrustOS Core</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.12em] text-gray-400">Trust Score</p>
+                      <p className="mt-2 text-3xl font-black text-white tabular-nums">{trustEconomy.score1000.toLocaleString()}</p>
+                      <p className="text-xs text-gray-400">Scale: 0 to 1,000</p>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.12em] text-gray-400">Community Trust</p>
+                      <p className="mt-2 text-3xl font-black text-emerald-300 tabular-nums">{trustEconomy.communityTrustPercent}%</p>
+                      <p className="text-xs text-gray-400">Public trust perception index</p>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.12em] text-gray-400">Current Tier</p>
+                      <p className="mt-2 text-2xl font-black text-white">{trustEconomy.trustTier.icon} {trustEconomy.trustTier.label}</p>
+                      <p className="text-xs text-gray-400">{trustEconomy.trustTier.description}</p>
+                    </div>
+                  </div>
+                  {trustEconomy.nextTier && (
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-emerald-300 mb-1.5">
+                        <span>Progress to {trustEconomy.nextTier.icon} {trustEconomy.nextTier.label}</span>
+                        <span>{trustEconomy.score1000} / {trustEconomy.nextTier.minScore}</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                        <div
+                          className="h-full rounded-full bg-emerald-400 transition-all duration-700"
+                          style={{ width: `${Math.min(100, Math.round((trustEconomy.score1000 / trustEconomy.nextTier.minScore) * 100))}%` }}
+                        />
+                      </div>
+                      <p className="mt-1.5 text-xs text-gray-400">{trustEconomy.nextTierDelta} more points to unlock {trustEconomy.nextTier.label}</p>
+                    </div>
+                  )}
+                  {!trustEconomy.nextTier && (
+                    <p className="mt-4 text-xs font-bold text-lime-300">🌴 You have reached the highest trust tier — Community Elder</p>
+                  )}
+                </section>
+
+                {/* ── Tier Privileges ── */}
+                <section className="rounded-2xl border border-indigo-500/20 bg-[#0f0f1e] p-5">
+                  <div className="mb-1 flex items-center justify-between">
+                    <h2 className="text-base font-bold text-white">Tier Privileges</h2>
+                    <span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[11px] font-bold text-indigo-300">
+                      {trustEconomy.trustTier.icon} {trustEconomy.trustTier.label}
+                    </span>
+                  </div>
+                  <p className="mb-4 text-xs text-gray-400">{privileges.summary}</p>
+                  <div className="space-y-2">
+                    {privileges.privilegeList.map((p) => (
+                      <div
+                        key={p.label}
+                        className={`flex items-start gap-3 rounded-xl border px-3 py-2.5 ${
+                          p.unlocked
+                            ? "border-emerald-500/20 bg-emerald-500/5"
+                            : "border-gray-800 bg-gray-900/50 opacity-50"
+                        }`}
+                      >
+                        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${p.unlocked ? "bg-emerald-500/20" : "bg-gray-700"}`}>
+                          <span className={`material-symbols-outlined text-[15px] ${p.unlocked ? "text-emerald-300" : "text-gray-500"}`}
+                            style={{ fontVariationSettings: "'FILL' 1" }}>
+                            {p.unlocked ? p.icon : "lock"}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className={`text-sm font-semibold ${p.unlocked ? "text-white" : "text-gray-500"}`}>{p.label}</p>
+                          <p className="text-xs text-gray-500">{p.description}</p>
+                        </div>
+                        {p.unlocked && (
+                          <span className="ml-auto shrink-0 text-emerald-400">
+                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {/* Marketplace badge preview */}
+                  {privileges.marketplaceBadge && (
+                    <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5">
+                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-300">Your Marketplace Badge</p>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black ${privileges.marketplaceBadgeColor}`}>
+                          {trustEconomy.trustTier.icon} {privileges.marketplaceBadge}
+                        </span>
+                        <p className="text-xs text-gray-400">Shown on all your marketplace listings</p>
+                      </div>
+                    </div>
+                  )}
+                  {!privileges.marketplaceBadge && (
+                    <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900/50 px-3 py-2.5">
+                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500">Marketplace Badge</p>
+                      <p className="mt-1 text-xs text-gray-600">Reach 🌳 Tree tier (300 pts) to earn the Trusted Seller badge on your listings</p>
+                    </div>
+                  )}
+                </section>
+
+                {/* ── Follower Milestones ── */}
+                <section className="rounded-2xl border border-pink-500/20 bg-[#0f0f1e] p-5">
+                  <div className="mb-1 flex items-center justify-between">
+                    <h2 className="text-base font-bold text-white">Follower Milestones</h2>
+                    <span className="rounded-full border border-pink-500/30 bg-pink-500/10 px-2 py-0.5 text-[11px] font-bold text-pink-300">
+                      {milestoneStatus.data?.followerCount?.toLocaleString() ?? 0} followers
+                    </span>
+                  </div>
+                  <p className="mb-4 text-xs text-gray-400">
+                    Hit follower milestones to earn HuudCoins and unlock celebrations.
+                  </p>
+
+                  {/* Next milestone progress bar */}
+                  {milestoneStatus.data?.nextMilestone && (
+                    <div className="mb-4 rounded-xl border border-white/10 bg-white/5 p-4">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-pink-300 mb-1.5">
+                        <span>Next: {milestoneStatus.data.nextMilestone.emoji} {milestoneStatus.data.nextMilestone.label}</span>
+                        <span>{milestoneStatus.data.followerCount?.toLocaleString()} / {milestoneStatus.data.nextMilestone.count.toLocaleString()}</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                        <div
+                          className="h-full rounded-full bg-pink-400 transition-all duration-700"
+                          style={{ width: `${milestoneStatus.data.nextMilestone.progressPercent}%` }}
+                        />
+                      </div>
+                      <p className="mt-1.5 text-xs text-gray-400">
+                        Earn <span className="font-bold text-yellow-300">+{milestoneStatus.data.nextMilestone.hcReward.toLocaleString()} HC</span> when you reach this milestone
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Milestone grid */}
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {(milestoneStatus.data?.milestones ?? []).map((m: MilestoneInfo) => (
+                      <div
+                        key={m.count}
+                        className={`rounded-xl border p-3 transition-all ${
+                          m.rewarded
+                            ? "border-yellow-500/40 bg-yellow-500/10"
+                            : m.achieved
+                            ? "border-pink-500/40 bg-pink-500/10"
+                            : "border-white/10 bg-white/5 opacity-50"
+                        }`}
+                      >
+                        <div className="text-xl mb-1">{m.emoji}</div>
+                        <p className="text-[11px] font-bold text-white">{m.label}</p>
+                        <p className="text-[10px] text-yellow-300 font-semibold">+{m.hcReward.toLocaleString()} HC</p>
+                        {m.rewarded && (
+                          <span className="mt-1 inline-block rounded-full bg-yellow-500/20 px-1.5 py-0.5 text-[9px] font-bold text-yellow-300">CLAIMED</span>
+                        )}
+                        {m.achieved && !m.rewarded && (
+                          <span className="mt-1 inline-block rounded-full bg-pink-500/20 px-1.5 py-0.5 text-[9px] font-bold text-pink-300">ACHIEVED</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {!milestoneStatus.data?.nextMilestone && (milestoneStatus.data?.milestones?.length ?? 0) > 0 && (
+                    <p className="mt-4 text-xs font-bold text-yellow-300">👑 All milestones reached — you are a NeyborHuud Legend!</p>
+                  )}
+                </section>
+
+                {/* ── Community Vouches ── */}
+                <section className="rounded-2xl border border-violet-500/20 bg-[#0f0f1e] p-5">
+                  <div className="mb-1 flex items-center justify-between">
+                    <h2 className="text-base font-bold text-white">Community Vouches</h2>
+                    <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[11px] font-bold text-violet-300">
+                      {myVouches.data?.length ?? 0} received
+                    </span>
+                  </div>
+                  <p className="mb-4 text-xs text-gray-400">
+                    Verified neighbours who have staked their reputation on you.
+                  </p>
+
+                  {myVouches.isLoading ? (
+                    <div className="flex gap-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="animate-pulse w-10 h-10 rounded-full bg-white/10" />
+                      ))}
+                    </div>
+                  ) : (myVouches.data?.length ?? 0) > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {myVouches.data!.map((v) => (
+                        <a
+                          key={v.id}
+                          href={`/profile/${v.voucherUsername}`}
+                          className="group flex items-center gap-2 rounded-xl border border-violet-500/20 bg-violet-500/5 px-2 py-1.5 hover:bg-violet-500/10 transition-colors"
+                        >
+                          {v.voucherAvatar ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={v.voucherAvatar} alt={v.voucherUsername} className="w-7 h-7 rounded-full object-cover border border-violet-400/30" />
+                          ) : (
+                            <div className="w-7 h-7 rounded-full bg-violet-500/20 flex items-center justify-center">
+                              <span className="text-violet-300 font-bold text-xs">{v.voucherUsername.charAt(0).toUpperCase()}</span>
+                            </div>
+                          )}
+                          <span className="text-xs font-semibold text-violet-200 group-hover:text-white">@{v.voucherUsername}</span>
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-gray-700 bg-[#0f0f1e] py-8 text-center">
+                      <span className="material-symbols-outlined text-3xl text-gray-600" style={{ fontVariationSettings: "'FILL' 1" }}>handshake</span>
+                      <p className="mt-2 text-sm font-semibold text-gray-400">No vouches yet</p>
+                      <p className="mt-1 text-xs text-gray-600">Build connections and earn trust — neighbours at Tree tier can vouch for you.</p>
+                    </div>
+                  )}
+
+                  {/* Vouch eligibility notice */}
+                  <div className={`mt-4 rounded-xl border px-3 py-2.5 ${privileges.canVouch ? "border-emerald-500/20 bg-emerald-500/5" : "border-gray-800 bg-gray-900/50"}`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`material-symbols-outlined text-[16px] ${privileges.canVouch ? "text-emerald-400" : "text-gray-500"}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+                        {privileges.canVouch ? "check_circle" : "lock"}
+                      </span>
+                      <p className={`text-xs font-semibold ${privileges.canVouch ? "text-emerald-300" : "text-gray-500"}`}>
+                        {privileges.canVouch
+                          ? `You can vouch for up to ${privileges.maxOutgoingVouches} neighbours`
+                          : "Reach 🌳 Tree tier (300 pts) to vouch for others"}
+                      </p>
+                    </div>
+                    {privileges.canVouch && (
+                      <p className="mt-1 text-xs text-gray-500">Visit a neighbour&apos;s profile to vouch for them.</p>
+                    )}
+                  </div>
+                </section>
+
+                {/* ── Trust Activity Feed ── */}
+                <section className="rounded-2xl border border-gray-800 bg-[#1a1a2e] p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-base font-bold text-white">Trust Activity Log</h2>
+                    <span className="text-xs text-gray-500">Why your score changed</span>
+                  </div>
+
+                  {trustProfile.isLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="animate-pulse h-14 rounded-xl bg-white/5" />
+                      ))}
+                    </div>
+                  ) : trustEvents.length > 0 ? (
+                    <div className="space-y-2">
+                      {trustEvents.map((event) => {
+                        const meta = TRUST_EVENT_META[event.eventType as keyof typeof TRUST_EVENT_META] ?? {
+                          label: event.eventType,
+                          icon: "info",
+                          positive: event.pointsChange >= 0,
+                        };
+                        const isPositive = meta.positive && event.pointsChange >= 0;
+                        return (
+                          <div key={event.id} className="flex items-start gap-3 rounded-xl border border-gray-800 bg-[#0f0f1e] px-3 py-2.5">
+                            <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isPositive ? "bg-emerald-500/15" : "bg-rose-500/15"}`}>
+                              <span className={`material-symbols-outlined text-[16px] ${isPositive ? "text-emerald-400" : "text-rose-400"}`}
+                                style={{ fontVariationSettings: "'FILL' 1" }}>
+                                {meta.icon}
+                              </span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-white">{meta.label}</p>
+                              {event.reason && <p className="text-xs text-gray-400">{event.reason}</p>}
+                              <p className="text-[11px] text-gray-600">{formatTimeAgo(event.createdAt)}</p>
+                            </div>
+                            <span className={`shrink-0 text-sm font-black tabular-nums ${isPositive ? "text-emerald-300" : "text-rose-400"}`}>
+                              {isPositive ? "+" : ""}{event.pointsChange}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-gray-700 bg-[#0f0f1e] py-10 text-center">
+                      <span className="material-symbols-outlined text-4xl text-gray-600" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        history
+                      </span>
+                      <p className="mt-2 text-sm font-semibold text-gray-400">No activity recorded yet</p>
+                      <p className="mt-1 text-xs text-gray-600">Completing jobs, selling products, getting vouched, and verifying your identity will all appear here.</p>
+                    </div>
+                  )}
+                </section>
+
+                {/* ── Trust Breakdown ── */}
+                <section className="rounded-2xl border border-gray-800 bg-[#1a1a2e] p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-base font-bold text-white">Trust Breakdown</h2>
+                    <span className="text-xs text-gray-400">Pillars that drive TrustOS</span>
+                  </div>
+                  <div className="space-y-3">
+                    {trustEconomy.breakdown.map((item) => {
+                      const pct = Math.round((item.current / item.max) * 100);
+                      return (
+                        <div key={item.id} className="rounded-xl border border-gray-800 bg-[#0f0f1e] p-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-sm font-semibold text-white">{item.label}</p>
+                            <p className="text-xs font-bold text-gray-300 tabular-nums">{item.current} / {item.max}</p>
+                          </div>
+                          <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-800">
+                            <div className={`h-full rounded-full ${item.colorClass}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                          </div>
+                          <p className="mt-2 text-xs text-gray-400">{item.reason}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                {/* ── How Trust Is Earned ── */}
+                <section className="rounded-2xl border border-gray-800 bg-[#1a1a2e] p-5">
+                  <h2 className="text-base font-bold text-white">How Trust Is Earned</h2>
+                  <p className="mt-1 text-xs text-gray-400">Actions are rewarded with caps to protect the economy from farming.</p>
+                  <div className="mt-4 space-y-2">
+                    {trustEconomy.topActions.map((rule) => (
+                      <div key={rule.id} className="flex items-center justify-between rounded-xl border border-gray-800 bg-[#0f0f1e] px-3 py-2">
+                        <div>
+                          <p className="text-sm font-semibold text-white">{rule.title}</p>
+                          <p className="text-xs text-gray-400">{rule.description}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-black text-emerald-300">+{rule.pointsPerAction}</p>
+                          <p className="text-[11px] text-gray-500">cap {rule.dailyCap}/day</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* ── Guardrails ── */}
+                <section className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-5">
+                  <h2 className="text-base font-bold text-white">Trust Economy Guardrails</h2>
+                  <div className="mt-3 space-y-2">
+                    {trustEconomy.riskControls.map((control) => (
+                      <div key={control} className="rounded-xl border border-rose-300/15 bg-black/15 px-3 py-2 text-sm text-rose-100">
+                        {control}
+                      </div>
+                    ))}
+                  </div>
+                </section>
               </>
             )}
 

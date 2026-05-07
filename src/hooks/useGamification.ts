@@ -178,3 +178,26 @@ export function useTransactions(page = 1) {
     retry: false,
   });
 }
+
+export function useTipUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ recipientId, amount }: { recipientId: string; amount: 50 | 100 | 200 | 500 }) =>
+      gamificationService.tipUser(recipientId, amount),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+    },
+  });
+}
+
+export function usePinPost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ postId, days }: { postId: string; days: 1 | 7 }) =>
+      gamificationService.pinPost(postId, days),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+    },
+  });
+}

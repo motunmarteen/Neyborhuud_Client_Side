@@ -283,3 +283,24 @@ export function useUserJobs(userId: string | null, limit = 3) {
     retry: false,
   });
 }
+
+export function useBoostJob() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ jobId, days }: { jobId: string; days: 3 | 7 }) =>
+      jobsService.boostJob(jobId, days),
+    onSuccess: (res, { days }) => {
+      const data = (res as any)?.data ?? res;
+      const until = data?.boostedUntil
+        ? new Date(data.boostedUntil).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })
+        : "";
+      toast.success(
+        data?.extended ? `Boost extended! Featured until ${until} 🚀` : `Job boosted for ${days} days! 🚀`,
+        { description: `${data?.deducted ?? "–"} HuudCoins deducted.` },
+      );
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+    },
+    onError: (error) => toast.error(getErrorMessage(error) || "Boost failed. Please try again."),
+  });
+}

@@ -154,4 +154,14 @@ export const eventsService = {
       description,
     });
   },
+
+  /**
+   * Boost an event with HuudCoins
+   */
+  async boostEvent(eventId: string, days: 3 | 7) {
+    return await apiClient.post<{ deducted: number; days: number; boostedUntil: string }>(
+      `/events/${eventId}/boost`,
+      { days },
+    );
+  },
 };

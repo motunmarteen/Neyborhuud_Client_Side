@@ -26,6 +26,7 @@ interface XPostCardProps {
     onEdit?: (post: Post) => void;
     onDelete?: (postId: string) => void;
     onReport?: (postId: string) => void;
+    onPin?: (postId: string) => void;
     onHelpful?: () => void;
     userLocation?: { lat: number; lng: number } | null;
 }
@@ -42,6 +43,7 @@ export function XPostCard({
     onEdit,
     onDelete,
     onReport,
+    onPin,
     onHelpful,
     userLocation,
 }: XPostCardProps) {
@@ -162,6 +164,13 @@ export function XPostCard({
                     }
                 }}
             >
+                {/* Pinned overlay badge */}
+                {post.isPinned && (
+                    <div className="absolute top-3 left-3 z-30 flex items-center gap-1 px-2 py-1 rounded-full shadow-lg" style={{ background: 'rgba(251,191,36,0.95)' }}>
+                        <span className="material-symbols-outlined text-[13px] text-black" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
+                        <span className="text-black text-[10px] font-black uppercase tracking-wide">Pinned</span>
+                    </div>
+                )}
                 {/* Background Image */}
                 <div className="absolute inset-0">
                     <img
@@ -274,6 +283,11 @@ export function XPostCard({
                                             {isOwner && onDelete && (
                                                 <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-red-400">
                                                     <span className="material-symbols-outlined text-[18px]">delete</span> Delete
+                                                </button>
+                                            )}
+                                            {isOwner && onPin && (
+                                                <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-amber-400">
+                                                    <span className="material-symbols-outlined text-[18px]">push_pin</span> {post.isPinned ? "Extend Pin" : "Pin to Feed"} 🪙
                                                 </button>
                                             )}
                                             {!isOwner && !isAnonymousAuthor && (
@@ -535,6 +549,13 @@ export function XPostCard({
                     }
                 }}
             >
+                {/* Pinned overlay badge */}
+                {post.isPinned && (
+                    <div className="absolute top-3 left-3 z-30 flex items-center gap-1 px-2 py-1 rounded-full shadow-lg" style={{ background: 'rgba(251,191,36,0.95)' }}>
+                        <span className="material-symbols-outlined text-[13px] text-black" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
+                        <span className="text-black text-[10px] font-black uppercase tracking-wide">Pinned</span>
+                    </div>
+                )}
                 {/* ── RIGHT SIDE: Vertical action rail ── */}
                 <div className="absolute right-3 top-2/3 -translate-y-1/2 z-20 flex flex-col items-center gap-4">
                     {/* Like */}
@@ -692,6 +713,11 @@ export function XPostCard({
                                                     <span className="material-symbols-outlined text-[18px]">delete</span> Delete
                                                 </button>
                                             )}
+                                            {isOwner && onPin && (
+                                                <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-amber-400">
+                                                    <span className="material-symbols-outlined text-[18px]">push_pin</span> {post.isPinned ? "Extend Pin" : "Pin to Feed"} 🪙
+                                                </button>
+                                            )}
                                             {!isOwner && !isAnonymousAuthor && (
                                                 <button onClick={handleMessageAuthor} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white">
                                                     <span className="material-symbols-outlined text-[18px]">chat</span> Message
@@ -767,6 +793,13 @@ export function XPostCard({
                 }
             }}
         >
+            {/* Pinned overlay badge */}
+            {post.isPinned && (
+                <div className="absolute top-3 left-3 z-30 flex items-center gap-1 px-2 py-1 rounded-full shadow" style={{ background: 'rgba(251,191,36,0.95)' }}>
+                    <span className="material-symbols-outlined text-[13px] text-black" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
+                    <span className="text-black text-[10px] font-black uppercase tracking-wide">Pinned</span>
+                </div>
+            )}
             {/* ── RIGHT SIDE: Vertical action rail ── */}
             <div className="absolute right-3 top-2/3 -translate-y-1/2 z-20 flex flex-col items-center gap-4">
                 {/* Like */}
@@ -920,6 +953,11 @@ export function XPostCard({
                                     {isOwner && onDelete && (
                                         <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors text-red-500">
                                             <span className="material-symbols-outlined text-[18px]">delete</span> Delete
+                                        </button>
+                                    )}
+                                    {isOwner && onPin && (
+                                        <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-amber-50 transition-colors text-amber-600">
+                                            <span className="material-symbols-outlined text-[18px]">push_pin</span> {post.isPinned ? "Extend Pin" : "Pin to Feed"} 🪙
                                         </button>
                                     )}
                                     {!isOwner && !isAnonymousAuthor && (

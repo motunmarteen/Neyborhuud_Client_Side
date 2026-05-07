@@ -819,3 +819,34 @@ export function useConfirmReceipt(orderId: string) {
     },
   });
 }
+
+/**
+ * Hook for boosting a marketplace listing with HuudCoins.
+ * On success invalidates the listings cache so the boosted badge appears immediately.
+ */
+export function useBoostProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ productId, days }: { productId: string; days: 3 | 7 | 14 | 30 }) =>
+      marketplaceService.boostProduct(productId, days),
+    onSuccess: (res, { days }) => {
+      const data = (res as any)?.data ?? res;
+      const until = data?.boostedUntil
+        ? new Date(data.boostedUntil).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })
+        : "";
+      toast.success(
+        data?.extended
+          ? `Boost extended! Featured until ${until} 🚀`
+          : `Listing boosted for ${days} days! Featured until ${until} 🚀`,
+        { description: `${data?.deducted ?? "–"} HuudCoins deducted from your wallet.` },
+      );
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "my-listings"] });
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "products"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Boost failed. Please try again.");
+    },
+  });
+}

@@ -68,4 +68,11 @@ export const followService = {
       `/follow/counts/${userId}`,
     );
   },
+
+  /**
+   * Get follower milestone status for the authenticated user
+   */
+  async getMyMilestoneStatus() {
+    return await apiClient.get('/follow/milestones/me');
+  },
 };

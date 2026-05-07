@@ -54,6 +54,13 @@ export default function EventCard({ event, onAttend, attendPending }: Props) {
             alt={event.title}
             className="w-full h-full object-cover"
           />
+          {/* Boosted badge */}
+          {(event as any).isBoosted && (
+            <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 shadow z-10">
+              <span className="text-[11px]">🚀</span>
+              <span className="text-black text-[9px] font-black uppercase tracking-wide">Boosted</span>
+            </div>
+          )}
           {isCancelled && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/60">
               <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">

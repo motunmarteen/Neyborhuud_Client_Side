@@ -779,6 +779,8 @@ export interface MarketplaceItem {
   isLiked?: boolean;
   isSaved?: boolean;
   status: "available" | "sold" | "reserved" | "removed" | "active" | "pending";
+  isBoosted?: boolean;
+  boostedUntil?: string;
   createdAt: string;
   updatedAt?: string;
 }

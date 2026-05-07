@@ -34,6 +34,8 @@ import { useTranslation } from '@/lib/i18n';
 import { FeedTab, Post, ContentType } from '@/types/api';
 import { useInView } from 'react-intersection-observer';
 import { useQueryClient } from '@tanstack/react-query';
+import { usePinPost } from '@/hooks/useGamification';
+import { CoinSpendModal } from '@/components/gamification/CoinSpendModal';
 
 function XFeedInner() {
     const router = useRouter();
@@ -160,6 +162,8 @@ function XFeedInner() {
     const [editingPost, setEditingPost] = useState<Post | null>(null);
     const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
     const [reportingPostId, setReportingPostId] = useState<string | null>(null);
+    const [pinningPostId, setPinningPostId] = useState<string | null>(null);
+    const pinPost = usePinPost();
 
     // Flatten posts from all pages
     const posts: Post[] =
@@ -496,6 +500,7 @@ function XFeedInner() {
                                         onEdit={() => handleEditPost(post)}
                                         onDelete={() => setDeletingPostId(post.id)}
                                         onReport={(id) => setReportingPostId(id)}
+                                        onPin={(id) => setPinningPostId(id)}
                                         onEmergencyAction={(action) => handleEmergencyAction(post, action)}
                                         onCardClick={() => openPostDetails(post.id)}
                                     />
@@ -579,6 +584,23 @@ function XFeedInner() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Pin Post Modal */}
+            {pinningPostId && (
+                <CoinSpendModal
+                    title="Pin Post to Feed"
+                    description="Keep your post at the top of your neighbourhood feed"
+                    options={[
+                        { label: "24 Hours", value: 1, coins: 100 },
+                        { label: "7 Days", value: 7, coins: 300, popular: true },
+                    ]}
+                    defaultValue={1}
+                    isPending={pinPost.isPending}
+                    onConfirm={(days) => pinPost.mutate({ postId: pinningPostId, days: days as 1 | 7 })}
+                    onClose={() => setPinningPostId(null)}
+                    confirmLabel="Pin Post"
+                />
             )}
         </div>
     );

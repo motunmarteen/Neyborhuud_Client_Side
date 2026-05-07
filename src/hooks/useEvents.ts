@@ -295,3 +295,24 @@ export function useReportEvent() {
     },
   });
 }
+
+export function useBoostEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ eventId, days }: { eventId: string; days: 3 | 7 }) =>
+      eventsService.boostEvent(eventId, days),
+    onSuccess: (res, { days }) => {
+      const data = (res as any)?.data ?? res;
+      const until = data?.boostedUntil
+        ? new Date(data.boostedUntil).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })
+        : "";
+      toast.success(
+        data?.extended ? `Boost extended! Featured until ${until} 🚀` : `Event boosted for ${days} days! 🚀`,
+        { description: `${data?.deducted ?? "–"} HuudCoins deducted.` },
+      );
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+    },
+    onError: (error) => toast.error(getErrorMessage(error) || "Boost failed. Please try again."),
+  });
+}

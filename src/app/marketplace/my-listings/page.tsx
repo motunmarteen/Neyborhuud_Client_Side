@@ -52,15 +52,31 @@ function ListingWithOffers({
 }: {
   product: Product;
   userLocation: { lat: number; lng: number } | null;
-  onBoost: (id: string, title: string) => void;
+  onBoost: (id: string, title: string, isBoosted: boolean, boostedUntil?: string) => void;
 }) {
   const productId = (product as any)._id ?? product.id;
   const productTitle = (product as any).title ?? (product as any).name ?? "Listing";
+  const isBoosted = (product as any).isBoosted === true;
+  const boostedUntil: string | undefined = (product as any).boostedUntil;
+  const boostActive = isBoosted && boostedUntil && new Date(boostedUntil) > new Date();
 
   return (
     <div className="flex flex-col">
       <ProductCard product={product} userLocation={userLocation} />
       <PendingOffersBadge product={product} />
+
+      {/* Active boost expiry notice */}
+      {boostActive && (
+        <p className="mt-1 text-center text-[11px] text-amber-400/80">
+          🚀 Boosted until{" "}
+          {new Date(boostedUntil!).toLocaleDateString("en-NG", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </p>
+      )}
+
       {/* Owner actions: Edit + Boost */}
       <div className="mt-2 flex gap-2">
         <Link
@@ -71,11 +87,15 @@ function ListingWithOffers({
           Edit
         </Link>
         <button
-          onClick={() => onBoost(productId, productTitle)}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400 hover:bg-amber-500/25 transition-colors"
+          onClick={() => onBoost(productId, productTitle, isBoosted, boostedUntil)}
+          className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+            boostActive
+              ? "bg-amber-500/30 text-amber-300 hover:bg-amber-500/40"
+              : "bg-amber-500/15 text-amber-400 hover:bg-amber-500/25"
+          }`}
         >
           <span className="material-symbols-outlined text-sm">rocket_launch</span>
-          Boost
+          {boostActive ? "Extend Boost" : "Boost"}
         </button>
       </div>
     </div>
@@ -87,7 +107,7 @@ export default function MyListingsPage() {
   const [
     boostProduct,
     setBoostProduct,
-  ] = useState<{ id: string; title: string } | null>(null);
+  ] = useState<{ id: string; title: string; isBoosted: boolean; boostedUntil?: string } | null>(null);
   const {
     data,
     fetchNextPage,
@@ -105,6 +125,8 @@ export default function MyListingsPage() {
         <BoostModal
           productId={boostProduct.id}
           productTitle={boostProduct.title}
+          alreadyBoosted={boostProduct.isBoosted}
+          boostedUntil={boostProduct.boostedUntil}
           onClose={() => setBoostProduct(null)}
         />
       )}
@@ -211,7 +233,7 @@ export default function MyListingsPage() {
                           }
                         : null
                     }
-                    onBoost={(id, title) => setBoostProduct({ id, title })}
+                    onBoost={(id, title, isBoosted, boostedUntil) => setBoostProduct({ id, title, isBoosted, boostedUntil })}
                   />
                 );
               })}
