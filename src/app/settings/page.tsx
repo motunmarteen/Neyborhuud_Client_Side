@@ -125,18 +125,27 @@ export default function SettingsPage() {
 
     // Accessibility
     const [textSize, setTextSize] = useState<'small' | 'medium' | 'large'>('medium');
+    const [liteMode, setLiteMode] = useState(false);
     const SIZE_CLASS: Record<string, string> = { small: 'text-size-sm', medium: '', large: 'text-size-lg' };
     const applyTextSize = (size: 'small' | 'medium' | 'large') => {
         setTextSize(size);
         document.body.classList.remove('text-size-sm', 'text-size-lg');
         const cls = SIZE_CLASS[size];
         if (cls) document.body.classList.add(cls);
-        // persist
         fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ accessibility: { textSize: size } }) }).catch(() => {});
         const stored = localStorage.getItem('neyborhuud_user');
         if (stored) {
             const parsed = JSON.parse(stored);
             localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), textSize: size } } }));
+        }
+    };
+    const applyLiteMode = (enabled: boolean) => {
+        setLiteMode(enabled);
+        fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ accessibility: { liteMode: enabled } }) }).catch(() => {});
+        const stored = localStorage.getItem('neyborhuud_user');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), liteMode: enabled } } }));
         }
     };
 
@@ -146,7 +155,7 @@ export default function SettingsPage() {
         if (notifSaveTimer.current) clearTimeout(notifSaveTimer.current);
         notifSaveTimer.current = setTimeout(async () => {
             try {
-                await fetchAPI('/auth/settings/notifications', { method: 'PUT', body: JSON.stringify(updated) });
+                await fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ notifications: updated }) });
                 const stored = localStorage.getItem('neyborhuud_user');
                 if (stored) {
                     const parsed = JSON.parse(stored);
@@ -173,6 +182,9 @@ export default function SettingsPage() {
             }
             if (parsed.settings?.accessibility?.textSize) {
                 setTextSize(parsed.settings.accessibility.textSize);
+            }
+            if (parsed.settings?.accessibility?.liteMode !== undefined) {
+                setLiteMode(!!parsed.settings.accessibility.liteMode);
             }
         }
 
@@ -346,9 +358,9 @@ export default function SettingsPage() {
     const handleSaveNotifications = async () => {
         setSaving(true);
         try {
-            await fetchAPI('/auth/settings/notifications', {
-                method: 'PUT',
-                body: JSON.stringify(notifications)
+            await fetchAPI('/profile/settings', {
+                method: 'PATCH',
+                body: JSON.stringify({ notifications })
             });
             
             // Update local storage
@@ -1147,6 +1159,16 @@ export default function SettingsPage() {
                                         </button>
                                     ))}
                                 </div>
+                            </div>
+
+                            {/* Lite Mode */}
+                            <div className="pt-4 border-t border-charcoal/5 mt-4">
+                                <ToggleSwitch
+                                    enabled={liteMode}
+                                    onChange={applyLiteMode}
+                                    label="Lite Mode"
+                                    description="Reduce animations and heavy visuals to save data"
+                                />
                             </div>
                         </div>
 
