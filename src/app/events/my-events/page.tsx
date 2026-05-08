@@ -10,7 +10,7 @@ import { BottomNav } from "@/components/feed/BottomNav";
 import EventCard from "@/components/events/EventCard";
 import { useMyEvents, useMyOrganizedEvents, useAttendEvent, useBoostEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
-import { CoinSpendModal } from "@/components/gamification/CoinSpendModal";
+import { BoostModal } from "@/components/gamification/BoostModal";
 
 type Tab = "attending" | "organizing";
 
@@ -187,14 +187,16 @@ export default function MyEventsPage() {
 
       {/* Boost event modal */}
       {boostingEventId && (
-        <CoinSpendModal
-          title="Boost Event"
-          description="Promote your event to more neighbours"
+        <BoostModal
+          type="event"
+          itemTitle={
+            organizingList.find((e: any) => (e._id ?? e.id) === boostingEventId)?.title ?? "Event"
+          }
           options={[
-            { label: "3 Days", value: 3, coins: 150 },
-            { label: "7 Days", value: 7, coins: 300, popular: true },
+            { days: 3, coins: 150, label: "3 Days" },
+            { days: 7, coins: 300, label: "7 Days", badge: "Best Value" },
           ]}
-          defaultValue={7}
+          defaultDays={7}
           isPending={boostEvent.isPending}
           alreadyActive={
             organizingList.find((e: any) => (e._id ?? e.id) === boostingEventId)?.isBoosted
@@ -206,7 +208,6 @@ export default function MyEventsPage() {
             boostEvent.mutate({ eventId: boostingEventId, days: days as 3 | 7 })
           }
           onClose={() => setBoostingEventId(null)}
-          confirmLabel="Boost Event"
         />
       )}
     </div>

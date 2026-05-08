@@ -35,7 +35,7 @@ import { FeedTab, Post, ContentType } from '@/types/api';
 import { useInView } from 'react-intersection-observer';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePinPost } from '@/hooks/useGamification';
-import { CoinSpendModal } from '@/components/gamification/CoinSpendModal';
+import { BoostModal } from '@/components/gamification/BoostModal';
 
 function XFeedInner() {
     const router = useRouter();
@@ -588,18 +588,17 @@ function XFeedInner() {
 
             {/* Pin Post Modal */}
             {pinningPostId && (
-                <CoinSpendModal
-                    title="Pin Post to Feed"
-                    description="Keep your post at the top of your neighbourhood feed"
+                <BoostModal
+                    type="post"
+                    itemTitle="Pin Post to Feed"
                     options={[
-                        { label: "24 Hours", value: 1, coins: 100 },
-                        { label: "7 Days", value: 7, coins: 300, popular: true },
+                        { days: 1, coins: 100, label: "24 Hours" },
+                        { days: 7, coins: 300, label: "7 Days", badge: "Popular" },
                     ]}
-                    defaultValue={1}
+                    defaultDays={1}
                     isPending={pinPost.isPending}
                     onConfirm={(days) => pinPost.mutate({ postId: pinningPostId, days: days as 1 | 7 })}
                     onClose={() => setPinningPostId(null)}
-                    confirmLabel="Pin Post"
                 />
             )}
         </div>

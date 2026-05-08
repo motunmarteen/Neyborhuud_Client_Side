@@ -5,22 +5,24 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useVerifyPayment } from "@/hooks/usePayments";
+import type { Payment } from "@/types/api";
 
 function SuccessInner() {
   const searchParams = useSearchParams();
-  // Paystack returns both ?reference= and ?trxref=
+  // HuudCoin refs start with "hc_"; legacy Paystack refs are kept for compatibility
   const reference =
     searchParams.get("reference") ?? searchParams.get("trxref");
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useVerifyPayment(reference);
-  const payment = (data as any)?.data ?? data;
-  const isSuccess =
-    payment?.status === "completed" || payment?.status === "processing";
+  const payment = ((data as any)?.data ?? data) as Payment | null;
+  const isSuccess = payment?.status === "completed";
 
-  // Refresh user profile so tier badge updates everywhere
+  // Refresh wallet balance + gamification stats after confirmed spend
   useEffect(() => {
     if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification", "stats"] });
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     }
   }, [isSuccess, queryClient]);
@@ -29,12 +31,12 @@ function SuccessInner() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0f0f1e] text-white px-4">
         <div className="text-center">
-          <p className="text-gray-400 mb-6">No payment reference found.</p>
+          <p className="text-gray-400 mb-6">No transaction reference found.</p>
           <Link
-            href="/premium"
+            href="/gamification/wallet"
             className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-sm transition-colors"
           >
-            Back to Premium
+            View Wallet
           </Link>
         </div>
       </div>
@@ -44,41 +46,44 @@ function SuccessInner() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f0f1e] text-white px-4">
       <div className="w-full max-w-sm text-center">
+
         {/* Loading */}
         {isLoading && (
           <>
-            <div className="w-16 h-16 border-4 border-gray-700 border-t-blue-400 rounded-full animate-spin mx-auto mb-6" />
-            <h1 className="text-xl font-bold mb-2">Verifying Payment</h1>
-            <p className="text-gray-400 text-sm">
-              Please wait while we confirm your payment…
-            </p>
+            <div className="w-16 h-16 border-4 border-gray-700 border-t-amber-400 rounded-full animate-spin mx-auto mb-6" />
+            <h1 className="text-xl font-bold mb-2">Confirming Transaction</h1>
+            <p className="text-gray-400 text-sm">Just a moment…</p>
           </>
         )}
 
         {/* Success */}
         {!isLoading && isSuccess && (
           <>
-            <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
-              <span className="material-symbols-outlined text-green-400 text-5xl">
-                check_circle
-              </span>
+            <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-6">
+              <span className="text-5xl">🪙</span>
             </div>
-            <h1 className="text-2xl font-bold mb-2 text-green-400">
-              Payment Successful!
+            <h1 className="text-2xl font-bold mb-2 text-amber-400">
+              HuudCoins Spent!
             </h1>
-            <p className="text-gray-400 text-sm mb-8">
-              Your payment has been confirmed and your account has been updated.
-            </p>
+            {payment?.coinsSpent && (
+              <p className="text-gray-300 text-base font-semibold mb-1">
+                {payment.coinsSpent} HuudCoins deducted
+              </p>
+            )}
+            {payment?.description && (
+              <p className="text-gray-400 text-sm mb-6">{payment.description}</p>
+            )}
+            <p className="text-gray-500 text-xs mb-8 font-mono">{reference}</p>
             <div className="flex gap-3 justify-center">
               <Link
-                href="/premium"
+                href="/gamification/wallet"
                 className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-sm transition-colors"
               >
-                View Plan
+                View Wallet
               </Link>
               <Link
                 href="/feed"
-                className="px-5 py-2.5 bg-green-500 hover:bg-green-600 rounded-xl text-sm font-semibold transition-colors"
+                className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-sm font-bold transition-colors"
               >
                 Go to Feed
               </Link>
@@ -95,19 +100,19 @@ function SuccessInner() {
               </span>
             </div>
             <h1 className="text-2xl font-bold mb-2 text-red-400">
-              {isError ? "Verification Failed" : "Payment Failed"}
+              {isError ? "Transaction Not Found" : "Transaction Failed"}
             </h1>
             <p className="text-gray-400 text-sm mb-8">
               {isError
-                ? "We could not verify your payment. If money was deducted, please contact support."
-                : "Your payment was not successful. Please try again."}
+                ? "We could not find this transaction. If coins were deducted, contact support."
+                : "The transaction did not complete. Your coins have not been deducted."}
             </p>
             <div className="flex gap-3 justify-center">
               <Link
-                href="/premium"
+                href="/gamification/wallet"
                 className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-sm transition-colors"
               >
-                Try Again
+                View Wallet
               </Link>
               <a
                 href="mailto:support@neyborhuud.com"
@@ -123,12 +128,12 @@ function SuccessInner() {
   );
 }
 
-export default function PremiumSuccessPage() {
+export default function PaymentSuccessPage() {
   return (
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-[#0f0f1e]">
-          <div className="w-16 h-16 border-4 border-gray-700 border-t-blue-400 rounded-full animate-spin" />
+          <div className="w-16 h-16 border-4 border-gray-700 border-t-amber-400 rounded-full animate-spin" />
         </div>
       }
     >

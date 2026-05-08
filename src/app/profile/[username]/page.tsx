@@ -31,7 +31,7 @@ import { chatService } from '@/services/chat.service';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { useTipUser } from '@/hooks/useGamification';
-import { CoinSpendModal } from '@/components/gamification/CoinSpendModal';
+import { TipModal } from '@/components/gamification/TipModal';
 import { useInView } from 'react-intersection-observer';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import apiClient from '@/lib/api-client';
@@ -1493,22 +1493,23 @@ export default function ProfilePage() {
 
       {/* Tip user modal */}
       {showTipModal && profile?.id && (
-        <CoinSpendModal
-          title={`Tip ${profile.firstName ?? profile.username ?? "Neighbour"}`}
-          description="Send HuudCoins as a token of appreciation — all coins go directly to them."
-          options={[
-            { label: "50 coins", value: 50, coins: 50 },
-            { label: "100 coins", value: 100, coins: 100, popular: true },
-            { label: "200 coins", value: 200, coins: 200 },
-            { label: "500 coins", value: 500, coins: 500 },
-          ]}
-          defaultValue={100}
+        <TipModal
+          recipient={{
+            id: profile.id,
+            displayName:
+              profile.firstName && profile.lastName
+                ? `${profile.firstName} ${profile.lastName}`
+                : profile.firstName ?? profile.username ?? "Neighbour",
+            username: profile.username,
+            avatarUrl: profile.profilePicture || profile.avatarUrl || undefined,
+            trustScore: trustScore,
+            tier: profileTrustTier?.tier ?? "bronze",
+          }}
           isPending={tipUser.isPending}
           onConfirm={(amount) =>
-            tipUser.mutate({ recipientId: profile.id, amount: amount as 50 | 100 | 200 | 500 })
+            tipUser.mutate({ recipientId: profile.id, amount })
           }
           onClose={() => setShowTipModal(false)}
-          confirmLabel="Send Tip"
         />
       )}
     </div>

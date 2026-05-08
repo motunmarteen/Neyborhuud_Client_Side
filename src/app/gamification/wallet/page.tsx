@@ -7,8 +7,11 @@ import LeftSidebar from "@/components/navigation/LeftSidebar";
 import RightSidebar from "@/components/navigation/RightSidebar";
 import { BottomNav } from "@/components/feed/BottomNav";
 import { useWallet, useTransactions } from "@/hooks/useGamification";
+import { usePaymentHistory } from "@/hooks/usePayments";
+import { Payment } from "@/types/api";
 
 type TxType = "all" | "earned" | "spent";
+type MainTab = "activity" | "spends";
 
 const TX_ICONS: Record<string, string> = {
   check_in: "today",
@@ -65,12 +68,36 @@ function EarnRow({ icon, label, amount }: { icon: string; label: string; amount:
   );
 }
 
+const PAYMENT_TYPE_LABELS: Record<string, string> = {
+  listing_boost: "Listing Boost",
+  job_boost: "Job Boost",
+  service_boost: "Service Boost",
+  event_boost: "Event Boost",
+  tip_user: "Tip to Neighbour",
+  event_ticket: "Event Ticket",
+  marketplace_pledge: "Marketplace Pledge",
+  service_payment: "Service Payment",
+};
+
+const PAYMENT_TYPE_ICONS: Record<string, string> = {
+  listing_boost: "🏷️",
+  job_boost: "💼",
+  service_boost: "🔧",
+  event_boost: "🎉",
+  tip_user: "💸",
+  event_ticket: "🎟️",
+  marketplace_pledge: "🤝",
+  service_payment: "💳",
+};
+
 export default function WalletPage() {
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<TxType>("all");
+  const [mainTab, setMainTab] = useState<MainTab>("activity");
 
   const wallet = useWallet();
   const txQuery = useTransactions(page);
+  const paymentsQuery = usePaymentHistory();
 
   const walletData = (wallet.data as any) ?? null;
   const balance: number = walletData?.balance ?? walletData?.huudCoins ?? walletData?.totalHuudCoins ?? 0;
@@ -79,6 +106,7 @@ export default function WalletPage() {
 
   const allTxs: any[] = txQuery.data?.transactions ?? [];
   const totalPages: number = txQuery.data?.totalPages ?? 1;
+  const allPayments: Payment[] = paymentsQuery.data?.pages.flatMap((p: any) => p.payments) ?? [];
 
   const displayedTxs =
     filter === "earned"
@@ -117,8 +145,7 @@ export default function WalletPage() {
 
           <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
             {/* Balance card */}
-            <div className="bg-gradient-to-br from-yellow-500/20 via-yellow-400/10 to-transparent border border-yellow-500/30 rounded-2xl p-6">
-              {wallet.isLoading ? (
+            <div className="bg-gradient-to-br from-yellow-500/20 via-yellow-400/10 to-transparent border border-yellow-500/30 rounded-2xl p-6">              {wallet.isLoading ? (
                 <div className="h-16 animate-pulse bg-gray-800 rounded-xl" />
               ) : wallet.isError ? (
                 <p className="text-sm text-gray-500 text-center py-4">
@@ -151,6 +178,25 @@ export default function WalletPage() {
               )}
             </div>
 
+            {/* Main Tab Navigation */}
+            <div className="flex gap-1 rounded-2xl bg-[#1a1a2e] border border-gray-800 p-1">
+              {(["activity", "spends"] as MainTab[]).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setMainTab(tab)}
+                  className={`flex-1 rounded-xl py-2 text-sm font-bold transition-colors capitalize ${
+                    mainTab === tab
+                      ? "bg-amber-500 text-white shadow"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {tab === "activity" ? "🪙 Activity" : "💸 Coin Spends"}
+                </button>
+              ))}
+            </div>
+
+            {mainTab === "activity" && (
+              <>
             {/* How to earn */}
             <div className="bg-[#1a1a2e] border border-gray-800 rounded-xl p-4">
               <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
@@ -370,6 +416,93 @@ export default function WalletPage() {
                 </div>
               )}
             </div>
+              </>
+            )}
+
+            {/* ─── Coin Spends Tab ─── */}
+            {mainTab === "spends" && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-sm font-semibold text-white">Boost &amp; Payment History</h2>
+                  <Link
+                    href="/premium"
+                    className="text-xs text-amber-400 hover:text-amber-300 transition"
+                  >
+                    Full history →
+                  </Link>
+                </div>
+
+                {paymentsQuery.isLoading && (
+                  <div className="space-y-2">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="h-14 animate-pulse bg-gray-800 rounded-xl" />
+                    ))}
+                  </div>
+                )}
+
+                {!paymentsQuery.isLoading && allPayments.length === 0 && (
+                  <div className="bg-[#1a1a2e] border border-gray-800 rounded-xl p-10 text-center">
+                    <span className="text-4xl mb-3 block">🚀</span>
+                    <p className="text-gray-500 text-sm">No boosts or payments yet.</p>
+                    <p className="text-xs text-gray-600 mt-2">
+                      Spend HuudCoins to boost jobs, services, or events.
+                    </p>
+                  </div>
+                )}
+
+                {!paymentsQuery.isLoading && allPayments.length > 0 && (
+                  <div className="space-y-2">
+                    {allPayments.map((p) => (
+                      <div
+                        key={p.id ?? p.reference}
+                        className="bg-[#1a1a2e] border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0 text-lg">
+                          {PAYMENT_TYPE_ICONS[p.type] ?? "🪙"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-white truncate">
+                            {PAYMENT_TYPE_LABELS[p.type] ?? p.type}
+                          </p>
+                          {p.description && (
+                            <p className="text-xs text-gray-500 truncate">{p.description}</p>
+                          )}
+                          <p className="text-xs text-gray-600">
+                            {new Date(p.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end shrink-0">
+                          <span className="text-sm font-black text-red-400">
+                            -🪙 {p.coinsSpent.toLocaleString()}
+                          </span>
+                          <span
+                            className={`text-xs capitalize ${
+                              p.status === "completed"
+                                ? "text-green-500"
+                                : p.status === "refunded"
+                                ? "text-amber-400"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {p.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+
+                    {paymentsQuery.hasNextPage && (
+                      <button
+                        onClick={() => paymentsQuery.fetchNextPage()}
+                        disabled={paymentsQuery.isFetchingNextPage}
+                        className="w-full py-2 text-xs text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-xl transition"
+                      >
+                        {paymentsQuery.isFetchingNextPage ? "Loading…" : "Load More"}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Bottom nav spacer */}

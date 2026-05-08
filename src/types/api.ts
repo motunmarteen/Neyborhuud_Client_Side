@@ -908,22 +908,32 @@ export interface Report {
 }
 
 // ==================== Payment Types ====================
+// All platform transactions are denominated in HuudCoins.
+// No external payment gateway is integrated.
 
 export interface Payment {
   id: string;
   userId: string;
   type:
     | "listing_boost"
-    | "premium_subscription"
+    | "job_boost"
+    | "service_boost"
+    | "event_boost"
+    | "tip_user"
     | "event_ticket"
-    | "marketplace_purchase"
+    | "marketplace_pledge"
     | "service_payment";
-  amount: number;
+  coinsSpent: number;
+  /** Always "HuudCoins" */
   currency: string;
-  status: "pending" | "processing" | "completed" | "failed" | "refunded";
-  provider: "flutterwave" | "paystack" | "stripe";
+  status: "completed" | "failed" | "refunded";
+  /** Always "huudcoins" — no external gateway */
+  provider: string;
   reference: string;
+  description: string;
   metadata?: Record<string, any>;
+  /** Populated for tip_user payments */
+  recipientId?: string;
   createdAt: string;
   updatedAt: string;
 }

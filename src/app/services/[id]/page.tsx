@@ -13,7 +13,7 @@ import BookModal from "@/components/services/BookModal";
 import RateServiceModal from "@/components/services/RateServiceModal";
 import { useService, useServiceReviews, useFavoriteService, useBoostService } from "@/hooks/useServices";
 import { useAuth } from "@/hooks/useAuth";
-import { CoinSpendModal } from "@/components/gamification/CoinSpendModal";
+import { BoostModal } from "@/components/gamification/BoostModal";
 
 const DAY_FULL: Record<string, string> = {
   Mon: "Mon", Tue: "Tue", Wed: "Wed", Thu: "Thu",
@@ -380,20 +380,19 @@ export default function ServiceDetailPage() {
         <RateServiceModal serviceId={service.id} serviceTitle={service.title} onClose={() => setShowRate(false)} />
       )}
       {showBoost && (
-        <CoinSpendModal
-          title="Boost Service Listing"
-          description="Reach more customers in your neighbourhood"
+        <BoostModal
+          type="service"
+          itemTitle={service.title}
           options={[
-            { label: "3 Days", value: 3, coins: 200 },
-            { label: "7 Days", value: 7, coins: 400, popular: true },
+            { days: 3, coins: 200, label: "3 Days" },
+            { days: 7, coins: 400, label: "7 Days", badge: "Best Value" },
           ]}
-          defaultValue={7}
+          defaultDays={7}
           isPending={boostService.isPending}
           alreadyActive={service.isBoosted}
           activeUntil={service.boostedUntil}
           onConfirm={(days) => boostService.mutate({ serviceId: service.id, days: days as 3 | 7 })}
           onClose={() => setShowBoost(false)}
-          confirmLabel="Boost Service"
         />
       )}
     </>

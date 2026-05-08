@@ -10,7 +10,7 @@ import { BottomNav } from "@/components/feed/BottomNav";
 import ApplyModal from "@/components/jobs/ApplyModal";
 import { useJob, useSaveJob, useCloseJob, useBoostJob } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
-import { CoinSpendModal } from "@/components/gamification/CoinSpendModal";
+import { BoostModal } from "@/components/gamification/BoostModal";
 
 const TYPE_COLORS: Record<string, string> = {
   "full-time": "bg-green-500/20 text-green-400",
@@ -315,20 +315,19 @@ export default function JobDetailPage() {
       )}
 
       {showBoost && (
-        <CoinSpendModal
-          title="Boost Job Posting"
-          description="Get more applicants by featuring your job"
+        <BoostModal
+          type="job"
+          itemTitle={job.title}
           options={[
-            { label: "3 Days", value: 3, coins: 200 },
-            { label: "7 Days", value: 7, coins: 400, popular: true },
+            { days: 3, coins: 200, label: "3 Days" },
+            { days: 7, coins: 400, label: "7 Days", badge: "Best Value" },
           ]}
-          defaultValue={7}
+          defaultDays={7}
           isPending={boostJob.isPending}
           alreadyActive={job.isBoosted}
           activeUntil={job.boostedUntil}
           onConfirm={(days) => boostJob.mutate({ jobId: job.id ?? id, days: days as 3 | 7 })}
           onClose={() => setShowBoost(false)}
-          confirmLabel="Boost Job"
         />
       )}
     </div>
