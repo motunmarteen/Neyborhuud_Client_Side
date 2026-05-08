@@ -42,9 +42,13 @@ export const adminService = {
    * Suspend a user
    */
   async suspendUser(userId: string, reason: string, duration?: number) {
+    // Backend expects `until` as ISO date string; duration is in days.
+    // If no duration provided, suspend for 36,500 days (~permanent).
+    const days = duration && duration > 0 ? duration : 36500;
+    const until = new Date(Date.now() + days * 86_400_000).toISOString();
     return await apiClient.post(`/admin/users/${userId}/suspend`, {
       reason,
-      duration,
+      until,
     });
   },
 
@@ -109,16 +113,22 @@ export const adminService = {
   },
 
   /**
-   * Resolve a report
+   * Resolve a report — maps UI action to backend status
    */
   async resolveReport(
     reportId: string,
     action: "dismiss" | "remove" | "warn" | "suspend",
     notes?: string,
   ) {
-    return await apiClient.post(`/admin/reports/${reportId}/resolve`, {
-      action,
-      notes,
+    const STATUS_MAP: Record<string, string> = {
+      dismiss: 'dismissed',
+      remove:  'actioned',
+      warn:    'actioned',
+      suspend: 'actioned',
+    };
+    return await apiClient.patch(`/admin/reports/${reportId}/status`, {
+      status: STATUS_MAP[action] ?? 'reviewed',
+      note: notes,
     });
   },
 

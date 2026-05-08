@@ -200,7 +200,7 @@ function ReportRow({
       </td>
       <td className="px-4 py-3 text-right">
         <button
-          onClick={() => onReview(report.id)}
+          onClick={() => onReview((report as any)._id ? String((report as any)._id) : report.id)}
           className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-bold text-white/60 hover:border-emerald-500/50 hover:text-emerald-300 transition-colors"
         >
           Review
