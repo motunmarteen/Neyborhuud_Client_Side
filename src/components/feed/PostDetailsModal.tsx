@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { usePost } from '@/hooks/usePosts';
 import { CommentItem } from './CommentItem';
 import { CommentForm } from './CommentForm';
+import ShareModal from './ShareModal';
 import { PostAuthor } from '@/types/api';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import { contentService } from '@/services/content.service';
@@ -21,6 +22,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
     const { data: details, isLoading, isError, error } = usePost(postId);
     const modalRef = useRef<HTMLDivElement>(null);
     const queryClient = useQueryClient();
+    const [showShare, setShowShare] = useState(false);
     const [showEditHistory, setShowEditHistory] = useState(false);
     const [editHistory, setEditHistory] = useState<Array<{ _id: string; title?: string; body: string; editReason?: string; versionNumber: number; createdAt: string }>>([]);
     const [historyLoading, setHistoryLoading] = useState(false);
@@ -455,9 +457,9 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                         <span className="font-bold text-sm group-hover:text-primary" style={{ color: 'var(--neu-text)' }}>{details.content.comments || 0}</span>
                                         <span className="text-sm group-hover:text-primary" style={{ color: 'var(--neu-text-muted)' }}>Replies</span>
                                     </div>
-                                    <div className="flex items-center gap-1.5 transition-colors group cursor-pointer hover:text-primary">
+                                    <div className="flex items-center gap-1.5 transition-colors group cursor-pointer hover:text-primary" onClick={() => setShowShare(true)}>
                                         <span className="font-bold text-sm group-hover:text-primary" style={{ color: 'var(--neu-text)' }}>{details.content.shares || 0}</span>
-                                        <span className="text-sm group-hover:text-primary" style={{ color: 'var(--neu-text-muted)' }}>Reposts</span>
+                                        <span className="text-sm group-hover:text-primary" style={{ color: 'var(--neu-text-muted)' }}>Share</span>
                                     </div>
                                     <div className="flex items-center gap-1.5" style={{ color: 'var(--neu-text-muted)' }}>
                                         <span className="font-bold text-sm" style={{ color: 'var(--neu-text)' }}>{details.content.views || 0}</span>
@@ -586,6 +588,15 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Share Modal */}
+            {showShare && postId && (
+                <ShareModal
+                    postId={postId}
+                    postContent={details?.content?.content ?? details?.content?.body ?? ''}
+                    onClose={() => setShowShare(false)}
+                />
             )}
         </div>
     );

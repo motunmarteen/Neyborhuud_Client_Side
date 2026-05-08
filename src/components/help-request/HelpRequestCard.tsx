@@ -122,7 +122,7 @@ export function HelpRequestCard({ post }: HelpRequestCardProps) {
     const handleCardClick = (e: React.MouseEvent) => {
         const target = e.target as HTMLElement;
         if (!target.closest('a') && !target.closest('button') && !target.closest('input')) {
-            router.push(`/post/${postId}`);
+            router.push(`/help-request/${postId}`);
         }
     };
 
@@ -132,14 +132,32 @@ export function HelpRequestCard({ post }: HelpRequestCardProps) {
             onClick={handleCardClick}
         >
             <div className="p-4">
-                {/* Row 1: category badge + location + time */}
+                {/* Row 1: category badge + status badge + location + time */}
                 <div className="flex items-center justify-between mb-3">
-                    {categoryConfig && (
-                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold ${categoryConfig.color}`}>
-                            <span className="material-symbols-outlined text-[13px]">{categoryConfig.icon}</span>
-                            {categoryConfig.label}
-                        </span>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                        {categoryConfig && (
+                            <span className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold ${categoryConfig.color}`}>
+                                <span className="material-symbols-outlined text-[13px]">{categoryConfig.icon}</span>
+                                {categoryConfig.label}
+                            </span>
+                        )}
+                        {(() => {
+                            const helpStatus: string = meta.helpStatus ?? (post as any).helpStatus ?? 'open';
+                            const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
+                                open:        { label: 'Open',        cls: 'text-emerald-400 bg-emerald-400/10' },
+                                in_progress: { label: 'In Progress', cls: 'text-amber-400 bg-amber-400/10' },
+                                fulfilled:   { label: 'Fulfilled',   cls: 'text-blue-400 bg-blue-400/10' },
+                                closed:      { label: 'Closed',      cls: 'text-white/40 bg-white/5' },
+                            };
+                            const sc = STATUS_CONFIG[helpStatus];
+                            if (!sc) return null;
+                            return (
+                                <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${sc.cls}`}>
+                                    {sc.label}
+                                </span>
+                            );
+                        })()}
+                    </div>
                     <div className="flex items-center gap-1.5 ml-auto">
                         {location && (location.lga || location.state) && (
                             <span className="text-[11px] flex items-center gap-0.5" style={{ color: 'var(--neu-text-muted)' }}>

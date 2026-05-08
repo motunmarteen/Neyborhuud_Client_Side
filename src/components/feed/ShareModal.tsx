@@ -148,20 +148,23 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
     ? `${postContent.substring(0, 97)}…`
     : postContent;
 
-  const getTrackingLink = async (platformId: string): Promise<string> => {
+  const getTrackingLink = async (platformId: string): Promise<{ link: string; points_earned: number }> => {
     const res = await apiClient.post<{ link: string; points_earned: number }>(
       `/content/${postId}/share/external`,
       { platform: platformId },
     );
     const payload = (res as any)?.data?.data ?? (res as any)?.data ?? res;
-    return payload?.link ?? `${window.location.origin}/post/${postId}`;
+    return {
+      link: payload?.link ?? `${window.location.origin}/post/${postId}`,
+      points_earned: payload?.points_earned ?? 5,
+    };
   };
 
   const handlePlatform = async (platform: Platform) => {
     if (loading) return;
     setLoading(platform.id);
     try {
-      const link = await getTrackingLink(platform.id);
+      const { link, points_earned } = await getTrackingLink(platform.id);
       setEarnedLink(link);
 
       const shareUrl = platform.buildUrl(link, shareText);
@@ -175,7 +178,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
         setTimeout(() => setCopied(false), 3000);
       }
 
-      toast.success(`+5 HuudCoins earned for sharing! 🎉`, { duration: 3000 });
+      toast.success(`+${points_earned} HuudCoins earned for sharing! 🎉`, { duration: 3000 });
     } catch {
       toast.error('Could not share right now. Please try again.');
     } finally {
@@ -187,12 +190,14 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
     if (loading) return;
     setLoading('copy');
     try {
-      const link = earnedLink ?? await getTrackingLink('copy');
+      const { link, points_earned } = earnedLink
+        ? { link: earnedLink, points_earned: 5 }
+        : await getTrackingLink('copy');
       setEarnedLink(link);
       await navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
-      toast.success('+5 HuudCoins earned for sharing! 🎉', { duration: 3000 });
+      toast.success(`+${points_earned} HuudCoins earned for sharing! 🎉`, { duration: 3000 });
     } catch {
       toast.error('Could not copy link.');
     } finally {
@@ -204,14 +209,16 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
     if (!navigator.share || loading) return;
     setLoading('native');
     try {
-      const link = earnedLink ?? await getTrackingLink('native');
+      const { link, points_earned } = earnedLink
+        ? { link: earnedLink, points_earned: 5 }
+        : await getTrackingLink('native');
       setEarnedLink(link);
       await navigator.share({
         title: 'NeyborHuud Post',
         text: shareText,
         url: link,
       });
-      toast.success('+5 HuudCoins earned for sharing! 🎉', { duration: 3000 });
+      toast.success(`+${points_earned} HuudCoins earned for sharing! 🎉`, { duration: 3000 });
     } catch {
       // user cancelled — no error toast
     } finally {

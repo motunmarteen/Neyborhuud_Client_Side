@@ -144,6 +144,9 @@ export const contentService = {
         venue: (payload as any).venue
           ? JSON.stringify((payload as any).venue)
           : undefined,
+        helpRequestPayment: payload.helpRequestPayment
+          ? JSON.stringify(payload.helpRequestPayment)
+          : undefined,
       };
       return await apiClient.uploadFiles<Post>(
         "/content/posts",

@@ -1,69 +1,74 @@
 "use client";
 
-import { toast } from "sonner";
-import { useInitiatePayment } from "@/hooks/usePayments";
+import { useWallet } from "@/hooks/useGamification";
 
+/**
+ * Tier definitions — earned automatically by accumulating HuudCoins.
+ * No fiat purchase required.  Tier = f(HuudCoin balance).
+ */
 const TIERS = [
   {
-    id: "free" as const,
-    name: "Free",
-    price: 0,
-    borderColor: "border-gray-600",
-    badgeClass: "bg-gray-700 text-gray-300",
+    id: "bronze" as const,
+    name: "Bronze",
+    coinsRequired: 0,
+    borderColor: "border-amber-700",
+    badgeClass: "bg-amber-900/40 text-amber-400",
+    progressColor: "bg-amber-500",
+    icon: "🥉",
     features: [
       "Basic feed access",
       "3 marketplace listings",
       "1 active job post",
       "Community chat",
     ],
-    cta: null,
-  },
-  {
-    id: "bronze" as const,
-    name: "Bronze",
-    price: 500,
-    period: "/month",
-    borderColor: "border-amber-700",
-    badgeClass: "bg-amber-900/40 text-amber-400",
-    btnClass: "bg-amber-700 hover:bg-amber-600 text-white",
-    features: [
-      "Everything in Free",
-      "10 marketplace listings",
-      "5 active job posts",
-      "Priority feed placement",
-      "Verified badge",
-    ],
-    cta: "Upgrade to Bronze",
+    howToEarn: "Join the platform and start engaging",
   },
   {
     id: "silver" as const,
     name: "Silver",
-    price: 1500,
-    period: "/month",
+    coinsRequired: 500,
     borderColor: "border-slate-400",
     badgeClass: "bg-slate-700/40 text-slate-300",
-    btnClass: "bg-blue-500 hover:bg-blue-400 text-white",
+    progressColor: "bg-slate-400",
     popular: true,
+    icon: "🥈",
     features: [
       "Everything in Bronze",
+      "10 marketplace listings",
+      "5 active job posts",
+      "Priority feed placement",
+      "Verified tier badge",
+    ],
+    howToEarn: "Post content, comment daily, attend events",
+  },
+  {
+    id: "gold" as const,
+    name: "Gold",
+    coinsRequired: 2000,
+    borderColor: "border-yellow-400",
+    badgeClass: "bg-yellow-900/40 text-yellow-400",
+    progressColor: "bg-yellow-400",
+    icon: "🥇",
+    features: [
+      "Everything in Silver",
       "25 marketplace listings",
       "15 active job posts",
       "2× HuudCoins earn rate",
       "Analytics dashboard",
       "Promoted profile",
     ],
-    cta: "Upgrade to Silver",
+    howToEarn: "Be consistently active — post FYIs, help neighbours, complete jobs",
   },
   {
-    id: "gold" as const,
-    name: "Gold",
-    price: 3000,
-    period: "/month",
-    borderColor: "border-yellow-400",
-    badgeClass: "bg-yellow-900/40 text-yellow-400",
-    btnClass: "bg-yellow-500 hover:bg-yellow-400 text-black",
+    id: "platinum" as const,
+    name: "Platinum",
+    coinsRequired: 10000,
+    borderColor: "border-purple-400",
+    badgeClass: "bg-purple-900/40 text-purple-400",
+    progressColor: "bg-purple-400",
+    icon: "💎",
     features: [
-      "Everything in Silver",
+      "Everything in Gold",
       "Unlimited listings",
       "Unlimited job posts",
       "3× HuudCoins earn rate",
@@ -71,26 +76,20 @@ const TIERS = [
       "Early feature access",
       "Dedicated support",
     ],
-    cta: "Upgrade to Gold",
+    howToEarn: "Become a pillar of your community — highest activity, trust, and impact",
   },
-  {
-    id: "platinum" as const,
-    name: "Platinum",
-    price: 7500,
-    period: "/month",
-    borderColor: "border-purple-400",
-    badgeClass: "bg-purple-900/40 text-purple-400",
-    btnClass: "bg-purple-500 hover:bg-purple-400 text-white",
-    features: [
-      "Everything in Gold",
-      "Business profile page",
-      "API access",
-      "5× HuudCoins earn rate",
-      "White-glove onboarding",
-      "Custom community branding",
-    ],
-    cta: "Upgrade to Platinum",
-  },
+];
+
+/** Ways to earn HuudCoins — shown in the "earn more" section */
+const EARN_ACTIONS = [
+  { icon: "✍️", label: "Post content",         coins: "+1–5" },
+  { icon: "💬", label: "Comment on posts",       coins: "+2" },
+  { icon: "📅", label: "Daily check-in",         coins: "+10" },
+  { icon: "🛍️", label: "List on marketplace",    coins: "+10" },
+  { icon: "🎉", label: "Create / attend events", coins: "+2–5" },
+  { icon: "💼", label: "Post or complete a job", coins: "+5" },
+  { icon: "⭐", label: "Rate a service",          coins: "+2" },
+  { icon: "🔗", label: "Share content externally", coins: "+3" },
 ];
 
 interface Props {
@@ -98,98 +97,189 @@ interface Props {
 }
 
 export function PremiumCards({ currentTier }: Props) {
-  const { mutate: initiatePayment, isPending } = useInitiatePayment();
+  const { data: walletRaw } = useWallet();
+  const balance: number = (walletRaw as any)?.balance ?? (walletRaw as any)?.coins ?? 0;
 
-  function handleUpgrade(tier: (typeof TIERS)[number]) {
-    if (!tier.cta) return;
-    initiatePayment(
-      {
-        type: "premium_subscription",
-        amount: tier.price,
-        currency: "NGN",
-        metadata: { plan: tier.id },
-      },
-      {
-        onError: () =>
-          toast.error("Failed to initiate payment. Please try again."),
-      },
-    );
-  }
+  // Determine the tier the user currently holds
+  const activeTier = currentTier ?? "bronze";
+  const activeTierDef = TIERS.find((t) => t.id === activeTier) ?? TIERS[0];
 
-  const activeTier = currentTier ?? "free";
+  // Determine next tier
+  const nextTierDef = TIERS.find((t) => t.coinsRequired > balance);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-      {TIERS.map((tier) => {
-        const isCurrent = activeTier === tier.id;
-        return (
-          <div
-            key={tier.id}
-            className={`relative flex flex-col rounded-2xl border-2 bg-[#1a1a2e] p-5 ${tier.borderColor} ${
-              tier.popular
-                ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-[#0f0f1e]"
-                : ""
-            }`}
-          >
-            {tier.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-blue-500 text-xs font-bold text-white whitespace-nowrap">
-                Most Popular
-              </div>
-            )}
+    <div className="space-y-8">
 
-            {/* Tier badge */}
-            <div
-              className={`inline-flex items-center self-start px-2.5 py-1 rounded-full text-xs font-bold mb-3 ${tier.badgeClass}`}
-            >
-              {tier.name}
-            </div>
+      {/* ── Earn-based explanation banner ─────────────────────────────── */}
+      <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-6 py-5 flex items-start gap-4">
+        <span className="text-3xl mt-0.5">🪙</span>
+        <div>
+          <h3 className="font-bold text-amber-300 text-base">Tiers are earned, not bought</h3>
+          <p className="text-gray-400 text-sm mt-1 leading-relaxed">
+            NeyborHuud is free for everyone. Your tier badge is automatically upgraded as you
+            accumulate HuudCoins through platform activity — no payment, no subscription.
+            Stay active, help your neighbours, and watch your tier grow.
+          </p>
+        </div>
+      </div>
 
-            {/* Price */}
-            <div className="mb-4">
-              {tier.price === 0 ? (
-                <span className="text-2xl font-bold text-white">Free</span>
-              ) : (
-                <span className="text-2xl font-bold text-white">
-                  ₦{tier.price.toLocaleString()}
-                  <span className="text-sm font-normal text-gray-400">
-                    {tier.period}
-                  </span>
-                </span>
-              )}
-            </div>
-
-            {/* Features list */}
-            <ul className="space-y-2 flex-1 mb-5">
-              {tier.features.map((f) => (
-                <li
-                  key={f}
-                  className="flex items-start gap-2 text-sm text-gray-300"
-                >
-                  <span className="material-symbols-outlined text-green-400 text-base mt-0.5">
-                    check_circle
-                  </span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            {/* CTA */}
-            {isCurrent ? (
-              <div className="text-center py-2.5 rounded-xl bg-gray-700/40 text-gray-400 text-sm font-semibold">
-                Current Plan
-              </div>
-            ) : tier.cta && "btnClass" in tier ? (
-              <button
-                onClick={() => handleUpgrade(tier)}
-                disabled={isPending}
-                className={`w-full py-2.5 rounded-xl text-sm font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${tier.btnClass}`}
-              >
-                {isPending ? "Processing…" : tier.cta}
-              </button>
-            ) : null}
+      {/* ── Current balance + progress bar ────────────────────────────── */}
+      <div className="rounded-2xl border border-gray-700 bg-[#1a1a2e] px-6 py-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-400">Your HuudCoins balance</p>
+            <p className="text-3xl font-bold text-amber-400">🪙 {balance.toLocaleString()}</p>
           </div>
-        );
-      })}
+          <div className="text-right">
+            <p className="text-sm text-gray-400">Current tier</p>
+            <p className="text-xl font-bold text-white">
+              {activeTierDef.icon} {activeTierDef.name}
+            </p>
+          </div>
+        </div>
+
+        {/* Progress to next tier */}
+        {nextTierDef && (
+          <div>
+            <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+              <span>{activeTierDef.name}</span>
+              <span>
+                {nextTierDef.coinsRequired - balance} coins to {nextTierDef.name}
+              </span>
+              <span>{nextTierDef.name}</span>
+            </div>
+            <div className="h-2.5 rounded-full bg-gray-800 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${nextTierDef.progressColor}`}
+                style={{
+                  width: `${Math.min(
+                    100,
+                    ((balance - activeTierDef.coinsRequired) /
+                      (nextTierDef.coinsRequired - activeTierDef.coinsRequired)) *
+                      100,
+                  )}%`,
+                }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1.5">
+              {nextTierDef.howToEarn}
+            </p>
+          </div>
+        )}
+        {!nextTierDef && (
+          <p className="text-sm text-purple-400 font-semibold text-center">
+            💎 You&apos;ve reached the highest tier — Platinum!
+          </p>
+        )}
+      </div>
+
+      {/* ── Tier grid ─────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {TIERS.map((tier) => {
+          const isCurrent = activeTier === tier.id;
+          const isUnlocked = balance >= tier.coinsRequired;
+          const isNext = tier.id === nextTierDef?.id;
+
+          return (
+            <div
+              key={tier.id}
+              className={`relative flex flex-col rounded-2xl border-2 bg-[#1a1a2e] p-5 transition-all ${
+                isCurrent
+                  ? `${tier.borderColor} ring-2 ring-offset-2 ring-offset-[#0f0f1e] ring-${tier.borderColor.replace("border-", "")}`
+                  : isUnlocked
+                    ? tier.borderColor
+                    : "border-gray-800 opacity-60"
+              }`}
+            >
+              {tier.popular && isNext && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-blue-500 text-xs font-bold text-white whitespace-nowrap">
+                  Next Goal
+                </div>
+              )}
+
+              {/* Tier badge */}
+              <div className="flex items-center justify-between mb-3">
+                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${tier.badgeClass}`}>
+                  {tier.icon} {tier.name}
+                </div>
+                {isCurrent && (
+                  <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">
+                    Active
+                  </span>
+                )}
+                {isUnlocked && !isCurrent && (
+                  <span className="text-xs font-bold text-gray-400 bg-gray-700/40 px-2 py-0.5 rounded-full">
+                    Earned
+                  </span>
+                )}
+              </div>
+
+              {/* Coins required */}
+              <div className="mb-4">
+                {tier.coinsRequired === 0 ? (
+                  <span className="text-lg font-bold text-white">Starting tier</span>
+                ) : (
+                  <span className="text-lg font-bold text-white">
+                    🪙 {tier.coinsRequired.toLocaleString()}
+                    <span className="text-sm font-normal text-gray-400"> coins</span>
+                  </span>
+                )}
+              </div>
+
+              {/* Features list */}
+              <ul className="space-y-1.5 flex-1 mb-4">
+                {tier.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
+                    <span className="material-symbols-outlined text-green-400 text-base mt-0.5">
+                      check_circle
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Status footer */}
+              <div className={`text-center py-2 rounded-xl text-xs font-semibold ${
+                isCurrent
+                  ? "bg-green-500/10 text-green-400"
+                  : isUnlocked
+                    ? "bg-gray-700/40 text-gray-300"
+                    : "bg-gray-800 text-gray-500"
+              }`}>
+                {isCurrent
+                  ? "✓ Your current tier"
+                  : isUnlocked
+                    ? "✓ Unlocked"
+                    : `Need ${(tier.coinsRequired - balance).toLocaleString()} more coins`}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── How to earn more HuudCoins ────────────────────────────────── */}
+      <div className="rounded-2xl border border-gray-700 bg-[#1a1a2e] px-6 py-5">
+        <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-amber-400">bolt</span>
+          How to earn more HuudCoins
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {EARN_ACTIONS.map((action) => (
+            <div
+              key={action.label}
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-[#0f0f1e] border border-gray-800 text-center"
+            >
+              <span className="text-2xl">{action.icon}</span>
+              <span className="text-xs text-gray-400 leading-tight">{action.label}</span>
+              <span className="text-xs font-bold text-amber-400">{action.coins}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-gray-600 mt-4 text-center">
+          Coins are awarded daily with caps to keep the economy fair.
+          Check in every day for streak bonuses!
+        </p>
+      </div>
     </div>
   );
 }

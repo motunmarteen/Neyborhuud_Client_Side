@@ -8,8 +8,6 @@ import apiClient from "./api-client";
 
 class SocketService {
   private socket: Socket | null = null;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
 
   /**
    * Initialize socket connection
@@ -30,8 +28,8 @@ class SocketService {
       },
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: this.maxReconnectAttempts,
+      reconnectionDelayMax: 10000,
+      reconnectionAttempts: Infinity,
     });
 
     this.setupEventListeners();
@@ -48,7 +46,6 @@ class SocketService {
 
     this.socket.on("connect", () => {
       console.log("Socket connected");
-      this.reconnectAttempts = 0;
     });
 
     this.socket.on("disconnect", (reason) => {
@@ -56,17 +53,11 @@ class SocketService {
     });
 
     this.socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-      this.reconnectAttempts++;
-
-      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.error("Max reconnection attempts reached");
-        this.disconnect();
-      }
+      console.warn("Socket reconnecting...", error.message);
     });
 
     this.socket.on("error", (error) => {
-      console.error("Socket error:", error);
+      console.warn("Socket error:", error);
     });
   }
 

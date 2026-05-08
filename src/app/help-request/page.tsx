@@ -6,13 +6,12 @@
 'use client';
 
 import { useState, useCallback, useRef, Suspense } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { HelpRequestCategoryTabs, HelpRequestCategory } from '@/components/help-request/HelpRequestCategoryTabs';
-import { CreatePostModal } from '@/components/feed/CreatePostModal';
+import CreateHelpRequestModal from '@/components/help-request/CreateHelpRequestModal';
 import { HelpRequestCard } from '@/components/help-request/HelpRequestCard';
 import { useHelpRequestList } from '@/hooks/useHelpRequest';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,7 +20,6 @@ import { Post } from '@/types/api';
 function HelpRequestPageInner() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [categoryFilter, setCategoryFilter] = useState<HelpRequestCategory>('');
-    const queryClient = useQueryClient();
     const { user } = useAuth();
     const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -37,11 +35,6 @@ function HelpRequestPageInner() {
     } = useHelpRequestList({ category: categoryFilter || undefined });
 
     const posts: Post[] = data?.pages?.flatMap((page) => page?.helpRequests || []) || [];
-
-    const handleCreateSuccess = () => {
-        queryClient.invalidateQueries({ queryKey: ['helpRequest'] });
-        queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
-    };
 
     // Infinite scroll sentinel
     const lastPostRef = useCallback(
@@ -173,13 +166,10 @@ function HelpRequestPageInner() {
                 </Suspense>
             </div>
 
-            {/* Help Request creation modal — locked to help_request type */}
-            <CreatePostModal
+            {/* Help Request creation modal */}
+            <CreateHelpRequestModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSuccess={handleCreateSuccess}
-                defaultContentType="help_request"
-                lockContentType={true}
             />
         </div>
     );
