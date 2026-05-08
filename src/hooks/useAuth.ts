@@ -12,7 +12,8 @@ import apiClient from "@/lib/api-client";
 export function useAuth() {
   const queryClient = useQueryClient();
 
-  // Cached user + one-time community sync from GET /profile/me when token exists
+  // Fetch fresh user from GET /profile/me — ensures role/isAdmin is always current.
+  // Falls back to localStorage cache if the server is unreachable.
   const {
     data: user,
     isLoading,
@@ -21,12 +22,30 @@ export function useAuth() {
     queryKey: ["currentUser"],
     queryFn: async () => {
       if (!apiClient.isAuthenticated()) return null;
+      try {
+        const res = await apiClient.get<{ user: import("@/types/api").User }>("/profile/me");
+        if (res.success && res.data?.user) {
+          const freshUser = res.data.user;
+          // Persist fresh data (including role) back to localStorage
+          if (typeof window !== "undefined") {
+            const cached = localStorage.getItem("neyborhuud_user");
+            const existing = cached ? JSON.parse(cached) : {};
+            localStorage.setItem(
+              "neyborhuud_user",
+              JSON.stringify({ ...existing, ...freshUser }),
+            );
+          }
+          return freshUser;
+        }
+      } catch {
+        /* offline or network error — fall back to cache */
+      }
       await authService.syncCommunityFromProfile();
       return authService.getCachedUser();
     },
     enabled: apiClient.isAuthenticated(),
     retry: false,
-    staleTime: Infinity,
+    staleTime: 60_000, // re-fetch after 1 min so role changes propagate
   });
 
   // Login mutation

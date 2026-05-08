@@ -324,6 +324,16 @@ export default function SettingsPage() {
         }
     };
 
+    const handleLogout = async () => {
+        try {
+            await authService.logout();
+            router.replace('/login');
+        } catch {
+            // Even if the API call fails, clear local state and redirect
+            router.replace('/login');
+        }
+    };
+
     const handleDeleteAccount = async () => {
         if (
             !window.confirm(
@@ -1206,6 +1216,21 @@ export default function SettingsPage() {
                                     <span className="text-sm font-bold text-charcoal">Two-Factor Auth</span>
                                 </div>
                                 <span className="text-xs text-charcoal/30 uppercase">Coming Soon</span>
+                            </button>
+                        </div>
+
+                        {/* Sign Out */}
+                        <div className="neumorphic rounded-2xl p-6 mb-6 border border-charcoal/10">
+                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-3">
+                                Session
+                            </h2>
+                            <button
+                                type="button"
+                                onClick={() => void handleLogout()}
+                                className="flex w-full items-center gap-3 rounded-xl py-3 px-4 text-left text-brand-red/70 hover:text-brand-red hover:bg-brand-red/5 transition-colors min-h-[44px] touch-manipulation"
+                            >
+                                <i className="bi bi-box-arrow-right text-lg" aria-hidden />
+                                <span className="text-sm font-bold">Sign out</span>
                             </button>
                         </div>
 

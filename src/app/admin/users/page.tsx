@@ -38,8 +38,9 @@ function SuspendModal({
 
   const handleSubmit = async () => {
     if (!reason.trim()) return;
+    const uid = (user as any)._id ? String((user as any)._id) : user.id;
     await suspend.mutateAsync({
-      userId: user.id,
+      userId: uid,
       reason,
       duration: duration ? Number(duration) : undefined,
     });
@@ -99,7 +100,8 @@ function UserRow({ user }: { user: User }) {
   const updateRole = useUpdateUserRole();
   const deleteUser = useDeleteUser();
 
-  const isSuspended = (user as any).status === 'suspended';
+  const uid = (user as any)._id ? String((user as any)._id) : user.id;
+  const isSuspended = (user as any).status === 'suspended' || (user as any).isSuspended === true;
   const initial = ((user.firstName || user.username)?.[0] ?? 'U').toUpperCase();
 
   return (
@@ -132,12 +134,12 @@ function UserRow({ user }: { user: User }) {
 
         {/* Verification */}
         <td className="hidden px-4 py-3 md:table-cell">
-          {user.identityVerified ? (
+          {(user as any).emailVerified || (user as any).isVerified ? (
             <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400">
-              <span className="material-symbols-outlined text-[14px]">verified</span> Verified
+              <span className="material-symbols-outlined text-[14px]">mark_email_read</span> Verified
             </span>
           ) : (
-            <span className="text-xs text-white/30">Unverified</span>
+            <span className="text-xs text-amber-400/70">Unverified</span>
           )}
         </td>
 
@@ -169,7 +171,7 @@ function UserRow({ user }: { user: User }) {
                 <div className="absolute right-0 top-full z-50 mt-1 w-52 overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a2e] shadow-2xl">
                   {/* Verify / Unverify */}
                   <button
-                    onClick={() => { user.identityVerified ? unverify.mutate(user.id) : verify.mutate(user.id); setMenuOpen(false); }}
+                    onClick={() => { user.identityVerified ? unverify.mutate(uid) : verify.mutate(uid); setMenuOpen(false); }}
                     className="flex w-full items-center gap-3 px-4 py-3 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
                   >
                     <span className="material-symbols-outlined text-[16px]">verified</span>
@@ -179,7 +181,7 @@ function UserRow({ user }: { user: User }) {
                   {/* Suspend / Unsuspend */}
                   {isSuspended ? (
                     <button
-                      onClick={() => { unsuspend.mutate(user.id); setMenuOpen(false); }}
+                      onClick={() => { unsuspend.mutate(uid); setMenuOpen(false); }}
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm text-emerald-400 hover:bg-white/5 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[16px]">lock_open</span>
@@ -202,7 +204,7 @@ function UserRow({ user }: { user: User }) {
                       {(['user', 'moderator', 'admin'] as const).filter((r) => r !== user.role).map((r) => (
                         <button
                           key={r}
-                          onClick={() => { updateRole.mutate({ userId: user.id, role: r }); setMenuOpen(false); }}
+                          onClick={() => { updateRole.mutate({ userId: uid, role: r }); setMenuOpen(false); }}
                           className="rounded-lg bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white/60 hover:bg-white/20 hover:text-white capitalize transition-colors"
                         >
                           {r}
@@ -215,7 +217,7 @@ function UserRow({ user }: { user: User }) {
                   <button
                     onClick={() => {
                       if (confirm(`Permanently delete @${user.username}? This cannot be undone.`)) {
-                        deleteUser.mutate({ userId: user.id, reason: 'Admin action' });
+                        deleteUser.mutate({ userId: uid, reason: 'Admin action' });
                       }
                       setMenuOpen(false);
                     }}
@@ -344,7 +346,7 @@ export default function AdminUsersPage() {
                 <tr className="border-b border-white/10">
                   <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-white/30">User</th>
                   <th className="hidden px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-white/30 sm:table-cell">Role</th>
-                  <th className="hidden px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-white/30 md:table-cell">Verified</th>
+                  <th className="hidden px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-white/30 md:table-cell">Email Verified</th>
                   <th className="hidden px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-white/30 md:table-cell">Status</th>
                   <th className="hidden px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-white/30 lg:table-cell">Joined</th>
                   <th className="px-4 py-3 text-right text-[10px] font-black uppercase tracking-widest text-white/30">Actions</th>
