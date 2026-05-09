@@ -1,35 +1,28 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
-import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 import { useEmailValidation } from '@/hooks/useEmailValidation';
 import { toast } from 'sonner';
 
 function forgotPasswordBody(email: string) {
     const normalized = email.trim().toLowerCase();
-    // Backend accepts either field; we send both (same as login identifier).
     return JSON.stringify({ email: normalized, identifier: normalized });
 }
 
 function getErrorStatus(error: unknown): number | undefined {
     if (error && typeof error === 'object' && 'status' in error) {
-        const s = (error as { status?: number }).status;
-        return typeof s === 'number' ? s : undefined;
+        const status = (error as { status?: number }).status;
+        return typeof status === 'number' ? status : undefined;
     }
     return undefined;
 }
 
 function isNetworkError(message: string): boolean {
-    const m = message.toLowerCase();
-    return (
-        m.includes('failed to fetch') ||
-        m.includes('load failed') ||
-        m.includes('network') ||
-        m.includes('networkerror')
-    );
+    const normalized = message.toLowerCase();
+    return normalized.includes('failed to fetch') || normalized.includes('load failed') || normalized.includes('network');
 }
 
 type Step = 'form' | 'sent' | 'error';
@@ -41,63 +34,47 @@ export default function ForgotPasswordPage() {
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [resendCooldown, setResendCooldown] = useState(0);
+    const emailValidation = useEmailValidation({ debounceMs: 400, checkAvailability: false });
 
-    // Email validation
-    const emailValidation = useEmailValidation({ 
-        debounceMs: 400, 
-        checkAvailability: false // Don't check availability for password reset
-    });
-
-    // Validate email when it changes
     useEffect(() => {
         emailValidation.validate(email);
     }, [email]);
 
-    // Cooldown timer
     useEffect(() => {
-        if (resendCooldown > 0) {
-            const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
-            return () => clearTimeout(timer);
-        }
+        if (resendCooldown <= 0) return;
+        const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+        return () => clearTimeout(timer);
     }, [resendCooldown]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const requestReset = async () => {
+        await fetchAPI('/auth/forgot-password', {
+            method: 'POST',
+            body: forgotPasswordBody(email),
+        });
+    };
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
         if (!emailValidation.isFormatValid || loading) return;
 
         setLoading(true);
         setErrorMessage('');
 
         try {
-            await fetchAPI('/auth/forgot-password', {
-                method: 'POST',
-                body: forgotPasswordBody(email),
-            });
-
+            await requestReset();
             setStep('sent');
             setResendCooldown(60);
         } catch (error: unknown) {
-            console.error('Password reset request failed:', error);
             const message = error instanceof Error ? error.message : 'Something went wrong.';
             const status = getErrorStatus(error);
 
-            // Rate limit — backend returns 429 + message; must not show fake "email sent" success.
-            if (status === 429) {
+            if (status === 429 || (status !== undefined && status >= 400 && status < 500)) {
                 setErrorMessage(message);
                 setStep('error');
                 toast.error(message);
                 return;
             }
 
-            // Validation / bad request (e.g. Joi) — show real message, not anti-enumeration success.
-            if (status !== undefined && status >= 400 && status < 500) {
-                setErrorMessage(message);
-                setStep('error');
-                toast.error(message);
-                return;
-            }
-
-            // Server or connectivity failure
             if (status === undefined ? isNetworkError(message) : status >= 500) {
                 const generic = 'Unable to process request. Please try again later.';
                 setErrorMessage(generic);
@@ -106,7 +83,6 @@ export default function ForgotPasswordPage() {
                 return;
             }
 
-            // 2xx-style anti-enumeration is handled in try; remaining cases: show generic error
             setErrorMessage(message);
             setStep('error');
             toast.error(message);
@@ -117,227 +93,102 @@ export default function ForgotPasswordPage() {
 
     const handleResend = async () => {
         if (resendCooldown > 0 || loading) return;
-
         setLoading(true);
+        setErrorMessage('');
         try {
-            await fetchAPI('/auth/forgot-password', {
-                method: 'POST',
-                body: forgotPasswordBody(email),
-            });
+            await requestReset();
             setResendCooldown(60);
-            toast.success('If that account exists, we sent another reset link.');
+            toast.success('Reset link sent.');
         } catch (error: unknown) {
-            const msg =
-                error instanceof Error ? error.message : 'Could not resend. Try again later.';
-            const status = getErrorStatus(error);
-            console.error('Resend failed:', error);
-            if (status === 429) {
-                toast.error(msg, { duration: 6000 });
-            } else {
-                toast.error(msg);
-            }
+            const message = error instanceof Error ? error.message : 'Could not resend. Try again later.';
+            setErrorMessage(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
     };
 
-    // Success: Email Sent Screen
-    if (step === 'sent') {
-        return (
-            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
-                    {/* Decorative Glows */}
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-blue/5 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+    const isSent = step === 'sent';
+    const isError = step === 'error';
 
-                    {/* Icon */}
-                    <div className="w-28 h-28 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
-                        <div className="relative">
-                            <i className="bi bi-envelope-paper text-5xl text-brand-blue"></i>
-                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                                <i className="bi bi-check text-white text-xs"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
-                        Check Your Inbox
-                    </h1>
-                    
-                    <p className="text-sm mb-2 relative z-10 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
-                        If an account exists for
-                    </p>
-                    <p className="font-bold text-base mb-6 relative z-10 break-all px-4" style={{ color: 'var(--neu-text)' }}>
-                        {email}
-                    </p>
-                    <p className="text-sm mb-6 relative z-10 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
-                        you'll receive a password reset link.
-                    </p>
-
-                    {/* Instructions Box */}
-                    <div className="w-full neu-socket rounded-2xl p-4 mb-6 relative z-10">
-                        <div className="flex items-start gap-3 text-left">
-                            <i className="bi bi-lightbulb text-yellow-500 text-lg mt-0.5"></i>
-                            <div className="text-xs leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
-                                <p className="mb-2">The link will expire in <strong>15 minutes</strong>.</p>
-                                <p>Check your <strong>spam folder</strong> if you don't see it.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Resend Button */}
-                    <button
-                        onClick={handleResend}
-                        disabled={resendCooldown > 0 || loading}
-                        className={`
-                            text-sm font-bold transition-all mb-6 relative z-10
-                            ${resendCooldown > 0 || loading 
-                                ? 'cursor-not-allowed' 
-                                : 'text-brand-blue hover:text-brand-blue/70'}
-                        `}
-                        style={{ color: resendCooldown > 0 || loading ? 'var(--neu-text-muted)' : undefined }}
-                    >
-                        {loading ? (
-                            <span className="flex items-center gap-2">
-                                <span className="w-4 h-4 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></span>
-                                Sending...
-                            </span>
-                        ) : resendCooldown > 0 ? (
-                            `Resend in ${resendCooldown}s`
-                        ) : (
-                            'Resend Reset Link'
-                        )}
-                    </button>
-
-                    {/* Back to Login */}
-                    <button
-                        onClick={() => router.push('/login')}
-                        className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
-                    >
-                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
-                            Back to Login
-                        </span>
-                    </button>
-
-                    {/* Try Different Email */}
-                    <button
-                        onClick={() => setStep('form')}
-                        className="hover:opacity-70 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors relative z-10 mt-4"
-                        style={{ color: 'var(--neu-text-muted)' }}
-                    >
-                        Try Different Email
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // Error Screen
-    if (step === 'error') {
-        return (
-            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-red/5 rounded-full blur-3xl"></div>
-
-                    <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mb-8 relative z-10">
-                        <i className="bi bi-exclamation-triangle text-5xl text-brand-red"></i>
-                    </div>
-
-                    <h1 className="text-2xl font-semibold mb-3 relative z-10 tracking-tight" style={{ color: 'var(--neu-text)' }}>
-                        Something Went Wrong
-                    </h1>
-                    
-                    <p className="text-sm mb-8 relative z-10 leading-relaxed px-4" style={{ color: 'var(--neu-text-secondary)' }}>
-                        {errorMessage || 'We couldn\'t process your request. Please try again.'}
-                    </p>
-
-                    <button
-                        onClick={() => setStep('form')}
-                        className="neu-btn w-full py-5 rounded-2xl group transition-all relative z-10 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
-                    >
-                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest text-xs group-hover:text-brand-blue transition-colors">
-                            Try Again
-                        </span>
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // Form Screen
     return (
-        <div className="h-[100dvh] neu-base overflow-hidden">
-        <div className="h-full flex flex-col p-6 max-w-md mx-auto w-full">
-            {/* Header */}
-            <div className="mt-12 mb-8">
-                <button 
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 hover:opacity-70 mb-6 transition-colors"
-                    style={{ color: 'var(--neu-text-muted)' }}
-                >
-                    <i className="bi bi-arrow-left text-lg"></i>
-                    <span className="text-xs font-bold uppercase tracking-widest">Back</span>
-                </button>
-                
-                <h1 className="text-3xl font-semibold tracking-tighter leading-none" style={{ color: 'var(--neu-text)' }}>
-                    Forgot Password?
-                </h1>
-                <p className="font-light mt-3 text-base leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
-                    No worries! Enter your email and we'll send you a reset link.
-                </p>
-            </div>
+        <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
+            <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
+                <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
+                    <button type="button" onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-xl text-charcoal/55 transition-colors hover:text-primary" aria-label="Back" title="Back">
+                        <i className="bi bi-arrow-left" aria-hidden />
+                    </button>
+                    <span className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">Password help</span>
+                    <button type="button" onClick={() => router.push('/login')} className="flex h-8 w-8 items-center justify-center rounded-xl text-charcoal/55 transition-colors hover:text-primary" aria-label="Login" title="Login">
+                        <i className="bi bi-box-arrow-in-right" aria-hidden />
+                    </button>
+                </div>
 
-            {/* Icon */}
-            <div className="flex justify-center mb-8">
-                <div className="w-24 h-24 rounded-full neu-card-raised flex items-center justify-center">
-                    <i className="bi bi-key text-4xl text-brand-blue"></i>
+                <div className="flex min-h-0 flex-1 flex-col py-3">
+                    <div className="-mx-5 min-h-0 flex-1 overflow-hidden bg-white/[0.76] shadow-inner sm:-mx-6">
+                        <div className="relative flex h-full items-center justify-center overflow-hidden px-6">
+                            <div className="absolute left-4 top-7 h-2 w-36 rotate-12 rounded-full bg-brand-blue/16" aria-hidden />
+                            <div className="absolute right-6 top-1/2 h-2 w-32 -rotate-12 rounded-full bg-primary/14" aria-hidden />
+                            <div className="absolute bottom-8 left-12 h-2 w-40 -rotate-6 rounded-full bg-brand-amber/18" aria-hidden />
+                            <div className="relative w-full max-w-[19rem] overflow-hidden rounded-[1.6rem] border border-white/85 bg-white/[0.92] shadow-[0_26px_64px_rgba(26,26,46,0.16)] backdrop-blur-xl">
+                                <div className={`h-1.5 ${isError ? 'bg-brand-red' : 'bg-gradient-to-r from-brand-blue via-primary to-brand-amber'}`} aria-hidden />
+                                <div className="p-4">
+                                    <div className="mb-4 flex items-center justify-between gap-3">
+                                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-[0_16px_34px_rgba(0,135,81,0.25)] ${isError ? 'bg-brand-red' : isSent ? 'bg-primary' : 'bg-brand-blue'}`}>
+                                            <i className={`bi ${isError ? 'bi-exclamation-triangle-fill' : isSent ? 'bi-envelope-check-fill' : 'bi-key-fill'} text-xl`} aria-hidden />
+                                        </div>
+                                        <div className="rounded-full border border-charcoal/5 bg-[#F8FAFC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">NeyborHuud</div>
+                                    </div>
+                                    <p className={`mb-1 text-[9px] font-black uppercase tracking-[0.24em] ${isError ? 'text-brand-red' : 'text-primary'}`}>{isError ? 'Request failed' : isSent ? 'Inbox next' : 'Account recovery'}</p>
+                                    <h1 className="truncate text-2xl font-black tracking-tighter text-[#1A1A2E]">{isError ? 'Try again' : isSent ? 'Check your inbox' : 'Reset password'}</h1>
+                                    <p className="truncate text-[11px] font-semibold text-[#64748B]">{email || 'Use your account email'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="shrink-0 overflow-hidden rounded-[1.7rem] border border-white/85 bg-white/[0.94] shadow-[0_28px_70px_rgba(26,26,46,0.18)] backdrop-blur-2xl">
+                        <div className={`h-1.5 ${isError ? 'bg-brand-red' : 'bg-gradient-to-r from-brand-blue via-primary to-brand-amber'}`} aria-hidden />
+                        <div className="p-4">
+                            {step === 'form' && (
+                                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                                    <PremiumInput label="Email Address" type="email" icon="bi-envelope" placeholder="nancy@example.com" value={email} onChange={event => setEmail(event.target.value)} validationStatus={emailValidation.status} error={emailValidation.status === 'invalid' ? 'Please enter a valid email' : undefined} />
+                                    <button type="submit" disabled={loading || !emailValidation.isFormatValid} className={`flex h-[52px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${!loading && emailValidation.isFormatValid ? 'bg-brand-blue text-white shadow-[0_18px_34px_rgba(13,110,253,0.28)] active:scale-[0.98]' : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'}`}>
+                                        {loading ? <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" aria-hidden /> : <i className="bi bi-send" aria-hidden />}
+                                        Send reset link
+                                    </button>
+                                </form>
+                            )}
+
+                            {step === 'sent' && (
+                                <div className="flex flex-col gap-4">
+                                    <div className="rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-primary">If an account exists for {email}, a reset link has been sent.</div>
+                                    <div className="grid grid-cols-[0.9fr_1.1fr] gap-3">
+                                        <button type="button" onClick={handleResend} disabled={resendCooldown > 0 || loading} className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${resendCooldown > 0 || loading ? 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]' : 'border border-charcoal/5 bg-white text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)]'}`}>
+                                            {loading ? <i className="bi bi-arrow-repeat animate-spin" aria-hidden /> : <i className="bi bi-send" aria-hidden />}
+                                            {loading ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}
+                                        </button>
+                                        <button type="button" onClick={() => router.push('/login')} className="flex h-[50px] items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] transition-all active:scale-[0.98]">
+                                            Login
+                                            <i className="bi bi-arrow-right" aria-hidden />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {step === 'error' && (
+                                <div className="flex flex-col gap-4">
+                                    <div className="rounded-2xl border border-brand-red/15 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-brand-red">{errorMessage || 'We could not process your request. Please try again.'}</div>
+                                    <button type="button" onClick={() => setStep('form')} className="flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-brand-blue px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_34px_rgba(13,110,253,0.28)] transition-all active:scale-[0.98]">
+                                        Try again
+                                        <i className="bi bi-arrow-right" aria-hidden />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-                <PremiumInput
-                    label="Email Address"
-                    type="email"
-                    icon="bi-envelope"
-                    placeholder="nancy@example.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    validationStatus={emailValidation.status}
-                    error={emailValidation.status === 'invalid' ? 'Please enter a valid email' : undefined}
-                />
-
-                <button
-                    disabled={loading || !emailValidation.isFormatValid}
-                    className={`
-                        neu-btn py-5 rounded-2xl mt-4 transition-all duration-300 active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]
-                        ${(loading || !emailValidation.isFormatValid) 
-                            ? 'opacity-50 cursor-not-allowed scale-[0.98]' 
-                            : 'hover:scale-[1.02]'}
-                    `}
-                >
-                    <span className="font-black uppercase tracking-widest text-sm" style={{ color: 'var(--neu-text)' }}>
-                        {loading ? (
-                            <span className="flex items-center justify-center gap-2">
-                                <span className="w-4 h-4 border-2 border-charcoal/30 border-t-charcoal rounded-full animate-spin"></span>
-                                Sending...
-                            </span>
-                        ) : (
-                            'Send Reset Link'
-                        )}
-                    </span>
-                </button>
-            </form>
-
-            {/* Footer */}
-            <div className="mt-auto pb-10 text-center">
-                <p className="text-sm font-light" style={{ color: 'var(--neu-text-muted)' }}>
-                    Remember your password?{' '}
-                    <Link href="/login" className="text-brand-blue font-bold hover:underline">
-                        Log in
-                    </Link>
-                </p>
-            </div>
-        </div>
         </div>
     );
 }

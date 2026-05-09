@@ -159,6 +159,14 @@ html.dark body {
   background-size: 360px 360px;
 }
 
+.location-picker-premium-map {
+  background-image:
+    linear-gradient(rgba(0, 135, 81, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 144, 217, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 50% 42%, rgba(0, 135, 81, 0.16), transparent 34%);
+  background-size: 34px 34px, 34px 34px, 100% 100%;
+}
+
 .dark .doodle-surface,
 .dark .doodle-surface-muted {
   background-color: #141420;

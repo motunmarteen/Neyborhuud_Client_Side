@@ -11,15 +11,7 @@ export const getApiUrl = () => {
     // Check both environment variable names for compatibility
     const envUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
     if (envUrl && envUrl !== 'undefined') {
-        // Only log in browser/client-side, not during build
-        if (typeof window !== 'undefined') {
-            console.log('🌐 Using API URL:', envUrl);
-        }
         return envUrl;
-    }
-    // Only log in browser/client-side, not during build
-    if (typeof window !== 'undefined') {
-        console.warn('⚠️ No API URL in env, using production:', PRODUCTION_API_URL);
     }
     return PRODUCTION_API_URL;
 };
@@ -145,9 +137,7 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
                 });
             }
             
-            // For registration requests, log the sanitized payload for debugging
             if (endpoint.includes('/auth/create-account') || endpoint.includes('/auth/register')) {
-                console.log('🔍 Registration request payload (after sanitization):', JSON.stringify(sanitized, null, 2));
                 if (sanitized.assignedCommunityId || sanitized.communityId || sanitized.communityName) {
                     console.error('❌ CRITICAL ERROR: assignedCommunityId/communityId/communityName still present after sanitization!');
                 }
@@ -189,8 +179,7 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 
             // Expected 4xx: use debug so Next.js dev overlay does not treat it as an app error.
             // 5xx / unknown: still error-level for visibility.
-            const logLine =
-                `Backend ${response.status} ${response.statusText} — ${url}\nParsed body: ${JSON.stringify(data)}`;
+            const logLine = `Backend ${response.status} ${response.statusText} — ${url}`;
             if (response.status >= 500) {
                 console.error('❌', logLine);
             } else {
@@ -206,10 +195,7 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 
         return data;
     } catch (error: any) {
-        // HTTP errors were already logged above; avoid duplicate console.error + dev overlay noise.
-        if (error?.responseData === undefined) {
-            console.error(`[API Error] ${endpoint}:`, error);
-        }
+        // HTTP errors were already logged above; avoid duplicate console noise.
         throw error;
     }
 }

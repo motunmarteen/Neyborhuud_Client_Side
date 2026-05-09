@@ -15,10 +15,10 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "NeyborHuud - Your Neighbourhood Operating System",
+    default: "NeyborHuud - Your Huud Operating System",
     template: "%s | NeyborHuud",
   },
-  description: "Digital infrastructure for the modern African neighbourhood. Safety, trust, and local prosperity — hyperlocal feed, SOS alerts, marketplace, and more.",
+  description: "Digital infrastructure for the modern African Huud. Safety, trust, and local prosperity — hyperlocal feed, SOS alerts, marketplace, and more.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -31,13 +31,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "NeyborHuud",
-    title: "NeyborHuud - Your Neighbourhood Operating System",
-    description: "Digital infrastructure for the modern African neighbourhood. Safety, trust, and local prosperity.",
+    title: "NeyborHuud - Your Huud Operating System",
+    description: "Digital infrastructure for the modern African Huud. Safety, trust, and local prosperity.",
   },
   twitter: {
     card: "summary",
     title: "NeyborHuud",
-    description: "Digital infrastructure for the modern African neighbourhood.",
+    description: "Digital infrastructure for the modern African Huud.",
   },
   robots: {
     index: true,

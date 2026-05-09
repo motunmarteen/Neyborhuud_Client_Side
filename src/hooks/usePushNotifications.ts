@@ -14,6 +14,20 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return Uint8Array.from(Array.from(raw).map((c) => c.charCodeAt(0)));
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error(`${label} timed out`)), ms);
+    promise
+      .then(resolve)
+      .catch(reject)
+      .finally(() => window.clearTimeout(timer));
+  });
+}
+
+function getErrorText(error: unknown): string {
+  return error instanceof Error ? error.message : 'Failed to enable push notifications';
+}
+
 export type PushPermissionState = 'default' | 'granted' | 'denied' | 'unsupported';
 
 export interface UsePushNotificationsReturn {
@@ -46,16 +60,18 @@ export function usePushNotifications(): UsePushNotificationsReturn {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-      setPermission('unsupported');
-      return;
+      const timer = window.setTimeout(() => setPermission('unsupported'), 0);
+      return () => window.clearTimeout(timer);
     }
-    setPermission(Notification.permission as PushPermissionState);
+    const timer = window.setTimeout(() => setPermission(Notification.permission as PushPermissionState), 0);
 
     // Check if already subscribed
     navigator.serviceWorker.ready
       .then((reg) => reg.pushManager.getSubscription())
       .then((sub) => setIsSubscribed(!!sub))
       .catch(() => {});
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   const requestPermissionAndSubscribe = async (): Promise<boolean> => {
@@ -72,7 +88,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
     try {
       // 1. Request permission
-      const perm = await Notification.requestPermission();
+      const perm = await withTimeout(Notification.requestPermission(), 15_000, 'Notification permission');
       setPermission(perm as PushPermissionState);
 
       if (perm !== 'granted') {
@@ -81,10 +97,10 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       }
 
       // 2. Get service worker registration
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await withTimeout(navigator.serviceWorker.ready, 12_000, 'Service worker readiness');
 
       // 3. Check if already subscribed
-      let sub = await registration.pushManager.getSubscription();
+      let sub = await withTimeout(registration.pushManager.getSubscription(), 8_000, 'Push subscription lookup');
       if (!sub) {
         const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (!vapidPublicKey) {
@@ -95,21 +111,30 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         }
 
         // 4. Subscribe
-        sub = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as unknown as BufferSource,
-        });
+        sub = await withTimeout(
+          registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as unknown as BufferSource,
+          }),
+          12_000,
+          'Push subscription',
+        );
       }
 
       // 5. Send subscription to backend
-      await apiClient.post('/mobile/push/subscribe', { subscription: sub.toJSON() });
+      await withTimeout(
+        apiClient.post('/mobile/push/subscribe', { subscription: sub.toJSON() }),
+        10_000,
+        'Push subscription sync',
+      );
 
       setIsSubscribed(true);
       setIsRegistering(false);
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[Push] Subscription failed:', err);
-      setError(err?.message ?? 'Failed to enable push notifications');
+      setError(getErrorText(err));
+      attemptedRef.current = false;
       setIsRegistering(false);
       return false;
     }

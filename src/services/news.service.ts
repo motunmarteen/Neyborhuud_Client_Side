@@ -86,14 +86,14 @@ export const newsService = {
    * The backend returns raw XML; we parse it here.
    */
   async getFeed(sourceId: string, sourceName: string): Promise<RssArticle[]> {
-    const response = await apiClient.get<string>(`/news/feed`, {
+    // apiClient.get() already returns response.data, so the result IS the raw XML string.
+    const xml = await apiClient.get<string>(`/news/feed`, {
       params: { source: sourceId },
       responseType: "text",
-      // Override Content-Type so axios doesn't try to JSON-parse RSS XML
+      // Prevent axios from JSON-parsing the RSS XML response
       transformResponse: [(data) => data],
     });
-    const xml = typeof response.data === "string" ? response.data : "";
-    return parseRssXml(xml, sourceId, sourceName);
+    return parseRssXml(typeof xml === "string" ? xml : "", sourceId, sourceName);
   },
 
   /**

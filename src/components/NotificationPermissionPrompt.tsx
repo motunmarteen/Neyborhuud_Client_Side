@@ -20,21 +20,44 @@
  */
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 const SNOOZE_KEY = 'nh_push_prompt_snoozed_until';
 const SNOOZE_DAYS = 3; // Re-prompt every 3 days since it's a safety app
 
+function snoozePrompt(days = SNOOZE_DAYS) {
+  try {
+    const until = Date.now() + days * 24 * 60 * 60 * 1000;
+    localStorage.setItem(SNOOZE_KEY, String(until));
+  } catch {
+    // Storage can fail in private/restricted contexts; the prompt should still dismiss.
+  }
+}
+
 export default function NotificationPermissionPrompt() {
   const { permission, isSubscribed, isRegistering, requestPermissionAndSubscribe } =
     usePushNotifications();
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
+  const isAuthRoute = [
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/reset-password',
+    '/verify-email',
+    '/welcome',
+  ].some((route) => pathname === route || pathname.startsWith(`${route}/`));
 
   useEffect(() => {
+    if (isAuthRoute) return;
     // Already subscribed — never show
     if (isSubscribed) return;
     // Browser denied — show the "how to fix" variant immediately
-    if (permission === 'denied') { setVisible(true); return; }
+    if (permission === 'denied') {
+      const timer = window.setTimeout(() => setVisible(true), 0);
+      return () => window.clearTimeout(timer);
+    }
     // Not supported (e.g. non-PWA desktop) — skip
     if (permission === 'unsupported') return;
 
@@ -43,26 +66,23 @@ export default function NotificationPermissionPrompt() {
     if (snoozedUntil && Date.now() < Number(snoozedUntil)) return;
 
     // Show immediately — no delay for a safety app
-    setVisible(true);
-  }, [isSubscribed, permission]);
-
-  useEffect(() => {
-    if (isSubscribed) setVisible(false);
-  }, [isSubscribed]);
+    const timer = window.setTimeout(() => setVisible(true), 0);
+    return () => window.clearTimeout(timer);
+  }, [isAuthRoute, isSubscribed, permission]);
 
   function handleEnable() {
+    setVisible(false);
     requestPermissionAndSubscribe().then((granted) => {
-      if (granted) setVisible(false);
+      if (!granted) snoozePrompt(1);
     });
   }
 
   function handleSnooze() {
-    const until = Date.now() + SNOOZE_DAYS * 24 * 60 * 60 * 1000;
-    localStorage.setItem(SNOOZE_KEY, String(until));
     setVisible(false);
+    snoozePrompt();
   }
 
-  if (!visible) return null;
+  if (isAuthRoute || isSubscribed || !visible) return null;
 
   // ── DENIED STATE ─────────────────────────────────────────────────────────
   if (permission === 'denied') {
@@ -75,18 +95,18 @@ export default function NotificationPermissionPrompt() {
             </div>
             <div>
               <p className="font-bold text-gray-900">Notifications are blocked</p>
-              <p className="text-sm text-gray-500">You won't receive SOS and safety alerts</p>
+              <p className="text-sm text-gray-500">You won&apos;t receive SOS and safety alerts</p>
             </div>
           </div>
           <p className="text-sm text-gray-600 mb-5 leading-relaxed">
             To receive life-saving safety alerts, open your browser settings, find
-            NeyborHuud, and change <strong>Notifications</strong> to <strong>Allow</strong>.
+            NeyburH, and change <strong>Notifications</strong> to <strong>Allow</strong>.
           </p>
           <button
             onClick={handleSnooze}
             className="w-full rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            I'll do it later
+            I&apos;ll do it later
           </button>
         </div>
       </div>
@@ -112,14 +132,14 @@ export default function NotificationPermissionPrompt() {
           Enable Safety Notifications
         </h2>
         <p className="text-sm text-gray-500 text-center leading-relaxed mb-2">
-          NeyborHuud is a <strong className="text-gray-700">community safety app</strong>.
-          Push notifications are critical — you'll receive:
+          NeyburH is a <strong className="text-gray-700">community safety app</strong>.
+          Push notifications are critical — you&apos;ll receive:
         </p>
 
         {/* Feature list */}
         <ul className="text-sm text-gray-600 space-y-2 mb-6 mt-4">
           {[
-            { icon: 'sos', label: 'Instant SOS alerts from neighbours', color: 'text-red-500' },
+            { icon: 'sos', label: 'Instant SOS alerts from NeyburHs', color: 'text-red-500' },
             { icon: 'location_on', label: 'Geofence & safety zone alerts', color: 'text-orange-500' },
             { icon: 'route', label: 'Trip monitoring & overdue alerts', color: 'text-yellow-600' },
             { icon: 'chat', label: 'Messages & community updates', color: 'text-blue-500' },

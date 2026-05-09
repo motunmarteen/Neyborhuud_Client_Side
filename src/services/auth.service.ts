@@ -398,7 +398,12 @@ export const authService = {
   /**
    * Resend email verification
    */
-  async resendVerificationEmail() {
+  async resendVerificationEmail(email?: string) {
+    if (email && email.trim()) {
+      return await apiClient.post("/auth/resend-verification", {
+        email: email.trim().toLowerCase(),
+      });
+    }
     return await apiClient.post("/auth/resend-verification");
   },
 

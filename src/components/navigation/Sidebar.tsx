@@ -176,6 +176,8 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                         <button
                             onClick={onMobileClose}
                             className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors"
+                            aria-label="Close menu"
+                            title="Close menu"
                         >
                             <i className="bi bi-x-lg text-xl" />
                         </button>

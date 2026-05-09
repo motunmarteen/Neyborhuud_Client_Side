@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 
 const DailyCheckInModal = dynamic(
   () => import("@/components/gamification/DailyCheckInModal"),
@@ -8,5 +9,17 @@ const DailyCheckInModal = dynamic(
 );
 
 export default function DailyCheckInModalLoader() {
+  const pathname = usePathname();
+  const isAuthRoute = [
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+    "/verify-email",
+    "/welcome",
+  ].some((route) => pathname === route || pathname.startsWith(`${route}/`));
+
+  if (isAuthRoute) return null;
+
   return <DailyCheckInModal />;
 }

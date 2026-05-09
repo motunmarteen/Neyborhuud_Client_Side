@@ -30,6 +30,8 @@ interface LocationPickerProps {
     label?: string;
     /** Whether the map is read-only (display only) */
     readOnly?: boolean;
+    /** Visual treatment for feature-led signup surfaces */
+    presentation?: 'default' | 'premium';
 }
 
 export function LocationPicker({
@@ -43,6 +45,7 @@ export function LocationPicker({
     onRetry,
     label = 'Your Location',
     readOnly = false,
+    presentation = 'default',
 }: LocationPickerProps) {
     const [currentLocation, setCurrentLocation] = useState<MapLocation | null>(initialLocation || null);
     const [address, setAddress] = useState<LocationAddress | null>(null);
@@ -107,35 +110,50 @@ export function LocationPicker({
         fair: 'text-orange-400',
         poor: 'text-red-400',
     };
+    const isPremium = presentation === 'premium';
+    const isSignupLocationMap = mapHeight === 'signup-location';
+    const resolvedMapHeight = isSignupLocationMap ? '100%' : mapHeight;
+    const mapHeightClass = isSignupLocationMap
+        ? 'min-h-0 flex-1'
+        : mapHeight === 'clamp(300px, 48dvh, 470px)'
+        ? 'h-[clamp(300px,48dvh,470px)]'
+        : mapHeight === '160px'
+            ? 'h-[160px]'
+            : 'h-[180px]';
+    const emptyMapClass = `${isPremium ? 'location-picker-premium-map relative overflow-hidden bg-white/[0.78] shadow-inner' : 'neu-socket rounded-2xl'} ${mapHeightClass} flex items-center justify-center`;
+    const rootClass = isSignupLocationMap ? 'flex h-full min-h-0 flex-col gap-2' : 'flex flex-col gap-3';
 
     return (
-        <div className="flex flex-col gap-3">
+        <div className={rootClass}>
             {/* Label with accuracy indicator */}
-            <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
-                    {label}
-                </span>
-                {accuracy && accuracyQuality && (
-                    <span className={`text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${accuracyColors[accuracyQuality]}`}>
-                        <i className="bi bi-broadcast"></i>
-                        {formatAccuracy(accuracy)}
-                        {accuracyQuality === 'excellent' && ' GPS'}
-                        {accuracyQuality === 'poor' && ' (Approximate)'}
+            {!isSignupLocationMap && (
+                <div className="flex items-center justify-between px-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--neu-text-muted)]">
+                        {label}
                     </span>
-                )}
-            </div>
+                    {accuracy && accuracyQuality && (
+                        <span className={`text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${accuracyColors[accuracyQuality]}`}>
+                            <i className="bi bi-broadcast"></i>
+                            {formatAccuracy(accuracy)}
+                            {accuracyQuality === 'excellent' && ' GPS'}
+                            {accuracyQuality === 'poor' && ' (Approximate)'}
+                        </span>
+                    )}
+                </div>
+            )}
 
             {/* Map or detecting state */}
             {isDetecting && !currentLocation ? (
-                <div className="neu-socket rounded-2xl flex items-center justify-center" style={{ height: mapHeight }}>
-                    <div className="flex flex-col items-center gap-3">
-                        <div className="relative">
-                            <i className="bi bi-geo-alt text-3xl text-brand-blue animate-bounce"></i>
-                            <div className="absolute inset-0 animate-ping">
-                                <i className="bi bi-geo-alt text-3xl text-brand-blue/30"></i>
-                            </div>
+                <div className={emptyMapClass}>
+                    {isPremium && (
+                        <div className="absolute inset-x-10 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" aria-hidden />
+                    )}
+                    <div className="relative z-10 flex flex-col items-center gap-3 text-center">
+                        <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_18px_44px_rgba(26,26,46,0.16)]">
+                            <span className="absolute h-16 w-16 animate-ping rounded-full bg-brand-blue/15" aria-hidden />
+                            <i className="bi bi-geo-alt-fill text-3xl text-brand-blue animate-bounce" aria-hidden />
                         </div>
-                        <span className="text-[10px] text-charcoal/50 font-medium uppercase tracking-wider">
+                        <span className="text-[10px] text-charcoal/50 font-black uppercase tracking-wider">
                             Detecting your location...
                         </span>
                     </div>
@@ -144,73 +162,105 @@ export function LocationPicker({
                 <InteractiveMap
                     center={currentLocation}
                     draggable={!readOnly}
-                    height={mapHeight}
+                    height={resolvedMapHeight}
                     onLocationChange={handleLocationChange}
                     zoom={16}
                     accuracyRadius={accuracy && accuracy < 500 ? accuracy : undefined}
-                    className="shadow-lg"
+                    className={isPremium ? `${isSignupLocationMap ? 'min-h-0 flex-1' : ''} overflow-hidden rounded-2xl shadow-[0_18px_44px_rgba(26,26,46,0.16)] ring-1 ring-black/5` : 'shadow-lg'}
                 />
             ) : (
-                <div className="neu-socket rounded-2xl flex items-center justify-center" style={{ height: mapHeight }}>
-                    <div className="flex flex-col items-center gap-3 text-center px-4">
-                        <i className="bi bi-geo-alt-fill text-3xl text-charcoal/20"></i>
-                        <span className="text-[10px] text-charcoal/40 font-medium">
-                            Location not available
-                        </span>
-                        {showRetry && onRetry && (
-                            <button
-                                type="button"
-                                onClick={onRetry}
-                                className="text-[9px] font-black uppercase tracking-widest text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-lg hover:bg-brand-blue/20 transition-colors"
-                            >
-                                Enable Location
-                            </button>
-                        )}
-                    </div>
+                <div className={emptyMapClass}>
+                    {isPremium && (
+                        <>
+                            <div className="absolute left-[10%] top-[22%] h-2.5 w-32 rotate-12 rounded-full bg-brand-blue/18 shadow-[0_0_24px_rgba(74,144,217,0.16)]" aria-hidden />
+                            <div className="absolute right-[8%] top-[41%] h-2.5 w-36 -rotate-12 rounded-full bg-primary/18 shadow-[0_0_24px_rgba(0,135,81,0.16)]" aria-hidden />
+                            <div className="absolute bottom-[24%] left-[18%] h-2.5 w-40 -rotate-6 rounded-full bg-brand-amber/22 shadow-[0_0_24px_rgba(245,166,35,0.16)]" aria-hidden />
+                            <div className="absolute inset-x-8 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/28 to-transparent" aria-hidden />
+                            <div className="absolute inset-y-8 left-1/2 w-px bg-gradient-to-b from-transparent via-brand-blue/22 to-transparent" aria-hidden />
+                        </>
+                    )}
+                    {isSignupLocationMap ? (
+                        <div className="relative z-10 flex flex-col items-center justify-center">
+                            <div className="absolute h-48 w-48 rounded-full border border-primary/14 bg-primary/[0.035]" aria-hidden />
+                            <div className="absolute h-32 w-32 rounded-full border border-brand-blue/18 bg-brand-blue/[0.035]" aria-hidden />
+                            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-[0_28px_62px_rgba(26,26,46,0.2)]">
+                                <span className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-black text-white shadow-[0_10px_22px_rgba(0,135,81,0.36)]">N</span>
+                                <i className="bi bi-geo-alt-fill text-5xl text-primary/70" aria-hidden />
+                            </div>
+                            <span className="sr-only">Location not available</span>
+                        </div>
+                    ) : (
+                        <div className="relative z-10 flex flex-col items-center gap-3 text-center px-4">
+                            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/95 shadow-[0_18px_44px_rgba(26,26,46,0.14)]">
+                                <i className="bi bi-geo-alt-fill text-4xl text-primary/35" aria-hidden />
+                            </div>
+                            <div className="space-y-1">
+                                <span className="block text-[11px] text-charcoal/60 font-black uppercase tracking-widest">
+                                    Location not available
+                                </span>
+                                {isPremium && (
+                                    <span className="block max-w-[14rem] text-[10px] leading-relaxed text-charcoal/45">
+                                        Use your Huud point to match the right NeyburH.
+                                    </span>
+                                )}
+                            </div>
+                            {showRetry && onRetry && (
+                                <button
+                                    type="button"
+                                    onClick={onRetry}
+                                    className="text-[9px] font-black uppercase tracking-widest text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-lg hover:bg-brand-blue/20 transition-colors"
+                                >
+                                    Enable Location
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
 
             {/* Address display */}
-            <div className={`
+            {!isSignupLocationMap && (
+                <div className={`
                 flex items-center justify-between p-3 rounded-xl transition-all
                 ${currentLocation ? 'neu-socket ring-1 ring-primary/20' : 'neu-socket'}
             `}>
-                <div className="flex items-center gap-3 overflow-hidden flex-1">
-                    <div className={`w-2 h-2 shrink-0 rounded-full ${currentLocation ? 'bg-primary animate-pulse' : 'bg-charcoal/30'}`}></div>
-                    <div className="flex flex-col overflow-hidden flex-1">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.1em] truncate" style={{ color: 'var(--neu-text)' }}>
-                            {isResolvingAddress ? 'Resolving address...' :
-                                address?.formatted ? address.formatted :
-                                    address ? `${address.lga}, ${address.state}` :
-                                        currentLocation ? `${currentLocation.lat.toFixed(4)}, ${currentLocation.lng.toFixed(4)}` :
-                                            'Waiting for location...'}
-                        </span>
-                        {address?.neighborhood && address.neighborhood !== address.lga && (
-                            <span className="text-[9px] truncate" style={{ color: 'var(--neu-text-muted)' }}>
-                                {address.neighborhood}
+                    <div className="flex items-center gap-3 overflow-hidden flex-1">
+                        <div className={`w-2 h-2 shrink-0 rounded-full ${currentLocation ? 'bg-primary animate-pulse' : 'bg-charcoal/30'}`}></div>
+                        <div className="flex flex-col overflow-hidden flex-1">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.1em] truncate text-[var(--neu-text)]">
+                                {isResolvingAddress ? 'Resolving address...' :
+                                    address?.formatted ? address.formatted :
+                                        address ? `${address.lga}, ${address.state}` :
+                                            currentLocation ? `${currentLocation.lat.toFixed(4)}, ${currentLocation.lng.toFixed(4)}` :
+                                                'Waiting for location...'}
                             </span>
-                        )}
+                            {address?.neighborhood && address.neighborhood !== address.lga && (
+                                <span className="text-[9px] truncate text-[var(--neu-text-muted)]">
+                                    {address.neighborhood}
+                                </span>
+                            )}
+                        </div>
                     </div>
-                </div>
 
-                {/* Coordinates button */}
-                {currentLocation && (
-                    <button
-                        type="button"
-                        onClick={() => {
-                            const url = `https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
-                            window.open(url, '_blank');
-                        }}
-                        className="shrink-0 ml-2 w-8 h-8 rounded-lg neu-btn flex items-center justify-center group"
-                        title="Open in Google Maps"
-                    >
-                        <i className="bi bi-box-arrow-up-right text-xs text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
-                    </button>
-                )}
-            </div>
+                    {/* Coordinates button */}
+                    {currentLocation && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const url = `https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
+                                window.open(url, '_blank');
+                            }}
+                            className="shrink-0 ml-2 w-8 h-8 rounded-lg neu-btn flex items-center justify-center group"
+                            title="Open in Google Maps"
+                        >
+                            <i className="bi bi-box-arrow-up-right text-xs text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Error message */}
-            {error && (
+            {!isSignupLocationMap && error && (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-50 border border-orange-200">
                     <i className="bi bi-exclamation-triangle text-orange-500"></i>
                     <span className="text-[10px] text-orange-600 font-medium">{error}</span>
@@ -218,8 +268,8 @@ export function LocationPicker({
             )}
 
             {/* Instructions when draggable */}
-            {!readOnly && currentLocation && (
-                <p className="text-[9px] text-center" style={{ color: 'var(--neu-text-muted)' }}>
+            {!isSignupLocationMap && !readOnly && currentLocation && (
+                <p className="text-[9px] text-center text-[var(--neu-text-muted)]">
                     Not accurate? Tap on the map or drag the pin to adjust your location.
                 </p>
             )}

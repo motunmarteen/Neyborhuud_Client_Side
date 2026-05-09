@@ -25,14 +25,16 @@ const NIGERIA_SOURCES: NewsSource[] = [
   { id: 'guardian_ng',  name: 'Guardian NG' },
   { id: 'premiumtimes', name: 'Premium Times' },
   { id: 'dailytrust',   name: 'Daily Trust' },
-  { id: 'leadership',   name: 'Leadership' },
+  { id: 'tribune',      name: 'Tribune' },
+  { id: 'sun',          name: 'The Sun' },
 ];
 
 const INTERNATIONAL_SOURCES: NewsSource[] = [
   { id: 'bbc_world',  name: 'BBC World' },
   { id: 'bbc_africa', name: 'BBC Africa' },
   { id: 'aljazeera',  name: 'Al Jazeera' },
-  { id: 'reuters',    name: 'Reuters' },
+  { id: 'skynews',    name: 'Sky News' },
+  { id: 'nytimes',    name: 'NY Times World' },
   { id: 'cnn',        name: 'CNN' },
 ];
 
