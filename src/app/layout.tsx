@@ -14,8 +14,11 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "NeyborHuud - Your NeyborHuud Operating System",
-  description: "Digital infrastructure for the modern African NeyborHuud. Safety, trust, and local prosperity.",
+  title: {
+    default: "NeyborHuud - Your Neighbourhood Operating System",
+    template: "%s | NeyborHuud",
+  },
+  description: "Digital infrastructure for the modern African neighbourhood. Safety, trust, and local prosperity — hyperlocal feed, SOS alerts, marketplace, and more.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -25,14 +28,27 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  openGraph: {
+    type: "website",
+    siteName: "NeyborHuud",
+    title: "NeyborHuud - Your Neighbourhood Operating System",
+    description: "Digital infrastructure for the modern African neighbourhood. Safety, trust, and local prosperity.",
+  },
+  twitter: {
+    card: "summary",
+    title: "NeyborHuud",
+    description: "Digital infrastructure for the modern African neighbourhood.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export const viewport = {
   themeColor: "#11d473",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -43,16 +59,24 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body
         className={`${jakarta.variable} font-display text-[#1A1A2E] transition-colors duration-200`}
         suppressHydrationWarning
       >
         <Providers>
+          <a href="#main-content" className="skip-to-content">
+            Skip to main content
+          </a>
           <TextSizeApplier />
           <DailyCheckInModal />
-          <div className="mx-auto w-full max-w-[1400px] relative">
+          <div id="main-content" className="mx-auto w-full max-w-[1400px] relative">
             {children}
           </div>
         </Providers>

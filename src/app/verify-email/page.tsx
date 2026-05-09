@@ -74,22 +74,15 @@ function VerifyEmailContent() {
     // Verify with code (new OTP-style)
     const verifyWithCode = async (code?: string) => {
         const codeToVerify = code || verificationCode;
-        console.log('🔍 verifyWithCode called:', { codeToVerify, length: codeToVerify.length, email, isVerifying });
         
         if (codeToVerify.length !== 6 || !email || isVerifying) {
-            console.log('⚠️ Verification skipped:', { length: codeToVerify.length, hasEmail: !!email, isVerifying });
             return;
         }
         
-        console.log('✅ Starting verification...');
         setIsVerifying(true);
         setErrorMessage('');
         
         try {
-            // Get current token to send with verification request
-            const currentToken = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
-            console.log('🔑 Current token before verification:', currentToken ? 'Present' : 'Missing');
-            
             const response = await fetchAPI('/auth/verify-email', {
                 method: 'POST',
                 body: JSON.stringify({ 
@@ -97,8 +90,6 @@ function VerifyEmailContent() {
                     code: codeToVerify 
                 })
             });
-
-            console.log('📦 Verification response:', response);
 
             // Store/update authentication tokens if provided
             if (response.data) {
@@ -110,12 +101,6 @@ function VerifyEmailContent() {
                 
                 if (accessToken) {
                     localStorage.setItem('neyborhuud_access_token', accessToken);
-                    console.log('✅ Access token stored after verification');
-                } else if (currentToken) {
-                    // If no new token but we have an old one, keep it
-                    console.log('ℹ️ No new token returned, keeping existing token');
-                } else {
-                    console.warn('⚠️ No token available after verification - user may need to login');
                 }
                 
                 if (d.session?.refresh_token) {
@@ -125,11 +110,6 @@ function VerifyEmailContent() {
                 // Update stored user data with verified status
                 if (d.user) {
                     localStorage.setItem('neyborhuud_user', JSON.stringify(d.user));
-                    console.log('✅ User data updated:', { 
-                        emailVerified: d.user.emailVerified, 
-                        isVerified: d.user.isVerified,
-                        verificationStatus: d.user.verificationStatus
-                    });
                 }
                 
                 if (d.user?.username) {
@@ -137,14 +117,8 @@ function VerifyEmailContent() {
                 }
             }
             
-            // Verify token is still valid by checking stored token
-            const finalToken = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
-            console.log('🔑 Final token after verification:', finalToken ? 'Present' : 'Missing');
-
             setStep('success');
         } catch (error: any) {
-            console.error('Code verification failed:', error);
-            
             if (error.message.includes('expired')) {
                 setErrorMessage('Code expired. Please request a new one.');
             } else if (error.message.includes('invalid') || error.message.includes('incorrect')) {
@@ -179,8 +153,8 @@ function VerifyEmailContent() {
             setResendCooldown(60);
             setVerificationCode('');
         } catch (error: any) {
-            console.error('Failed to resend:', error);
             setErrorMessage('Failed to resend code. Please try again.');
+            void error;
         } finally {
             setIsResending(false);
         }

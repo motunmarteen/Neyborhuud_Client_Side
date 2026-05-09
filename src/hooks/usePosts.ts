@@ -101,21 +101,10 @@ export function useUserPosts(userId: string | null) {
   return useInfiniteQuery({
     queryKey: ["userPosts", userId],
     queryFn: async ({ pageParam = 1 }) => {
-      console.log("🎣 useUserPosts queryFn called:", { userId, pageParam });
-
       if (!userId) {
-        console.error("❌ No userId provided to useUserPosts");
         throw new Error("User ID required");
       }
-
-      try {
-        const result = await contentService.getUserPosts(userId, pageParam, 20);
-        console.log("✅ useUserPosts result:", result);
-        return result;
-      } catch (error) {
-        console.error("❌ useUserPosts error:", error);
-        throw error;
-      }
+      return await contentService.getUserPosts(userId, pageParam, 20);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.pagination?.hasMore

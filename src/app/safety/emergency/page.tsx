@@ -15,6 +15,7 @@ import {
   type DispatchStatus,
 } from '@/services/safety.service';
 import type { IncidentReplay } from '@/types/api';
+import { toast } from 'sonner';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -188,7 +189,7 @@ export default function EmergencyPage() {
       await safetyService.escalateEmergency(emergencyId);
       loadHistory();
     } catch (err: any) {
-      alert(err?.response?.data?.message || 'Escalation failed');
+      toast.error(err?.response?.data?.message || 'Escalation failed');
     } finally {
       setEscalating(null);
     }
@@ -199,7 +200,7 @@ export default function EmergencyPage() {
       await safetyService.resolveEmergency(emergencyId);
       loadHistory();
     } catch (err: any) {
-      alert(err?.response?.data?.message || 'Failed to resolve');
+      toast.error(err?.response?.data?.message || 'Failed to resolve');
     }
   };
 

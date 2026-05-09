@@ -98,7 +98,6 @@ export default function LoginPage() {
                     pickerContext: data?.pickerContext ?? null,
                 });
                 apiClient.setToken(accessToken);
-                console.log('✅ Login successful, tokens stored');
             }
 
             if (getNeedsCommunitySelection()) {

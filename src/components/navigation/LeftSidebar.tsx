@@ -27,12 +27,14 @@ const mainNav = [
 
 const browseTypes = [
   { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi', href: '/fyi' },
-  { icon: 'forum', label: 'Local News', type: 'gossip', href: '/local-news' },
+  { icon: 'newspaper', label: 'Local News', type: 'local-news', href: '/local-news' },
   { icon: 'help', label: 'Help Requests', type: 'help_request', href: '/help-request' },
   { icon: 'work', label: 'Jobs', type: 'job', href: '/jobs' },
   { icon: 'event', label: 'Events', type: 'event', href: '/events' },
   { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace', href: '/marketplace' },
   { icon: 'handyman', label: 'Services', type: 'services', href: '/services' },
+  { icon: 'report', label: 'Incident Reports', type: 'incident', href: '/incident-reports' },
+  { icon: 'add_alert', label: 'Community Alerts', type: 'emergency', href: '/community-emergency' },
 ];
 
 
@@ -102,19 +104,9 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
     }
   }, [resolvedLat, resolvedLng, resolvedLga, resolvedState]);
 
+  // Derive coordinates for the ambient map pin
   const userLat = resolvedLat || fallbackCoords?.lat;
   const userLng = resolvedLng || fallbackCoords?.lng;
-
-  // Debug: log what coordinates we're passing
-  useEffect(() => {
-    console.log('🗺️ Sidebar map coords:', {
-      userLat, userLng,
-      fromUser: { lat: resolvedLat, lng: resolvedLng },
-      fallback: fallbackCoords,
-      location: user?.location,
-      flatFields: { lga: u?.lga, state: u?.state },
-    });
-  }, [userLat, userLng, resolvedLat, resolvedLng, user?.location, fallbackCoords, u?.lga, u?.state]);
 
   return (
     <div className="flex flex-col h-full">

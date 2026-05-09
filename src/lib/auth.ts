@@ -64,7 +64,14 @@ export const authStorage = {
     if (typeof window === "undefined") return null;
     const data =
       localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    try {
+      return JSON.parse(data) as SessionData;
+    } catch {
+      // Corrupted — purge all auth state to avoid a permanent login deadlock
+      this.clearAuthData();
+      return null;
+    }
   },
 
   /**
@@ -74,7 +81,15 @@ export const authStorage = {
     if (typeof window === "undefined") return null;
     const data =
       localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY);
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    try {
+      return JSON.parse(data);
+    } catch {
+      // Corrupted user blob — clear so the app can re-fetch from the server
+      localStorage.removeItem(USER_KEY);
+      sessionStorage.removeItem(USER_KEY);
+      return null;
+    }
   },
 
   /**

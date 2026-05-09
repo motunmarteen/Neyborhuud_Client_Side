@@ -107,11 +107,6 @@ function normalizeFeedResponse<T>(res: any): FeedResponse<T> {
   // Preserve metadata from response
   const meta = res?.meta ?? res?.data?.meta;
 
-  // Log feed type for verification
-  if (meta?.feedType) {
-    console.log(`📊 Feed Type: ${meta.feedType}`);
-  }
-
   return { content, pagination, meta };
 }
 
@@ -205,9 +200,6 @@ export const contentService = {
       const isUnavailable =
         status === 404 || status === 500 || status === 502 || status === 503;
       if (isUnavailable) {
-        console.warn(
-          `⚠️ /feed returned ${status}, falling back to /content/posts for recent posts`,
-        );
         const res = await apiClient.get<any>("/content/posts", {
           params: {
             page: options?.page || 1,
@@ -365,23 +357,16 @@ export const contentService = {
     page = 1,
     limit = 20,
   ): Promise<FeedResponse<Post>> {
-    console.log("🔍 getUserPosts called with:", { userId, page, limit });
-
     try {
       const res = await apiClient.get<any>(`/content/users/${userId}/posts`, {
         params: { page, limit },
       });
 
-      console.log("📦 getUserPosts raw response:", res);
-      console.log("📦 Response data:", res.data);
-      console.log("📦 Posts array:", res.data?.posts);
-      console.log("📦 Pagination:", res.data?.pagination);
-
       // Backend returns: { success, message, data: { posts, pagination, user } }
       const postsData = res.data?.posts || [];
       const paginationData = res.data?.pagination || {};
 
-      const normalized = {
+      return {
         content: postsData.map((item: any) => normalizeFeedItem(item)),
         pagination: {
           total: paginationData.total || 0,
@@ -391,21 +376,9 @@ export const contentService = {
           hasMore: paginationData.hasMore || false,
         },
       };
-
-      console.log("✅ getUserPosts normalized response:", normalized);
-      console.log("📊 Total posts found:", normalized.content.length);
-
-      return normalized;
     } catch (error: any) {
       // If endpoint doesn't exist (404), return empty result
       if (error?.response?.status === 404) {
-        console.warn(
-          "⚠️ User posts endpoint not implemented yet (404). Returning empty result.",
-        );
-        console.warn(
-          "⚠️ Backend needs to implement: GET /content/users/:userId/posts",
-        );
-
         return {
           content: [],
           pagination: {
@@ -537,6 +510,33 @@ export const contentService = {
   async updateHelpRequestAmount(postId: string, amountReceived: number) {
     return await apiClient.patch(`/content/posts/${postId}/amount`, {
       amountReceived,
+    });
+  },
+
+  // ==================== Community Emergency Post ====================
+
+  /**
+   * POST /api/v1/content/emergency
+   * Create a community emergency alert (NOT SOS — this is a community post).
+   */
+  async createEmergencyPost(payload: {
+    title: string;
+    body: string;
+    severity: "low" | "medium" | "critical";
+    emergencyType?: "crime" | "danger" | "missing_person" | "fire" | "accident" | "suspicious_activity";
+    location?: { lat?: number; lng?: number; lga?: string; state?: string; address?: string };
+    mediaUrls?: string[];
+  }) {
+    return await apiClient.post("/content/emergency", payload);
+  },
+
+  /**
+   * GET /api/v1/feed?contentType=emergency
+   * Fetch community emergency posts from the feed (filtered).
+   */
+  async getEmergencyFeed(params?: { page?: number; limit?: number; lga?: string }) {
+    return await apiClient.get("/feed", {
+      params: { contentType: "emergency", ...(params ?? {}) },
     });
   },
 };

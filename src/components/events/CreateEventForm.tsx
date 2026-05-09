@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useCreateEvent } from "@/hooks/useEvents";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { toast } from 'sonner';
 import { CreateEventPayload } from "@/types/api";
 
 const EVENT_TYPES = [
@@ -52,7 +53,7 @@ export default function CreateEventForm() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
-      alert("Image must be under 10 MB");
+      toast.error('Image must be under 10 MB');
       return;
     }
     setCoverFile(file);

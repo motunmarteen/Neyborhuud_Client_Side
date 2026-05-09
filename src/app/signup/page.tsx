@@ -14,6 +14,7 @@ import apiClient from '@/lib/api-client';
 import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValidation';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
+import { toast } from 'sonner';
 
 function SignupPageContent() {
     const router = useRouter();
@@ -88,8 +89,7 @@ function SignupPageContent() {
             setResendCooldown(60); // 60 second cooldown
             setVerificationCode(''); // Clear any entered code
         } catch (error: any) {
-            console.error('Failed to resend verification:', error);
-            alert('Failed to resend verification code. Please try again.');
+            toast.error('Failed to resend verification code. Please try again.');
         } finally {
             setIsResending(false);
         }
@@ -98,21 +98,17 @@ function SignupPageContent() {
     // Handle verification code submission
     const handleVerifyCode = async (code?: string) => {
         const codeToVerify = code || verificationCode;
-        console.log('🔍 handleVerifyCode called:', { codeToVerify, length: codeToVerify.length, isVerifying });
         
         if (codeToVerify.length !== 6 || isVerifying) {
-            console.log('⚠️ Verification skipped:', { length: codeToVerify.length, isVerifying });
             return;
         }
         
-        console.log('✅ Starting verification...');
         setIsVerifying(true);
         setVerificationError(null);
         
         try {
-            // Get current token to send with verification request
+            // Get current token — used to preserve existing auth if no new token returned
             const currentToken = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
-            console.log('🔑 Current token before verification:', currentToken ? 'Present' : 'Missing');
             
             const response = await fetchAPI('/auth/verify-email', {
                 method: 'POST',
@@ -121,8 +117,6 @@ function SignupPageContent() {
                     code: codeToVerify 
                 })
             });
-            
-            console.log('📦 Verification response:', response);
             
             // Store/update authentication tokens if provided
             if (response.data) {
@@ -134,12 +128,6 @@ function SignupPageContent() {
                 
                 if (accessToken) {
                     localStorage.setItem('neyborhuud_access_token', accessToken);
-                    console.log('✅ Access token stored after verification');
-                } else if (currentToken) {
-                    // If no new token but we have an old one, keep it
-                    console.log('ℹ️ No new token returned, keeping existing token');
-                } else {
-                    console.warn('⚠️ No token available after verification - user may need to login');
                 }
                 
                 if (d.session?.refresh_token) {
@@ -164,13 +152,6 @@ function SignupPageContent() {
                 });
                 const tok = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
                 if (tok) apiClient.setToken(tok);
-                if (vd.user) {
-                    console.log('✅ User data updated:', {
-                        emailVerified: (vd.user as { emailVerified?: boolean }).emailVerified,
-                        isVerified: (vd.user as { isVerified?: boolean }).isVerified,
-                        verificationStatus: (vd.user as { verificationStatus?: string }).verificationStatus,
-                    });
-                }
                 if (vd.needsCommunitySelection) {
                     router.push('/pick-community');
                     return;
@@ -181,14 +162,8 @@ function SignupPageContent() {
                 }
             }
             
-            // Verify token is still valid by checking stored token
-            const finalToken = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
-            console.log('🔑 Final token after verification:', finalToken ? 'Present' : 'Missing');
-            
-            console.log('✅ Email verified successfully');
             setStep('success');
         } catch (error: any) {
-            console.error('Verification failed:', error);
             
             // Provide helpful error messages
             if (error.message.includes('expired')) {
@@ -215,23 +190,13 @@ function SignupPageContent() {
         if (loc) {
             setLocation({ lat: loc.lat, lng: loc.lng });
             setGpsAccuracy(loc.accuracy);
-            console.log('🌍 === LOCATION DIAGNOSTIC START ===');
-            console.log('🌍 Raw GPS Coordinates:', {
-                lat: loc.lat,
-                lng: loc.lng,
-                accuracy: loc.accuracy
-            });
-            console.log('🌍 Google Maps Link:', `https://www.google.com/maps?q=${loc.lat},${loc.lng}`);
 
             // Use reverse geocoding with fallback support
             const address = await reverseGeocode(loc.lat, loc.lng);
 
             if (address) {
-                console.log('✅ Location resolved:', address.formatted || `${address.lga}, ${address.state}`);
-                console.log('📍 Source:', address.source);
                 setResolvedAddress(address);
             } else {
-                console.warn('🌍 Geocoding failed, showing coordinates only');
                 setResolvedAddress({
                     lga: 'Location Detected',
                     state: 'GPS Locked',
@@ -240,7 +205,6 @@ function SignupPageContent() {
                 setLocError('Could not resolve address - coordinates captured');
             }
 
-            console.log('🌍 === LOCATION DIAGNOSTIC END ===');
             setIsResolving(false);
 
         } else {
@@ -280,7 +244,7 @@ function SignupPageContent() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!isPassValid) return;
+        if (!isPassValid || loading) return;
         setLoading(true);
 
         try {
@@ -372,9 +336,8 @@ function SignupPageContent() {
             }
 
             // Debug: Log payload to verify no communityId fields
-            console.log('🔍 Registration Payload (sanitized):', JSON.stringify(sanitizedPayload, null, 2));
             if (sanitizedPayload.assignedCommunityId || sanitizedPayload.communityId) {
-                console.error('❌ ERROR: assignedCommunityId or communityId still present after sanitization!');
+                // Invalid state — sanitization should have removed these fields
             }
 
             const response = await fetchAPI('/auth/create-account', {
@@ -395,9 +358,6 @@ function SignupPageContent() {
                 if (accessToken) {
                     localStorage.setItem('neyborhuud_access_token', accessToken);
                     apiClient.setToken(accessToken);
-                    console.log('✅ Authentication tokens stored successfully');
-                } else {
-                    console.warn('⚠️ Create-account succeeded but no token received. Check backend response shape.');
                 }
 
                 const ext = d as {
@@ -420,9 +380,6 @@ function SignupPageContent() {
             setStep('verify-email');
             setResendCooldown(60); // Start with cooldown
         } catch (error: any) {
-            console.error("DIAGNOSTIC LOG:", error);
-            console.error("Full error object:", error);
-            
             // Provide more helpful error messages
             let friendlyMsg = error.message;
             if (error.message.includes('Failed to create user')) {
@@ -435,7 +392,7 @@ function SignupPageContent() {
                 friendlyMsg = "Could not reach the server. Please check your connection and try again.";
             }
             
-            alert(`⚠️ Registration Error: ${friendlyMsg}`);
+            toast.error(`Registration Error: ${friendlyMsg}`);
         } finally {
             setLoading(false);
         }

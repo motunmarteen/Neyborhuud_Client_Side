@@ -118,10 +118,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       });
 
-      socketService.on('post-update', (post) => {
+      socketService.on('post-update', (post: unknown) => {
         // Invalidate posts query
         queryClient.invalidateQueries({ queryKey: ['posts'] });
-        queryClient.invalidateQueries({ queryKey: ['post', post.id] });
+        const id = (post as { id?: string })?.id;
+        if (id) queryClient.invalidateQueries({ queryKey: ['post', id] });
       });
 
       // Emergency alert real-time listener
@@ -216,6 +217,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
       });
 
       return () => {
+        socketService.off('new-notification');
+        socketService.off('new-message');
+        socketService.off('post-update');
+        socketService.off('safety:emergency_post');
+        socketService.off('safety:emergency_cancelled');
+        socketService.off('safety:awareness_update');
+        socketService.off('safety:nearby_update');
+        socketService.off('safety:safe_update');
+        socketService.off('content:verification_update');
+        socketService.off('message:new');
+        socketService.off('message:priority');
+        socketService.off('message:delivered');
+        socketService.off('message:read');
+        socketService.off('key:rotated');
+        socketService.off('key:verified');
         socketService.disconnect();
       };
     }

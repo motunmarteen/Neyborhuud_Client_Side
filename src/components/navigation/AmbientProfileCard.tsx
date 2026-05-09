@@ -211,7 +211,6 @@ export default function AmbientProfileCard({
 
   // Initialize Leaflet map
   useEffect(() => {
-    console.log('🗺️ Map init check:', { mounted, lat, lng, hasContainer: !!mapContainerRef.current });
     if (!mounted || !lat || !lng || !mapContainerRef.current) return;
     // Prevent double-init
     if (mapInstanceRef.current) {
@@ -224,11 +223,8 @@ export default function AmbientProfileCard({
 
     import('leaflet').then((Leaflet) => {
       if (!mapContainerRef.current) {
-        console.log('🗺️ Map container gone after import');
         return;
       }
-      console.log('🗺️ Leaflet loaded, container size:', 
-        mapContainerRef.current.offsetWidth, 'x', mapContainerRef.current.offsetHeight);
 
       // Fix default marker icons (webpack/next breaks the asset paths)
       delete (Leaflet.Icon.Default.prototype as unknown as Record<string, unknown>)['_getIconUrl'];
@@ -285,20 +281,14 @@ export default function AmbientProfileCard({
 
   // Fetch hero stats (NeyburH Score + HuudCoins)
   useEffect(() => {
-    console.log('🎯 Hero stats fetch check:', { userId, hasUser: !!userId });
     if (!userId) return;
     let cancelled = false;
     import('@/services/gamification.service').then(({ gamificationService }) => {
-      console.log('🎯 Fetching hero stats for user:', userId);
       gamificationService.getHeroStats().then((res) => {
-        console.log('🎯 Hero stats response:', res);
         if (!cancelled && res.data) {
-          console.log('🎯 Setting hero stats:', res.data);
           setHeroStats(res.data);
         }
-      }).catch((err) => {
-        console.error('🎯 Hero stats fetch failed:', err);
-        // Use zero values if API fails or user has no stats
+      }).catch(() => {
         if (!cancelled) {
           setHeroStats({ trustScore: 0, totalHuudCoins: 0 });
         }

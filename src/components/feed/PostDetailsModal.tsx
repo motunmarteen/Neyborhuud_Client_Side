@@ -11,6 +11,7 @@ import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import { contentService } from '@/services/content.service';
 import { fyiService } from '@/services/fyi.service';
 import { formatTimeAgo } from '@/utils/timeAgo';
+import { toast } from 'sonner';
 
 interface PostDetailsModalProps {
     postId: string | null;
@@ -259,7 +260,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                     queryClient.invalidateQueries({ queryKey: ['post', postId] });
                                                     queryClient.invalidateQueries({ queryKey: ['posts'] });
                                                 } catch (err) {
-                                                    window.alert('Failed to update status. Please try again.');
+                                                    toast.error('Failed to update status. Please try again.');
                                                 } finally {
                                                     setStatusUpdating(false);
                                                 }
@@ -316,9 +317,9 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                     );
                                                     queryClient.invalidateQueries({ queryKey: ['post', postId] });
                                                     queryClient.invalidateQueries({ queryKey: ['posts'] });
-                                                    window.alert('Endorsement submitted successfully!');
+                                                    toast.success('Endorsement submitted successfully!');
                                                 } catch {
-                                                    window.alert('Failed to submit endorsement. Please try again.');
+                                                    toast.error('Failed to submit endorsement. Please try again.');
                                                 }
                                             }}
                                         >
@@ -349,7 +350,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                                 await fyiService.rsvpToBulletin(details.content.id, rsvpStatus);
                                                                 queryClient.invalidateQueries({ queryKey: ['post', postId] });
                                                             } catch {
-                                                                window.alert('Failed to RSVP. Please try again.');
+                                                                toast.error('Failed to RSVP. Please try again.');
                                                             } finally {
                                                                 setRsvpLoading(false);
                                                             }
@@ -374,9 +375,9 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                     try {
                                                         await fyiService.confirmReceipt(details.content.id);
                                                         queryClient.invalidateQueries({ queryKey: ['post', postId] });
-                                                        window.alert('Receipt confirmed. Stay safe!');
+                                                        toast.success('Receipt confirmed. Stay safe!');
                                                     } catch {
-                                                        window.alert('Failed to confirm receipt.');
+                                                        toast.error('Failed to confirm receipt.');
                                                     } finally {
                                                         setReceiptLoading(false);
                                                     }
@@ -407,7 +408,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                         queryClient.invalidateQueries({ queryKey: ['post', postId] });
                                                         queryClient.invalidateQueries({ queryKey: ['posts'] });
                                                     } catch {
-                                                        window.alert('Failed to update pin status.');
+                                                        toast.error('Failed to update pin status.');
                                                     } finally {
                                                         setPinLoading(false);
                                                     }

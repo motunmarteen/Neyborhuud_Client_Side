@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Download, Loader } from 'lucide-react';
 import { API_BASE_URL } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface MediaDownloadButtonProps {
   mediaUrl: string;
@@ -87,8 +88,7 @@ export default function MediaDownloadButton({
       link.remove();
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error('Media download error:', error);
-      alert('Failed to download media. Please try again.');
+      toast.error('Failed to download media. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -158,8 +158,7 @@ export function MediaDownloadIcon({
       link.remove();
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error('Media download error:', error);
-      alert('Failed to download media. Please try again.');
+      toast.error('Failed to download media. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -169,7 +168,6 @@ export function MediaDownloadIcon({
     <button
       onClick={handleDownload}
       disabled={loading}
-      className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-all z-10"
       title="Download"
     >
       {loading ? (

@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { ChatMessage, ChatMessageMeta, ChatMessageType } from '@/types/api';
 import VoiceRecorder from './VoiceRecorder';
 
@@ -423,7 +424,7 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
     // Frontend strict MIME validation
     const allowed = ALLOWED_MIME[pendingMediaKey];
     if (!allowed.includes(file.type)) {
-      alert(`Invalid file type: ${file.type || 'unknown'}.\nAllowed: ${allowed.join(', ')}`);
+      toast.error(`Invalid file type: ${file.type || 'unknown'}. Allowed: ${allowed.join(', ')}`);
       return;
     }
 

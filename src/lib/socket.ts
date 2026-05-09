@@ -8,6 +8,8 @@ import apiClient from "./api-client";
 
 class SocketService {
   private socket: Socket | null = null;
+  /** The userId last passed to authenticate(); re-sent on every reconnect. */
+  private authenticatedUserId: string | null = null;
 
   /**
    * Initialize socket connection
@@ -43,22 +45,43 @@ class SocketService {
    */
   private setupEventListeners() {
     if (!this.socket) return;
+    // Remove any stale listeners before (re-)registering to prevent duplication
+    this.socket.removeAllListeners("connect");
+    this.socket.removeAllListeners("disconnect");
+    this.socket.removeAllListeners("connect_error");
+    this.socket.removeAllListeners("error");
 
     this.socket.on("connect", () => {
-      console.log("Socket connected");
+      // Re-authenticate automatically after every reconnect so the server-side
+      // userId→socketId map stays accurate for private room routing.
+      if (this.authenticatedUserId) {
+        this.socket!.emit("authenticate", this.authenticatedUserId);
+      }
     });
 
-    this.socket.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
+    this.socket.on("disconnect", (_reason) => {
+      // Disconnected — reconnection handled by socket.io's built-in reconnection
     });
 
-    this.socket.on("connect_error", (error) => {
-      console.warn("Socket reconnecting...", error.message);
+    this.socket.on("connect_error", (_error) => {
+      // Connection error — socket.io will retry automatically
     });
 
-    this.socket.on("error", (error) => {
-      console.warn("Socket error:", error);
+    this.socket.on("error", (_error) => {
+      // Socket-level error
     });
+  }
+
+  /**
+   * Authenticate with the server.
+   * Call this once after connecting (e.g. after login).
+   * The userId is cached so it can be re-sent on every subsequent reconnect.
+   */
+  authenticate(userId: string): void {
+    this.authenticatedUserId = userId;
+    if (this.socket?.connected) {
+      this.socket.emit("authenticate", userId);
+    }
   }
 
   /**
@@ -69,6 +92,7 @@ class SocketService {
       this.socket.disconnect();
       this.socket = null;
     }
+    this.authenticatedUserId = null;
   }
 
   /**
@@ -81,25 +105,25 @@ class SocketService {
   /**
    * Listen to an event
    */
-  on(event: string, callback: (...args: any[]) => void) {
+  on<T = unknown>(event: string, callback: (data: T) => void): void {
     if (this.socket) {
-      this.socket.on(event, callback);
+      this.socket.on(event, callback as (...args: unknown[]) => void);
     }
   }
 
   /**
    * Remove event listener
    */
-  off(event: string, callback?: (...args: any[]) => void) {
+  off<T = unknown>(event: string, callback?: (data: T) => void): void {
     if (this.socket) {
-      this.socket.off(event, callback);
+      this.socket.off(event, callback as ((...args: unknown[]) => void) | undefined);
     }
   }
 
   /**
    * Emit an event
    */
-  emit(event: string, ...args: any[]) {
+  emit(event: string, ...args: unknown[]): void {
     if (this.socket) {
       this.socket.emit(event, ...args);
     }

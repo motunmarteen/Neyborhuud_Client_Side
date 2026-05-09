@@ -346,29 +346,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
             // Show success state briefly, then close (handled by useEffect)
             setShowSuccess(true);
         } catch (error: any) {
-            console.error('❌ Create Post Error:', error);
-            
-            // Additional diagnostic info
-            if (error.response?.status === 404) {
-                console.error('📋 Backend Diagnostic Info:');
-                console.error('   Endpoint: POST /api/v1/content/posts');
-                console.error('   Request Type:', selectedFiles.length > 0 ? 'multipart/form-data (with images)' : 'application/json (text only)');
-                console.error('   Payload:', {
-                    type: postType === 'image' && selectedFiles.length > 0 ? 'image' : 'text',
-                    contentLength: content.trim().length,
-                    hasMedia: selectedFiles.length > 0,
-                    mediaCount: selectedFiles.length,
-                    visibility,
-                    tagsCount: extractedTags.length,
-                    hasLocation: true, // We always try to get location
-                });
-                console.error('   Backend should have:');
-                console.error('   - Route: POST /api/v1/content/posts');
-                console.error('   - Multer middleware for multipart requests');
-                console.error('   - Handler that accepts both JSON and FormData');
-            }
-            
             // Error is handled by handleApiError in the hook
+            void error; // consume so linter doesn't flag unused variable
         } finally {
             setIsSubmitting(false);
         }

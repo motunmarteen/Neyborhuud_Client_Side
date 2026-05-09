@@ -41,20 +41,7 @@ class ApiClient {
         const errorData = error.response?.data;
         const errorMessage = errorData?.message || errorData?.error || '';
         
-        // Log detailed error info before handling
-        // Only log detailed auth errors for actual authorization issues (401, 403)
-        // Don't spam console for expected errors like 409 (already following)
-        if (status === 401 || status === 403) {
-          console.group('🔐 Authorization Error');
-          console.error('Status:', status);
-          console.error('URL:', error.config?.url);
-          console.error('Method:', error.config?.method);
-          console.error('Error Message:', errorMessage);
-          console.error('Error Data:', errorData);
-          console.error('Has Token:', !!this.getToken());
-          console.error('Token Preview:', this.getToken() ? `${this.getToken()?.substring(0, 20)}...` : 'None');
-          console.groupEnd();
-        }
+
 
         if (status === 401) {
           const errorMessageLower = (errorMessage || '').toLowerCase();
@@ -96,12 +83,6 @@ class ApiClient {
             genericAuthFailure;
 
           if (shouldForceLogout) {
-            // Token is actually invalid/expired OR user has no token - logout
-            console.error('❌ Token invalid or expired. Logging out...');
-            console.error('   - Has token:', hasToken);
-            console.error('   - Is token expired:', isTokenExpiredError);
-            console.error('   - Is token invalid:', isTokenInvalidError);
-            console.error('   - Error message:', errorMessage);
             this.clearToken();
             
             // Delay redirect to allow error message to show
@@ -111,13 +92,6 @@ class ApiClient {
               }, 2000); // 2 second delay
             }
           } else {
-            // User has token but got 401 - likely a permissions/authorization issue
-            // or backend validation issue (e.g., "user not active")
-            // Don't logout - let the error handler show the message
-            console.warn('⚠️ User has token but received 401. This might be a backend permissions or validation issue.');
-            console.warn('   - Has token:', hasToken);
-            console.warn('   - Error message:', errorMessage);
-            console.warn('   - NOT logging out - staying on page');
             return Promise.reject(error);
           }
         }
@@ -191,77 +165,8 @@ class ApiClient {
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<ApiResponse<T>> {
-    const fullUrl = `${this.client.defaults.baseURL}${url}`;
-    
-    // Log request details for debugging
-    console.group('📤 POST Request');
-    console.log('URL:', fullUrl);
-    console.log('Method: POST');
-    console.log('Headers:', {
-      'Content-Type': 'application/json', // Axios default for POST; overridden by config if set
-      ...this.client.defaults.headers.common,
-      ...config?.headers,
-    });
-    
-    // Log body (but not if it's FormData - too large)
-    if (data instanceof FormData) {
-      console.log('Body: FormData (multipart)');
-      // Log FormData entries
-      const entries: Record<string, any> = {};
-      data.forEach((value, key) => {
-        if (value instanceof File) {
-          entries[key] = `File: ${value.name} (${value.size} bytes, ${value.type})`;
-        } else {
-          entries[key] = value;
-        }
-      });
-      console.log('FormData entries:', entries);
-    } else {
-      console.log('Body:', data);
-    }
-    console.groupEnd();
-
-    try {
-      const response = await this.client.post<ApiResponse<T>>(url, data, config);
-      
-      console.group('✅ POST Response');
-      console.log('URL:', fullUrl);
-      console.log('Status:', response.status);
-      console.log('Data:', response.data);
-      console.groupEnd();
-      
-      return response.data;
-    } catch (error: any) {
-      // Enhanced error logging
-      console.group('❌ POST Error');
-      console.error('URL:', fullUrl);
-      console.error('Method: POST');
-      console.error('Status:', error.response?.status || 'No response');
-      console.error('Status Text:', error.response?.statusText || 'N/A');
-      console.error('Response Data:', error.response?.data || 'No response data');
-      console.error('Request Config:', {
-        url: fullUrl,
-        method: 'POST',
-        headers: {
-          ...this.client.defaults.headers.common,
-          ...config?.headers,
-        },
-        data: data instanceof FormData ? 'FormData (see above)' : data,
-      });
-      
-      // Check if it's a 404
-      if (error.response?.status === 404) {
-        console.error('🔍 404 DIAGNOSTIC:');
-        console.error('   - Endpoint not found on backend');
-        console.error('   - Check if route is registered: POST /api/v1/content/posts');
-        console.error('   - Check if route path matches exactly');
-        console.error('   - Check backend server logs for routing errors');
-        console.error('   - Verify baseURL is correct:', this.client.defaults.baseURL);
-      }
-      
-      console.groupEnd();
-      throw error;
-    }
+    const response = await this.client.post<ApiResponse<T>>(url, data, config);
+    return response.data;
   }
 
   /**
@@ -402,81 +307,18 @@ class ApiClient {
       });
     }
 
-    const fullUrl = `${this.client.defaults.baseURL}${url}`;
-    
-    // Log upload request details
-    console.group('📤 UPLOAD Request');
-    console.log('URL:', fullUrl);
-    console.log('Method: POST (multipart/form-data)');
-    console.log('Files:', files.map(f => ({
-      name: f.name,
-      size: f.size,
-      type: f.type,
-    })));
-    console.log('Additional Data:', additionalData);
-    
-    // Log FormData entries
-    const entries: Record<string, any> = {};
-    formData.forEach((value, key) => {
-      if (value instanceof File) {
-        entries[key] = `File: ${value.name} (${value.size} bytes)`;
-      } else {
-        entries[key] = value;
-      }
+    const response = await this.client.post<ApiResponse<T>>(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = (progressEvent.loaded / progressEvent.total) * 100;
+          onProgress(Math.round(progress));
+        }
+      },
     });
-    console.log('FormData entries:', entries);
-    console.groupEnd();
-
-    try {
-      const response = await this.client.post<ApiResponse<T>>(url, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (progressEvent) => {
-          if (onProgress && progressEvent.total) {
-            const progress = (progressEvent.loaded / progressEvent.total) * 100;
-            onProgress(Math.round(progress));
-          }
-        },
-      });
-      
-      console.group('✅ UPLOAD Response');
-      console.log('URL:', fullUrl);
-      console.log('Status:', response.status);
-      console.log('Data:', response.data);
-      console.groupEnd();
-      
-      return response.data;
-    } catch (error: any) {
-      // Enhanced error logging for uploads
-      console.group('❌ UPLOAD Error');
-      console.error('URL:', fullUrl);
-      console.error('Method: POST (multipart/form-data)');
-      console.error('Status:', error.response?.status || 'No response');
-      console.error('Status Text:', error.response?.statusText || 'N/A');
-      console.error('Response Data:', error.response?.data || 'No response data');
-      console.error('Files Count:', files.length);
-      console.error('Files:', files.map(f => ({
-        name: f.name,
-        size: f.size,
-        type: f.type,
-      })));
-      console.error('Additional Data:', additionalData);
-      
-      // Check if it's a 404
-      if (error.response?.status === 404) {
-        console.error('🔍 404 DIAGNOSTIC:');
-        console.error('   - Endpoint not found on backend');
-        console.error('   - Check if route is registered: POST /api/v1/content/posts');
-        console.error('   - Check if multer middleware is configured');
-        console.error('   - Check if route path matches exactly');
-        console.error('   - Verify baseURL is correct:', this.client.defaults.baseURL);
-        console.error('   - Backend should accept multipart/form-data');
-      }
-      
-      console.groupEnd();
-      throw error;
-    }
+    return response.data;
   }
 }
 

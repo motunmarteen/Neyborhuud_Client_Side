@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { GlobalSearch } from '@/components/GlobalSearch';
+import { useUnreadCount } from '@/hooks/useNotifications';
 
 export default function TopNav() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -12,6 +13,7 @@ export default function TopNav() {
   const isOnProfile = pathname?.startsWith('/profile/');
   const isTransparent = isOnFeed || isOnProfile;
   const navTone = isOnFeed ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]' : isOnProfile ? 'text-primary' : 'text-charcoal';
+  const { data: unreadCount = 0 } = useUnreadCount();
 
   return (
     <header
@@ -60,9 +62,19 @@ export default function TopNav() {
         <Link
           href="/notifications"
           className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors relative ${navTone}`}
+          aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
         >
           <span className="material-symbols-outlined text-[26px]">notifications</span>
-          <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full"></div>
+          {unreadCount > 0 && (
+            <div
+              className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-primary rounded-full flex items-center justify-center"
+              aria-hidden="true"
+            >
+              <span className="text-[9px] font-black text-white leading-none px-0.5">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            </div>
+          )}
         </Link>
       </div>
 

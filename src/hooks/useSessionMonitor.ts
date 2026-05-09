@@ -73,12 +73,10 @@ export function useSessionMonitor(options: UseSessionMonitorOptions = {}) {
     try {
       const success = await authService.touchSession();
       if (success) {
-        console.log("✅ Proactive session refresh successful");
         onSessionRefreshed?.();
       }
       return success;
     } catch (error) {
-      console.error("Proactive session refresh failed:", error);
       return false;
     } finally {
       setIsRefreshing(false);
@@ -90,17 +88,12 @@ export function useSessionMonitor(options: UseSessionMonitorOptions = {}) {
 
     // Check if session is expired
     if (authStorage.isSessionExpired()) {
-      console.log("⚠️ Session expired, logging out...");
       handleSessionExpired();
       return;
     }
 
     // Proactive refresh if enabled and token needs refresh
     if (enableProactiveRefresh && authStorage.shouldRefreshToken()) {
-      const hoursRemaining = authStorage.getHoursUntilExpiry();
-      console.log(
-        `🔄 Token expiring soon (${hoursRemaining.toFixed(1)} hours remaining), attempting refresh...`,
-      );
       await refreshSession();
     }
   }, [

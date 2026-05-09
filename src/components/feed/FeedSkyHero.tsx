@@ -534,13 +534,12 @@ export function FeedSkyHero() {
 
                 // Use backend city name if Nominatim failed
                 const city = cityName !== 'Your Area' ? cityName : (w.location?.name || cityName);
-                console.log(`[Weather] Backend: ${condition} (OWM id=${owmId} → WMO=${wmoCode}, rain=${w.isRaining}), ${w.temperature?.current}°C, city=${city}`);
                 setWeather({ temp: w.temperature?.current ?? 28, condition, city, wmoCode });
                 return;
               }
             }
           } catch {
-            console.log('[Weather] Backend unavailable, falling back to Open-Meteo');
+            // Backend unavailable — fall through to Open-Meteo
           }
         }
 
@@ -570,13 +569,11 @@ export function FeedSkyHero() {
           const ukmoRain = (ukmoCur?.rain ?? 0) + (ukmoCur?.showers ?? 0) + (ukmoCur?.precipitation ?? 0);
           if (ukmoCode >= 50 && code < 50) {
             code = ukmoCode;
-            console.log(`[Weather] UKMO model override: code ${ukmoCode} (rain from UKMO, default said ${defaultCur.weather_code})`);
           }
 
           // Correct WMO code if rain/showers fields disagree with weather_code
           if ((rain > 0 || showers > 0 || ukmoRain > 0) && code < 50) {
             code = showers > 0 ? 80 : 61;
-            console.log(`[Weather] Open-Meteo code corrected: rain=${rain}, showers=${showers}, ukmoRain=${ukmoRain} → code=${code}`);
           }
 
           setWeather({ temp, condition: interpretWeatherCode(code), city: cityName, wmoCode: code });
@@ -691,7 +688,6 @@ export function FeedSkyHero() {
           });
 
           if (parsed.some((p) => p.rate > 0)) {
-            console.log('[ExchangeRates]', parsed.map(p => `${p.currency}=${p.rate}`).join(', '));
             setRates(parsed);
             setRatesLoading(false);
             return;

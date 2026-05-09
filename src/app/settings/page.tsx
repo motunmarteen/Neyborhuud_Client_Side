@@ -129,23 +129,33 @@ export default function SettingsPage() {
     const SIZE_CLASS: Record<string, string> = { small: 'text-size-sm', medium: '', large: 'text-size-lg' };
     const applyTextSize = (size: 'small' | 'medium' | 'large') => {
         setTextSize(size);
-        document.body.classList.remove('text-size-sm', 'text-size-lg');
-        const cls = SIZE_CLASS[size];
-        if (cls) document.body.classList.add(cls);
+        if (typeof document !== 'undefined') {
+            document.body.classList.remove('text-size-sm', 'text-size-lg');
+            const cls = SIZE_CLASS[size];
+            if (cls) document.body.classList.add(cls);
+        }
         fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ accessibility: { textSize: size } }) }).catch(() => {});
-        const stored = localStorage.getItem('neyborhuud_user');
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), textSize: size } } }));
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('neyborhuud_user');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), textSize: size } } }));
+                } catch { /* ignore corrupt data */ }
+            }
         }
     };
     const applyLiteMode = (enabled: boolean) => {
         setLiteMode(enabled);
         fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ accessibility: { liteMode: enabled } }) }).catch(() => {});
-        const stored = localStorage.getItem('neyborhuud_user');
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), liteMode: enabled } } }));
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('neyborhuud_user');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), liteMode: enabled } } }));
+                } catch { /* ignore corrupt data */ }
+            }
         }
     };
 
@@ -156,13 +166,22 @@ export default function SettingsPage() {
         notifSaveTimer.current = setTimeout(async () => {
             try {
                 await fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ notifications: updated }) });
-                const stored = localStorage.getItem('neyborhuud_user');
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, notifications: updated } }));
+                if (typeof window !== 'undefined') {
+                    const stored = localStorage.getItem('neyborhuud_user');
+                    if (stored) {
+                        try {
+                            const parsed = JSON.parse(stored);
+                            localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, notifications: updated } }));
+                        } catch { /* ignore corrupt data */ }
+                    }
                 }
             } catch { /* silent */ }
         }, 500);
+    }, []);
+
+    // Clear debounced timer on unmount to prevent stale state updates
+    useEffect(() => () => {
+        if (notifSaveTimer.current) clearTimeout(notifSaveTimer.current);
     }, []);
 
     // Load user data from localStorage
@@ -217,7 +236,6 @@ export default function SettingsPage() {
                 setConsentRows(res.data.consents);
             }
         } catch (e: unknown) {
-            console.error(e);
             toast.error('Could not load consent settings.');
         } finally {
             setConsentsLoading(false);
@@ -287,7 +305,6 @@ export default function SettingsPage() {
                 setAccessLogEntries(res.data.accessHistory);
             }
         } catch (e: unknown) {
-            console.error(e);
             toast.error('Could not load access history.');
         } finally {
             setAccessLogLoading(false);
@@ -374,15 +391,14 @@ export default function SettingsPage() {
             });
             
             // Update local storage
-            if (user) {
+            if (user && typeof window !== 'undefined') {
                 const updated = { ...user, settings: { ...user.settings, notifications } };
                 localStorage.setItem('neyborhuud_user', JSON.stringify(updated));
             }
             
-            alert('Notification settings saved!');
+            toast.success('Notification settings saved.');
         } catch (error: any) {
-            console.error('Failed to save notifications:', error);
-            alert('Failed to save settings. Please try again.');
+            toast.error('Failed to save settings. Please try again.');
         } finally {
             setSaving(false);
         }
@@ -398,7 +414,6 @@ export default function SettingsPage() {
             setEmergencyServicesEnabled(newValue);
             toast.success(newValue ? 'Emergency services contact enabled.' : 'Emergency services contact disabled.');
         } catch (err: any) {
-            console.error('Failed to save safety settings:', err);
             toast.error('Could not save safety settings. Please try again.');
         } finally {
             setSavingSafety(false);
@@ -414,15 +429,14 @@ export default function SettingsPage() {
             });
             
             // Update local storage
-            if (user) {
+            if (user && typeof window !== 'undefined') {
                 const updated = { ...user, settings: { ...user.settings, privacy } };
                 localStorage.setItem('neyborhuud_user', JSON.stringify(updated));
             }
             
-            alert('Privacy settings saved!');
+            toast.success('Privacy settings saved.');
         } catch (error: any) {
-            console.error('Failed to save privacy:', error);
-            alert('Failed to save settings. Please try again.');
+            toast.error('Failed to save settings. Please try again.');
         } finally {
             setSaving(false);
         }
@@ -437,10 +451,9 @@ export default function SettingsPage() {
                 method: 'POST'
             });
             setResendCooldown(60);
-            alert('Verification email sent! Check your inbox.');
+            toast.success('Verification email sent! Check your inbox.');
         } catch (error: any) {
-            console.error('Failed to resend verification:', error);
-            alert('Failed to send verification email.');
+            toast.error('Failed to send verification email.');
         } finally {
             setResendingVerification(false);
         }

@@ -47,22 +47,15 @@ export function handleApiError(error: unknown): ErrorResponse | null {
                                       errorMessage401.toLowerCase().includes('malformed'));
           
           if (isTokenInvalidError) {
-            // Token is invalid/expired
             toast.error("Authentication required", {
               description: "Your session has expired. Please log in again.",
               duration: 3000,
             });
           } else {
-            // User is logged in but not authorized for this action (permissions issue)
             toast.error("Access Denied", {
-              description: errorMessage401 || "You don't have permission to access this resource. This might be a backend configuration issue.",
+              description: errorMessage401 || "You don't have permission to access this resource.",
               duration: 6000,
             });
-            console.error('🔍 Backend Authorization Issue:');
-            console.error('   - User has valid token but backend rejected request with 401');
-            console.error('   - This should typically be a 403 (Forbidden), not 401 (Unauthorized)');
-            console.error('   - Check backend route permissions/middleware');
-            console.error('   - Error:', errorMessage401);
           }
           break;
         case 403:
@@ -83,22 +76,9 @@ export function handleApiError(error: unknown): ErrorResponse | null {
           }
           break;
         case 404:
-          const requestUrl = error.config?.url || 'unknown';
-          const requestMethod = error.config?.method?.toUpperCase() || 'GET';
-          console.error('🔍 404 Error Details for Backend:');
-          console.error('   Request URL:', error.config?.baseURL + requestUrl);
-          console.error('   Request Method:', requestMethod);
-          console.error('   Expected Endpoint:', requestUrl);
-          console.error('   Full Request Config:', {
-            url: error.config?.url,
-            method: error.config?.method,
-            baseURL: error.config?.baseURL,
-            headers: error.config?.headers,
-          });
-          
-          toast.error("Endpoint Not Found (404)", {
-            description: `${requestMethod} ${requestUrl} - Check backend route registration`,
-            duration: 5000,
+          toast.error("Resource not found", {
+            description: "The requested resource could not be found.",
+            duration: 4000,
           });
           break;
         case 429:
@@ -127,7 +107,6 @@ export function handleApiError(error: unknown): ErrorResponse | null {
   }
 
   // Unknown error
-  console.error("Unhandled error:", error);
   toast.error("An unexpected error occurred");
   return null;
 }

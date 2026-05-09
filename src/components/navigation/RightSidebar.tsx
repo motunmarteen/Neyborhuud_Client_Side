@@ -8,42 +8,23 @@
 
 import Link from 'next/link';
 import SidebarWeatherWidget from './SidebarWeatherWidget';
-
-interface TrendingItem {
-    category: string;
-    topic: string;
-}
-
-interface MarketplaceItem {
-    title: string;
-    price: string;
-    isFree?: boolean;
-    image: string;
-}
-
-interface EventItem {
-    month: string;
-    day: string;
-    title: string;
-    details: string;
-    attendees: number;
-}
+import { useEvents } from '@/hooks/useEvents';
+import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 
 export default function RightSidebar() {
-    // Placeholder data - in production from API
-    const events: EventItem[] = [
-        { month: 'Oct', day: '24', title: 'Block Party & BBQ', details: 'Sat, 2:00 PM • Central Park', attendees: 14 },
-    ];
+    const { data: eventsData, isLoading: eventsLoading } = useEvents({ status: 'upcoming' });
+    const events = (eventsData?.pages?.[0] as any)?.data?.content
+        ?? (eventsData?.pages?.[0] as any)?.data?.events
+        ?? (eventsData?.pages?.[0] as any)?.data?.data
+        ?? [];
+    const upcomingEvents = Array.isArray(events) ? events.slice(0, 3) : [];
 
-    const marketplaceItems: MarketplaceItem[] = [
-        { title: 'Vintage Chair', price: '$45', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&h=200&fit=crop' },
-        { title: 'Moving Boxes', price: 'Free', isFree: true, image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&h=200&fit=crop' },
-    ];
-
-    const trending: TrendingItem[] = [
-        { category: 'Local Business', topic: '#NewCoffeeShop' },
-        { category: 'Safety', topic: '#SchoolZoneSpeed' },
-    ];
+    const { data: marketplaceData, isLoading: marketplaceLoading } = useMarketplaceProducts();
+    const listings = (marketplaceData?.pages?.[0] as any)?.data?.content
+        ?? (marketplaceData?.pages?.[0] as any)?.data?.listings
+        ?? (marketplaceData?.pages?.[0] as any)?.data?.data
+        ?? [];
+    const recentListings = Array.isArray(listings) ? listings.slice(0, 2) : [];
 
     return (
         <aside className="hidden xl:flex w-[480px] flex-col gap-6 p-6 neu-base overflow-y-auto shrink-0" style={{ boxShadow: '-4px 0 12px var(--neu-shadow-dark)' }}>
@@ -57,25 +38,47 @@ export default function RightSidebar() {
                     <Link href="/events" className="text-primary text-xs font-bold hover:underline">See all</Link>
                 </div>
                 <div className="flex flex-col gap-3">
-                    {events.map((event, idx) => (
-                        <div key={idx} className="neu-card-sm rounded-xl p-3 flex gap-3 cursor-pointer transition-all hover:scale-[1.01]">
-                            <div className="neu-socket rounded-lg w-12 h-12 flex flex-col items-center justify-center shrink-0 text-primary">
-                                <span className="text-xs font-bold uppercase">{event.month}</span>
-                                <span className="text-lg font-bold leading-none">{event.day}</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <h3 className="text-sm font-bold leading-tight mb-1" style={{ color: 'var(--neu-text)' }}>{event.title}</h3>
-                                <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>{event.details}</p>
-                                <div className="flex items-center mt-2">
-                                    <div className="flex -space-x-2">
-                                        <div className="w-5 h-5 rounded-full neu-chip text-[8px] flex items-center justify-center font-bold text-primary">A</div>
-                                        <div className="w-5 h-5 rounded-full neu-chip text-[8px] flex items-center justify-center font-bold text-primary">B</div>
+                    {eventsLoading ? (
+                        <>
+                            {[0, 1, 2].map((i) => (
+                                <div key={i} className="neu-card-sm rounded-xl p-3 flex gap-3 animate-pulse">
+                                    <div className="neu-socket rounded-lg w-12 h-12 shrink-0" />
+                                    <div className="flex flex-col gap-2 flex-1 min-w-0">
+                                        <div className="h-3 rounded bg-current opacity-10 w-3/4" />
+                                        <div className="h-2.5 rounded bg-current opacity-10 w-1/2" />
                                     </div>
-                                    <div className="w-5 h-5 rounded-full neu-socket text-[8px] flex items-center justify-center font-bold ml-0" style={{ color: 'var(--neu-text-muted)' }}>+{event.attendees}</div>
                                 </div>
-                            </div>
-                        </div>
-                    ))}
+                            ))}
+                        </>
+                    ) : upcomingEvents.length === 0 ? (
+                        <p className="text-xs py-2" style={{ color: 'var(--neu-text-muted)' }}>No upcoming events nearby.</p>
+                    ) : upcomingEvents.map((event: any) => {
+                        const date = event.date ? new Date(event.date) : null;
+                        const month = date ? date.toLocaleString('default', { month: 'short' }) : '';
+                        const day = date ? String(date.getDate()) : '';
+                        const attendees = event.attendeeCount ?? event.attendees?.length ?? 0;
+                        return (
+                            <Link
+                                key={event._id ?? event.id}
+                                href={`/events/${event._id ?? event.id}`}
+                                className="neu-card-sm rounded-xl p-3 flex gap-3 cursor-pointer transition-all hover:scale-[1.01]"
+                            >
+                                <div className="neu-socket rounded-lg w-12 h-12 flex flex-col items-center justify-center shrink-0 text-primary">
+                                    <span className="text-xs font-bold uppercase">{month}</span>
+                                    <span className="text-lg font-bold leading-none">{day}</span>
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <h3 className="text-sm font-bold leading-tight mb-1 truncate" style={{ color: 'var(--neu-text)' }}>{event.title}</h3>
+                                    <p className="text-xs truncate" style={{ color: 'var(--neu-text-muted)' }}>
+                                        {event.location?.name ?? event.location?.address ?? event.locationName ?? ''}
+                                    </p>
+                                    {attendees > 0 && (
+                                        <p className="text-[11px] mt-1 text-primary font-bold">{attendees} attending</p>
+                                    )}
+                                </div>
+                            </Link>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -86,39 +89,53 @@ export default function RightSidebar() {
                     <h2 className="text-base font-bold" style={{ color: 'var(--neu-text)' }}>Marketplace</h2>
                     <Link href="/marketplace" className="text-primary text-xs font-bold hover:underline">Browse</Link>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                    {marketplaceItems.map((item, idx) => (
-                        <div key={idx} className="group cursor-pointer">
-                            <div
-                                className="aspect-square rounded-xl bg-cover bg-center mb-2 overflow-hidden neu-card-sm"
-                                style={{ backgroundImage: `url("${item.image}")` }}
-                            >
-                                <div className="w-full h-full bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                {marketplaceLoading ? (
+                    <div className="grid grid-cols-2 gap-3">
+                        {[0, 1].map((i) => (
+                            <div key={i} className="animate-pulse">
+                                <div className="aspect-square rounded-xl mb-2 neu-card-sm" />
+                                <div className="h-3 rounded bg-current opacity-10 w-3/4 mb-1" />
+                                <div className="h-2.5 rounded bg-current opacity-10 w-1/3" />
                             </div>
-                            <h4 className="text-sm font-medium truncate" style={{ color: 'var(--neu-text)' }}>{item.title}</h4>
-                            <p className={`text-xs font-bold ${item.isFree ? 'text-green-500' : 'text-primary'}`}>
-                                {item.price}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Trending Topics */}
-            <div className="flex flex-col gap-3">
-                <div className="neu-divider" />
-                <h2 className="text-base font-bold" style={{ color: 'var(--neu-text)' }}>Trending Nearby</h2>
-                <div className="flex flex-col gap-2">
-                    {trending.map((item, idx) => (
-                        <Link key={idx} href="#" className="flex items-center justify-between group neu-card-sm rounded-xl p-3 transition-all hover:scale-[1.01]">
-                            <div>
-                                <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--neu-text-muted)' }}>{item.category}</p>
-                                <p className="text-sm font-bold group-hover:text-primary transition-colors" style={{ color: 'var(--neu-text)' }}>{item.topic}</p>
-                            </div>
-                            <span className="material-symbols-outlined text-sm" style={{ color: 'var(--neu-text-muted)' }}>trending_up</span>
-                        </Link>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : recentListings.length === 0 ? (
+                    <p className="text-xs py-2" style={{ color: 'var(--neu-text-muted)' }}>No listings nearby yet.</p>
+                ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                        {recentListings.map((item: any) => {
+                            const price = item.price != null
+                                ? item.price === 0 ? 'Free' : `₦${Number(item.price).toLocaleString()}`
+                                : item.priceLabel ?? 'Free';
+                            const isFree = item.price === 0 || price === 'Free';
+                            const image = item.images?.[0] ?? item.image ?? item.thumbnail ?? null;
+                            return (
+                                <Link
+                                    key={item._id ?? item.id}
+                                    href={`/marketplace/${item._id ?? item.id}`}
+                                    className="group cursor-pointer"
+                                >
+                                    {image ? (
+                                        <div
+                                            className="aspect-square rounded-xl bg-cover bg-center mb-2 overflow-hidden neu-card-sm"
+                                            style={{ backgroundImage: `url("${image}")` }}
+                                        >
+                                            <div className="w-full h-full bg-black/0 group-hover:bg-black/10 transition-colors" />
+                                        </div>
+                                    ) : (
+                                        <div className="aspect-square rounded-xl mb-2 neu-card-sm flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-[32px] text-gray-300">shopping_bag</span>
+                                        </div>
+                                    )}
+                                    <h4 className="text-sm font-medium truncate" style={{ color: 'var(--neu-text)' }}>{item.title ?? item.name}</h4>
+                                    <p className={`text-xs font-bold ${isFree ? 'text-green-500' : 'text-primary'}`}>
+                                        {price}
+                                    </p>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
         </aside>
     );

@@ -56,7 +56,7 @@ export default function ExampleDashboard() {
         },
       });
       setNewPostContent('');
-      alert('Post created successfully!');
+      // Post created — feed will update via React Query invalidation
     } catch (error) {
       // Error is automatically handled by handleApiError
     }

@@ -35,11 +35,6 @@ export const useSearch = (
       setError(null);
 
       try {
-        console.log("🔍 Performing search:", {
-          query: debouncedQuery,
-          type,
-          page,
-        });
         const response = await searchService.search({
           q: debouncedQuery,
           type,
@@ -47,18 +42,13 @@ export const useSearch = (
           limit: 20,
         });
 
-        console.log("✅ Search response:", response);
-
         if (!response || !response.data) {
-          console.error("❌ Invalid response structure:", response);
           throw new Error("Invalid response from search API");
         }
 
         setResults(response.data.results);
         setTotalResults(response.data.totalResults);
       } catch (err: any) {
-        console.error("❌ Search error:", err);
-        console.error("Error response:", err.response);
         const errorMessage =
           err.response?.data?.message || err.message || "Search failed";
         setError(errorMessage);

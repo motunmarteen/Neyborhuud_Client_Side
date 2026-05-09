@@ -78,11 +78,11 @@ export default function ProfilePage() {
 
     // Basic client-side validation
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.error('Please select an image file');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be smaller than 5MB');
+      toast.error('Image must be smaller than 5MB');
       return;
     }
 
@@ -91,9 +91,8 @@ export default function ProfilePage() {
       await uploadProfilePicture({ file });
       queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-    } catch (err) {
-      console.error('Failed to upload profile picture:', err);
-      alert('Could not upload image. Please try again.');
+    } catch {
+      toast.error('Could not upload image. Please try again.');
     } finally {
       setIsUploadingAvatar(false);
     }

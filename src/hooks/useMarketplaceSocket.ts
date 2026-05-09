@@ -50,7 +50,6 @@ export function useMarketplaceSocket() {
 
     // Handler for product:updated event (likes/unlikes)
     const handleProductUpdated = (data: ProductUpdatedEvent) => {
-      console.log("📢 Product updated:", data);
 
       // Update the specific product in cache
       queryClient.setQueryData<Product>(
@@ -80,7 +79,6 @@ export function useMarketplaceSocket() {
 
     // Handler for product:commented event
     const handleProductCommented = (data: ProductCommentedEvent) => {
-      console.log("💬 New comment on product:", data);
 
       // Update the product's comment count
       queryClient.setQueryData<Product>(

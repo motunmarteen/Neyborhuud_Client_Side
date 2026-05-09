@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from 'sonner';
 import TopNav from "@/components/navigation/TopNav";
 import LeftSidebar from "@/components/navigation/LeftSidebar";
 import RightSidebar from "@/components/navigation/RightSidebar";
@@ -93,7 +94,7 @@ export default function EditEventPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
-      alert("Image must be under 10 MB");
+      toast.error('Image must be under 10 MB');
       return;
     }
     setCoverFile(file);

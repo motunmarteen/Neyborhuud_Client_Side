@@ -27,7 +27,8 @@ function NotificationCard({ notification, onRead }: { notification: Notification
   const icon = typeIcon[notification.type] ?? 'notifications';
 
   const handleClick = () => {
-    if (!notification.isRead) onRead(notification.id);
+    const id = notification.id ?? (notification as any)._id;
+    if (!notification.isRead && id) onRead(id);
     if (notification.actionUrl) router.push(notification.actionUrl);
   };
 
@@ -139,8 +140,8 @@ export default function NotificationsPage() {
                 </div>
               ) : (
                 <div className="divide-y" style={{ borderColor: 'var(--neu-border)' }}>
-                  {notifications.map(n => (
-                    <NotificationCard key={n.id} notification={n} onRead={id => markRead.mutate(id)} />
+                  {notifications.map((n, i) => (
+                    <NotificationCard key={n.id ?? (n as any)._id ?? i} notification={n} onRead={id => markRead.mutate(id)} />
                   ))}
                 </div>
               )}

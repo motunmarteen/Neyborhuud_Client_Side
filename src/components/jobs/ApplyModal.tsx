@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useApplyForJob } from "@/hooks/useJobs";
+import { toast } from "sonner";
 
 interface ApplyModalProps {
   jobId: string;
@@ -20,7 +21,7 @@ export default function ApplyModal({ jobId, jobTitle, onClose }: ApplyModalProps
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 20 * 1024 * 1024) {
-      alert("File must be under 20 MB");
+      toast.error("File must be under 20 MB");
       return;
     }
     setResume(file);
