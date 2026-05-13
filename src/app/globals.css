@@ -24,32 +24,43 @@
    Served as static files for reliability (no encoding issues). */
 
 :root {
-  /* NeyborHuud — Nigeria Incident Map Palette */
-  --neon-green: #008751;
-  --primary: #008751;
-  --brand-blue: #4A90D9;
-  --brand-red: #E74C3C;
-  --brand-purple: #8E6FBF;
-  --brand-amber: #F5A623;
+  /* ═══════════════════════════════════════════════════
+     NeyborHuud Official Brand Palette — 6 colours only.
+     Never use a colour outside this set.
+     ═══════════════════════════════════════════════════
+     #00D431  Primary Green   — main brand, CTAs, highlights
+     #0000FF  Brand Blue      — links, info, secondary actions
+     #E9F6E6  Surface Green   — light backgrounds, cards, surfaces
+     #FF0000  Brand Red       — danger, SOS, errors, destructive
+     #006F35  Dark Green      — deep accents, FABs, hover states
+     #1A1A1A  Near Black      — primary text, dark backgrounds
+     ═══════════════════════════════════════════════════ */
+  --primary:          #00D431;
+  --neon-green:       #00D431;
+  --brand-blue:       #0000FF;
+  --brand-surface:    #E9F6E6;
+  --brand-red:        #FF0000;
+  --brand-green-dark: #006F35;
+  --brand-black:      #1A1A1A;
 
-  /* Light mode — White */
-  --background-light: #FFFFFF;
-  --surface-light: #FFFFFF;
-  --border-light: #F0E0DA;
-  --text-primary-light: #1A1A2E;
-  --text-secondary-light: #6B7280;
+  /* Light mode */
+  --background-light:     #FFFFFF;
+  --surface-light:        #E9F6E6;
+  --border-light:         #C8E8C8;
+  --text-primary-light:   #1A1A1A;
+  --text-secondary-light: #3D5A3E;
 
-  /* Dark mode — Deep Charcoal */
-  --background-dark: #141420;
-  --surface-dark: #1E1E2E;
-  --surface-base-dark: #16161F;
-  --border-dark: #2A2A3D;
-  --text-primary-dark: #F5F0ED;
-  --text-secondary-dark: #9CA3AF;
+  /* Dark mode */
+  --background-dark:      #0D1A0F;
+  --surface-dark:         #132218;
+  --surface-base-dark:    #0A1209;
+  --border-dark:          #1E3A22;
+  --text-primary-dark:    #E9F6E6;
+  --text-secondary-dark:  #8FBC8F;
 
   /* Legacy compat */
-  --charcoal: #1A1A2E;
-  --deep-text: #1A1A2E;
+  --charcoal: #1A1A1A;
+  --deep-text: #1A1A1A;
   --soft-bg: #FFFFFF;
 
   /* Theme Mapping */
@@ -62,43 +73,47 @@
   --background: var(--background-dark);
   --foreground: var(--text-primary-dark);
   --border: var(--border-dark);
-  --charcoal: #F5F0ED;
-  --deep-text: #F5F0ED;
-  --soft-bg: #141420;
+  --charcoal: #E9F6E6;
+  --deep-text: #E9F6E6;
+  --soft-bg: #0D1A0F;
 }
 
 @theme inline {
-  --color-neon-green: #008751;
-  --color-primary: #008751;
-  --color-brand-blue: #4A90D9;
-  --color-brand-red: #E74C3C;
-  --color-brand-purple: #8E6FBF;
-  --color-brand-amber: #F5A623;
-  --color-charcoal: var(--charcoal);
+  /* Official brand palette — Tailwind utility classes */
+  --color-primary:          #00D431;
+  --color-neon-green:       #00D431;
+  --color-brand-blue:       #0000FF;
+  --color-brand-surface:    #E9F6E6;
+  --color-brand-red:        #FF0000;
+  --color-brand-green-dark: #006F35;
+  --color-brand-black:      #1A1A1A;
+
+  --color-charcoal:  var(--charcoal);
   --color-deep-text: var(--deep-text);
-  --color-soft-bg: var(--soft-bg);
+  --color-soft-bg:   var(--soft-bg);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-secondary: var(--primary);
-  --color-accent: var(--brand-red);
+  --color-secondary:  var(--primary);
+  --color-accent:     var(--brand-red);
 
-  /* Design system colors */
-  --color-background-light: #FFFFFF;
-  --color-background-dark: #141420;
-  --color-surface-dark: #1E1E2E;
-  --color-surface-light: #FFFFFF;
-  --color-surface-base-dark: #16161F;
-  --color-border-dark: #2A2A3D;
-  --color-border-light: #F0E0DA;
-  --color-text-secondary-dark: #9CA3AF;
-  --color-text-secondary-light: #6B7280;
+  /* Surface & border tokens */
+  --color-background-light:    #FFFFFF;
+  --color-background-dark:     #0D1A0F;
+  --color-surface-dark:        #132218;
+  --color-surface-light:       #E9F6E6;
+  --color-surface-base-dark:   #0A1209;
+  --color-border-dark:         #1E3A22;
+  --color-border-light:        #C8E8C8;
+  --color-text-secondary-dark: #8FBC8F;
+  --color-text-secondary-light:#3D5A3E;
+
   --font-display: var(--font-jakarta);
 }
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  color: #1A1A2E;
+  color: #1A1A1A;
   background-color: #FFFFFF;
   background-image: url('/doodle-pattern.svg?v=2');
   background-repeat: repeat;
@@ -112,8 +127,8 @@ body {
 
 .dark body,
 html.dark body {
-  color: #F5F0ED;
-  background-color: #141420;
+  color: #E9F6E6;
+  background-color: #0D1A0F;
   background-image: url('/doodle-pattern-dark.svg?v=2');
 }
 
@@ -161,15 +176,15 @@ html.dark body {
 
 .location-picker-premium-map {
   background-image:
-    linear-gradient(rgba(0, 135, 81, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(74, 144, 217, 0.08) 1px, transparent 1px),
-    radial-gradient(circle at 50% 42%, rgba(0, 135, 81, 0.16), transparent 34%);
+    linear-gradient(rgba(0, 212, 49, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 255, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 50% 42%, rgba(0, 212, 49, 0.16), transparent 34%);
   background-size: 34px 34px, 34px 34px, 100% 100%;
 }
 
 .dark .doodle-surface,
 .dark .doodle-surface-muted {
-  background-color: #141420;
+  background-color: #0D1A0F;
   background-image: url('/doodle-pattern-dark.svg?v=2');
 }
 
@@ -180,7 +195,7 @@ html {
 
 /* Focus Rings — exclude inputs inside neumorphic containers (they use the glow line) */
 *:focus-visible {
-  outline: 2px solid #11d473;
+  outline: 2px solid #00D431;
   outline-offset: 2px;
 }
 
@@ -297,7 +312,7 @@ html {
 }
 
 .glow-neon {
-  box-shadow: 0 0 15px rgba(0, 135, 81, 0.4);
+  box-shadow: 0 0 15px rgba(0, 212, 49, 0.4);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -307,21 +322,21 @@ html {
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  --neu-bg: #FFFFFF;
-  --neu-shadow-dark: #E0E0E0;
+  --neu-bg: #F0FAF0;
+  --neu-shadow-dark: #C2DEC2;
   --neu-shadow-light: #FFFFFF;
-  --neu-text: #1A1A2E;
-  --neu-text-secondary: #4A4A5A;
-  --neu-text-muted: #8C8C9A;
+  --neu-text: #1A1A1A;
+  --neu-text-secondary: #2E502E;
+  --neu-text-muted: #5A825A;
 }
 
 .dark {
-  --neu-bg: #1A1A28;
-  --neu-shadow-dark: #0F0F1A;
-  --neu-shadow-light: #252538;
-  --neu-text: #F5F0ED;
-  --neu-text-secondary: #B0A8A3;
-  --neu-text-muted: #6B6B7B;
+  --neu-bg: #0D1A0F;
+  --neu-shadow-dark: #060E07;
+  --neu-shadow-light: #162218;
+  --neu-text: #E9F6E6;
+  --neu-text-secondary: #8FBC8F;
+  --neu-text-muted: #4A6B4A;
 }
 
 /* ── Base Surface ── */
@@ -475,7 +490,7 @@ html {
   bottom: 4px;
   height: 2px;
   border-radius: 2px;
-  background: linear-gradient(90deg, transparent, var(--neon-green, #008751), transparent);
+  background: linear-gradient(90deg, transparent, var(--neon-green, #00D431), transparent);
   opacity: 0.6;
   pointer-events: none;
   animation: focus-line-in 0.3s ease-out;
@@ -484,7 +499,7 @@ html {
 /* Native inputs/textareas using neu-input directly get a bottom-border glow instead */
 input.neu-input:focus,
 textarea.neu-input:focus {
-  border-bottom: 2px solid color-mix(in srgb, var(--neon-green, #008751) 50%, transparent) !important;
+  border-bottom: 2px solid color-mix(in srgb, var(--neon-green, #00D431) 50%, transparent) !important;
 }
 
 input.neu-input:focus::after,
@@ -615,10 +630,10 @@ textarea.neu-input:focus-within::after {
   fill: none;
   stroke-width: 10;
   stroke-linecap: round;
-  stroke: var(--neon-green, #008751);
+  stroke: var(--neon-green, #00D431);
   stroke-dasharray: 408;
   stroke-dashoffset: calc(408 - 408 * var(--score-pct) / 100);
-  filter: drop-shadow(0 0 6px var(--neon-green, #008751));
+  filter: drop-shadow(0 0 6px var(--neon-green, #00D431));
   transition: stroke-dashoffset 1s ease;
 }
 .score-ring .ring-label {
@@ -640,8 +655,8 @@ textarea.neu-input:focus-within::after {
 .xp-bar-fill {
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--neon-green, #008751), #059669);
-  box-shadow: 0 0 8px var(--neon-green, #008751);
+  background: linear-gradient(90deg, var(--neon-green, #00D431), #006F35);
+  box-shadow: 0 0 8px var(--neon-green, #00D431);
   transition: width 1s ease;
 }
 
@@ -703,9 +718,9 @@ textarea.neu-input:focus-within::after {
 
 /* ── Active Button ── */
 .mod-btn-active {
-  background: rgba(0, 135, 81, 0.1);
-  border: 1px solid rgba(0, 135, 81, 0.25);
-  color: #008751;
+  background: rgba(0, 212, 49, 0.1);
+  border: 1px solid rgba(0, 212, 49, 0.25);
+  color: #006F35;
 }
 
 /* ── Chip / Tag ── */
@@ -716,19 +731,19 @@ textarea.neu-input:focus-within::after {
 
 /* ── Modern FAB ── */
 .mod-fab {
-  background: linear-gradient(135deg, #008751, #006B3F);
-  box-shadow: 0 8px 24px rgba(0, 135, 81, 0.35), 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #00D431, #006F35);
+  box-shadow: 0 8px 24px rgba(0, 212, 49, 0.35), 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mod-fab:hover {
-  box-shadow: 0 12px 36px rgba(0, 135, 81, 0.45), 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 36px rgba(0, 212, 49, 0.45), 0 4px 12px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
 }
 
 .mod-fab:active {
   transform: scale(0.95);
-  box-shadow: 0 4px 16px rgba(0, 135, 81, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 212, 49, 0.3);
 }
 
 /* ── Divider Line ── */
@@ -747,14 +762,14 @@ textarea.neu-input:focus-within::after {
 }
 
 /* ── Content Type Accent Colors ── */
-.accent-line-post { background: linear-gradient(90deg, transparent, #008751, transparent); }
-.accent-line-fyi { background: linear-gradient(90deg, transparent, #f59e0b, transparent); }
-.accent-line-gossip { background: linear-gradient(90deg, transparent, #ec4899, transparent); }
-.accent-line-help_request { background: linear-gradient(90deg, transparent, #3b82f6, transparent); }
-.accent-line-job { background: linear-gradient(90deg, transparent, #06b6d4, transparent); }
-.accent-line-emergency { background: linear-gradient(90deg, transparent, #f97316, transparent); }
-.accent-line-event { background: linear-gradient(90deg, transparent, #a855f7, transparent); }
-.accent-line-marketplace { background: linear-gradient(90deg, transparent, #059669, transparent); }
+.accent-line-post        { background: linear-gradient(90deg, transparent, #00D431, transparent); }
+.accent-line-fyi         { background: linear-gradient(90deg, transparent, #0000FF, transparent); }
+.accent-line-gossip      { background: linear-gradient(90deg, transparent, #0000FF, transparent); }
+.accent-line-help_request{ background: linear-gradient(90deg, transparent, #0000FF, transparent); }
+.accent-line-job         { background: linear-gradient(90deg, transparent, #006F35, transparent); }
+.accent-line-emergency   { background: linear-gradient(90deg, transparent, #FF0000, transparent); }
+.accent-line-event       { background: linear-gradient(90deg, transparent, #00D431, transparent); }
+.accent-line-marketplace { background: linear-gradient(90deg, transparent, #006F35, transparent); }
 
 /* ── Light mode overrides (active — coral white theme) ── */
 html:not(.dark) .mod-card {
@@ -787,8 +802,8 @@ html:not(.dark) .mod-btn:hover {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 html:not(.dark) .mod-btn-active {
-  background: rgba(0, 135, 81, 0.08);
-  border-color: rgba(0, 135, 81, 0.2);
+  background: rgba(0, 212, 49, 0.08);
+  border-color: rgba(0, 212, 49, 0.2);
 }
 html:not(.dark) .mod-chip {
   background: rgba(0, 0, 0, 0.04);
@@ -803,10 +818,10 @@ html:not(.dark) .mod-modal {
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 html:not(.dark) .mod-fab {
-  box-shadow: 0 8px 24px rgba(0, 135, 81, 0.25), 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 212, 49, 0.25), 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 html:not(.dark) .mod-fab:hover {
-  box-shadow: 0 12px 36px rgba(0, 135, 81, 0.35), 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 36px rgba(0, 212, 49, 0.35), 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -833,7 +848,7 @@ html:not(.dark) .mod-fab:hover {
   transform: translateX(-50%);
   z-index: 9999;
   padding: 0.5rem 1.25rem;
-  background: var(--primary, #008751);
+  background: var(--primary, #00D431);
   color: #ffffff;
   font-weight: 700;
   font-size: 0.875rem;

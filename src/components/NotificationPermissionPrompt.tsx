@@ -3,28 +3,25 @@
 /**
  * NotificationPermissionPrompt
  *
- * A FULL-SCREEN blocking modal that appears immediately after login and requires
- * the user to either enable push notifications or explicitly decline.
+ * A bottom-sheet modal that appears after the user has logged in and
+ * prompts them to enable push notifications.
  *
- * Browser security REQUIRES a user gesture to call Notification.requestPermission(),
- * so we cannot silently enable notifications for everyone — but we make it
- * impossible to miss and very hard to skip.
- *
- * Strategy:
- * - Appears immediately (no delay) once the user is logged in
- * - Full-screen overlay — user must interact with it
- * - Tapping "Enable" calls requestPermissionAndSubscribe()
- * - Tapping "Skip for now" dismisses for 3 days (not 7 — safety app urgency)
- * - If browser permission was already denied, shows instructions to re-enable
- * - Does NOT show again once subscribed
+ * Rules:
+ * - NEVER shown on auth / onboarding routes (/, /welcome, /login, /signup, etc.)
+ * - NEVER shown to unauthenticated users
+ * - NEVER shown while a subscription attempt is already in progress
+ * - NEVER shown again once already subscribed
+ * - Dismissible by tapping "Skip", tapping "Enable", or dragging the sheet down
+ * - Re-prompts after SNOOZE_DAYS if the user skipped
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import apiClient from '@/lib/api-client';
 
 const SNOOZE_KEY = 'nh_push_prompt_snoozed_until';
-const SNOOZE_DAYS = 3; // Re-prompt every 3 days since it's a safety app
+const SNOOZE_DAYS = 3;
 
 function snoozePrompt(days = SNOOZE_DAYS) {
   try {
@@ -35,60 +32,136 @@ function snoozePrompt(days = SNOOZE_DAYS) {
   }
 }
 
+// Routes where the notification prompt must NEVER appear
+const EXCLUDED_ROUTES = [
+  '/',               // onboarding / landing slides
+  '/welcome',
+  '/login',
+  '/signup',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/pick-community',
+  '/complete-profile',
+];
+
+function isExcludedRoute(pathname: string): boolean {
+  return EXCLUDED_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+}
+
 export default function NotificationPermissionPrompt() {
   const { permission, isSubscribed, isRegistering, requestPermissionAndSubscribe } =
     usePushNotifications();
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
-  const isAuthRoute = [
-    '/login',
-    '/signup',
-    '/forgot-password',
-    '/reset-password',
-    '/verify-email',
-    '/welcome',
-  ].some((route) => pathname === route || pathname.startsWith(`${route}/`));
+  // Track whether we've started a registration so the effect won't re-show mid-flow
+  const isRegisteringRef = useRef(false);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    isRegisteringRef.current = isRegistering;
+  }, [isRegistering]);
 
   useEffect(() => {
-    if (isAuthRoute) return;
+    // Never show on excluded routes
+    if (isExcludedRoute(pathname)) return;
+    // Never show to unauthenticated users
+    if (!apiClient.isAuthenticated()) return;
     // Already subscribed — never show
     if (isSubscribed) return;
+    // Don't re-show the sheet while a subscription attempt is in progress
+    if (isRegisteringRef.current) return;
     // Browser denied — show the "how to fix" variant immediately
     if (permission === 'denied') {
-      const timer = window.setTimeout(() => setVisible(true), 0);
-      return () => window.clearTimeout(timer);
+      setVisible(true);
+      return;
     }
     // Not supported (e.g. non-PWA desktop) — skip
     if (permission === 'unsupported') return;
 
     // Check snooze
-    const snoozedUntil = localStorage.getItem(SNOOZE_KEY);
-    if (snoozedUntil && Date.now() < Number(snoozedUntil)) return;
+    try {
+      const snoozedUntil = localStorage.getItem(SNOOZE_KEY);
+      if (snoozedUntil && Date.now() < Number(snoozedUntil)) return;
+    } catch {
+      // ignore
+    }
 
-    // Show immediately — no delay for a safety app
-    const timer = window.setTimeout(() => setVisible(true), 0);
-    return () => window.clearTimeout(timer);
-  }, [isAuthRoute, isSubscribed, permission]);
+    setVisible(true);
+  }, [pathname, isSubscribed, permission]);
 
-  function handleEnable() {
+  const handleEnable = useCallback(() => {
     setVisible(false);
+    isRegisteringRef.current = true;
     requestPermissionAndSubscribe().then((granted) => {
+      isRegisteringRef.current = false;
       if (!granted) snoozePrompt(1);
     });
-  }
+  }, [requestPermissionAndSubscribe]);
 
-  function handleSnooze() {
+  const handleSnooze = useCallback(() => {
     setVisible(false);
     snoozePrompt();
-  }
+  }, []);
 
-  if (isAuthRoute || isSubscribed || !visible) return null;
+  // ── Drag-to-dismiss ────────────────────────────────────────────────────────
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const dragStartY = useRef<number | null>(null);
+  const dragCurrentY = useRef<number>(0);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    dragStartY.current = e.touches[0].clientY;
+    dragCurrentY.current = 0;
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (dragStartY.current === null) return;
+    const delta = e.touches[0].clientY - dragStartY.current;
+    if (delta < 0) return; // only allow downward drag
+    dragCurrentY.current = delta;
+    if (sheetRef.current) {
+      sheetRef.current.style.transform = `translateY(${delta}px)`;
+      sheetRef.current.style.transition = 'none';
+    }
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (sheetRef.current) {
+      sheetRef.current.style.transition = 'transform 0.3s ease';
+      if (dragCurrentY.current > 120) {
+        // Dragged far enough — dismiss
+        sheetRef.current.style.transform = `translateY(100%)`;
+        setTimeout(() => {
+          handleSnooze();
+          if (sheetRef.current) sheetRef.current.style.transform = '';
+        }, 300);
+      } else {
+        // Snap back
+        sheetRef.current.style.transform = '';
+      }
+    }
+    dragStartY.current = null;
+    dragCurrentY.current = 0;
+  }, [handleSnooze]);
+
+  if (!visible || isExcludedRoute(pathname) || isSubscribed) return null;
 
   // ── DENIED STATE ─────────────────────────────────────────────────────────
   if (permission === 'denied') {
     return (
       <div className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/60 backdrop-blur-sm">
-        <div className="w-full max-w-lg rounded-t-3xl bg-white p-6 shadow-2xl">
+        <div
+          ref={sheetRef}
+          className="w-full max-w-lg rounded-t-3xl bg-white p-6 shadow-2xl"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          {/* Pull bar */}
+          <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-5 cursor-grab" />
+
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-red-500 text-[26px]">notifications_off</span>
@@ -100,7 +173,7 @@ export default function NotificationPermissionPrompt() {
           </div>
           <p className="text-sm text-gray-600 mb-5 leading-relaxed">
             To receive life-saving safety alerts, open your browser settings, find
-            NeyburH, and change <strong>Notifications</strong> to <strong>Allow</strong>.
+            NeyborHuud, and change <strong>Notifications</strong> to <strong>Allow</strong>.
           </p>
           <button
             onClick={handleSnooze}
@@ -116,9 +189,15 @@ export default function NotificationPermissionPrompt() {
   // ── DEFAULT STATE ─────────────────────────────────────────────────────────
   return (
     <div className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-t-3xl bg-white pb-8 pt-6 px-6 shadow-2xl">
-        {/* Pull bar */}
-        <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-6" />
+      <div
+        ref={sheetRef}
+        className="w-full max-w-lg rounded-t-3xl bg-white pb-8 pt-4 px-6 shadow-2xl"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        {/* Pull bar — visual affordance for drag-to-dismiss */}
+        <div className="w-10 h-1 rounded-full bg-gray-300 mx-auto mb-6 cursor-grab" />
 
         {/* Icon */}
         <div className="flex justify-center mb-5">
@@ -132,14 +211,14 @@ export default function NotificationPermissionPrompt() {
           Enable Safety Notifications
         </h2>
         <p className="text-sm text-gray-500 text-center leading-relaxed mb-2">
-          NeyburH is a <strong className="text-gray-700">community safety app</strong>.
+          NeyborHuud is a <strong className="text-gray-700">community safety app</strong>.
           Push notifications are critical — you&apos;ll receive:
         </p>
 
         {/* Feature list */}
         <ul className="text-sm text-gray-600 space-y-2 mb-6 mt-4">
           {[
-            { icon: 'sos', label: 'Instant SOS alerts from NeyburHs', color: 'text-red-500' },
+            { icon: 'sos', label: 'Instant SOS alerts from neighbours', color: 'text-red-500' },
             { icon: 'location_on', label: 'Geofence & safety zone alerts', color: 'text-orange-500' },
             { icon: 'route', label: 'Trip monitoring & overdue alerts', color: 'text-yellow-600' },
             { icon: 'chat', label: 'Messages & community updates', color: 'text-blue-500' },

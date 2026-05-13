@@ -11,35 +11,35 @@ const slides = [
         title: 'One-Tap SOS',
         subtitle: 'Trigger an emergency alert in 2 seconds. Trusted guardians and responders are notified instantly.',
         icon: 'bi-exclamation-octagon-fill',
-        accentColor: '#FF4444',
+        accentColor: '#FF0000',
     },
     {
         id: 'sentinel',
         title: 'Sentinel AI',
         subtitle: 'Your street\'s always-on intelligence. Sentinel AI detects threats, monitors safety patterns, and keeps you ahead of danger.',
         icon: 'bi-cpu-fill',
-        accentColor: '#00C2FF',
+        accentColor: '#0000FF',
     },
     {
         id: 'feed',
         title: 'Hyperlocal Feed',
         subtitle: 'Posts, FYI alerts, local jobs, events & marketplace — everything happening on your street, in real time.',
         icon: 'bi-newspaper',
-        accentColor: '#FF9F43',
+        accentColor: '#00D431',
     },
     {
         id: 'community',
         title: 'Your Voice Matters',
         subtitle: 'Join the conversation. Build your Reputation. Lead your street.',
         icon: 'bi-people-fill',
-        accentColor: '#FF6B6B',
+        accentColor: '#006F35',
     },
     {
         id: 'identity',
         title: 'Identity is Power',
         subtitle: 'Build your Trust Score. Unlock the Huud Economy.',
         icon: 'bi-patch-check-fill',
-        accentColor: '#9F7AEA',
+        accentColor: '#0000FF',
     },
 ];
 
@@ -83,9 +83,9 @@ export default function Home() {
 
     return (
         <div className="neu-base min-h-[100dvh] flex flex-col items-center justify-between py-10 px-6 overflow-hidden relative">
-            {/* Very subtle ambient glow */}
+            {/* Ambient glow — stronger on SOS for dramatic urgency */}
             <div
-                className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[160px] opacity-[0.05] pointer-events-none transition-all duration-1000"
+                className={`absolute top-[-30%] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[160px] pointer-events-none transition-all duration-1000 ${activeSlide.id === 'sos' ? 'opacity-[0.18]' : 'opacity-[0.06]'}`}
                 style={{ backgroundColor: activeSlide.accentColor }}
             />
 
@@ -93,39 +93,65 @@ export default function Home() {
             <div className="grow flex flex-col items-center justify-center w-full max-w-md z-10 gap-10">
                 {/* Raised Icon Container */}
                 <div className="relative flex items-center justify-center">
-                    {/* SOS pulse rings */}
-                    {activeSlide.id === 'sos' && !isAnimating && (
-                        <>
-                            <span
-                                className="absolute rounded-full animate-ping"
-                                style={{ width: '17rem', height: '17rem', backgroundColor: activeSlide.accentColor, opacity: 0.08 }}
-                            />
-                            <span
-                                className="absolute rounded-full animate-ping"
-                                style={{ width: '14rem', height: '14rem', backgroundColor: activeSlide.accentColor, opacity: 0.12, animationDelay: '0.4s' }}
-                            />
-                        </>
-                    )}
-                    <div
-                        className={`
-                            neu-card-raised rounded-[2.5rem] w-56 h-56 flex items-center justify-center
-                            animate-neu-float transition-all duration-500
-                            ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}
-                        `}
-                    >
-                        {/* Inset Icon Socket */}
+                    {activeSlide.id === 'sos' ? (
+                        /* ── Premium SOS — neumorphic card + polished glass-red button ── */
                         <div
-                            className="neu-socket rounded-full w-36 h-36 flex items-center justify-center transition-shadow duration-700"
-                            style={{
-                                boxShadow: `inset 6px 6px 14px var(--neu-shadow-dark), inset -6px -6px 14px var(--neu-shadow-light), 0 0 25px ${activeSlide.accentColor}${activeSlide.id === 'sos' ? '40' : '12'}`,
-                            }}
+                            className={`
+                                neu-card-raised rounded-[2.5rem] w-56 h-56 flex items-center justify-center
+                                animate-neu-float transition-all duration-500
+                                ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}
+                            `}
                         >
-                            <i
-                                className={`bi ${activeSlide.icon} drop-shadow-sm transition-colors duration-500 ${activeSlide.id === 'sos' ? 'text-8xl' : 'text-7xl'}`}
-                                style={{ color: activeSlide.accentColor }}
-                            />
+                            {/* Polished red SOS button — same socket size as other slides */}
+                            <div
+                                className="relative w-36 h-36 rounded-full flex items-center justify-center overflow-hidden"
+                                style={{
+                                    background: 'radial-gradient(circle at 38% 32%, #FF4D4D 0%, #FF0000 50%, #B30000 100%)',
+                                    boxShadow: '0 10px 40px rgba(255,0,0,0.55), 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.18)',
+                                }}
+                            >
+                                {/* Glass specular highlight */}
+                                <div
+                                    className="absolute top-3 left-5 w-14 h-7 rounded-full pointer-events-none"
+                                    style={{ background: 'linear-gradient(150deg, rgba(255,255,255,0.28) 0%, transparent 100%)' }}
+                                />
+                                <span
+                                    className="material-symbols-outlined fill-1 text-white select-none relative z-10"
+                                    style={{ fontSize: '5rem', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.45))' }}
+                                >
+                                    sos
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        /* ── All other slides: neumorphic card + glassy polished circle ── */
+                        <div
+                            className={`
+                                neu-card-raised rounded-[2.5rem] w-56 h-56 flex items-center justify-center
+                                animate-neu-float transition-all duration-500
+                                ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}
+                            `}
+                        >
+                            {/* Polished glass circle — same treatment as SOS */}
+                            <div
+                                className="relative w-36 h-36 rounded-full flex items-center justify-center overflow-hidden"
+                                style={{
+                                    background: `radial-gradient(circle at 38% 32%, ${activeSlide.accentColor}CC 0%, ${activeSlide.accentColor} 50%, ${activeSlide.accentColor}CC 100%)`,
+                                    boxShadow: `0 10px 40px ${activeSlide.accentColor}55, 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.22)`,
+                                }}
+                            >
+                                {/* Glass specular highlight */}
+                                <div
+                                    className="absolute top-3 left-5 w-14 h-7 rounded-full pointer-events-none"
+                                    style={{ background: 'linear-gradient(150deg, rgba(255,255,255,0.32) 0%, transparent 100%)' }}
+                                />
+                                <i
+                                    className={`bi ${activeSlide.icon} text-white select-none relative z-10`}
+                                    style={{ fontSize: '4.5rem', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.35))' }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Text */}
