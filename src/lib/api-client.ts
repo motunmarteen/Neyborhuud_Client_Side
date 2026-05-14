@@ -75,12 +75,14 @@ class ApiClient {
               errorMessageLower.includes('session is valid') ||
               errorMessageLower.includes('session is invalid'));
 
+          // Only redirect to login when we had a session and the server rejected it.
+          // A 401 with no token is normal for guests (e.g. optional calls on `/`); never hijack that to /login.
           const shouldForceLogout =
-            !hasToken ||
-            isTokenExpiredError ||
-            isTokenInvalidError ||
-            sessionDead ||
-            genericAuthFailure;
+            hasToken &&
+            (isTokenExpiredError ||
+              isTokenInvalidError ||
+              sessionDead ||
+              genericAuthFailure);
 
           if (shouldForceLogout) {
             this.clearToken();
