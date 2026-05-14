@@ -88,6 +88,12 @@
   --color-brand-green-dark: #006F35;
   --color-brand-black:      #1A1A1A;
 
+  /* Compatibility aliases — map old tokens to brand colours so
+     existing tsx using brand-amber / brand-purple doesn't break.
+     Migrate usages to the official tokens over time (see DESIGN.md). */
+  --color-brand-amber:  #00D431;
+  --color-brand-purple: #0000FF;
+
   --color-charcoal:  var(--charcoal);
   --color-deep-text: var(--deep-text);
   --color-soft-bg:   var(--soft-bg);
@@ -599,6 +605,18 @@ textarea.neu-input:focus-within::after {
     -4px -4px 8px var(--neu-shadow-light);
 }
 
+/* ── Inset surface (non-circular, alias for neu-socket) ── */
+.neu-inset {
+  background: var(--neu-bg);
+  box-shadow:
+    inset 4px 4px 10px var(--neu-shadow-dark),
+    inset -4px -4px 10px var(--neu-shadow-light);
+}
+
+/* ── Accent colour token (used by ReportModal etc.) ── */
+:root  { --neu-accent: #00D431; }
+.dark  { --neu-accent: #00D431; }
+
 /* ── Neumorphic Divider ── */
 .neu-divider {
   height: 1px;
@@ -823,6 +841,157 @@ html:not(.dark) .mod-fab {
 html:not(.dark) .mod-fab:hover {
   box-shadow: 0 12px 36px rgba(0, 212, 49, 0.35), 0 4px 12px rgba(0, 0, 0, 0.12);
 }
+
+/* ═══════════════════════════════════════════════════════
+   GLASS BUTTON SYSTEM  (see DESIGN.md §5)
+   The two primary interactive button variants for the platform.
+   Use btn-glass-primary for the main CTA on any screen.
+   Use btn-glass-danger for destructive / emergency actions.
+   ═══════════════════════════════════════════════════════ */
+
+/* Shared base */
+.btn-glass-primary,
+.btn-glass-danger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: none;
+  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Specular highlight — top-left light catch */
+.btn-glass-primary::before,
+.btn-glass-danger::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 12%;
+  width: 40%;
+  height: 35%;
+  border-radius: 50%;
+  background: linear-gradient(150deg, rgba(255,255,255,0.28) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Primary — brand green */
+.btn-glass-primary {
+  background: radial-gradient(circle at 38% 32%, #33E85A 0%, #00D431 45%, #009922 100%);
+  box-shadow: 0 10px 32px rgba(0,212,49,0.45), 0 3px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.btn-glass-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(0,212,49,0.55), 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.btn-glass-primary:active {
+  transform: scale(0.97) translateY(0);
+  box-shadow: 0 5px 18px rgba(0,212,49,0.35), 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.btn-glass-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Danger — brand red */
+.btn-glass-danger {
+  background: radial-gradient(circle at 38% 32%, #FF4D4D 0%, #FF0000 50%, #B30000 100%);
+  box-shadow: 0 10px 32px rgba(255,0,0,0.45), 0 3px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+
+.btn-glass-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(255,0,0,0.55), 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+
+.btn-glass-danger:active {
+  transform: scale(0.97) translateY(0);
+  box-shadow: 0 5px 18px rgba(255,0,0,0.35), 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.btn-glass-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Secondary button — neumorphic raised, muted */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.875rem 1.5rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--neu-text-secondary);
+  background: var(--neu-bg);
+  cursor: pointer;
+  box-shadow:
+    6px 6px 14px var(--neu-shadow-dark),
+    -6px -6px 14px var(--neu-shadow-light);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-secondary:hover {
+  box-shadow:
+    4px 4px 10px var(--neu-shadow-dark),
+    -4px -4px 10px var(--neu-shadow-light);
+  color: var(--neu-text);
+}
+
+.btn-secondary:active {
+  box-shadow:
+    inset 4px 4px 10px var(--neu-shadow-dark),
+    inset -4px -4px 10px var(--neu-shadow-light);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Ghost button — text-only, no background */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-ghost:hover  { color: var(--neu-text-secondary); }
+.btn-ghost:active { opacity: 0.7; }
+.btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ═══════════════════════════════════════════════════════
    ACCESSIBILITY ENHANCEMENTS
