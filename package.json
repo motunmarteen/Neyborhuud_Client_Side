@@ -15,7 +15,7 @@
     "lint:strict": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "echo \"No tests configured\" && exit 0",
-    "check:curl": "curl --version",
+    "check:curl": "node scripts/curl-check.mjs",
     "check:all": "npm run typecheck && npm run lint && npm run build && npm run test"
   },
   "dependencies": {

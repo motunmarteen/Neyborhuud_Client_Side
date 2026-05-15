@@ -89,28 +89,25 @@ export function CommentThread({
                             {!comment.anonymous && comment.author?.username ? (
                                 <Link
                                     href={`/profile/${comment.author.username}`}
-                                    className="font-bold text-[13px] hover:underline"
-                                    style={{ color: 'var(--neu-text)' }}
+                                    className="text-[13px] font-bold text-[var(--neu-text)] hover:underline"
                                 >
                                     {comment.author.name}
                                 </Link>
                             ) : (
-                                <span className="font-bold text-[13px]" style={{ color: 'var(--neu-text)' }}>
-                                    Anonymous NeyburH
-                                </span>
+                                <span className="text-[13px] font-bold text-[var(--neu-text)]">Anonymous NeyburH</span>
                             )}
                             {comment.anonymous && (
-                                <span className="text-[11px] flex items-center gap-0.5" style={{ color: 'var(--neu-text-muted)' }}>
+                                <span className="flex items-center gap-0.5 text-[11px] text-[var(--neu-text-muted)]">
                                     <span className="material-symbols-outlined text-[11px]">lock</span>
                                 </span>
                             )}
-                            <span className="text-[12px]" style={{ color: 'var(--neu-text-muted)' }}>
+                            <span className="text-[12px] text-[var(--neu-text-muted)]">
                                 · {formatTimeAgo(comment.createdAt)}
                             </span>
                         </div>
 
                         {/* Comment body */}
-                        <p className="text-[14px] leading-5 mt-1 whitespace-pre-wrap break-words" style={{ color: 'var(--neu-text)' }}>
+                        <p className="mt-1 whitespace-pre-wrap break-words text-[14px] leading-5 text-[var(--neu-text)]">
                             {comment.body}
                         </p>
 
@@ -130,16 +127,16 @@ export function CommentThread({
                         )}
 
                         {/* Actions */}
-                        <div className="flex items-center gap-4 mt-1.5" style={{ color: 'var(--neu-text-muted)' }}>
+                        <div className="mt-1.5 flex items-center gap-4 text-[var(--neu-text-muted)]">
                             {/* Like button */}
                             {onLikeComment && (
                                 <button
                                     onClick={() => onLikeComment(commentId)}
                                     disabled={isLikingCommentId === commentId}
-                                    className="flex items-center gap-1 text-[12px] hover:text-red-400 transition-colors group disabled:opacity-50"
+                                    className="group flex items-center gap-1 text-[12px] transition-colors hover:text-red-500 disabled:opacity-50 dark:hover:text-red-400"
                                 >
                                     <span className={`material-symbols-outlined text-sm transition-colors ${
-                                        comment.isLiked ? 'fill-1 text-red-400' : 'group-hover:text-red-400'
+                                        comment.isLiked ? 'fill-1 text-red-500 dark:text-red-400' : 'group-hover:text-red-500 dark:group-hover:text-red-400'
                                     }`}>
                                         favorite
                                     </span>
@@ -151,7 +148,7 @@ export function CommentThread({
                             {canReply && (
                                 <button
                                     onClick={() => setShowReplyInput(!showReplyInput)}
-                                    className="text-[12px] font-medium hover:text-primary transition-colors"
+                                    className="text-[12px] font-medium text-[var(--neu-text-muted)] transition-colors hover:text-primary"
                                 >
                                     Reply
                                 </button>
@@ -159,7 +156,7 @@ export function CommentThread({
                             {hasReplies && (
                                 <button
                                     onClick={toggleReplies}
-                                    className="text-[12px] font-medium hover:text-primary transition-colors flex items-center gap-1"
+                                    className="flex items-center gap-1 text-[12px] font-medium text-[var(--neu-text-muted)] transition-colors hover:text-primary"
                                 >
                                     <span className="material-symbols-outlined text-sm">
                                         {showReplies ? 'expand_less' : 'expand_more'}

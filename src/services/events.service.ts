@@ -11,6 +11,129 @@ import {
   User,
 } from "@/types/api";
 
+/** Share payload from GET /events/:id/share (also used when parsing wrapped API responses). */
+export interface EventSharePlatforms {
+  whatsapp?: string;
+  twitter?: string;
+  facebook?: string;
+  linkedin?: string;
+  telegram?: string;
+  email?: string;
+}
+
+export interface EventSharePayload {
+  eventId: string;
+  title: string;
+  webUrl: string;
+  deepLink: string;
+  message: string;
+  platforms: EventSharePlatforms;
+  /** True when GET /share failed and we built links from the open event page (dev / older API). */
+  clientFallback?: boolean;
+}
+
+/** Fields from the event detail page used when GET /events/:id/share is unavailable (404/503). */
+export interface EventShareFallbackInput {
+  title: string;
+  startDate?: string;
+  venue?: string;
+}
+
+function httpStatusFromUnknownError(e: unknown): number | undefined {
+  if (!e || typeof e !== "object") return undefined;
+  const res = (e as { response?: { status?: number } }).response;
+  return typeof res?.status === "number" ? res.status : undefined;
+}
+
+function formatShareWhen(d: string | undefined): string | null {
+  if (!d) return null;
+  const t = new Date(d).getTime();
+  if (Number.isNaN(t)) return null;
+  return new Date(d).toLocaleString("en-NG", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** Build share text and platform intents in the browser (matches common server patterns). */
+export function buildClientEventSharePayload(
+  eventId: string,
+  input: EventShareFallbackInput,
+): EventSharePayload {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const webUrl = `${origin}/events/${eventId}`;
+  const deepLink = `neyborhuud://events/${eventId}`;
+  const when = formatShareWhen(input.startDate);
+  const lines = [
+    input.title,
+    when ? `When: ${when}` : null,
+    input.venue ? `Where: ${input.venue}` : null,
+    `Link: ${webUrl}`,
+  ].filter(Boolean) as string[];
+  const message = lines.join("\n");
+  const textEnc = encodeURIComponent(message);
+  const urlEnc = encodeURIComponent(webUrl);
+  const titleEnc = encodeURIComponent(input.title);
+  const tweet = encodeURIComponent(`${input.title}\n${webUrl}`);
+  return {
+    eventId,
+    title: input.title,
+    webUrl,
+    deepLink,
+    message,
+    clientFallback: true,
+    platforms: {
+      whatsapp: `https://wa.me/?text=${textEnc}`,
+      twitter: `https://twitter.com/intent/tweet?text=${tweet}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${urlEnc}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${urlEnc}`,
+      telegram: `https://t.me/share/url?url=${urlEnc}&text=${titleEnc}`,
+      email: `mailto:?subject=${titleEnc}&body=${textEnc}`,
+    },
+  };
+}
+
+/** Unwrap `share` from typical `{ success, data: { share } }` (or root `share`) shapes. */
+export function extractEventSharePayload(res: unknown): EventSharePayload | null {
+  if (!res || typeof res !== "object") return null;
+  const r = res as Record<string, unknown>;
+  let share: unknown = r.share;
+  if (!share && r.data != null && typeof r.data === "object") {
+    const d = r.data as Record<string, unknown>;
+    share = d.share;
+    if (!share && d.data != null && typeof d.data === "object") {
+      share = (d.data as Record<string, unknown>).share;
+    }
+  }
+  if (!share || typeof share !== "object") return null;
+  const s = share as Record<string, unknown>;
+  const webUrl = typeof s.webUrl === "string" ? s.webUrl.trim() : "";
+  const message = typeof s.message === "string" ? s.message.trim() : "";
+  if (!webUrl && !message) return null;
+
+  const platformsRaw = s.platforms;
+  const platforms: EventSharePlatforms = {};
+  if (platformsRaw && typeof platformsRaw === "object") {
+    const p = platformsRaw as Record<string, unknown>;
+    (["whatsapp", "twitter", "facebook", "linkedin", "telegram", "email"] as const).forEach((key) => {
+      if (typeof p[key] === "string" && p[key]) platforms[key] = p[key] as string;
+    });
+  }
+
+  return {
+    eventId: String(s.eventId ?? ""),
+    title: typeof s.title === "string" ? s.title : "",
+    webUrl,
+    deepLink: typeof s.deepLink === "string" ? s.deepLink : "",
+    message: typeof s.message === "string" ? s.message : "",
+    platforms,
+  };
+}
+
 export const eventsService = {
   /**
    * Create a new event
@@ -139,10 +262,47 @@ export const eventsService = {
   },
 
   /**
-   * Share an event
+   * Get server-built share text, URLs, and platform intents (public; optional auth).
    */
-  async shareEvent(eventId: string, message?: string) {
-    return await apiClient.post(`/events/${eventId}/share`, { message });
+  async getEventSharePayload(eventId: string) {
+    const res = await apiClient.get(`/events/${eventId}/share`);
+    const share = extractEventSharePayload(res);
+    if (!share) {
+      throw new Error("Invalid share response from server.");
+    }
+    return share;
+  },
+
+  /**
+   * Same as getEventSharePayload, but if the route is missing (404) or temporarily down (502/503)
+   * and `fallback` is provided, returns {@link buildClientEventSharePayload} instead of throwing.
+   */
+  async getEventSharePayloadWithFallback(
+    eventId: string,
+    fallback?: EventShareFallbackInput | null,
+  ): Promise<EventSharePayload> {
+    try {
+      const res = await apiClient.get(`/events/${eventId}/share`);
+      const share = extractEventSharePayload(res);
+      if (share) return share;
+    } catch (e) {
+      const st = httpStatusFromUnknownError(e);
+      if (fallback?.title && (st === 404 || st === 502 || st === 503)) {
+        return buildClientEventSharePayload(eventId, fallback);
+      }
+      throw e;
+    }
+    if (fallback?.title) {
+      return buildClientEventSharePayload(eventId, fallback);
+    }
+    throw new Error("Invalid share response from server.");
+  },
+
+  /**
+   * Record a completed share for analytics (authenticated users).
+   */
+  async recordEventShare(eventId: string) {
+    return await apiClient.post(`/events/${eventId}/share`, {});
   },
 
   /**

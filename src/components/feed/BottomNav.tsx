@@ -71,19 +71,20 @@ export function BottomNav({ hidden }: BottomNavProps) {
     .reduce((sum: number, c: any) => sum + (c.unreadCount ?? 0), 0);
 
   const navItemClass = (active: boolean) =>
-    `min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors touch-manipulation ${
+    `relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-2xl transition-all duration-200 ease-out touch-manipulation ${
       active
-        ? 'text-primary'
-        : ''
+        ? 'text-primary scale-105 bg-primary/12 shadow-[0_0_20px_rgba(0,212,49,0.18)] dark:text-emerald-400 dark:bg-emerald-500/15 dark:shadow-[0_0_20px_rgba(16,185,129,0.12)]'
+        : 'text-[#3D5A3E] hover:text-brand-black hover:bg-black/[0.04] dark:text-white/55 dark:hover:text-white/85 dark:hover:bg-white/[0.06]'
     }`;
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-50 neu-nav safe-area-bottom transition-transform duration-300 ease-in-out ${hidden ? 'translate-y-full' : 'translate-y-0'}`}
+      className={`fixed bottom-0 left-0 right-0 z-50 pointer-events-none safe-area-bottom transition-transform duration-300 ease-in-out ${hidden ? 'translate-y-full' : 'translate-y-0'}`}
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="flex items-center justify-around max-w-lg mx-auto h-14 px-2">
+      <div className="pointer-events-auto mx-3 mb-3 max-w-lg mx-auto rounded-[26px] border border-[var(--border-light)] bg-white/76 px-1.5 py-1 shadow-[0_12px_40px_rgba(0,111,53,0.12),0_0_0_1px_rgba(255,255,255,0.9)_inset] backdrop-blur-2xl dark:border-white/12 dark:bg-[rgba(12,18,24,0.55)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.05)_inset,0_0_48px_-8px_rgba(16,185,129,0.12)]">
+        <div className="flex h-[52px] items-center justify-around">
         {/* Home */}
         <Link
           href="/feed"
@@ -152,6 +153,7 @@ export function BottomNav({ hidden }: BottomNavProps) {
         >
           <span className={`material-symbols-outlined text-[30px] ${pathname.startsWith('/profile') ? 'fill-1' : ''}`}>person</span>
         </Link>
+        </div>
       </div>
     </nav>
   );

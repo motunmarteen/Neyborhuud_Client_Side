@@ -274,7 +274,7 @@ class ApiClient {
       Object.keys(obj).forEach((k) => {
         const v = obj[k];
         if (v === undefined || v === null) return;
-        const subKey = `${key}[${k}]`;
+        const subKey = `${key}[${k}]`;  
         if (typeof v === "object" && v !== null && !(v instanceof File) && !(v instanceof Blob) && !Array.isArray(v)) {
           this.appendFormValue(formData, subKey, v);
         } else if (Array.isArray(v)) {

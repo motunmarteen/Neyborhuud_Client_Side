@@ -14,13 +14,14 @@ import { HelpRequestCategoryTabs, HelpRequestCategory } from '@/components/help-
 import CreateHelpRequestModal from '@/components/help-request/CreateHelpRequestModal';
 import { HelpRequestCard } from '@/components/help-request/HelpRequestCard';
 import { useHelpRequestList } from '@/hooks/useHelpRequest';
-import { useAuth } from '@/hooks/useAuth';
 import { Post } from '@/types/api';
+import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
 
 function HelpRequestPageInner() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [categoryFilter, setCategoryFilter] = useState<HelpRequestCategory>('');
-    const { user } = useAuth();
+    const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
+    const [commentsAnchor, setCommentsAnchor] = useState<{ left: number; width: number } | null>(null);
     const observerRef = useRef<IntersectionObserver | null>(null);
 
     const {
@@ -138,9 +139,19 @@ function HelpRequestPageInner() {
                                     const postId = post.id || `${index}`;
                                     const isLast = index === posts.length - 1;
                                     return (
-                                        <div key={postId} ref={isLast ? lastPostRef : undefined}>
+                                        <div key={postId} ref={isLast ? lastPostRef : undefined} data-comment-anchor={`post-${postId}`}>
                                             <HelpRequestCard
                                                 post={post}
+                                                onComment={(id) => {
+                                                    const el = document.querySelector(`[data-comment-anchor="post-${id}"]`) as HTMLElement | null;
+                                                    if (el) {
+                                                        const rect = el.getBoundingClientRect();
+                                                        setCommentsAnchor({ left: rect.left, width: rect.width });
+                                                    } else {
+                                                        setCommentsAnchor(null);
+                                                    }
+                                                    setCommentsPostId(id);
+                                                }}
                                             />
                                         </div>
                                     );
@@ -170,6 +181,16 @@ function HelpRequestPageInner() {
             <CreateHelpRequestModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
+            />
+
+            <FeedCommentsSheet
+                isOpen={!!commentsPostId}
+                target={commentsPostId ? { kind: 'post', id: commentsPostId } : null}
+                desktopAnchor={commentsAnchor}
+                onClose={() => {
+                    setCommentsPostId(null);
+                    setCommentsAnchor(null);
+                }}
             />
         </div>
     );

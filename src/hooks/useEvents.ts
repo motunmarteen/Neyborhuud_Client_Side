@@ -3,13 +3,19 @@
  * Manages events, attendance, and creation with React Query
  */
 
+import { useLayoutEffect } from "react";
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { eventsService } from "@/services/events.service";
+import type { QueryClient } from "@tanstack/react-query";
+import { eventsService, type EventShareFallbackInput } from "@/services/events.service";
+import {
+  readEventDetailCache,
+  writeEventDetailCache,
+} from "@/lib/event-detail-cache";
 import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -54,13 +60,42 @@ export function useUserEvents(userId: string | null, limit = 6) {
   });
 }
 
-/** Single event by id */
+/** Single event by id (persists last response for faster reloads; refetches in background). */
 export function useEvent(eventId: string | null) {
+  const queryClient = useQueryClient();
+
+  useLayoutEffect(() => {
+    if (!eventId) return;
+    const key = ["events", "detail", eventId] as const;
+    if (queryClient.getQueryData(key) != null) return;
+    const cached = readEventDetailCache(eventId);
+    if (!cached) return;
+    queryClient.setQueryData(key, cached.payload);
+    void queryClient.invalidateQueries({ queryKey: key });
+  }, [eventId, queryClient]);
+
   return useQuery({
     queryKey: ["events", "detail", eventId],
-    queryFn: () => eventsService.getEvent(eventId!),
+    queryFn: async () => {
+      const res = await eventsService.getEvent(eventId!);
+      writeEventDetailCache(eventId!, res);
+      return res;
+    },
     enabled: !!eventId,
-    staleTime: 30000,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/** Warm detail cache + sessionStorage when the user hovers an event link (in-app navigation). */
+export function prefetchEventDetail(queryClient: QueryClient, eventId: string) {
+  return queryClient.prefetchQuery({
+    queryKey: ["events", "detail", eventId],
+    queryFn: async () => {
+      const res = await eventsService.getEvent(eventId);
+      writeEventDetailCache(eventId, res);
+      return res;
+    },
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -117,6 +152,7 @@ export function useAttendEvent() {
         ? eventsService.unattendEvent(eventId)
         : eventsService.attendEvent(eventId),
     onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["feed-discovery"] });
       queryClient.invalidateQueries({
         queryKey: ["events", "detail", variables.eventId],
       });
@@ -254,18 +290,30 @@ export function useNearbyEvents(
   });
 }
 
-/** Share an event */
-export function useShareEvent() {
+/** Fetch server-built share payload when the share sheet is open */
+export function useEventSharePayload(
+  eventId: string | null,
+  open: boolean,
+  options?: { fallback?: EventShareFallbackInput | null },
+) {
+  const fb = options?.fallback;
+  return useQuery({
+    queryKey: ["events", "share", eventId, fb?.title, fb?.startDate, fb?.venue],
+    queryFn: () => eventsService.getEventSharePayloadWithFallback(eventId!, fb ?? undefined),
+    enabled: !!eventId && open,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+}
+
+/** Record a completed share for analytics (POST /events/:id/share); requires auth on server */
+export function useRecordEventShare() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (eventId: string) => eventsService.shareEvent(eventId),
+    mutationFn: (eventId: string) => eventsService.recordEventShare(eventId),
     onSuccess: (_data, eventId) => {
       queryClient.invalidateQueries({ queryKey: ["events", "detail", eventId] });
-      toast.success("Event shared!");
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error) || "Failed to share event");
     },
   });
 }

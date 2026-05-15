@@ -246,7 +246,8 @@ export const marketplaceService = {
   // ==================== Product Discovery ====================
 
   /**
-   * Get all marketplace products (legacy endpoint - keeping for compatibility)
+   * Get all marketplace products
+   * GET /api/v1/marketplace
    */
   async getItems(
     page = 1,
@@ -260,7 +261,7 @@ export const marketplaceService = {
     },
   ) {
     return await apiClient.get<PaginatedResponse<Product>>(
-      "/marketplace/items",
+      "/marketplace",
       {
         params: { page, limit, ...filter },
       },
@@ -268,7 +269,9 @@ export const marketplaceService = {
   },
 
   /**
-   * Get nearby marketplace products
+   * Location-scoped marketplace listings (same collection route as {@link getItems}).
+   * GET /api/v1/marketplace?lat=&lng=&radius=&page=&limit=
+   * There is no separate `/marketplace/nearby` on the API.
    */
   async getNearbyItems(
     latitude: number,
@@ -277,12 +280,15 @@ export const marketplaceService = {
     page = 1,
     limit = 20,
   ) {
-    return await apiClient.get<PaginatedResponse<Product>>(
-      "/marketplace/items/nearby",
-      {
-        params: { lat: latitude, lng: longitude, radius, page, limit },
+    return await apiClient.get<PaginatedResponse<Product>>("/marketplace", {
+      params: {
+        page,
+        limit,
+        lat: latitude,
+        lng: longitude,
+        radius,
       },
-    );
+    });
   },
 
   /**

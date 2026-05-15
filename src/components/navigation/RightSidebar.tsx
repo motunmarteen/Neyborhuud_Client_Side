@@ -12,19 +12,13 @@ import { useEvents } from '@/hooks/useEvents';
 import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 
 export default function RightSidebar() {
-    const { data: eventsData, isLoading: eventsLoading } = useEvents({ status: 'upcoming' });
-    const events = (eventsData?.pages?.[0] as any)?.data?.content
-        ?? (eventsData?.pages?.[0] as any)?.data?.events
-        ?? (eventsData?.pages?.[0] as any)?.data?.data
-        ?? [];
-    const upcomingEvents = Array.isArray(events) ? events.slice(0, 3) : [];
+    const { data: eventsData, isLoading: eventsLoading } = useEvents();
+    const eventsRaw = eventsData?.pages?.flatMap((page: any) => page?.data?.events ?? page?.data ?? []) ?? [];
+    const upcomingEvents = Array.isArray(eventsRaw) ? eventsRaw.slice(0, 3) : [];
 
     const { data: marketplaceData, isLoading: marketplaceLoading } = useMarketplaceProducts();
-    const listings = (marketplaceData?.pages?.[0] as any)?.data?.content
-        ?? (marketplaceData?.pages?.[0] as any)?.data?.listings
-        ?? (marketplaceData?.pages?.[0] as any)?.data?.data
-        ?? [];
-    const recentListings = Array.isArray(listings) ? listings.slice(0, 2) : [];
+    const listingsRaw = marketplaceData?.pages?.flatMap((page: any) => page?.data ?? []) ?? [];
+    const recentListings = Array.isArray(listingsRaw) ? listingsRaw.slice(0, 2) : [];
 
     return (
         <aside className="hidden xl:flex w-[480px] flex-col gap-6 p-6 neu-base overflow-y-auto shrink-0" style={{ boxShadow: '-4px 0 12px var(--neu-shadow-dark)' }}>
@@ -34,7 +28,7 @@ export default function RightSidebar() {
             {/* Events Widget */}
             <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-base font-bold" style={{ color: 'var(--neu-text)' }}>Upcoming Events</h2>
+                    <Link href="/events" className="text-base font-bold hover:text-primary transition-colors" style={{ color: 'var(--neu-text)' }}>Upcoming Events</Link>
                     <Link href="/events" className="text-primary text-xs font-bold hover:underline">See all</Link>
                 </div>
                 <div className="flex flex-col gap-3">
@@ -51,7 +45,7 @@ export default function RightSidebar() {
                             ))}
                         </>
                     ) : upcomingEvents.length === 0 ? (
-                        <p className="text-xs py-2" style={{ color: 'var(--neu-text-muted)' }}>No upcoming events nearby.</p>
+                        <Link href="/events" className="text-xs py-2 hover:text-primary transition-colors" style={{ color: 'var(--neu-text-muted)' }}>No upcoming events nearby. Browse all →</Link>
                     ) : upcomingEvents.map((event: any) => {
                         const date = event.date ? new Date(event.date) : null;
                         const month = date ? date.toLocaleString('default', { month: 'short' }) : '';
@@ -86,7 +80,7 @@ export default function RightSidebar() {
             <div className="flex flex-col gap-3">
                 <div className="neu-divider" />
                 <div className="flex items-center justify-between">
-                    <h2 className="text-base font-bold" style={{ color: 'var(--neu-text)' }}>Marketplace</h2>
+                    <Link href="/marketplace" className="text-base font-bold hover:text-primary transition-colors" style={{ color: 'var(--neu-text)' }}>Marketplace</Link>
                     <Link href="/marketplace" className="text-primary text-xs font-bold hover:underline">Browse</Link>
                 </div>
                 {marketplaceLoading ? (
@@ -100,7 +94,7 @@ export default function RightSidebar() {
                         ))}
                     </div>
                 ) : recentListings.length === 0 ? (
-                    <p className="text-xs py-2" style={{ color: 'var(--neu-text-muted)' }}>No listings nearby yet.</p>
+                    <Link href="/marketplace" className="text-xs py-2 hover:text-primary transition-colors" style={{ color: 'var(--neu-text-muted)' }}>No listings nearby yet. Browse all →</Link>
                 ) : (
                     <div className="grid grid-cols-2 gap-3">
                         {recentListings.map((item: any) => {
@@ -112,7 +106,7 @@ export default function RightSidebar() {
                             return (
                                 <Link
                                     key={item._id ?? item.id}
-                                    href={`/marketplace/${item._id ?? item.id}`}
+                                    href={`/marketplace?product=${encodeURIComponent(String(item._id ?? item.id))}`}
                                     className="group cursor-pointer"
                                 >
                                     {image ? (

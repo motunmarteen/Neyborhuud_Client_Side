@@ -48,8 +48,7 @@ export function GossipCommentInput({
                     maxLength={500}
                     disabled={isSubmitting}
                     autoFocus={autoFocus}
-                    className="flex-1 px-3 py-2 rounded-xl neu-input text-sm resize-none"
-                    style={{ color: 'var(--neu-text)' }}
+                    className="neu-input flex-1 resize-none rounded-xl px-3 py-2 text-sm text-[var(--neu-text)] placeholder:text-[var(--neu-text-muted)]"
                 />
             </div>
 
@@ -62,7 +61,7 @@ export function GossipCommentInput({
                         className="w-4 h-4 rounded accent-[var(--primary)]"
                         disabled={isSubmitting}
                     />
-                    <span className="text-xs flex items-center gap-1" style={{ color: 'var(--neu-text-muted)' }}>
+                    <span className="flex items-center gap-1 text-xs text-[var(--neu-text-muted)]">
                         <span className="material-symbols-outlined text-xs">lock</span>
                         Anonymous
                     </span>
@@ -73,8 +72,7 @@ export function GossipCommentInput({
                         <button
                             type="button"
                             onClick={onCancel}
-                            className="px-3 py-1.5 text-xs rounded-lg transition-colors"
-                            style={{ color: 'var(--neu-text-muted)' }}
+                            className="rounded-lg px-3 py-1.5 text-xs text-[var(--neu-text-muted)] transition-colors hover:text-[var(--neu-text)]"
                         >
                             Cancel
                         </button>

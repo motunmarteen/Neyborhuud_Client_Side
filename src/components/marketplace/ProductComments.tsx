@@ -7,13 +7,16 @@ import { useProductComments, useProductCommentMutations } from "@/hooks/useMarke
 import { useState, useRef, useEffect } from "react";
 import { formatTimeAgo } from "@/utils/timeAgo";
 import { Comment } from "@/types/api";
+import { glassField } from "@/lib/glass-form-styles";
 
 interface ProductCommentsProps {
   productId: string;
   currentUserId?: string;
+  /** Tighter layout for bottom sheets */
+  embedded?: boolean;
 }
 
-export function ProductComments({ productId, currentUserId }: ProductCommentsProps) {
+export function ProductComments({ productId, currentUserId, embedded }: ProductCommentsProps) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useProductComments(productId);
   const { addComment } = useProductCommentMutations(productId);
@@ -57,15 +60,16 @@ export function ProductComments({ productId, currentUserId }: ProductCommentsPro
   }, [commentBody]);
 
   if (isLoading) {
+    const skelBg = embedded ? "bg-[var(--surface-light)] dark:bg-white/10" : "bg-gray-800";
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="animate-pulse">
             <div className="flex gap-3">
-              <div className="w-10 h-10 bg-gray-800 rounded-full" />
+              <div className={`h-10 w-10 rounded-full ${skelBg}`} />
               <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-800 rounded w-24" />
-                <div className="h-16 bg-gray-800 rounded" />
+                <div className={`h-4 w-24 rounded ${skelBg}`} />
+                <div className={`h-16 rounded ${skelBg}`} />
               </div>
             </div>
           </div>
@@ -75,24 +79,31 @@ export function ProductComments({ productId, currentUserId }: ProductCommentsPro
   }
 
   return (
-    <div className="space-y-6">
-      {/* Comment Count */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">
-          Comments {totalComments > 0 && `(${totalComments})`}
-        </h3>
-      </div>
+    <div className={embedded ? "space-y-4" : "space-y-6"}>
+      {!embedded && (
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-white">
+            Comments {totalComments > 0 && `(${totalComments})`}
+          </h3>
+        </div>
+      )}
 
       {/* Comment Form */}
       {currentUserId ? (
         <form onSubmit={handleSubmitComment} className="space-y-3">
           {replyingTo && (
-            <div className="flex items-center justify-between px-3 py-2 bg-gray-800/50 rounded-lg text-sm">
-              <span className="text-gray-400">Replying to comment</span>
+            <div
+              className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${
+                embedded
+                  ? "border border-[var(--border-light)] bg-[var(--surface-light)]/80 dark:border-white/12 dark:bg-white/[0.06]"
+                  : "bg-gray-800/50"
+              }`}
+            >
+              <span className={embedded ? "text-[var(--neu-text-muted)]" : "text-gray-400"}>Replying to comment</span>
               <button
                 type="button"
                 onClick={handleCancelReply}
-                className="text-red-400 hover:text-red-300"
+                className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
               >
                 Cancel
               </button>
@@ -104,28 +115,46 @@ export function ProductComments({ productId, currentUserId }: ProductCommentsPro
               value={commentBody}
               onChange={(e) => setCommentBody(e.target.value)}
               placeholder="Add a comment..."
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-none min-h-[80px]"
+              className={
+                embedded
+                  ? `${glassField} min-h-[64px] resize-none`
+                  : `min-h-[80px] w-full resize-none rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`
+              }
               maxLength={1000}
             />
-            <div className="absolute bottom-3 right-3 text-xs text-gray-500">
+            <div
+              className={`absolute bottom-3 right-3 text-xs ${
+                embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"
+              }`}
+            >
               {commentBody.length}/1000
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">
+            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"}`}>
               Maximum 3 comments per minute
             </span>
             <button
               type="submit"
               disabled={!commentBody.trim() || addComment.isPending}
-              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+              className={
+                embedded
+                  ? "rounded-full bg-gradient-to-r from-primary to-[#006F35] px-6 py-2 text-sm font-bold text-white shadow-md transition-opacity disabled:cursor-not-allowed disabled:opacity-45 dark:from-emerald-500 dark:to-teal-600"
+                  : "rounded-lg bg-blue-500 px-6 py-2 font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-500"
+              }
             >
               {addComment.isPending ? "Posting..." : "Post Comment"}
             </button>
           </div>
         </form>
       ) : (
-        <div className="p-4 bg-gray-800/50 rounded-lg text-center text-gray-400">
+        <div
+          className={`rounded-lg p-4 text-center ${
+            embedded
+              ? "border border-[var(--border-light)] bg-[var(--surface-light)]/70 text-[var(--neu-text-muted)] dark:border-white/12 dark:bg-white/[0.05]"
+              : "bg-gray-800/50 text-gray-400"
+          }`}
+        >
           Please log in to comment
         </div>
       )}
@@ -139,11 +168,12 @@ export function ProductComments({ productId, currentUserId }: ProductCommentsPro
               comment={comment}
               onReply={handleReplyClick}
               currentUserId={currentUserId}
+              embedded={!!embedded}
             />
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 text-gray-500">
+        <div className={`py-8 text-center ${embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"}`}>
           No comments yet. Be the first to comment!
         </div>
       )}
@@ -153,7 +183,12 @@ export function ProductComments({ productId, currentUserId }: ProductCommentsPro
         <button
           onClick={() => fetchNextPage()}
           disabled={isFetchingNextPage}
-          className="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50"
+          className={
+            embedded
+              ? "neu-btn w-full rounded-xl py-3 text-sm font-bold transition-colors disabled:opacity-50"
+              : "w-full rounded-lg bg-gray-800 py-3 text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
+          }
+          style={embedded ? { color: "var(--neu-text)" } : undefined}
         >
           {isFetchingNextPage ? "Loading..." : "Load More Comments"}
         </button>
@@ -166,9 +201,10 @@ interface CommentItemProps {
   comment: Comment;
   onReply: (commentId: string, username: string) => void;
   currentUserId?: string;
+  embedded?: boolean;
 }
 
-function CommentItem({ comment, onReply, currentUserId }: CommentItemProps) {
+function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemProps) {
   const user = comment.user || (comment as any).author || (typeof comment.userId === 'object' ? comment.userId : null);
   const username = user?.username || "Anonymous";
   const avatar = user?.avatar || user?.avatarUrl;
@@ -193,18 +229,26 @@ function CommentItem({ comment, onReply, currentUserId }: CommentItemProps) {
       </div>
 
       {/* Comment Content */}
-      <div className="flex-1 min-w-0">
-        <div className="bg-gray-800 rounded-lg px-4 py-3">
+      <div className="min-w-0 flex-1">
+        <div
+          className={
+            embedded
+              ? "rounded-xl border border-[var(--border-light)] bg-[var(--surface-light)]/75 px-4 py-3 dark:border-white/12 dark:bg-white/[0.06]"
+              : "rounded-lg bg-gray-800 px-4 py-3"
+          }
+        >
           {/* Username and time */}
-          <div className="flex items-center gap-2 mb-2">
-            <span className="font-semibold text-white">{username}</span>
-            <span className="text-xs text-gray-500">
+          <div className="mb-2 flex items-center gap-2">
+            <span className={`font-semibold ${embedded ? "text-[var(--neu-text)]" : "text-white"}`}>{username}</span>
+            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"}`}>
               {formatTimeAgo(comment.createdAt)}
             </span>
           </div>
 
           {/* Body */}
-          <p className="text-gray-300 whitespace-pre-wrap break-words">
+          <p
+            className={`whitespace-pre-wrap break-words ${embedded ? "text-[var(--neu-text-secondary)]" : "text-gray-300"}`}
+          >
             {comment.body}
           </p>
 
@@ -224,16 +268,18 @@ function CommentItem({ comment, onReply, currentUserId }: CommentItemProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-4 mt-2 px-4">
+        <div className="mt-2 flex items-center gap-4 px-4">
           {likesCount > 0 && (
-            <span className="text-xs text-gray-500">
+            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"}`}>
               {likesCount} {likesCount === 1 ? "like" : "likes"}
             </span>
           )}
           {currentUserId && (
             <button
               onClick={() => onReply(commentId, username)}
-              className="text-xs text-gray-400 hover:text-blue-400 transition-colors"
+              className={`text-xs transition-colors ${
+                embedded ? "text-[var(--neu-text-muted)] hover:text-primary" : "text-gray-400 hover:text-blue-400"
+              }`}
             >
               Reply
             </button>

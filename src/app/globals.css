@@ -194,6 +194,81 @@ html.dark body {
   background-image: url('/doodle-pattern-dark.svg?v=2');
 }
 
+/* Doodle modal system: feed comments, marketplace sheets, offer dialog, share, glass form cards */
+.feed-comments-backdrop,
+.doodle-modal-backdrop {
+  background-color: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+.dark .feed-comments-backdrop,
+.dark .doodle-modal-backdrop {
+  background-color: rgba(13, 26, 15, 0.48);
+}
+
+.feed-comments-panel,
+.doodle-modal-panel {
+  background-color: #ffffff;
+  background-image: url('/doodle-pattern.svg?v=2');
+  background-repeat: repeat;
+  background-size: 360px 360px;
+  color: var(--neu-text);
+}
+
+.dark .feed-comments-panel,
+.dark .doodle-modal-panel {
+  background-color: #0d1a0f;
+  background-image: url('/doodle-pattern-dark.svg?v=2');
+}
+
+.feed-comments-panel-wash,
+.doodle-modal-panel-wash {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    radial-gradient(circle at 50% 0%, rgba(0, 135, 81, 0.11), transparent 38%);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+}
+
+.dark .feed-comments-panel-wash,
+.dark .doodle-modal-panel-wash {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    radial-gradient(circle at 50% 0%, rgba(0, 135, 81, 0.12), transparent 34%);
+}
+
+.feed-comments-ambient,
+.doodle-modal-ambient {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.feed-comments-ambient-float,
+.doodle-modal-ambient-float {
+  position: absolute;
+  left: 50%;
+  top: -3rem;
+  width: 140%;
+  height: 11rem;
+  transform: translateX(-50%);
+  opacity: 0.5;
+  background: radial-gradient(ellipse 75% 65% at 50% 0%, rgba(0, 212, 49, 0.14), transparent 68%);
+}
+
+.dark .feed-comments-ambient-float,
+.dark .doodle-modal-ambient-float {
+  opacity: 0.45;
+  background: radial-gradient(ellipse 75% 65% at 50% 0%, rgba(0, 212, 49, 0.12), transparent 68%);
+}
+
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;

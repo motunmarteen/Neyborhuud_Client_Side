@@ -844,7 +844,7 @@ export default function ConversationPage() {
               )}
               {conv.context.productId && (
                 <Link
-                  href={`/marketplace/${conv.context.productId}`}
+                  href={`/marketplace?product=${encodeURIComponent(String(conv.context.productId))}`}
                   className="shrink-0 rounded-full border border-blue-500/60 px-3 py-1 text-xs font-medium text-blue-200 hover:bg-blue-900/40"
                 >
                   View

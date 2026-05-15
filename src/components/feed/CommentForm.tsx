@@ -71,8 +71,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                         value={body}
                         onChange={(e) => setBody(e.target.value)}
                         placeholder={placeholder}
-                        className="w-full bg-transparent border-none focus:ring-0 text-[16px] placeholder-[var(--neu-text-muted)] resize-none py-1.5 h-auto overflow-hidden min-h-[40px]"
-                        style={{ color: 'var(--neu-text)' }}
+                        className="h-auto min-h-[40px] w-full resize-none border-none bg-transparent py-1.5 text-[16px] text-[var(--neu-text)] placeholder:text-[var(--neu-text-muted)] focus:ring-0"
                         rows={1}
                         onInput={(e) => {
                             const target = e.target as HTMLTextAreaElement;
@@ -115,7 +114,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                 value={tempUrl}
                                 onChange={(e) => setTempUrl(e.target.value)}
                                 placeholder="Paste image URL..."
-                                className="flex-1 text-xs p-2 rounded-lg neu-input transition-all"
+                                className="neu-input flex-1 rounded-lg p-2 text-xs text-[var(--neu-text)] transition-all placeholder:text-[var(--neu-text-muted)]"
                                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addMediaUrl())}
                             />
                             <button
@@ -128,7 +127,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                             <button
                                 type="button"
                                 onClick={() => setShowMediaInput(false)}
-                                className="text-xs" style={{ color: 'var(--neu-text-muted)' }}
+                                className="text-xs text-[var(--neu-text-muted)] transition-colors hover:text-[var(--neu-text)]"
                             >
                                 Cancel
                             </button>

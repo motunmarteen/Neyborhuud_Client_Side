@@ -5,6 +5,7 @@ import { useCreateEvent } from "@/hooks/useEvents";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { toast } from 'sonner';
 import { CreateEventPayload } from "@/types/api";
+import { glassField, glassLabel, glassMutedLabel } from "@/lib/glass-form-styles";
 
 const EVENT_TYPES = [
   "community",
@@ -90,74 +91,70 @@ export default function CreateEventForm() {
   const isUploading = createEvent.isPending && uploadProgress > 0 && uploadProgress < 100;
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Cover image */}
       <div>
-        <label className="block text-sm text-gray-400 mb-2">Cover Image (optional)</label>
+        <label className={glassMutedLabel}>Cover image (optional)</label>
         <div
           onClick={() => fileRef.current?.click()}
-          className={`relative h-48 rounded-xl border-2 border-dashed cursor-pointer overflow-hidden transition-colors ${
-            coverPreview ? "border-transparent" : "border-gray-700 hover:border-gray-500"
+          className={`relative h-48 cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed transition-colors ${
+            coverPreview
+              ? "border-transparent"
+              : "border-primary/30 bg-primary/[0.06] hover:border-primary/45 dark:border-emerald-400/25 dark:bg-emerald-500/10"
           }`}
         >
           {coverPreview ? (
-            <img src={coverPreview} className="w-full h-full object-cover" alt="cover preview" />
+            <img src={coverPreview} className="h-full w-full object-cover" alt="Cover preview" />
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-2">
-              <span className="material-symbols-outlined text-3xl">add_photo_alternate</span>
-              <span className="text-sm">Upload cover image (max 10MB)</span>
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-[#3D5A3E] dark:text-white/55">
+              <span className="material-symbols-outlined text-4xl text-[#006F35]/60 dark:text-emerald-400/70">add_photo_alternate</span>
+              <span className="text-sm font-medium">Upload cover image (max 10MB)</span>
             </div>
           )}
         </div>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleCoverChange}
-        />
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
         {isUploading && (
-          <div className="mt-2 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-blue-500 transition-all"
-              style={{ width: `${uploadProgress}%` }}
-            />
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-light)] dark:bg-white/10">
+            <div className="h-full bg-gradient-to-r from-primary to-[#006F35] transition-all" style={{ width: `${uploadProgress}%` }} />
           </div>
         )}
       </div>
 
-      {/* Title */}
       <div>
-        <label className="block text-sm text-gray-400 mb-1.5">Event Title *</label>
+        <label className={glassLabel}>
+          Event title <span className="text-red-500">*</span>
+        </label>
         <input
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Community Clean-up Drive"
-          className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+          placeholder="e.g. Community clean-up drive"
+          className={glassField}
         />
       </div>
 
-      {/* Description */}
       <div>
-        <label className="block text-sm text-gray-400 mb-1.5">Description *</label>
+        <label className={glassLabel}>
+          Description <span className="text-red-500">*</span>
+        </label>
         <textarea
           required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Tell people what this event is about..."
+          placeholder="Tell people what this event is about…"
           rows={4}
-          className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+          className={`${glassField} resize-none`}
         />
       </div>
 
-      {/* Type */}
       <div>
-        <label className="block text-sm text-gray-400 mb-1.5">Event Type *</label>
+        <label className={glassLabel}>
+          Event type <span className="text-red-500">*</span>
+        </label>
         <select
           value={type}
-          onChange={(e) => setType(e.target.value as typeof EVENT_TYPES[number])}
-          className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors capitalize"
+          onChange={(e) => setType(e.target.value as (typeof EVENT_TYPES)[number])}
+          className={`${glassField} capitalize`}
         >
           {EVENT_TYPES.map((t) => (
             <option key={t} value={t} className="capitalize">
@@ -167,70 +164,61 @@ export default function CreateEventForm() {
         </select>
       </div>
 
-      {/* Dates */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Start Date & Time *</label>
+          <label className={glassLabel}>
+            Start date &amp; time <span className="text-red-500">*</span>
+          </label>
           <input
             required
             type="datetime-local"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+            className={glassField}
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-400 mb-1.5">End Date & Time *</label>
-          <input
-            required
-            type="datetime-local"
-            value={endDate}
-            min={startDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
-          />
+          <label className={glassLabel}>
+            End date &amp; time <span className="text-red-500">*</span>
+          </label>
+          <input required type="datetime-local" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} className={glassField} />
         </div>
       </div>
 
-      {/* Venue */}
       <div>
-        <label className="block text-sm text-gray-400 mb-1.5">Venue</label>
+        <label className={glassMutedLabel}>Venue</label>
         <input
           value={venue}
           onChange={(e) => setVenue(e.target.value)}
           placeholder="e.g. Community Centre, Lagos Island"
-          className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+          className={glassField}
         />
       </div>
 
-      {/* Capacity */}
       <div>
-        <label className="block text-sm text-gray-400 mb-1.5">Capacity (optional)</label>
+        <label className={glassMutedLabel}>Capacity (optional)</label>
         <input
           type="number"
           min="1"
           value={capacity}
           onChange={(e) => setCapacity(e.target.value)}
           placeholder="Leave blank for unlimited"
-          className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+          className={glassField}
         />
       </div>
 
-      {/* Free toggle + price */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-gray-400">Free Event</span>
+        <div className="mb-3 flex items-center justify-between rounded-2xl border border-[var(--border-light)] bg-[var(--surface-light)]/80 px-4 py-3 dark:border-white/12 dark:bg-white/[0.05]">
+          <span className="text-sm font-medium text-[#3D5A3E] dark:text-white/65">Free event</span>
           <button
             type="button"
+            role="switch"
+            aria-checked={isFree}
             onClick={() => setIsFree((v) => !v)}
-            className={`w-12 h-6 rounded-full relative transition-colors ${
-              isFree ? "bg-green-600" : "bg-gray-700"
-            }`}
+            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${isFree ? "bg-gradient-to-r from-primary to-[#006F35]" : "bg-[#3D5A3E]/25 dark:bg-white/15"}`}
           >
             <span
-              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
-                isFree ? "left-6" : "left-0.5"
-              }`}
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${isFree ? "left-6" : "left-0.5"}`}
             />
           </button>
         </div>
@@ -242,28 +230,26 @@ export default function CreateEventForm() {
             value={ticketPrice}
             onChange={(e) => setTicketPrice(e.target.value)}
             placeholder="Ticket price (₦)"
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+            className={glassField}
           />
         )}
       </div>
 
-      {/* Visibility */}
       <div>
-        <label className="block text-sm text-gray-400 mb-1.5">Visibility</label>
+        <label className={glassMutedLabel}>Visibility</label>
         <select
           value={visibility}
-          onChange={(e) => setVisibility(e.target.value as typeof VISIBILITY_OPTIONS[number])}
-          className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+          onChange={(e) => setVisibility(e.target.value as (typeof VISIBILITY_OPTIONS)[number])}
+          className={glassField}
         >
           <option value="public">Public</option>
-          <option value="neighborhood">Neighborhood Only</option>
+          <option value="neighborhood">Neighborhood only</option>
           <option value="private">Private</option>
         </select>
       </div>
 
-      {/* Tags */}
       <div>
-        <label className="block text-sm text-gray-400 mb-1.5">Tags (optional)</label>
+        <label className={glassMutedLabel}>Tags (optional)</label>
         <div className="flex gap-2">
           <input
             value={tagInput}
@@ -275,29 +261,25 @@ export default function CreateEventForm() {
               }
             }}
             placeholder="Add a tag and press Enter"
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+            className={`${glassField} min-w-0 flex-1`}
           />
           <button
             type="button"
             onClick={addTag}
-            className="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-white transition-colors"
+            className="shrink-0 rounded-2xl border border-[var(--border-light)] bg-white px-4 py-3 text-sm font-bold text-brand-black shadow-sm transition-colors hover:bg-[var(--surface-light)] dark:border-white/15 dark:bg-white/10 dark:text-white"
           >
             Add
           </button>
         </div>
         {tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="mt-3 flex flex-wrap gap-2">
             {tags.map((t) => (
               <span
                 key={t}
-                className="flex items-center gap-1 bg-gray-800 text-gray-300 rounded-full px-3 py-1 text-sm"
+                className="flex items-center gap-1 rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] px-3 py-1 text-sm font-medium text-[#2E502E] dark:border-white/12 dark:bg-white/[0.06] dark:text-white/85"
               >
                 #{t}
-                <button
-                  type="button"
-                  onClick={() => removeTag(t)}
-                  className="text-gray-500 hover:text-red-400 transition-colors ml-0.5"
-                >
+                <button type="button" onClick={() => removeTag(t)} className="ml-0.5 text-[#3D5A3E] transition-colors hover:text-red-600 dark:text-white/50">
                   ×
                 </button>
               </span>
@@ -306,13 +288,12 @@ export default function CreateEventForm() {
         )}
       </div>
 
-      {/* Submit */}
       <button
         type="submit"
         disabled={createEvent.isPending}
-        className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 rounded-xl font-bold text-white transition-colors"
+        className="min-h-[52px] w-full rounded-full bg-gradient-to-r from-primary to-[#006F35] py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,212,49,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none dark:from-emerald-500 dark:to-teal-600"
       >
-        {createEvent.isPending ? "Creating…" : "Create Event"}
+        {createEvent.isPending ? "Creating…" : "Create event"}
       </button>
     </form>
   );
