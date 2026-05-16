@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { useProductMutations } from "@/hooks/useMarketplace";
 import { Product } from "@/services/marketplace.service";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { glassField, glassFieldError, glassLabel } from "@/lib/glass-form-styles";
 
 interface ProductFormProps {
   product?: Product;
@@ -187,269 +188,222 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
   const isPending = createProduct.isPending || updateProduct.isPending;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-[#1a1a2e] rounded-xl p-6 border border-gray-800">
-        <h2 className="text-2xl font-bold text-white mb-6">
-          {isEditing ? "Edit Product" : "Create Product Listing"}
-        </h2>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Title */}
+      <div>
+        <label className={glassLabel}>
+          Title <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="e.g., iPhone 15 Pro Max - Like New"
+          maxLength={100}
+          className={`${glassField} ${errors.title ? glassFieldError : ""}`}
+        />
+        {errors.title && <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.title}</p>}
+        <p className="mt-1 text-xs text-[#3D5A3E]/70 dark:text-white/40">{title.length}/100</p>
+      </div>
 
-        {/* Title */}
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
-            Title <span className="text-red-500">*</span>
+      {/* Description */}
+      <div>
+        <label className={glassLabel}>
+          Description <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Describe your product in detail..."
+          rows={6}
+          className={`${glassField} resize-none ${errors.description ? glassFieldError : ""}`}
+        />
+        {errors.description && (
+          <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.description}</p>
+        )}
+      </div>
+
+      {/* Price and Category Row */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className={glassLabel}>
+            Price (₦) <span className="text-red-500">*</span>
           </label>
           <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g., iPhone 15 Pro Max - Like New"
-            maxLength={100}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder="0"
+            min="0"
+            step="0.01"
+            className={`${glassField} ${errors.price ? glassFieldError : ""}`}
           />
-          {errors.title && (
-            <p className="mt-1 text-sm text-red-400">{errors.title}</p>
-          )}
-          <p className="mt-1 text-xs text-gray-500">{title.length}/100</p>
+          {errors.price && <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.price}</p>}
         </div>
 
-        {/* Description */}
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
-            Description <span className="text-red-500">*</span>
+        <div>
+          <label className={glassLabel}>
+            Category <span className="text-red-500">*</span>
           </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe your product in detail..."
-            rows={6}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none resize-none"
-          />
-          {errors.description && (
-            <p className="mt-1 text-sm text-red-400">{errors.description}</p>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={`${glassField} ${errors.category ? glassFieldError : ""}`}
+          >
+            <option value="">Select a category</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+          {errors.category && (
+            <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.category}</p>
           )}
         </div>
+      </div>
 
-        {/* Price and Category Row */}
-        <div className="grid md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2">
-              Price (₦) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="0"
-              min="0"
-              step="0.01"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
-            />
-            {errors.price && (
-              <p className="mt-1 text-sm text-red-400">{errors.price}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2">
-              Category <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
+      {/* Condition */}
+      <div>
+        <label className={glassLabel}>Condition</label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {CONDITIONS.map((cond) => (
+            <button
+              key={cond.value}
+              type="button"
+              onClick={() => setCondition(cond.value as typeof condition)}
+              className={`rounded-2xl border-2 px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
+                condition === cond.value
+                  ? "border-transparent bg-gradient-to-r from-primary to-[#006F35] text-white shadow-[0_8px_20px_rgba(0,212,49,0.28)] dark:from-emerald-500 dark:to-teal-600"
+                  : "border-[var(--border-light)] bg-white/75 text-[#3D5A3E] hover:border-primary/35 dark:border-white/12 dark:bg-white/[0.06] dark:text-white/75"
+              }`}
             >
-              <option value="">Select a category</option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            {errors.category && (
-              <p className="mt-1 text-sm text-red-400">{errors.category}</p>
-            )}
-          </div>
+              {cond.label}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Condition */}
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
-            Condition
-          </label>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            {CONDITIONS.map((cond) => (
-              <button
-                key={cond.value}
-                type="button"
-                onClick={() => setCondition(cond.value as typeof condition)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                  condition === cond.value
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-                }`}
-              >
-                {cond.label}
-              </button>
+      {/* Images */}
+      <div>
+        <label className={glassLabel}>
+          Images <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleImageChange}
+          className="hidden"
+          id="product-images"
+        />
+        <label
+          htmlFor="product-images"
+          className="block w-full cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-primary/[0.06] px-4 py-8 text-center text-sm font-medium text-[#3D5A3E] transition-colors hover:border-primary/50 hover:bg-primary/[0.1] dark:border-emerald-400/25 dark:bg-emerald-500/10 dark:text-white/70"
+        >
+          <span className="material-symbols-outlined mx-auto mb-2 block text-4xl text-[#006F35]/60 dark:text-emerald-400/70">
+            add_photo_alternate
+          </span>
+          Click to upload images (max 5)
+        </label>
+        {errors.images && <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.images}</p>}
+
+        {(images.length > 0 || imageUrls.length > 0) && (
+          <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
+            {imageUrls.map((url, idx) => (
+              <div key={`url-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] dark:border-white/10">
+                <img src={url} alt={`Product ${idx + 1}`} className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(idx, true)}
+                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-red-500 text-white shadow-md transition-colors hover:bg-red-600"
+                  aria-label="Remove image"
+                >
+                  <span className="material-symbols-outlined text-[16px]">close</span>
+                </button>
+              </div>
+            ))}
+            {images.map((file, idx) => (
+              <div key={`file-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] dark:border-white/10">
+                <img src={URL.createObjectURL(file)} alt={`Upload ${idx + 1}`} className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(idx, false)}
+                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-red-500 text-white shadow-md transition-colors hover:bg-red-600"
+                  aria-label="Remove image"
+                >
+                  <span className="material-symbols-outlined text-[16px]">close</span>
+                </button>
+              </div>
             ))}
           </div>
-        </div>
-
-        {/* Images */}
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
-            Images <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-            className="hidden"
-            id="product-images"
-          />
-          <label
-            htmlFor="product-images"
-            className="block w-full px-4 py-8 border-2 border-dashed border-gray-700 rounded-lg text-center text-gray-400 hover:border-green-500 hover:text-green-400 cursor-pointer transition-colors"
-          >
-            <svg
-              className="w-12 h-12 mx-auto mb-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Click to upload images (max 5)
-          </label>
-          {errors.images && (
-            <p className="mt-1 text-sm text-red-400">{errors.images}</p>
-          )}
-
-          {/* Image Previews */}
-          {(images.length > 0 || imageUrls.length > 0) && (
-            <div className="mt-4 grid grid-cols-3 md:grid-cols-5 gap-3">
-              {imageUrls.map((url, idx) => (
-                <div key={`url-${idx}`} className="relative aspect-square">
-                  <img
-                    src={url}
-                    alt={`Product ${idx + 1}`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(idx, true)}
-                    className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-              {images.map((file, idx) => (
-                <div key={`file-${idx}`} className="relative aspect-square">
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt={`Upload ${idx + 1}`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(idx, false)}
-                    className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Negotiable */}
-        {!isEditing && (
-          <div className="mb-6">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={negotiable}
-                onChange={(e) => setNegotiable(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-700 bg-gray-800 text-green-500 focus:ring-green-500"
-              />
-              <span className="text-sm text-gray-300">Price is negotiable</span>
-            </label>
-          </div>
         )}
+      </div>
 
-        {/* Location status (required for new listings) */}
-        {!isEditing && (
-          <div className="mb-6">
-            {locationLoading && (
-              <p className="text-sm text-gray-400">
-                Detecting your location…
-              </p>
-            )}
-            {!locationLoading && userLocation &&
-              !(userLocation.latitude === 0 && userLocation.longitude === 0) && (
-                <p className="text-sm text-green-400">
-                  Location set{(userLocation as any).formattedAddress ? `: ${(userLocation as any).formattedAddress}` : (userLocation as any).address ? `: ${(userLocation as any).address}` : ""}
-                </p>
-              )}
-            {!locationLoading && (!userLocation ||
-              (userLocation.latitude === 0 && userLocation.longitude === 0)) && (
-              <div className="flex items-center justify-between gap-3 p-3 bg-red-500/10 border border-red-500/40 rounded-lg">
-                <p className="text-sm text-red-300">
-                  {locationError ||
-                    "Location is required to create a listing."}
+      {!isEditing && (
+        <div>
+          <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[var(--border-light)] bg-[var(--surface-light)]/80 px-4 py-3 dark:border-white/12 dark:bg-white/[0.05]">
+            <input
+              type="checkbox"
+              checked={negotiable}
+              onChange={(e) => setNegotiable(e.target.checked)}
+              className="h-5 w-5 rounded border-[var(--border-light)] text-primary focus:ring-primary/30 dark:border-white/20 dark:bg-white/10"
+            />
+            <span className="text-sm font-medium text-[#2E502E] dark:text-white/85">Price is negotiable</span>
+          </label>
+        </div>
+      )}
+
+      {!isEditing && (
+        <div>
+          {locationLoading && <p className="text-sm font-medium text-[#3D5A3E] dark:text-white/55">Detecting your location…</p>}
+          {!locationLoading && userLocation && !(userLocation.latitude === 0 && userLocation.longitude === 0) && (
+            <p className="rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3 text-sm font-medium text-[#006F35] dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+              Location set
+              {(userLocation as any).formattedAddress
+                ? `: ${(userLocation as any).formattedAddress}`
+                : (userLocation as any).address
+                  ? `: ${(userLocation as any).address}`
+                  : ""}
+            </p>
+          )}
+          {!locationLoading &&
+            (!userLocation || (userLocation.latitude === 0 && userLocation.longitude === 0)) && (
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-400/40 bg-red-500/[0.08] p-4 dark:bg-red-500/10">
+                <p className="text-sm font-medium text-red-700 dark:text-red-200">
+                  {locationError || "Location is required to create a listing."}
                 </p>
                 <button
                   type="button"
                   onClick={getCurrentLocation}
-                  className="px-3 py-1.5 text-sm bg-red-500 hover:bg-red-600 text-white rounded-md"
+                  className="shrink-0 rounded-full bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-red-700"
                 >
                   Enable
                 </button>
               </div>
             )}
-            {errors.location && (
-              <p className="text-sm text-red-400 mt-2">{errors.location}</p>
-            )}
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-3 pt-4 border-t border-gray-800">
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={isPending}
-              className="flex-1 px-6 py-3 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 text-white font-semibold rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-          )}
-          <button
-            type="submit"
-            disabled={isPending || (!isEditing && locationLoading)}
-            className="flex-1 px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
-          >
-            {isPending
-              ? isEditing
-                ? "Updating..."
-                : "Creating..."
-              : isEditing
-              ? "Update Product"
-              : "Create Listing"}
-          </button>
+          {errors.location && <p className="mt-2 text-sm font-medium text-red-600 dark:text-red-300">{errors.location}</p>}
         </div>
+      )}
+
+      <div className="flex flex-col gap-3 border-t border-[var(--border-light)] pt-5 dark:border-white/10 sm:flex-row sm:justify-end">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            className="min-h-[48px] w-full shrink-0 rounded-full border border-[var(--border-light)] bg-white px-4 text-sm font-bold text-brand-black shadow-sm transition-transform active:scale-[0.99] disabled:opacity-50 dark:border-white/15 dark:bg-white/10 dark:text-white sm:min-w-0 sm:flex-1"
+          >
+            Cancel
+          </button>
+        )}
+        <button
+          type="submit"
+          disabled={isPending || (!isEditing && locationLoading)}
+          className="min-h-[48px] w-full shrink-0 rounded-full bg-gradient-to-r from-primary to-[#006F35] px-4 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,212,49,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none dark:from-emerald-500 dark:to-teal-600 sm:min-w-0 sm:flex-1"
+        >
+          {isPending ? (isEditing ? "Updating…" : "Creating…") : isEditing ? "Save changes" : "Create listing"}
+        </button>
       </div>
     </form>
   );

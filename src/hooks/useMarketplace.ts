@@ -204,6 +204,42 @@ export function useProductMutations() {
 /**
  * Hook for product like mutations with optimistic updates
  */
+function patchProductLikeInPages(old: any, productId: string, isLiked: boolean, likesCount: number) {
+  if (!old?.pages) return old;
+  const patchList = (list: Product[]) =>
+    list.map((p) => {
+      const pid = p.id || (p as any)._id;
+      if (pid !== productId) return p;
+      return {
+        ...p,
+        isLiked,
+        engagement: {
+          ...p.engagement,
+          isLiked,
+          likesCount,
+          commentsCount: p.engagement?.commentsCount ?? 0,
+        },
+      };
+    });
+
+  return {
+    ...old,
+    pages: old.pages.map((page: any) => {
+      if (!page) return page;
+      if (Array.isArray(page.data)) {
+        return { ...page, data: patchList(page.data) };
+      }
+      if (page.data?.data && Array.isArray(page.data.data)) {
+        return {
+          ...page,
+          data: { ...page.data, data: patchList(page.data.data) },
+        };
+      }
+      return page;
+    }),
+  };
+}
+
 export function useProductLike(productId: string) {
   const queryClient = useQueryClient();
 
@@ -221,6 +257,11 @@ export function useProductLike(productId: string) {
         "product",
         productId,
       ]);
+      const previousMainList = queryClient.getQueriesData({ queryKey: ["marketplace", "products"] });
+      const previousMyListings = queryClient.getQueriesData({
+        queryKey: ["marketplace", "my-listings"],
+      });
+      const previousSaved = queryClient.getQueriesData({ queryKey: ["marketplace", "saved"] });
 
       // Optimistically update
       if (previousProduct) {
@@ -246,9 +287,51 @@ export function useProductLike(productId: string) {
         );
       }
 
-      return { previousProduct };
+      const listProduct = previousProduct ||
+        (() => {
+          for (const [, data] of previousMainList) {
+            const pages = (data as any)?.pages;
+            if (!pages) continue;
+            for (const page of pages) {
+              const arr = Array.isArray(page?.data)
+                ? page.data
+                : page?.data?.data;
+              if (!Array.isArray(arr)) continue;
+              const hit = arr.find(
+                (p: Product) => (p.id || (p as any)._id) === productId,
+              );
+              if (hit) return hit;
+            }
+          }
+          return null;
+        })();
+
+      if (listProduct) {
+        const currentIsLiked =
+          listProduct.engagement?.isLiked ?? listProduct.isLiked ?? false;
+        const currentLikes = listProduct.engagement?.likesCount ?? 0;
+        const nextIsLiked = !currentIsLiked;
+        const nextLikes = currentIsLiked ? currentLikes - 1 : currentLikes + 1;
+
+        queryClient.setQueriesData({ queryKey: ["marketplace", "products"] }, (old) =>
+          patchProductLikeInPages(old, productId, nextIsLiked, nextLikes),
+        );
+        queryClient.setQueriesData({ queryKey: ["marketplace", "my-listings"] }, (old) =>
+          patchProductLikeInPages(old, productId, nextIsLiked, nextLikes),
+        );
+        queryClient.setQueriesData({ queryKey: ["marketplace", "saved"] }, (old) =>
+          patchProductLikeInPages(old, productId, nextIsLiked, nextLikes),
+        );
+      }
+
+      return {
+        previousProduct,
+        previousMainList,
+        previousMyListings,
+        previousSaved,
+      };
     },
-    onError: (error, _, context) => {
+    onError: (error, _, context: any) => {
       // Rollback on error
       if (context?.previousProduct) {
         queryClient.setQueryData(
@@ -256,11 +339,29 @@ export function useProductLike(productId: string) {
           context.previousProduct,
         );
       }
+      if (context?.previousMainList) {
+        context.previousMainList.forEach(([key, data]: [any, any]) => {
+          queryClient.setQueryData(key, data);
+        });
+      }
+      if (context?.previousMyListings) {
+        context.previousMyListings.forEach(([key, data]: [any, any]) => {
+          queryClient.setQueryData(key, data);
+        });
+      }
+      if (context?.previousSaved) {
+        context.previousSaved.forEach(([key, data]: [any, any]) => {
+          queryClient.setQueryData(key, data);
+        });
+      }
       toast.error(getErrorMessage(error) || "Failed to update like");
     },
     onSuccess: (data) => {
-      // Update with server data
+      // Update with server data (detail + list caches stay in sync)
       const responseData = (data as any).data || data;
+      const isLiked = !!responseData.isLiked;
+      const likesCount = Number(responseData.likesCount) || 0;
+
       queryClient.setQueryData<Product>(
         ["marketplace", "product", productId],
         (old) => {
@@ -269,13 +370,24 @@ export function useProductLike(productId: string) {
             ...old,
             engagement: {
               ...old.engagement,
-              isLiked: responseData.isLiked,
-              likesCount: responseData.likesCount,
+              isLiked,
+              likesCount,
               commentsCount: old.engagement?.commentsCount ?? 0,
             },
           };
         },
       );
+
+      queryClient.setQueriesData({ queryKey: ["marketplace", "products"] }, (old) =>
+        patchProductLikeInPages(old, productId, isLiked, likesCount),
+      );
+      queryClient.setQueriesData({ queryKey: ["marketplace", "my-listings"] }, (old) =>
+        patchProductLikeInPages(old, productId, isLiked, likesCount),
+      );
+      queryClient.setQueriesData({ queryKey: ["marketplace", "saved"] }, (old) =>
+        patchProductLikeInPages(old, productId, isLiked, likesCount),
+      );
+      queryClient.invalidateQueries({ queryKey: ["feed-discovery"] });
     },
   });
 }

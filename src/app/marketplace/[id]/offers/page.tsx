@@ -296,7 +296,7 @@ export default function ProductOffersPage() {
                 : "No offers yet on this listing."}
             </p>
             <Link
-              href={`/marketplace/${productId}`}
+              href={`/marketplace?product=${encodeURIComponent(productId)}`}
               className="mt-4 inline-block rounded-full bg-green-600 px-5 py-2 text-sm font-semibold hover:bg-green-500 transition-colors"
             >
               View listing

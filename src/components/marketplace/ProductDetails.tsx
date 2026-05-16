@@ -15,6 +15,8 @@ import { BuyerIntentActions } from "./BuyerIntentActions";
 interface ProductDetailsProps {
   productId: string;
   currentUserId?: string;
+  /** Session loading — avoid flashing guest CTAs */
+  authPending?: boolean;
   userLocation?: { lat: number; lng: number } | null;
   onEdit?: (productId: string) => void;
   onDelete?: (productId: string) => void;
@@ -23,6 +25,7 @@ interface ProductDetailsProps {
 export function ProductDetails({
   productId,
   currentUserId,
+  authPending = false,
   userLocation,
   onEdit,
   onDelete,
@@ -241,6 +244,7 @@ export function ProductDetails({
                   product={product}
                   currentUserId={currentUserId}
                   isOwner={!!isOwner}
+                  authPending={authPending}
                 />
               </div>
             )}

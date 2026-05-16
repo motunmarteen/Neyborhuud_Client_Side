@@ -17,10 +17,13 @@ import { FYICard } from '@/components/fyi/FYICard';
 import { useFYIList } from '@/hooks/useFYI';
 import { useAuth } from '@/hooks/useAuth';
 import { Post } from '@/types/api';
+import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
 
 function FYIPageInner() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [subtypeFilter, setSubtypeFilter] = useState<FYISubtype>('');
+    const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
+    const [commentsAnchor, setCommentsAnchor] = useState<{ left: number; width: number } | null>(null);
     const queryClient = useQueryClient();
     const { user } = useAuth();
     const observerRef = useRef<IntersectionObserver | null>(null);
@@ -145,10 +148,20 @@ function FYIPageInner() {
                                     const postId = post.id || `${index}`;
                                     const isLast = index === posts.length - 1;
                                     return (
-                                        <div key={postId} ref={isLast ? lastPostRef : undefined}>
+                                        <div key={postId} ref={isLast ? lastPostRef : undefined} data-comment-anchor={`post-${postId}`}>
                                             <FYICard
                                                 post={post}
                                                 currentUserId={user?.id}
+                                                onComment={(id) => {
+                                                    const el = document.querySelector(`[data-comment-anchor="post-${id}"]`) as HTMLElement | null;
+                                                    if (el) {
+                                                        const rect = el.getBoundingClientRect();
+                                                        setCommentsAnchor({ left: rect.left, width: rect.width });
+                                                    } else {
+                                                        setCommentsAnchor(null);
+                                                    }
+                                                    setCommentsPostId(id);
+                                                }}
                                             />
                                         </div>
                                     );
@@ -182,6 +195,16 @@ function FYIPageInner() {
                 defaultContentType="fyi"
                 lockContentType={true}
                 defaultFyiSubtype={subtypeFilter || undefined}
+            />
+
+            <FeedCommentsSheet
+                isOpen={!!commentsPostId}
+                target={commentsPostId ? { kind: 'post', id: commentsPostId } : null}
+                desktopAnchor={commentsAnchor}
+                onClose={() => {
+                    setCommentsPostId(null);
+                    setCommentsAnchor(null);
+                }}
             />
         </div>
     );

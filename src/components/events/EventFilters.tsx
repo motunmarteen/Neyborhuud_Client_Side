@@ -27,7 +27,7 @@ export default function EventFilters({ filters, onChange }: Props) {
   return (
     <div className="space-y-3">
       {/* Type row */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
         {TYPE_OPTIONS.map((opt) => {
           const val = opt === "All" ? "All" : opt.toLowerCase();
           const active = filters.type === val;
@@ -35,10 +35,10 @@ export default function EventFilters({ filters, onChange }: Props) {
             <button
               key={opt}
               onClick={() => onChange("type", val)}
-              className={`shrink-0 text-sm px-4 py-1.5 rounded-full transition-colors ${
+              className={`shrink-0 text-sm px-4 py-1.5 rounded-xl font-semibold transition-all ${
                 active
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                  ? "mod-btn-active text-primary"
+                  : "mod-btn text-slate-700 hover:text-slate-950"
               }`}
             >
               {opt}
@@ -48,7 +48,7 @@ export default function EventFilters({ filters, onChange }: Props) {
       </div>
 
       {/* Date row */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
         {DATE_OPTIONS.map((opt) => {
           const val = opt === "All" ? "All" : opt.toLowerCase().replace(/ /g, "-");
           const active = filters.date === val;
@@ -56,10 +56,10 @@ export default function EventFilters({ filters, onChange }: Props) {
             <button
               key={opt}
               onClick={() => onChange("date", val)}
-              className={`shrink-0 text-sm px-4 py-1.5 rounded-full transition-colors ${
+              className={`shrink-0 text-sm px-4 py-1.5 rounded-xl font-semibold transition-all ${
                 active
-                  ? "bg-purple-600 text-white"
-                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                  ? "mod-btn-active text-primary"
+                  : "mod-btn text-slate-700 hover:text-slate-950"
               }`}
             >
               {opt}

@@ -46,6 +46,9 @@ export function useAuth() {
     enabled: apiClient.isAuthenticated(),
     retry: false,
     staleTime: 60_000, // re-fetch after 1 min so role changes propagate
+    /** Instant id for gated UI (Offer/Chat) before /profile/me returns */
+    placeholderData: () =>
+      apiClient.isAuthenticated() ? authService.getCachedUser() ?? undefined : undefined,
   });
 
   // Login mutation

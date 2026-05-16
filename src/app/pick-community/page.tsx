@@ -22,7 +22,7 @@ function PickCommunityContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isChangingCommunity = searchParams.get('change') === 'true';
-  
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +72,7 @@ function PickCommunityContent() {
     // For community change, try to get location from stored user data
     let locationState = ctx?.state;
     let locationLga = ctx?.lga;
-    
+
     if (isChangingCommunity && (!locationState || !locationLga)) {
       const userData = localStorage.getItem('neyborhuud_user');
       if (userData) {
@@ -101,10 +101,9 @@ function PickCommunityContent() {
       setLoading(true);
       setError(null);
       try {
-        // Use userLocation for change mode, otherwise use ctx
         const stateParam = userLocation?.state || ctx?.state || locationState;
         const lgaParam = userLocation?.lga || ctx?.lga || locationLga;
-        
+
         const res = await apiClient.get<{
           options?: PickerOption[];
           seedRequired?: boolean;
@@ -149,7 +148,7 @@ function PickCommunityContent() {
   const handleConfirm = async () => {
     const locationParams = getLocationParams();
     if (!selectedId || (!locationParams.state && !locationParams.lga)) return;
-    
+
     setSubmitting(true);
     setError(null);
     try {
@@ -162,10 +161,9 @@ function PickCommunityContent() {
         setError(res.message || 'Could not save your area.');
         return;
       }
-      
+
       // If changing community, go back to settings; otherwise follow normal flow
       if (isChangingCommunity) {
-        // Update local storage with new community info
         const userData = localStorage.getItem('neyborhuud_user');
         if (userData && res.data?.community) {
           const user = JSON.parse(userData);
@@ -178,7 +176,7 @@ function PickCommunityContent() {
         router.replace('/settings');
         return;
       }
-      
+
       const needsGps = res.data?.needsGpsLocationVerification === true;
       router.replace(needsGps ? '/verify-location' : '/feed');
     } catch (e: unknown) {
@@ -188,206 +186,292 @@ function PickCommunityContent() {
     }
   };
 
-  // Get display location (from userLocation or ctx)
   const displayLocation = userLocation || ctx;
+  const selectedOption = options.find((o) => o.id === selectedId);
 
   return (
-    <div className="h-[100dvh] neu-base overflow-y-auto">
-      <div className="max-w-lg mx-auto px-5 py-8 pb-24">
-        {/* Back button for change mode */}
-        {isChangingCommunity && (
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 mb-4 text-sm font-medium"
-            style={{ color: 'var(--neu-text-muted)' }}
-          >
-            <i className="bi bi-arrow-left"></i>
-            Back to Settings
-          </button>
-        )}
-        
-        {!isChangingCommunity && (
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: 'var(--neu-text-muted)' }}>
-            Step 2 of 2
-          </p>
-        )}
-        <h1 className="text-2xl font-semibold tracking-tight mb-2" style={{ color: 'var(--neu-text)' }}>
-          {isChangingCommunity ? 'Change your community' : 'Choose your neyborhuud'}
-        </h1>
-        <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
+    <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
+      <div className="mx-auto flex h-full w-full max-w-md flex-col px-5 pb-4 pt-4 sm:px-6">
+
+        {/* ── Top Chrome Bar ── */}
+        <div className="grid shrink-0 grid-cols-[1fr_auto] gap-2 rounded-[1.15rem] bg-white/70 p-1.5 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
+          <div className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-white shadow-[0_12px_24px_rgba(0,135,81,0.24)]">
+            <i className="bi bi-geo-alt-fill text-lg" aria-hidden />
+            <span className="text-[10px] font-black uppercase tracking-widest">
+              {isChangingCommunity ? 'Change Area' : 'Pick Neyborhuud'}
+            </span>
+          </div>
           {isChangingCommunity ? (
-            <>
-              You are currently in{' '}
-              <strong style={{ color: 'var(--neu-text)' }}>
-                {displayLocation?.lga || '…'}, {displayLocation?.state || '…'}
-              </strong>
-              . Select a different ward or area if you've moved or picked the wrong one.
-            </>
-          ) : (
-            <>
-              We placed you in{' '}
-              <strong style={{ color: 'var(--neu-text)' }}>
-                {displayLocation?.lga || '…'}, {displayLocation?.state || '…'}
-              </strong>
-              . Pick the ward, LCDA, or area that matches where you live (similar to how shopping apps ask you to
-              confirm your area within your LGA).
-            </>
-          )}
-        </p>
-        {ctx?.resolutionSource && ctx.resolutionSource !== 'centroid' && !isChangingCommunity && (
-          <p className="text-xs mb-4 leading-relaxed rounded-xl px-3 py-2" style={{ background: 'var(--neu-card-bg, rgba(0,0,0,0.04))', color: 'var(--neu-text-muted)' }}>
-            Area detected via {ctx.resolutionSource === 'google' ? 'Google Maps' : ctx.resolutionSource === 'mapbox' ? 'Mapbox' : ctx.resolutionSource === 'openstreetmap' ? 'OpenStreetMap' : ctx.resolutionSource}
-            {ctx.formattedAddress ? ` — ${ctx.formattedAddress}` : ''}
-            {ctx.geocoderDisagreement ? ' (refined to match Nigerian LGA boundaries)' : ''}
-          </p>
-        )}
-
-        {/* Combobox dropdown */}
-        <div ref={comboRef} className="relative mb-4">
-          <button
-            type="button"
-            onClick={() => { if (!loading) setDropdownOpen((v) => !v); }}
-            className="neu-card-sm rounded-2xl w-full flex items-center gap-2 px-4 py-3 transition-all cursor-pointer outline-none focus:outline-none focus-visible:outline-none"
-            style={
-              selectedId
-                ? { borderBottom: '2px solid var(--neon-green, #11d473)', boxShadow: '0 2px 6px rgba(17,212,115,0.10)', outline: 'none' }
-                : { outline: 'none' }
-            }
-          >
-            {selectedId ? (
-              <span className="flex-1 text-sm font-semibold text-left" style={{ color: 'var(--neon-green, #11d473)' }}>
-                <i className="bi bi-check-circle-fill mr-2 text-xs" />
-                {options.find((o) => o.id === selectedId)?.name}
-              </span>
-            ) : (
-              <span className="flex-1 text-sm text-left" style={{ color: 'var(--neu-text-muted)' }}>
-                {loading ? 'Loading areas…' : 'Select your area'}
-              </span>
-            )}
-            <i
-              className={`bi bi-chevron-down text-xs transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
-              style={{ color: 'var(--neu-text-muted)' }}
-            />
-          </button>
-
-          {dropdownOpen && (
-            <div
-              className="absolute z-50 left-0 right-0 mt-2 rounded-2xl overflow-hidden"
-              style={{
-                background: 'var(--neu-card-bg, #1a2c1a)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
-              }}
+            <button
+              onClick={() => router.back()}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl text-charcoal/45 transition-colors hover:text-brand-blue"
+              aria-label="Back to Settings"
             >
-              {/* Search input inside dropdown */}
-              <div className="px-3 pt-3 pb-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                  <i className="bi bi-search text-xs" style={{ color: 'var(--neu-text-muted)' }} />
-                  <input
-                    type="text"
-                    placeholder="Search areas…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    autoFocus
-                    className="w-full bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none text-sm"
-                    style={{ color: 'var(--neu-text)', outline: 'none' }}
-                  />
-                  {search && (
-                    <button
-                      type="button"
-                      onClick={() => setSearch('')}
-                      className="text-xs p-0.5"
-                      style={{ color: 'var(--neu-text-muted)' }}
-                    >
-                      <i className="bi bi-x-lg" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Scrollable options list */}
-              <ul className="max-h-64 overflow-y-auto py-1" style={{ scrollbarWidth: 'thin' }}>
-                {filtered.length === 0 ? (
-                  <li className="px-4 py-6 text-center text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-                    No areas match &ldquo;{search}&rdquo;
-                  </li>
-                ) : (
-                  filtered.map((o) => {
-                    const isSelected = selectedId === o.id;
-                    return (
-                      <li key={o.id}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedId(o.id);
-                            setSearch('');
-                            setDropdownOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors"
-                          style={{
-                            background: isSelected ? 'rgba(17,212,115,0.08)' : 'transparent',
-                            color: isSelected ? 'var(--neon-green, #11d473)' : 'var(--neu-text)',
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = isSelected ? 'rgba(17,212,115,0.08)' : 'transparent';
-                          }}
-                        >
-                          <span className="text-sm font-medium flex-1">{o.name}</span>
-                          {isSelected && (
-                            <i className="bi bi-check-lg text-sm" style={{ color: 'var(--neon-green, #11d473)' }} />
-                          )}
-                        </button>
-                      </li>
-                    );
-                  })
-                )}
-              </ul>
+              <i className="bi bi-arrow-left text-lg" aria-hidden />
+            </button>
+          ) : (
+            <div className="flex h-11 items-center justify-center rounded-2xl border border-charcoal/5 bg-white/50 px-3">
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-charcoal/40">
+                Step 2 of 2
+              </span>
             </div>
           )}
         </div>
 
-        {seedRequired && !loading && (
-          <div className="neu-socket rounded-2xl p-4 text-sm" style={{ color: 'var(--neu-text-secondary)' }}>
-            <p className="font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
-              Area list not loaded on the server yet
-            </p>
-            <p className="mb-2">
-              Ask your backend admin to run{' '}
-              <code className="text-xs bg-black/5 px-1 rounded">pnpm run seed:communities</code> once
-              against production MongoDB, then redeploy or retry.
-            </p>
+        {/* ── Scrollable Content ── */}
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-3">
+
+          {/* ── Location Detection Hero ── */}
+          <div className="-mx-5 shrink-0 bg-white/[0.76] shadow-inner sm:-mx-6">
+            <div className="relative flex min-h-[110px] items-center justify-center overflow-hidden px-6 py-3">
+              <div className="absolute left-4 top-5 h-2 w-32 rotate-12 rounded-full bg-primary/16" aria-hidden />
+              <div className="absolute right-4 top-1/2 h-2 w-32 -rotate-12 rounded-full bg-brand-blue/16" aria-hidden />
+              <div className="absolute bottom-4 left-10 h-2 w-36 -rotate-6 rounded-full bg-brand-amber/20" aria-hidden />
+              <div className="absolute inset-x-10 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/24 to-transparent" aria-hidden />
+
+              <div className="relative w-full max-w-[19rem] overflow-hidden rounded-[1.6rem] border border-white/85 bg-white/[0.92] shadow-[0_26px_64px_rgba(26,26,46,0.16)] backdrop-blur-xl">
+                <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
+                <div className="p-4">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-[0_10px_20px_rgba(0,135,81,0.3)]">
+                      <i className="bi bi-map-fill text-sm" aria-hidden />
+                    </div>
+                    <div className="rounded-full border border-charcoal/5 bg-[#F8FAFC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
+                      {isChangingCommunity ? 'Your Location' : 'Area Detected'}
+                    </div>
+                  </div>
+                  <p className="mb-0.5 text-[9px] font-black uppercase tracking-[0.24em] text-primary">
+                    {isChangingCommunity ? 'Current location' : 'Detected location'}
+                  </p>
+                  <h2 className="truncate text-xl font-black tracking-tighter text-[#1A1A2E]">
+                    {displayLocation?.lga || '…'}, {displayLocation?.state || '…'}
+                  </h2>
+                  {ctx?.formattedAddress && !isChangingCommunity && (
+                    <p className="mt-1 truncate text-[10px] font-medium text-[#64748B]">
+                      {ctx.formattedAddress}
+                    </p>
+                  )}
+                  {ctx?.resolutionSource && ctx.resolutionSource !== 'centroid' && !isChangingCommunity && (
+                    <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-[#475569]">
+                      <i className="bi bi-broadcast-pin text-brand-blue" aria-hidden />
+                      <span className="truncate">
+                        Via{' '}
+                        {ctx.resolutionSource === 'google'
+                          ? 'Google Maps'
+                          : ctx.resolutionSource === 'mapbox'
+                          ? 'Mapbox'
+                          : ctx.resolutionSource === 'openstreetmap'
+                          ? 'OpenStreetMap'
+                          : ctx.resolutionSource}
+                        {ctx.geocoderDisagreement ? ' (refined)' : ''}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        )}
 
-        {error && (
-          <div className="rounded-2xl p-4 mb-4 text-sm" style={{ border: '1px solid rgba(255,107,107,0.35)', color: 'var(--neu-text)' }}>
-            {error}
+          {/* ── Main Form Card ── */}
+          <div className="shrink-0 rounded-[1.7rem] border border-white/85 bg-white/[0.94] shadow-[0_28px_70px_rgba(26,26,46,0.18)] backdrop-blur-2xl">
+            <div className="h-1.5 rounded-t-[1.7rem] bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
+            <div className="flex flex-col gap-3 p-3.5">
+
+              {/* Card header */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)]">
+                  <i className="bi bi-house-heart-fill text-xl" aria-hidden />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">
+                    {isChangingCommunity ? 'Select new area' : 'Confirm your area'}
+                  </p>
+                  <h1 className="truncate text-[1.3rem] font-black tracking-tighter text-[#1A1A2E]">
+                    {isChangingCommunity ? 'Change neyborhuud' : 'Choose neyborhuud'}
+                  </h1>
+                  <p className="truncate text-[11px] font-medium text-[#6B7280]">
+                    {isChangingCommunity
+                      ? 'Select a different ward or area after moving.'
+                      : 'Pick the ward, LCDA, or area matching where you live.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* ── Combobox ── */}
+              <div ref={comboRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => { if (!loading) setDropdownOpen((v) => !v); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all cursor-pointer outline-none focus:outline-none ${
+                    selectedId
+                      ? 'border-primary/30 bg-primary/5 shadow-[0_0_0_1px_rgba(0,135,81,0.12)]'
+                      : 'border-charcoal/5 bg-white shadow-[0_4px_16px_rgba(26,26,46,0.06)]'
+                  }`}
+                >
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all ${selectedId ? 'bg-primary text-white' : 'bg-[#F1F5F9] text-[#94A3B8]'}`}>
+                    <i className={`bi ${selectedId ? 'bi-check-lg' : 'bi-geo'} text-sm`} aria-hidden />
+                  </div>
+                  {selectedId ? (
+                    <span className="flex-1 text-sm font-semibold text-left truncate text-primary">
+                      {selectedOption?.name}
+                    </span>
+                  ) : (
+                    <span className="flex-1 text-sm text-left text-[#94A3B8]">
+                      {loading ? 'Loading areas…' : 'Select your area'}
+                    </span>
+                  )}
+                  {loading ? (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary/20 border-t-primary shrink-0" aria-hidden />
+                  ) : (
+                    <i
+                      className={`bi bi-chevron-down text-[#94A3B8] text-xs transition-transform duration-200 shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`}
+                      aria-hidden
+                    />
+                  )}
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute z-50 left-0 right-0 mt-2 rounded-2xl overflow-hidden border border-charcoal/5 bg-white shadow-[0_20px_60px_rgba(26,26,46,0.22)]">
+                    {/* Search input */}
+                    <div className="px-3 pt-3 pb-2 border-b border-charcoal/5">
+                      <div className="flex items-center gap-2 rounded-xl border border-charcoal/5 bg-[#F8FAFC] px-3 py-2">
+                        <i className="bi bi-search text-xs text-[#94A3B8]" aria-hidden />
+                        <input
+                          type="text"
+                          placeholder="Search areas…"
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          autoFocus
+                          className="w-full bg-transparent border-0 outline-none focus:outline-none text-sm text-[#1A1A2E] placeholder:text-[#94A3B8]"
+                        />
+                        {search && (
+                          <button
+                            type="button"
+                            onClick={() => setSearch('')}
+                            className="text-[#94A3B8] hover:text-[#1A1A2E] transition-colors"
+                          >
+                            <i className="bi bi-x-lg text-xs" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Options list */}
+                    <ul className="max-h-56 overflow-y-auto py-1">
+                      {filtered.length === 0 ? (
+                        <li className="px-4 py-5 text-center text-sm text-[#94A3B8]">
+                          No areas match &ldquo;{search}&rdquo;
+                        </li>
+                      ) : (
+                        filtered.map((o) => {
+                          const isSelected = selectedId === o.id;
+                          return (
+                            <li key={o.id}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedId(o.id);
+                                  setSearch('');
+                                  setDropdownOpen(false);
+                                }}
+                                className={`w-full text-left px-4 py-2.5 flex items-center gap-3 transition-colors ${
+                                  isSelected
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'text-[#1A1A2E] hover:bg-[#F8FAFC]'
+                                }`}
+                              >
+                                <div
+                                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all ${
+                                    isSelected ? 'bg-primary' : 'border border-charcoal/15'
+                                  }`}
+                                >
+                                  {isSelected && (
+                                    <i className="bi bi-check text-white text-[10px]" />
+                                  )}
+                                </div>
+                                <span className="text-sm font-medium flex-1 truncate">{o.name}</span>
+                                <span className="text-[10px] text-[#94A3B8] uppercase tracking-wide shrink-0">
+                                  {o.kind === 'ward' ? 'Ward' : o.kind === 'lcda' ? 'LCDA' : 'LGA'}
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Seed required warning */}
+              {seedRequired && !loading && (
+                <div className="rounded-2xl border border-brand-amber/25 bg-brand-amber/10 px-4 py-3">
+                  <p className="text-[11px] font-black uppercase tracking-wide text-brand-amber mb-1">
+                    Areas not seeded yet
+                  </p>
+                  <p className="text-[11px] font-medium leading-relaxed text-[#92400E]">
+                    Ask your backend admin to run{' '}
+                    <code className="text-[10px] bg-black/5 px-1 rounded">pnpm run seed:communities</code>{' '}
+                    against production MongoDB, then retry.
+                  </p>
+                </div>
+              )}
+
+              {/* Error alert */}
+              {error && (
+                <div
+                  role="alert"
+                  className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-[#991B1B]"
+                >
+                  {error}
+                </div>
+              )}
+
+              {/* Submit button */}
+              <div className="grid grid-cols-[1.2fr_0.8fr] gap-3">
+                <button
+                  type="button"
+                  disabled={!selectedId || submitting}
+                  onClick={() => void handleConfirm()}
+                  className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${
+                    selectedId && !submitting
+                      ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] active:scale-[0.98]'
+                      : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'
+                  }`}
+                >
+                  {submitting ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden />
+                      Saving
+                    </>
+                  ) : (
+                    <>
+                      {isChangingCommunity ? 'Update area' : 'Confirm area'}
+                      <i className="bi bi-arrow-right" aria-hidden />
+                    </>
+                  )}
+                </button>
+                <Link
+                  href={isChangingCommunity ? '/settings' : '/feed'}
+                  className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-charcoal/5 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)] transition-all"
+                >
+                  {isChangingCommunity ? 'Cancel' : 'Skip'}
+                  <i className="bi bi-x" aria-hidden />
+                </Link>
+              </div>
+            </div>
           </div>
-        )}
 
-        <p className="text-xs mt-8 leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
-          Data is sourced from public Nigerian administrative ward listings. Lagos also includes official-style
-          LCDA rows where seeded.{' '}
-          <Link href="/info/nigeria-postal-codes" className="text-brand-blue font-semibold underline-offset-2 hover:underline">
-            Nigeria postal codes & myths
-          </Link>
-        </p>
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 p-4 neu-base border-t border-black/5">
-        <div className="max-w-lg mx-auto">
-          <button
-            type="button"
-            disabled={!selectedId || submitting}
-            onClick={() => void handleConfirm()}
-            className="neu-btn w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs disabled:opacity-40"
-            style={{ color: 'var(--neu-text)' }}
-          >
-            {submitting ? 'Saving…' : isChangingCommunity ? 'Update my community' : 'Confirm my area'}
-          </button>
+          {/* Footer note */}
+          <p className="shrink-0 px-1 pb-2 text-[10px] leading-relaxed text-[#94A3B8]">
+            Data sourced from public Nigerian administrative ward listings. Lagos includes official LCDA rows where seeded.{' '}
+            <Link
+              href="/info/nigeria-postal-codes"
+              className="text-brand-blue font-semibold underline-offset-2 hover:underline"
+            >
+              Nigeria postal codes &amp; myths
+            </Link>
+          </p>
         </div>
       </div>
     </div>

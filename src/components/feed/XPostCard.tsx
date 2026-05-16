@@ -1,19 +1,121 @@
 /**
- * XPostCard Component - Stitch Design Post Card
- * Card-based design with dark theme, rounded corners, material icons
+ * XPostCard — Immersive feed card
+ * Three modes: text-only (ambient spheres), media-only (full-bleed), mixed (media bg + text panel)
+ * iOS-inspired Liquid Glass action rail
  */
 
-import { Post, PostAuthor } from '@/types/api';
+import { MediaItem, Post, PostAuthor } from '@/types/api';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { haversineDistance, formatDistance } from '@/utils/distance';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { useFollow } from '@/hooks/useFollow';
-import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import { chatService } from '@/services/chat.service';
 import ShareModal from './ShareModal';
 
+// ── Ambient sphere palettes (text-only mode background glow) ──────────────────
+const SPHERE_PALETTES: Record<string, [string, string, string]> = {
+    post:         ['rgba(99,102,241,0.45)',  'rgba(168,85,247,0.35)',  'rgba(59,130,246,0.25)'],
+    event:        ['rgba(139,92,246,0.45)',  'rgba(99,102,241,0.35)',  'rgba(236,72,153,0.25)'],
+    marketplace:  ['rgba(16,185,129,0.45)',  'rgba(5,150,105,0.35)',   'rgba(20,184,166,0.25)'],
+    emergency:    ['rgba(239,68,68,0.50)',   'rgba(249,115,22,0.40)',  'rgba(234,179,8,0.25)'],
+    fyi:          ['rgba(245,158,11,0.45)',  'rgba(234,179,8,0.35)',   'rgba(249,115,22,0.25)'],
+    help_request: ['rgba(16,185,129,0.45)',  'rgba(5,150,105,0.35)',   'rgba(34,197,94,0.25)'],
+    gossip:       ['rgba(236,72,153,0.45)',  'rgba(168,85,247,0.35)',  'rgba(239,68,68,0.25)'],
+    job:          ['rgba(59,130,246,0.45)',  'rgba(99,102,241,0.35)',  'rgba(14,165,233,0.25)'],
+};
+
+// ── Content type badge config ──────────────────────────────────────────────────
+const TYPE_BADGE: Record<string, { label: string; cls: string }> = {
+    event:        { label: 'EVENT',     cls: 'bg-purple-500/20 text-purple-200 border-purple-400/25' },
+    marketplace:  { label: 'MARKET',    cls: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/25' },
+    emergency:    { label: 'EMERGENCY', cls: 'bg-red-500/25 text-red-200 border-red-400/30' },
+    fyi:          { label: 'FYI',       cls: 'bg-amber-500/20 text-amber-200 border-amber-400/25' },
+    help_request: { label: 'HELP',      cls: 'bg-green-500/20 text-green-200 border-green-400/25' },
+    gossip:       { label: 'GOSSIP',    cls: 'bg-pink-500/20 text-pink-200 border-pink-400/25' },
+    job:          { label: 'JOB',       cls: 'bg-blue-500/20 text-blue-200 border-blue-400/25' },
+};
+
+const CARD_HEIGHT = '90vh';
+
+const isVideoUrl = (url: string) => /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url);
+
+const formatCompactCount = (value?: number) => {
+    if (!value) return undefined;
+    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(value >= 10_000_000 ? 0 : 1)}M`;
+    if (value >= 1_000) return `${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}K`;
+    return `${value}`;
+};
+
+// ── iOS 26 Liquid Glass action button ─────────────────────────────────────────
+interface GlassBtnProps {
+    icon: string;
+    count?: number;
+    active?: boolean;
+    activeIconClass?: string;
+    onClick: (e: React.MouseEvent) => void;
+    label?: string;
+    filled?: boolean;
+}
+
+function GlassBtn({ icon, count, active, activeIconClass, onClick, label, filled }: GlassBtnProps) {
+    return (
+        <button
+            onClick={onClick}
+            className="group flex flex-col items-center gap-1 rounded-full p-1 transition-transform duration-200 ease-out hover:scale-110 active:scale-90"
+            aria-label={label}
+        >
+            <span
+                className={`material-symbols-outlined text-[22px] transition-transform duration-200 ${active ? (activeIconClass || 'text-white') : 'text-white'}`}
+                style={{
+                    ...(filled && active ? { fontVariationSettings: '"FILL" 1' } : {}),
+                    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.85))',
+                }}
+            >
+                {icon}
+            </span>
+            {(count !== undefined && count > 0) && (
+                <span className="text-[10px] font-black tracking-tight text-white" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
+                    {formatCompactCount(count)}
+                </span>
+            )}
+            {label && !(count !== undefined && count > 0) && (
+                <span className="text-[9px] font-semibold text-white/70">{label}</span>
+            )}
+        </button>
+    );
+}
+
+// ── Emergency action buttons ───────────────────────────────────────────────────
+function EmergencyActions({ post, onEmergencyAction }: { post: Post; onEmergencyAction: (a: string) => void }) {
+    const actions = [
+        { key: 'acknowledge', icon: 'visibility', label: 'Seen', active: post.isAcknowledged, cls: 'bg-blue-500/25 text-blue-200 border-blue-400/30' },
+        { key: 'aware', icon: 'notifications_active', label: 'Aware', active: post.isAware, cls: 'bg-amber-500/25 text-amber-200 border-amber-400/30' },
+        { key: 'nearby', icon: 'location_on', label: 'Nearby', active: post.isNearby, cls: 'bg-green-500/25 text-green-200 border-green-400/30' },
+        { key: 'safe', icon: 'shield', label: 'Safe', active: post.isSafe, cls: 'bg-emerald-500/25 text-emerald-200 border-emerald-400/30' },
+        { key: 'confirm', icon: 'check_circle', label: 'Confirm', active: post.confirmDisputeAction === 'confirm', cls: 'bg-teal-500/25 text-teal-200 border-teal-400/30' },
+        { key: 'dispute', icon: 'cancel', label: 'Dispute', active: post.confirmDisputeAction === 'dispute', cls: 'bg-red-500/25 text-red-200 border-red-400/30' },
+    ].filter(a => !post.availableActions || post.availableActions.includes(a.key));
+
+    return (
+        <div className="flex flex-wrap gap-2 px-4 py-3 border-t border-white/10 bg-black/50 backdrop-blur-md">
+            {actions.map(a => (
+                <button
+                    key={a.key}
+                    onClick={(e) => { e.stopPropagation(); onEmergencyAction(a.key); }}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border transition-all ${
+                        a.active ? a.cls : 'bg-white/10 text-white/70 border-white/15 hover:bg-white/15'
+                    }`}
+                >
+                    <span className="material-symbols-outlined text-[14px]">{a.icon}</span>
+                    {a.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+// ── Props ──────────────────────────────────────────────────────────────────────
 interface XPostCardProps {
     post: Post;
     onLike: () => void;
@@ -31,11 +133,11 @@ interface XPostCardProps {
     userLocation?: { lat: number; lng: number } | null;
 }
 
+// ── Main component ─────────────────────────────────────────────────────────────
 export function XPostCard({
     post,
     onLike,
     onComment,
-    onShare,
     onSave,
     onEmergencyAction,
     onCardClick,
@@ -45,20 +147,17 @@ export function XPostCard({
     onReport,
     onPin,
     onHelpful,
-    userLocation,
 }: XPostCardProps) {
     const [imageError, setImageError] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [showShare, setShowShare] = useState(false);
     const router = useRouter();
 
-    // Get author info
     const author = post.author as PostAuthor;
     const authorName = author?.name || 'Anonymous';
     const authorUsername = author?.username || 'user';
     const authorAvatar = author?.avatarUrl || (author as any)?.profilePicture || null;
 
-    // Follow state — only for posts not by the current user and not anonymous
     const isAnonymousAuthor = !author?.id || author.id === 'anonymous';
     const isOwnerPost = currentUserId && (author?.id === currentUserId || (post as any).authorId === currentUserId);
 
@@ -81,34 +180,14 @@ export function XPostCard({
         { enabled: canFollow && !!author?.id }
     );
 
-    // Distance calculation
-    const postLat = post.location && ('latitude' in post.location ? post.location.latitude : ('lat' in post.location ? (post.location as any).lat : null));
-    const postLng = post.location && ('longitude' in post.location ? post.location.longitude : ('lng' in post.location ? (post.location as any).lng : null));
-    const distanceLabel = userLocation && postLat != null && postLng != null
-        ? formatDistance(haversineDistance(userLocation.lat, userLocation.lng, postLat, postLng))
-        : null;
-
-    // Location name for display
-    const locationName = post.location && 'formattedAddress' in post.location && post.location.formattedAddress
-        ? post.location.formattedAddress
-        : post.location && 'address' in post.location && (post.location as Record<string, unknown>).address
-            ? String((post.location as Record<string, unknown>).address)
-            : post.location && 'neighborhood' in post.location && (post.location as any).neighborhood
-                ? (post.location as any).neighborhood
-                : post.location && 'lga' in post.location && (post.location as any).lga
-                    ? (post.location as any).lga
-                    : null;
-
-    // Get media URLs
-    const mediaUrls = post.media
-        ? Array.isArray(post.media)
-            ? post.media.map((m) => (typeof m === 'string' ? m : m.url))
-            : []
+    const mediaItems: Array<{ url: string; type?: MediaItem['type']; thumbnailUrl?: string }> = Array.isArray(post.media)
+        ? post.media
+            .map((m) => (typeof m === 'string' ? { url: m } : { url: m.url, type: m.type, thumbnailUrl: m.thumbnailUrl }))
+            .filter((m) => Boolean(m.url))
         : [];
-
-    const handleProfileClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-    };
+    const mediaUrls = mediaItems.map((m) => m.url);
+    const primaryMedia = mediaItems[0];
+    const isPrimaryVideo = Boolean(primaryMedia && (primaryMedia.type === 'video' || isVideoUrl(primaryMedia.url)));
 
     const isSafetyAlert =
         post.contentType === 'emergency' ||
@@ -116,1104 +195,523 @@ export function XPostCard({
         post.tags?.includes('safety') ||
         post.tags?.includes('SAFETY') ||
         (post as unknown as Record<string, unknown>).category === 'SAFETY';
+
     const feedLayerLabel =
-        post._feedLayer === 'explore'
-            ? 'Street Radar'
-            : post._feedLayer === 'extended'
-                ? 'Following Places'
-                : 'Your Huud';
+        post._feedLayer === 'explore' ? 'Street Radar' :
+        post._feedLayer === 'extended' ? 'Following Places' :
+        'Your Huud';
+
     const severityLabel = post.severity ? post.severity.toUpperCase() : null;
     const isOwner = isOwnerPost;
 
     const hasMedia = mediaUrls.length > 0;
-
-    // Determine if this is a "quote card" — all text-only posts use the gradient quote style
     const textContent = post.content || post.body || '';
-    const wordCount = textContent.trim().split(/\s+/).length;
-    const isCasualType = !isSafetyAlert;
-    const isQuoteCard = !hasMedia && isCasualType && textContent.trim().length > 0;
+    const hasText = textContent.trim().length > 0;
 
-    // Rotating gradient backgrounds for quote cards (content-type aware)
-    const quoteGradients: Record<string, string> = {
-        gossip: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-        event: 'linear-gradient(135deg, #1a1a2e 0%, #2d1b4e 50%, #4a1a6b 100%)',
-        marketplace: 'linear-gradient(135deg, #0a1a0f 0%, #0d2818 50%, #1a4028 100%)',
-        job: 'linear-gradient(135deg, #1a1a2e 0%, #1a2a4a 50%, #1e3a5f 100%)',
-        post: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-    };
-    const quoteAccentColors: Record<string, string> = {
-        gossip: '#e879a8',
-        event: '#a78bfa',
-        marketplace: '#4ade80',
-        job: '#60a5fa',
-        post: '#818cf8',
+    const mode: 'text' | 'media' | 'mixed' = hasMedia ? (hasText ? 'mixed' : 'media') : 'text';
+
+    const wordCount = textContent.trim().split(/\s+/).filter(Boolean).length;
+    const textSizeClass =
+        wordCount <= 6  ? 'text-[32px] leading-tight' :
+        wordCount <= 15 ? 'text-[24px] leading-snug' :
+        wordCount <= 35 ? 'text-[19px] leading-snug' :
+        wordCount <= 70 ? 'text-[16px] leading-relaxed' :
+        'text-[14px] leading-relaxed';
+
+    const spheres = SPHERE_PALETTES[post.contentType || 'post'] || SPHERE_PALETTES.post;
+    const typeBadge = post.contentType ? TYPE_BADGE[post.contentType] : undefined;
+
+    const handleProfileClick = (e: React.MouseEvent) => e.stopPropagation();
+
+    const handleCardClick = (e: React.MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('button') && !target.closest('a')) onCardClick?.();
     };
 
-    // ── REEL-STYLE CARD (with image background) ──
-    if (hasMedia) {
-        return (
-            <article
-                className={`relative overflow-hidden cursor-pointer rounded-2xl bg-gray-900 ${
-                    isSafetyAlert ? 'ring-2 ring-orange-500/50' : ''
-                }`}
-                style={{ minHeight: '78vh' }}
-                onClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (!target.closest('button') && !target.closest('a')) {
-                        onCardClick?.();
-                    }
-                }}
-            >
-                {/* Pinned overlay badge */}
-                {post.isPinned && (
-                    <div className="absolute top-3 left-3 z-30 flex items-center gap-1 px-2 py-1 rounded-full shadow-lg" style={{ background: 'rgba(251,191,36,0.95)' }}>
-                        <span className="material-symbols-outlined text-[13px] text-black" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
-                        <span className="text-black text-[10px] font-black uppercase tracking-wide">Pinned</span>
-                    </div>
-                )}
-                {/* Background Image */}
-                <div className="absolute inset-0">
-                    <img
-                        src={mediaUrls[0]}
-                        alt="Post background"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                            e.currentTarget.src = 'https://i.pravatar.cc/600?u=fallback';
+    // ── Shared: Top utility layer ─────────────────────────────────────────────
+    const authorHeader = (
+        <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 px-4 pt-4 pb-20 bg-gradient-to-b from-black/60 via-black/18 to-transparent">
+            <div className="pointer-events-auto flex items-start justify-between gap-3">
+                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                    {typeBadge && (
+                        <span
+                            className={`text-[9px] px-2 py-[3px] rounded-full font-bold tracking-wider uppercase border ${typeBadge.cls}`}
+                            style={{ backdropFilter: 'blur(12px)' }}
+                        >
+                            {typeBadge.label}
+                        </span>
+                    )}
+                    <span
+                        className="text-[9px] px-2 py-[3px] rounded-full font-bold tracking-wider uppercase text-white/70"
+                        style={{
+                            background: 'rgba(255,255,255,0.11)',
+                            backdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255,255,255,0.14)',
                         }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
+                    >
+                        {feedLayerLabel}
+                    </span>
                 </div>
-
-                {/* Multi-image indicator */}
-                {mediaUrls.length > 1 && (
-                    <div className="absolute top-4 right-4 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10">
-                        <span className="material-symbols-outlined text-white text-[14px]">photo_library</span>
-                        <span className="text-white text-xs font-bold">{mediaUrls.length}</span>
-                    </div>
-                )}
-
-                {/* Safety Alert Banner — top center */}
-                {isSafetyAlert && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-500/25 backdrop-blur-md border border-orange-400/30">
-                        <span className="material-symbols-outlined text-orange-300 text-[14px]">warning</span>
-                        <span className="text-orange-200 text-[11px] font-bold uppercase tracking-wider">Safety Alert</span>
-                        {severityLabel && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-500/30 text-orange-100 font-bold">{severityLabel}</span>
-                        )}
-                    </div>
-                )}
-
-                {/* All content overlaid */}
-                <div className="relative z-10 flex flex-col justify-between" style={{ minHeight: '78vh' }}>
-
-                    {/* ── TOP: Minimal header ── */}
-                    <div className="p-4 pt-5">
-                        <div className="flex items-center gap-3">
-                            <div className="relative flex-shrink-0">
-                                <Link
-                                    href={`/profile/${authorUsername}`}
-                                    className="block group"
-                                    onClick={handleProfileClick}
-                                    aria-label={`View ${authorName}'s profile`}
-                                >
-                                    <MapPinAvatar
-                                        src={authorAvatar}
-                                        alt={authorName}
-                                        size="lg"
-                                        onError={() => { if (!imageError) setImageError(true); }}
-                                    />
-                                </Link>
-                                {canFollow && !isFollowing && (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); toggleFollow(); }}
-                                        disabled={isFollowPending}
-                                        className={`absolute bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform bg-white border-2 border-white ${isFollowPending ? 'opacity-50' : ''}`}
-                                        aria-label="HuudLink"
-                                    >
-                                        <span className="material-symbols-outlined text-[16px] font-bold text-primary">add</span>
-                                    </button>
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                    <Link
-                                        href={`/profile/${authorUsername}`}
-                                        onClick={handleProfileClick}
-                                        className="font-bold text-[14px] text-white hover:underline drop-shadow-md truncate"
-                                    >
-                                        {authorName}
-                                    </Link>
-                                </div>
-                                {/* Location + Time + Distance — single clean line */}
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="text-[11px] text-white/60 drop-shadow-sm">{formatTimeAgo(post.createdAt)}</span>
-                                    {locationName && (
-                                        <>
-                                            <span className="text-white/30 text-[10px]">·</span>
-                                            <span className="material-symbols-outlined text-[12px] text-white/50">location_on</span>
-                                            <span className="text-[11px] text-white/60 truncate max-w-[120px]">{locationName}</span>
-                                        </>
-                                    )}
-                                    {distanceLabel && (
-                                        <span className="flex-shrink-0 text-[10px] px-1.5 py-[1px] rounded-full bg-white/15 text-white/70 font-medium backdrop-blur-sm">
-                                            {distanceLabel}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            {/* Feed layer + Menu */}
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                                <span className="text-[9px] px-2 py-[3px] rounded-full bg-white/15 text-white/80 font-bold tracking-wider uppercase backdrop-blur-sm">
-                                    {feedLayerLabel}
-                                </span>
-                                <div className="relative">
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-                                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/15 transition-colors text-white/70"
-                                    >
-                                        <span className="material-symbols-outlined text-[20px]">more_vert</span>
-                                    </button>
-                                    {showMenu && (
-                                        <div className="absolute right-0 top-10 z-30 w-44 rounded-2xl overflow-hidden bg-black/70 backdrop-blur-2xl border border-white/10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                                            {isOwner && onEdit && (
-                                                <button onClick={() => { setShowMenu(false); onEdit(post); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white">
-                                                    <span className="material-symbols-outlined text-[18px]">edit</span> Edit
-                                                </button>
-                                            )}
-                                            {isOwner && onDelete && (
-                                                <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-red-400">
-                                                    <span className="material-symbols-outlined text-[18px]">delete</span> Delete
-                                                </button>
-                                            )}
-                                            {isOwner && onPin && (
-                                                <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-amber-400">
-                                                    <span className="material-symbols-outlined text-[18px]">push_pin</span> {post.isPinned ? "Extend Pin" : "Pin to Feed"} 🪙
-                                                </button>
-                                            )}
-                                            {!isOwner && !isAnonymousAuthor && (
-                                                <button onClick={handleMessageAuthor} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white">
-                                                    <span className="material-symbols-outlined text-[18px]">chat</span> Message
-                                                </button>
-                                            )}
-                                            {!isOwner && (
-                                                <button onClick={() => { setShowMenu(false); onReport?.(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white/60">
-                                                    <span className="material-symbols-outlined text-[18px]">flag</span> Report
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ── MIDDLE: Image breathes ── */}
-                    <div className="flex-1" />
-
-                    {/* ── RIGHT SIDE: Vertical action rail (TikTok-style) ── */}
-                    <div className="absolute right-3 bottom-[170px] z-20 flex flex-col items-center gap-4">
-                        {/* Like */}
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onLike(); }}
-                            className="flex flex-col items-center gap-0.5 group"
-                        >
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                                post.isLiked ? 'bg-pink-500/30 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
-                            }`}>
-                                <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
-                                    post.isLiked ? 'text-pink-400 fill-1' : 'text-white'
-                                }`}>favorite</span>
-                            </div>
-                            {post.likes > 0 && <span className="text-[11px] font-bold text-white drop-shadow-md">{post.likes}</span>}
-                        </button>
-                        {/* Comment */}
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onComment(); }}
-                            className="flex flex-col items-center gap-0.5 group"
-                        >
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md hover:bg-black/50 transition-all">
-                                <span className="material-symbols-outlined text-[22px] text-white group-hover:scale-110 transition-transform">chat_bubble</span>
-                            </div>
-                            {post.comments > 0 && <span className="text-[11px] font-bold text-white drop-shadow-md">{post.comments}</span>}
-                        </button>
-                        {/* Share */}
-                        <button
-                            onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
-                            className="flex flex-col items-center gap-0.5 group"
-                        >
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md hover:bg-black/50 transition-all">
-                                <span className="material-symbols-outlined text-[22px] text-white group-hover:scale-110 transition-transform">send</span>
-                            </div>
-                        </button>
-                        {/* Save */}
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onSave(); }}
-                            className="flex flex-col items-center gap-0.5 group"
-                        >
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                                post.isSaved ? 'bg-white/25 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
-                            }`}>
-                                <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
-                                    post.isSaved ? 'text-white fill-1' : 'text-white'
-                                }`}>bookmark</span>
-                            </div>
-                        </button>
-                        {/* Helpful (FYI only) */}
-                        {post.contentType === 'fyi' && onHelpful && (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onHelpful(); }}
-                                className="flex flex-col items-center gap-0.5 group"
-                            >
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                                    post.isHelpful ? 'bg-emerald-500/30 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
-                                }`}>
-                                    <span className={`material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform ${
-                                        post.isHelpful ? 'text-emerald-300 fill-1' : 'text-white'
-                                    }`}>thumb_up</span>
-                                </div>
-                                {(post.helpfulCount || 0) > 0 && <span className="text-[11px] font-bold text-white">{post.helpfulCount}</span>}
-                            </button>
-                        )}
-                        {/* Views */}
-                        {post.views > 0 && (
-                            <div className="flex flex-col items-center gap-0.5">
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-transparent">
-                                    <span className="material-symbols-outlined text-[20px] text-white/40">visibility</span>
-                                </div>
-                                <span className="text-[11px] text-white/40">{post.views}</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* ── BOTTOM: Content panel ── */}
-                    <div className="p-4 pr-16 space-y-2.5">
-                        {/* Pinned / Priority badges */}
-                        <div className="flex flex-wrap items-center gap-1.5">
-                            {post.isPinned && (
-                                <span className="text-[10px] px-2 py-[2px] rounded-full bg-blue-400/25 text-blue-200 font-bold backdrop-blur-sm border border-blue-400/20">
-                                    <span className="material-symbols-outlined text-[11px] mr-0.5 align-text-bottom">push_pin</span> Pinned
-                                </span>
-                            )}
-                            {post.priority && post.priority !== 'normal' && (
-                                <span className={`inline-flex items-center gap-0.5 px-2 py-[2px] rounded-full text-[10px] font-bold backdrop-blur-sm ${
-                                    post.priority === 'critical' ? 'bg-red-500/25 text-red-200 border border-red-400/20' :
-                                    post.priority === 'high' ? 'bg-orange-500/25 text-orange-200 border border-orange-400/20' :
-                                    'bg-blue-500/25 text-blue-200 border border-blue-400/20'
-                                }`}>
-                                    {post.priority.charAt(0).toUpperCase() + post.priority.slice(1)}
-                                </span>
-                            )}
-                            {post.updatedAt && post.updatedAt !== post.createdAt && (
-                                <span className="text-[10px] italic text-white/40">edited</span>
-                            )}
-                        </div>
-
-                        {/* Post Content */}
-                        <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words text-white font-medium drop-shadow-lg">
-                            {post.content || post.body || ''}
-                        </p>
-
-                        {/* Content type badge row */}
-                        {post.contentType && post.contentType !== 'post' && (
-                            <div className="flex flex-wrap gap-1.5">
-                                {post.contentType === 'fyi' && post.fyiSubtype && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/25 text-amber-200 font-bold backdrop-blur-sm border border-amber-400/15">
-                                        {post.fyiSubtype.replace(/_/g, ' ').toUpperCase()}
-                                    </span>
-                                )}
-                                {post.contentType === 'event' && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/25 text-purple-200 font-bold backdrop-blur-sm border border-purple-400/15">📅 EVENT</span>
-                                )}
-                                {post.contentType === 'marketplace' && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/25 text-green-200 font-bold backdrop-blur-sm border border-green-400/15">🛒 MARKETPLACE</span>
-                                )}
-                                {post.contentType === 'emergency' && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/25 text-red-200 font-bold backdrop-blur-sm border border-red-400/15">🚨 EMERGENCY</span>
-                                )}
-                                {post.contentType === 'help_request' && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/25 text-sky-200 font-bold backdrop-blur-sm border border-sky-400/15">🤝 HELP</span>
-                                )}
-                                {post.contentType === 'job' && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/25 text-indigo-200 font-bold backdrop-blur-sm border border-indigo-400/15">💼 JOB</span>
-                                )}
-                                {post.contentType === 'gossip' && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/25 text-pink-200 font-bold backdrop-blur-sm border border-pink-400/15">👀 GOSSIP</span>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Event Info */}
-                        {post.contentType === 'event' && (post as any).eventDate && (
-                            <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-black/30 backdrop-blur-md border border-white/5">
-                                <span className="text-[11px] font-bold text-purple-300">📅 {new Date((post as any).eventDate).toLocaleDateString()}</span>
-                                {(post as any).eventTime && <span className="text-[11px] text-purple-200">⏰ {(post as any).eventTime}</span>}
-                                {(post as any).venue?.name && <span className="text-[11px] text-purple-200">📍 {(post as any).venue.name}</span>}
-                                {(post as any).ticketInfo === 'paid' && (post as any).ticketPrice && (
-                                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 font-bold">₦{Number((post as any).ticketPrice).toLocaleString()}</span>
-                                )}
-                                {(post as any).ticketInfo === 'free' && (
-                                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-500/30 text-green-300 font-bold">FREE</span>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Marketplace Info */}
-                        {post.contentType === 'marketplace' && (
-                            <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-black/30 backdrop-blur-md border border-white/5">
-                                {(post as any).price != null && (
-                                    <span className="text-sm font-bold text-green-300">₦{Number((post as any).price).toLocaleString()}</span>
-                                )}
-                                {(post as any).isNegotiable && (
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-200 font-medium">Negotiable</span>
-                                )}
-                                {(post as any).itemCondition && (
-                                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-200 font-medium capitalize">{(post as any).itemCondition === 'used' ? 'Tokunbo' : (post as any).itemCondition}</span>
-                                )}
-                                {(post as any).availability && (post as any).availability !== 'available' && (
-                                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
-                                        (post as any).availability === 'sold' ? 'bg-red-500/30 text-red-300' : 'bg-yellow-500/30 text-yellow-300'
-                                    }`}>
-                                        {(post as any).availability === 'sold' ? 'SOLD' : 'RESERVED'}
-                                    </span>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Tags */}
-                        {post.tags && post.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5">
-                                {post.tags.map((tag, i) => (
-                                    <span key={i} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 text-white/80 backdrop-blur-sm">
-                                        #{tag}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Emergency Action Buttons */}
-                        {isSafetyAlert && onEmergencyAction && (
-                            <div className="flex flex-wrap gap-2 pt-1">
-                                {(!post.availableActions || post.availableActions.includes('acknowledge')) && (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); onEmergencyAction('acknowledge'); }}
-                                        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all backdrop-blur-md border ${
-                                            post.isAcknowledged ? 'bg-blue-500/25 text-blue-200 border-blue-400/30' : 'bg-white/10 hover:bg-blue-500/15 text-white/70 border-white/10'
-                                        }`}
-                                    >
-                                        <span className="material-symbols-outlined text-[14px]">visibility</span>Seen
-                                    </button>
-                                )}
-                                {(!post.availableActions || post.availableActions.includes('aware')) && (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); onEmergencyAction('aware'); }}
-                                        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all backdrop-blur-md border ${
-                                            post.isAware ? 'bg-amber-500/25 text-amber-200 border-amber-400/30' : 'bg-white/10 hover:bg-amber-500/15 text-white/70 border-white/10'
-                                        }`}
-                                    >
-                                        <span className="material-symbols-outlined text-[14px]">notifications_active</span>Aware
-                                    </button>
-                                )}
-                                {(!post.availableActions || post.availableActions.includes('safe')) && (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); onEmergencyAction('safe'); }}
-                                        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all backdrop-blur-md border ${
-                                            post.isSafe ? 'bg-emerald-500/25 text-emerald-200 border-emerald-400/30' : 'bg-white/10 hover:bg-emerald-500/15 text-white/70 border-white/10'
-                                        }`}
-                                    >
-                                        <span className="material-symbols-outlined text-[14px]">shield</span>Safe
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </article>
-        );
-    }
-
-    // ── QUOTE-STYLE CARD (short text, no media, gradient bg) ──
-    if (isQuoteCard) {
-        const gradient = quoteGradients[post.contentType || 'post'] || quoteGradients.post;
-        const accentColor = quoteAccentColors[post.contentType || 'post'] || quoteAccentColors.post;
-
-        return (
-            <article
-                className={`relative overflow-hidden cursor-pointer rounded-2xl ${
-                    isSafetyAlert ? 'ring-2 ring-orange-500/50' : ''
-                }`}
-                style={{ background: gradient, minHeight: '70vh' }}
-                onClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (!target.closest('button') && !target.closest('a')) {
-                        onCardClick?.();
-                    }
-                }}
-            >
-                {/* Pinned overlay badge */}
-                {post.isPinned && (
-                    <div className="absolute top-3 left-3 z-30 flex items-center gap-1 px-2 py-1 rounded-full shadow-lg" style={{ background: 'rgba(251,191,36,0.95)' }}>
-                        <span className="material-symbols-outlined text-[13px] text-black" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
-                        <span className="text-black text-[10px] font-black uppercase tracking-wide">Pinned</span>
-                    </div>
-                )}
-                {/* ── RIGHT SIDE: Vertical action rail ── */}
-                <div className="absolute right-3 top-2/3 -translate-y-1/2 z-20 flex flex-col items-center gap-4">
-                    {/* Like */}
-                    <button onClick={(e) => { e.stopPropagation(); onLike(); }} className="flex flex-col items-center gap-0.5 group">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                            post.isLiked ? 'bg-pink-500/30 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
-                        }`}>
-                            <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
-                                post.isLiked ? 'text-pink-400 fill-1' : 'text-white'
-                            }`}>favorite</span>
-                        </div>
-                        {post.likes > 0 && <span className="text-[11px] font-bold text-white drop-shadow-md">{post.likes}</span>}
+                <div className="relative shrink-0">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setShowMenu(v => !v); }}
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-white/75 transition-all hover:scale-105 hover:text-white active:scale-95"
+                        style={{
+                            background: 'rgba(255,255,255,0.11)',
+                            backdropFilter: 'blur(16px) saturate(170%)',
+                            border: '1px solid rgba(255,255,255,0.16)',
+                        }}
+                    >
+                        <span className="material-symbols-outlined text-[19px]">more_horiz</span>
                     </button>
-                    {/* Comment */}
-                    <button onClick={(e) => { e.stopPropagation(); onComment(); }} className="flex flex-col items-center gap-0.5 group">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md hover:bg-black/50 transition-all">
-                            <span className="material-symbols-outlined text-[22px] text-white group-hover:scale-110 transition-transform">chat_bubble</span>
-                        </div>
-                        {post.comments > 0 && <span className="text-[11px] font-bold text-white drop-shadow-md">{post.comments}</span>}
-                    </button>
-                    {/* Share */}
-                    <button onClick={(e) => { e.stopPropagation(); setShowShare(true); }} className="flex flex-col items-center gap-0.5 group">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md hover:bg-black/50 transition-all">
-                            <span className="material-symbols-outlined text-[22px] text-white group-hover:scale-110 transition-transform">send</span>
-                        </div>
-                    </button>
-                    {/* Save */}
-                    <button onClick={(e) => { e.stopPropagation(); onSave(); }} className="flex flex-col items-center gap-0.5 group">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                            post.isSaved ? 'bg-white/25 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
-                        }`}>
-                            <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
-                                post.isSaved ? 'text-white fill-1' : 'text-white'
-                            }`}>bookmark</span>
-                        </div>
-                        {post.isSaved && <span className="text-[10px] font-bold text-white">Saved</span>}
-                    </button>
-                    {/* Helpful (FYI only) */}
-                    {post.contentType === 'fyi' && onHelpful && (
-                        <button onClick={(e) => { e.stopPropagation(); onHelpful(); }} className="flex flex-col items-center gap-0.5 group">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                                post.isHelpful ? 'bg-emerald-500/30 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
-                            }`}>
-                                <span className={`material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform ${
-                                    post.isHelpful ? 'text-emerald-300 fill-1' : 'text-white'
-                                }`}>thumb_up</span>
-                            </div>
-                            {(post.helpfulCount || 0) > 0 && <span className="text-[11px] font-bold text-white">{post.helpfulCount}</span>}
-                        </button>
-                    )}
-                    {/* Views */}
-                    {post.views > 0 && (
-                        <div className="flex flex-col items-center gap-0.5">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-transparent">
-                                <span className="material-symbols-outlined text-[20px] text-white/40">visibility</span>
-                            </div>
-                            <span className="text-[11px] text-white/40">{post.views}</span>
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex flex-col" style={{ minHeight: '70vh' }}>
-
-                    {/* Safety Alert Banner */}
-                    {isSafetyAlert && (
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-500/25 backdrop-blur-md border border-orange-400/30">
-                            <span className="material-symbols-outlined text-orange-300 text-[14px]">warning</span>
-                            <span className="text-orange-200 text-[11px] font-bold uppercase tracking-wider">Safety Alert</span>
-                        </div>
-                    )}
-
-                    {/* ── TOP: Author header ── */}
-                    <div className="p-4 pt-5">
-                        <div className="flex items-center gap-3">
-                            <div className="relative flex-shrink-0">
-                                <Link
-                                    href={`/profile/${authorUsername}`}
-                                    className="block group"
-                                    onClick={handleProfileClick}
-                                    aria-label={`View ${authorName}'s profile`}
-                                >
-                                    <MapPinAvatar
-                                        src={authorAvatar}
-                                        alt={authorName}
-                                        size="lg"
-                                        onError={() => { if (!imageError) setImageError(true); }}
-                                    />
-                                </Link>
-                                {canFollow && !isFollowing && (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); toggleFollow(); }}
-                                        disabled={isFollowPending}
-                                        className={`absolute bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform bg-white border-2 border-white ${isFollowPending ? 'opacity-50' : ''}`}
-                                        aria-label="HuudLink"
-                                    >
-                                        <span className="material-symbols-outlined text-[16px] font-bold text-primary">add</span>
-                                    </button>
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                    <Link
-                                        href={`/profile/${authorUsername}`}
-                                        onClick={handleProfileClick}
-                                        className="font-bold text-[14px] text-white hover:underline truncate"
-                                    >
-                                        {authorName}
-                                    </Link>
-                                </div>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="text-[11px] text-white/50">{formatTimeAgo(post.createdAt)}</span>
-                                    {locationName && (
-                                        <>
-                                            <span className="text-white/25 text-[10px]">·</span>
-                                            <span className="material-symbols-outlined text-[12px] text-white/40">location_on</span>
-                                            <span className="text-[11px] text-white/50 truncate max-w-[120px]">{locationName}</span>
-                                        </>
-                                    )}
-                                    {distanceLabel && (
-                                        <span className="flex-shrink-0 text-[10px] px-1.5 py-[1px] rounded-full bg-white/15 text-white/60 font-medium">
-                                            {distanceLabel}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            {/* Feed layer + content type + Menu */}
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                                <span className="text-[9px] px-2 py-[3px] rounded-full bg-white/15 text-white/70 font-bold tracking-wider uppercase">
-                                    {feedLayerLabel}
-                                </span>
-                                {post.contentType && post.contentType !== 'post' && (
-                                    <span
-                                        className="text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider"
-                                        style={{ color: accentColor, background: `${accentColor}20`, border: `1px solid ${accentColor}30` }}
-                                    >
-                                        {post.contentType === 'gossip' ? 'GOSSIP' : post.contentType === 'event' ? 'EVENT' : post.contentType === 'marketplace' ? 'MARKET' : post.contentType === 'job' ? 'JOB' : post.contentType.toUpperCase()}
-                                    </span>
-                                )}
-                                <div className="relative">
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-                                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/15 transition-colors text-white/60"
-                                    >
-                                        <span className="material-symbols-outlined text-[20px]">more_vert</span>
-                                    </button>
-                                    {showMenu && (
-                                        <div className="absolute right-0 top-10 z-30 w-44 rounded-2xl overflow-hidden bg-black/70 backdrop-blur-2xl border border-white/10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                                            {isOwner && onEdit && (
-                                                <button onClick={() => { setShowMenu(false); onEdit(post); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white">
-                                                    <span className="material-symbols-outlined text-[18px]">edit</span> Edit
-                                                </button>
-                                            )}
-                                            {isOwner && onDelete && (
-                                                <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-red-400">
-                                                    <span className="material-symbols-outlined text-[18px]">delete</span> Delete
-                                                </button>
-                                            )}
-                                            {isOwner && onPin && (
-                                                <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-amber-400">
-                                                    <span className="material-symbols-outlined text-[18px]">push_pin</span> {post.isPinned ? "Extend Pin" : "Pin to Feed"} 🪙
-                                                </button>
-                                            )}
-                                            {!isOwner && !isAnonymousAuthor && (
-                                                <button onClick={handleMessageAuthor} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white">
-                                                    <span className="material-symbols-outlined text-[18px]">chat</span> Message
-                                                </button>
-                                            )}
-                                            {!isOwner && (
-                                                <button onClick={() => { setShowMenu(false); onReport?.(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white/60">
-                                                    <span className="material-symbols-outlined text-[18px]">flag</span> Report
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ── CENTER: Big quote text ── */}
-                    <div className="px-8 pr-14 py-6 flex-1 flex flex-col justify-center items-center">
-                        <span className="text-5xl leading-none mb-3 font-serif self-start opacity-20" style={{ color: accentColor }}>&ldquo;</span>
-                        <p
-                            className="font-extrabold leading-snug whitespace-pre-wrap break-words text-center"
+                    {showMenu && (
+                        <div
+                            className="absolute right-0 top-11 z-40 w-44 overflow-hidden rounded-2xl shadow-2xl"
                             style={{
-                                color: accentColor,
-                                fontSize: wordCount <= 10 ? '28px' : wordCount <= 20 ? '22px' : wordCount <= 50 ? '17px' : '14px',
+                                background: 'rgba(4,12,16,0.88)',
+                                backdropFilter: 'blur(28px) saturate(180%)',
+                                border: '1px solid rgba(255,255,255,0.12)',
                             }}
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            {textContent}
-                        </p>
-                        <span className="text-5xl leading-none mt-3 font-serif self-end opacity-20" style={{ color: accentColor }}>&rdquo;</span>
-
-                        {/* Badges under text */}
-                        <div className="flex flex-wrap items-center justify-center gap-1.5 mt-4">
-                            {post.isPinned && (
-                                <span className="text-[10px] px-2 py-[2px] rounded-full bg-white/10 text-white/60 font-bold">
-                                    <span className="material-symbols-outlined text-[11px] mr-0.5 align-text-bottom">push_pin</span> Pinned
-                                </span>
+                            {isOwner && onEdit && (
+                                <button onClick={() => { setShowMenu(false); onEdit(post); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-white transition-colors hover:bg-white/8">
+                                    <span className="material-symbols-outlined text-[17px]">edit</span> Edit
+                                </button>
                             )}
-                            {post.updatedAt && post.updatedAt !== post.createdAt && (
-                                <span className="text-[10px] italic text-white/30">edited</span>
+                            {isOwner && onDelete && (
+                                <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-red-400 transition-colors hover:bg-white/8">
+                                    <span className="material-symbols-outlined text-[17px]">delete</span> Delete
+                                </button>
                             )}
-                        </div>
-                    </div>
-
-                    {/* Tags */}
-                    {post.tags && post.tags.length > 0 && (
-                        <div className="px-6 pb-2 flex flex-wrap justify-center gap-1.5">
-                            {post.tags.map((tag, i) => (
-                                <span key={i} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 text-white/70">
-                                    #{tag}
-                                </span>
-                            ))}
+                            {isOwner && onPin && (
+                                <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-amber-400 transition-colors hover:bg-white/8">
+                                    <span className="material-symbols-outlined text-[17px]">push_pin</span> {post.isPinned ? 'Extend Pin' : 'Pin to Feed'}
+                                </button>
+                            )}
+                            {!isOwner && !isAnonymousAuthor && (
+                                <button onClick={handleMessageAuthor} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-white transition-colors hover:bg-white/8">
+                                    <span className="material-symbols-outlined text-[17px]">chat</span> Message
+                                </button>
+                            )}
+                            {!isOwner && (
+                                <button onClick={() => { setShowMenu(false); onReport?.(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-white/55 transition-colors hover:bg-white/8">
+                                    <span className="material-symbols-outlined text-[17px]">flag</span> Report
+                                </button>
+                            )}
                         </div>
                     )}
-
-                    {/* Bottom padding */}
-                    <div className="pb-4" />
                 </div>
-            </article>
-        );
-    }
-
-    return (
-        <>
-        <article
-            className={`relative bg-white overflow-hidden cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow ${
-                isSafetyAlert ? 'ring-1 ring-orange-400/40' : ''
-            }`}
-            onClick={(e) => {
-                const target = e.target as HTMLElement;
-                if (!target.closest('button') && !target.closest('a')) {
-                    onCardClick?.();
-                }
-            }}
-        >
-            {/* Pinned overlay badge */}
-            {post.isPinned && (
-                <div className="absolute top-3 left-3 z-30 flex items-center gap-1 px-2 py-1 rounded-full shadow" style={{ background: 'rgba(251,191,36,0.95)' }}>
-                    <span className="material-symbols-outlined text-[13px] text-black" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
-                    <span className="text-black text-[10px] font-black uppercase tracking-wide">Pinned</span>
-                </div>
-            )}
-            {/* ── RIGHT SIDE: Vertical action rail ── */}
-            <div className="absolute right-3 top-2/3 -translate-y-1/2 z-20 flex flex-col items-center gap-4">
-                {/* Like */}
-                <button onClick={(e) => { e.stopPropagation(); onLike(); }} className="flex flex-col items-center gap-0.5 group">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                        post.isLiked ? 'bg-pink-500/15' : 'bg-black/5 hover:bg-black/10'
-                    }`}>
-                        <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
-                            post.isLiked ? 'text-pink-500 fill-1' : 'text-gray-400'
-                        }`}>favorite</span>
-                    </div>
-                    {post.likes > 0 && <span className="text-[11px] font-bold text-gray-500">{post.likes}</span>}
-                </button>
-                {/* Comment */}
-                <button onClick={(e) => { e.stopPropagation(); onComment(); }} className="flex flex-col items-center gap-0.5 group">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/5 hover:bg-black/10 transition-all">
-                        <span className="material-symbols-outlined text-[22px] text-gray-400 group-hover:scale-110 transition-transform">chat_bubble</span>
-                    </div>
-                    {post.comments > 0 && <span className="text-[11px] font-bold text-gray-500">{post.comments}</span>}
-                </button>
-                {/* Share */}
-                <button onClick={(e) => { e.stopPropagation(); setShowShare(true); }} className="flex flex-col items-center gap-0.5 group">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/5 hover:bg-black/10 transition-all">
-                        <span className="material-symbols-outlined text-[22px] text-gray-400 group-hover:scale-110 transition-transform">send</span>
-                    </div>
-                </button>
-                {/* Save */}
-                <button onClick={(e) => { e.stopPropagation(); onSave(); }} className="flex flex-col items-center gap-0.5 group">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                        post.isSaved ? 'bg-primary/15' : 'bg-black/5 hover:bg-black/10'
-                    }`}>
-                        <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
-                            post.isSaved ? 'text-primary fill-1' : 'text-gray-400'
-                        }`}>bookmark</span>
-                    </div>
-                    {post.isSaved && <span className="text-[10px] font-bold text-primary">Saved</span>}
-                </button>
-                {/* Helpful (FYI only) */}
-                {post.contentType === 'fyi' && onHelpful && (
-                    <button onClick={(e) => { e.stopPropagation(); onHelpful(); }} className="flex flex-col items-center gap-0.5 group">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                            post.isHelpful ? 'bg-emerald-500/15' : 'bg-black/5 hover:bg-black/10'
-                        }`}>
-                            <span className={`material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform ${
-                                post.isHelpful ? 'text-emerald-500 fill-1' : 'text-gray-400'
-                            }`}>thumb_up</span>
-                        </div>
-                        {(post.helpfulCount || 0) > 0 && <span className="text-[11px] font-bold text-emerald-500">{post.helpfulCount}</span>}
-                    </button>
-                )}
-                {/* Views */}
-                {post.views > 0 && (
-                    <div className="flex flex-col items-center gap-0.5">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center">
-                            <span className="material-symbols-outlined text-[20px] text-gray-300">visibility</span>
-                        </div>
-                        <span className="text-[11px] text-gray-400">{post.views}</span>
-                    </div>
-                )}
             </div>
-            {/* Content Type Accent Line */}
-            <div className={`h-[3px] w-full accent-line-${post.contentType || 'post'} opacity-50 rounded-t-2xl`} />
+        </div>
+    );
 
-            {/* Safety Alert Banner */}
-            {isSafetyAlert && (
-                <div className="px-4 py-2 flex items-center gap-2 bg-orange-50 border-b border-orange-100">
-                    <span className="material-symbols-outlined text-orange-500 text-[14px]">warning</span>
-                    <span className="text-orange-600 text-[11px] font-bold uppercase tracking-wider">Safety Alert</span>
-                    {severityLabel && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-600 font-bold">{severityLabel}</span>
-                    )}
+    // ── Shared: Action rail ───────────────────────────────────────────────────
+    const actionRail = (
+        <div className="absolute right-3 bottom-5 z-30 flex flex-col items-center gap-3 sm:right-4 sm:bottom-6">
+            <GlassBtn
+                icon="favorite"
+                count={post.likes || undefined}
+                active={post.isLiked === true}
+                activeIconClass="text-pink-300"
+                filled
+                onClick={(e) => { e.stopPropagation(); onLike(); }}
+            />
+            <GlassBtn
+                icon="chat_bubble"
+                count={post.comments || undefined}
+                onClick={(e) => { e.stopPropagation(); onComment(); }}
+            />
+            <GlassBtn
+                icon="send"
+                onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
+            />
+            <GlassBtn
+                icon="bookmark"
+                active={post.isSaved === true}
+                activeIconClass="text-white"
+                filled
+                onClick={(e) => { e.stopPropagation(); onSave(); }}
+                label={post.isSaved ? 'Saved' : undefined}
+            />
+            {post.contentType === 'fyi' && onHelpful && (
+                <GlassBtn
+                    icon="thumb_up"
+                    count={(post.helpfulCount || 0) || undefined}
+                    active={post.isHelpful === true}
+                    activeIconClass="text-emerald-300"
+                    filled
+                    onClick={(e) => { e.stopPropagation(); onHelpful(); }}
+                />
+            )}
+            {(post.views || 0) > 0 && (
+                <div className="flex flex-col items-center gap-0.5">
+                    <span className="material-symbols-outlined text-[18px] text-white/35">visibility</span>
+                    <span className="text-[10px] font-medium text-white/45">{formatCompactCount(post.views)}</span>
                 </div>
             )}
+        </div>
+    );
 
-            <div className="p-4 pr-14">
-                {/* ── Author Header ── */}
-                <div className="flex items-center gap-3 mb-3">
-                    <div className="relative flex-shrink-0">
-                        <Link
-                            href={`/profile/${authorUsername}`}
-                            className="block group"
-                            onClick={handleProfileClick}
-                            aria-label={`View ${authorName}'s profile`}
-                        >
-                            <MapPinAvatar
-                                src={authorAvatar}
-                                alt={authorName}
-                                size="lg"
-                                onError={() => { if (!imageError) setImageError(true); }}
-                            />
+    const renderBottomAuthorPanel = (includeText = mode !== 'text') => (
+        <div className="absolute bottom-5 left-4 right-[76px] z-20 sm:bottom-6 sm:left-5 sm:right-24">
+            <div className="flex max-w-[560px] flex-col gap-3">
+                <div className="flex items-center gap-2.5">
+                    <div className="relative shrink-0">
+                        <Link href={`/profile/${authorUsername}`} onClick={handleProfileClick}>
+                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10">
+                                {authorAvatar ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={authorAvatar} alt={authorName} className="h-full w-full object-cover" onError={() => { if (!imageError) setImageError(true); }} />
+                                ) : (
+                                    <span className="material-symbols-outlined text-[18px] text-white/55">person</span>
+                                )}
+                            </div>
                         </Link>
                         {canFollow && !isFollowing && (
                             <button
                                 onClick={(e) => { e.stopPropagation(); toggleFollow(); }}
                                 disabled={isFollowPending}
-                                className={`absolute bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform bg-white border-2 border-white ${isFollowPending ? 'opacity-50' : ''}`}
-                                aria-label="HuudLink"
+                                className="absolute -bottom-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-black/30 bg-emerald-400 text-black shadow-lg transition-transform hover:scale-110 active:scale-95"
                             >
-                                <span className="material-symbols-outlined text-[16px] font-bold text-primary">add</span>
+                                <span className="material-symbols-outlined text-[11px] font-bold">add</span>
                             </button>
                         )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                            <Link
-                                href={`/profile/${authorUsername}`}
-                                onClick={handleProfileClick}
-                                className="font-bold text-[14px] hover:underline truncate"
-                                style={{ color: 'var(--neu-text)' }}
-                            >
-                                {authorName}
-                            </Link>
-                        </div>
-                        {/* Time + Location + Distance */}
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>{formatTimeAgo(post.createdAt)}</span>
-                            {locationName && (
-                                <>
-                                    <span className="text-[10px]" style={{ color: 'var(--neu-text-muted)', opacity: 0.4 }}>·</span>
-                                    <span className="material-symbols-outlined text-[12px]" style={{ color: 'var(--neu-text-muted)', opacity: 0.6 }}>location_on</span>
-                                    <span className="text-[11px] truncate max-w-[120px]" style={{ color: 'var(--neu-text-muted)' }}>{locationName}</span>
-                                </>
-                            )}
-                            {distanceLabel && (
-                                <span className="flex-shrink-0 text-[10px] px-1.5 py-[1px] rounded-full bg-gray-100 font-medium" style={{ color: 'var(--neu-text-muted)' }}>
-                                    {distanceLabel}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                    {/* Badges + Menu */}
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <span className="text-[9px] px-2 py-[3px] rounded-full bg-primary/10 text-primary font-bold tracking-wider uppercase">
-                            {feedLayerLabel}
-                        </span>
-                        <div className="relative">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-                                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                                style={{ color: 'var(--neu-text-muted)' }}
-                            >
-                                <span className="material-symbols-outlined text-[20px]">more_vert</span>
-                            </button>
-                            {showMenu && (
-                                <div className="absolute right-0 top-10 z-30 w-44 rounded-2xl overflow-hidden bg-white shadow-xl border border-gray-100" onClick={(e) => e.stopPropagation()}>
-                                    {isOwner && onEdit && (
-                                        <button onClick={() => { setShowMenu(false); onEdit(post); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors" style={{ color: 'var(--neu-text)' }}>
-                                            <span className="material-symbols-outlined text-[18px]">edit</span> Edit
-                                        </button>
-                                    )}
-                                    {isOwner && onDelete && (
-                                        <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors text-red-500">
-                                            <span className="material-symbols-outlined text-[18px]">delete</span> Delete
-                                        </button>
-                                    )}
-                                    {isOwner && onPin && (
-                                        <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-amber-50 transition-colors text-amber-600">
-                                            <span className="material-symbols-outlined text-[18px]">push_pin</span> {post.isPinned ? "Extend Pin" : "Pin to Feed"} 🪙
-                                        </button>
-                                    )}
-                                    {!isOwner && !isAnonymousAuthor && (
-                                        <button onClick={handleMessageAuthor} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors" style={{ color: 'var(--neu-text)' }}>
-                                            <span className="material-symbols-outlined text-[18px]">chat</span> Message
-                                        </button>
-                                    )}
-                                    {!isOwner && (
-                                        <button onClick={() => { setShowMenu(false); onReport?.(post.id); }} className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors" style={{ color: 'var(--neu-text-muted)' }}>
-                                            <span className="material-symbols-outlined text-[18px]">flag</span> Report
-                                        </button>
-                                    )}
-                                </div>
-                            )}
+                    <div className="min-w-0">
+                        <Link
+                            href={`/profile/${authorUsername}`}
+                            onClick={handleProfileClick}
+                            className="block max-w-[150px] whitespace-normal text-[12px] font-black leading-[1.05] text-white hover:underline"
+                            style={{ textShadow: '0 1px 10px rgba(0,0,0,0.8)' }}
+                        >
+                            {isAnonymousAuthor ? 'Anonymous Neyborh' : authorName}
+                        </Link>
+                        <div className="mt-1 text-[10px] font-bold leading-none text-white/58">
+                            {formatTimeAgo(post.createdAt)}
                         </div>
                     </div>
                 </div>
-
-                {/* ── Badge Row: Pinned, Priority, Content Type, FYI ── */}
-                {(post.isPinned || (post.priority && post.priority !== 'normal') || (post.contentType && post.contentType !== 'post') || post.fyiStatus) && (
-                    <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                        {post.isPinned && (
-                            <span className="text-[10px] px-2 py-[2px] rounded-full bg-blue-50 text-blue-500 font-bold border border-blue-100">
-                                <span className="material-symbols-outlined text-[11px] mr-0.5 align-text-bottom">push_pin</span> Pinned
-                            </span>
-                        )}
-                        {post.priority && post.priority !== 'normal' && (
-                            <span className={`inline-flex items-center gap-0.5 px-2 py-[2px] rounded-full text-[10px] font-bold border ${
-                                post.priority === 'critical' ? 'bg-red-50 text-red-500 border-red-100' :
-                                post.priority === 'high' ? 'bg-orange-50 text-orange-500 border-orange-100' :
-                                'bg-blue-50 text-blue-500 border-blue-100'
-                            }`}>
-                                {post.priority.charAt(0).toUpperCase() + post.priority.slice(1)}
-                            </span>
-                        )}
-                        {post.contentType === 'fyi' && post.fyiSubtype && (
-                            <span className="text-[10px] px-2 py-[2px] rounded-full bg-amber-50 text-amber-600 font-bold border border-amber-100">
-                                {post.fyiSubtype.replace(/_/g, ' ').toUpperCase()}
-                            </span>
-                        )}
-                        {post.contentType === 'event' && (
-                            <span className="text-[10px] px-2 py-[2px] rounded-full bg-purple-50 text-purple-500 font-bold border border-purple-100">📅 EVENT</span>
-                        )}
-                        {post.contentType === 'marketplace' && (
-                            <span className="text-[10px] px-2 py-[2px] rounded-full bg-green-50 text-green-600 font-bold border border-green-100">🛒 MARKETPLACE</span>
-                        )}
-                        {post.contentType === 'emergency' && (
-                            <span className="text-[10px] px-2 py-[2px] rounded-full bg-red-50 text-red-500 font-bold border border-red-100">🚨 EMERGENCY</span>
-                        )}
-                        {post.contentType === 'help_request' && (
-                            <span className="text-[10px] px-2 py-[2px] rounded-full bg-sky-50 text-sky-600 font-bold border border-sky-100">🤝 HELP</span>
-                        )}
-                        {post.contentType === 'job' && (
-                            <span className="text-[10px] px-2 py-[2px] rounded-full bg-indigo-50 text-indigo-500 font-bold border border-indigo-100">💼 JOB</span>
-                        )}
-                        {post.contentType === 'gossip' && (
-                            <span className="text-[10px] px-2 py-[2px] rounded-full bg-pink-50 text-pink-500 font-bold border border-pink-100">👀 GOSSIP</span>
-                        )}
-                        {post.fyiStatus && post.fyiStatus !== 'active' && (
-                            <span className={`text-[10px] px-2 py-[2px] rounded-full font-bold border ${
-                                post.fyiStatus === 'found' || post.fyiStatus === 'returned' || post.fyiStatus === 'resolved'
-                                    ? 'bg-green-50 text-green-500 border-green-100'
-                                    : 'bg-gray-50 text-gray-500 border-gray-100'
-                            }`}>
-                                {post.fyiStatus.charAt(0).toUpperCase() + post.fyiStatus.slice(1)}
-                            </span>
-                        )}
-                        {post.updatedAt && post.updatedAt !== post.createdAt && (
-                            <span className="text-[10px] italic" style={{ color: 'var(--neu-text-muted)' }}>edited</span>
-                        )}
-                        {post.expiresAt && (
-                            <span className="text-[10px] px-2 py-[2px] rounded-full bg-yellow-50 text-yellow-600 font-medium border border-yellow-100">
-                                Expires {new Date(post.expiresAt).toLocaleDateString()}
-                            </span>
-                        )}
-                        {post.endorsements && post.endorsements.length > 0 && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] px-2 py-[2px] rounded-full bg-emerald-50 text-emerald-500 font-bold border border-emerald-100">
-                                <span className="material-symbols-outlined text-[11px]">verified</span>
-                                Endorsed ({post.endorsements.length})
-                            </span>
-                        )}
-                    </div>
+                {includeText && hasText && (
+                    <p
+                        className={`${mode === 'text' ? textSizeClass : 'text-[14px] leading-snug sm:text-[15px]'} line-clamp-4 whitespace-pre-wrap break-words font-semibold text-white`}
+                        style={{ textShadow: '0 2px 18px rgba(0,0,0,0.92)' }}
+                    >
+                        {textContent}
+                    </p>
                 )}
 
-                {/* ── Post Content ── */}
-                <p className="text-[15px] mb-3 leading-relaxed whitespace-pre-wrap break-words" style={{ color: 'var(--neu-text)' }}>
-                    {post.content || post.body || ''}
-                </p>
-
-                {/* Event Info */}
-                {post.contentType === 'event' && (post as any).eventDate && (
-                    <div className="flex flex-wrap items-center gap-2 mb-3 p-3 rounded-xl bg-purple-50/80 border border-purple-100/50">
-                        <span className="text-[11px] font-bold text-purple-600">📅 {new Date((post as any).eventDate).toLocaleDateString()}</span>
-                        {(post as any).eventTime && <span className="text-[11px] text-purple-500">⏰ {(post as any).eventTime}</span>}
-                        {(post as any).venue?.name && <span className="text-[11px] text-purple-500">📍 {(post as any).venue.name}</span>}
-                        {(post as any).ticketInfo === 'paid' && (post as any).ticketPrice && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 font-bold">₦{Number((post as any).ticketPrice).toLocaleString()}</span>
-                        )}
-                        {(post as any).ticketInfo === 'free' && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-600 font-bold">FREE</span>
-                        )}
-                        {(post as any).eventCategory && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100/50 text-purple-500 font-medium capitalize">{(post as any).eventCategory}</span>
-                        )}
-                    </div>
-                )}
-
-                {/* Marketplace Info */}
-                {post.contentType === 'marketplace' && (
-                    <div className="flex flex-wrap items-center gap-2 mb-3 p-3 rounded-xl bg-green-50/80 border border-green-100/50">
-                        {(post as any).price != null && (
-                            <span className="text-sm font-bold text-green-600">₦{Number((post as any).price).toLocaleString()}</span>
-                        )}
-                        {(post as any).isNegotiable && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-600 font-medium">Negotiable</span>
-                        )}
-                        {(post as any).itemCondition && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-600 font-medium capitalize">{(post as any).itemCondition === 'used' ? 'Tokunbo' : (post as any).itemCondition}</span>
-                        )}
-                        {(post as any).itemCategory && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100/50 text-green-500 font-medium">{(post as any).itemCategory}</span>
-                        )}
-                        {(post as any).deliveryOption && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100/50 text-green-500 font-medium capitalize">{(post as any).deliveryOption}</span>
-                        )}
-                        {(post as any).availability && (post as any).availability !== 'available' && (
-                            <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
-                                (post as any).availability === 'sold' ? 'bg-red-100 text-red-500' : 'bg-yellow-100 text-yellow-600'
-                            }`}>
-                                {(post as any).availability === 'sold' ? 'SOLD' : 'RESERVED'}
-                            </span>
-                        )}
-                    </div>
-                )}
-
-                {/* Tags */}
-                {post.tags && post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                        {post.tags.map((tag, i) => (
-                            <span key={i} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary/8 text-primary">
-                                #{tag}
-                            </span>
-                        ))}
-                    </div>
-                )}
-
-                {/* Cultural Context */}
-                {post.culturalContext && post.culturalContext.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                        {post.culturalContext.map((ctx, i) => (
-                            <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-500 border border-purple-100/50">
-                                <span className="material-symbols-outlined text-[12px]">language</span>
-                                {ctx}
-                            </span>
-                        ))}
-                    </div>
-                )}
-
-                {/* Target Audience */}
-                {post.targetAudience && (post.targetAudience.ageRange || post.targetAudience.gender || (post.targetAudience.interests && post.targetAudience.interests.length > 0)) && (
-                    <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                        <span className="material-symbols-outlined text-[14px]" style={{ color: 'var(--neu-text-muted)' }}>group</span>
-                        {post.targetAudience.ageRange && (post.targetAudience.ageRange.min || post.targetAudience.ageRange.max) && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-teal-50 text-teal-600 font-medium border border-teal-100/50">
-                                {post.targetAudience.ageRange.min || '?'}-{post.targetAudience.ageRange.max || '?'} yrs
-                            </span>
-                        )}
-                        {post.targetAudience.gender && post.targetAudience.gender !== 'all' && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-teal-50 text-teal-600 font-medium capitalize border border-teal-100/50">
-                                {post.targetAudience.gender}
-                            </span>
-                        )}
-                        {post.targetAudience.interests && post.targetAudience.interests.length > 0 && post.targetAudience.interests.map((interest, i) => (
-                            <span key={i} className="text-[11px] px-2 py-0.5 rounded-full bg-teal-50 text-teal-600 font-medium border border-teal-100/50">
-                                {interest}
-                            </span>
-                        ))}
-                    </div>
-                )}
+                <div className="flex flex-col gap-2">
+                    {eventBlock}
+                    {marketBlock}
+                    {tagsBlock}
+                    {post.updatedAt && post.updatedAt !== post.createdAt && (
+                        <span className="text-[10px] italic text-white/35">edited</span>
+                    )}
+                </div>
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onComment(); }}
+                    className="flex h-8 w-full max-w-[210px] items-center rounded-full border border-white/12 bg-white/8 px-3 text-left text-[11px] font-semibold text-white/55 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/12 hover:text-white/75 active:scale-[0.98]"
+                    aria-label="Add comment"
+                >
+                    Add comment...
+                </button>
             </div>
+        </div>
+    );
 
-            {/* Emergency Action Buttons */}
+    // ── Shared: structured content blocks ────────────────────────────────────
+    const eventBlock = post.contentType === 'event' && (post as any).eventDate ? (
+        <div
+            className="flex flex-wrap items-center gap-2 p-3 rounded-2xl"
+            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
+        >
+            <span className="text-[12px] font-bold text-purple-300">📅 {new Date((post as any).eventDate).toLocaleDateString()}</span>
+            {(post as any).eventTime && <span className="text-[11px] text-white/65">⏰ {(post as any).eventTime}</span>}
+            {(post as any).venue?.name && <span className="text-[11px] text-white/65">📍 {(post as any).venue.name}</span>}
+            {(post as any).ticketInfo === 'paid' && (post as any).ticketPrice && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 font-bold">₦{Number((post as any).ticketPrice).toLocaleString()}</span>
+            )}
+            {(post as any).ticketInfo === 'free' && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-500/30 text-green-300 font-bold">FREE</span>
+            )}
+            {(post as any).eventCategory && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{(post as any).eventCategory}</span>
+            )}
+        </div>
+    ) : null;
+
+    const marketBlock = post.contentType === 'marketplace' ? (
+        <div
+            className="flex flex-wrap items-center gap-2 p-3 rounded-2xl"
+            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
+        >
+            {(post as any).price != null && <span className="text-base font-bold text-emerald-300">₦{Number((post as any).price).toLocaleString()}</span>}
+            {(post as any).isNegotiable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 font-medium">Negotiable</span>}
+            {(post as any).itemCondition && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 font-medium capitalize">
+                    {(post as any).itemCondition === 'used' ? 'Tokunbo' : (post as any).itemCondition}
+                </span>
+            )}
+            {(post as any).itemCategory && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium">{(post as any).itemCategory}</span>}
+            {(post as any).deliveryOption && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{(post as any).deliveryOption}</span>}
+            {(post as any).availability && (post as any).availability !== 'available' && (
+                <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${(post as any).availability === 'sold' ? 'bg-red-500/30 text-red-300' : 'bg-yellow-500/30 text-yellow-300'}`}>
+                    {(post as any).availability === 'sold' ? 'SOLD' : 'RESERVED'}
+                </span>
+            )}
+        </div>
+    ) : null;
+
+    const tagsBlock = post.tags && post.tags.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5">
+            {post.tags.map((tag, i) => (
+                <span
+                    key={i}
+                    className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-white/70"
+                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(10px)' }}
+                >
+                    #{tag}
+                </span>
+            ))}
+        </div>
+    ) : null;
+
+    const pinnedBadge = post.isPinned ? (
+        <div
+            className="absolute top-4 left-4 z-40 flex items-center gap-1 px-2.5 py-1.5 rounded-full"
+            style={{ background: 'rgba(251,191,36,0.95)', backdropFilter: 'blur(10px)' }}
+        >
+            <span className="material-symbols-outlined text-[12px] text-black" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
+            <span className="text-black text-[10px] font-black uppercase tracking-wide">Pinned</span>
+        </div>
+    ) : null;
+
+    const safetyAlertPill = isSafetyAlert ? (
+        <div className="absolute left-4 top-[64px] z-30 flex items-center gap-1.5 rounded-full border border-orange-400/30 bg-orange-500/25 px-3 py-1.5 backdrop-blur-md">
+            <span className="material-symbols-outlined text-[14px] text-orange-300">warning</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-orange-100">Safety Alert</span>
+            {severityLabel && <span className="rounded-full bg-orange-500/30 px-1.5 py-0.5 text-[10px] font-bold text-orange-100">{severityLabel}</span>}
+        </div>
+    ) : null;
+
+    const multiMediaIndicator = mediaUrls.length > 1 ? (
+        <div
+            className="absolute right-16 top-4 z-30 flex items-center gap-1 rounded-full px-2.5 py-1.5"
+            style={{ background: 'rgba(0,0,0,0.38)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.16)' }}
+        >
+            <span className="material-symbols-outlined text-[14px] text-white">photo_library</span>
+            <span className="text-[11px] font-bold text-white">{mediaUrls.length}</span>
+        </div>
+    ) : null;
+
+    const mediaBackground = primaryMedia ? (
+        <div className="absolute inset-0">
+            {isPrimaryVideo ? (
+                <video
+                    src={primaryMedia.url}
+                    poster={primaryMedia.thumbnailUrl}
+                    className="h-full w-full object-cover"
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                    preload="metadata"
+                />
+            ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                    src={primaryMedia.url}
+                    alt="Post media"
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                    onError={(e) => { e.currentTarget.src = 'https://i.pravatar.cc/600?u=fallback'; }}
+                />
+            )}
+            <div
+                className="absolute inset-0"
+                style={{
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0.60) 0%, rgba(0,0,0,0.10) 28%, rgba(0,0,0,0.12) 52%, rgba(0,0,0,0.92) 100%)',
+                }}
+            />
+            <div
+                aria-hidden
+                className="absolute inset-0 opacity-70"
+                style={{
+                    background: 'radial-gradient(circle at 84% 44%, rgba(0,255,190,0.18), transparent 28%), radial-gradient(circle at 8% 88%, rgba(0,135,81,0.20), transparent 34%)',
+                }}
+            />
+            <div aria-hidden className="pointer-events-none absolute -right-24 bottom-8 h-72 w-72 rounded-full border border-emerald-300/20 blur-[0.3px]" />
+        </div>
+    ) : null;
+
+    // ── TEXT-ONLY MODE ────────────────────────────────────────────────────────
+    if (mode === 'text') {
+        return (
+            <>
+            <article
+                className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-orange-500/50' : ''}`}
+                style={{ background: '#030a0b', height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
+                onClick={handleCardClick}
+            >
+                {/* Ambient sphere background */}
+                <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+                    <div className="absolute -top-28 -left-28 h-[360px] w-[360px] rounded-full animate-soft-float" style={{ background: spheres[0], filter: 'blur(96px)' }} />
+                    <div className="absolute top-[28%] -right-24 h-[340px] w-[340px] rounded-full" style={{ background: spheres[1], filter: 'blur(88px)' }} />
+                    <div className="absolute -bottom-24 left-[8%] h-[320px] w-[320px] rounded-full animate-soft-float" style={{ background: spheres[2], filter: 'blur(82px)', animationDelay: '1.2s' }} />
+                    <div className="absolute -right-24 bottom-20 h-80 w-80 rounded-full border border-emerald-300/20" />
+                    <div className="absolute -right-10 bottom-16 h-96 w-96 rounded-full border border-teal-300/15" />
+                </div>
+                {/* Subtle vignette */}
+                <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 38%, transparent 26%, rgba(0,0,0,0.62) 100%), linear-gradient(180deg, rgba(0,0,0,0.60), transparent 30%, rgba(0,0,0,0.86))' }} />
+
+                {pinnedBadge}
+
+                {safetyAlertPill}
+
+                {authorHeader}
+                {actionRail}
+
+                {/* Center: hero text */}
+                <div
+                    className="absolute inset-x-0 z-20 flex flex-col justify-center gap-4 px-6 pr-20"
+                    style={{ top: '88px', bottom: '178px' }}
+                >
+                    {/* Priority badge */}
+                    {post.priority && post.priority !== 'normal' && (
+                        <span
+                            className={`self-start text-[10px] px-2.5 py-1 rounded-full font-bold backdrop-blur-sm border ${
+                                post.priority === 'critical' ? 'bg-red-500/25 text-red-200 border-red-400/25' :
+                                post.priority === 'high' ? 'bg-orange-500/25 text-orange-200 border-orange-400/25' :
+                                'bg-blue-500/25 text-blue-200 border-blue-400/25'
+                            }`}
+                        >
+                            {post.priority.charAt(0).toUpperCase() + post.priority.slice(1)} Priority
+                        </span>
+                    )}
+
+                    {/* Main text */}
+                    <p
+                        className={`whitespace-pre-wrap break-words font-black tracking-[-0.035em] text-white ${textSizeClass}`}
+                        style={{ textShadow: '0 3px 34px rgba(0,0,0,0.65), 0 0 34px rgba(16,185,129,0.18)' }}
+                    >
+                        {textContent}
+                    </p>
+
+                    {eventBlock}
+                    {marketBlock}
+
+                    {/* Cultural context */}
+                    {post.culturalContext && post.culturalContext.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                            {post.culturalContext.map((ctx, i) => (
+                                <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-500/20 text-purple-200 border border-purple-400/20 backdrop-blur-sm">
+                                    <span className="material-symbols-outlined text-[12px]">language</span>
+                                    {ctx}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {tagsBlock}
+
+                    {post.fyiStatus && post.fyiStatus !== 'active' && (
+                        <span className={`self-start text-[10px] px-2.5 py-1 rounded-full font-bold backdrop-blur-sm border ${
+                            ['found','returned','resolved'].includes(post.fyiStatus)
+                                ? 'bg-green-500/25 text-green-200 border-green-400/20'
+                                : 'bg-white/10 text-white/60 border-white/10'
+                        }`}>
+                            {post.fyiStatus.charAt(0).toUpperCase() + post.fyiStatus.slice(1)}
+                        </span>
+                    )}
+
+                    {post.expiresAt && (
+                        <span className="self-start text-[10px] px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-200 font-medium border border-yellow-400/20 backdrop-blur-sm">
+                            Expires {new Date(post.expiresAt).toLocaleDateString()}
+                        </span>
+                    )}
+
+                    {post.updatedAt && post.updatedAt !== post.createdAt && (
+                        <span className="text-[10px] italic text-white/25">edited</span>
+                    )}
+                </div>
+
+                {renderBottomAuthorPanel(false)}
+
+                {/* Emergency actions — bottom strip */}
+                {isSafetyAlert && onEmergencyAction && (
+                    <div className="absolute bottom-0 left-0 right-0 z-30">
+                        <EmergencyActions post={post} onEmergencyAction={onEmergencyAction} />
+                    </div>
+                )}
+            </article>
+            {showShare && (
+                <ShareModal postId={post.id ?? (post as any)._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
+            )}
+            </>
+        );
+    }
+
+    // ── MEDIA-ONLY MODE ───────────────────────────────────────────────────────
+    if (mode === 'media') {
+        return (
+            <>
+            <article
+                className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-orange-500/50' : ''}`}
+                style={{ height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
+                onClick={handleCardClick}
+            >
+                {mediaBackground}
+
+                {pinnedBadge}
+                {multiMediaIndicator}
+                {safetyAlertPill}
+
+                {authorHeader}
+                {actionRail}
+                {renderBottomAuthorPanel(false)}
+
+                {/* Emergency actions */}
+                {isSafetyAlert && onEmergencyAction && (
+                    <div className="absolute bottom-0 left-0 right-0 z-30">
+                        <EmergencyActions post={post} onEmergencyAction={onEmergencyAction} />
+                    </div>
+                )}
+            </article>
+            {showShare && (
+                <ShareModal postId={post.id ?? (post as any)._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
+            )}
+            </>
+        );
+    }
+
+    // ── MIXED MODE (media + text) ─────────────────────────────────────────────
+    return (
+        <>
+        <article
+            className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-orange-500/50' : ''}`}
+            style={{ height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
+            onClick={handleCardClick}
+        >
+            {mediaBackground}
+
+            {pinnedBadge}
+            {multiMediaIndicator}
+            {safetyAlertPill}
+
+            {authorHeader}
+            {actionRail}
+            {renderBottomAuthorPanel(true)}
+
+            {/* Emergency actions */}
             {isSafetyAlert && onEmergencyAction && (
-                <div className="px-4 py-2.5 flex flex-wrap gap-2 border-t border-orange-100 bg-orange-50/30">
-                    {(!post.availableActions || post.availableActions.includes('acknowledge')) && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('acknowledge'); }}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                                post.isAcknowledged ? 'bg-blue-100 text-blue-600 border-blue-200' : 'bg-white hover:bg-blue-50 text-blue-400 border-gray-200'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-[14px]">visibility</span>Seen
-                        </button>
-                    )}
-                    {(!post.availableActions || post.availableActions.includes('aware')) && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('aware'); }}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                                post.isAware ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-white hover:bg-amber-50 text-amber-400 border-gray-200'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-[14px]">notifications_active</span>Aware
-                        </button>
-                    )}
-                    {(!post.availableActions || post.availableActions.includes('nearby')) && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('nearby'); }}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                                post.isNearby ? 'bg-green-100 text-green-600 border-green-200' : 'bg-white hover:bg-green-50 text-green-400 border-gray-200'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-[14px]">location_on</span>Nearby
-                        </button>
-                    )}
-                    {(!post.availableActions || post.availableActions.includes('safe')) && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('safe'); }}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                                post.isSafe ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : 'bg-white hover:bg-emerald-50 text-emerald-400 border-gray-200'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-[14px]">shield</span>Safe
-                        </button>
-                    )}
-                    {(!post.availableActions || post.availableActions.includes('confirm')) && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('confirm'); }}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                                post.confirmDisputeAction === 'confirm' ? 'bg-teal-100 text-teal-600 border-teal-200' : 'bg-white hover:bg-teal-50 text-teal-400 border-gray-200'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-[14px]">check_circle</span>Confirm
-                        </button>
-                    )}
-                    {(!post.availableActions || post.availableActions.includes('dispute')) && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onEmergencyAction('dispute'); }}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                                post.confirmDisputeAction === 'dispute' ? 'bg-red-100 text-red-600 border-red-200' : 'bg-white hover:bg-red-50 text-red-400 border-gray-200'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-[14px]">cancel</span>Dispute
-                        </button>
-                    )}
+                <div className="absolute bottom-0 left-0 right-0 z-30">
+                    <EmergencyActions post={post} onEmergencyAction={onEmergencyAction} />
                 </div>
             )}
-
         </article>
-
-        {/* Share Modal */}
         {showShare && (
-            <ShareModal
-                postId={post.id ?? (post as any)._id ?? ''}
-                postContent={post.content ?? ''}
-                onClose={() => setShowShare(false)}
-            />
+            <ShareModal postId={post.id ?? (post as any)._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
         )}
         </>
     );

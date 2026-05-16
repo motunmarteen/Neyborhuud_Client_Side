@@ -1,6 +1,5 @@
 /**
- * ProductCard Component - Reel-style marketplace card
- * Matches XPostCard design with gradient backgrounds and vertical action rail
+ * ProductCard — compact 2-column grid card with immersive media, glass actions, and buyer bar
  */
 
 "use client";
@@ -8,13 +7,15 @@
 import { Product } from "@/services/marketplace.service";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatTimeAgo } from "@/utils/timeAgo";
 import { formatDistance, haversineDistance } from "@/utils/distance";
-import MapPinAvatar from "@/components/ui/MapPinAvatar";
 import { useProductLike } from "@/hooks/useMarketplace";
-import { normalizeTrustScore } from "@/lib/trust-economy";
-import { getMarketplaceBadge } from "@/lib/trust-privileges";
-import { getTrustTier } from "@/hooks/useTrust";
+import { useAuth } from "@/hooks/useAuth";
+import { formatTimeAgo } from "@/utils/timeAgo";
+import { BuyerIntentActions } from "@/components/marketplace/BuyerIntentActions";
+import { MarketplaceCommentsSheet } from "@/components/marketplace/MarketplaceCommentsSheet";
+import { MarketplaceShareSheet } from "@/components/marketplace/MarketplaceShareSheet";
+import { getViewerId } from "@/lib/auth-user";
+import apiClient from "@/lib/api-client";
 
 interface ProductCardProps {
   product: Product;
@@ -22,18 +23,97 @@ interface ProductCardProps {
   currentUserId?: string;
 }
 
-export function ProductCard({ product, userLocation, currentUserId }: ProductCardProps) {
-  const router = useRouter();
-  const [imageError, setImageError] = useState(false);
-  const toggleLike = useProductLike(product.id);
+function formatConditionWords(condition?: string) {
+  if (!condition) return "";
+  return condition
+    .replace(/_/g, " ")
+    .replace(/-/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
 
-  // Get primary image  
+/** Uppercase badge text on image overlay */
+function formatConditionLabel(condition?: string) {
+  const w = formatConditionWords(condition);
+  return w ? w.toUpperCase() : "";
+}
+
+function formatCompactCount(value?: number) {
+  if (!value) return undefined;
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(value >= 10_000_000 ? 0 : 1)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}K`;
+  return `${value}`;
+}
+
+function GlassRoundAction({
+  icon,
+  count,
+  active,
+  activeClass,
+  label,
+  onClick,
+  disabled,
+}: {
+  icon: string;
+  count?: number;
+  active?: boolean;
+  activeClass?: string;
+  label: string;
+  onClick: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className="group flex flex-col items-center gap-0.5 rounded-full p-0.5 transition-transform duration-200 ease-out hover:scale-110 active:scale-90 disabled:opacity-50"
+    >
+      <span
+        className={`flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/35 shadow-[0_4px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-colors ${
+          active ? activeClass || "border-rose-400/40 bg-rose-500/35" : "hover:bg-black/45"
+        }`}
+      >
+        <span
+          className={`material-symbols-outlined text-[19px] ${active ? "text-white" : "text-white/95"}`}
+          style={{
+            ...(icon === "favorite" && active ? { fontVariationSettings: '"FILL" 1' } : {}),
+            filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.85))",
+          }}
+        >
+          {icon}
+        </span>
+      </span>
+      {count !== undefined && count > 0 && (
+        <span className="text-[9px] font-black tracking-tight text-white" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}>
+          {formatCompactCount(count)}
+        </span>
+      )}
+    </button>
+  );
+}
+
+export function ProductCard({ product, userLocation, currentUserId: currentUserIdProp }: ProductCardProps) {
+  const router = useRouter();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const currentUserId = currentUserIdProp ?? getViewerId(user);
+  const authPending = apiClient.isAuthenticated() && isAuthLoading && !getViewerId(user);
+  const [imageError, setImageError] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
+
+  const productId = product.id || (product as any)._id || "";
+  const toggleLike = useProductLike(productId);
+
   const primaryImage = product.images?.[0];
   const hasImage = primaryImage && !imageError;
 
-  // Calculate distance
   const distanceLabel =
-    userLocation && product.location?.latitude && product.location?.longitude
+    userLocation && product.location?.latitude != null && product.location?.longitude != null
       ? formatDistance(
           haversineDistance(
             userLocation.lat,
@@ -44,295 +124,243 @@ export function ProductCard({ product, userLocation, currentUserId }: ProductCar
         )
       : null;
 
-  // Format price
   const formattedPrice = new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: product.currency || "NGN",
     minimumFractionDigits: 0,
   }).format(product.price);
 
-  // Get seller info
-  const sellerName = product.seller?.username || product.seller?.firstName || "Seller";
-  const sellerAvatar = (product.seller as any)?.avatarUrl || (product.seller as any)?.profilePicture || null;
+  const isLiked = product.engagement?.isLiked ?? (product as any).isLiked;
+  const likesCount = product.engagement?.likesCount ?? 0;
+  const commentsCount = product.engagement?.commentsCount ?? 0;
 
-  // Derive seller trust badge from any trust score stored on the seller object
-  const sellerTrustRaw = (product.seller as any)?.trustScore ?? (product.seller as any)?.trust_score;
-  const sellerTrustBadge = sellerTrustRaw != null
-    ? (() => {
-        const { score1000 } = normalizeTrustScore(Number(sellerTrustRaw));
-        const tier = getTrustTier(score1000);
-        return getMarketplaceBadge(tier.tier);
-      })()
-    : null;
+  const isOwner = !!(currentUserId && product.sellerId && currentUserId === product.sellerId);
+  const isSold = product.status === "sold";
 
-  const isLiked = product.engagement?.isLiked;
-  const likesCount = product.engagement?.likesCount || 0;
-  const commentsCount = product.engagement?.commentsCount || 0;
-
-  // Boost badge — only shown while the boost is still active
   const isActiveBoosted =
-    (product as any).isBoosted === true &&
-    (product as any).boostedUntil &&
-    new Date((product as any).boostedUntil) > new Date();
+    product.isBoosted === true &&
+    product.boostedUntil &&
+    new Date(product.boostedUntil) > new Date();
 
-  const handleLike = (e: React.MouseEvent) => {
+  const locationLine =
+    product.location?.formattedAddress ||
+    [product.location?.neighborhood, product.location?.lga, product.location?.state].filter(Boolean).join(" · ") ||
+    (distanceLabel ? `${distanceLabel} away` : "") ||
+    "";
+
+  const conditionBadge = formatConditionLabel(product.condition);
+  const conditionReadable = formatConditionWords(product.condition);
+  const categoryLabel = product.category?.trim() || "";
+  const productKey = product.id ?? (product as { _id?: string })._id;
+  const cardDomId = productKey ? `mp-product-${productKey}` : undefined;
+  const rawDescription = product.description?.trim() ?? "";
+  /** ~3 lines in card body — toggle to read full text */
+  const descriptionToggleThreshold = 96;
+  const needsDescToggle = rawDescription.length > descriptionToggleThreshold;
+
+  const onLike = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!currentUserId) {
+      router.push("/login");
+      return;
+    }
     toggleLike.mutate();
   };
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (!target.closest('button') && !target.closest('a')) {
-      router.push(`/marketplace/${product.id}`);
-    }
-  };
-
-  // ── IMAGE CARD (reel-style with background) ──
-  if (hasImage) {
-    return (
-      <article
-        className="relative overflow-hidden cursor-pointer rounded-2xl bg-gray-900"
-        style={{ minHeight: '70vh' }}
-        onClick={handleCardClick}
-      >
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <img
-            src={primaryImage}
-            alt={product.title}
-            className="w-full h-full object-cover"
-            onError={() => setImageError(true)}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
-        </div>
-
-        {/* Boosted badge */}
-        {isActiveBoosted && (
-          <div className="absolute top-4 left-4 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500 shadow-lg">
-            <span className="text-[13px]">🚀</span>
-            <span className="text-black text-[10px] font-black uppercase tracking-wide">Boosted</span>
-          </div>
-        )}
-
-        {/* Multi-image indicator */}
-        {(product.images?.length || 0) > 1 && (
-          <div className="absolute top-4 right-4 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10">
-            <span className="material-symbols-outlined text-white text-[14px]">photo_library</span>
-            <span className="text-white text-xs font-bold">{product.images?.length}</span>
-          </div>
-        )}
-
-        {/* Status badges */}
-        {product.status === "sold" && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-red-500/90 backdrop-blur-md border border-red-400/30">
-            <span className="text-white text-xs font-bold uppercase tracking-wider">Sold</span>
-          </div>
-        )}
-
-        {/* Content overlaid */}
-        <div className="relative z-10 flex flex-col justify-between" style={{ minHeight: '70vh' }}>
-          {/* ── TOP: Minimal header ── */}
-          <div className="p-4 pt-5">
-            <div className="flex items-center gap-3">
-              <MapPinAvatar
-                src={sellerAvatar}
-                fallbackInitial={sellerName[0]}
-                alt={sellerName}
-                size="md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (product.sellerId) router.push(`/profile/${product.sellerId}`);
-                }}
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm truncate">{sellerName}</p>
-                {distanceLabel && (
-                  <p className="text-white/70 text-xs flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[12px]">location_on</span>
-                    {distanceLabel} away
-                  </p>
-                )}
-                {sellerTrustBadge && (
-                  <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-black ${sellerTrustBadge.colorClass}`}>
-                    {sellerTrustBadge.label}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* ── BOTTOM: Product info ── */}
-          <div className="p-4 pb-6">
-            {/* Category tag */}
-            {product.category && (
-              <div className="inline-block px-2.5 py-1 rounded-full bg-green-500/20 backdrop-blur-sm border border-green-400/30 mb-2">
-                <span className="text-green-300 text-xs font-semibold">{product.category}</span>
-              </div>
-            )}
-
-            {/* Title */}
-            <h2 className="text-white text-2xl font-bold mb-2 line-clamp-2">{product.title}</h2>
-
-            {/* Price */}
-            <div className="text-3xl font-bold text-green-400 mb-1">
-              {formattedPrice}
-              {product.negotiable && (
-                <span className="text-sm text-white/60 ml-2 font-normal">negotiable</span>
-              )}
-            </div>
-
-            {/* Condition */}
-            {product.condition && (
-              <p className="text-white/70 text-sm capitalize">
-                Condition: <span className="text-white font-medium">{product.condition.replace(/_/g, " ")}</span>
-              </p>
-            )}
-
-            {/* Time */}
-            <p className="text-white/50 text-xs mt-2">{formatTimeAgo(product.createdAt)}</p>
-          </div>
-        </div>
-
-        {/* ── RIGHT SIDE: Vertical action rail ── */}
-        <div className="absolute right-3 top-2/3 -translate-y-1/2 z-20 flex flex-col items-center gap-4">
-          {/* Like */}
-          <button onClick={handleLike} disabled={toggleLike.isPending} className="flex flex-col items-center gap-0.5 group">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isLiked ? 'bg-red-500/90' : 'bg-black/40 backdrop-blur-md group-hover:bg-black/60'}`}>
-              <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'text-white' : 'text-white/90'}`}>
-                {isLiked ? 'favorite' : 'favorite_border'}
-              </span>
-            </div>
-            {likesCount > 0 && <span className="text-white text-xs font-bold">{likesCount}</span>}
-          </button>
-
-          {/* Comments */}
-          <button className="flex flex-col items-center gap-0.5">
-            <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-black/60 transition-all">
-              <span className="material-symbols-outlined text-white/90 text-[20px]">chat_bubble</span>
-            </div>
-            {commentsCount > 0 && <span className="text-white text-xs font-bold">{commentsCount}</span>}
-          </button>
-
-          {/* Share */}
-          <button className="flex flex-col items-center gap-0.5">
-            <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-black/60 transition-all">
-              <span className="material-symbols-outlined text-white/90 text-[20px]">share</span>
-            </div>
-          </button>
-        </div>
-      </article>
-    );
-  }
-
-  // ── QUOTE CARD (gradient background for no-image products) ──
   return (
-    <article
-      className="relative overflow-hidden cursor-pointer rounded-2xl bg-gray-900"
-      style={{ minHeight: '70vh' }}
-      onClick={handleCardClick}
-    >
-      {/* Boosted badge (quote card) */}
-      {isActiveBoosted && (
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500 shadow-lg">
-          <span className="text-[13px]">🚀</span>
-          <span className="text-black text-[10px] font-black uppercase tracking-wide">Boosted</span>
-        </div>
-      )}
+    <>
+      <article
+        id={cardDomId}
+        className="group/card flex h-full flex-col overflow-hidden rounded-[22px] border border-[var(--border-light)] bg-white/92 shadow-[0_10px_36px_rgba(0,111,53,0.1),0_0_0_1px_rgba(255,255,255,0.8)_inset] backdrop-blur-xl transition-[transform,box-shadow,outline] duration-300 hover:border-primary/25 dark:border-white/[0.08] dark:bg-[rgba(16,22,30,0.65)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35),0_0_60px_-20px_rgba(16,185,129,0.15)] dark:hover:border-emerald-400/15"
+      >
+        {/* Image + overlays (no separate detail page — info lives on card) */}
+        <div
+          className="relative block w-full text-left"
+          aria-hidden={false}
+        >
+          <div className="relative aspect-[4/5] w-full overflow-hidden">
+            {hasImage ? (
+              <img
+                src={primaryImage}
+                alt=""
+                className={`h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.03] ${isSold ? "opacity-55 grayscale-[0.2]" : ""}`}
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div
+                className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[var(--surface-light)] via-white to-[#E9F6E6] px-3 dark:from-emerald-900/40 dark:via-slate-900 dark:to-slate-950"
+                aria-hidden
+              >
+                <span className="material-symbols-outlined text-4xl text-[#006F35]/30 dark:text-emerald-300/40">image</span>
+              </div>
+            )}
 
-      {/* Status badge */}
-      {product.status === "sold" && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-red-500/90 backdrop-blur-md border border-red-400/30">
-          <span className="text-white text-xs font-bold uppercase tracking-wider">Sold</span>
-        </div>
-      )}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/55" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent" />
 
-      {/* Content centered */}
-      <div className="relative z-10 flex flex-col items-center justify-center text-center px-6" style={{ minHeight: '70vh' }}>
-        {/* Category tag */}
-        {product.category && (
-          <div className="inline-block px-3 py-1.5 rounded-full bg-green-500/20 backdrop-blur-sm border border-green-400/30 mb-4">
-            <span className="text-green-300 text-sm font-semibold">{product.category}</span>
-          </div>
-        )}
-
-        {/* Title */}
-        <h2 className="text-white text-4xl font-bold mb-6 max-w-lg leading-tight" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
-          {product.title}
-        </h2>
-
-        {/* Price */}
-        <div className="text-5xl font-bold text-green-400 mb-3" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.4)' }}>
-          {formattedPrice}
-        </div>
-
-        {product.negotiable && (
-          <p className="text-white/80 text-lg mb-4">Price Negotiable</p>
-        )}
-
-        {/* Description preview */}
-        {product.description && (
-          <p className="text-white/70 text-base max-w-md line-clamp-3 mb-6">
-            {product.description}
-          </p>
-        )}
-
-        {/* Condition */}
-        {product.condition && (
-          <div className="px-4 py-2 rounded-full bg-black/20 backdrop-blur-sm border border-white/10">
-            <span className="text-white text-sm capitalize">Condition: {product.condition.replace(/_/g, " ")}</span>
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-          {/* Seller */}
-          <div className="flex items-center gap-2">
-            <MapPinAvatar src={sellerAvatar} fallbackInitial={sellerName[0]} alt={sellerName} size="sm" />
-            <div>
-              <span className="text-white/80 text-sm font-medium">{sellerName}</span>
-              {sellerTrustBadge && (
-                <span className={`ml-1.5 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-black ${sellerTrustBadge.colorClass}`}>
-                  {sellerTrustBadge.label}
+            {/* Top badges */}
+            <div className="absolute left-2.5 top-2.5 z-10 flex max-w-[calc(100%-4.5rem)] flex-wrap gap-1.5">
+              {conditionBadge && (
+                <span className="rounded-full border border-white/15 bg-black/40 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-white/95 shadow-lg backdrop-blur-md">
+                  {conditionBadge}
+                </span>
+              )}
+              {categoryLabel && (
+                <span className="rounded-full border border-emerald-400/25 bg-emerald-500/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.25)] backdrop-blur-md">
+                  {categoryLabel}
+                </span>
+              )}
+              {isActiveBoosted && (
+                <span className="flex items-center gap-0.5 rounded-full border border-amber-300/30 bg-amber-400/90 px-2 py-0.5 text-[9px] font-black text-slate-900 shadow-md">
+                  <span>🚀</span>
+                  BOOST
                 </span>
               )}
             </div>
-          </div>
 
-          {/* Time & Location */}
-          <div className="text-right text-white/60 text-xs">
-            {distanceLabel && <p>{distanceLabel} away</p>}
-            <p>{formatTimeAgo(product.createdAt)}</p>
+            {isSold && (
+              <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-red-400/35 bg-red-600/90 px-4 py-1.5 text-[11px] font-black uppercase tracking-widest text-white shadow-xl backdrop-blur-md">
+                Sold
+              </div>
+            )}
+
+            {(product.images?.length || 0) > 1 && (
+              <div className="absolute bottom-2 left-2.5 z-10 flex items-center gap-0.5 rounded-full border border-white/10 bg-black/45 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-md">
+                <span className="material-symbols-outlined text-[12px]">photo_library</span>
+                {product.images?.length}
+              </div>
+            )}
+
+            {/* Side glass actions */}
+            <div
+              className="absolute bottom-3 right-2 z-20 flex flex-col gap-2.5"
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              role="presentation"
+            >
+              <GlassRoundAction
+                icon={isLiked ? "favorite" : "favorite_border"}
+                count={likesCount}
+                active={!!isLiked}
+                activeClass="border-rose-400/40 bg-rose-500/40"
+                label={isLiked ? "Unlike" : "Like"}
+                onClick={onLike}
+                disabled={toggleLike.isPending}
+              />
+              <GlassRoundAction
+                icon="chat_bubble"
+                count={commentsCount}
+                label="Comments"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCommentsOpen(true);
+                }}
+              />
+              <GlassRoundAction
+                icon="ios_share"
+                label="Share"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShareOpen(true);
+                }}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ── RIGHT SIDE: Vertical action rail ── */}
-      <div className="absolute right-3 top-2/3 -translate-y-1/2 z-20 flex flex-col items-center gap-4">
-        {/* Like */}
-        <button onClick={handleLike} disabled={toggleLike.isPending} className="flex flex-col items-center gap-0.5 group">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isLiked ? 'bg-red-500/90' : 'bg-white/10 backdrop-blur-md group-hover:bg-white/20'}`}>
-            <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'text-white' : 'text-white/90'}`}>
-              {isLiked ? 'favorite' : 'favorite_border'}
-            </span>
+        {/* Info panel */}
+        <div className="flex flex-1 flex-col gap-2 px-3 pb-3 pt-2.5">
+          <div className="min-h-0 flex-1 space-y-1">
+            <h2 className="line-clamp-2 text-[13px] font-bold leading-snug tracking-tight text-brand-black dark:text-white/95">{product.title}</h2>
+            <p className="text-[15px] font-extrabold tracking-tight text-[#006F35] drop-shadow-none dark:text-emerald-400 dark:drop-shadow-[0_0_12px_rgba(52,211,153,0.35)]">
+              {formattedPrice}
+              {product.negotiable && (
+                <span className="ml-1.5 text-[10px] font-semibold text-[#3D5A3E]/80 dark:text-white/45">· negotiable</span>
+              )}
+            </p>
+            {locationLine ? (
+              <p className="flex items-start gap-1 text-[11px] leading-snug text-[#3D5A3E] dark:text-white/55">
+                <span className="material-symbols-outlined mt-0.5 shrink-0 text-[13px] text-primary dark:text-emerald-400/70">location_on</span>
+                <span className="line-clamp-2">{locationLine}</span>
+              </p>
+            ) : null}
+            {(conditionReadable || categoryLabel) && (
+              <p className="text-[10px] leading-snug text-[#3D5A3E]/85 dark:text-white/50">
+                {conditionReadable ? (
+                  <>
+                    <span className="font-semibold text-brand-black dark:text-white/75">Condition:</span>{" "}
+                    <span className="font-medium text-[#006F35] dark:text-emerald-400/90">{conditionReadable}</span>
+                  </>
+                ) : null}
+                {conditionReadable && categoryLabel ? <span className="text-[#3D5A3E]/50 dark:text-white/35"> · </span> : null}
+                {categoryLabel ? <span className="capitalize">{categoryLabel.toLowerCase()}</span> : null}
+              </p>
+            )}
+            {product.createdAt ? (
+              <p className="text-[10px] text-[#3D5A3E]/70 dark:text-white/40">Posted {formatTimeAgo(product.createdAt)}</p>
+            ) : null}
+            {rawDescription ? (
+              <div className="space-y-0.5 pt-0.5">
+                <p
+                  className={`text-[11px] leading-relaxed text-[#3D5A3E]/90 dark:text-white/45 whitespace-pre-wrap break-words ${
+                    !descExpanded && needsDescToggle ? "line-clamp-3" : ""
+                  }`}
+                >
+                  {rawDescription}
+                </p>
+                {needsDescToggle ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDescExpanded((v) => !v);
+                    }}
+                    className="text-[10px] font-bold tracking-wide text-[#006F35] transition-colors hover:text-primary dark:text-emerald-400 dark:hover:text-emerald-300"
+                    aria-expanded={descExpanded}
+                  >
+                    {descExpanded ? "Show less" : "Show more"}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
-          {likesCount > 0 && <span className="text-white text-xs font-bold">{likesCount}</span>}
-        </button>
 
-        {/* Comments */}
-        <button className="flex flex-col items-center gap-0.5">
-          <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all">
-            <span className="material-symbols-outlined text-white/90 text-[20px]">chat_bubble</span>
+          <div onClick={(e) => e.stopPropagation()} className="mt-auto">
+            {isOwner ? (
+              <p className="rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] py-2 text-center text-[11px] font-semibold text-[#2E502E] backdrop-blur-md dark:border-white/10 dark:bg-white/[0.06] dark:text-white/60">
+                Your listing
+              </p>
+            ) : isSold ? (
+              <p className="rounded-full border border-[var(--border-light)] bg-white/60 py-2 text-center text-[11px] font-medium text-[#3D5A3E]/70 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/45">
+                No longer available
+              </p>
+            ) : (
+              <BuyerIntentActions
+                product={product}
+                currentUserId={currentUserId}
+                isOwner={isOwner}
+                layout="compact"
+                authPending={authPending}
+              />
+            )}
           </div>
-          {commentsCount > 0 && <span className="text-white text-xs font-bold">{commentsCount}</span>}
-        </button>
+        </div>
+      </article>
 
-        {/* Share */}
-        <button className="flex flex-col items-center gap-0.5">
-          <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all">
-            <span className="material-symbols-outlined text-white/90 text-[20px]">share</span>
-          </div>
-        </button>
-      </div>
-    </article>
+      <MarketplaceCommentsSheet
+        open={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+        productId={commentsOpen ? productId : null}
+        commentsCount={commentsCount}
+        currentUserId={currentUserId}
+      />
+
+      <MarketplaceShareSheet
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        productId={productId}
+        title={product.title}
+      />
+    </>
   );
 }

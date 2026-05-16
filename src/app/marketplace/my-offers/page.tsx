@@ -510,7 +510,7 @@ function OfferCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <h3
-              onClick={() => router.push(`/marketplace/${offer.productId}`)}
+              onClick={() => router.push(`/marketplace?product=${encodeURIComponent(offer.productId)}`)}
               className="font-semibold text-base sm:text-lg truncate text-white hover:text-green-400 cursor-pointer transition-colors"
             >
               {offer.product?.title || "Product"}
@@ -711,7 +711,7 @@ function OfferCard({
               : `Accept counteroffer of ${formatNGN(counterAmt)}`}
           </button>
           <button
-            onClick={() => router.push(`/marketplace/${offer.productId}`)}
+            onClick={() => router.push(`/marketplace?product=${encodeURIComponent(offer.productId)}`)}
             className="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-full font-semibold transition-all text-sm sm:text-base"
           >
             Send a new offer
@@ -736,7 +736,9 @@ function OfferCard({
         {offer.status === "accepted" && tab === "sent" && !offer.orderId && (
           <button
             onClick={() =>
-              router.push(`/marketplace/${offer.productId}?offerId=${offer.id}`)
+              router.push(
+                `/marketplace?product=${encodeURIComponent(offer.productId)}&offerId=${encodeURIComponent(offer.id)}`
+              )
             }
             className="flex-1 py-2 bg-green-500 hover:bg-green-600 rounded-full font-semibold transition-all text-white text-sm"
           >

@@ -1,6 +1,6 @@
 /**
- * GossipCard Component
- * Neighbourhood discussion card — quote-style gradient card matching feed design.
+ * GossipCard — Community discussion card
+ * iOS 26 Liquid Glass action rail + ambient sphere background.
  */
 
 'use client';
@@ -9,7 +9,6 @@ import { GossipPost, DISCUSSION_TYPE_LABELS, DiscussionType } from '@/types/goss
 import { formatTimeAgo } from '@/utils/timeAgo';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import { gossipService } from '@/services/gossip.service';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -17,7 +16,15 @@ import { useState } from 'react';
 interface GossipCardProps {
     post: GossipPost;
     currentUserId?: string;
+    onComment?: (gossipId: string) => void;
 }
+
+// Sphere palette: pink / purple / indigo (gossip vibe)
+const SPHERES: [string, string, string] = [
+    'rgba(236,72,153,0.45)',
+    'rgba(168,85,247,0.38)',
+    'rgba(99,102,241,0.28)',
+];
 
 const TYPE_ACCENT: Record<string, string> = {
     safety:                 '#f87171',
@@ -30,9 +37,36 @@ const TYPE_ACCENT: Record<string, string> = {
     general:                '#e879a8',
 };
 
-const GRADIENT = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)';
+const CARD_HEIGHT = '90vh';
 
-export function GossipCard({ post }: GossipCardProps) {
+// ── iOS 26 Liquid Glass button ─────────────────────────────────────────────────
+function GlassBtn({
+    icon, count, active, activeIconClass, onClick, filled,
+}: {
+    icon: string; count?: number; active?: boolean;
+    activeIconClass?: string; onClick: (e: React.MouseEvent) => void; filled?: boolean;
+}) {
+    return (
+        <button onClick={onClick} className="flex flex-col items-center gap-1 rounded-full p-1 transition-transform duration-150 hover:scale-110 active:scale-[0.88] group">
+            <span
+                className={`material-symbols-outlined text-[22px] transition-transform duration-150 ${active ? (activeIconClass || 'text-white') : 'text-white'}`}
+                style={{
+                    ...(filled && active ? { fontVariationSettings: '"FILL" 1' } : {}),
+                    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.85))',
+                }}
+            >
+                {icon}
+            </span>
+            {(count !== undefined && count > 0) && (
+                <span className="text-[10px] font-bold text-white" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+                    {count}
+                </span>
+            )}
+        </button>
+    );
+}
+
+export function GossipCard({ post, onComment }: GossipCardProps) {
     const router = useRouter();
     const queryClient = useQueryClient();
     const [showMenu, setShowMenu] = useState(false);
@@ -67,171 +101,202 @@ export function GossipCard({ post }: GossipCardProps) {
     const accentColor = TYPE_ACCENT[post.discussionType] ?? TYPE_ACCENT.general;
     const typeLabel =
         DISCUSSION_TYPE_LABELS[post.discussionType as DiscussionType] ||
-        post.discussionType?.charAt(0).toUpperCase() + post.discussionType?.slice(1);
+        (post.discussionType?.charAt(0).toUpperCase() + post.discussionType?.slice(1)) ||
+        'Gossip';
 
     const textContent = (post.title ? post.title + (post.body ? '\n' + post.body : '') : post.body) || '';
-    const wordCount = textContent.trim().split(/\s+/).length;
-    const fontSize = wordCount <= 10 ? '28px' : wordCount <= 20 ? '22px' : wordCount <= 50 ? '17px' : '14px';
+    const wordCount = textContent.trim().split(/\s+/).filter(Boolean).length;
+    const textSizeClass =
+        wordCount <= 6  ? 'text-[32px] leading-tight' :
+        wordCount <= 15 ? 'text-[24px] leading-snug' :
+        wordCount <= 35 ? 'text-[19px] leading-snug' :
+        wordCount <= 70 ? 'text-[16px] leading-relaxed' :
+        'text-[14px] leading-relaxed';
 
-    const handleLike = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        likeMutation.mutate();
-    };
+    const hasMedia = (post.mediaUrls?.length ?? 0) > 0;
 
     const handleCardClick = (e: React.MouseEvent) => {
         const target = e.target as HTMLElement;
         if (!target.closest('a') && !target.closest('button')) {
-            router.push(`/gossip/${postId}`);
+            router.push(`/local-news/${postId}`);
         }
     };
 
-    const hasMedia = (post.mediaUrls?.length ?? 0) > 0;
-
     return (
         <article
-            className="relative overflow-hidden cursor-pointer rounded-2xl"
-            style={{ background: GRADIENT, minHeight: '70vh' }}
+            className="relative overflow-hidden cursor-pointer rounded-none border-y border-white/10 sm:rounded-3xl sm:border"
+            style={{ background: '#07070f', height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
             onClick={handleCardClick}
         >
-            {/* ── RIGHT SIDE: Vertical action rail ── */}
-            <div className="absolute right-3 top-2/3 -translate-y-1/2 z-20 flex flex-col items-center gap-4">
-                {/* Like */}
-                <button onClick={handleLike} disabled={likeMutation.isPending} aria-label={isLiked ? 'Unlike' : 'Like'} className="flex flex-col items-center gap-0.5 group">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                        isLiked ? 'bg-pink-500/30 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md hover:bg-black/50'
-                    }`}>
-                        <span className={`material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform ${
-                            isLiked ? 'text-pink-400 fill-1' : 'text-white'
-                        }`}>favorite</span>
-                    </div>
-                    {(post.likeCount || 0) > 0 && <span className="text-[11px] font-bold text-white drop-shadow-md">{post.likeCount}</span>}
-                </button>
-                {/* Comment */}
-                <button onClick={(e) => { e.stopPropagation(); router.push(`/gossip/${postId}`); }} className="flex flex-col items-center gap-0.5 group">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md hover:bg-black/50 transition-all">
-                        <span className="material-symbols-outlined text-[22px] text-white group-hover:scale-110 transition-transform">chat_bubble</span>
-                    </div>
-                    {(post.commentCount || 0) > 0 && <span className="text-[11px] font-bold text-white drop-shadow-md">{post.commentCount}</span>}
-                </button>
-                {/* Views */}
+            {/* Ambient sphere background */}
+            <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute -top-28 -left-28 w-[340px] h-[340px] rounded-full" style={{ background: SPHERES[0], filter: 'blur(90px)' }} />
+                <div className="absolute top-[35%] -right-20 w-[300px] h-[300px] rounded-full" style={{ background: SPHERES[1], filter: 'blur(80px)' }} />
+                <div className="absolute -bottom-24 left-[15%] w-[280px] h-[280px] rounded-full" style={{ background: SPHERES[2], filter: 'blur(75px)' }} />
+            </div>
+            {/* Vignette */}
+            <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%)' }} />
+
+            {/* ── Action rail ── */}
+            <div className="absolute right-3 bottom-5 z-30 flex flex-col items-center gap-3 sm:bottom-6">
+                <GlassBtn
+                    icon="favorite"
+                    count={post.likeCount || undefined}
+                    active={isLiked}
+                    activeIconClass="text-pink-300"
+                    filled
+                    onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
+                />
+                <GlassBtn
+                    icon="chat_bubble"
+                    count={post.commentCount || undefined}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (onComment) {
+                            onComment(postId);
+                            return;
+                        }
+                        router.push(`/local-news/${postId}`);
+                    }}
+                />
                 {(post.viewCount || 0) > 0 && (
                     <div className="flex flex-col items-center gap-0.5">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-transparent">
-                            <span className="material-symbols-outlined text-[20px] text-white/40">visibility</span>
-                        </div>
-                        <span className="text-[11px] text-white/40">{post.viewCount}</span>
+                        <span className="material-symbols-outlined text-[18px] text-white/30">visibility</span>
+                        <span className="text-[10px] text-white/35 font-medium">{post.viewCount}</span>
                     </div>
                 )}
             </div>
 
-            <div className="flex flex-col" style={{ minHeight: '70vh' }}>
-
-                {/* ── TOP: Author header ── */}
-                <div className="p-4 pt-5">
-                    <div className="flex items-center gap-3">
-                        {/* Avatar */}
-                        <div className="relative flex-shrink-0">
-                            {post.anonymous ? (
-                                <div className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-[20px] text-white/60">person</span>
-                                </div>
-                            ) : (
-                                <Link href={`/profile/${post.author?.username}`} onClick={(e) => e.stopPropagation()}>
-                                    <MapPinAvatar src={post.author?.avatarUrl} alt={post.author?.name} size="lg" />
-                                </Link>
-                            )}
-                        </div>
-
-                        {/* Name + meta */}
-                        <div className="flex-1 min-w-0">
-                            {post.anonymous ? (
-                                <div className="flex items-center gap-1.5">
-                                    <span className="font-bold text-[14px] text-white">Anonymous NeyburH</span>
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-medium">hidden</span>
-                                </div>
-                            ) : (
-                                <Link
-                                    href={`/profile/${post.author?.username}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="font-bold text-[14px] text-white hover:underline truncate block"
-                                >
-                                    {post.author?.name}
-                                </Link>
-                            )}
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-[11px] text-white/50">{formatTimeAgo(post.createdAt)}</span>
-                                {post.location && (post.location.lga || post.location.state) && (
-                                    <>
-                                        <span className="text-white/25 text-[10px]">·</span>
-                                        <span className="material-symbols-outlined text-[12px] text-white/40">location_on</span>
-                                        <span className="text-[11px] text-white/50 truncate max-w-[100px]">
-                                            {post.location.lga || post.location.state}
-                                        </span>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Type badge + menu */}
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
+            {/* ── Top badges + menu ── */}
+            <div className="absolute top-0 left-0 right-0 z-30 px-4 pt-4 pb-16 bg-gradient-to-b from-black/65 via-black/20 to-transparent pointer-events-none">
+                <div className="flex items-center justify-between gap-3 pointer-events-auto">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <span
+                            className="text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider"
+                            style={{
+                                color: accentColor,
+                                background: `${accentColor}1a`,
+                                border: `1px solid ${accentColor}2e`,
+                                backdropFilter: 'blur(12px)',
+                            }}
+                        >
+                            {typeLabel}
+                        </span>
+                        {post.slangEnrichment?.hasSlang && (
                             <span
-                                className="text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider"
-                                style={{ color: accentColor, background: `${accentColor}20`, border: `1px solid ${accentColor}30` }}
+                                className="text-[9px] px-1.5 py-[3px] rounded-full font-bold text-green-400"
+                                style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.22)' }}
                             >
-                                {typeLabel}
+                                🇳🇬
                             </span>
-                            {post.slangEnrichment?.hasSlang && (
-                                <span className="text-[9px] px-1.5 py-[3px] rounded-full bg-green-500/15 text-green-400 font-bold">🇳🇬</span>
-                            )}
-                            <div className="relative">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/15 transition-colors text-white/60"
+                        )}
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <div className="relative">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setShowMenu(v => !v); }}
+                                className="w-8 h-8 flex items-center justify-center rounded-full text-white/65 hover:text-white transition-colors"
+                                style={{ background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.14)' }}
+                            >
+                                <span className="material-symbols-outlined text-[18px]">more_vert</span>
+                            </button>
+                            {showMenu && (
+                                <div
+                                    className="absolute right-0 top-10 z-40 w-40 rounded-2xl overflow-hidden shadow-2xl"
+                                    style={{ background: 'rgba(8,8,20,0.88)', backdropFilter: 'blur(28px) saturate(180%)', border: '1px solid rgba(255,255,255,0.10)' }}
+                                    onClick={(e) => e.stopPropagation()}
                                 >
-                                    <span className="material-symbols-outlined text-[20px]">more_vert</span>
-                                </button>
-                                {showMenu && (
-                                    <div
-                                        className="absolute right-0 top-10 z-30 w-40 rounded-2xl overflow-hidden bg-black/70 backdrop-blur-2xl border border-white/10 shadow-2xl"
-                                        onClick={(e) => e.stopPropagation()}
+                                    <button
+                                        onClick={() => { setShowMenu(false); router.push(`/local-news/${postId}`); }}
+                                        className="w-full text-left px-4 py-3 text-[13px] flex items-center gap-3 hover:bg-white/8 transition-colors text-white/70"
                                     >
-                                        <button
-                                            onClick={() => { setShowMenu(false); router.push(`/gossip/${postId}`); }}
-                                            className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors text-white/60"
-                                        >
-                                            <span className="material-symbols-outlined text-[18px]">open_in_new</span> Open
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                                        <span className="material-symbols-outlined text-[17px]">open_in_new</span> Open
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* ── CENTER: Big quote text ── */}
-                <div className="px-8 pr-14 py-6 flex-1 flex flex-col justify-center items-center">
-                    <span className="text-5xl leading-none mb-3 font-serif self-start opacity-20" style={{ color: accentColor }}>&ldquo;</span>
+            {/* ── Bottom author cluster ── */}
+            <div className="absolute bottom-5 left-4 right-[76px] z-30 sm:bottom-6 sm:left-5 sm:right-24">
+                <div className="flex items-center gap-2.5">
+                    <div className="relative shrink-0">
+                        {post.anonymous ? (
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10">
+                                <span className="material-symbols-outlined text-[18px] text-white/55">person</span>
+                            </div>
+                        ) : (
+                            <Link href={`/profile/${post.author?.username}`} onClick={(e) => e.stopPropagation()}>
+                                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10">
+                                    {post.author?.avatarUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={post.author.avatarUrl} alt={post.author?.name || 'Author'} className="h-full w-full object-cover" />
+                                    ) : (
+                                        <span className="material-symbols-outlined text-[18px] text-white/55">person</span>
+                                    )}
+                                </div>
+                            </Link>
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        {post.anonymous ? (
+                            <span className="block max-w-[150px] whitespace-normal text-[12px] font-black leading-[1.05] text-white" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.8)' }}>
+                                Anonymous Neyborh
+                            </span>
+                        ) : (
+                            <Link
+                                href={`/profile/${post.author?.username}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="block max-w-[150px] whitespace-normal text-[12px] font-black leading-[1.05] text-white hover:underline"
+                                style={{ textShadow: '0 1px 10px rgba(0,0,0,0.8)' }}
+                            >
+                                {post.author?.name || 'Anonymous Neyborh'}
+                            </Link>
+                        )}
+                        <div className="mt-1 text-[10px] font-bold leading-none text-white/58">
+                            {formatTimeAgo(post.createdAt)}
+                        </div>
+                    </div>
+                </div>
+                {textContent.trim().length > 0 && (
                     <p
-                        className="font-extrabold leading-snug whitespace-pre-wrap break-words text-center"
-                        style={{ color: accentColor, fontSize }}
+                        className="mt-3 text-[14px] font-semibold leading-snug whitespace-pre-wrap break-words text-white"
+                        style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}
                     >
                         {textContent}
                     </p>
-                    <span className="text-5xl leading-none mt-3 font-serif self-end opacity-20" style={{ color: accentColor }}>&rdquo;</span>
+                )}
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (onComment) {
+                            onComment(postId);
+                            return;
+                        }
+                        router.push(`/local-news/${postId}`);
+                    }}
+                    className="mt-3 flex h-8 w-full max-w-[210px] items-center rounded-full border border-white/12 bg-white/8 px-3 text-left text-[11px] font-semibold text-white/55 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/12 hover:text-white/75 active:scale-[0.98]"
+                    aria-label="Add comment"
+                >
+                    Add comment...
+                </button>
+            </div>
 
-                    {/* Edited badge */}
-                    {post.updatedAt && post.updatedAt !== post.createdAt && (
-                        <span className="mt-2 text-[10px] italic text-white/30">edited</span>
-                    )}
-                </div>
-
-                {/* Media grid (if any) */}
+            {/* ── Center media/tags block ── */}
+            <div
+                className="absolute inset-x-0 z-20 px-7 pr-20 flex flex-col justify-center items-center gap-4"
+                style={{ top: '88px', bottom: '205px' }}
+            >
+                {/* Media grid */}
                 {hasMedia && (
-                    <div className={`mx-4 mb-2 grid gap-1.5 rounded-xl overflow-hidden ${post.mediaUrls!.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                    <div className={`w-full grid gap-1.5 rounded-2xl overflow-hidden ${post.mediaUrls!.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                         {post.mediaUrls!.slice(0, 4).map((url, i) => (
                             <div
                                 key={i}
-                                className={`relative bg-black/20 rounded-xl overflow-hidden ${post.mediaUrls!.length === 1 ? 'aspect-video' : 'aspect-square'}`}
+                                className={`relative bg-black/20 rounded-2xl overflow-hidden ${post.mediaUrls!.length === 1 ? 'aspect-video' : 'aspect-square'}`}
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -248,17 +313,22 @@ export function GossipCard({ post }: GossipCardProps) {
 
                 {/* Tags */}
                 {post.tags && post.tags.length > 0 && (
-                    <div className="px-6 pb-2 flex flex-wrap justify-center gap-1.5">
+                    <div className="flex flex-wrap justify-center gap-1.5 w-full">
                         {post.tags.slice(0, 5).map((tag) => (
-                            <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 text-white/70">
+                            <span
+                                key={tag}
+                                className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-white/65"
+                                style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(10px)' }}
+                            >
                                 #{tag}
                             </span>
                         ))}
                     </div>
                 )}
 
-                {/* Bottom spacing */}
-                <div className="pb-5" />
+                {post.updatedAt && post.updatedAt !== post.createdAt && (
+                    <span className="text-[10px] italic text-white/25">edited</span>
+                )}
             </div>
         </article>
     );

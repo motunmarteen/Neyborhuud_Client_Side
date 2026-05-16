@@ -1,6 +1,6 @@
 /**
- * HelpRequestCard Component
- * Displays a help request post with target amount, payment details, progress bar, and hashtags.
+ * HelpRequestCard — Community help request card
+ * iOS 26 Liquid Glass action rail + ambient sphere background (green palette).
  */
 
 'use client';
@@ -10,31 +10,76 @@ import { Post } from '@/types/api';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import { contentService } from '@/services/content.service';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 
 interface HelpRequestCardProps {
     post: Post;
+    onComment?: (postId: string) => void;
 }
 
-/** Format Naira amounts: ₦1,000,000 */
 function formatNaira(amount: number | string): string {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     if (isNaN(num)) return '';
     return `₦${num.toLocaleString('en-NG')}`;
 }
 
-const CATEGORY_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-    financial:  { label: 'Financial',  color: 'text-green-400 bg-green-400/10',  icon: 'account_balance_wallet' },
-    medical:    { label: 'Medical',    color: 'text-red-400 bg-red-400/10',      icon: 'local_hospital' },
-    food:       { label: 'Food',       color: 'text-orange-400 bg-orange-400/10',icon: 'restaurant' },
-    shelter:    { label: 'Shelter',    color: 'text-blue-400 bg-blue-400/10',    icon: 'home' },
-    emergency:  { label: 'Emergency',  color: 'text-pink-400 bg-pink-400/10',    icon: 'emergency' },
+// Green / emerald spheres
+const SPHERES: [string, string, string] = [
+    'rgba(16,185,129,0.45)',
+    'rgba(5,150,105,0.38)',
+    'rgba(34,197,94,0.28)',
+];
+
+const CARD_HEIGHT = '90vh';
+
+const CATEGORY_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
+    financial:  { label: 'Financial',  icon: 'account_balance_wallet', color: 'rgba(16,185,129,0.22)' },
+    medical:    { label: 'Medical',    icon: 'local_hospital',          color: 'rgba(239,68,68,0.22)' },
+    food:       { label: 'Food',       icon: 'restaurant',              color: 'rgba(249,115,22,0.22)' },
+    shelter:    { label: 'Shelter',    icon: 'home',                    color: 'rgba(59,130,246,0.22)' },
+    emergency:  { label: 'Emergency',  icon: 'emergency',               color: 'rgba(236,72,153,0.22)' },
 };
 
-export function HelpRequestCard({ post }: HelpRequestCardProps) {
+const STATUS_CONFIG: Record<string, { label: string; textCls: string }> = {
+    open:        { label: 'Open',        textCls: 'text-emerald-300' },
+    in_progress: { label: 'In Progress', textCls: 'text-amber-300' },
+    fulfilled:   { label: 'Fulfilled',   textCls: 'text-blue-300' },
+    closed:      { label: 'Closed',      textCls: 'text-white/35' },
+};
+
+// ── iOS 26 Liquid Glass button ─────────────────────────────────────────────────
+function GlassBtn({
+    icon, count, active, activeIconClass, onClick, filled, label,
+}: {
+    icon: string; count?: number; active?: boolean;
+    activeIconClass?: string; onClick: (e: React.MouseEvent) => void; filled?: boolean; label?: string;
+}) {
+    return (
+        <button onClick={onClick} className="flex flex-col items-center gap-1 rounded-full p-1 transition-transform duration-150 hover:scale-110 active:scale-[0.88] group" aria-label={label}>
+            <span
+                className={`material-symbols-outlined text-[22px] transition-transform duration-150 ${active ? (activeIconClass || 'text-white') : 'text-white'}`}
+                style={{
+                    ...(filled && active ? { fontVariationSettings: '"FILL" 1' } : {}),
+                    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.85))',
+                }}
+            >
+                {icon}
+            </span>
+            {(count !== undefined && count > 0) && (
+                <span className="text-[10px] font-bold text-white" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+                    {count}
+                </span>
+            )}
+            {label && !(count !== undefined && count > 0) && (
+                <span className="text-[9px] font-semibold text-white/55">{label}</span>
+            )}
+        </button>
+    );
+}
+
+export function HelpRequestCard({ post, onComment }: HelpRequestCardProps) {
     const router = useRouter();
     const queryClient = useQueryClient();
     const { user } = useAuth();
@@ -45,18 +90,18 @@ export function HelpRequestCard({ post }: HelpRequestCardProps) {
     const accountDetails = post.helpRequestPayment ?? meta.helpRequestPayment ?? meta.accountDetails ?? (post as any).helpRequestPayment ?? (post as any).accountDetails;
     const helpCategory: string = post.helpCategory ?? meta.helpCategory ?? (post as any).helpCategory ?? '';
     const storedReceived: number = post.amountReceived ?? meta.amountReceived ?? (post as any).amountReceived ?? 0;
+    const helpStatus: string = meta.helpStatus ?? (post as any).helpStatus ?? 'open';
 
     const categoryConfig = CATEGORY_CONFIG[helpCategory];
+    const statusConfig = STATUS_CONFIG[helpStatus];
     const isOwner = !!(user && (user.id === post.author?.id || (user as any)._id === post.author?.id));
 
-    // Local UI state
     const [copied, setCopied] = useState(false);
     const [showUpdateReceived, setShowUpdateReceived] = useState(false);
     const [receivedInput, setReceivedInput] = useState(String(storedReceived || ''));
     const [localReceived, setLocalReceived] = useState<number>(storedReceived);
     const receivedInputRef = useRef<HTMLInputElement>(null);
 
-    // Derived progress
     const progressPct = targetAmount && targetAmount > 0
         ? Math.min(100, Math.round((localReceived / targetAmount) * 100))
         : null;
@@ -88,8 +133,7 @@ export function HelpRequestCard({ post }: HelpRequestCardProps) {
     });
 
     const updateReceivedMutation = useMutation({
-        mutationFn: (newAmount: number) =>
-            contentService.updateHelpRequestAmount(postId, newAmount),
+        mutationFn: (newAmount: number) => contentService.updateHelpRequestAmount(postId, newAmount),
         onSuccess: (_, newAmount) => {
             setLocalReceived(newAmount);
             setShowUpdateReceived(false);
@@ -117,7 +161,14 @@ export function HelpRequestCard({ post }: HelpRequestCardProps) {
 
     const isLiked = post.isLiked === true;
     const mediaUrls = (Array.isArray(post.media) ? post.media : []) as string[];
-    const location = post.location as any;
+    const hasMedia = mediaUrls.length > 0;
+    const textContent = post.content || post.body || '';
+    const wordCount = textContent.trim().split(/\s+/).filter(Boolean).length;
+    const textSizeClass =
+        wordCount <= 6  ? 'text-[30px] leading-tight' :
+        wordCount <= 15 ? 'text-[22px] leading-snug' :
+        wordCount <= 35 ? 'text-[18px] leading-snug' :
+        'text-[15px] leading-relaxed';
 
     const handleCardClick = (e: React.MouseEvent) => {
         const target = e.target as HTMLElement;
@@ -126,265 +177,321 @@ export function HelpRequestCard({ post }: HelpRequestCardProps) {
         }
     };
 
-    return (
-        <article
-            className="neu-card-sm rounded-2xl overflow-hidden hover:opacity-95 active:scale-[0.995] transition-all cursor-pointer"
-            onClick={handleCardClick}
-        >
-            <div className="p-4">
-                {/* Row 1: category badge + status badge + location + time */}
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1.5">
-                        {categoryConfig && (
-                            <span className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold ${categoryConfig.color}`}>
-                                <span className="material-symbols-outlined text-[13px]">{categoryConfig.icon}</span>
-                                {categoryConfig.label}
-                            </span>
-                        )}
-                        {(() => {
-                            const helpStatus: string = meta.helpStatus ?? (post as any).helpStatus ?? 'open';
-                            const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-                                open:        { label: 'Open',        cls: 'text-emerald-400 bg-emerald-400/10' },
-                                in_progress: { label: 'In Progress', cls: 'text-amber-400 bg-amber-400/10' },
-                                fulfilled:   { label: 'Fulfilled',   cls: 'text-blue-400 bg-blue-400/10' },
-                                closed:      { label: 'Closed',      cls: 'text-white/40 bg-white/5' },
-                            };
-                            const sc = STATUS_CONFIG[helpStatus];
-                            if (!sc) return null;
-                            return (
-                                <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${sc.cls}`}>
-                                    {sc.label}
-                                </span>
-                            );
-                        })()}
-                    </div>
-                    <div className="flex items-center gap-1.5 ml-auto">
-                        {location && (location.lga || location.state) && (
-                            <span className="text-[11px] flex items-center gap-0.5" style={{ color: 'var(--neu-text-muted)' }}>
-                                <span className="material-symbols-outlined text-[13px]">location_on</span>
-                                {location.lga || location.state}
-                            </span>
-                        )}
-                        <span className="text-[12px]" style={{ color: 'var(--neu-text-muted)' }}>
-                            {formatTimeAgo(post.createdAt)}
-                        </span>
-                    </div>
+    // ── Action rail ────────────────────────────────────────────────────────────
+    const actionRail = (
+        <div className="absolute right-3 bottom-5 z-30 flex flex-col items-center gap-3 sm:bottom-6">
+            <GlassBtn
+                icon="favorite"
+                count={post.likes || undefined}
+                active={isLiked}
+                activeIconClass="text-pink-300"
+                filled
+                onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
+            />
+            <GlassBtn
+                icon="chat_bubble"
+                count={post.comments || undefined}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (onComment) {
+                        onComment(postId);
+                    }
+                }}
+            />
+            <GlassBtn
+                icon="volunteer_activism"
+                activeIconClass="text-emerald-300"
+                label="Help"
+                onClick={(e) => { e.stopPropagation(); router.push(`/help-request/${postId}`); }}
+            />
+            {(post.views || 0) > 0 && (
+                <div className="flex flex-col items-center gap-0.5">
+                    <span className="material-symbols-outlined text-[18px] text-white/30">visibility</span>
+                    <span className="text-[10px] text-white/35 font-medium">{post.views}</span>
                 </div>
+            )}
+        </div>
+    );
 
-                {/* Row 2: avatar + author */}
-                <div className="flex items-center gap-2.5 mb-3">
-                    <Link href={`/profile/${post.author?.username}`} onClick={(e) => e.stopPropagation()} className="flex-shrink-0">
-                        <MapPinAvatar src={post.author?.avatarUrl} alt={post.author?.name} size="sm" />
+    // ── Top status badges ─────────────────────────────────────────────────────
+    const topBadges = (
+        <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 bg-gradient-to-b from-black/65 via-black/20 to-transparent px-4 pb-16 pt-4">
+            <div className="pointer-events-auto flex items-center gap-1.5">
+                {statusConfig && (
+                    <span
+                        className={`text-[9px] px-2 py-[3px] rounded-full font-bold tracking-wider uppercase ${statusConfig.textCls}`}
+                        style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.13)', backdropFilter: 'blur(12px)' }}
+                    >
+                        {statusConfig.label}
+                    </span>
+                )}
+                {categoryConfig && (
+                    <span
+                        className="flex items-center gap-0.5 text-[9px] px-2 py-[3px] rounded-full font-bold text-white/75"
+                        style={{ background: categoryConfig.color, border: '1px solid rgba(255,255,255,0.15)', backdropFilter: 'blur(12px)' }}
+                    >
+                        <span className="material-symbols-outlined text-[12px]">{categoryConfig.icon}</span>
+                        {categoryConfig.label}
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+
+    // ── Bottom author cluster ─────────────────────────────────────────────────
+    const bottomAuthorPanel = (
+        <div className="absolute bottom-5 left-4 right-[76px] z-30 sm:bottom-6 sm:left-5 sm:right-24">
+            <div className="flex items-center gap-2.5">
+                <div className="relative shrink-0">
+                    <Link href={`/profile/${post.author?.username}`} onClick={(e) => e.stopPropagation()}>
+                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10">
+                            {post.author?.avatarUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={post.author.avatarUrl} alt={post.author?.name || 'Author'} className="h-full w-full object-cover" />
+                            ) : (
+                                <span className="material-symbols-outlined text-[18px] text-white/55">person</span>
+                            )}
+                        </div>
                     </Link>
-                    <div className="min-w-0 flex-1">
-                        <Link
-                            href={`/profile/${post.author?.username}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[13px] font-semibold hover:underline block truncate"
-                            style={{ color: 'var(--neu-text)' }}
-                        >
-                            {post.author?.name}
-                        </Link>
-                        {post.author?.username && (
-                            <span className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>
-                                @{post.author.username}
-                            </span>
-                        )}
+                </div>
+                <div className="min-w-0">
+                    <Link
+                        href={`/profile/${post.author?.username}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="block max-w-[150px] whitespace-normal text-[12px] font-black leading-[1.05] text-white hover:underline"
+                        style={{ textShadow: '0 1px 10px rgba(0,0,0,0.8)' }}
+                    >
+                        {post.author?.name || 'Anonymous Neyborh'}
+                    </Link>
+                    <div className="mt-1 text-[10px] font-bold leading-none text-white/58">
+                        {formatTimeAgo(post.createdAt)}
                     </div>
                 </div>
+            </div>
+            {hasMedia && textContent.trim().length > 0 && (
+                <p
+                    className="mt-3 text-[14px] font-semibold leading-snug text-white whitespace-pre-wrap break-words"
+                    style={{ textShadow: '0 1px 8px rgba(0,0,0,0.65)' }}
+                >
+                    <span className="text-emerald-300 font-black mr-1.5">#helprequest</span>
+                    {textContent}
+                </p>
+            )}
+            <button
+                type="button"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (onComment) {
+                        onComment(postId);
+                    }
+                }}
+                className="mt-3 flex h-8 w-full max-w-[210px] items-center rounded-full border border-white/12 bg-white/8 px-3 text-left text-[11px] font-semibold text-white/55 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/12 hover:text-white/75 active:scale-[0.98]"
+                aria-label="Add comment"
+            >
+                Add comment...
+            </button>
+        </div>
+    );
 
-                {/* Row 3: hashtags + body inline */}
-                <div className="mb-3">
-                    <p className="text-[14px] leading-6 whitespace-pre-wrap break-words" style={{ color: 'var(--neu-text-muted)' }}>
-                        <span className="font-semibold mr-1" style={{ color: 'var(--primary)' }}>
-                            #helprequest
-                            {helpCategory ? ` #${helpCategory}` : ''}
-                        </span>
-                        {post.content || post.body}
-                    </p>
+    // ── Shared structured content blocks ───────────────────────────────────────
+    const fundingBlock = targetAmount != null && targetAmount > 0 ? (
+        <div
+            className="p-3.5 rounded-2xl flex flex-col gap-2.5"
+            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.09)', backdropFilter: 'blur(12px)' }}
+        >
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[17px] text-emerald-400">savings</span>
+                    <span className="text-[11px] font-bold uppercase text-white/45">Funding Goal</span>
                 </div>
+                <span className="text-[15px] font-bold text-white">{formatNaira(targetAmount)}</span>
+            </div>
+            <div>
+                <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.10)' }}>
+                    <div
+                        className="h-full rounded-full bg-emerald-400 transition-all duration-500"
+                        style={{ width: `${progressPct ?? 0}%` }}
+                    />
+                </div>
+                <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-[11px] font-medium text-emerald-300">{formatNaira(localReceived)} raised</span>
+                    <span className="text-[11px] text-white/35">{progressPct != null ? `${progressPct}%` : ''}</span>
+                </div>
+            </div>
+            {isOwner && !showUpdateReceived && (
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setReceivedInput(String(localReceived || '')); setShowUpdateReceived(true); setTimeout(() => receivedInputRef.current?.focus(), 50); }}
+                    className="self-start flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-xl text-emerald-300 hover:text-emerald-200 transition-colors"
+                    style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.20)' }}
+                >
+                    <span className="material-symbols-outlined text-[13px]">edit</span>
+                    Update amount
+                </button>
+            )}
+            {isOwner && showUpdateReceived && (
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="relative flex-1">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[12px] font-bold text-white/40">₦</span>
+                        <input
+                            ref={receivedInputRef}
+                            type="number"
+                            value={receivedInput}
+                            onChange={(e) => setReceivedInput(e.target.value)}
+                            min="0"
+                            placeholder="Amount received"
+                            className="w-full pl-6 pr-2 py-1.5 rounded-xl text-[12px] focus:outline-none bg-white/10 text-white placeholder:text-white/25 border border-white/10"
+                        />
+                    </div>
+                    <button type="button" onClick={handleSaveReceived} disabled={updateReceivedMutation.isPending}
+                        className="px-3 py-1.5 rounded-xl text-[12px] font-bold text-white bg-emerald-500/30 hover:bg-emerald-500/40 transition-all">
+                        {updateReceivedMutation.isPending ? '…' : 'Save'}
+                    </button>
+                    <button type="button" onClick={(e) => { e.stopPropagation(); setShowUpdateReceived(false); }}
+                        className="px-2.5 py-1.5 rounded-xl text-[12px] text-white/50 hover:text-white/70 transition-colors"
+                        style={{ background: 'rgba(255,255,255,0.08)' }}>
+                        ✕
+                    </button>
+                </div>
+            )}
+        </div>
+    ) : null;
 
-                {/* Media grid */}
-                {mediaUrls.length > 0 && (
-                    <div className={`mb-3 grid gap-1.5 rounded-xl overflow-hidden ${mediaUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                        {mediaUrls.slice(0, 4).map((url, i) => (
-                            <div
-                                key={i}
-                                className={`relative bg-black/10 rounded-xl overflow-hidden ${mediaUrls.length === 1 ? 'aspect-video' : 'aspect-square'}`}
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={url} alt={`media ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
-                                {i === 3 && mediaUrls.length > 4 && (
-                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                        <span className="text-white font-bold text-lg">+{mediaUrls.length - 4}</span>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+    const accountBlock = accountDetails && (accountDetails.bankName || accountDetails.accountName || accountDetails.accountNumber) ? (
+        <div
+            className="p-3.5 rounded-2xl"
+            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.09)', backdropFilter: 'blur(12px)' }}
+        >
+            <div className="flex items-center gap-1.5 mb-2">
+                <span className="material-symbols-outlined text-[15px] text-white/40">account_balance</span>
+                <span className="text-[11px] font-bold uppercase text-white/40">How to Help</span>
+            </div>
+            <div className="flex flex-col gap-1.5">
+                {accountDetails.bankName && (
+                    <div className="flex items-center justify-between">
+                        <span className="text-[12px] text-white/35">Bank</span>
+                        <span className="text-[12px] font-semibold text-white">{accountDetails.bankName}</span>
                     </div>
                 )}
-
-                {/* Funding goal + progress block */}
-                {targetAmount != null && targetAmount > 0 && (
-                    <div className="mb-3 p-3 rounded-xl flex flex-col gap-2" style={{ background: 'var(--neu-bg-offset, rgba(0,0,0,0.04))' }}>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5">
-                                <span className="material-symbols-outlined text-[18px] text-green-400">savings</span>
-                                <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>Funding Goal</span>
-                            </div>
-                            <span className="text-[15px] font-bold" style={{ color: 'var(--neu-text)' }}>{formatNaira(targetAmount)}</span>
-                        </div>
-
-                        {/* Progress bar */}
-                        <div>
-                            <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'var(--neu-shadow-light)' }}>
-                                <div
-                                    className="h-full rounded-full transition-all duration-500"
-                                    style={{ width: `${progressPct ?? 0}%`, background: 'var(--primary)' }}
-                                />
-                            </div>
-                            <div className="flex items-center justify-between mt-1">
-                                <span className="text-[11px] font-medium" style={{ color: 'var(--primary)' }}>
-                                    {formatNaira(localReceived)} raised
-                                </span>
-                                <span className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>
-                                    {progressPct != null ? `${progressPct}%` : ''}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Owner: update received amount */}
-                        {isOwner && !showUpdateReceived && (
+                {accountDetails.accountName && (
+                    <div className="flex items-center justify-between">
+                        <span className="text-[12px] text-white/35">Name</span>
+                        <span className="text-[12px] font-semibold text-white">{accountDetails.accountName}</span>
+                    </div>
+                )}
+                {accountDetails.accountNumber && (
+                    <div className="flex items-center justify-between gap-2">
+                        <span className="text-[12px] text-white/35">Account</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[13px] font-mono font-bold tracking-wider text-white">{accountDetails.accountNumber}</span>
                             <button
                                 type="button"
-                                onClick={(e) => { e.stopPropagation(); setReceivedInput(String(localReceived || '')); setShowUpdateReceived(true); setTimeout(() => receivedInputRef.current?.focus(), 50); }}
-                                className="self-start flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg neu-btn transition-all"
-                                style={{ color: 'var(--primary)' }}
+                                onClick={handleCopyAccount}
+                                className="flex items-center gap-0.5 px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all"
+                                style={{
+                                    background: 'rgba(255,255,255,0.10)',
+                                    color: copied ? '#4ade80' : 'rgba(255,255,255,0.45)',
+                                }}
                             >
-                                <span className="material-symbols-outlined text-[13px]">edit</span>
-                                Update amount received
+                                <span className="material-symbols-outlined text-[13px]">{copied ? 'check' : 'content_copy'}</span>
+                                {copied ? 'Copied!' : 'Copy'}
                             </button>
-                        )}
-
-                        {isOwner && showUpdateReceived && (
-                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                <div className="relative flex-1">
-                                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[12px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>₦</span>
-                                    <input
-                                        ref={receivedInputRef}
-                                        type="number"
-                                        value={receivedInput}
-                                        onChange={(e) => setReceivedInput(e.target.value)}
-                                        min="0"
-                                        placeholder="Amount received so far"
-                                        className="w-full pl-6 pr-2 py-1.5 rounded-xl text-[12px] focus:outline-none neu-input"
-                                    />
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={handleSaveReceived}
-                                    disabled={updateReceivedMutation.isPending}
-                                    className="px-3 py-1.5 rounded-xl text-[12px] font-bold text-primary neu-btn-active transition-all"
-                                >
-                                    {updateReceivedMutation.isPending ? '…' : 'Save'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setShowUpdateReceived(false); }}
-                                    className="px-2.5 py-1.5 rounded-xl text-[12px] neu-btn transition-all"
-                                    style={{ color: 'var(--neu-text-muted)' }}
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Payment / account details block */}
-                {accountDetails && (accountDetails.bankName || accountDetails.accountName || accountDetails.accountNumber) && (
-                    <div className="mb-3 p-3 rounded-xl" style={{ background: 'var(--neu-bg-offset, rgba(0,0,0,0.04))' }}>
-                        <div className="flex items-center gap-1.5 mb-2">
-                            <span className="material-symbols-outlined text-[15px]" style={{ color: 'var(--neu-text-muted)' }}>account_balance</span>
-                            <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>How to Help</span>
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                            {accountDetails.bankName && (
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[12px]" style={{ color: 'var(--neu-text-muted)' }}>Bank</span>
-                                    <span className="text-[12px] font-semibold" style={{ color: 'var(--neu-text)' }}>{accountDetails.bankName}</span>
-                                </div>
-                            )}
-                            {accountDetails.accountName && (
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[12px]" style={{ color: 'var(--neu-text-muted)' }}>Account Name</span>
-                                    <span className="text-[12px] font-semibold" style={{ color: 'var(--neu-text)' }}>{accountDetails.accountName}</span>
-                                </div>
-                            )}
-                            {accountDetails.accountNumber && (
-                                <div className="flex items-center justify-between gap-2">
-                                    <span className="text-[12px]" style={{ color: 'var(--neu-text-muted)' }}>Account No.</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[13px] font-mono font-bold tracking-wider" style={{ color: 'var(--neu-text)' }}>
-                                            {accountDetails.accountNumber}
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={handleCopyAccount}
-                                            aria-label="Copy account number"
-                                            className="flex items-center gap-0.5 px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all neu-btn"
-                                            style={{ color: copied ? 'var(--primary)' : 'var(--neu-text-muted)' }}
-                                        >
-                                            <span className="material-symbols-outlined text-[13px]">{copied ? 'check' : 'content_copy'}</span>
-                                            {copied ? 'Copied!' : 'Copy'}
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 )}
+            </div>
+        </div>
+    ) : null;
 
-                {/* Stats bar */}
-                <div className="flex items-center gap-1 mt-3 pt-3 border-t" style={{ borderColor: 'var(--neu-shadow-light)' }}>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
-                        disabled={likeMutation.isPending}
-                        aria-label={isLiked ? 'Unlike' : 'Like'}
-                        className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-[13px] font-medium transition-all group ${
-                            isLiked ? 'bg-red-500/10 text-red-400' : 'hover:bg-red-500/10 hover:text-red-400'
-                        }`}
-                        style={!isLiked ? { color: 'var(--neu-text-muted)' } : undefined}
-                    >
-                        <span className={`material-symbols-outlined text-[18px] transition-colors ${isLiked ? 'fill-1' : ''}`}>favorite</span>
-                        <span>{post.likes || 0}</span>
-                    </button>
-
-                    <button
-                        onClick={(e) => { e.stopPropagation(); router.push(`/post/${postId}`); }}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-[13px] font-medium hover:bg-white/5 transition-all"
-                        style={{ color: 'var(--neu-text-muted)' }}
-                    >
-                        <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
-                        <span>{post.comments || 0}</span>
-                    </button>
-
-                    {(post.views || 0) > 0 && (
-                        <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>
-                            <span className="material-symbols-outlined text-[18px]">visibility</span>
-                            <span>{post.views}</span>
-                        </div>
-                    )}
-
-                    <button
-                        onClick={(e) => { e.stopPropagation(); router.push(`/post/${postId}`); }}
-                        className="ml-auto flex items-center gap-1 text-[12px] font-bold text-green-400 hover:text-green-300 transition-colors px-2 py-1 rounded-xl hover:bg-green-400/10"
-                    >
-                        <span className="material-symbols-outlined text-[16px]">volunteer_activism</span>
-                        <span>Offer Help</span>
-                    </button>
+    // ── TEXT-ONLY MODE ────────────────────────────────────────────────────────
+    if (!hasMedia) {
+        return (
+            <article
+                className="relative overflow-hidden cursor-pointer rounded-none border-y border-white/10 sm:rounded-3xl sm:border"
+                style={{ background: '#04100a', height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
+                onClick={handleCardClick}
+            >
+                {/* Ambient spheres */}
+                <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+                    <div className="absolute -top-28 -left-28 w-[340px] h-[340px] rounded-full" style={{ background: SPHERES[0], filter: 'blur(90px)' }} />
+                    <div className="absolute top-[35%] -right-20 w-[300px] h-[300px] rounded-full" style={{ background: SPHERES[1], filter: 'blur(80px)' }} />
+                    <div className="absolute -bottom-24 left-[15%] w-[280px] h-[280px] rounded-full" style={{ background: SPHERES[2], filter: 'blur(75px)' }} />
                 </div>
+                <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%)' }} />
+
+                {topBadges}
+                {actionRail}
+                {bottomAuthorPanel}
+
+                {/* Center: content */}
+                <div
+                    className="absolute inset-x-0 z-20 px-5 pr-20 flex flex-col justify-center gap-4 overflow-y-auto"
+                    style={{ top: '88px', bottom: '148px' }}
+                >
+                    <p
+                        className={`font-bold whitespace-pre-wrap break-words text-white ${textSizeClass}`}
+                        style={{ textShadow: '0 2px 24px rgba(0,0,0,0.4)' }}
+                    >
+                        <span className="text-emerald-300 mr-1.5 font-black">
+                            #helprequest{helpCategory ? ` #${helpCategory}` : ''}
+                        </span>
+                        {textContent}
+                    </p>
+
+                    {fundingBlock}
+                    {accountBlock}
+
+                    {post.updatedAt && post.updatedAt !== post.createdAt && (
+                        <span className="text-[10px] italic text-white/25">edited</span>
+                    )}
+                </div>
+            </article>
+        );
+    }
+
+    // ── MIXED MODE (text + media) ─────────────────────────────────────────────
+    return (
+        <article
+            className="relative overflow-hidden cursor-pointer rounded-none border-y border-white/10 bg-black sm:rounded-3xl sm:border"
+            style={{ height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
+            onClick={handleCardClick}
+        >
+            {/* Full-bleed media */}
+            <div className="absolute inset-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src={mediaUrls[0]}
+                    alt="Help request media"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.src = 'https://i.pravatar.cc/600?u=help'; }}
+                />
+                <div
+                    className="absolute inset-0"
+                    style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.52) 0%, transparent 25%, rgba(0,0,0,0.88) 65%, rgba(0,0,0,0.97) 100%)' }}
+                />
+            </div>
+
+            {mediaUrls.length > 1 && (
+                <div
+                    className="absolute top-4 right-14 z-30 flex items-center gap-1 px-2.5 py-1.5 rounded-full"
+                    style={{ background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.14)' }}
+                >
+                    <span className="material-symbols-outlined text-white text-[14px]">photo_library</span>
+                    <span className="text-white text-[11px] font-bold">{mediaUrls.length}</span>
+                </div>
+            )}
+
+            {topBadges}
+            {actionRail}
+            {bottomAuthorPanel}
+
+            {/* Bottom details panel */}
+            <div className="absolute bottom-[160px] left-0 right-0 z-20 px-5 pr-20 flex flex-col gap-3">
+                {fundingBlock}
+                {accountBlock}
+                {post.updatedAt && post.updatedAt !== post.createdAt && (
+                    <span className="text-[10px] italic text-white/25">edited</span>
+                )}
             </div>
         </article>
     );

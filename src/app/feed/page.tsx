@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
   getNeedsCommunitySelection,
@@ -36,6 +36,10 @@ import { useInView } from 'react-intersection-observer';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePinPost } from '@/hooks/useGamification';
 import { BoostModal } from '@/components/gamification/BoostModal';
+import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
+import { FeedDiscoveryBlock } from '@/components/feed/FeedDiscoveryBlock';
+import { mergeDiscoveryIntoFeed, type DiscoveryFeedItem } from '@/lib/feedDiscoveryMerge';
+import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
 
 function XFeedInner() {
     const router = useRouter();
@@ -163,27 +167,61 @@ function XFeedInner() {
     const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
     const [reportingPostId, setReportingPostId] = useState<string | null>(null);
     const [pinningPostId, setPinningPostId] = useState<string | null>(null);
+    const [commentsTarget, setCommentsTarget] = useState<{ kind: 'post' | 'gossip'; id: string } | null>(null);
+    const [commentsAnchor, setCommentsAnchor] = useState<{ left: number; width: number } | null>(null);
     const pinPost = usePinPost();
 
+    const openCommentsFromElement = (target: { kind: 'post' | 'gossip'; id: string }, element: HTMLElement | null) => {
+        if (element) {
+            const rect = element.getBoundingClientRect();
+            setCommentsAnchor({ left: rect.left, width: rect.width });
+        } else {
+            setCommentsAnchor(null);
+        }
+        setCommentsTarget(target);
+    };
+
     // Flatten posts from all pages
-    const posts: Post[] =
-        feedData?.pages.flatMap((page: any) => page.content ?? page.data?.content ?? []) ?? [];
+    const posts: Post[] = useMemo(
+        () =>
+            feedData?.pages.flatMap((page: any) => page.content ?? page.data?.content ?? []) ?? [],
+        [feedData?.pages],
+    );
 
     // Fetch gossip posts for the same feed tab and merge into timeline
     const { data: gossipData } = useGossipList({ feedTab });
-    const gossipPosts: GossipPost[] = gossipData?.pages?.flatMap((page) => page?.gossip || []) ?? [];
+    const gossipPosts: GossipPost[] = useMemo(
+        () => gossipData?.pages?.flatMap((page) => page?.gossip || []) ?? [],
+        [gossipData?.pages],
+    );
 
     // Merge and sort by createdAt descending
     type FeedItem = { _type: 'post'; data: Post } | { _type: 'gossip'; data: GossipPost };
-    const mergedFeed: FeedItem[] = [
-        ...posts.map((p): FeedItem => ({ _type: 'post', data: p })),
-        ...gossipPosts.map((g): FeedItem => ({ _type: 'gossip', data: g })),
-    ].sort((a, b) => {
-        const dateA = new Date(a.data.createdAt || 0).getTime();
-        const dateB = new Date(b.data.createdAt || 0).getTime();
-        return dateB - dateA;
-    });
+    const mergedFeed: FeedItem[] = useMemo(
+        () =>
+            [
+                ...posts.map((p): FeedItem => ({ _type: 'post', data: p })),
+                ...gossipPosts.map((g): FeedItem => ({ _type: 'gossip', data: g })),
+            ].sort((a, b) => {
+                const dateA = new Date(a.data.createdAt || 0).getTime();
+                const dateB = new Date(b.data.createdAt || 0).getTime();
+                return dateB - dateA;
+            }),
+        [posts, gossipPosts],
+    );
     const missedAlerts = feedData?.pages?.[0]?.meta?.missedAlerts ?? null;
+
+    /** Mixed marketplace / events / jobs when not using a content-type sidebar filter */
+    const discoveryEnabled = !contentTypeFilter;
+    const { pools: discoveryPools } = useFeedDiscoveryPools(discoveryEnabled, {
+        lat: location?.lat ?? null,
+        lng: location?.lng ?? null,
+    });
+
+    const timeline: DiscoveryFeedItem[] = useMemo(
+        () => mergeDiscoveryIntoFeed(mergedFeed, discoveryPools, discoveryEnabled),
+        [mergedFeed, discoveryPools, discoveryEnabled],
+    );
 
     // Infinite scroll
     const { ref: loadMoreRef, inView } = useInView({
@@ -340,14 +378,14 @@ function XFeedInner() {
 
 
     return (
-        <div className="relative flex h-screen w-full overflow-hidden neu-base">
+        <div className="relative flex h-screen w-full overflow-hidden text-white neu-base">
             {/* Left Sidebar */}
             <Suspense fallback={<div className="w-64" />}>
                 <LeftSidebar />
             </Suspense>
 
             {/* Main scroll area: TopNav + Feed */}
-            <main ref={mainRef} className="flex flex-col flex-1 overflow-y-auto">
+            <main ref={mainRef} className="flex flex-1 flex-col overflow-y-auto scroll-smooth md:snap-y md:snap-proximity">
                 {/* Top Navigation — scrolls with content */}
                 <TopNav />
 
@@ -463,47 +501,104 @@ function XFeedInner() {
                         </div>
 
                         {/* Posts Feed — full width, outside px-4 container */}
-                        <div className="flex flex-col gap-2 bg-black/[0.03] mt-3">
-                            {mergedFeed.map((item) => {
-                                if (item._type === 'gossip') {
+                        <div
+                            className="mt-3 flex flex-col gap-5 pb-4 md:items-center"
+                            style={{
+                                background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)), radial-gradient(circle at 50% 0%, rgba(0,135,81,0.12), transparent 34%)',
+                                backdropFilter: 'blur(18px) saturate(150%)',
+                                WebkitBackdropFilter: 'blur(18px) saturate(150%)',
+                            }}
+                        >
+                            {timeline.map((item) => {
+                                if (
+                                    item._type === 'discovery_marketplace' ||
+                                    item._type === 'discovery_event' ||
+                                    item._type === 'discovery_job'
+                                ) {
                                     return (
-                                        <div key={`gossip-${item.data.id || item.data._id}`} className="px-4">
-                                            <GossipCard post={item.data} />
+                                        <div
+                                            key={item.key}
+                                            className={
+                                                item._type === 'discovery_marketplace'
+                                                    ? 'w-full max-w-[min(640px,calc(100vw-1rem))] md:mx-auto md:max-w-[580px] md:snap-center'
+                                                    : 'w-full md:max-w-[480px] md:snap-center'
+                                            }
+                                        >
+                                            <FeedDiscoveryBlock
+                                                item={item}
+                                                userLocation={location}
+                                                currentUserId={currentUserId}
+                                            />
                                         </div>
+                                    );
+                                }
+                                if (item._type === 'gossip') {
+                                    const gossipId = item.data.id || item.data._id;
+                                    return (
+                                    <div
+                                        key={`gossip-${gossipId}`}
+                                        className="w-full md:max-w-[480px] md:snap-center"
+                                        data-comment-anchor={`gossip-${gossipId}`}
+                                    >
+                                        <GossipCard
+                                            post={item.data}
+                                            onComment={(id) => {
+                                                const el = document.querySelector(`[data-comment-anchor="gossip-${id}"]`) as HTMLElement | null;
+                                                openCommentsFromElement({ kind: 'gossip', id }, el);
+                                            }}
+                                        />
+                                    </div>
                                     );
                                 }
                                 const post = item.data;
                                 if (post.contentType === 'fyi') {
                                     return (
-                                        <div key={post.id} className="px-4">
-                                            <FYICard post={post} currentUserId={currentUserId || undefined} />
+                                        <div key={post.id} className="w-full md:max-w-[480px] md:snap-center" data-comment-anchor={`post-${post.id}`}>
+                                            <FYICard
+                                                post={post}
+                                                currentUserId={currentUserId || undefined}
+                                                onComment={(id) => {
+                                                    const el = document.querySelector(`[data-comment-anchor="post-${id}"]`) as HTMLElement | null;
+                                                    openCommentsFromElement({ kind: 'post', id }, el);
+                                                }}
+                                            />
                                         </div>
                                     );
                                 }
                                 if (post.contentType === 'help_request') {
                                     return (
-                                        <div key={post.id} className="px-4">
-                                            <HelpRequestCard post={post} />
+                                        <div key={post.id} className="w-full md:max-w-[480px] md:snap-center" data-comment-anchor={`post-${post.id}`}>
+                                            <HelpRequestCard
+                                                post={post}
+                                                onComment={(id) => {
+                                                    const el = document.querySelector(`[data-comment-anchor="post-${id}"]`) as HTMLElement | null;
+                                                    openCommentsFromElement({ kind: 'post', id }, el);
+                                                }}
+                                            />
                                         </div>
                                     );
                                 }
                                 return (
-                                    <XPostCard
-                                        key={post.id}
-                                        post={post}
-                                        currentUserId={currentUserId || undefined}
-                                        userLocation={location}
-                                        onLike={() => handleLike(post)}
-                                        onComment={() => openPostDetails(post.id)}
-                                        onShare={() => handleShare(post)}
-                                        onSave={() => handleSave(post)}
-                                        onEdit={() => handleEditPost(post)}
-                                        onDelete={() => setDeletingPostId(post.id)}
-                                        onReport={(id) => setReportingPostId(id)}
-                                        onPin={(id) => setPinningPostId(id)}
-                                        onEmergencyAction={(action) => handleEmergencyAction(post, action)}
-                                        onCardClick={() => openPostDetails(post.id)}
-                                    />
+                                    <div key={post.id} className="w-full md:snap-center" data-comment-anchor={`post-${post.id}`}>
+                                        <XPostCard
+                                            post={post}
+                                            currentUserId={currentUserId || undefined}
+                                            userLocation={location}
+                                            onLike={() => handleLike(post)}
+                                            onComment={() => {
+                                                const el = document.querySelector(`[data-comment-anchor="post-${post.id}"]`) as HTMLElement | null;
+                                                openCommentsFromElement({ kind: 'post', id: post.id }, el);
+                                            }}
+                                            onShare={() => handleShare(post)}
+                                            onSave={() => handleSave(post)}
+                                            onEdit={() => handleEditPost(post)}
+                                            onDelete={() => setDeletingPostId(post.id)}
+                                            onReport={(id) => setReportingPostId(id)}
+                                            onPin={(id) => setPinningPostId(id)}
+                                            onEmergencyAction={(action) => handleEmergencyAction(post, action)}
+                                            onCardClick={() => openPostDetails(post.id)}
+                                        />
+                                    </div>
                                 );
                             })}
                         </div>
@@ -546,6 +641,16 @@ function XFeedInner() {
                 postId={selectedPostId}
                 isOpen={isPostDetailsOpen}
                 onClose={() => setIsPostDetailsOpen(false)}
+            />
+
+            <FeedCommentsSheet
+                isOpen={!!commentsTarget}
+                target={commentsTarget}
+                desktopAnchor={commentsAnchor}
+                onClose={() => {
+                    setCommentsTarget(null);
+                    setCommentsAnchor(null);
+                }}
             />
 
             {/* Report Modal */}

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Lint runner that always exits with 0 (for CI/CD)
+// Lint runner — exits non-zero when ESLint reports errors
 import { execSync } from "child_process";
 
 console.log("Running ESLint...\n");
@@ -7,10 +7,8 @@ console.log("Running ESLint...\n");
 try {
   execSync("eslint .", { stdio: "inherit" });
   console.log("\n✅ Lint check passed!");
+  process.exit(0);
 } catch {
-  // Lint found issues but we don't want to fail the build
-  console.log("\n⚠️  Lint warnings/errors found but not blocking deployment");
-  console.log("Run `pnpm run lint:strict` to see strict lint enforcement\n");
+  console.log("\n⚠️  Lint found issues — fix errors above (or run `pnpm run lint:strict`).");
+  process.exit(1);
 }
-
-process.exit(0);

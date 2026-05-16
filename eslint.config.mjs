@@ -9,8 +9,12 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".next-*/**",
     "out/**",
     "build/**",
+    "dist/**",
+    "coverage/**",
+    "node_modules/**",
     "next-env.d.ts",
     // Generated PWA files - should not be linted
     "public/sw.js",

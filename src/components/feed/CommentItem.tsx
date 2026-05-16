@@ -69,13 +69,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                         </Link>
                         <Link
                             href={`/profile/${username}`}
-                            className="text-[14px] hover:underline truncate max-w-[100px] sm:max-w-none"
-                            style={{ color: 'var(--neu-text-muted)' }}
+                            className="max-w-[100px] truncate text-[14px] text-[var(--neu-text-secondary)] hover:underline sm:max-w-none"
                         >
                             @{username}
                         </Link>
-                        <span style={{ color: 'var(--neu-text-muted)' }}>·</span>
-                        <span className="text-[14px] hover:underline cursor-pointer" style={{ color: 'var(--neu-text-muted)' }}>
+                        <span className="text-[var(--neu-text-muted)]">·</span>
+                        <span className="cursor-pointer text-[14px] text-[var(--neu-text-muted)] hover:underline">
                             {formatTimeAgo(comment.createdAt)}
                         </span>
                     </div>
@@ -83,8 +82,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                     {isAuthor && (
                         <button
                             onClick={handleDelete}
-                            className="hover:text-red-400 transition-colors p-1.5 rounded-full hover:bg-red-400/10"
-                            style={{ color: 'var(--neu-text-muted)' }}
+                            className="rounded-full p-1.5 text-[var(--neu-text-muted)] transition-colors hover:bg-red-400/10 hover:text-red-600 dark:hover:text-red-300"
                             title="Delete comment"
                         >
                             <span className="material-symbols-outlined text-sm">delete</span>
@@ -93,7 +91,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                 </div>
 
                 {/* Comment Body */}
-                <div className="text-[15px] leading-normal mt-0.5 whitespace-pre-wrap break-words" style={{ color: 'var(--neu-text)' }}>
+                <div className="mt-0.5 whitespace-pre-wrap break-words text-[15px] leading-normal text-[var(--neu-text)]">
                     {comment.body}
                 </div>
 
@@ -116,10 +114,10 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                 )}
 
                 {/* Actions Toolbar */}
-                <div className="flex items-center gap-6 mt-3" style={{ color: 'var(--neu-text-muted)' }}>
+                <div className="mt-3 flex items-center gap-6 text-[var(--neu-text-muted)]">
                     <button
                         onClick={handleLike}
-                        className={`flex items-center gap-2 group transition-colors ${comment.isLiked ? 'text-pink-400' : 'hover:text-pink-400'}`}
+                        className={`group flex items-center gap-2 transition-colors ${comment.isLiked ? 'text-pink-500 dark:text-pink-400' : 'hover:text-pink-500 dark:hover:text-pink-400'}`}
                     >
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center group-hover:bg-pink-400/10 transition-colors`}>
                             <span className={`material-symbols-outlined text-[18px] ${comment.isLiked ? 'fill-1' : ''}`}>favorite</span>
@@ -129,7 +127,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
 
                     <button
                         onClick={() => setIsReplying(!isReplying)}
-                        className={`flex items-center gap-2 group transition-colors ${isReplying ? 'text-primary' : 'hover:text-primary'}`}
+                        className={`group flex items-center gap-2 transition-colors ${isReplying ? 'text-primary' : 'hover:text-primary'}`}
                     >
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center group-hover:bg-primary/10 transition-colors">
                             <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
@@ -137,7 +135,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                         <span className="text-xs font-medium">Reply</span>
                     </button>
 
-                    <button className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors group">
+                    <button className="group flex h-8 w-8 items-center justify-center rounded-xl transition-colors hover:bg-primary/10 hover:text-primary">
                         <span className="material-symbols-outlined text-[18px]">share</span>
                     </button>
                 </div>

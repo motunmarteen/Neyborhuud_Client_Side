@@ -101,6 +101,7 @@ export function useApplyForJob() {
       resume?: File;
     }) => jobsService.applyForJob(jobId, coverLetter, resume),
     onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["feed-discovery"] });
       queryClient.invalidateQueries({
         queryKey: ["jobs", "detail", variables.jobId],
       });
@@ -200,6 +201,7 @@ export function useSaveJob() {
     mutationFn: ({ jobId, saved }: { jobId: string; saved: boolean }) =>
       saved ? jobsService.unsaveJob(jobId) : jobsService.saveJob(jobId),
     onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["feed-discovery"] });
       queryClient.invalidateQueries({
         queryKey: ["jobs", "detail", variables.jobId],
       });

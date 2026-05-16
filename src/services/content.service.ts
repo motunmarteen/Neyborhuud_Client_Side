@@ -20,6 +20,14 @@ import {
  * API sends: id/_id, content, body, title, mediaUrls, authorId, likesCount, commentsCount, etc.
  */
 function normalizeFeedItem(item: any): Post {
+  const toCount = (...values: Array<unknown>) => {
+    for (const value of values) {
+      const num =
+        typeof value === "string" ? Number(value) : typeof value === "number" ? value : NaN;
+      if (Number.isFinite(num)) return num;
+    }
+    return 0;
+  };
   const authorId = item?.authorId ?? item?.author;
   const fullName = [authorId?.firstName, authorId?.lastName]
     .filter(Boolean)
@@ -40,10 +48,16 @@ function normalizeFeedItem(item: any): Post {
         }
       : ({} as Post["author"]),
     media: item?.mediaUrls ?? item?.media,
-    likes: item?.likesCount ?? item?.likes ?? 0,
-    comments: item?.commentsCount ?? item?.comments ?? 0,
-    shares: item?.sharesCount ?? item?.shares ?? 0,
-    views: item?.viewsCount ?? item?.views ?? 0,
+    likes: toCount(item?.likesCount, item?.likeCount, item?.likes, item?.engagement?.likesCount),
+    comments: toCount(
+      item?.commentsCount,
+      item?.commentCount,
+      item?.comments,
+      item?.engagement?.commentsCount,
+      item?.metadata?.commentsCount,
+    ),
+    shares: toCount(item?.sharesCount, item?.shareCount, item?.shares),
+    views: toCount(item?.viewsCount, item?.viewCount, item?.views),
     isLiked: item?.isLiked,
     isSaved: item?.isSaved,
     isAcknowledged: item?.isAcknowledged,
