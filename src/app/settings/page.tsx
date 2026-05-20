@@ -267,9 +267,8 @@ export default function SettingsPage() {
     }, []);
 
     useEffect(() => {
-        if (activeTab !== 'account') return;
         void refreshAccountProfile();
-    }, [activeTab, refreshAccountProfile]);
+    }, [refreshAccountProfile]);
 
     const handleConsentToggle = async (type: ConsentType, granted: boolean) => {
         if (type === 'data_processing' && !granted) {
