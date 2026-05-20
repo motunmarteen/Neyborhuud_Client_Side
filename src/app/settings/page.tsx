@@ -12,6 +12,7 @@ import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
+import { isAdminUser } from '@/lib/adminAccess';
 
 function latestForType(
     rows: UserConsentRecord[],
@@ -521,9 +522,9 @@ export default function SettingsPage() {
             <div className="max-w-md mx-auto px-6 py-6">
                 {/* Email Verification Banner */}
                 {!emailVerified && (
-                    <div className="mb-6 p-4 rounded-2xl bg-yellow-500/10 border border-yellow-500/20">
+                    <div className="mb-6 p-4 rounded-2xl bg-primary/10 border border-yellow-500/20">
                         <div className="flex items-start gap-3">
-                            <i className="bi bi-exclamation-triangle text-yellow-500 text-lg mt-0.5"></i>
+                            <i className="bi bi-exclamation-triangle text-primary text-lg mt-0.5"></i>
                             <div className="flex-1">
                                 <p className="text-sm font-bold text-charcoal mb-1">
                                     Verify Your Email
@@ -771,7 +772,7 @@ export default function SettingsPage() {
                                 className="flex items-center justify-between p-3 rounded-xl hover:bg-charcoal/5 transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined text-[20px] text-red-500">block</span>
+                                    <span className="material-symbols-outlined text-[20px] text-brand-red">block</span>
                                     <div>
                                         <span className="text-sm font-bold text-charcoal block">Manage Blocked Users</span>
                                         <span className="text-[10px] text-charcoal/50">View and unblock NeyburHs you&apos;ve blocked</span>
@@ -956,7 +957,7 @@ export default function SettingsPage() {
                                 as referral codes — see Invite NeyburHs below.
                             </p>
                             {usernameChangePolicy && !usernameChangePolicy.canChangeUsername && usernameChangePolicy.nextUsernameChangeAt ? (
-                                <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
+                                <p className="text-xs text-amber-700 dark:text-primary mb-3">
                                     Next change allowed:{' '}
                                     {new Date(usernameChangePolicy.nextUsernameChangeAt).toLocaleString()}
                                 </p>
@@ -1134,7 +1135,7 @@ export default function SettingsPage() {
                                             {emailVerified ? (
                                                 <i className="bi bi-patch-check-fill text-primary text-sm"></i>
                                             ) : (
-                                                <i className="bi bi-exclamation-circle text-yellow-500 text-sm"></i>
+                                                <i className="bi bi-exclamation-circle text-primary text-sm"></i>
                                             )}
                                         </div>
                                     </div>
@@ -1153,6 +1154,19 @@ export default function SettingsPage() {
                             <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
                                 Location &amp; Accessibility
                             </h2>
+                            <Link
+                                href="/settings/places"
+                                className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-[18px] text-charcoal/40 group-hover:text-primary transition-colors">explore</span>
+                                    <div>
+                                        <span className="text-sm font-bold text-charcoal block">My places</span>
+                                        <span className="text-[10px] text-charcoal/40">Home, work, chill spots &amp; more</span>
+                                    </div>
+                                </div>
+                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                            </Link>
                             <Link
                                 href="/settings/location"
                                 className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
@@ -1200,6 +1214,19 @@ export default function SettingsPage() {
                             <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
                                 Security
                             </h2>
+
+                            {isAdminUser(user) && (
+                                <Link
+                                    href="/admin"
+                                    className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <i className="bi bi-shield-check text-emerald-600 group-hover:text-brand-blue transition-colors"></i>
+                                        <span className="text-sm font-bold text-charcoal">Admin Panel</span>
+                                    </div>
+                                    <i className="bi bi-chevron-right text-charcoal/20"></i>
+                                </Link>
+                            )}
                             
                             <Link 
                                 href="/settings/password"

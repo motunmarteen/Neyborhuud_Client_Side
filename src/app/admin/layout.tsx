@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 const adminNavItems = [
   { href: '/admin',         icon: 'dashboard',      label: 'Dashboard' },
@@ -16,31 +16,35 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading } = useAuth();
+  const { hasAdminAccess, isChecking, isAuthenticated } = useAdminAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && (!user || (user.role !== 'admin' && user.role !== 'super_admin'))) {
+    if (isChecking) return;
+    if (!isAuthenticated) {
+      router.replace('/login?next=/admin');
+      return;
+    }
+    if (!hasAdminAccess) {
       router.replace('/feed');
     }
-  }, [user, isLoading, router]);
+  }, [isChecking, isAuthenticated, hasAdminAccess, router]);
 
-  // Show nothing while checking auth
-  if (isLoading || !user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+  if (isChecking || !hasAdminAccess) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#0f0f1e]">
+      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-brand-black">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+        <p className="text-xs text-white/40">Verifying admin access…</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#0f0f1e] text-white">
-      {/* Admin sidebar */}
+    <div className="flex h-screen w-full overflow-hidden bg-brand-black text-white">
       <aside className="hidden w-56 shrink-0 flex-col border-r border-white/10 bg-[#13132a] lg:flex">
         <div className="flex h-16 items-center gap-2 border-b border-white/10 px-5">
-          <span className="material-symbols-outlined text-[20px] text-emerald-400">admin_panel_settings</span>
+          <span className="material-symbols-outlined text-[20px] text-primary">admin_panel_settings</span>
           <span className="text-sm font-black uppercase tracking-widest text-white">Admin</span>
         </div>
         <nav className="flex-1 space-y-1 px-3 py-4">
@@ -54,7 +58,7 @@ export default function AdminLayout({
                 href={item.href}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
                   active
-                    ? 'bg-emerald-600/20 text-emerald-300'
+                    ? 'bg-emerald-600/20 text-primary'
                     : 'text-white/60 hover:bg-white/5 hover:text-white'
                 }`}
               >
@@ -75,11 +79,9 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile top bar */}
         <div className="flex h-14 items-center gap-3 border-b border-white/10 bg-[#13132a] px-4 lg:hidden">
-          <span className="material-symbols-outlined text-emerald-400">admin_panel_settings</span>
+          <span className="material-symbols-outlined text-primary">admin_panel_settings</span>
           <span className="text-sm font-black uppercase tracking-widest">Admin</span>
           <div className="ml-auto flex gap-1">
             {adminNavItems.map((item) => (
@@ -88,7 +90,7 @@ export default function AdminLayout({
                 href={item.href}
                 className={`flex items-center justify-center rounded-lg p-2 transition-colors ${
                   (item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href))
-                    ? 'bg-emerald-600/20 text-emerald-300'
+                    ? 'bg-emerald-600/20 text-primary'
                     : 'text-white/50 hover:text-white'
                 }`}
               >

@@ -17,6 +17,7 @@ export function useAuth() {
   const {
     data: user,
     isLoading,
+    isFetching,
     error,
   } = useQuery({
     queryKey: ["currentUser"],
@@ -45,8 +46,9 @@ export function useAuth() {
     },
     enabled: apiClient.isAuthenticated(),
     retry: false,
-    staleTime: 60_000, // re-fetch after 1 min so role changes propagate
-    /** Instant id for gated UI (Offer/Chat) before /profile/me returns */
+    staleTime: 60_000,
+    refetchOnMount: "always",
+    /** Instant id for gated UI — admin routes must wait for isFetching (see admin/layout). */
     placeholderData: () =>
       apiClient.isAuthenticated() ? authService.getCachedUser() ?? undefined : undefined,
   });
@@ -60,10 +62,9 @@ export function useAuth() {
       identifier: string;
       password: string;
     }) => authService.login(identifier, password),
-    onSuccess: (data) => {
-      if (data.data) {
-        queryClient.setQueryData(["currentUser"], data.data.user);
-      }
+    onSuccess: async () => {
+      // Always refetch /profile/me so role/isAdmin from MongoDB is current (login payload may omit them).
+      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
     onError: handleApiError,
   });
@@ -149,8 +150,9 @@ export function useAuth() {
     // State
     user,
     isLoading,
+    isFetching,
     error,
-    isAuthenticated: !!user,
+    isAuthenticated: apiClient.isAuthenticated(),
 
     // Actions
     login: loginMutation.mutateAsync,

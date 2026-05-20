@@ -324,15 +324,14 @@ class ApiClient {
   }
 }
 
-// Get API base URL from environment
+// Get API base URL from environment (must match @/lib/api — EC2 production API)
 const getApiBaseUrl = (): string => {
   const envUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
   if (envUrl && envUrl !== "undefined") {
     return envUrl;
   }
-  // Default to production URL
-  return "https://neyborhuud-serverside.onrender.com/api/v1";
+  return "https://api.neyborhuud.com/api/v1";
 };
 
 // Export singleton instance
