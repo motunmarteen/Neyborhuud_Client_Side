@@ -143,7 +143,7 @@ export function GossipCard({ post, onComment }: GossipCardProps) {
                     icon="favorite"
                     count={post.likeCount || undefined}
                     active={isLiked}
-                    activeIconClass="text-pink-300"
+                    activeIconClass="text-brand-blue"
                     filled
                     onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
                 />
@@ -184,8 +184,8 @@ export function GossipCard({ post, onComment }: GossipCardProps) {
                         </span>
                         {post.slangEnrichment?.hasSlang && (
                             <span
-                                className="text-[9px] px-1.5 py-[3px] rounded-full font-bold text-green-400"
-                                style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.22)' }}
+                                className="text-[9px] px-1.5 py-[3px] rounded-full font-bold text-primary"
+                                style={{ background: 'rgba(0,212,49,0.15)', border: '1px solid rgba(0,212,49,0.22)' }}
                             >
                                 🇳🇬
                             </span>

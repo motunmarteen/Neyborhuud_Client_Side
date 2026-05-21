@@ -7,13 +7,13 @@ import { Event } from "@/types/api";
 import { prefetchEventDetail } from "@/hooks/useEvents";
 
 const TYPE_COLORS: Record<Event["type"], string> = {
-  community: "bg-blue-500/20 text-blue-400",
-  social: "bg-pink-500/20 text-pink-400",
-  sports: "bg-orange-500/20 text-orange-400",
-  cultural: "bg-purple-500/20 text-purple-400",
-  educational: "bg-teal-500/20 text-teal-400",
-  business: "bg-green-500/20 text-green-400",
-  other: "bg-gray-500/20 text-gray-400",
+  community: "bg-brand-blue/20 text-brand-blue",
+  social: "bg-brand-blue/20 text-pink-400",
+  sports: "bg-brand-red/20 text-brand-red",
+  cultural: "bg-brand-blue/20 text-brand-blue",
+  educational: "bg-brand-green-dark/20 text-teal-400",
+  business: "bg-primary/20 text-primary",
+  other: "bg-brand-surface/20 text-[var(--neu-text-muted)]",
 };
 
 function formatEventDate(d: string) {
@@ -57,14 +57,14 @@ export default function EventCard({ event, onAttend, attendPending, variant = "i
       ? "radial-gradient(circle at 20% 22%, rgba(236,72,153,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(168,85,247,0.20), transparent 40%)"
       : event.type === "cultural"
         ? "radial-gradient(circle at 20% 22%, rgba(245,158,11,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(217,70,239,0.20), transparent 40%)"
-        : "radial-gradient(circle at 20% 22%, rgba(16,185,129,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(59,130,246,0.20), transparent 40%)";
+        : "radial-gradient(circle at 20% 22%, rgba(0,212,49,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(59,130,246,0.20), transparent 40%)";
 
   const isFeedVariant = variant === "feed";
 
   return (
     <article
       className={`feed-post-card group relative mx-auto w-full overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${
-        isCancelled ? "ring-2 ring-red-500/40" : ""
+        isCancelled ? "ring-2 ring-brand-red/40" : ""
       } ${isFeedVariant ? "min-h-[260px] h-[min(52vh,420px)] max-h-[420px] sm:max-h-[440px]" : ""}`}
       style={isFeedVariant ? undefined : { height: "90vh", minHeight: "90vh" }}
     >
@@ -101,15 +101,15 @@ export default function EventCard({ event, onAttend, attendPending, variant = "i
               {event.type}
             </span>
             {event.isFree ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/25 text-green-200 font-bold">Free</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-primary font-bold">Free</span>
             ) : event.ticketPrice != null ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/25 text-amber-200 font-bold">₦{event.ticketPrice.toLocaleString()}</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-white/90 font-bold">₦{event.ticketPrice.toLocaleString()}</span>
             ) : null}
             {(event as any).isBoosted && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/90 text-black font-black uppercase tracking-wide">Boosted</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/90 text-black font-black uppercase tracking-wide">Boosted</span>
             )}
             {isCancelled && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/35 text-red-100 font-bold uppercase tracking-wide">Cancelled</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-red/35 text-red-100 font-bold uppercase tracking-wide">Cancelled</span>
             )}
           </div>
           <button
@@ -147,7 +147,7 @@ export default function EventCard({ event, onAttend, attendPending, variant = "i
             disabled={attendPending}
             className={`rounded-full px-3.5 py-1.5 text-xs font-bold border backdrop-blur-md transition-all disabled:opacity-50 ${
               event.isAttending
-                ? "bg-green-500/30 border-green-400/40 text-green-100"
+                ? "bg-primary/30 border-brand-green-dark/40 text-green-100"
                 : "bg-white/10 border-white/20 text-white/85 hover:bg-white/15"
             }`}
           >

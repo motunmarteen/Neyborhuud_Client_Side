@@ -15,13 +15,13 @@ export default function AchievementCard({ achievement }: Props) {
   const canClaim = achievement.completed && !(achievement as any).claimedAt;
 
   return (
-    <div className="bg-[#1a1a2e] border border-gray-800 rounded-xl p-4">
+    <div className="bg-brand-black border border-black/[0.08] rounded-xl p-4">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span
               className={`material-symbols-outlined text-[18px] ${
-                achievement.completed ? "text-yellow-400" : "text-gray-600"
+                achievement.completed ? "text-primary400" : "text-[var(--neu-text-secondary)]"
               }`}
               style={{ fontVariationSettings: achievement.completed ? "'FILL' 1" : "'FILL' 0" }}
             >
@@ -29,22 +29,22 @@ export default function AchievementCard({ achievement }: Props) {
             </span>
             <p className="text-sm font-semibold text-white truncate">{achievement.name}</p>
           </div>
-          <p className="text-xs text-gray-400 mt-1 ml-6">{achievement.description}</p>
+          <p className="text-xs text-[var(--neu-text-muted)] mt-1 ml-6">{achievement.description}</p>
         </div>
 
         {/* Reward label */}
-        <span className="shrink-0 text-xs font-bold text-green-400 bg-green-500/10 border border-green-500/20 rounded-full px-2 py-0.5">
+        <span className="shrink-0 text-xs font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">
           +{achievement.reward?.points ?? 0} pts
         </span>
       </div>
 
       {/* Progress bar */}
       <div className="mt-3">
-        <div className="flex justify-between text-[10px] text-gray-500 mb-1">
+        <div className="flex justify-between text-[10px] text-[var(--neu-text-muted)] mb-1">
           <span>{achievement.progress} / {achievement.goal}</span>
           <span>{pct}%</span>
         </div>
-        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-2 bg-brand-black rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               achievement.completed
@@ -61,14 +61,14 @@ export default function AchievementCard({ achievement }: Props) {
         <button
           onClick={() => claim.mutate(achievement.id)}
           disabled={claim.isPending}
-          className="mt-3 w-full py-2 rounded-lg bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold transition-colors disabled:opacity-50"
+          className="mt-3 w-full py-2 rounded-lg bg-primary hover:bg-primary400 text-black text-sm font-bold transition-colors disabled:opacity-50"
         >
           {claim.isPending ? "Claiming…" : "Claim Reward 🎉"}
         </button>
       )}
 
       {(achievement as any).claimedAt && (
-        <p className="mt-2 text-center text-[11px] text-green-400">✓ Reward claimed</p>
+        <p className="mt-2 text-center text-[11px] text-primary">✓ Reward claimed</p>
       )}
     </div>
   );

@@ -40,7 +40,7 @@ export default function SavedPage() {
               </div>
             ) : posts.length === 0 ? (
               <div className="flex flex-col items-center gap-4 py-16">
-                <span className="material-symbols-outlined text-[64px] text-gray-300">bookmark_border</span>
+                <span className="material-symbols-outlined text-[64px] text-[var(--neu-text-muted)]">bookmark_border</span>
                 <p className="text-lg font-medium" style={{ color: 'var(--neu-text-muted)' }}>No saved posts yet</p>
                 <p className="text-sm text-center max-w-xs" style={{ color: 'var(--neu-text-muted)' }}>
                   Bookmark posts to find them here later

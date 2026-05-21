@@ -134,14 +134,14 @@ export default function ForgotPasswordPage() {
                                 <div className={`h-1.5 ${isError ? 'bg-brand-red' : 'bg-gradient-to-r from-brand-blue via-primary to-brand-amber'}`} aria-hidden />
                                 <div className="p-4">
                                     <div className="mb-4 flex items-center justify-between gap-3">
-                                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-[0_16px_34px_rgba(0,135,81,0.25)] ${isError ? 'bg-brand-red' : isSent ? 'bg-primary' : 'bg-brand-blue'}`}>
+                                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-[0_16px_34px_rgba(0,111,53,0.25)] ${isError ? 'bg-brand-red' : isSent ? 'bg-primary' : 'bg-brand-blue'}`}>
                                             <i className={`bi ${isError ? 'bi-exclamation-triangle-fill' : isSent ? 'bi-envelope-check-fill' : 'bi-key-fill'} text-xl`} aria-hidden />
                                         </div>
-                                        <div className="rounded-full border border-charcoal/5 bg-[#F8FAFC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">NeyborHuud</div>
+                                        <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">NeyborHuud</div>
                                     </div>
                                     <p className={`mb-1 text-[9px] font-black uppercase tracking-[0.24em] ${isError ? 'text-brand-red' : 'text-primary'}`}>{isError ? 'Request failed' : isSent ? 'Inbox next' : 'Account recovery'}</p>
-                                    <h1 className="truncate text-2xl font-black tracking-tighter text-[#1A1A2E]">{isError ? 'Try again' : isSent ? 'Check your inbox' : 'Reset password'}</h1>
-                                    <p className="truncate text-[11px] font-semibold text-[#64748B]">{email || 'Use your account email'}</p>
+                                    <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">{isError ? 'Try again' : isSent ? 'Check your inbox' : 'Reset password'}</h1>
+                                    <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{email || 'Use your account email'}</p>
                                 </div>
                             </div>
                         </div>
@@ -153,7 +153,7 @@ export default function ForgotPasswordPage() {
                             {step === 'form' && (
                                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                                     <PremiumInput label="Email Address" type="email" icon="bi-envelope" placeholder="nancy@example.com" value={email} onChange={event => setEmail(event.target.value)} validationStatus={emailValidation.status} error={emailValidation.status === 'invalid' ? 'Please enter a valid email' : undefined} />
-                                    <button type="submit" disabled={loading || !emailValidation.isFormatValid} className={`flex h-[52px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${!loading && emailValidation.isFormatValid ? 'bg-brand-blue text-white shadow-[0_18px_34px_rgba(13,110,253,0.28)] active:scale-[0.98]' : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'}`}>
+                                    <button type="submit" disabled={loading || !emailValidation.isFormatValid} className="btn-glass-primary h-[52px] w-full gap-2">
                                         {loading ? <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" aria-hidden /> : <i className="bi bi-send" aria-hidden />}
                                         Send reset link
                                     </button>
@@ -164,11 +164,11 @@ export default function ForgotPasswordPage() {
                                 <div className="flex flex-col gap-4">
                                     <div className="rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-primary">If an account exists for {email}, a reset link has been sent.</div>
                                     <div className="grid grid-cols-[0.9fr_1.1fr] gap-3">
-                                        <button type="button" onClick={handleResend} disabled={resendCooldown > 0 || loading} className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${resendCooldown > 0 || loading ? 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]' : 'border border-charcoal/5 bg-white text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)]'}`}>
+                                        <button type="button" onClick={handleResend} disabled={resendCooldown > 0 || loading} className="btn-secondary h-[50px] w-full gap-2">
                                             {loading ? <i className="bi bi-arrow-repeat animate-spin" aria-hidden /> : <i className="bi bi-send" aria-hidden />}
                                             {loading ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}
                                         </button>
-                                        <button type="button" onClick={() => router.push('/login')} className="flex h-[50px] items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] transition-all active:scale-[0.98]">
+                                        <button type="button" onClick={() => router.push('/login')} className="btn-glass-primary h-[50px] w-full gap-2">
                                             Login
                                             <i className="bi bi-arrow-right" aria-hidden />
                                         </button>
@@ -179,7 +179,7 @@ export default function ForgotPasswordPage() {
                             {step === 'error' && (
                                 <div className="flex flex-col gap-4">
                                     <div className="rounded-2xl border border-brand-red/15 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-brand-red">{errorMessage || 'We could not process your request. Please try again.'}</div>
-                                    <button type="button" onClick={() => setStep('form')} className="flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-brand-blue px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_34px_rgba(13,110,253,0.28)] transition-all active:scale-[0.98]">
+                                    <button type="button" onClick={() => setStep('form')} className="btn-glass-primary h-[52px] w-full gap-2">
                                         Try again
                                         <i className="bi bi-arrow-right" aria-hidden />
                                     </button>

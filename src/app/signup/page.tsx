@@ -461,7 +461,7 @@ function SignupPageContent() {
                 <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
                     <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
                         <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-white shadow-[0_12px_24px_rgba(0,135,81,0.22)]">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-white shadow-[0_12px_24px_rgba(0,111,53,0.22)]">
                                 <i className="bi bi-envelope-check-fill text-sm" aria-hidden />
                             </div>
                             <span className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">Verify email</span>
@@ -492,17 +492,17 @@ function SignupPageContent() {
                                     <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
                                     <div className="p-4">
                                         <div className="mb-4 flex items-center justify-between gap-3">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_16px_34px_rgba(0,135,81,0.3)]">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_16px_34px_rgba(0,111,53,0.3)]">
                                                 <i className="bi bi-shield-check text-xl" aria-hidden />
                                             </div>
-                                            <div className="rounded-full border border-charcoal/5 bg-[#F8FAFC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
+                                            <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
                                                 One-time code
                                             </div>
                                         </div>
                                         <p className="mb-1 text-[9px] font-black uppercase tracking-[0.24em] text-primary">{verificationError ? 'Delivery needs attention' : 'Inbox secured'}</p>
-                                        <h1 className="truncate text-2xl font-black tracking-tighter text-[#1A1A2E]">Check your email</h1>
-                                        <p className="truncate text-[11px] font-semibold text-[#64748B]">{formData.email}</p>
-                                        <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[#475569]">
+                                        <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">Check your email</h1>
+                                        <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{formData.email}</p>
+                                        <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[var(--neu-text-secondary)]">
                                             <i className="bi bi-geo-alt-fill text-primary" aria-hidden />
                                             <span className="truncate">{huudName}</span>
                                         </div>
@@ -542,7 +542,7 @@ function SignupPageContent() {
                                         type="button"
                                         onClick={handleResendVerification}
                                         disabled={resendCooldown > 0 || isResending}
-                                        className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${resendCooldown > 0 || isResending ? 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]' : 'border border-charcoal/5 bg-white text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)]'}`}
+                                        className="btn-secondary h-[50px] w-full gap-2"
                                     >
                                         <i className={`bi ${isResending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
                                         {isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}
@@ -551,7 +551,7 @@ function SignupPageContent() {
                                         type="button"
                                         onClick={() => handleVerifyCode()}
                                         disabled={verificationCode.length !== 6 || isVerifying}
-                                        className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${verificationCode.length === 6 && !isVerifying ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] active:scale-[0.98]' : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'}`}
+                                        className="btn-glass-primary h-[50px] w-full gap-2"
                                     >
                                         {isVerifying ? (
                                             <>
@@ -590,14 +590,14 @@ function SignupPageContent() {
                                 <div className="absolute right-8 top-1/2 h-2 w-32 -rotate-12 rounded-full bg-brand-amber/18" aria-hidden />
                                 <div className="relative flex h-32 w-32 items-center justify-center rounded-full border border-primary/12 bg-primary/[0.035]">
                                     <div className="absolute h-24 w-24 rounded-full border border-brand-blue/20 bg-brand-blue/[0.04]" aria-hidden />
-                                    <div className="relative flex h-20 w-20 items-center justify-center rounded-[2rem] bg-primary text-white shadow-[0_24px_54px_rgba(0,135,81,0.32)]">
+                                    <div className="relative flex h-20 w-20 items-center justify-center rounded-[2rem] bg-primary text-white shadow-[0_24px_54px_rgba(0,111,53,0.32)]">
                                         <i className="bi bi-person-check-fill text-4xl" aria-hidden />
                                     </div>
                                 </div>
                                 <div className="absolute bottom-5 left-1/2 w-[min(19rem,calc(100%-3rem))] -translate-x-1/2 rounded-2xl border border-white/85 bg-white/[0.9] px-4 py-3 shadow-[0_18px_40px_rgba(26,26,46,0.12)] backdrop-blur-xl">
                                     <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">Account secured</p>
-                                    <h1 className="truncate text-2xl font-black tracking-tighter text-[#1A1A2E]">Welcome, NeyborHuud</h1>
-                                    <p className="truncate text-[11px] font-semibold text-[#64748B]">{identityHandle} · {huudName}</p>
+                                    <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">Welcome, NeyborHuud</h1>
+                                    <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{identityHandle} · {huudName}</p>
                                 </div>
                             </div>
                         </div>
@@ -605,10 +605,10 @@ function SignupPageContent() {
                         <div className="shrink-0 overflow-hidden rounded-[1.7rem] border border-white/85 bg-white/[0.94] shadow-[0_28px_70px_rgba(26,26,46,0.18)] backdrop-blur-2xl">
                             <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
                             <div className="flex flex-col gap-4 p-4">
-                                <div className="flex items-center justify-between rounded-2xl border border-charcoal/5 bg-[#F8FAFC] px-4 py-3">
+                                <div className="flex items-center justify-between rounded-2xl border border-charcoal/5 bg-brand-surface px-4 py-3">
                                     <div>
                                         <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
-                                        <p className="text-[11px] font-semibold text-[#64748B]">Signup reward unlocked</p>
+                                        <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Signup reward unlocked</p>
                                     </div>
                                     <div className="flex items-center gap-2 text-primary">
                                         <span className="text-3xl font-black leading-none">20</span>
@@ -623,7 +623,7 @@ function SignupPageContent() {
                                         }
                                         router.push('/feed');
                                     }}
-                                    className="flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] transition-all active:scale-[0.98]"
+                                    className="btn-glass-primary h-[52px] w-full gap-2"
                                 >
                                     Enter NeyborHuud
                                     <i className="bi bi-arrow-right" aria-hidden />
@@ -654,7 +654,7 @@ function SignupPageContent() {
                                     if (canOpen) setSignupStage(item.id);
                                 }}
                                 disabled={!canOpen}
-                                className={`flex h-11 items-center justify-center rounded-2xl px-2 transition-all ${isActive ? 'bg-primary text-white shadow-[0_12px_24px_rgba(0,135,81,0.24)]' : 'text-charcoal/45'} ${!canOpen ? 'opacity-40' : ''}`}
+                                className={`flex h-11 items-center justify-center rounded-2xl px-2 transition-all ${isActive ? 'bg-primary text-white shadow-[0_12px_24px_rgba(0,111,53,0.24)]' : 'text-charcoal/45'} ${!canOpen ? 'opacity-40' : ''}`}
                                 aria-label={item.label}
                                 title={item.label}
                             >
@@ -694,7 +694,7 @@ function SignupPageContent() {
                                 <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
                                 <div className="p-3.5">
                                     <div className="mb-3 flex items-center gap-3">
-                                        <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)]">
+                                        <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
                                             <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-primary shadow-md">N</span>
                                             <i className="bi bi-geo-alt-fill text-xl" aria-hidden />
                                         </div>
@@ -704,8 +704,8 @@ function SignupPageContent() {
                                                 <span className="h-1 w-1 rounded-full bg-brand-blue/60" aria-hidden />
                                                 <p className="truncate text-[9px] font-bold uppercase tracking-wider text-brand-blue">{huudSignal}</p>
                                             </div>
-                                            <h2 className="truncate text-[1.35rem] font-black tracking-tighter text-[#1A1A2E]">{huudName}</h2>
-                                            <p className="truncate text-[11px] font-medium text-[#6B7280]">{huudRegion}</p>
+                                            <h2 className="truncate text-[1.35rem] font-black tracking-tighter text-brand-black">{huudName}</h2>
+                                            <p className="truncate text-[11px] font-medium text-[var(--neu-text-muted)]">{huudRegion}</p>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-1 gap-3 min-[390px]:grid-cols-2">
@@ -713,7 +713,7 @@ function SignupPageContent() {
                                             type="button"
                                             onClick={fetchLocation}
                                             disabled={isResolving}
-                                            className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-charcoal/5 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)] transition-all disabled:opacity-40"
+                                            className="btn-secondary h-[50px] w-full gap-2 disabled:opacity-40"
                                         >
                                             <i className={`bi ${isResolving ? 'bi-arrow-repeat animate-spin' : 'bi-broadcast'}`} aria-hidden />
                                             {isResolving ? 'Scanning' : 'Scan Huud'}
@@ -721,7 +721,7 @@ function SignupPageContent() {
                                         <button
                                             type="button"
                                             onClick={() => setSignupStage('identity')}
-                                            className="flex h-[50px] items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_36px_rgba(0,135,81,0.34)] transition-transform active:scale-[0.98]"
+                                            className="btn-glass-primary h-[50px] w-full gap-2"
                                         >
                                             Confirm Huud
                                             <i className="bi bi-arrow-right" aria-hidden />
@@ -746,14 +746,14 @@ function SignupPageContent() {
                                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-purple text-white shadow-[0_16px_34px_rgba(142,111,191,0.3)]">
                                                     <i className="bi bi-person-badge text-xl" aria-hidden />
                                                 </div>
-                                                <div className="rounded-full border border-charcoal/5 bg-[#F8FAFC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-brand-purple">
+                                                <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-brand-purple">
                                                     NeyborHuud ID
                                                 </div>
                                             </div>
                                             <p className="mb-1 text-[9px] font-black uppercase tracking-[0.24em] text-primary">{identityStatus}</p>
-                                            <h2 className="truncate text-2xl font-black tracking-tighter text-[#1A1A2E]">{identityHandle}</h2>
-                                            <p className="truncate text-[11px] font-semibold text-[#64748B]">{identityEmail}</p>
-                                            <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[#475569]">
+                                            <h2 className="truncate text-2xl font-black tracking-tighter text-brand-black">{identityHandle}</h2>
+                                            <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{identityEmail}</p>
+                                            <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[var(--neu-text-secondary)]">
                                                 <i className="bi bi-geo-alt-fill text-primary" aria-hidden />
                                                 <span className="truncate">{huudName}</span>
                                             </div>
@@ -802,7 +802,7 @@ function SignupPageContent() {
                                         <button
                                             type="button"
                                             onClick={() => setSignupStage('location')}
-                                            className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-charcoal/5 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)] transition-all"
+                                            className="btn-secondary h-[50px] w-full gap-2"
                                         >
                                             <i className="bi bi-arrow-left" aria-hidden />
                                             Huud Map
@@ -811,7 +811,7 @@ function SignupPageContent() {
                                             type="button"
                                             onClick={() => setSignupStage('security')}
                                             disabled={!canContinueIdentity}
-                                            className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${canContinueIdentity ? 'bg-brand-purple text-white shadow-[0_18px_36px_rgba(142,111,191,0.32)] active:scale-[0.98]' : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'}`}
+                                            className="btn-glass-primary h-[50px] w-full gap-2"
                                         >
                                             Reserve ID
                                             <i className="bi bi-arrow-right" aria-hidden />
@@ -831,7 +831,7 @@ function SignupPageContent() {
                                     <div className="absolute inset-x-12 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/24 to-transparent" aria-hidden />
                                     <div className="relative flex h-28 w-28 items-center justify-center rounded-full border border-primary/12 bg-primary/[0.035]">
                                         <div className="absolute h-20 w-20 rounded-full border border-brand-amber/20 bg-brand-amber/[0.04]" aria-hidden />
-                                        <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-primary text-white shadow-[0_22px_48px_rgba(0,135,81,0.32)]">
+                                        <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-primary text-white shadow-[0_22px_48px_rgba(0,111,53,0.32)]">
                                             <i className="bi bi-shield-lock-fill text-3xl" aria-hidden />
                                         </div>
                                     </div>
@@ -839,9 +839,9 @@ function SignupPageContent() {
                                         <div className="flex items-center justify-between gap-3">
                                             <div className="min-w-0">
                                                 <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">{securityStatus}</p>
-                                                <p className="truncate text-[11px] font-semibold text-[#64748B]">{consentStatus}</p>
+                                                <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{consentStatus}</p>
                                             </div>
-                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F8FAFC] text-primary">
+                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-surface text-primary">
                                                 <i className="bi bi-key-fill" aria-hidden />
                                             </div>
                                         </div>
@@ -887,11 +887,11 @@ function SignupPageContent() {
                                                 })
                                             }
                                         />
-                                        <span className="text-[11px] font-medium leading-relaxed text-[#334155]">
-                                            I agree to the <span className="font-black text-brand-blue">Community Rules</span> and <span className="font-black text-brand-blue">Terms of Service</span>, and I have read the <span className="font-black text-brand-blue">Privacy Policy</span>. I consent to the processing of my personal data needed to run my account, including under Nigerian data protection law (<span className="font-black text-[#1A1A2E]">NDPA / NDPR</span>).
+                                        <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
+                                            I agree to the <span className="font-black text-brand-blue">Community Rules</span> and <span className="font-black text-brand-blue">Terms of Service</span>, and I have read the <span className="font-black text-brand-blue">Privacy Policy</span>. I consent to the processing of my personal data needed to run my account, including under Nigerian data protection law (<span className="font-black text-brand-black">NDPA / NDPR</span>).
                                         </span>
                                     </label>
-                                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-charcoal/5 bg-[#F8FAFC] px-3 py-2.5">
+                                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2.5">
                                         <input
                                             type="checkbox"
                                             className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-primary"
@@ -903,7 +903,7 @@ function SignupPageContent() {
                                                 })
                                             }
                                         />
-                                        <span className="text-[11px] font-medium leading-relaxed text-[#475569]">
+                                        <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
                                             Product updates, offers, analytics, and limited partner use as described in the Privacy Policy.
                                         </span>
                                     </label>
@@ -913,7 +913,7 @@ function SignupPageContent() {
                                     <button
                                         type="button"
                                         onClick={() => setSignupStage('identity')}
-                                        className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-charcoal/5 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)] transition-all"
+                                        className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-charcoal/5 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-brand-black shadow-[0_12px_30px_rgba(26,26,46,0.1)] transition-all"
                                     >
                                         <i className="bi bi-arrow-left" aria-hidden />
                                         NeyborHuud ID
@@ -921,7 +921,7 @@ function SignupPageContent() {
                                     <button
                                         type="submit"
                                         disabled={!canSubmit}
-                                        className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${canSubmit ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] active:scale-[0.98]' : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'}`}
+                                        className="btn-glass-primary h-[50px] w-full gap-2"
                                     >
                                         {loading ? (
                                             <>

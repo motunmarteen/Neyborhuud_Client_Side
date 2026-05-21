@@ -73,8 +73,8 @@ export function BottomNav({ hidden }: BottomNavProps) {
   const navItemClass = (active: boolean) =>
     `relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-2xl transition-all duration-200 ease-out touch-manipulation ${
       active
-        ? 'text-primary scale-105 bg-primary/12 shadow-[0_0_20px_rgba(0,212,49,0.18)] dark:text-emerald-400 dark:bg-emerald-500/15 dark:shadow-[0_0_20px_rgba(16,185,129,0.12)]'
-        : 'text-[#3D5A3E] hover:text-brand-black hover:bg-black/[0.04] dark:text-white/55 dark:hover:text-white/85 dark:hover:bg-white/[0.06]'
+        ? 'text-primary scale-105 bg-primary/12 shadow-[0_0_20px_rgba(0,212,49,0.18)] dark:text-primary dark:bg-primary/15 dark:shadow-[0_0_20px_rgba(0,212,49,0.12)]'
+        : 'text-brand-green-dark/70 hover:text-brand-black hover:bg-black/[0.04] dark:text-white/55 dark:hover:text-white/85 dark:hover:bg-white/[0.06]'
     }`;
 
   return (
@@ -83,7 +83,7 @@ export function BottomNav({ hidden }: BottomNavProps) {
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="pointer-events-auto mx-3 mb-3 max-w-lg mx-auto rounded-[26px] border border-[var(--border-light)] bg-white/76 px-1.5 py-1 shadow-[0_12px_40px_rgba(0,111,53,0.12),0_0_0_1px_rgba(255,255,255,0.9)_inset] backdrop-blur-2xl dark:border-white/12 dark:bg-[rgba(12,18,24,0.55)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.05)_inset,0_0_48px_-8px_rgba(16,185,129,0.12)]">
+      <div className="pointer-events-auto mx-3 mb-3 max-w-lg mx-auto rounded-[26px] border border-[var(--border-light)] bg-white/76 px-1.5 py-1 shadow-[0_12px_40px_rgba(0,111,53,0.12),0_0_0_1px_rgba(255,255,255,0.9)_inset] backdrop-blur-2xl dark:border-white/12 dark:bg-[rgba(12,18,24,0.55)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.05)_inset,0_0_48px_-8px_rgba(0,212,49,0.12)]">
         <div className="flex h-[52px] items-center justify-around">
         {/* Home */}
         <Link
@@ -120,11 +120,11 @@ export function BottomNav({ hidden }: BottomNavProps) {
         >
           {/* Pulsing ring when active or pending */}
           {(pathname.startsWith('/sos') || pathname.startsWith('/safety') || sos.phase !== 'idle') && (
-            <span className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-red-500/20 animate-ping" />
+            <span className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-brand-red/20 animate-ping" />
           )}
           {/* Steady glow backdrop */}
-          <span className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-red-500/10" />
-          <span className={`material-symbols-outlined text-[30px] text-red-500 relative z-10 ${pathname.startsWith('/sos') || pathname.startsWith('/safety') ? 'fill-1' : ''}`}>sos</span>
+          <span className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-brand-red/10" />
+          <span className={`material-symbols-outlined text-[30px] text-brand-red relative z-10 ${pathname.startsWith('/sos') || pathname.startsWith('/safety') ? 'fill-1' : ''}`}>sos</span>
         </button>
 
         {/* Messages */}
@@ -137,7 +137,7 @@ export function BottomNav({ hidden }: BottomNavProps) {
           <div className="relative">
             <span className={`material-symbols-outlined text-[30px] ${pathname === '/messages' ? 'fill-1' : ''}`}>chat</span>
             {unreadMessages > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-brand-red text-white text-[10px] font-bold flex items-center justify-center">
                 {unreadMessages > 99 ? '99+' : unreadMessages}
               </span>
             )}

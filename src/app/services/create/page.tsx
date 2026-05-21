@@ -30,7 +30,7 @@ export default function CreateServicePage() {
             <div className="flex items-center gap-3 mb-1">
               <button
                 onClick={() => router.back()}
-                className="p-2 rounded-full mod-btn transition-all"
+                className="p-2 rounded-full mod-chip transition-all"
                 style={{ color: "var(--neu-text-muted)" }}
               >
                 <span className="material-symbols-outlined text-[20px]">arrow_back</span>

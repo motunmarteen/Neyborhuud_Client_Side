@@ -27,11 +27,11 @@ export default function MySalesPage() {
         <TopNav />
         <div className="flex flex-1 overflow-hidden">
           <LeftSidebar />
-          <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white p-6">
+          <div className="flex-1 overflow-y-auto bg-brand-black text-white p-6">
             <div className="max-w-4xl mx-auto">
               <div className="animate-pulse space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-32 bg-gray-800 rounded-lg" />
+                  <div key={i} className="h-32 bg-brand-black rounded-lg" />
                 ))}
               </div>
             </div>
@@ -45,16 +45,16 @@ export default function MySalesPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      pending: "bg-yellow-500",
-      accepted: "bg-blue-500",
-      payment_pending: "bg-orange-500",
-      paid: "bg-purple-500",
-      in_transit: "bg-indigo-500",
-      delivered: "bg-teal-500",
-      completed: "bg-green-500",
-      cancelled: "bg-red-500",
+      pending: "bg-primary",
+      accepted: "bg-brand-blue",
+      payment_pending: "bg-brand-red",
+      paid: "bg-brand-blue",
+      in_transit: "bg-brand-blue500",
+      delivered: "bg-brand-green-dark",
+      completed: "bg-primary",
+      cancelled: "bg-brand-red",
     };
-    return colors[status] || "bg-gray-500";
+    return colors[status] || "bg-brand-surface";
   };
 
   return (
@@ -62,41 +62,41 @@ export default function MySalesPage() {
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+        <div className="flex-1 overflow-y-auto bg-brand-black text-white">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4"
+            className="flex items-center gap-2 text-[var(--neu-text-muted)] hover:text-white transition-colors mb-4"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             Back
           </button>
           <div className="flex items-center gap-3 mb-2">
-            <span className="material-symbols-outlined text-green-400 text-3xl">sell</span>
+            <span className="material-symbols-outlined text-primary text-3xl">sell</span>
             <h1 className="text-3xl font-bold">My Sales</h1>
           </div>
-          <p className="text-gray-400 mt-2">Items you're selling</p>
+          <p className="text-[var(--neu-text-muted)] mt-2">Items you're selling</p>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-3 mb-6 flex-wrap">
           <button
             onClick={() => router.push("/marketplace/my-orders")}
-            className="px-5 py-2.5 bg-gray-800/50 hover:bg-gray-700/50 rounded-full transition-all border border-gray-700"
+            className="px-5 py-2.5 bg-brand-black/50 hover:bg-brand-black/50 rounded-full transition-all border border-black/[0.08]"
           >
             My Orders
           </button>
           <button
             onClick={() => router.push("/marketplace/my-sales")}
-            className="px-5 py-2.5 bg-green-500 text-white rounded-full font-semibold"
+            className="px-5 py-2.5 bg-primary text-white rounded-full font-semibold"
           >
             My Sales
           </button>
           <button
             onClick={() => router.push("/marketplace/my-offers")}
-            className="px-5 py-2.5 bg-gray-800/50 hover:bg-gray-700/50 rounded-full transition-all border border-gray-700"
+            className="px-5 py-2.5 bg-brand-black/50 hover:bg-brand-black/50 rounded-full transition-all border border-black/[0.08]"
           >
             My Offers
           </button>
@@ -105,14 +105,14 @@ export default function MySalesPage() {
         {/* Sales List */}
         {sales.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-800/50 flex items-center justify-center">
-              <span className="material-symbols-outlined text-gray-500 text-[48px]">payments</span>
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-brand-black/50 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[var(--neu-text-muted)] text-[48px]">payments</span>
             </div>
             <h3 className="text-xl font-semibold mb-2">No Sales Yet</h3>
-            <p className="text-gray-400 mb-6">You haven't received any purchase requests</p>
+            <p className="text-[var(--neu-text-muted)] mb-6">You haven't received any purchase requests</p>
             <button
               onClick={() => router.push("/marketplace/create")}
-              className="px-6 py-3 bg-green-500 hover:bg-green-600 rounded-full font-semibold transition-all text-white"
+              className="px-6 py-3 bg-primary hover:bg-brand-green-dark rounded-full font-semibold transition-all text-white"
             >
               List an Item
             </button>
@@ -123,11 +123,11 @@ export default function MySalesPage() {
               <div
                 key={order.id}
                 onClick={() => router.push(`/marketplace/orders/${order.id}`)}
-                className="bg-gray-900 rounded-2xl p-5 hover:bg-gray-800 transition-all cursor-pointer border border-gray-800/50"
+                className="bg-brand-black rounded-2xl p-5 hover:bg-brand-black transition-all cursor-pointer border border-black/[0.08]/50"
               >
                 <div className="flex gap-4">
                   {/* Product Image */}
-                  <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-800/50 flex-shrink-0">
+                  <div className="w-24 h-24 rounded-xl overflow-hidden bg-brand-black/50 flex-shrink-0">
                     {order.product?.images?.[0] ? (
                       <img
                         src={order.product.images[0]}
@@ -136,7 +136,7 @@ export default function MySalesPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <span className="material-symbols-outlined text-gray-600 text-[32px]">inventory_2</span>
+                        <span className="material-symbols-outlined text-[var(--neu-text-secondary)] text-[32px]">inventory_2</span>
                       </div>
                     )}
                   </div>
@@ -151,7 +151,7 @@ export default function MySalesPage() {
                       {order.buyer?.username || order.buyer?.firstName || "Unknown"}
                     </p>
                     <div className="flex items-center gap-3 mt-2 flex-wrap">
-                      <span className="text-green-400 font-semibold">
+                      <span className="text-primary font-semibold">
                         ₦{order.amount.toLocaleString()}
                       </span>
                       <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${getStatusColor(order.status)}`}>
@@ -171,7 +171,7 @@ export default function MySalesPage() {
                         e.stopPropagation();
                         router.push(`/messages/${order.conversationId}`);
                       }}
-                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-full text-sm font-semibold transition-all self-center flex items-center gap-2"
+                      className="px-4 py-2 bg-brand-blue hover:bg-blue-600 rounded-full text-sm font-semibold transition-all self-center flex items-center gap-2"
                     >
                       <span className="material-symbols-outlined text-[16px]">chat</span>
                       Chat
@@ -186,7 +186,7 @@ export default function MySalesPage() {
               <button
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
-                className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-semibold transition-colors"
+                className="w-full py-3 bg-brand-black hover:bg-brand-black rounded-lg font-semibold transition-colors"
               >
                 {isFetchingNextPage ? "Loading..." : "Load More"}
               </button>

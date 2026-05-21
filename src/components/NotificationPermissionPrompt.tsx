@@ -69,8 +69,8 @@ export default function NotificationPermissionPrompt() {
     if (isExcludedRoute(pathname)) return;
     // Never show to unauthenticated users
     if (!apiClient.isAuthenticated()) return;
-    // Already subscribed — never show
-    if (isSubscribed) return;
+    // Already subscribed or browser permission granted — never show
+    if (isSubscribed || permission === 'granted') return;
     // Don't re-show the sheet while a subscription attempt is in progress
     if (isRegisteringRef.current) return;
     // Browser denied — show the "how to fix" variant immediately
@@ -146,7 +146,7 @@ export default function NotificationPermissionPrompt() {
     dragCurrentY.current = 0;
   }, [handleSnooze]);
 
-  if (!visible || isExcludedRoute(pathname) || isSubscribed) return null;
+  if (!visible || isExcludedRoute(pathname) || isSubscribed || permission === 'granted') return null;
 
   // ── DENIED STATE ─────────────────────────────────────────────────────────
   if (permission === 'denied') {
@@ -160,24 +160,24 @@ export default function NotificationPermissionPrompt() {
           onTouchEnd={onTouchEnd}
         >
           {/* Pull bar */}
-          <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-5 cursor-grab" />
+          <div className="w-10 h-1 rounded-full bg-brand-surface mx-auto mb-5 cursor-grab" />
 
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-red-500 text-[26px]">notifications_off</span>
+              <span className="material-symbols-outlined text-brand-red text-[26px]">notifications_off</span>
             </div>
             <div>
-              <p className="font-bold text-gray-900">Notifications are blocked</p>
-              <p className="text-sm text-gray-500">You won&apos;t receive SOS and safety alerts</p>
+              <p className="font-bold text-[var(--neu-text-muted)]">Notifications are blocked</p>
+              <p className="text-sm text-[var(--neu-text-muted)]">You won&apos;t receive SOS and safety alerts</p>
             </div>
           </div>
-          <p className="text-sm text-gray-600 mb-5 leading-relaxed">
+          <p className="text-sm text-[var(--neu-text-secondary)] mb-5 leading-relaxed">
             To receive life-saving safety alerts, open your browser settings, find
             NeyborHuud, and change <strong>Notifications</strong> to <strong>Allow</strong>.
           </p>
           <button
             onClick={handleSnooze}
-            className="w-full rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            className="w-full rounded-xl border border-black/[0.08] py-3 text-sm font-medium text-[var(--neu-text-secondary)] hover:bg-brand-surface transition-colors"
           >
             I&apos;ll do it later
           </button>
@@ -197,7 +197,7 @@ export default function NotificationPermissionPrompt() {
         onTouchEnd={onTouchEnd}
       >
         {/* Pull bar — visual affordance for drag-to-dismiss */}
-        <div className="w-10 h-1 rounded-full bg-gray-300 mx-auto mb-6 cursor-grab" />
+        <div className="w-10 h-1 rounded-full bg-brand-surface mx-auto mb-6 cursor-grab" />
 
         {/* Icon */}
         <div className="flex justify-center mb-5">
@@ -207,21 +207,21 @@ export default function NotificationPermissionPrompt() {
         </div>
 
         {/* Title & description */}
-        <h2 className="text-xl font-bold text-gray-900 text-center mb-2">
+        <h2 className="text-xl font-bold text-[var(--neu-text-muted)] text-center mb-2">
           Enable Safety Notifications
         </h2>
-        <p className="text-sm text-gray-500 text-center leading-relaxed mb-2">
-          NeyborHuud is a <strong className="text-gray-700">community safety app</strong>.
+        <p className="text-sm text-[var(--neu-text-muted)] text-center leading-relaxed mb-2">
+          NeyborHuud is a <strong className="text-[var(--neu-text-muted)]">community safety app</strong>.
           Push notifications are critical — you&apos;ll receive:
         </p>
 
         {/* Feature list */}
-        <ul className="text-sm text-gray-600 space-y-2 mb-6 mt-4">
+        <ul className="text-sm text-[var(--neu-text-secondary)] space-y-2 mb-6 mt-4">
           {[
-            { icon: 'sos', label: 'Instant SOS alerts from neighbours', color: 'text-red-500' },
-            { icon: 'location_on', label: 'Geofence & safety zone alerts', color: 'text-orange-500' },
-            { icon: 'route', label: 'Trip monitoring & overdue alerts', color: 'text-yellow-600' },
-            { icon: 'chat', label: 'Messages & community updates', color: 'text-blue-500' },
+            { icon: 'sos', label: 'Instant SOS alerts from neighbours', color: 'text-brand-red' },
+            { icon: 'location_on', label: 'Geofence & safety zone alerts', color: 'text-brand-red' },
+            { icon: 'route', label: 'Trip monitoring & overdue alerts', color: 'text-primary600' },
+            { icon: 'chat', label: 'Messages & community updates', color: 'text-brand-blue' },
           ].map(({ icon, label, color }) => (
             <li key={icon} className="flex items-center gap-3">
               <span className={`material-symbols-outlined ${color} text-[20px]`}>{icon}</span>
@@ -240,7 +240,7 @@ export default function NotificationPermissionPrompt() {
         </button>
         <button
           onClick={handleSnooze}
-          className="w-full rounded-2xl py-3 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          className="w-full rounded-2xl py-3 text-sm text-[var(--neu-text-muted)] hover:text-[var(--neu-text-secondary)] transition-colors"
         >
           Skip for now (not recommended)
         </button>

@@ -63,13 +63,13 @@ function GossipDetailInner() {
 
     const getDiscussionTypeColor = (type: string) => {
         switch (type) {
-            case 'safety': return 'bg-red-500/10 text-red-400';
-            case 'cultural_discussion': return 'bg-amber-500/10 text-amber-400';
-            case 'local_gist': return 'bg-green-500/10 text-green-400';
+            case 'safety': return 'bg-brand-red/10 text-brand-red';
+            case 'cultural_discussion': return 'bg-primary/10 text-primary';
+            case 'local_gist': return 'bg-primary/10 text-primary';
             case 'community_question':
-            case 'recommendation_request': return 'bg-purple-500/10 text-purple-400';
-            case 'business_inquiry': return 'bg-blue-500/10 text-blue-400';
-            case 'social_update': return 'bg-cyan-500/10 text-cyan-400';
+            case 'recommendation_request': return 'bg-brand-blue/10 text-brand-blue';
+            case 'business_inquiry': return 'bg-brand-blue/10 text-brand-blue';
+            case 'social_update': return 'bg-brand-blue500/10 text-brand-blue400';
             default: return 'neu-chip';
         }
     };
@@ -107,13 +107,13 @@ function GossipDetailInner() {
                     <main className="flex-1 overflow-y-auto px-4 py-6">
                         <div className="max-w-[680px] mx-auto">
                             <div className="neu-card-sm rounded-2xl p-8 text-center">
-                                <span className="material-symbols-outlined text-4xl text-red-400 mb-4">error</span>
+                                <span className="material-symbols-outlined text-4xl text-brand-red mb-4">error</span>
                                 <p className="text-sm mb-2" style={{ color: 'var(--neu-text)' }}>
                                     {error instanceof Error ? error.message : 'Discussion not found'}
                                 </p>
                                 <button
                                     onClick={() => router.push('/local-news')}
-                                    className="mt-4 px-6 py-2.5 neu-btn rounded-2xl text-sm font-bold text-primary"
+                                    className="mt-4 px-6 py-2.5 mod-chip rounded-2xl text-sm font-bold text-primary"
                                 >
                                     Back to Local News
                                 </button>
@@ -206,10 +206,10 @@ function GossipDetailInner() {
                                         </button>
                                         <button
                                             onClick={() => setShowDeleteConfirm(true)}
-                                            className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                                            className="p-1.5 rounded-lg hover:bg-brand-red/10 transition-colors"
                                             title="Delete"
                                         >
-                                            <span className="material-symbols-outlined text-lg text-red-400">delete</span>
+                                            <span className="material-symbols-outlined text-lg text-brand-red">delete</span>
                                         </button>
                                     </div>
                                 )}
@@ -222,14 +222,14 @@ function GossipDetailInner() {
                                 </span>
                                 {gossip.culturalContext && gossip.culturalContext.categories.length > 0 && (
                                     gossip.culturalContext.categories.map((cat) => (
-                                        <span key={cat} className="px-2 py-0.5 text-xs rounded-full font-medium bg-amber-500/10 text-amber-400 flex items-center gap-1">
+                                        <span key={cat} className="px-2 py-0.5 text-xs rounded-full font-medium bg-primary/10 text-primary flex items-center gap-1">
                                             <span className="material-symbols-outlined text-xs">public</span>
                                             {cat}
                                         </span>
                                     ))
                                 )}
                                 {gossip.slangEnrichment?.hasSlang && (
-                                    <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-green-500/10 text-green-400">
+                                    <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-primary/10 text-primary">
                                         🇳🇬 Pidgin
                                     </span>
                                 )}
@@ -270,7 +270,7 @@ function GossipDetailInner() {
                                         {gossip.slangEnrichment.meanings.map((m) => (
                                             <span
                                                 key={m.term}
-                                                className="text-[12px] px-2 py-1 rounded-lg bg-green-500/10 text-green-400"
+                                                className="text-[12px] px-2 py-1 rounded-lg bg-primary/10 text-primary"
                                             >
                                                 <strong>{m.term}</strong>: {m.meaning}
                                                 {m.region && m.region !== 'national' && (
@@ -305,7 +305,7 @@ function GossipDetailInner() {
                             {gossip.culturalContext?.holidays && gossip.culturalContext.holidays.length > 0 && (
                                 <div className="flex items-center gap-2 mt-2">
                                     {gossip.culturalContext.holidays.map((h) => (
-                                        <span key={h} className="text-[12px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 flex items-center gap-1">
+                                        <span key={h} className="text-[12px] px-2 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-1">
                                             <span className="material-symbols-outlined text-xs">celebration</span>
                                             {h}
                                         </span>
@@ -318,10 +318,10 @@ function GossipDetailInner() {
                                 <button
                                     onClick={handleLike}
                                     disabled={mutations.isLiking}
-                                    className="flex items-center gap-1.5 hover:text-red-400 transition-colors group"
+                                    className="flex items-center gap-1.5 hover:text-brand-red transition-colors group"
                                 >
                                     <span className={`material-symbols-outlined text-xl transition-colors ${
-                                        isLiked ? 'fill-1 text-red-400' : 'group-hover:text-red-400'
+                                        isLiked ? 'fill-1 text-brand-red' : 'group-hover:text-brand-red'
                                     }`}>
                                         favorite
                                     </span>
@@ -417,7 +417,7 @@ function GossipDetailInner() {
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="neu-modal rounded-2xl max-w-sm w-full p-6 text-center">
-                        <span className="material-symbols-outlined text-4xl text-red-400 mb-3">warning</span>
+                        <span className="material-symbols-outlined text-4xl text-brand-red mb-3">warning</span>
                         <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--neu-text)' }}>Delete Discussion?</h3>
                         <p className="text-sm mb-6" style={{ color: 'var(--neu-text-muted)' }}>
                             This action cannot be undone. All comments will also be removed.
@@ -425,7 +425,7 @@ function GossipDetailInner() {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowDeleteConfirm(false)}
-                                className="flex-1 px-4 py-3 neu-btn rounded-2xl font-bold"
+                                className="flex-1 px-4 py-3 mod-chip rounded-2xl font-bold"
                                 style={{ color: 'var(--neu-text)' }}
                             >
                                 Cancel
@@ -433,11 +433,11 @@ function GossipDetailInner() {
                             <button
                                 onClick={handleDelete}
                                 disabled={mutations.isDeleting}
-                                className="flex-1 px-4 py-3 bg-red-500/20 text-red-400 rounded-2xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-3 bg-brand-red/20 text-brand-red rounded-2xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {mutations.isDeleting ? (
                                     <>
-                                        <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                                        <div className="w-4 h-4 border-2 border-brand-red border-t-transparent rounded-full animate-spin" />
                                         Deleting...
                                     </>
                                 ) : (

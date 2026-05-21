@@ -33,17 +33,17 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  completed: "text-green-400",
-  failed: "text-red-400",
-  refunded: "text-amber-400",
+  completed: "text-primary",
+  failed: "text-brand-red",
+  refunded: "text-primary",
 };
 
 const TIER_META: Record<string, { icon: string; color: string; label: string }> = {
   bronze:   { icon: "🥉", color: "text-amber-700", label: "Bronze" },
-  silver:   { icon: "🥈", color: "text-slate-400", label: "Silver" },
-  gold:     { icon: "🥇", color: "text-yellow-400", label: "Gold" },
-  platinum: { icon: "💎", color: "text-purple-400", label: "Platinum" },
-  free:     { icon: "⭐", color: "text-gray-400",   label: "Starter" },
+  silver:   { icon: "🥈", color: "text-[var(--neu-text-muted)]", label: "Silver" },
+  gold:     { icon: "🥇", color: "text-primary400", label: "Gold" },
+  platinum: { icon: "💎", color: "text-brand-blue", label: "Platinum" },
+  free:     { icon: "⭐", color: "text-[var(--neu-text-muted)]",   label: "Starter" },
 };
 
 export default function PremiumPage() {
@@ -63,12 +63,12 @@ export default function PremiumPage() {
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
-        <main className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+        <main className="flex-1 overflow-y-auto bg-brand-black text-white">
           {/* Page header */}
-          <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800 px-4 py-4">
+          <div className="sticky top-0 z-10 bg-brand-black border-b border-black/[0.08] px-4 py-4">
             <div className="max-w-5xl mx-auto">
               <h1 className="text-2xl font-bold">Your Activity Tier</h1>
-              <p className="text-gray-400 text-sm mt-0.5">
+              <p className="text-[var(--neu-text-muted)] text-sm mt-0.5">
                 Earn HuudCoins to level up automatically — no subscription needed.
               </p>
             </div>
@@ -81,14 +81,14 @@ export default function PremiumPage() {
             {/* Current tier + stats summary */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Current tier */}
-              <div className="rounded-2xl border border-gray-700 bg-[#1a1a2e] px-5 py-4 flex items-center gap-4 col-span-1">
+              <div className="rounded-2xl border border-black/[0.08] bg-brand-black px-5 py-4 flex items-center gap-4 col-span-1">
                 <span className="text-4xl">{tierMeta.icon}</span>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Current Tier</p>
+                  <p className="text-xs text-[var(--neu-text-muted)] uppercase tracking-wide">Current Tier</p>
                   <p className={`text-xl font-black capitalize ${tierMeta.color}`}>
                     {tierMeta.label}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-[var(--neu-text-muted)] mt-0.5">
                     Upgrades as you earn coins
                   </p>
                 </div>
@@ -96,7 +96,7 @@ export default function PremiumPage() {
 
               {/* Total coins spent */}
               <div className="rounded-2xl border border-amber-800/40 bg-amber-950/30 px-5 py-4 col-span-1">
-                <p className="text-xs text-amber-400 uppercase tracking-wide mb-1">Total Coins Spent</p>
+                <p className="text-xs text-primary uppercase tracking-wide mb-1">Total Coins Spent</p>
                 <p className="text-3xl font-black text-amber-300">
                   🪙 {(stats?.totalSpent ?? 0).toLocaleString()}
                 </p>
@@ -104,18 +104,18 @@ export default function PremiumPage() {
               </div>
 
               {/* Quick links */}
-              <div className="rounded-2xl border border-gray-700 bg-[#1a1a2e] px-5 py-4 col-span-1 flex flex-col gap-2 justify-center">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Quick Actions</p>
+              <div className="rounded-2xl border border-black/[0.08] bg-brand-black px-5 py-4 col-span-1 flex flex-col gap-2 justify-center">
+                <p className="text-xs text-[var(--neu-text-muted)] uppercase tracking-wide">Quick Actions</p>
                 <Link
                   href="/gamification/wallet"
-                  className="text-sm font-semibold text-amber-400 hover:text-amber-300 transition flex items-center gap-1.5"
+                  className="text-sm font-semibold text-primary hover:text-amber-300 transition flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
                   View Wallet
                 </Link>
                 <Link
                   href="/gamification/leaderboard"
-                  className="text-sm font-semibold text-purple-400 hover:text-purple-300 transition flex items-center gap-1.5"
+                  className="text-sm font-semibold text-brand-blue hover:text-purple-300 transition flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-[16px]">leaderboard</span>
                   Leaderboard
@@ -132,16 +132,16 @@ export default function PremiumPage() {
                     ([type, data]) => (
                       <div
                         key={type}
-                        className="rounded-xl border border-gray-800 bg-[#1a1a2e] px-4 py-3 text-center"
+                        className="rounded-xl border border-black/[0.08] bg-brand-black px-4 py-3 text-center"
                       >
                         <span className="text-2xl">{TYPE_ICONS[type] ?? "🪙"}</span>
-                        <p className="text-xs text-gray-400 mt-1 leading-tight">
+                        <p className="text-xs text-[var(--neu-text-muted)] mt-1 leading-tight">
                           {TYPE_LABELS[type] ?? type}
                         </p>
-                        <p className="font-black text-amber-400 mt-1">
+                        <p className="font-black text-primary mt-1">
                           🪙 {data.coins.toLocaleString()}
                         </p>
-                        <p className="text-xs text-gray-600">{data.count}×</p>
+                        <p className="text-xs text-[var(--neu-text-secondary)]">{data.count}×</p>
                       </div>
                     ),
                   )}
@@ -158,33 +158,33 @@ export default function PremiumPage() {
                   {[1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className="h-14 bg-[#1a1a2e] rounded-xl animate-pulse"
+                      className="h-14 bg-brand-black rounded-xl animate-pulse"
                     />
                   ))}
                 </div>
               )}
 
               {!isLoading && payments.length === 0 && (
-                <p className="text-gray-500 py-8 text-center">
+                <p className="text-[var(--neu-text-muted)] py-8 text-center">
                   No HuudCoin spends yet.
                 </p>
               )}
 
               {!isLoading && payments.length > 0 && (
-                <div className="rounded-2xl border border-gray-700 overflow-hidden">
+                <div className="rounded-2xl border border-black/[0.08] overflow-hidden">
                   <table className="w-full text-sm">
-                    <thead className="bg-[#1a1a2e] border-b border-gray-700">
+                    <thead className="bg-brand-black border-b border-black/[0.08]">
                       <tr>
-                        <th className="text-left px-4 py-3 text-gray-400 font-semibold">
+                        <th className="text-left px-4 py-3 text-[var(--neu-text-muted)] font-semibold">
                           Type
                         </th>
-                        <th className="text-left px-4 py-3 text-gray-400 font-semibold">
+                        <th className="text-left px-4 py-3 text-[var(--neu-text-muted)] font-semibold">
                           HuudCoins
                         </th>
-                        <th className="text-left px-4 py-3 text-gray-400 font-semibold">
+                        <th className="text-left px-4 py-3 text-[var(--neu-text-muted)] font-semibold">
                           Status
                         </th>
-                        <th className="text-left px-4 py-3 text-gray-400 font-semibold">
+                        <th className="text-left px-4 py-3 text-[var(--neu-text-muted)] font-semibold">
                           Date
                         </th>
                       </tr>
@@ -193,20 +193,20 @@ export default function PremiumPage() {
                       {payments.map((p: Payment) => (
                         <tr
                           key={p.id ?? p.reference}
-                          className="bg-[#0f0f1e] hover:bg-[#1a1a2e] transition-colors"
+                          className="bg-brand-black hover:bg-brand-black transition-colors"
                         >
                           <td className="px-4 py-3 text-white">
                             {TYPE_LABELS[p.type] ?? p.type}
                           </td>
-                          <td className="px-4 py-3 font-semibold text-amber-400">
+                          <td className="px-4 py-3 font-semibold text-primary">
                             🪙 {p.coinsSpent.toLocaleString()}
                           </td>
                           <td
-                            className={`px-4 py-3 font-semibold capitalize ${STATUS_COLORS[p.status] ?? "text-gray-300"}`}
+                            className={`px-4 py-3 font-semibold capitalize ${STATUS_COLORS[p.status] ?? "text-[var(--neu-text-muted)]"}`}
                           >
                             {p.status}
                           </td>
-                          <td className="px-4 py-3 text-gray-400">
+                          <td className="px-4 py-3 text-[var(--neu-text-muted)]">
                             {new Date(p.createdAt).toLocaleDateString()}
                           </td>
                         </tr>
@@ -215,11 +215,11 @@ export default function PremiumPage() {
                   </table>
 
                   {hasNextPage && (
-                    <div className="p-4 text-center bg-[#1a1a2e]">
+                    <div className="p-4 text-center bg-brand-black">
                       <button
                         onClick={() => fetchNextPage()}
                         disabled={isFetchingNextPage}
-                        className="px-6 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-60 rounded-lg text-sm transition-colors"
+                        className="px-6 py-2 bg-brand-black hover:bg-brand-surface disabled:opacity-60 rounded-lg text-sm transition-colors"
                       >
                         {isFetchingNextPage ? "Loading…" : "Load More"}
                       </button>

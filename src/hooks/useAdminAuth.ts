@@ -9,7 +9,7 @@ import type { User } from "@/types/api";
 
 function normalizeProfileUser(raw: Record<string, unknown>): User {
   return {
-    ...(raw as User),
+    ...(raw as unknown as User),
     id: String(raw.id ?? raw._id ?? ""),
     role: (raw.role as User["role"]) ?? "user",
     isAdmin: Boolean(raw.isAdmin),

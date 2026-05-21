@@ -201,14 +201,14 @@ function VerifyEmailContent() {
                                 <div className={`h-1.5 ${isError ? 'bg-brand-red' : 'bg-gradient-to-r from-primary via-brand-blue to-brand-amber'}`} aria-hidden />
                                 <div className="p-4">
                                     <div className="mb-4 flex items-center justify-between gap-3">
-                                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-[0_16px_34px_rgba(0,135,81,0.25)] ${isError ? 'bg-brand-red' : isSuccess ? 'bg-primary' : 'bg-brand-blue'}`}>
+                                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-[0_16px_34px_rgba(0,111,53,0.25)] ${isError ? 'bg-brand-red' : isSuccess ? 'bg-primary' : 'bg-brand-blue'}`}>
                                             <i className={`bi ${icon} text-xl ${isLoading ? 'animate-pulse' : ''}`} aria-hidden />
                                         </div>
-                                        <div className="rounded-full border border-charcoal/5 bg-[#F8FAFC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">Email</div>
+                                        <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">Email</div>
                                     </div>
                                     <p className={`mb-1 text-[9px] font-black uppercase tracking-[0.24em] ${isError ? 'text-brand-red' : 'text-primary'}`}>{status}</p>
-                                    <h1 className="truncate text-2xl font-black tracking-tighter text-[#1A1A2E]">{headline}</h1>
-                                    <p className="truncate text-[11px] font-semibold text-[#64748B]">{username ? `@${username}` : email || 'Secure your account'}</p>
+                                    <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">{headline}</h1>
+                                    <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{username ? `@${username}` : email || 'Secure your account'}</p>
                                 </div>
                             </div>
                         </div>
@@ -223,11 +223,11 @@ function VerifyEmailContent() {
                                     <OTPInput length={6} value={verificationCode} onChange={setVerificationCode} onComplete={verifyWithCode} disabled={isVerifying || !email} error={!!errorMessage} autoFocus={!!email} />
                                     {errorMessage && <div className="rounded-2xl border border-brand-red/15 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-brand-red">{errorMessage}</div>}
                                     <div className="grid grid-cols-[0.86fr_1.14fr] gap-3">
-                                        <button type="button" onClick={handleResendCode} disabled={resendCooldown > 0 || isResending || !email} className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${resendCooldown > 0 || isResending || !email ? 'border border-charcoal/5 bg-white text-[#94A3B8]' : 'border border-charcoal/5 bg-white text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)]'}`}>
+                                        <button type="button" onClick={handleResendCode} disabled={resendCooldown > 0 || isResending || !email} className="btn-secondary h-[50px] w-full gap-2">
                                             <i className={`bi ${isResending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
                                             {isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}
                                         </button>
-                                        <button type="button" onClick={() => verifyWithCode()} disabled={verificationCode.length !== 6 || isVerifying || !email} className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${verificationCode.length === 6 && !isVerifying && email ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] active:scale-[0.98]' : 'border border-charcoal/5 bg-white text-[#94A3B8]'}`}>
+                                        <button type="button" onClick={() => verifyWithCode()} disabled={verificationCode.length !== 6 || isVerifying || !email} className="btn-glass-primary h-[50px] w-full gap-2">
                                             {isVerifying ? <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" aria-hidden /> : <i className="bi bi-check2-circle" aria-hidden />}
                                             Verify
                                         </button>
@@ -242,11 +242,11 @@ function VerifyEmailContent() {
                                     <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
                                         <div>
                                             <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
-                                            <p className="text-[11px] font-semibold text-[#64748B]">Email verification reward</p>
+                                            <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Email verification reward</p>
                                         </div>
                                         <div className="flex items-center gap-2 text-primary"><span className="text-3xl font-black leading-none">10</span><i className="bi bi-coin text-xl text-brand-amber" aria-hidden /></div>
                                     </div>
-                                    <button type="button" onClick={() => router.push(nextRoute)} className="flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] transition-all active:scale-[0.98]">
+                                    <button type="button" onClick={() => router.push(nextRoute)} className="btn-glass-primary h-[52px] w-full gap-2">
                                         Continue
                                         <i className="bi bi-arrow-right" aria-hidden />
                                     </button>
@@ -257,8 +257,8 @@ function VerifyEmailContent() {
                                 <div className="flex flex-col gap-4">
                                     <div className="rounded-2xl border border-brand-red/15 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-brand-red">{errorMessage || 'Verification failed. Please try again.'}</div>
                                     <div className="grid grid-cols-[0.9fr_1.1fr] gap-3">
-                                        <button type="button" onClick={() => token && verifyWithToken(token)} disabled={!token || step === 'expired'} className={`flex h-[50px] items-center justify-center rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest ${!token || step === 'expired' ? 'border border-charcoal/5 bg-white text-[#94A3B8]' : 'border border-charcoal/5 bg-white text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)]'}`}>Retry</button>
-                                        <button type="button" onClick={() => { setStep('code-entry'); setErrorMessage(''); setVerificationCode(''); }} className="flex h-[50px] items-center justify-center gap-2 rounded-2xl bg-brand-blue px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_34px_rgba(13,110,253,0.28)] transition-all active:scale-[0.98]">
+                                        <button type="button" onClick={() => token && verifyWithToken(token)} disabled={!token || step === 'expired'} className="btn-secondary h-[50px] w-full">Retry</button>
+                                        <button type="button" onClick={() => { setStep('code-entry'); setErrorMessage(''); setVerificationCode(''); }} className="btn-glass-primary h-[50px] w-full gap-2">
                                             Enter code
                                             <i className="bi bi-arrow-right" aria-hidden />
                                         </button>

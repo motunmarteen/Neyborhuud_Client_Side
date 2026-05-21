@@ -29,7 +29,7 @@ export function HeroStatsBar() {
   if (!stats) return null;
 
   return (
-    <div className="flex items-center justify-center gap-4 px-5 py-2 bg-[#1a1a2e]/80 backdrop-blur-md border-t border-white/[0.06]">
+    <div className="flex items-center justify-center gap-4 px-5 py-2 bg-brand-black/80 backdrop-blur-md border-t border-white/[0.06]">
       {/* Trust Score */}
       <div className="flex items-center gap-1.5">
         <span className="text-[13px]" role="img" aria-label="Trust">🛡</span>

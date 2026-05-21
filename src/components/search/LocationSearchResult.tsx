@@ -30,7 +30,7 @@ export const LocationSearchResult = ({ location, onClose }: Props) => {
   return (
     <button
       onClick={handleClick}
-      className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-surface-base-dark rounded-lg transition-colors text-left"
+      className="w-full flex items-center gap-3 p-3 hover:bg-brand-surface dark:hover:bg-surface-base-dark rounded-lg transition-colors text-left"
     >
       {/* Location Icon */}
       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -39,17 +39,17 @@ export const LocationSearchResult = ({ location, onClose }: Props) => {
 
       {/* Location Info */}
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-gray-900 dark:text-white">
+        <p className="font-semibold text-[var(--neu-text-muted)] dark:text-white">
           {location.city}, {location.state}
         </p>
         {location.lga && (
-          <p className="text-sm text-gray-500 dark:text-text-secondary-dark">{location.lga}</p>
+          <p className="text-sm text-[var(--neu-text-muted)] dark:text-text-secondary-dark">{location.lga}</p>
         )}
       </div>
 
       {/* User Count */}
       {typeof location?.userCount === 'number' && (
-        <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-text-secondary-dark shrink-0">
+        <div className="flex items-center gap-1 text-sm text-[var(--neu-text-muted)] dark:text-text-secondary-dark shrink-0">
           <i className="bi bi-people" />
           {location.userCount.toLocaleString()}
         </div>

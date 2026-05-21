@@ -179,7 +179,7 @@ export function buildTrustEconomyModel(input: TrustEconomyInputs): TrustEconomyM
         label: "Identity Integrity",
         current: identity,
         max: 200,
-        colorClass: "bg-cyan-500",
+        colorClass: "bg-brand-blue500",
         reason: "Verification and complete profile foundation.",
       },
       {
@@ -187,7 +187,7 @@ export function buildTrustEconomyModel(input: TrustEconomyInputs): TrustEconomyM
         label: "Consistency",
         current: consistency,
         max: 150,
-        colorClass: "bg-indigo-500",
+        colorClass: "bg-brand-blue500",
         reason: "Daily check-ins and sustained healthy activity.",
       },
       {
@@ -195,7 +195,7 @@ export function buildTrustEconomyModel(input: TrustEconomyInputs): TrustEconomyM
         label: "Constructive Contribution",
         current: contribution,
         max: 250,
-        colorClass: "bg-emerald-500",
+        colorClass: "bg-primary",
         reason: "Helpful participation and completed achievements.",
       },
       {
@@ -203,7 +203,7 @@ export function buildTrustEconomyModel(input: TrustEconomyInputs): TrustEconomyM
         label: "Reliability",
         current: reliability,
         max: 200,
-        colorClass: "bg-amber-500",
+        colorClass: "bg-primary",
         reason: "Safe behavior and low-risk interaction history.",
       },
       {
@@ -211,7 +211,7 @@ export function buildTrustEconomyModel(input: TrustEconomyInputs): TrustEconomyM
         label: "Community Endorsement",
         current: community,
         max: 200,
-        colorClass: "bg-fuchsia-500",
+        colorClass: "bg-brand-blue500",
         reason: "Vouches from trusted community members.",
       },
     ],

@@ -52,7 +52,7 @@ export default function ApplyModal({ jobId, jobTitle, onClose }: ApplyModalProps
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full mod-btn transition-all"
+            className="p-2 rounded-full mod-chip transition-all"
             style={{ color: "var(--neu-text-muted)" }}
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
@@ -144,7 +144,7 @@ export default function ApplyModal({ jobId, jobTitle, onClose }: ApplyModalProps
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl font-bold transition-all mod-btn"
+              className="flex-1 py-3 rounded-xl font-bold transition-all mod-chip"
               style={{ color: "var(--neu-text)" }}
             >
               Cancel
@@ -152,7 +152,7 @@ export default function ApplyModal({ jobId, jobTitle, onClose }: ApplyModalProps
             <button
               type="submit"
               disabled={applyMutation.isPending}
-              className="flex-1 py-3 rounded-xl font-bold transition-all mod-btn-active text-primary disabled:opacity-60"
+              className="flex-1 py-3 rounded-xl font-bold transition-all mod-chip mod-chip-active text-primary disabled:opacity-60"
             >
               {applyMutation.isPending ? "Submitting…" : "Submit Application"}
             </button>

@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { gamificationService } from "@/services/gamification.service";
 import { getErrorMessage } from "@/lib/error-handler";
+import apiClient from "@/lib/api-client";
+import { emitCoinsUpdated } from "@/lib/gamification-events";
 
 // ── Queries ────────────────────────────────────────────────────
 
@@ -76,6 +78,7 @@ export function useMyStreak() {
     },
     staleTime: 60_000,
     retry: false,
+    enabled: typeof window !== "undefined" && apiClient.isAuthenticated(),
   });
 }
 
@@ -88,7 +91,14 @@ export function useCheckIn(onSuccess?: (data: any) => void) {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["gamification", "streak"] });
       queryClient.invalidateQueries({ queryKey: ["gamification", "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification", "transactions"] });
       const data = (res as any)?.data ?? res;
+      if (data?.totalHuudCoins != null) {
+        emitCoinsUpdated({ totalHuudCoins: data.totalHuudCoins });
+      } else {
+        emitCoinsUpdated();
+      }
       onSuccess?.(data);
     },
     onError: (err) => {

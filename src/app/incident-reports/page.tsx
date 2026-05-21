@@ -91,7 +91,7 @@ function CreateIncidentForm({ onSuccess }: { onSuccess: () => void }) {
       {/* Title */}
       <div>
         <label className="block text-sm font-semibold mb-1" style={{ color: 'var(--neu-text)' }}>
-          Title <span className="text-red-500">*</span>
+          Title <span className="text-brand-red">*</span>
         </label>
         <input
           value={title}
@@ -107,7 +107,7 @@ function CreateIncidentForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-semibold mb-1" style={{ color: 'var(--neu-text)' }}>
-            Category <span className="text-red-500">*</span>
+            Category <span className="text-brand-red">*</span>
           </label>
           <select
             value={category}
@@ -124,7 +124,7 @@ function CreateIncidentForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
         <div>
           <label className="block text-sm font-semibold mb-1" style={{ color: 'var(--neu-text)' }}>
-            Severity <span className="text-red-500">*</span>
+            Severity <span className="text-brand-red">*</span>
           </label>
           <select
             value={severity}
@@ -142,7 +142,7 @@ function CreateIncidentForm({ onSuccess }: { onSuccess: () => void }) {
       {/* Description */}
       <div>
         <label className="block text-sm font-semibold mb-1" style={{ color: 'var(--neu-text)' }}>
-          Description <span className="text-red-500">*</span>
+          Description <span className="text-brand-red">*</span>
         </label>
         <textarea
           value={description}
@@ -161,7 +161,7 @@ function CreateIncidentForm({ onSuccess }: { onSuccess: () => void }) {
       {/* Incident date */}
       <div>
         <label className="block text-sm font-semibold mb-1" style={{ color: 'var(--neu-text)' }}>
-          When did it happen? <span className="text-red-500">*</span>
+          When did it happen? <span className="text-brand-red">*</span>
         </label>
         <input
           type="datetime-local"
@@ -234,7 +234,7 @@ function CreateIncidentForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full py-3.5 neu-btn-active rounded-2xl font-bold text-primary text-sm transition-all active:scale-95 disabled:opacity-50"
+        className="w-full py-3.5 mod-chip mod-chip-active rounded-2xl font-bold text-primary text-sm transition-all active:scale-95 disabled:opacity-50"
       >
         {submitting ? 'Filing Report...' : 'File Incident Report'}
       </button>
@@ -309,7 +309,7 @@ function IncidentCard({ incident, onInteract }: {
           {/* Witness */}
           <button
             onClick={e => { e.stopPropagation(); onInteract(incident.id, 'witness'); }}
-            className={`flex items-center gap-1 text-xs transition-all ${isWitness ? 'text-blue-500' : ''}`}
+            className={`flex items-center gap-1 text-xs transition-all ${isWitness ? 'text-brand-blue' : ''}`}
             style={!isWitness ? { color: 'var(--neu-text-muted)' } : {}}
           >
             <span className="material-symbols-outlined text-base">visibility</span>
@@ -318,7 +318,7 @@ function IncidentCard({ incident, onInteract }: {
           {/* Confirm */}
           <button
             onClick={e => { e.stopPropagation(); onInteract(incident.id, 'confirm'); }}
-            className={`flex items-center gap-1 text-xs transition-all ${isConfirm ? 'text-green-500' : ''}`}
+            className={`flex items-center gap-1 text-xs transition-all ${isConfirm ? 'text-primary' : ''}`}
             style={!isConfirm ? { color: 'var(--neu-text-muted)' } : {}}
           >
             <span className="material-symbols-outlined text-base">check_circle</span>
@@ -502,7 +502,7 @@ function IncidentReportsInner() {
                 className="flex-1 px-4 py-2.5 neu-input rounded-2xl text-sm"
                 style={{ color: 'var(--neu-text)', background: 'var(--neu-bg)' }}
               />
-              <button type="submit" className="px-4 py-2.5 neu-btn rounded-2xl text-sm text-primary font-semibold">
+              <button type="submit" className="px-4 py-2.5 mod-chip rounded-2xl text-sm text-primary font-semibold">
                 Search
               </button>
             </form>
@@ -515,8 +515,8 @@ function IncidentReportsInner() {
                   onClick={() => { setCategoryFilter(f.value as IncidentCategory | ''); load(1, true); }}
                   className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     categoryFilter === f.value
-                      ? 'neu-btn-active text-primary'
-                      : 'neu-btn'
+                      ? 'mod-chip mod-chip-active text-primary'
+                      : 'mod-chip'
                   }`}
                   style={categoryFilter !== f.value ? { color: 'var(--neu-text-muted)' } : {}}
                 >
@@ -537,7 +537,7 @@ function IncidentReportsInner() {
                   key={s}
                   onClick={() => { setStatusFilter(s as IncidentStatus | ''); load(1, true); }}
                   className={`flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                    statusFilter === s ? 'neu-btn-active text-primary' : 'neu-socket'
+                    statusFilter === s ? 'mod-chip mod-chip-active text-primary' : 'neu-socket'
                   }`}
                   style={statusFilter !== s ? { color: 'var(--neu-text-muted)' } : {}}
                 >
@@ -557,9 +557,9 @@ function IncidentReportsInner() {
 
               {!loading && error && (
                 <div className="neu-card-sm rounded-2xl p-8 flex flex-col items-center">
-                  <span className="material-symbols-outlined text-3xl text-red-400 mb-3">error</span>
+                  <span className="material-symbols-outlined text-3xl text-brand-red mb-3">error</span>
                   <p className="text-sm text-center mb-4" style={{ color: 'var(--neu-text)' }}>{error}</p>
-                  <button onClick={() => load(1, true)} className="px-6 py-2.5 neu-btn rounded-2xl text-sm font-bold text-primary">
+                  <button onClick={() => load(1, true)} className="px-6 py-2.5 mod-chip rounded-2xl text-sm font-bold text-primary">
                     Retry
                   </button>
                 </div>
@@ -581,7 +581,7 @@ function IncidentReportsInner() {
                   {user && (
                     <button
                       onClick={() => setShowCreate(true)}
-                      className="px-6 py-2.5 neu-btn-active rounded-2xl text-sm font-bold text-primary"
+                      className="px-6 py-2.5 mod-chip mod-chip-active rounded-2xl text-sm font-bold text-primary"
                     >
                       File Report
                     </button>

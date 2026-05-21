@@ -43,7 +43,7 @@ function StatCard({
   label,
   value,
   icon,
-  color = 'text-emerald-400',
+  color = 'text-primary',
 }: {
   label: string;
   value: number | string;
@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="flex h-full items-center justify-center p-8 text-center">
         <div>
-          <span className="material-symbols-outlined text-[48px] text-red-400">error</span>
+          <span className="material-symbols-outlined text-[48px] text-brand-red">error</span>
           <p className="mt-3 text-white/70">Could not load dashboard stats.</p>
           <p className="text-xs text-white/40">Make sure the admin API is reachable.</p>
         </div>
@@ -103,10 +103,10 @@ export default function AdminDashboardPage() {
       {/* Primary stat cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard label="Total Users"      value={stats.totalUsers ?? 0}            icon="group"         color="text-sky-400" />
-        <StatCard label="Active (24h)"     value={stats.activeUsers ?? 0}           icon="person_check"  color="text-emerald-400" />
-        <StatCard label="Total Posts"      value={stats.totalPosts ?? 0}            icon="article"       color="text-violet-400" />
-        <StatCard label="Events"           value={stats.totalEvents ?? 0}           icon="event"         color="text-amber-400" />
-        <StatCard label="Jobs"             value={stats.totalJobs ?? 0}             icon="work"          color="text-rose-400" />
+        <StatCard label="Active (24h)"     value={stats.activeUsers ?? 0}           icon="person_check"  color="text-primary" />
+        <StatCard label="Total Posts"      value={stats.totalPosts ?? 0}            icon="article"       color="text-brand-blue" />
+        <StatCard label="Events"           value={stats.totalEvents ?? 0}           icon="event"         color="text-primary" />
+        <StatCard label="Jobs"             value={stats.totalJobs ?? 0}             icon="work"          color="text-brand-red400" />
         <StatCard label="Listings"         value={stats.totalMarketplaceItems ?? 0} icon="storefront"    color="text-teal-400" />
       </div>
 
@@ -115,8 +115,8 @@ export default function AdminDashboardPage() {
         <h2 className="mb-3 text-[11px] font-black uppercase tracking-widest text-white/40">Engagement</h2>
         <div className="grid grid-cols-3 gap-3">
           <StatCard label="Likes"    value={stats.engagement?.likes ?? 0}    icon="thumb_up"  color="text-pink-400" />
-          <StatCard label="Comments" value={stats.engagement?.comments ?? 0} icon="comment"   color="text-blue-400" />
-          <StatCard label="Shares"   value={stats.engagement?.shares ?? 0}   icon="share"     color="text-indigo-400" />
+          <StatCard label="Comments" value={stats.engagement?.comments ?? 0} icon="comment"   color="text-brand-blue" />
+          <StatCard label="Shares"   value={stats.engagement?.shares ?? 0}   icon="share"     color="text-brand-blue400" />
         </div>
       </div>
 

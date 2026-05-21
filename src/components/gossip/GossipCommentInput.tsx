@@ -80,7 +80,7 @@ export function GossipCommentInput({
                     <button
                         type="submit"
                         disabled={isSubmitting || !body.trim()}
-                        className="px-4 py-1.5 neu-btn-active rounded-xl text-xs font-bold text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+                        className="px-4 py-1.5 mod-chip mod-chip-active rounded-xl text-xs font-bold text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1"
                     >
                         {isSubmitting ? (
                             <>

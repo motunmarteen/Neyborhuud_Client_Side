@@ -16,10 +16,10 @@ function fmt(iso?: string) {
 }
 
 function escalationColor(level: number): string {
-  if (level === 0) return '#22c55e';
+  if (level === 0) return '#006F35';
   if (level === 1) return '#eab308';
   if (level === 2) return '#f97316';
-  return '#ef4444';
+  return '#FF0000';
 }
 
 function minsAgo(iso?: string): string {
@@ -82,7 +82,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
   if (error) {
     return (
       <div className="neu-card-sm rounded-2xl p-4">
-        <p className="text-sm text-red-500">{error}</p>
+        <p className="text-sm text-brand-red">{error}</p>
       </div>
     );
   }
@@ -124,7 +124,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
             <span className="material-symbols-outlined text-red-600" style={{ fontSize: '20px' }}>emergency</span>
             <p className="font-bold text-sm text-red-600">🆘 SOS Activated — Requires Immediate Response</p>
           </div>
-          <p className="text-xs" style={{ color: '#6b7280' }}>
+          <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
             <strong>Triggered automatically due to missed trip check-ins.</strong>{' '}
             {displayName ?? 'This user'} has not responded to{' '}
             {trip.missedCheckIns ?? 'multiple'} check-in alert
@@ -183,7 +183,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
         <div className="neu-socket rounded-xl p-2">
           <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Progress</p>
           <p className="text-sm font-semibold mt-0.5" style={{ color: 'var(--neu-text)' }}>{trip.progressPercent ?? 0}%</p>
-          <div className="mt-1 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+          <div className="mt-1 h-1.5 rounded-full bg-brand-surface overflow-hidden">
             <div
               className="h-full rounded-full"
               style={{ width: `${trip.progressPercent ?? 0}%`, background: 'var(--primary)' }}
@@ -204,7 +204,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
           <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Deviation</p>
           <p
             className="text-xs font-semibold mt-0.5"
-            style={{ color: (trip.routeDeviationMeters ?? 0) > 300 ? '#f59e0b' : 'var(--neu-text)' }}
+            style={{ color: (trip.routeDeviationMeters ?? 0) > 300 ? '#00D431' : 'var(--neu-text)' }}
           >
             {trip.routeDeviationMeters ? `${trip.routeDeviationMeters.toFixed(0)} m` : '—'}
           </p>
@@ -213,7 +213,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
           <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Missed Check-ins</p>
           <p
             className="text-xs font-semibold mt-0.5"
-            style={{ color: (trip.missedCheckIns ?? 0) > 0 ? '#f59e0b' : 'var(--neu-text)' }}
+            style={{ color: (trip.missedCheckIns ?? 0) > 0 ? '#00D431' : 'var(--neu-text)' }}
           >
             {trip.missedCheckIns ?? 0}
           </p>
@@ -242,7 +242,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
         <button
           onClick={load}
           disabled={loading}
-          className="px-3 py-1.5 rounded-xl neu-btn text-xs"
+          className="px-3 py-1.5 rounded-xl mod-chip text-xs"
           style={{ color: 'var(--primary)' }}
         >
           {loading ? 'Refreshing…' : 'Refresh'}
@@ -276,7 +276,7 @@ function GuardianTripViewPageInner({ userId }: { userId: string }) {
               </div>
               <Link
                 href="/safety"
-                className="px-3 py-2 rounded-xl neu-btn text-xs font-medium"
+                className="px-3 py-2 rounded-xl mod-chip text-xs font-medium"
                 style={{ color: 'var(--neu-text-muted)' }}
               >
                 ← Safety

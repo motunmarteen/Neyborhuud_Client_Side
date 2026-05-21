@@ -76,7 +76,7 @@ export const TRUST_TIERS: TrustTierInfo[] = BASE_TRUST_TIERS.map((tier) => ({
       ? "text-teal-700"
       : tier.tier === "tree"
       ? "text-green-700"
-      : "text-lime-700",
+      : "text-primary700",
   bg:
     tier.tier === "seedling"
       ? "bg-emerald-50 border-emerald-200"
@@ -84,7 +84,7 @@ export const TRUST_TIERS: TrustTierInfo[] = BASE_TRUST_TIERS.map((tier) => ({
       ? "bg-teal-50 border-teal-200"
       : tier.tier === "tree"
       ? "bg-green-50 border-green-200"
-      : "bg-lime-50 border-lime-200",
+      : "bg-primary50 border-lime-200",
 }));
 
 /** Derive a user's trust tier from their numeric score. */

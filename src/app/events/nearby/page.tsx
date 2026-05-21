@@ -76,7 +76,7 @@ export default function NearbyEventsPage() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => router.back()}
-                    className="p-2 rounded-full mod-btn text-slate-700 hover:text-slate-950 transition-colors"
+                    className="p-2 rounded-full mod-chip text-slate-700 hover:text-slate-950 transition-colors"
                     aria-label="Go back"
                   >
                     <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -102,8 +102,8 @@ export default function NearbyEventsPage() {
                       onClick={() => setRadius(r)}
                       className={`shrink-0 text-sm px-4 py-1.5 rounded-xl font-semibold transition-all ${
                         radius === r
-                          ? "mod-btn-active text-primary"
-                          : "mod-btn text-slate-700 hover:text-slate-950"
+                          ? "mod-chip mod-chip-active text-primary"
+                          : "mod-chip text-slate-700 hover:text-slate-950"
                       }`}
                     >
                       {r} km
@@ -126,8 +126,8 @@ export default function NearbyEventsPage() {
             {/* Geo error */}
             {geoError && !geoLoading && (
               <div className="mod-card rounded-2xl text-center py-16 px-5">
-                <span className="material-symbols-outlined text-red-400 text-5xl">location_off</span>
-                <p className="text-red-400 mt-4 mb-2 font-semibold">Location access denied</p>
+                <span className="material-symbols-outlined text-brand-red text-5xl">location_off</span>
+                <p className="text-brand-red mt-4 mb-2 font-semibold">Location access denied</p>
                 <p className="text-slate-600 text-sm">
                   Please enable location permissions to see nearby events.
                 </p>
@@ -151,7 +151,7 @@ export default function NearbyEventsPage() {
             {/* Error */}
             {error && location && !isLoading && (
               <div className="mod-card rounded-2xl text-center py-12">
-                <p className="text-red-400 mb-4 font-semibold">Failed to load nearby events</p>
+                <p className="text-brand-red mb-4 font-semibold">Failed to load nearby events</p>
               </div>
             )}
           </div>
@@ -163,7 +163,7 @@ export default function NearbyEventsPage() {
                   className="mt-3 flex flex-col gap-5 pb-4 md:items-center"
                   style={{
                     background:
-                      "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)), radial-gradient(circle at 50% 0%, rgba(0,135,81,0.12), transparent 34%)",
+                      "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)), radial-gradient(circle at 50% 0%, rgba(0,111,53,0.12), transparent 34%)",
                     backdropFilter: "blur(18px) saturate(150%)",
                     WebkitBackdropFilter: "blur(18px) saturate(150%)",
                   }}
@@ -207,7 +207,7 @@ export default function NearbyEventsPage() {
                 {radius < 50 && (
                   <button
                     onClick={() => setRadius((r) => Math.min(r * 2, 50))}
-                    className="px-6 py-2.5 rounded-xl mod-btn-active text-primary font-semibold transition-colors"
+                    className="px-6 py-2.5 rounded-xl mod-chip mod-chip-active text-primary font-semibold transition-colors"
                   >
                     Expand to {Math.min(radius * 2, 50)} km
                   </button>

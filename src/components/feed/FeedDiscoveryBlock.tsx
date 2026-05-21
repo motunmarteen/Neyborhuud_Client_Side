@@ -78,7 +78,7 @@ function SectionFooter({
     >
       <Link
         href={href}
-        className="inline-flex items-center gap-0.5 text-[11px] font-bold uppercase tracking-wide text-emerald-300/90 transition-colors hover:text-emerald-200"
+        className="inline-flex items-center gap-0.5 text-[11px] font-bold uppercase tracking-wide text-primary/90 transition-colors hover:text-white/90"
       >
         {label}
         <span className="material-symbols-outlined text-[16px]">chevron_right</span>

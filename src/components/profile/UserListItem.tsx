@@ -36,7 +36,7 @@ export function UserListItem({ user }: UserListItemProps) {
   const userInitial = displayName[0]?.toUpperCase() || 'U';
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+    <div className="flex items-center justify-between px-4 py-3 hover:bg-brand-surface dark:hover:bg-brand-black/80/50 transition-colors">
       {/* User Info */}
       <Link
         href={`/profile/${user.username}`}
@@ -53,18 +53,18 @@ export function UserListItem({ user }: UserListItemProps) {
         {/* Name and Username */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <p className="font-bold text-gray-900 dark:text-white truncate">
+            <p className="font-bold text-[var(--neu-text-muted)] dark:text-white truncate">
               {displayName}
             </p>
             {user.isVerified && (
               <i className="bi bi-patch-check-fill text-primary text-sm shrink-0" />
             )}
           </div>
-          <p className="text-gray-500 dark:text-gray-400 text-sm truncate">
+          <p className="text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] text-sm truncate">
             @{user.username}
           </p>
           {user.bio && (
-            <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-1 mt-0.5">
+            <p className="text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] text-sm line-clamp-1 mt-0.5">
               {user.bio}
             </p>
           )}
@@ -75,8 +75,8 @@ export function UserListItem({ user }: UserListItemProps) {
       {!isOwnProfile && currentUser && (
         <div className="ml-3 shrink-0">
           {isLoadingStatus ? (
-            <div className="px-4 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 animate-pulse">
-              <div className="w-16 h-4 bg-gray-300 dark:bg-gray-700 rounded" />
+            <div className="px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-black/[0.08] animate-pulse">
+              <div className="w-16 h-4 bg-brand-surface dark:bg-brand-black rounded" />
             </div>
           ) : (
             <button
@@ -87,8 +87,8 @@ export function UserListItem({ user }: UserListItemProps) {
               disabled={isPending}
               className={`px-4 py-1.5 rounded-full font-semibold text-sm transition-all ${
                 isFollowing
-                  ? 'border border-gray-300 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 dark:hover:text-red-500 group'
-                  : 'bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100'
+                  ? 'border border-black/[0.08] dark:border-black/[0.08] hover:border-brand-red dark:hover:border-brand-red hover:bg-brand-red/10 dark:hover:bg-brand-red/20 hover:text-brand-red dark:hover:text-brand-red group'
+                  : 'bg-brand-black dark:bg-white text-white dark:text-black hover:bg-brand-black dark:hover:bg-brand-surface'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
               type="button"
             >

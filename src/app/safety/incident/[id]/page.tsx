@@ -54,10 +54,10 @@ function formatDuration(ms: number): string {
 
 function StatusPill({ status, cancelledDuringPending }: { status: IncidentSummary['status']; cancelledDuringPending: boolean }) {
   const map: Record<IncidentSummary['status'], { label: string; cls: string }> = {
-    pending:   { label: 'Pending',   cls: 'bg-yellow-700/40 text-yellow-200 border-yellow-600/50' },
-    triggered: { label: 'Triggered', cls: 'bg-orange-700/40 text-orange-200 border-orange-600/50' },
-    active:    { label: 'Active',    cls: 'bg-red-700/40 text-red-200 border-red-600/50' },
-    resolved:  { label: 'Resolved',  cls: 'bg-green-700/40 text-green-200 border-green-600/50' },
+    pending:   { label: 'Pending',   cls: 'bg-primary700/40 text-primary200 border-yellow-600/50' },
+    triggered: { label: 'Triggered', cls: 'bg-brand-red700/40 text-brand-red border-orange-600/50' },
+    active:    { label: 'Active',    cls: 'bg-red-700/40 text-brand-red border-red-600/50' },
+    resolved:  { label: 'Resolved',  cls: 'bg-green-700/40 text-primary border-green-600/50' },
     cancelled: {
       label: cancelledDuringPending ? 'Cancelled (no alert sent)' : 'Cancelled (false alarm)',
       cls: 'bg-slate-700/40 text-slate-200 border-slate-600/50',
@@ -125,7 +125,7 @@ export default function IncidentRecapPage() {
 
         {loading && <div className="text-center text-white/60 py-12">Loading incident…</div>}
         {error && (
-          <div className="rounded-lg bg-red-950/40 border border-red-700/50 px-3 py-2 text-sm text-red-200">
+          <div className="rounded-lg bg-red-950/40 border border-red-700/50 px-3 py-2 text-sm text-brand-red">
             {error}
           </div>
         )}
@@ -177,7 +177,7 @@ export default function IncidentRecapPage() {
               </div>
               {summary.guardians.fastestResponseMs !== null && (
                 <div className="text-xs text-white/60">
-                  Fastest response: <span className="text-green-400 font-medium">{formatDuration(summary.guardians.fastestResponseMs)}</span>
+                  Fastest response: <span className="text-primary font-medium">{formatDuration(summary.guardians.fastestResponseMs)}</span>
                 </div>
               )}
               {summary.guardians.details.length > 0 && (
@@ -185,7 +185,7 @@ export default function IncidentRecapPage() {
                   {summary.guardians.details.map((g) => (
                     <li key={g.guardianId} className="py-2 text-xs flex items-center justify-between">
                       <span className="text-white/70 font-mono truncate">{g.guardianId}</span>
-                      <span className={g.acknowledgedAt ? 'text-green-400' : g.notifiedAt ? 'text-yellow-400' : 'text-white/40'}>
+                      <span className={g.acknowledgedAt ? 'text-primary' : g.notifiedAt ? 'text-primary400' : 'text-white/40'}>
                         {g.acknowledgedAt
                           ? `Acked in ${formatDuration(g.responseMs ?? 0)}`
                           : g.notifiedAt
@@ -206,9 +206,9 @@ export default function IncidentRecapPage() {
                 <span
                   className={
                     summary.agencyDispatch.status === 'sent'
-                      ? 'text-green-400'
+                      ? 'text-primary'
                       : summary.agencyDispatch.status === 'failed'
-                      ? 'text-red-400'
+                      ? 'text-brand-red'
                       : 'text-white/50'
                   }
                 >

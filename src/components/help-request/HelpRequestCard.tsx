@@ -27,7 +27,7 @@ function formatNaira(amount: number | string): string {
 
 // Green / emerald spheres
 const SPHERES: [string, string, string] = [
-    'rgba(16,185,129,0.45)',
+    'rgba(0,212,49,0.45)',
     'rgba(5,150,105,0.38)',
     'rgba(34,197,94,0.28)',
 ];
@@ -35,7 +35,7 @@ const SPHERES: [string, string, string] = [
 const CARD_HEIGHT = '90vh';
 
 const CATEGORY_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-    financial:  { label: 'Financial',  icon: 'account_balance_wallet', color: 'rgba(16,185,129,0.22)' },
+    financial:  { label: 'Financial',  icon: 'account_balance_wallet', color: 'rgba(0,212,49,0.22)' },
     medical:    { label: 'Medical',    icon: 'local_hospital',          color: 'rgba(239,68,68,0.22)' },
     food:       { label: 'Food',       icon: 'restaurant',              color: 'rgba(249,115,22,0.22)' },
     shelter:    { label: 'Shelter',    icon: 'home',                    color: 'rgba(59,130,246,0.22)' },
@@ -43,9 +43,9 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: string; color: stri
 };
 
 const STATUS_CONFIG: Record<string, { label: string; textCls: string }> = {
-    open:        { label: 'Open',        textCls: 'text-emerald-300' },
+    open:        { label: 'Open',        textCls: 'text-primary' },
     in_progress: { label: 'In Progress', textCls: 'text-amber-300' },
-    fulfilled:   { label: 'Fulfilled',   textCls: 'text-blue-300' },
+    fulfilled:   { label: 'Fulfilled',   textCls: 'text-brand-blue' },
     closed:      { label: 'Closed',      textCls: 'text-white/35' },
 };
 
@@ -184,7 +184,7 @@ export function HelpRequestCard({ post, onComment }: HelpRequestCardProps) {
                 icon="favorite"
                 count={post.likes || undefined}
                 active={isLiked}
-                activeIconClass="text-pink-300"
+                activeIconClass="text-brand-blue"
                 filled
                 onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
             />
@@ -200,7 +200,7 @@ export function HelpRequestCard({ post, onComment }: HelpRequestCardProps) {
             />
             <GlassBtn
                 icon="volunteer_activism"
-                activeIconClass="text-emerald-300"
+                activeIconClass="text-primary"
                 label="Help"
                 onClick={(e) => { e.stopPropagation(); router.push(`/help-request/${postId}`); }}
             />
@@ -273,7 +273,7 @@ export function HelpRequestCard({ post, onComment }: HelpRequestCardProps) {
                     className="mt-3 text-[14px] font-semibold leading-snug text-white whitespace-pre-wrap break-words"
                     style={{ textShadow: '0 1px 8px rgba(0,0,0,0.65)' }}
                 >
-                    <span className="text-emerald-300 font-black mr-1.5">#helprequest</span>
+                    <span className="text-primary font-black mr-1.5">#helprequest</span>
                     {textContent}
                 </p>
             )}
@@ -301,7 +301,7 @@ export function HelpRequestCard({ post, onComment }: HelpRequestCardProps) {
         >
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[17px] text-emerald-400">savings</span>
+                    <span className="material-symbols-outlined text-[17px] text-primary">savings</span>
                     <span className="text-[11px] font-bold uppercase text-white/45">Funding Goal</span>
                 </div>
                 <span className="text-[15px] font-bold text-white">{formatNaira(targetAmount)}</span>
@@ -309,12 +309,12 @@ export function HelpRequestCard({ post, onComment }: HelpRequestCardProps) {
             <div>
                 <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.10)' }}>
                     <div
-                        className="h-full rounded-full bg-emerald-400 transition-all duration-500"
+                        className="h-full rounded-full bg-primary transition-all duration-500"
                         style={{ width: `${progressPct ?? 0}%` }}
                     />
                 </div>
                 <div className="flex items-center justify-between mt-1.5">
-                    <span className="text-[11px] font-medium text-emerald-300">{formatNaira(localReceived)} raised</span>
+                    <span className="text-[11px] font-medium text-primary">{formatNaira(localReceived)} raised</span>
                     <span className="text-[11px] text-white/35">{progressPct != null ? `${progressPct}%` : ''}</span>
                 </div>
             </div>
@@ -322,8 +322,8 @@ export function HelpRequestCard({ post, onComment }: HelpRequestCardProps) {
                 <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setReceivedInput(String(localReceived || '')); setShowUpdateReceived(true); setTimeout(() => receivedInputRef.current?.focus(), 50); }}
-                    className="self-start flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-xl text-emerald-300 hover:text-emerald-200 transition-colors"
-                    style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.20)' }}
+                    className="self-start flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-xl text-primary hover:text-white/90 transition-colors"
+                    style={{ background: 'rgba(0,212,49,0.15)', border: '1px solid rgba(0,212,49,0.20)' }}
                 >
                     <span className="material-symbols-outlined text-[13px]">edit</span>
                     Update amount
@@ -344,7 +344,7 @@ export function HelpRequestCard({ post, onComment }: HelpRequestCardProps) {
                         />
                     </div>
                     <button type="button" onClick={handleSaveReceived} disabled={updateReceivedMutation.isPending}
-                        className="px-3 py-1.5 rounded-xl text-[12px] font-bold text-white bg-emerald-500/30 hover:bg-emerald-500/40 transition-all">
+                        className="px-3 py-1.5 rounded-xl text-[12px] font-bold text-white bg-primary/30 hover:bg-primary/40 transition-all">
                         {updateReceivedMutation.isPending ? '…' : 'Save'}
                     </button>
                     <button type="button" onClick={(e) => { e.stopPropagation(); setShowUpdateReceived(false); }}
@@ -432,7 +432,7 @@ export function HelpRequestCard({ post, onComment }: HelpRequestCardProps) {
                         className={`font-bold whitespace-pre-wrap break-words text-white ${textSizeClass}`}
                         style={{ textShadow: '0 2px 24px rgba(0,0,0,0.4)' }}
                     >
-                        <span className="text-emerald-300 mr-1.5 font-black">
+                        <span className="text-primary mr-1.5 font-black">
                             #helprequest{helpCategory ? ` #${helpCategory}` : ''}
                         </span>
                         {textContent}

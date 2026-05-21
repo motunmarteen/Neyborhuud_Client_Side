@@ -44,7 +44,7 @@ export default function BookModal({ serviceId, serviceTitle, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full mod-btn transition-all"
+            className="p-2 rounded-full mod-chip transition-all"
             style={{ color: "var(--neu-text-muted)" }}
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
@@ -86,7 +86,7 @@ export default function BookModal({ serviceId, serviceTitle, onClose }: Props) {
           <button
             type="submit"
             disabled={book.isPending || !date}
-            className="w-full py-3.5 mod-btn-active text-primary disabled:opacity-50 rounded-xl font-bold transition-all"
+            className="w-full py-3.5 mod-chip mod-chip-active text-primary disabled:opacity-50 rounded-xl font-bold transition-all"
           >
             {book.isPending ? "Booking…" : "Confirm Booking"}
           </button>

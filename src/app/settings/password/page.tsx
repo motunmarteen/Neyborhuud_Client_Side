@@ -137,7 +137,7 @@ export default function ChangePasswordPage() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className={`neu-btn py-5 rounded-2xl mt-2 ${!canSubmit ? 'opacity-40 cursor-not-allowed' : ''}`}
+            className={`mod-chip py-5 rounded-2xl mt-2 ${!canSubmit ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             <span
               className="font-black uppercase tracking-widest text-sm"

@@ -54,16 +54,16 @@ interface EmergencyPost {
 
 const EMERGENCY_TYPE_META: Record<EmergencyType, { label: string; icon: string; color: string }> = {
   crime:               { label: 'Crime',              icon: 'local_police',      color: 'text-red-600' },
-  danger:              { label: 'Danger',             icon: 'dangerous',         color: 'text-orange-600' },
+  danger:              { label: 'Danger',             icon: 'dangerous',         color: 'text-brand-red600' },
   missing_person:      { label: 'Missing Person',     icon: 'person_search',     color: 'text-purple-600' },
-  fire:                { label: 'Fire',               icon: 'local_fire_department', color: 'text-red-500' },
+  fire:                { label: 'Fire',               icon: 'local_fire_department', color: 'text-brand-red' },
   accident:            { label: 'Accident',           icon: 'car_crash',         color: 'text-amber-600' },
-  suspicious_activity: { label: 'Suspicious Activity', icon: 'report',          color: 'text-yellow-600' },
+  suspicious_activity: { label: 'Suspicious Activity', icon: 'report',          color: 'text-primary600' },
 };
 
 const SEVERITY_META: Record<Severity, { label: string; bg: string; text: string; border: string }> = {
-  low:      { label: 'Low',      bg: 'bg-yellow-50',  text: 'text-yellow-700', border: 'border-yellow-200' },
-  medium:   { label: 'Medium',   bg: 'bg-orange-50',  text: 'text-orange-700', border: 'border-orange-200' },
+  low:      { label: 'Low',      bg: 'bg-primary50',  text: 'text-primary700', border: 'border-yellow-200' },
+  medium:   { label: 'Medium',   bg: 'bg-brand-red50',  text: 'text-brand-red700', border: 'border-orange-200' },
   critical: { label: 'CRITICAL', bg: 'bg-red-50',     text: 'text-red-700',    border: 'border-red-200' },
 };
 
@@ -120,7 +120,7 @@ function CreateEmergencyForm({ onSuccess }: { onSuccess: () => void }) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {/* Warning header */}
       <div className="flex items-start gap-2 p-3 rounded-2xl bg-red-50 border border-red-100">
-        <span className="material-symbols-outlined text-red-500 text-xl flex-shrink-0 mt-0.5">warning</span>
+        <span className="material-symbols-outlined text-brand-red text-xl flex-shrink-0 mt-0.5">warning</span>
         <p className="text-xs" style={{ color: 'var(--neu-text)' }}>
           This will immediately alert your community. Only post real emergencies — up to 3 per hour.
         </p>
@@ -129,7 +129,7 @@ function CreateEmergencyForm({ onSuccess }: { onSuccess: () => void }) {
       {/* Emergency type */}
       <div>
         <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
-          Emergency Type <span className="text-red-500">*</span>
+          Emergency Type <span className="text-brand-red">*</span>
         </label>
         <div className="grid grid-cols-3 gap-2">
           {(Object.entries(EMERGENCY_TYPE_META) as [EmergencyType, typeof EMERGENCY_TYPE_META[EmergencyType]][]).map(([key, meta]) => (
@@ -138,7 +138,7 @@ function CreateEmergencyForm({ onSuccess }: { onSuccess: () => void }) {
               type="button"
               onClick={() => setEmergencyType(key)}
               className={`flex flex-col items-center gap-1 p-3 rounded-2xl text-xs font-semibold transition-all ${
-                emergencyType === key ? 'neu-btn-active text-primary' : 'neu-socket'
+                emergencyType === key ? 'mod-chip mod-chip-active text-primary' : 'neu-socket'
               }`}
               style={emergencyType !== key ? { color: 'var(--neu-text-muted)' } : {}}
             >
@@ -154,7 +154,7 @@ function CreateEmergencyForm({ onSuccess }: { onSuccess: () => void }) {
       {/* Severity */}
       <div>
         <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
-          Severity <span className="text-red-500">*</span>
+          Severity <span className="text-brand-red">*</span>
         </label>
         <div className="grid grid-cols-3 gap-2">
           {(Object.entries(SEVERITY_META) as [Severity, typeof SEVERITY_META[Severity]][]).map(([key, meta]) => (
@@ -193,7 +193,7 @@ function CreateEmergencyForm({ onSuccess }: { onSuccess: () => void }) {
       {/* Body */}
       <div>
         <label className="block text-sm font-semibold mb-1" style={{ color: 'var(--neu-text)' }}>
-          Description <span className="text-red-500">*</span>
+          Description <span className="text-brand-red">*</span>
         </label>
         <textarea
           value={body}
@@ -228,7 +228,7 @@ function CreateEmergencyForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full py-4 rounded-2xl neu-btn-active font-bold text-primary text-sm transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+        className="w-full py-4 rounded-2xl mod-chip mod-chip-active font-bold text-primary text-sm transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
       >
         <span className="material-symbols-outlined text-xl">campaign</span>
         {submitting ? 'Posting Alert...' : 'Post Emergency Alert'}
@@ -259,7 +259,7 @@ function EmergencyCard({ post, onReact }: {
         <div className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${
           post.severity === 'critical' ? 'bg-red-100' : 'neu-socket'
         }`}>
-          <span className={`material-symbols-outlined text-xl ${typeMeta?.color ?? 'text-red-500'}`}>
+          <span className={`material-symbols-outlined text-xl ${typeMeta?.color ?? 'text-brand-red'}`}>
             {typeMeta?.icon ?? 'emergency'}
           </span>
         </div>
@@ -302,7 +302,7 @@ function EmergencyCard({ post, onReact }: {
 
       {/* Expiry countdown */}
       {countdown && (
-        <div className={`flex items-center gap-1 text-xs font-semibold ${expired ? 'text-gray-400' : 'text-orange-500'}`}>
+        <div className={`flex items-center gap-1 text-xs font-semibold ${expired ? 'text-[var(--neu-text-muted)]' : 'text-brand-red'}`}>
           <span className="material-symbols-outlined text-sm">schedule</span>
           {countdown}
         </div>
@@ -313,7 +313,7 @@ function EmergencyCard({ post, onReact }: {
         <div className="flex items-center gap-3 pt-1 border-t" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
           <button
             onClick={() => onReact(post.id ?? post._id, 'aware')}
-            className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${isAware ? 'text-blue-500' : ''}`}
+            className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${isAware ? 'text-brand-blue' : ''}`}
             style={!isAware ? { color: 'var(--neu-text-muted)' } : {}}
           >
             <span className="material-symbols-outlined text-base">notifications_active</span>
@@ -321,7 +321,7 @@ function EmergencyCard({ post, onReact }: {
           </button>
           <button
             onClick={() => onReact(post.id ?? post._id, 'nearby')}
-            className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${isNearby ? 'text-orange-500' : ''}`}
+            className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${isNearby ? 'text-brand-red' : ''}`}
             style={!isNearby ? { color: 'var(--neu-text-muted)' } : {}}
           >
             <span className="material-symbols-outlined text-base">my_location</span>
@@ -329,7 +329,7 @@ function EmergencyCard({ post, onReact }: {
           </button>
           <button
             onClick={() => onReact(post.id ?? post._id, 'safe')}
-            className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${isSafe ? 'text-green-500' : ''}`}
+            className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${isSafe ? 'text-primary' : ''}`}
             style={!isSafe ? { color: 'var(--neu-text-muted)' } : {}}
           >
             <span className="material-symbols-outlined text-base">health_and_safety</span>
@@ -420,7 +420,7 @@ function CommunityEmergencyInner() {
         <div>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.1)' }}>
-              <span className="material-symbols-outlined text-lg text-red-500">campaign</span>
+              <span className="material-symbols-outlined text-lg text-brand-red">campaign</span>
             </div>
             <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Community Alerts</h1>
           </div>
@@ -432,7 +432,7 @@ function CommunityEmergencyInner() {
           <button
             onClick={() => setShowCreate(v => !v)}
             className={`neu-fab w-10 h-10 rounded-2xl flex items-center justify-center transition-all active:scale-95 ${
-              showCreate ? 'text-red-500' : 'text-primary'
+              showCreate ? 'text-brand-red' : 'text-primary'
             }`}
           >
             <span className="material-symbols-outlined text-xl">
@@ -466,16 +466,16 @@ function CommunityEmergencyInner() {
       <div className="px-4 flex flex-col gap-4">
         {loading && (
           <div className="flex flex-col items-center justify-center py-14">
-            <div className="w-8 h-8 border-4 border-red-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
             <p className="text-sm mt-4" style={{ color: 'var(--neu-text-muted)' }}>Loading alerts...</p>
           </div>
         )}
 
         {!loading && error && (
           <div className="neu-card-sm rounded-2xl p-8 flex flex-col items-center">
-            <span className="material-symbols-outlined text-4xl text-red-400 mb-3">error</span>
+            <span className="material-symbols-outlined text-4xl text-brand-red mb-3">error</span>
             <p className="text-sm text-center mb-4" style={{ color: 'var(--neu-text)' }}>{error}</p>
-            <button onClick={() => loadPosts(1)} className="px-6 py-2.5 neu-btn rounded-2xl text-sm font-bold text-primary">
+            <button onClick={() => loadPosts(1)} className="px-6 py-2.5 mod-chip rounded-2xl text-sm font-bold text-primary">
               Retry
             </button>
           </div>
@@ -484,7 +484,7 @@ function CommunityEmergencyInner() {
         {!loading && !error && posts.length === 0 && (
           <div className="neu-card-sm rounded-2xl flex flex-col items-center justify-center py-14 px-6">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'rgba(239,68,68,0.08)' }}>
-              <span className="material-symbols-outlined text-4xl text-red-400 opacity-50">campaign</span>
+              <span className="material-symbols-outlined text-4xl text-brand-red opacity-50">campaign</span>
             </div>
             <p className="text-base font-semibold text-center" style={{ color: 'var(--neu-text)' }}>
               No active alerts
@@ -495,7 +495,7 @@ function CommunityEmergencyInner() {
             {user && (
               <button
                 onClick={() => setShowCreate(true)}
-                className="px-6 py-2.5 neu-btn-active rounded-2xl text-sm font-bold text-primary"
+                className="px-6 py-2.5 mod-chip mod-chip-active rounded-2xl text-sm font-bold text-primary"
               >
                 Post Alert
               </button>
@@ -515,7 +515,7 @@ function CommunityEmergencyInner() {
 
         {loadingMore && (
           <div className="flex justify-center py-4">
-            <div className="w-6 h-6 border-3 border-red-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-3 border-brand-red border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </div>
@@ -533,7 +533,7 @@ export default function CommunityEmergencyPage() {
           <Suspense
             fallback={
               <div className="flex justify-center py-24">
-                <div className="w-8 h-8 border-4 border-red-400 border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
               </div>
             }
           >

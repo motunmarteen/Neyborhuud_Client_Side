@@ -70,13 +70,13 @@ export function GlassFormPage({ title, subtitle, titleId = "glass-form-title", o
                       {title}
                     </h1>
                     {subtitle ? (
-                      <p className="mt-1 text-xs font-medium leading-relaxed text-[#3D5A3E] dark:text-white/55 sm:text-sm">{subtitle}</p>
+                      <p className="mt-1 text-xs font-medium leading-relaxed text-brand-green-dark/70 dark:text-white/55 sm:text-sm">{subtitle}</p>
                     ) : null}
                   </div>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="neu-btn grid h-10 w-10 shrink-0 place-items-center rounded-full transition-colors"
+                    className="mod-chip grid h-10 w-10 shrink-0 place-items-center rounded-full transition-colors"
                     aria-label="Close"
                   >
                     <span className="material-symbols-outlined text-[22px]" style={{ color: "var(--neu-text-secondary)" }}>

@@ -32,19 +32,19 @@ function fmtCountdown(secs: number | null): string {
 
 function statusColor(status: Trip['status']): string {
   switch (status) {
-    case 'active': return 'text-green-500';
-    case 'escalated': return 'text-amber-500';
+    case 'active': return 'text-primary';
+    case 'escalated': return 'text-primary';
     case 'panic': return 'text-red-600';
-    case 'completed': return 'text-blue-500';
-    case 'cancelled': return 'text-gray-400';
-    default: return 'text-yellow-500';
+    case 'completed': return 'text-brand-blue';
+    case 'cancelled': return 'text-[var(--neu-text-muted)]';
+    default: return 'text-primary';
   }
 }
 
 function escalationColor(level: number): string {
-  if (level === 0) return 'bg-green-500';
-  if (level === 1) return 'bg-yellow-400';
-  if (level === 2) return 'bg-orange-500';
+  if (level === 0) return 'bg-primary';
+  if (level === 1) return 'bg-primary400';
+  if (level === 2) return 'bg-brand-red';
   return 'bg-red-600';
 }
 
@@ -72,9 +72,9 @@ function EscalationBanner({
           <p className="font-bold text-sm" style={{ color: '#d97706' }}>
             {'⚠️ Missed Check-in — Level ' + alert.level}
           </p>
-          <p className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{alert.message}</p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--neu-text-muted)' }}>{alert.message}</p>
         </div>
-        <button onClick={onDismiss} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+        <button onClick={onDismiss} className="text-[var(--neu-text-muted)] hover:text-[var(--neu-text-secondary)] text-lg leading-none">×</button>
       </div>
       <button
         onClick={onCheckIn}
@@ -105,7 +105,7 @@ function AutoSosActivatedBanner({ onCheckIn, onGoToSos }: { onCheckIn: () => voi
         <span className="material-symbols-outlined text-red-600" style={{ fontSize: '22px' }}>emergency</span>
         <p className="font-bold text-sm text-red-600">🆘 SOS Activated Automatically</p>
       </div>
-      <p className="text-xs" style={{ color: '#6b7280' }}>
+      <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
         The system triggered a <strong>silent SOS</strong> because you have not responded to multiple
         check-in alerts. Your guardians are being notified with your trip details and last known location.
         You can still check in to show you are safe — this will de-escalate the situation.
@@ -232,13 +232,13 @@ function ActiveTripPanel({
           </div>
           <div className="neu-socket rounded-xl p-2 text-center">
             <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Next Check-in</p>
-            <p className="text-xs font-semibold mt-0.5" style={{ color: checkInCountdown !== null && checkInCountdown <= 120 ? '#f59e0b' : 'var(--neu-text)' }}>
+            <p className="text-xs font-semibold mt-0.5" style={{ color: checkInCountdown !== null && checkInCountdown <= 120 ? '#00D431' : 'var(--neu-text)' }}>
               {fmtCountdown(checkInCountdown)}
             </p>
           </div>
           <div className="neu-socket rounded-xl p-2 text-center">
             <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Deviation</p>
-            <p className="text-xs font-semibold mt-0.5" style={{ color: (trip.routeDeviationMeters ?? 0) > 300 ? '#f59e0b' : 'var(--neu-text)' }}>
+            <p className="text-xs font-semibold mt-0.5" style={{ color: (trip.routeDeviationMeters ?? 0) > 300 ? '#00D431' : 'var(--neu-text)' }}>
               {trip.routeDeviationMeters ? `${trip.routeDeviationMeters.toFixed(0)} m` : '—'}
             </p>
           </div>
@@ -248,7 +248,7 @@ function ActiveTripPanel({
               {[1, 2, 3, 4].map((lvl) => (
                 <div
                   key={lvl}
-                  className={`w-3 h-3 rounded-sm transition-colors ${lvl <= trip.escalationLevel ? escalationColor(lvl) : 'bg-gray-200 dark:bg-gray-700'}`}
+                  className={`w-3 h-3 rounded-sm transition-colors ${lvl <= trip.escalationLevel ? escalationColor(lvl) : 'bg-brand-surface dark:bg-brand-black'}`}
                 />
               ))}
             </div>
@@ -262,7 +262,7 @@ function ActiveTripPanel({
         {currentLocation && (
           <div className="mt-2 text-xs" style={{ color: 'var(--neu-text-muted)' }}>
             📍 {currentLocation.latitude.toFixed(5)}, {currentLocation.longitude.toFixed(5)}
-            {tracking && <span className="ml-2 text-green-500 font-medium">● Live</span>}
+            {tracking && <span className="ml-2 text-primary font-medium">● Live</span>}
           </div>
         )}
       </div>
@@ -283,7 +283,7 @@ function ActiveTripPanel({
             {isPaused ? (
               <button
                 onClick={onResume}
-                className="px-4 py-2.5 rounded-xl neu-btn text-sm font-semibold"
+                className="px-4 py-2.5 rounded-xl mod-chip text-sm font-semibold"
                 style={{ color: 'var(--primary)' }}
               >
                 ▶ Resume
@@ -291,7 +291,7 @@ function ActiveTripPanel({
             ) : (
               <button
                 onClick={onPause}
-                className="px-4 py-2.5 rounded-xl neu-btn text-sm font-semibold"
+                className="px-4 py-2.5 rounded-xl mod-chip text-sm font-semibold"
                 style={{ color: 'var(--neu-text)' }}
               >
                 ⏸ Pause
@@ -300,15 +300,15 @@ function ActiveTripPanel({
 
             <button
               onClick={onComplete}
-              className="px-4 py-2.5 rounded-xl neu-btn text-sm font-semibold"
-              style={{ color: '#3b82f6' }}
+              className="px-4 py-2.5 rounded-xl mod-chip text-sm font-semibold"
+              style={{ color: '#0000FF' }}
             >
               🏁 Arrived Safely
             </button>
 
             <button
               onClick={() => setShowCancel((p) => !p)}
-              className="px-4 py-2.5 rounded-xl neu-btn text-sm font-semibold text-red-500"
+              className="px-4 py-2.5 rounded-xl mod-chip text-sm font-semibold text-brand-red"
             >
               ✕ Cancel Trip
             </button>
@@ -335,7 +335,7 @@ function ActiveTripPanel({
 
       {isTerminal && (
         <div className="neu-card-sm rounded-2xl p-4 text-center">
-          <p className="font-semibold" style={{ color: trip.status === 'completed' ? '#3b82f6' : 'var(--neu-text-muted)' }}>
+          <p className="font-semibold" style={{ color: trip.status === 'completed' ? '#0000FF' : 'var(--neu-text-muted)' }}>
             {trip.status === 'completed' ? '🏁 Trip completed safely!' : '✕ Trip was cancelled'}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
@@ -500,7 +500,7 @@ function StartTripForm({ onStart }: { onStart: (payload: any) => Promise<void> }
               onClick={handleUseMyLocation}
               disabled={gpsLoading}
               title="Use current location"
-              className="px-3 py-2.5 rounded-xl neu-btn flex items-center gap-1 text-xs font-medium shrink-0"
+              className="px-3 py-2.5 rounded-xl mod-chip flex items-center gap-1 text-xs font-medium shrink-0"
               style={{ color: originCoords ? '#16a34a' : 'var(--primary)', opacity: gpsLoading ? 0.6 : 1 }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
@@ -509,7 +509,7 @@ function StartTripForm({ onStart }: { onStart: (payload: any) => Promise<void> }
               {gpsLoading ? 'Getting…' : originCoords ? 'Got it' : 'My Location'}
             </button>
           </div>
-          {gpsError && <p className="text-xs text-red-500">{gpsError}</p>}
+          {gpsError && <p className="text-xs text-brand-red">{gpsError}</p>}
           {originCoords && !gpsLoading && (
             <p className="text-xs" style={{ color: '#16a34a' }}>
               📍 GPS captured ({originCoords.latitude.toFixed(4)}, {originCoords.longitude.toFixed(4)})
@@ -588,7 +588,7 @@ function StartTripForm({ onStart }: { onStart: (payload: any) => Promise<void> }
         />
 
         {err && (
-          <p className="text-sm text-red-500 font-medium">{err}</p>
+          <p className="text-sm text-brand-red font-medium">{err}</p>
         )}
 
         <button
@@ -651,7 +651,7 @@ function SafeTripsInner() {
               </div>
               <Link
                 href="/safety/trips/history"
-                className="px-3 py-2 rounded-xl neu-btn text-xs font-medium"
+                className="px-3 py-2 rounded-xl mod-chip text-xs font-medium"
                 style={{ color: 'var(--primary)' }}
               >
                 History

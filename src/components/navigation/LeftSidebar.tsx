@@ -8,13 +8,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { getStoredCommunity } from '@/lib/communityContext';
 import AmbientProfileCard from './AmbientProfileCard';
 
+import { SIDEBAR_ACCENTS } from '@/lib/brand-styles';
+
 const quickActions = [
-  { icon: 'shield', label: 'Sentinel', href: '/safety', accent: '#8b5cf6' },
-  { icon: 'route', label: 'Safe Trip', href: '/safety/trips', accent: '#008751' },
-  { icon: 'fence', label: 'Safety Zones', href: '/safety/geofences', accent: '#f59e0b' },
-  { icon: 'phone_in_talk', label: 'Fake Call', href: '/safety/fake-call', accent: '#22c55e' },
-  { icon: 'pin', label: 'Panic PIN', href: '/safety/panic-pin', accent: '#ef4444' },
-  { icon: 'chat', label: 'Messages', href: '/messages', accent: '#3b82f6' },
+  { icon: 'shield', label: 'Sentinel', href: '/safety' },
+  { icon: 'route', label: 'Safe Trip', href: '/safety/trips' },
+  { icon: 'fence', label: 'Safety Zones', href: '/safety/geofences' },
+  { icon: 'phone_in_talk', label: 'Fake Call', href: '/safety/fake-call' },
+  { icon: 'pin', label: 'Panic PIN', href: '/safety/panic-pin' },
+  { icon: 'chat', label: 'Messages', href: '/messages' },
 ];
 
 const mainNav = [
@@ -132,8 +134,9 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
         <div className="flex flex-col gap-3">
           <h2 className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Quick Actions</h2>
           <div className="grid grid-cols-3 gap-1.5">
-            {quickActions.map((item) => {
+            {quickActions.map((item, idx) => {
               const active = isActive(item.href);
+              const accent = SIDEBAR_ACCENTS[idx % SIDEBAR_ACCENTS.length];
               return (
                 <Link
                   key={item.href}
@@ -143,8 +146,8 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
                     active ? 'text-white shadow-md' : 'hover:opacity-80'
                   }`}
                   style={active
-                    ? { background: item.accent, color: '#fff', boxShadow: `0 4px 16px ${item.accent}55` }
-                    : { color: item.accent, background: `${item.accent}14` }
+                    ? { background: accent, color: '#fff', boxShadow: `0 4px 16px ${accent}55` }
+                    : { color: accent, background: `${accent}14` }
                   }
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{item.icon}</span>

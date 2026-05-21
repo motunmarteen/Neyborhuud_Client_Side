@@ -34,7 +34,7 @@ export const PostSearchResult = ({ post, onClose }: Props) => {
   return (
     <button
       onClick={handleClick}
-      className="w-full p-3 hover:bg-gray-50 dark:hover:bg-surface-base-dark rounded-lg transition-colors text-left"
+      className="w-full p-3 hover:bg-brand-surface dark:hover:bg-surface-base-dark rounded-lg transition-colors text-left"
     >
       <div className="flex items-start gap-3">
         {/* Author Avatar */}
@@ -49,24 +49,24 @@ export const PostSearchResult = ({ post, onClose }: Props) => {
         <div className="flex-1 min-w-0">
           {/* Author Info */}
           <div className="flex items-center gap-1 mb-1">
-            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+            <span className="font-semibold text-[var(--neu-text-muted)] dark:text-white text-sm">
               {post.author?.name || 'Unknown'}
             </span>
             {post.author?.isVerified && (
               <i className="bi bi-patch-check-fill text-primary text-xs shrink-0" />
             )}
-            <span className="text-gray-500 dark:text-text-secondary-dark text-sm">
+            <span className="text-[var(--neu-text-muted)] dark:text-text-secondary-dark text-sm">
               · {formatTimeAgo(post.createdAt)}
             </span>
           </div>
 
           {/* Post Title */}
           {post.title && (
-            <h4 className="font-medium text-gray-900 dark:text-white mb-1 line-clamp-1">{post.title}</h4>
+            <h4 className="font-medium text-[var(--neu-text-muted)] dark:text-white mb-1 line-clamp-1">{post.title}</h4>
           )}
 
           {/* Post Content */}
-          <p className="text-gray-700 dark:text-text-secondary-dark text-sm line-clamp-2">{post.content}</p>
+          <p className="text-[var(--neu-text-muted)] dark:text-text-secondary-dark text-sm line-clamp-2">{post.content}</p>
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
@@ -77,7 +77,7 @@ export const PostSearchResult = ({ post, onClose }: Props) => {
                 </span>
               ))}
               {post.tags.length > 3 && (
-                <span className="text-gray-500 dark:text-text-secondary-dark text-sm">
+                <span className="text-[var(--neu-text-muted)] dark:text-text-secondary-dark text-sm">
                   +{post.tags.length - 3} more
                 </span>
               )}
@@ -85,9 +85,9 @@ export const PostSearchResult = ({ post, onClose }: Props) => {
           )}
 
           {/* Engagement Stats */}
-          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-text-secondary-dark">
+          <div className="flex items-center gap-4 mt-2 text-sm text-[var(--neu-text-muted)] dark:text-text-secondary-dark">
             <span className="flex items-center gap-1">
-              <i className={`bi ${post.isLiked ? 'bi-heart-fill text-red-500' : 'bi-heart'}`} />
+              <i className={`bi ${post.isLiked ? 'bi-heart-fill text-brand-red' : 'bi-heart'}`} />
               {post.likes || 0}
             </span>
             <span className="flex items-center gap-1">

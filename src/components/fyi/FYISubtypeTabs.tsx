@@ -23,10 +23,10 @@ const TABS: Array<{ key: FYISubtype; label: string; icon: string }> = [
 // Per-subtype accent color when active
 const ACTIVE_COLOR: Record<string, string> = {
     '':                       'text-[var(--primary)]',
-    safety_notice:             'text-red-400',
-    lost_found:                'text-purple-400',
-    community_announcement:    'text-blue-400',
-    alert:                     'text-orange-400',
+    safety_notice:             'text-brand-red',
+    lost_found:                'text-brand-blue',
+    community_announcement:    'text-brand-blue',
+    alert:                     'text-brand-red',
 };
 
 export function FYISubtypeTabs({ activeSubtype, onSubtypeChange }: FYISubtypeTabsProps) {

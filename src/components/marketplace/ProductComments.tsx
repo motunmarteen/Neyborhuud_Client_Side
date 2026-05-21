@@ -60,7 +60,7 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
   }, [commentBody]);
 
   if (isLoading) {
-    const skelBg = embedded ? "bg-[var(--surface-light)] dark:bg-white/10" : "bg-gray-800";
+    const skelBg = embedded ? "bg-[var(--surface-light)] dark:bg-white/10" : "bg-brand-black";
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
@@ -96,14 +96,14 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
               className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${
                 embedded
                   ? "border border-[var(--border-light)] bg-[var(--surface-light)]/80 dark:border-white/12 dark:bg-white/[0.06]"
-                  : "bg-gray-800/50"
+                  : "bg-brand-black/50"
               }`}
             >
-              <span className={embedded ? "text-[var(--neu-text-muted)]" : "text-gray-400"}>Replying to comment</span>
+              <span className={embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}>Replying to comment</span>
               <button
                 type="button"
                 onClick={handleCancelReply}
-                className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                className="text-brand-red hover:text-brand-red dark:text-brand-red dark:hover:text-brand-red"
               >
                 Cancel
               </button>
@@ -118,20 +118,20 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
               className={
                 embedded
                   ? `${glassField} min-h-[64px] resize-none`
-                  : `min-h-[80px] w-full resize-none rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`
+                  : `min-h-[80px] w-full resize-none rounded-lg border border-black/[0.08] bg-brand-black px-4 py-3 text-white outline-none placeholder:text-[var(--neu-text-muted)] focus:border-brand-blue focus:ring-1 focus:ring-brand-blue`
               }
               maxLength={1000}
             />
             <div
               className={`absolute bottom-3 right-3 text-xs ${
-                embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"
+                embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"
               }`}
             >
               {commentBody.length}/1000
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"}`}>
+            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}`}>
               Maximum 3 comments per minute
             </span>
             <button
@@ -140,7 +140,7 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
               className={
                 embedded
                   ? "rounded-full bg-gradient-to-r from-primary to-[#006F35] px-6 py-2 text-sm font-bold text-white shadow-md transition-opacity disabled:cursor-not-allowed disabled:opacity-45 dark:from-emerald-500 dark:to-teal-600"
-                  : "rounded-lg bg-blue-500 px-6 py-2 font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-500"
+                  : "rounded-lg bg-brand-blue px-6 py-2 font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-brand-black disabled:text-[var(--neu-text-muted)]"
               }
             >
               {addComment.isPending ? "Posting..." : "Post Comment"}
@@ -152,7 +152,7 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
           className={`rounded-lg p-4 text-center ${
             embedded
               ? "border border-[var(--border-light)] bg-[var(--surface-light)]/70 text-[var(--neu-text-muted)] dark:border-white/12 dark:bg-white/[0.05]"
-              : "bg-gray-800/50 text-gray-400"
+              : "bg-brand-black/50 text-[var(--neu-text-muted)]"
           }`}
         >
           Please log in to comment
@@ -173,7 +173,7 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
           ))}
         </div>
       ) : (
-        <div className={`py-8 text-center ${embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"}`}>
+        <div className={`py-8 text-center ${embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}`}>
           No comments yet. Be the first to comment!
         </div>
       )}
@@ -185,8 +185,8 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
           disabled={isFetchingNextPage}
           className={
             embedded
-              ? "neu-btn w-full rounded-xl py-3 text-sm font-bold transition-colors disabled:opacity-50"
-              : "w-full rounded-lg bg-gray-800 py-3 text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
+              ? "mod-chip w-full rounded-xl py-3 text-sm font-bold transition-colors disabled:opacity-50"
+              : "w-full rounded-lg bg-brand-black py-3 text-white transition-colors hover:bg-brand-black disabled:opacity-50"
           }
           style={embedded ? { color: "var(--neu-text)" } : undefined}
         >
@@ -234,20 +234,20 @@ function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemP
           className={
             embedded
               ? "rounded-xl border border-[var(--border-light)] bg-[var(--surface-light)]/75 px-4 py-3 dark:border-white/12 dark:bg-white/[0.06]"
-              : "rounded-lg bg-gray-800 px-4 py-3"
+              : "rounded-lg bg-brand-black px-4 py-3"
           }
         >
           {/* Username and time */}
           <div className="mb-2 flex items-center gap-2">
             <span className={`font-semibold ${embedded ? "text-[var(--neu-text)]" : "text-white"}`}>{username}</span>
-            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"}`}>
+            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}`}>
               {formatTimeAgo(comment.createdAt)}
             </span>
           </div>
 
           {/* Body */}
           <p
-            className={`whitespace-pre-wrap break-words ${embedded ? "text-[var(--neu-text-secondary)]" : "text-gray-300"}`}
+            className={`whitespace-pre-wrap break-words ${embedded ? "text-[var(--neu-text-secondary)]" : "text-[var(--neu-text-muted)]"}`}
           >
             {comment.body}
           </p>
@@ -270,7 +270,7 @@ function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemP
         {/* Actions */}
         <div className="mt-2 flex items-center gap-4 px-4">
           {likesCount > 0 && (
-            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-gray-500"}`}>
+            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}`}>
               {likesCount} {likesCount === 1 ? "like" : "likes"}
             </span>
           )}
@@ -278,7 +278,7 @@ function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemP
             <button
               onClick={() => onReply(commentId, username)}
               className={`text-xs transition-colors ${
-                embedded ? "text-[var(--neu-text-muted)] hover:text-primary" : "text-gray-400 hover:text-blue-400"
+                embedded ? "text-[var(--neu-text-muted)] hover:text-primary" : "text-[var(--neu-text-muted)] hover:text-brand-blue"
               }`}
             >
               Reply

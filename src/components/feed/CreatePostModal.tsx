@@ -114,7 +114,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                 <div className="neu-modal rounded-2xl w-full max-w-md p-8 flex flex-col items-center text-center">
                     <div className="w-16 h-16 rounded-full neu-socket flex items-center justify-center mb-4">
-                        <span className="material-symbols-outlined text-4xl text-orange-500">public_off</span>
+                        <span className="material-symbols-outlined text-4xl text-brand-red">public_off</span>
                     </div>
                     <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--neu-text)' }}>
                         {t('createPost.nigeriaOnly')}
@@ -124,7 +124,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                     </p>
                     <button
                         onClick={onClose}
-                        className="px-6 py-2 neu-btn rounded-xl text-sm font-bold"
+                        className="btn-secondary px-6 py-2 text-sm font-bold"
                         style={{ color: 'var(--neu-text)' }}
                     >
                         {t('common.close')}
@@ -394,7 +394,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                     <button
                         onClick={handleClose}
                         disabled={isSubmitting}
-                        className="w-8 h-8 rounded-xl neu-btn flex items-center justify-center disabled:opacity-50 transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+                        className="w-8 h-8 rounded-xl btn-ghost flex items-center justify-center disabled:opacity-50 transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
                     >
                         <span className="material-symbols-outlined text-xl" style={{ color: 'var(--neu-text-muted)' }}>close</span>
                     </button>
@@ -456,8 +456,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                         disabled={isSubmitting}
                                         className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all ${
                                             contentType === ct.value
-                                                ? 'neu-btn-active text-primary'
-                                                : 'neu-btn'
+                                                ? 'mod-chip mod-chip-active text-primary'
+                                                : 'mod-chip'
                                         } disabled:opacity-50`}
                                         style={contentType !== ct.value ? { color: 'var(--neu-text-muted)' } : undefined}
                                     >
@@ -663,8 +663,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                             disabled={isSubmitting}
                                             className={`w-full px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                                                 isNegotiable
-                                                    ? 'neu-btn-active text-green-400 bg-green-500/10'
-                                                    : 'neu-btn'
+                                                    ? 'mod-chip mod-chip-active text-primary bg-primary/10'
+                                                    : 'mod-chip'
                                             }`}
                                             style={!isNegotiable ? { color: 'var(--neu-text-muted)' } : undefined}
                                         >
@@ -753,7 +753,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                                 type="button"
                                                 onClick={() => setHrStep(s)}
                                                 className={`w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center transition-all ${
-                                                    hrStep === s ? 'neu-btn-active text-primary' : 'neu-btn'
+                                                    hrStep === s ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'
                                                 }`}
                                                 style={hrStep !== s ? { color: 'var(--neu-text-muted)' } : undefined}
                                             >
@@ -787,7 +787,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                                     onClick={() => setHelpCategory(opt.value)}
                                                     disabled={isSubmitting}
                                                     className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                                                        helpCategory === opt.value ? 'neu-btn-active text-primary' : 'neu-btn'
+                                                        helpCategory === opt.value ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'
                                                     }`}
                                                     style={helpCategory !== opt.value ? { color: 'var(--neu-text-muted)' } : undefined}
                                                 >
@@ -798,7 +798,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                         <button
                                             type="button"
                                             onClick={() => setHrStep(2)}
-                                            className="mt-1 self-end px-4 py-1.5 rounded-xl text-xs font-bold text-primary neu-btn-active transition-all"
+                                            className="mt-1 self-end px-4 py-1.5 rounded-xl text-xs font-bold text-primary mod-chip mod-chip-active transition-all"
                                         >
                                             Next →
                                         </button>
@@ -831,7 +831,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                             <button
                                                 type="button"
                                                 onClick={() => setHrStep(1)}
-                                                className="px-4 py-1.5 rounded-xl text-xs font-bold neu-btn transition-all"
+                                                className="px-4 py-1.5 rounded-xl text-xs font-bold mod-chip transition-all"
                                                 style={{ color: 'var(--neu-text-muted)' }}
                                             >
                                                 ← Back
@@ -839,7 +839,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                             <button
                                                 type="button"
                                                 onClick={() => setHrStep(3)}
-                                                className="ml-auto px-4 py-1.5 rounded-xl text-xs font-bold text-primary neu-btn-active transition-all"
+                                                className="ml-auto px-4 py-1.5 rounded-xl text-xs font-bold text-primary mod-chip mod-chip-active transition-all"
                                             >
                                                 Next →
                                             </button>
@@ -894,7 +894,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                         <button
                                             type="button"
                                             onClick={() => setHrStep(2)}
-                                            className="mt-1 self-start px-4 py-1.5 rounded-xl text-xs font-bold neu-btn transition-all"
+                                            className="mt-1 self-start px-4 py-1.5 rounded-xl text-xs font-bold mod-chip transition-all"
                                             style={{ color: 'var(--neu-text-muted)' }}
                                         >
                                             ← Back
@@ -941,8 +941,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                         disabled={isSubmitting}
                                         className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all ${
                                             category === cat
-                                                ? 'neu-btn-active text-primary'
-                                                : 'neu-btn'
+                                                ? 'mod-chip mod-chip-active text-primary'
+                                                : 'mod-chip'
                                         } disabled:opacity-50`}
                                         style={category !== cat ? { color: 'var(--neu-text-muted)' } : undefined}
                                     >
@@ -983,10 +983,10 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                         disabled={isSubmitting}
                                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                                             priority === p
-                                                ? p === 'critical' ? 'bg-red-500/20 text-red-400 neu-btn-active'
-                                                : p === 'high' ? 'bg-orange-500/20 text-orange-400 neu-btn-active'
-                                                : 'text-primary neu-btn-active'
-                                                : 'neu-btn'
+                                                ? p === 'critical' ? 'bg-brand-red/20 text-brand-red mod-chip mod-chip-active'
+                                                : p === 'high' ? 'bg-brand-red/20 text-brand-red mod-chip mod-chip-active'
+                                                : 'text-primary mod-chip mod-chip-active'
+                                                : 'mod-chip'
                                         }`}
                                         style={priority !== p ? { color: 'var(--neu-text-muted)' } : undefined}
                                     >
@@ -1024,7 +1024,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isSubmitting}
-                                className="flex items-center justify-center p-2 rounded-xl neu-btn transition-all text-primary disabled:opacity-50 active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+                                className="flex items-center justify-center p-2 rounded-xl btn-ghost transition-all text-primary disabled:opacity-50 active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
                             >
                                 <span className="material-symbols-outlined text-[20px]">image</span>
                             </button>
@@ -1032,7 +1032,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isSubmitting}
-                                className="flex items-center justify-center p-2 rounded-xl neu-btn transition-all text-primary disabled:opacity-50 active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+                                className="flex items-center justify-center p-2 rounded-xl btn-ghost transition-all text-primary disabled:opacity-50 active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
                             >
                                 <span className="material-symbols-outlined text-[20px]">videocam</span>
                             </button>
@@ -1054,8 +1054,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                                 isSubmitting ||
                                 (!content.trim() && selectedFiles.length === 0)
                             }
-                            className="px-6 py-2 neu-btn rounded-xl text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
-                            style={{ color: 'var(--neu-text)' }}
+                            className="btn-glass-primary px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             {isSubmitting ? (
                                 <>

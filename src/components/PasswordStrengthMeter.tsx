@@ -30,11 +30,11 @@ export function PasswordStrengthMeter({
 
   const barClass =
     meetsPolicy || tier === "strong"
-      ? "bg-emerald-500 dark:bg-emerald-500"
+      ? "bg-primary dark:bg-primary"
       : tier === "good"
-        ? "bg-emerald-400/90 dark:bg-emerald-400/80"
+        ? "bg-primary/90 dark:bg-primary/80"
         : tier === "fair"
-          ? "bg-amber-400 dark:bg-amber-500/90"
+          ? "bg-primary dark:bg-primary/90"
           : tier === "weak"
             ? "bg-amber-600/85 dark:bg-amber-600/80"
             : "bg-zinc-300 dark:bg-zinc-600";
@@ -60,7 +60,7 @@ export function PasswordStrengthMeter({
 
   const labelClass =
     meetsPolicy || tier === "strong"
-      ? "text-emerald-800 dark:text-emerald-200"
+      ? "text-emerald-800 dark:text-white/90"
       : tier === "empty"
         ? "text-zinc-500 dark:text-zinc-400"
         : "text-zinc-700 dark:text-zinc-300";
@@ -82,7 +82,7 @@ export function PasswordStrengthMeter({
           </p>
         </div>
         {meetsPolicy ? (
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-emerald-600 dark:text-primary">
             <i className="bi bi-check-lg text-base" aria-hidden />
           </span>
         ) : null}
@@ -107,20 +107,20 @@ export function PasswordStrengthMeter({
                 {item.pending ? (
                   <i className="bi bi-circle text-[0.65rem]" />
                 ) : item.ok ? (
-                  <i className="bi bi-check-circle-fill text-emerald-600 dark:text-emerald-400 text-sm" />
+                  <i className="bi bi-check-circle-fill text-emerald-600 dark:text-primary text-sm" />
                 ) : (
-                  <i className="bi bi-dash-circle text-amber-600 dark:text-amber-400 text-sm" />
+                  <i className="bi bi-dash-circle text-amber-600 dark:text-primary text-sm" />
                 )}
               </span>
               <span
                 className={cx(
                   item.pending && "text-zinc-400 dark:text-zinc-500",
-                  !item.pending && !item.ok && "font-medium text-amber-900 dark:text-amber-200",
+                  !item.pending && !item.ok && "font-medium text-amber-900 dark:text-white/90",
                 )}
               >
                 {item.label}
                 {!item.pending && !item.ok ? (
-                  <span className="mt-0.5 block font-normal text-amber-800/90 dark:text-amber-200/85">
+                  <span className="mt-0.5 block font-normal text-amber-800/90 dark:text-white/90/85">
                     {item.failMessage}
                   </span>
                 ) : null}

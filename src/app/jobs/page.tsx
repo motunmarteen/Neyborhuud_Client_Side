@@ -63,7 +63,7 @@ export default function JobsPage() {
               </div>
               <Link
                 href="/jobs/create"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm mod-btn-active text-primary transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm mod-chip mod-chip-active text-primary transition-all"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
                 Post Job
@@ -74,7 +74,7 @@ export default function JobsPage() {
             <div className="flex gap-2 mb-4">
               <Link
                 href="/jobs/my-applications"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-btn transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-chip transition-all"
                 style={{ color: "var(--neu-text-secondary)" }}
               >
                 <span className="material-symbols-outlined text-[14px]">description</span>
@@ -82,7 +82,7 @@ export default function JobsPage() {
               </Link>
               <Link
                 href="/jobs/saved"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-btn transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-chip transition-all"
                 style={{ color: "var(--neu-text-secondary)" }}
               >
                 <span className="material-symbols-outlined text-[14px]">bookmark</span>
@@ -126,7 +126,7 @@ export default function JobsPage() {
                 <p className="text-sm mb-4" style={{ color: "var(--neu-text)" }}>Could not load jobs</p>
                 <button
                   onClick={() => refetch()}
-                  className="px-6 py-2.5 rounded-xl font-bold text-sm mod-btn transition-all"
+                  className="px-6 py-2.5 rounded-xl font-bold text-sm mod-chip transition-all"
                   style={{ color: "var(--neu-text)" }}
                 >
                   Retry
@@ -177,7 +177,7 @@ export default function JobsPage() {
                 </p>
                 <Link
                   href="/jobs/create"
-                  className="px-6 py-2.5 rounded-xl font-bold text-sm mod-btn-active text-primary transition-all"
+                  className="px-6 py-2.5 rounded-xl font-bold text-sm mod-chip mod-chip-active text-primary transition-all"
                 >
                   Post a Job
                 </Link>

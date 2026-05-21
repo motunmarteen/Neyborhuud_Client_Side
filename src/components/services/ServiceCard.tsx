@@ -24,7 +24,7 @@ export default function ServiceCard({ service, onFavorite, favoriting }: Props) 
     <div className="mod-card rounded-2xl overflow-hidden relative">
       {/* Boosted badge */}
       {(service as any).isBoosted && (
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 shadow">
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary shadow">
           <span className="text-[11px]">🚀</span>
           <span className="text-black text-[9px] font-black uppercase tracking-wide">Boosted</span>
         </div>
@@ -109,7 +109,7 @@ export default function ServiceCard({ service, onFavorite, favoriting }: Props) 
               <button
                 onClick={() => onFavorite(service.id, !!service.isFavorited)}
                 disabled={favoriting}
-                className="p-1.5 rounded-full mod-btn transition-all"
+                className="p-1.5 rounded-full mod-chip transition-all"
               >
                 <span
                   className="material-symbols-outlined text-[18px]"
@@ -124,7 +124,7 @@ export default function ServiceCard({ service, onFavorite, favoriting }: Props) 
             )}
             <Link
               href={`/services/${service.id}`}
-              className="px-4 py-1.5 mod-btn-active text-primary rounded-full text-sm font-semibold transition-all"
+              className="px-4 py-1.5 mod-chip mod-chip-active text-primary rounded-full text-sm font-semibold transition-all"
             >
               View
             </Link>

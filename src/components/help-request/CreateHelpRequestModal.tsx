@@ -116,7 +116,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
       />
 
       {/* Modal */}
-      <div className="relative w-full sm:max-w-lg mx-auto bg-[#1a1a2e] rounded-t-2xl sm:rounded-2xl border border-white/10 overflow-hidden max-h-[92dvh] flex flex-col">
+      <div className="relative w-full sm:max-w-lg mx-auto bg-brand-black rounded-t-2xl sm:rounded-2xl border border-white/10 overflow-hidden max-h-[92dvh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
               {/* Category */}
               <div>
                 <label className="text-white/70 text-xs font-medium mb-2 block">
-                  Category <span className="text-rose-400">*</span>
+                  Category <span className="text-brand-red400">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {CATEGORIES.map((cat) => (
@@ -158,7 +158,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                       onClick={() => setCategory(cat.value)}
                       className={`flex flex-col items-center gap-1 py-2.5 px-2 rounded-xl border text-center transition-all ${
                         category === cat.value
-                          ? "border-amber-400/60 bg-amber-400/10"
+                          ? "border-primary/60 bg-primary/10"
                           : "border-white/10 bg-white/5 hover:border-white/20"
                       }`}
                     >
@@ -179,7 +179,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
               {/* Description */}
               <div>
                 <label className="text-white/70 text-xs font-medium mb-1.5 block">
-                  Describe your situation <span className="text-rose-400">*</span>
+                  Describe your situation <span className="text-brand-red400">*</span>
                 </label>
                 <textarea
                   value={body}
@@ -187,11 +187,11 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                   placeholder="Explain what help you need, why, and how it will be used…"
                   rows={4}
                   maxLength={1000}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/30 resize-none focus:outline-none focus:border-amber-400/40"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/30 resize-none focus:outline-none focus:border-primary/40"
                 />
                 <div className="flex justify-between mt-1">
                   {body.trim().length > 0 && body.trim().length < 20 && (
-                    <span className="text-rose-400 text-[11px] flex items-center gap-1">
+                    <span className="text-brand-red400 text-[11px] flex items-center gap-1">
                       <AlertCircle size={10} /> Minimum 20 characters
                     </span>
                   )}
@@ -216,7 +216,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                     onChange={(e) => setTargetAmount(e.target.value)}
                     placeholder="0"
                     min={0}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-7 pr-3 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-amber-400/40"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-7 pr-3 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary/40"
                   />
                 </div>
               </div>
@@ -230,8 +230,8 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                   {(
                     [
                       { value: "normal", label: "Normal", color: "text-white/70" },
-                      { value: "high", label: "⚠️ High", color: "text-amber-400" },
-                      { value: "critical", label: "🚨 Critical", color: "text-rose-400" },
+                      { value: "high", label: "⚠️ High", color: "text-primary" },
+                      { value: "critical", label: "🚨 Critical", color: "text-brand-red400" },
                     ] as const
                   ).map((p) => (
                     <button
@@ -239,7 +239,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                       onClick={() => setPriority(p.value)}
                       className={`py-2 rounded-xl border text-[12px] font-medium transition-all ${
                         priority === p.value
-                          ? "border-amber-400/60 bg-amber-400/10 text-white"
+                          ? "border-primary/60 bg-primary/10 text-white"
                           : "border-white/10 bg-white/5 hover:border-white/20"
                       } ${p.color}`}
                     >
@@ -264,7 +264,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                       />
                       <button
                         onClick={() => removeImage(i)}
-                        className="absolute -top-1 -right-1 bg-rose-500 rounded-full w-4 h-4 flex items-center justify-center"
+                        className="absolute -top-1 -right-1 bg-brand-red500 rounded-full w-4 h-4 flex items-center justify-center"
                       >
                         <X size={10} />
                       </button>
@@ -303,7 +303,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                   value={bankName}
                   onChange={(e) => setBankName(e.target.value)}
                   placeholder="e.g. First Bank, GTBank, UBA…"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-amber-400/40"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary/40"
                 />
               </div>
 
@@ -319,7 +319,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                   }
                   placeholder="10-digit NUBAN"
                   inputMode="numeric"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-amber-400/40"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary/40"
                 />
               </div>
 
@@ -332,22 +332,22 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                   value={accountName}
                   onChange={(e) => setAccountName(e.target.value)}
                   placeholder="Name as it appears on the account"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-amber-400/40"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary/40"
                 />
               </div>
 
               {/* HuudCoin Coming Soon */}
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-amber-400/40 bg-amber-400/5">
-                <span className="text-amber-400 text-xl">🪙</span>
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-primary/40 bg-primary/5">
+                <span className="text-primary text-xl">🪙</span>
                 <div className="flex-1">
-                  <p className="text-[12px] font-bold text-amber-500">
+                  <p className="text-[12px] font-bold text-primary">
                     Pay with HuudCoins
                   </p>
                   <p className="text-[11px] text-white/50">
                     Coming soon — HuudCoins will be exchangeable for Naira
                   </p>
                 </div>
-                <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-400/10 text-amber-500 whitespace-nowrap">
+                <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-primary/10 text-primary whitespace-nowrap">
                   SOON
                 </span>
               </div>
@@ -369,7 +369,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
               <button
                 onClick={() => mutation.mutate()}
                 disabled={!canProceedStep1 || mutation.isPending}
-                className="flex-1 py-2.5 rounded-xl bg-amber-500 text-black text-sm font-bold hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 rounded-xl bg-primary text-black text-sm font-bold hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {mutation.isPending ? "Posting…" : "Post Request"}
               </button>
@@ -378,7 +378,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
             <button
               onClick={() => mutation.mutate()}
               disabled={mutation.isPending}
-              className="w-full py-2.5 rounded-xl bg-amber-500 text-black text-sm font-bold hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-2.5 rounded-xl bg-primary text-black text-sm font-bold hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {mutation.isPending ? "Posting…" : "Post Help Request"}
             </button>

@@ -23,10 +23,10 @@ const TABS: Array<{ key: HelpRequestCategory; label: string; icon: string }> = [
 
 const ACTIVE_COLOR: Record<string, string> = {
     '':          'text-[var(--primary)]',
-    financial:   'text-green-400',
-    medical:     'text-red-400',
-    food:        'text-orange-400',
-    shelter:     'text-blue-400',
+    financial:   'text-primary',
+    medical:     'text-brand-red',
+    food:        'text-brand-red',
+    shelter:     'text-brand-blue',
     emergency:   'text-pink-400',
 };
 

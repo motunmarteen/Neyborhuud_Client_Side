@@ -11,9 +11,9 @@ import { useMyApplications, useWithdrawApplication } from "@/hooks/useJobs";
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
   pending:    { bg: "var(--neu-shadow-dark)", color: "var(--neu-text-muted)",   label: "Pending"   },
-  reviewing:  { bg: "#3b82f620",             color: "var(--brand-blue)",        label: "Reviewing" },
-  accepted:   { bg: "#22c55e20",             color: "var(--primary)",           label: "Accepted"  },
-  rejected:   { bg: "#ef444420",             color: "var(--brand-red)",         label: "Rejected"  },
+  reviewing:  { bg: "#0000FF20",             color: "var(--brand-blue)",        label: "Reviewing" },
+  accepted:   { bg: "#006F3520",             color: "var(--primary)",           label: "Accepted"  },
+  rejected:   { bg: "#FF000020",             color: "var(--brand-red)",         label: "Rejected"  },
   withdrawn:  { bg: "#f9731620",             color: "#f97316",                  label: "Withdrawn" },
 };
 
@@ -42,7 +42,7 @@ export default function MyApplicationsPage() {
           <div className="flex items-center gap-3 mb-6">
             <Link
               href="/jobs"
-              className="p-2 rounded-xl mod-btn transition-all"
+              className="p-2 rounded-xl mod-chip transition-all"
               style={{ color: "var(--neu-text-muted)" }}
             >
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -168,7 +168,7 @@ export default function MyApplicationsPage() {
               <p className="text-sm mb-6" style={{ color: "var(--neu-text-muted)" }}>Browse jobs and apply!</p>
               <Link
                 href="/jobs"
-                className="px-6 py-2.5 rounded-xl font-bold text-sm mod-btn-active text-primary transition-all"
+                className="px-6 py-2.5 rounded-xl font-bold text-sm mod-chip mod-chip-active text-primary transition-all"
               >
                 Browse Jobs
               </Link>

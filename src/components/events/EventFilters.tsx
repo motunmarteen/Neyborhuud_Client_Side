@@ -37,8 +37,8 @@ export default function EventFilters({ filters, onChange }: Props) {
               onClick={() => onChange("type", val)}
               className={`shrink-0 text-sm px-4 py-1.5 rounded-xl font-semibold transition-all ${
                 active
-                  ? "mod-btn-active text-primary"
-                  : "mod-btn text-slate-700 hover:text-slate-950"
+                  ? "mod-chip mod-chip-active text-primary"
+                  : "mod-chip text-slate-700 hover:text-slate-950"
               }`}
             >
               {opt}
@@ -58,8 +58,8 @@ export default function EventFilters({ filters, onChange }: Props) {
               onClick={() => onChange("date", val)}
               className={`shrink-0 text-sm px-4 py-1.5 rounded-xl font-semibold transition-all ${
                 active
-                  ? "mod-btn-active text-primary"
-                  : "mod-btn text-slate-700 hover:text-slate-950"
+                  ? "mod-chip mod-chip-active text-primary"
+                  : "mod-chip text-slate-700 hover:text-slate-950"
               }`}
             >
               {opt}

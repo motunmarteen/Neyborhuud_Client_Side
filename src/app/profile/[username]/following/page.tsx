@@ -64,21 +64,21 @@ export default function FollowingPage() {
         <LeftSidebar />
         <div className="flex-1 overflow-y-auto">
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md z-10">
+      <div className="border-b border-black/[0.08] dark:border-black/[0.08] sticky top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md z-10">
         <div className="flex items-center gap-4 px-4 h-14">
           <button
             onClick={() => router.back()}
-            className="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-full hover:bg-brand-surface dark:hover:bg-brand-black/80 flex items-center justify-center transition-colors"
             aria-label="Go back"
             type="button"
           >
             <i className="bi bi-arrow-left text-xl" />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-xl text-gray-900 dark:text-white truncate">
+            <h1 className="font-bold text-xl text-[var(--neu-text-muted)] dark:text-white truncate">
               {displayName}
             </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p className="text-xs text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] truncate">
               @{username}
             </p>
           </div>
@@ -86,17 +86,17 @@ export default function FollowingPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-black sticky top-14 z-10">
+      <div className="border-b border-black/[0.08] dark:border-black/[0.08] bg-white dark:bg-black sticky top-14 z-10">
         <div className="flex">
           <button
             onClick={() => router.push(`/profile/${username}/followers`)}
-            className="flex-1 py-4 text-center font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
+            className="flex-1 py-4 text-center font-semibold text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] hover:bg-brand-surface dark:hover:bg-brand-black/80/50 transition-colors"
             type="button"
           >
             Linkers
           </button>
           <button
-            className="flex-1 py-4 text-center font-semibold text-gray-900 dark:text-white border-b-4 border-primary"
+            className="flex-1 py-4 text-center font-semibold text-[var(--neu-text-muted)] dark:text-white border-b-4 border-primary"
             type="button"
           >
             Linking
@@ -111,12 +111,12 @@ export default function FollowingPage() {
           <div className="divide-y divide-gray-200 dark:divide-gray-800">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="px-4 py-3 flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse shrink-0" />
+                <div className="w-12 h-12 rounded-full bg-brand-surface dark:bg-brand-black animate-pulse shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="w-32 h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                  <div className="w-24 h-3 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                  <div className="w-32 h-4 bg-brand-surface dark:bg-brand-black rounded animate-pulse" />
+                  <div className="w-24 h-3 bg-brand-surface dark:bg-brand-black rounded animate-pulse" />
                 </div>
-                <div className="w-20 h-8 bg-gray-200 dark:bg-gray-800 rounded-full animate-pulse" />
+                <div className="w-20 h-8 bg-brand-surface dark:bg-brand-black rounded-full animate-pulse" />
               </div>
             ))}
           </div>
@@ -126,17 +126,17 @@ export default function FollowingPage() {
         {error && !isLoading && (
           <div className="text-center py-16 px-4">
             <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-4">
-              <i className="bi bi-exclamation-triangle text-3xl text-red-500" />
+              <i className="bi bi-exclamation-triangle text-3xl text-brand-red" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-xl font-bold text-[var(--neu-text-muted)] dark:text-white mb-2">
               Failed to load following
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-4">
+            <p className="text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] mb-4">
               Something went wrong. Please try again.
             </p>
             <button
               onClick={() => router.back()}
-              className="px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black font-semibold rounded-full hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+              className="px-6 py-2.5 bg-brand-black dark:bg-white text-white dark:text-black font-semibold rounded-full hover:bg-brand-black dark:hover:bg-brand-surface transition-colors"
               type="button"
             >
               Go Back
@@ -147,13 +147,13 @@ export default function FollowingPage() {
         {/* Empty State */}
         {!isLoading && !error && following.length === 0 && (
           <div className="text-center py-16 px-4">
-            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center mx-auto mb-4">
-              <i className="bi bi-person-plus text-3xl text-gray-400 dark:text-gray-600" />
+            <div className="w-16 h-16 rounded-full bg-brand-surface dark:bg-brand-black flex items-center justify-center mx-auto mb-4">
+              <i className="bi bi-person-plus text-3xl text-[var(--neu-text-muted)] dark:text-[var(--neu-text-secondary)]" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-xl font-bold text-[var(--neu-text-muted)] dark:text-white mb-2">
               Not following anyone yet
             </h2>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">
               When @{username} follows someone, they'll show up here.
             </p>
           </div>
@@ -174,18 +174,18 @@ export default function FollowingPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 rounded-full border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 rounded-full border border-black/[0.08] dark:border-black/[0.08] hover:bg-brand-surface dark:hover:bg-brand-black/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   type="button"
                 >
                   <i className="bi bi-chevron-left" />
                 </button>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="text-sm text-[var(--neu-text-secondary)] dark:text-[var(--neu-text-muted)]">
                   Page {pagination.page} of {pagination.totalPages}
                 </span>
                 <button
                   onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
                   disabled={page === pagination.totalPages}
-                  className="px-4 py-2 rounded-full border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 rounded-full border border-black/[0.08] dark:border-black/[0.08] hover:bg-brand-surface dark:hover:bg-brand-black/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   type="button"
                 >
                   <i className="bi bi-chevron-right" />
@@ -195,7 +195,7 @@ export default function FollowingPage() {
 
             {/* Total Count */}
             {pagination && (
-              <div className="text-center text-sm text-gray-500 dark:text-gray-400 pb-6">
+              <div className="text-center text-sm text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] pb-6">
                 {pagination.total.toLocaleString()} following
               </div>
             )}

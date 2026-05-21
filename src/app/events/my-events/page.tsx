@@ -91,7 +91,7 @@ export default function MyEventsPage() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => router.back()}
-                    className="p-2 rounded-full mod-btn text-slate-700 hover:text-slate-950 transition-colors"
+                    className="p-2 rounded-full mod-chip text-slate-700 hover:text-slate-950 transition-colors"
                     aria-label="Go back"
                   >
                     <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -100,7 +100,7 @@ export default function MyEventsPage() {
                 </div>
                 <Link
                   href="/events/create"
-                  className="shrink-0 flex items-center gap-1 text-xs px-3 py-2 rounded-xl mod-btn-active text-primary font-semibold"
+                  className="shrink-0 flex items-center gap-1 text-xs px-3 py-2 rounded-xl mod-chip mod-chip-active text-primary font-semibold"
                 >
                   <span className="material-symbols-outlined text-[14px]">add</span>
                   Create
@@ -115,8 +115,8 @@ export default function MyEventsPage() {
                     onClick={() => setTab(t)}
                     className={`flex-1 py-2 rounded-xl text-sm font-bold capitalize transition-all ${
                       tab === t
-                        ? "mod-btn-active text-primary"
-                        : "mod-btn text-slate-700 hover:text-slate-950"
+                        ? "mod-chip mod-chip-active text-primary"
+                        : "mod-chip text-slate-700 hover:text-slate-950"
                     }`}
                   >
                     {t}
@@ -157,7 +157,7 @@ export default function MyEventsPage() {
                   className="mt-3 flex flex-col gap-5 pb-4 md:items-center"
                   style={{
                     background:
-                      "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)), radial-gradient(circle at 50% 0%, rgba(0,135,81,0.12), transparent 34%)",
+                      "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)), radial-gradient(circle at 50% 0%, rgba(0,111,53,0.12), transparent 34%)",
                     backdropFilter: "blur(18px) saturate(150%)",
                     WebkitBackdropFilter: "blur(18px) saturate(150%)",
                   }}
@@ -177,7 +177,7 @@ export default function MyEventsPage() {
                       {tab === "organizing" && (
                         <button
                           onClick={() => setBoostingEventId(event._id ?? event.id)}
-                          className="absolute bottom-[88px] left-5 z-40 flex items-center gap-1.5 rounded-full border border-amber-300/30 bg-amber-500/25 px-3 py-1.5 text-xs font-bold text-amber-100 shadow-lg backdrop-blur-md transition-all hover:bg-amber-500/35"
+                          className="absolute bottom-[88px] left-5 z-40 flex items-center gap-1.5 rounded-full border border-amber-300/30 bg-primary/25 px-3 py-1.5 text-xs font-bold text-amber-100 shadow-lg backdrop-blur-md transition-all hover:bg-primary/35"
                         >
                           Boost
                           {event.isBoosted && event.boostedUntil && (
@@ -215,7 +215,7 @@ export default function MyEventsPage() {
                 </p>
                 <Link
                   href={tab === "attending" ? "/events" : "/events/create"}
-                  className="inline-block px-6 py-2.5 rounded-xl mod-btn-active text-primary font-semibold"
+                  className="inline-block px-6 py-2.5 rounded-xl mod-chip mod-chip-active text-primary font-semibold"
                 >
                   {tab === "attending" ? "Browse Events" : "Create Event"}
                 </Link>

@@ -381,17 +381,17 @@ export default function ProfilePage() {
           <div className="flex-1 overflow-y-auto flex items-center justify-center">
         <div className="text-center px-4">
           <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mx-auto mb-6">
-            <i className="bi bi-person-x text-5xl text-slate-400" />
+            <i className="bi bi-person-x text-5xl text-[var(--neu-text-muted)]" />
           </div>
           <h1 className="text-3xl font-bold mb-3 text-slate-900">
             User Not Found
           </h1>
-          <p className="mb-6 max-w-md text-slate-500">
+          <p className="mb-6 max-w-md text-[var(--neu-text-muted)]">
             The user @{username} doesn't exist or their profile is unavailable.
           </p>
           <button
             onClick={() => router.back()}
-            className="neu-btn rounded-2xl px-6 py-2.5 font-semibold text-primary transition-colors"
+            className="mod-chip rounded-2xl px-6 py-2.5 font-semibold text-primary transition-colors"
           >
             Go Back
           </button>
@@ -451,7 +451,7 @@ export default function ProfilePage() {
   const primaryStatCards = [
     { label: 'Linkers', value: followerCount.toLocaleString(), icon: 'group', tone: 'from-emerald-500/15 to-emerald-500/5 text-emerald-700' },
     { label: 'Linking', value: followingCount.toLocaleString(), icon: 'share', tone: 'from-sky-500/15 to-sky-500/5 text-sky-700' },
-    { label: 'NeyburH Score', value: trustScore.toLocaleString(), icon: 'verified_user', tone: 'from-lime-500/15 to-lime-500/5 text-lime-700' },
+    { label: 'NeyburH Score', value: trustScore.toLocaleString(), icon: 'verified_user', tone: 'from-lime-500/15 to-lime-500/5 text-primary700' },
     { label: 'HuudCoins', value: Number(huudCoins).toLocaleString(), icon: 'stars', tone: 'from-amber-500/20 to-amber-500/5 text-amber-700' },
   ];
   const profileFacts = [
@@ -505,7 +505,7 @@ export default function ProfilePage() {
                 }
               />
             ) : (
-              <div className="h-full bg-[radial-gradient(circle_at_top_left,rgba(0,135,81,0.22),transparent_34%),linear-gradient(135deg,rgba(240,253,244,1),rgba(219,234,254,1))]" />
+              <div className="h-full bg-[radial-gradient(circle_at_top_left,rgba(0,111,53,0.22),transparent_34%),linear-gradient(135deg,rgba(240,253,244,1),rgba(219,234,254,1))]" />
             )}
             <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-slate-950/70 pointer-events-none" />
             <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-transparent pointer-events-none" />
@@ -560,7 +560,7 @@ export default function ProfilePage() {
                 <div className="min-w-0 pb-2 text-white">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     {profile.identityVerified && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/20 px-2 py-1 text-[11px] font-bold text-emerald-100 ring-1 ring-emerald-200/30 backdrop-blur">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2 py-1 text-[11px] font-bold text-emerald-100 ring-1 ring-emerald-200/30 backdrop-blur">
                         <span className="material-symbols-outlined text-[13px]">verified</span>
                         Verified
                       </span>
@@ -574,7 +574,7 @@ export default function ProfilePage() {
                     </span>
                     {/* Vouch count chip — shown when there are vouches */}
                     {(vouchStatus?.vouchCount ?? 0) > 0 && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 px-2 py-1 text-[11px] font-bold text-amber-100 ring-1 ring-amber-200/30 backdrop-blur">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2 py-1 text-[11px] font-bold text-amber-100 ring-1 ring-amber-200/30 backdrop-blur">
                         🤜 {vouchStatus!.vouchCount} {vouchStatus!.vouchCount === 1 ? 'vouch' : 'vouches'}
                       </span>
                     )}
@@ -663,7 +663,7 @@ export default function ProfilePage() {
                 {isBlockPending ? 'Unblocking...' : 'Blocked'}
               </button>
             ) : isBlockedByThem ? (
-              <div className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-black text-slate-500">
+              <div className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-black text-[var(--neu-text-muted)]">
                 <span className="material-symbols-outlined text-[16px]">block</span>
                 Unavailable
               </div>
@@ -673,7 +673,7 @@ export default function ProfilePage() {
                   onClick={toggleFollow}
                   disabled={isFollowPending}
                   className={`group inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
-                    isFollowing ? 'border border-slate-200 bg-white text-slate-700 hover:border-red-200 hover:bg-red-50 hover:text-red-600' : 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700'
+                    isFollowing ? 'border border-slate-200 bg-white text-slate-700 hover:border-red-200 hover:bg-brand-red/10 hover:text-brand-red' : 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                   type="button"
                 >
@@ -733,7 +733,7 @@ export default function ProfilePage() {
                           <button
                             onClick={() => { toggleBlock(); setShowMoreMenu(false); }}
                             disabled={isBlockPending}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium hover:bg-brand-red/10 dark:hover:bg-brand-red/20 text-red-600 dark:text-brand-red transition-colors"
                           >
                             <span className="material-symbols-outlined text-[18px]">{isBlocked ? 'lock_open' : 'block'}</span>
                             {isBlocked ? 'Unblock NeyburH' : 'Block NeyburH'}
@@ -759,7 +759,7 @@ export default function ProfilePage() {
                     {/* ── Proximity badge ── */}
                     {!vouchStatus?.hasVouched && (
                       vouchStatus?.locationRequired ? (
-                        <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-100 border border-slate-300 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-100 border border-slate-300 px-2 py-0.5 text-[10px] font-bold text-[var(--neu-text-muted)]">
                           <span className="material-symbols-outlined text-[12px]">location_off</span>
                           Location needed
                         </span>
@@ -781,7 +781,7 @@ export default function ProfilePage() {
                       ? `${vouchStatus!.vouchCount} NeyburH${vouchStatus!.vouchCount === 1 ? '' : 's'} vouch for @${profile.username}`
                       : `@${profile.username} has no vouches yet`}
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="mt-0.5 text-xs text-[var(--neu-text-muted)]">
                     {vouchStatus?.hasVouched
                       ? 'You have vouched for this NeyburH. Their actions reflect on your trust.'
                       : vouchStatus?.canVouch === false
@@ -798,7 +798,7 @@ export default function ProfilePage() {
                     <button
                       onClick={() => revokeMutation.mutate()}
                       disabled={isVouchPending}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-100 px-3.5 py-2 text-sm font-black text-amber-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-100 px-3.5 py-2 text-sm font-black text-amber-700 transition hover:border-red-300 hover:bg-brand-red/10 hover:text-brand-red disabled:opacity-50"
                       type="button"
                       title="Revoke your vouch"
                     >
@@ -834,8 +834,8 @@ export default function ProfilePage() {
                       disabled={isVouchPending}
                       className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-black text-white shadow-md transition disabled:cursor-not-allowed disabled:opacity-50 ${
                         vouchStatus?.canVouch === false || vouchStatus?.locationRequired || vouchStatus?.withinRange === false
-                          ? 'bg-gray-400 shadow-gray-400/25 cursor-pointer hover:bg-gray-500'
-                          : 'bg-amber-500 shadow-amber-500/25 hover:bg-amber-600'
+                          ? 'bg-brand-surface shadow-gray-400/25 cursor-pointer hover:bg-brand-surface'
+                          : 'bg-primary shadow-amber-500/25 hover:bg-amber-600'
                       }`}
                       type="button"
                       title={
@@ -869,7 +869,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-amber-200">
                     <div
-                      className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                      className="h-full rounded-full bg-primary transition-all duration-500"
                       style={{ width: `${Math.min(100, ((vouchStatus?.vouchCount ?? 0) / 3) * 100)}%` }}
                     />
                   </div>
@@ -885,7 +885,7 @@ export default function ProfilePage() {
                   <span className="material-symbols-outlined text-[20px]">person_pin_circle</span>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">About this NeyburH</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">About this NeyburH</p>
                   <p className="mt-1 text-sm leading-6 text-slate-700">
                     {profile.bio || `${displayName} is part of the ${locationLabel || 'NeyborHuud'} community.`}
                   </p>
@@ -896,7 +896,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-2 gap-2">
               {profileFacts.map((fact) => (
                 <div key={fact.label} className="rounded-2xl border border-slate-200 bg-white p-3">
-                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">
                     <span className="material-symbols-outlined text-[14px] text-emerald-600">{fact.icon}</span>
                     {fact.label}
                   </div>
@@ -911,7 +911,7 @@ export default function ProfilePage() {
               <div
                 className="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-left"
               >
-                <h3 className="mb-2 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                <h3 className="mb-2 text-[11px] font-black uppercase tracking-wider text-[var(--neu-text-muted)]">
                   Handle history
                 </h3>
                 {renameAudit.length > 0 ? (
@@ -993,7 +993,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="p-5">
-                <div className="mb-2 flex items-center justify-between text-xs font-bold text-slate-500">
+                <div className="mb-2 flex items-center justify-between text-xs font-bold text-[var(--neu-text-muted)]">
                   <span>Community trust</span>
                   <span>{scorePercent}%</span>
                 </div>
@@ -1017,7 +1017,7 @@ export default function ProfilePage() {
                 {/* Voucher list */}
                 {voucherList.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 mb-2">
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)] mb-2">
                       Vouched by
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -1040,7 +1040,7 @@ export default function ProfilePage() {
                         </button>
                       ))}
                       {voucherList.length > 5 && (
-                        <span className="flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-500">
+                        <span className="flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-[var(--neu-text-muted)]">
                           +{voucherList.length - 5} more
                         </span>
                       )}
@@ -1050,11 +1050,11 @@ export default function ProfilePage() {
 
                 {/* Tier Privileges mini-list */}
                 <div className="mt-4 border-t border-slate-100 pt-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 mb-2">Tier Abilities</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)] mb-2">Tier Abilities</p>
                   <div className="space-y-1.5">
                     {profilePrivileges.privilegeList.slice(0, 4).map((p) => (
-                      <div key={p.label} className={`flex items-center gap-2 text-xs ${p.unlocked ? 'text-slate-700' : 'text-slate-400'}`}>
-                        <span className={`material-symbols-outlined text-[14px] ${p.unlocked ? 'text-emerald-500' : 'text-slate-300'}`}
+                      <div key={p.label} className={`flex items-center gap-2 text-xs ${p.unlocked ? 'text-slate-700' : 'text-[var(--neu-text-muted)]'}`}>
+                        <span className={`material-symbols-outlined text-[14px] ${p.unlocked ? 'text-primary' : 'text-slate-300'}`}
                           style={{ fontVariationSettings: "'FILL' 1" }}>
                           {p.unlocked ? 'check_circle' : 'cancel'}
                         </span>
@@ -1062,13 +1062,13 @@ export default function ProfilePage() {
                       </div>
                     ))}
                   </div>
-                  <p className="mt-2 text-[10px] text-slate-400">{profilePrivileges.summary}</p>
+                  <p className="mt-2 text-[10px] text-[var(--neu-text-muted)]">{profilePrivileges.summary}</p>
                 </div>
 
                 {/* Trust Activity preview (latest 3) */}
                 {trustRecentEvents.length > 0 && (
                   <div className="mt-4 border-t border-slate-100 pt-4">
-                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 mb-2">Recent Trust Events</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)] mb-2">Recent Trust Events</p>
                     <div className="space-y-1.5">
                       {trustRecentEvents.slice(0, 3).map((event) => {
                         const meta = TRUST_EVENT_META[event.eventType as keyof typeof TRUST_EVENT_META] ?? {
@@ -1079,10 +1079,10 @@ export default function ProfilePage() {
                         const isPos = meta.positive && event.pointsChange >= 0;
                         return (
                           <div key={event.id} className="flex items-center gap-2">
-                            <span className={`material-symbols-outlined text-[13px] ${isPos ? 'text-emerald-500' : 'text-rose-500'}`}
+                            <span className={`material-symbols-outlined text-[13px] ${isPos ? 'text-primary' : 'text-brand-red500'}`}
                               style={{ fontVariationSettings: "'FILL' 1" }}>{meta.icon}</span>
                             <span className="min-w-0 flex-1 truncate text-xs text-slate-600">{meta.label}</span>
-                            <span className={`shrink-0 text-[11px] font-black tabular-nums ${isPos ? 'text-emerald-600' : 'text-rose-500'}`}>
+                            <span className={`shrink-0 text-[11px] font-black tabular-nums ${isPos ? 'text-emerald-600' : 'text-brand-red500'}`}>
                               {isPos ? '+' : ''}{event.pointsChange}
                             </span>
                           </div>
@@ -1095,7 +1095,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Profile Snapshot</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Profile Snapshot</p>
               <div className="mt-4 space-y-3">
                 {profileFacts.map((fact) => (
                   <div key={`side-${fact.label}`} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
@@ -1103,7 +1103,7 @@ export default function ProfilePage() {
                       <span className="material-symbols-outlined text-[18px]">{fact.icon}</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{fact.label}</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">{fact.label}</p>
                       <p className="truncate text-sm font-bold capitalize text-slate-800">{fact.value}</p>
                     </div>
                   </div>
@@ -1112,7 +1112,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Verification</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Verification</p>
               <div className="mt-4 space-y-3">
                 {[
                   { label: 'Location anchored', done: !!profile.location?.latitude },
@@ -1120,7 +1120,7 @@ export default function ProfilePage() {
                   { label: 'Community ready', done: !!profile.assignedCommunityId || !!locationLabel },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-3">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-full ${item.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-full ${item.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-[var(--neu-text-muted)]'}`}>
                       <span className="material-symbols-outlined text-[17px]">{item.done ? 'check' : 'pending'}</span>
                     </div>
                     <span className="text-sm font-bold text-slate-700">{item.label}</span>
@@ -1134,7 +1134,7 @@ export default function ProfilePage() {
             <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Badges</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Badges</p>
                   <h2 className="mt-1 text-xl font-black text-slate-900">Neyborhuud credibility</h2>
                 </div>
                 <Link
@@ -1154,14 +1154,14 @@ export default function ProfilePage() {
                           <span className="material-symbols-outlined text-[22px]">{badge.icon ?? "military_tech"}</span>
                         </div>
                         <p className="text-sm font-black leading-tight text-slate-800">{badge.name ?? badge.title ?? "Badge"}</p>
-                        <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{badge.tier ?? badge.category ?? "Earned"}</p>
+                        <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">{badge.tier ?? badge.category ?? "Earned"}</p>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-200 px-4 py-8 text-center">
                     <span className="material-symbols-outlined text-[36px] text-slate-300">military_tech</span>
-                    <p className="mt-2 text-sm font-bold text-slate-500">No badges earned yet</p>
+                    <p className="mt-2 text-sm font-bold text-[var(--neu-text-muted)]">No badges earned yet</p>
                     <Link href="/gamification" className="mt-3 inline-block text-xs font-black text-emerald-600 hover:underline">
                       Go earn your first badge →
                     </Link>
@@ -1177,14 +1177,14 @@ export default function ProfilePage() {
                   common:    'bg-slate-50    text-slate-600  ring-slate-100',
                   uncommon:  'bg-emerald-50  text-emerald-700 ring-emerald-100',
                   rare:      'bg-sky-50      text-sky-700    ring-sky-100',
-                  epic:      'bg-violet-50   text-violet-700 ring-violet-100',
+                  epic:      'bg-brand-blue50   text-brand-blue700 ring-violet-100',
                   legendary: 'bg-amber-50    text-amber-700  ring-amber-100',
                 };
                 if (publicBadges.length === 0) {
                   return (
                     <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-200 px-4 py-8 text-center">
                       <span className="material-symbols-outlined text-[36px] text-slate-300">military_tech</span>
-                      <p className="mt-2 text-sm font-bold text-slate-500">
+                      <p className="mt-2 text-sm font-bold text-[var(--neu-text-muted)]">
                         @{profile.username} hasn&apos;t earned any badges yet
                       </p>
                     </div>
@@ -1200,7 +1200,7 @@ export default function ProfilePage() {
                             <span className="material-symbols-outlined text-[22px]">{badge.icon ?? 'military_tech'}</span>
                           </div>
                           <p className="text-sm font-black leading-tight text-slate-800">{badge.name ?? badge.title ?? 'Badge'}</p>
-                          <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+                          <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
                             {badge.rarity ?? badge.tier ?? badge.category ?? 'Earned'}
                           </p>
                         </div>
@@ -1214,7 +1214,7 @@ export default function ProfilePage() {
             {/* ── Gamification Quick Links (own profile only) ── */}
             {isOwnProfile && (
               <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 mb-4">Your HuudCoins Activity</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)] mb-4">Your HuudCoins Activity</p>
                 <div className="grid grid-cols-2 gap-3">
                   <Link
                     href="/gamification"
@@ -1225,7 +1225,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <p className="text-sm font-black text-slate-800">Gamification Hub</p>
-                      <p className="text-[11px] text-slate-500">Badges · Leaderboard</p>
+                      <p className="text-[11px] text-[var(--neu-text-muted)]">Badges · Leaderboard</p>
                     </div>
                   </Link>
                   <Link
@@ -1237,7 +1237,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <p className="text-sm font-black text-slate-800">HuudCoins Wallet</p>
-                      <p className="text-[11px] text-slate-500">Balance · Transactions</p>
+                      <p className="text-[11px] text-[var(--neu-text-muted)]">Balance · Transactions</p>
                     </div>
                   </Link>
                 </div>
@@ -1249,7 +1249,7 @@ export default function ProfilePage() {
               <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Jobs</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Jobs</p>
                     <h2 className="mt-1 text-xl font-black text-slate-900">Posted by {isOwnProfile ? "you" : profile.firstName ?? profile.username}</h2>
                   </div>
                   <Link href="/jobs" className="text-xs font-black text-emerald-600 hover:underline">See all →</Link>
@@ -1266,11 +1266,11 @@ export default function ProfilePage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-black text-slate-800 truncate">{job.title ?? "Job listing"}</p>
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-[11px] text-[var(--neu-text-muted)]">
                           {job.type?.replace("-", " ")} · {job.workMode ?? "—"} · {job.location?.lga ?? job.location?.state ?? ""}
                         </p>
                       </div>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${job.status === "open" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${job.status === "open" ? "bg-green-100 text-green-700" : "bg-brand-surface text-[var(--neu-text-muted)]"}`}>
                         {job.status ?? "open"}
                       </span>
                     </Link>
@@ -1284,7 +1284,7 @@ export default function ProfilePage() {
               <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Events</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Events</p>
                     <h2 className="mt-1 text-xl font-black text-slate-900">Organised by {isOwnProfile ? "you" : profile.firstName ?? profile.username}</h2>
                   </div>
                   <Link href="/events" className="text-xs font-black text-emerald-600 hover:underline">See all →</Link>
@@ -1301,12 +1301,12 @@ export default function ProfilePage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-black text-slate-800 truncate">{event.title ?? "Event"}</p>
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-[11px] text-[var(--neu-text-muted)]">
                           {event.date ? new Date(event.date).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" }) : "Date TBC"}
                           {event.location?.lga ? ` · ${event.location.lga}` : ""}
                         </p>
                       </div>
-                      <span className="shrink-0 text-[11px] font-bold text-slate-400">{event.attendees ?? 0} going</span>
+                      <span className="shrink-0 text-[11px] font-bold text-[var(--neu-text-muted)]">{event.attendees ?? 0} going</span>
                     </Link>
                   ))}
                 </div>
@@ -1318,7 +1318,7 @@ export default function ProfilePage() {
               <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Services</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Services</p>
                     <h2 className="mt-1 text-xl font-black text-slate-900">{isOwnProfile ? "Your" : `${profile.firstName ?? profile.username}'s`} service offerings</h2>
                   </div>
                   <Link href="/services" className="text-xs font-black text-emerald-600 hover:underline">See all →</Link>
@@ -1335,7 +1335,7 @@ export default function ProfilePage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-black text-slate-800 truncate">{service.title ?? "Service"}</p>
-                        <p className="text-[11px] text-slate-500 capitalize">
+                        <p className="text-[11px] text-[var(--neu-text-muted)] capitalize">
                           {service.category ?? "—"}
                           {service.pricing?.amount ? ` · ₦${Number(service.pricing.amount).toLocaleString()}` : service.pricing?.type === "custom" ? " · Custom price" : ""}
                         </p>
@@ -1353,10 +1353,10 @@ export default function ProfilePage() {
             <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Activity</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Activity</p>
                   <h2 className="mt-1 text-xl font-black text-slate-900">Recent neyborhuud posts</h2>
                 </div>
-                <div className="grid grid-cols-3 rounded-2xl bg-slate-100 p-1 text-sm font-black text-slate-500">
+                <div className="grid grid-cols-3 rounded-2xl bg-slate-100 p-1 text-sm font-black text-[var(--neu-text-muted)]">
                   <button className="rounded-xl bg-white px-4 py-2 text-emerald-700 shadow-sm" type="button">All</button>
                   <button className="rounded-xl px-4 py-2 transition hover:text-emerald-700" type="button">Alerts</button>
                   <button className="rounded-xl px-4 py-2 transition hover:text-emerald-700" type="button">Market</button>
@@ -1377,13 +1377,13 @@ export default function ProfilePage() {
           {/* Error State */}
           {isErrorPosts && !isLoadingPosts && (
             <div className="rounded-3xl border border-red-100 bg-red-50/60 px-4 py-12 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-red-500 shadow-sm">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-brand-red shadow-sm">
                 <span className="material-symbols-outlined text-[34px]">error</span>
               </div>
               <h2 className="mb-2 text-xl font-black text-slate-900">
                 Failed to load posts
               </h2>
-              <p className="mx-auto mb-4 max-w-md text-sm text-slate-500">
+              <p className="mx-auto mb-4 max-w-md text-sm text-[var(--neu-text-muted)]">
                 {postsError?.message || 'Something went wrong. Please try again.'}
               </p>
               <button
@@ -1406,7 +1406,7 @@ export default function ProfilePage() {
                 <p className="mb-2 text-xl font-black text-slate-900">
                   No posts yet
                 </p>
-                <p className="text-sm leading-6 text-slate-500">
+                <p className="text-sm leading-6 text-[var(--neu-text-muted)]">
                   When {isOwnProfile ? 'you post' : `@${profile.username} posts`}, they'll show up here.
                 </p>
                 {isOwnProfile && (
@@ -1443,7 +1443,7 @@ export default function ProfilePage() {
               {hasNextPage && (
                 <div ref={loadMoreRef} className="py-8 flex items-center justify-center">
                   {isFetchingNextPage ? (
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
+                    <div className="flex items-center gap-2 text-sm font-bold text-[var(--neu-text-muted)]">
                       <i className="bi bi-hourglass-split animate-spin" />
                       <span>Loading more posts...</span>
                     </div>

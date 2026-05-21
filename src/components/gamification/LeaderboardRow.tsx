@@ -13,16 +13,16 @@ function RankDisplay({ rank }: { rank: number }) {
   if (rank === 2) return <span className="text-2xl">🥈</span>;
   if (rank === 3) return <span className="text-2xl">🥉</span>;
   return (
-    <span className="w-8 text-center text-sm font-bold text-gray-400">#{rank}</span>
+    <span className="w-8 text-center text-sm font-bold text-[var(--neu-text-muted)]">#{rank}</span>
   );
 }
 
 const LEVEL_COLORS = [
-  "bg-gray-700 text-gray-300",     // 1–4
-  "bg-green-500/20 text-green-400", // 5–9
-  "bg-blue-500/20 text-blue-400",   // 10–19
-  "bg-purple-500/20 text-purple-400", // 20–29
-  "bg-yellow-500/20 text-yellow-400", // 30+
+  "bg-brand-black text-[var(--neu-text-muted)]",     // 1–4
+  "bg-primary/20 text-primary", // 5–9
+  "bg-brand-blue/20 text-brand-blue",   // 10–19
+  "bg-brand-blue/20 text-brand-blue", // 20–29
+  "bg-primary/20 text-primary400", // 30+
 ];
 function levelColor(level: number) {
   if (level >= 30) return LEVEL_COLORS[4];
@@ -42,8 +42,8 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
     <div
       className={`flex items-center gap-3 py-3 px-4 rounded-xl transition-colors ${
         isMe
-          ? "bg-blue-500/10 border border-blue-500/30"
-          : "hover:bg-gray-800/50"
+          ? "bg-brand-blue/10 border border-brand-blue/30"
+          : "hover:bg-brand-black/50"
       }`}
     >
       {/* Rank */}
@@ -52,7 +52,7 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
       </div>
 
       {/* Avatar */}
-      <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden shrink-0 flex items-center justify-center text-sm font-bold text-white">
+      <div className="w-9 h-9 rounded-full bg-brand-black overflow-hidden shrink-0 flex items-center justify-center text-sm font-bold text-white">
         {(entry.user?.avatarUrl ?? entry.user?.profilePicture) ? (
           <img src={entry.user.avatarUrl ?? entry.user.profilePicture} alt={displayName} className="w-full h-full object-cover" />
         ) : (
@@ -64,12 +64,12 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
       <div className="flex-1 min-w-0">
         <Link
           href={`/profile/${entry.user?.username ?? ""}`}
-          className="text-sm font-semibold text-white hover:text-blue-400 transition-colors truncate block"
+          className="text-sm font-semibold text-white hover:text-brand-blue transition-colors truncate block"
         >
           {displayName}
-          {isMe && <span className="ml-1 text-xs text-blue-400">(You)</span>}
+          {isMe && <span className="ml-1 text-xs text-brand-blue">(You)</span>}
         </Link>
-        <p className="text-xs text-gray-500 truncate">@{entry.user?.username ?? "—"}</p>
+        <p className="text-xs text-[var(--neu-text-muted)] truncate">@{entry.user?.username ?? "—"}</p>
       </div>
 
       {/* Points + level */}
@@ -80,7 +80,7 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
         <span className="text-sm font-bold text-white tabular-nums">
           {(entry.points ?? 0).toLocaleString()}
         </span>
-        <span className="text-xs text-gray-500">pts</span>
+        <span className="text-xs text-[var(--neu-text-muted)]">pts</span>
       </div>
     </div>
   );

@@ -66,14 +66,14 @@ export function CoinSpendModal({
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+            <h2 className="text-lg font-bold text-[var(--neu-text-muted)]">{title}</h2>
             {description && (
-              <p className="mt-1 text-sm text-gray-500">{description}</p>
+              <p className="mt-1 text-sm text-[var(--neu-text-muted)]">{description}</p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="ml-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="ml-4 rounded-full p-1 text-[var(--neu-text-muted)] hover:bg-brand-surface hover:text-[var(--neu-text-secondary)]"
             aria-label="Close"
           >
             ✕
@@ -98,13 +98,13 @@ export function CoinSpendModal({
         {done ? (
           <div className="py-6 text-center">
             <div className="mb-2 text-4xl">🎉</div>
-            <p className="font-semibold text-gray-800">Done!</p>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="font-semibold text-[var(--neu-text-muted)]">Done!</p>
+            <p className="mt-1 text-sm text-[var(--neu-text-muted)]">
               {selectedOption?.coins.toLocaleString()} HuudCoins deducted.
             </p>
             <button
               onClick={onClose}
-              className="mt-4 rounded-xl bg-green-600 px-6 py-2 text-sm font-medium text-white hover:bg-green-700"
+              className="mt-4 rounded-xl bg-brand-green-dark px-6 py-2 text-sm font-medium text-white hover:bg-green-700"
             >
               Close
             </button>
@@ -125,16 +125,16 @@ export function CoinSpendModal({
                       active
                         ? "border-amber-500 bg-amber-50"
                         : affordable
-                        ? "border-gray-200 bg-white hover:border-amber-300"
-                        : "cursor-not-allowed border-gray-100 bg-gray-50 opacity-50"
+                        ? "border-black/[0.08] bg-white hover:border-primary"
+                        : "cursor-not-allowed border-black/[0.08] bg-brand-surface opacity-50"
                     }`}
                   >
                     {opt.popular && (
-                      <span className="absolute right-2 top-1.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      <span className="absolute right-2 top-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
                         Popular
                       </span>
                     )}
-                    <p className="font-semibold text-gray-800">{opt.label}</p>
+                    <p className="font-semibold text-[var(--neu-text-muted)]">{opt.label}</p>
                     <p className="mt-0.5 text-sm text-amber-700">
                       🪙 {opt.coins.toLocaleString()} coins
                     </p>
@@ -158,7 +158,7 @@ export function CoinSpendModal({
             <button
               onClick={handleConfirm}
               disabled={!hasEnough || isPending}
-              className="w-full rounded-xl bg-amber-500 py-3 font-semibold text-white transition-colors hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-xl bg-primary py-3 font-semibold text-white transition-colors hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPending
                 ? "Processing…"

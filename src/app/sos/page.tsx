@@ -65,14 +65,14 @@ function ActiveSosPanel() {
 
   if (sos.phase === 'pending') {
     return (
-      <div className="rounded-2xl border-2 border-yellow-500/50 bg-yellow-950/30 p-5 mb-6">
+      <div className="rounded-2xl border-2 border-yellow-500/50 bg-primary950/30 p-5 mb-6">
         <div className="flex items-center gap-3 mb-3">
-          <span className="material-symbols-outlined text-yellow-400 text-3xl animate-pulse">
+          <span className="material-symbols-outlined text-primary400 text-3xl animate-pulse">
             timer
           </span>
           <div className="flex-1">
-            <h2 className="text-lg font-bold text-yellow-100">SOS arming…</h2>
-            <p className="text-sm text-yellow-300/80">
+            <h2 className="text-lg font-bold text-primary100">SOS arming…</h2>
+            <p className="text-sm text-primary/80">
               {sos.secondsRemaining}s before guardians are alerted
             </p>
           </div>
@@ -80,7 +80,7 @@ function ActiveSosPanel() {
         <button
           type="button"
           onClick={() => void sos.cancelSos('Cancelled from /sos page')}
-          className="w-full py-3 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-base transition-colors"
+          className="w-full py-3 rounded-xl bg-primary hover:bg-primary400 text-black font-bold text-base transition-colors"
         >
           Cancel SOS
         </button>
@@ -90,14 +90,14 @@ function ActiveSosPanel() {
 
   if (sos.phase === 'active') {
     return (
-      <div className="rounded-2xl border-2 border-red-500/60 bg-red-950/40 p-5 mb-6">
+      <div className="rounded-2xl border-2 border-brand-red/60 bg-red-950/40 p-5 mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <span className="material-symbols-outlined text-red-400 text-3xl animate-pulse">
+          <span className="material-symbols-outlined text-brand-red text-3xl animate-pulse">
             emergency_home
           </span>
           <div className="flex-1">
             <h2 className="text-lg font-bold text-red-100">SOS ACTIVE</h2>
-            <p className="text-sm text-red-300/80">
+            <p className="text-sm text-brand-red/80">
               Guardians notified · Escalation level {sos.activeSos?.escalationLevel ?? 0}
             </p>
           </div>
@@ -114,7 +114,7 @@ function ActiveSosPanel() {
           <button
             type="button"
             onClick={() => void sos.resolveSos()}
-            className="py-3 rounded-xl bg-green-600 hover:bg-green-500 text-white font-semibold text-sm transition-colors"
+            className="py-3 rounded-xl bg-brand-green-dark hover:bg-primary text-white font-semibold text-sm transition-colors"
           >
             I&apos;m safe now
           </button>
@@ -151,17 +151,17 @@ function ArmedSosButton() {
     <div className="rounded-2xl neu-card p-6 mb-6">
       {/* Drill mode countdown overlay (purely visual, no API call) */}
       {drill.running && (
-        <div className="mb-4 p-4 rounded-xl border border-blue-500/40 bg-blue-950/30 text-center">
-          <div className="text-xs uppercase tracking-widest text-blue-300 mb-1">
+        <div className="mb-4 p-4 rounded-xl border border-brand-blue/40 bg-blue-950/30 text-center">
+          <div className="text-xs uppercase tracking-widest text-brand-blue mb-1">
             DRILL MODE — no real alert
           </div>
-          <div className="text-5xl font-black tabular-nums text-blue-200 my-2">
+          <div className="text-5xl font-black tabular-nums text-brand-blue my-2">
             {drill.seconds}
           </div>
           <button
             type="button"
             onClick={drill.stop}
-            className="mt-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium"
+            className="mt-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-brand-blue text-white text-sm font-medium"
           >
             Stop drill
           </button>
@@ -173,10 +173,10 @@ function ArmedSosButton() {
         type="button"
         onClick={handleTrigger}
         disabled={disabled}
-        className="relative w-full aspect-square max-w-[260px] mx-auto rounded-full bg-gradient-to-br from-red-500 to-red-700 shadow-xl shadow-red-900/40 flex flex-col items-center justify-center text-white font-black uppercase tracking-widest transition-transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="relative w-full aspect-square max-w-[260px] mx-auto rounded-full bg-gradient-to-br from-brand-red to-brand-red shadow-xl shadow-red-900/40 flex flex-col items-center justify-center text-white font-black uppercase tracking-widest transition-transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
         aria-label="Trigger SOS"
       >
-        <span className="absolute inset-0 rounded-full bg-red-500/40 animate-ping pointer-events-none" />
+        <span className="absolute inset-0 rounded-full bg-brand-red/40 animate-ping pointer-events-none" />
         <span className="material-symbols-outlined text-7xl mb-1 relative">
           sos
         </span>
@@ -198,7 +198,7 @@ function ArmedSosButton() {
             type="checkbox"
             checked={silent}
             onChange={(e) => setSilent(e.target.checked)}
-            className="mt-1 w-4 h-4 accent-red-500"
+            className="mt-1 w-4 h-4 accent-brand-red"
           />
           <div className="flex-1">
             <div className="text-sm font-semibold flex items-center gap-2">
@@ -226,7 +226,7 @@ function ArmedSosButton() {
               onChange={(e) => setCountdown(Number(e.target.value))}
               aria-label="Countdown seconds"
               title="Countdown seconds"
-              className="w-full accent-red-500"
+              className="w-full accent-brand-red"
             />
             <div className="text-xs text-white/50 mt-1">
               Time to cancel before guardians are alerted (0 = instant).
@@ -240,7 +240,7 @@ function ArmedSosButton() {
             type="checkbox"
             checked={emergencyServices}
             onChange={(e) => setEmergencyServices(e.target.checked)}
-            className="mt-1 w-4 h-4 accent-red-500"
+            className="mt-1 w-4 h-4 accent-brand-red"
           />
           <div className="flex-1">
             <div className="text-sm font-semibold flex items-center gap-2">
@@ -258,17 +258,17 @@ function ArmedSosButton() {
           type="button"
           onClick={() => drill.start(5)}
           disabled={drill.running}
-          className="w-full p-3 rounded-xl border border-blue-500/30 bg-blue-950/10 hover:bg-blue-950/30 text-left transition-colors disabled:opacity-60"
+          className="w-full p-3 rounded-xl border border-brand-blue/30 bg-blue-950/10 hover:bg-blue-950/30 text-left transition-colors disabled:opacity-60"
         >
           <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined text-blue-400">
+            <span className="material-symbols-outlined text-brand-blue">
               fitness_center
             </span>
             <div className="flex-1">
-              <div className="text-sm font-semibold text-blue-200">
+              <div className="text-sm font-semibold text-brand-blue">
                 Run a drill
               </div>
-              <div className="text-xs text-blue-300/70 mt-0.5">
+              <div className="text-xs text-brand-blue/70 mt-0.5">
                 Practice the countdown without alerting anyone.
               </div>
             </div>
@@ -277,12 +277,12 @@ function ArmedSosButton() {
 
         {/* Error */}
         {sos.error && (
-          <div className="p-3 rounded-xl border border-red-500/40 bg-red-950/30 text-sm text-red-200 flex items-start justify-between gap-2">
+          <div className="p-3 rounded-xl border border-brand-red/40 bg-red-950/30 text-sm text-brand-red flex items-start justify-between gap-2">
             <span>{sos.error}</span>
             <button
               type="button"
               onClick={sos.clearError}
-              className="text-red-300 hover:text-red-100 text-xs underline shrink-0"
+              className="text-brand-red hover:text-red-100 text-xs underline shrink-0"
             >
               Dismiss
             </button>
@@ -305,28 +305,28 @@ const QUICK_ACTIONS: Array<{
     icon: 'shield_person',
     label: 'Trusted contacts',
     href: '/safety/manage#guardians',
-    iconClass: 'text-blue-400',
+    iconClass: 'text-brand-blue',
     description: 'Manage your guardians',
   },
   {
     icon: 'pin',
     label: 'Panic PIN',
     href: '/safety/panic-pin',
-    iconClass: 'text-red-400',
+    iconClass: 'text-brand-red',
     description: 'Duress code setup',
   },
   {
     icon: 'route',
     label: 'Trips & check-ins',
     href: '/safety/trips',
-    iconClass: 'text-emerald-400',
+    iconClass: 'text-primary',
     description: 'Plan & monitor journeys',
   },
   {
     icon: 'phone_in_talk',
     label: 'Fake call',
     href: '/safety/fake-call',
-    iconClass: 'text-green-400',
+    iconClass: 'text-primary',
     description: 'Stage an exit excuse',
   },
 ];
@@ -380,14 +380,14 @@ function PanicPinStatus() {
         className="block rounded-xl border border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-950/40 p-3 mb-4 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-emerald-400 text-2xl">
+          <span className="material-symbols-outlined text-primary text-2xl">
             verified_user
           </span>
           <div className="flex-1">
-            <div className="text-sm font-semibold text-emerald-200">Panic PIN active</div>
-            <div className="text-xs text-emerald-300/70">Tap to manage your duress code.</div>
+            <div className="text-sm font-semibold text-white/90">Panic PIN active</div>
+            <div className="text-xs text-primary/70">Tap to manage your duress code.</div>
           </div>
-          <span className="material-symbols-outlined text-emerald-300">chevron_right</span>
+          <span className="material-symbols-outlined text-primary">chevron_right</span>
         </div>
       </Link>
     );
@@ -395,15 +395,15 @@ function PanicPinStatus() {
   return (
     <Link
       href="/safety/panic-pin"
-      className="block rounded-xl border border-red-500/30 bg-red-950/20 hover:bg-red-950/40 p-3 mb-4 transition-colors"
+      className="block rounded-xl border border-brand-red/30 bg-red-950/20 hover:bg-red-950/40 p-3 mb-4 transition-colors"
     >
       <div className="flex items-center gap-3">
-        <span className="material-symbols-outlined text-red-400 text-2xl">pin</span>
+        <span className="material-symbols-outlined text-brand-red text-2xl">pin</span>
         <div className="flex-1">
-          <div className="text-sm font-semibold text-red-200">Set up your Panic PIN</div>
-          <div className="text-xs text-red-300/80">A duress code that silently triggers SOS.</div>
+          <div className="text-sm font-semibold text-brand-red">Set up your Panic PIN</div>
+          <div className="text-xs text-brand-red/80">A duress code that silently triggers SOS.</div>
         </div>
-        <span className="material-symbols-outlined text-red-300">chevron_right</span>
+        <span className="material-symbols-outlined text-brand-red">chevron_right</span>
       </div>
     </Link>
   );
@@ -445,7 +445,7 @@ function RecentHistory() {
       </div>
 
       {error && (
-        <div className="text-xs text-red-300 p-3 rounded-xl bg-red-950/20 border border-red-500/30">
+        <div className="text-xs text-brand-red p-3 rounded-xl bg-red-950/20 border border-brand-red/30">
           {error}
         </div>
       )}
@@ -468,10 +468,10 @@ function RecentHistory() {
                   <span
                     className={`material-symbols-outlined text-2xl ${
                       e.status === 'resolved'
-                        ? 'text-green-400'
+                        ? 'text-primary'
                         : e.status === 'cancelled'
-                        ? 'text-slate-400'
-                        : 'text-red-400'
+                        ? 'text-[var(--neu-text-muted)]'
+                        : 'text-brand-red'
                     }`}
                   >
                     {e.status === 'resolved'
@@ -548,10 +548,10 @@ function GuardiansFeed() {
             <span
               className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                 s.currentStatus === 'safe' || s.currentStatus === 'arrived'
-                  ? 'bg-emerald-400'
+                  ? 'bg-primary'
                   : s.currentStatus === 'unsafe' || s.currentStatus === 'need_attention'
-                  ? 'bg-red-400'
-                  : 'bg-amber-400'
+                  ? 'bg-brand-red'
+                  : 'bg-primary'
               }`}
             />
             <div className="flex-1 min-w-0">
@@ -598,7 +598,7 @@ export default function SosPage() {
         <main className="min-w-0">
           <header className="mb-5">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-red-500 text-4xl">
+              <span className="material-symbols-outlined text-brand-red text-4xl">
                 sos
               </span>
               <div>

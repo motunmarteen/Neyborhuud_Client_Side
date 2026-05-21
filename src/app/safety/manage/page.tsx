@@ -73,8 +73,8 @@ const SOURCE_ICON: Record<string, string> = {
 
 const SEVERITY_COLOR: Record<string, string> = {
   low:      'border-green-700 bg-green-950/40',
-  medium:   'border-yellow-700 bg-yellow-950/40',
-  high:     'border-orange-700 bg-orange-950/40',
+  medium:   'border-yellow-700 bg-primary950/40',
+  high:     'border-orange-700 bg-brand-red950/40',
   critical: 'border-red-700 bg-red-950/40',
 };
 
@@ -387,33 +387,33 @@ function SafetyPageInner() {
                 {emergencyAlerts.map((alert) => (
                   <div
                     key={alert.emergencyId}
-                    className={`rounded-2xl border p-4 flex flex-col gap-2 ${SEVERITY_COLOR[alert.severity] ?? 'border-gray-700 bg-gray-900/40'}`}
+                    className={`rounded-2xl border p-4 flex flex-col gap-2 ${SEVERITY_COLOR[alert.severity] ?? 'border-black/[0.08] bg-brand-black/40'}`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-start gap-2">
                         <span className="text-lg">{SOURCE_ICON[alert.source ?? ''] ?? '🚨'}</span>
                         <div>
-                          <p className="font-bold text-sm text-red-300">{alert.title}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{alert.body}</p>
+                          <p className="font-bold text-sm text-brand-red">{alert.title}</p>
+                          <p className="text-xs text-[var(--neu-text-muted)] mt-0.5">{alert.body}</p>
                         </div>
                       </div>
                       <button
                         onClick={() => setEmergencyAlerts((prev) => prev.filter((a) => a.emergencyId !== alert.emergencyId))}
-                        className="shrink-0 text-gray-500 hover:text-gray-300 text-lg leading-none"
+                        className="shrink-0 text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)] text-lg leading-none"
                       >
                         ×
                       </button>
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--neu-text-muted)]">
                       {alert.assignedAgency && (
-                        <span>🏛️ <strong className="text-blue-400">{alert.assignedAgency}</strong></span>
+                        <span>🏛️ <strong className="text-brand-blue">{alert.assignedAgency}</strong></span>
                       )}
                       <span>📍 {alert.locationStr}</span>
                       <span className="ml-auto">{new Date(alert.timestamp).toLocaleTimeString()}</span>
                     </div>
                     <Link
                       href="/safety/emergency"
-                      className="self-start text-xs text-blue-400 underline mt-1"
+                      className="self-start text-xs text-brand-blue underline mt-1"
                     >
                       View Emergency Dashboard →
                     </Link>
@@ -452,7 +452,7 @@ function SafetyPageInner() {
             <Link href="/safety/kidnapping-tracking" className="block">
               <div className="neu-card-sm rounded-2xl p-4 flex items-center justify-between gap-4 hover:opacity-90 transition-opacity cursor-pointer border border-red-900/60">
                 <div className="flex-1">
-                  <h2 className="text-base font-bold text-red-400">🚨 Kidnapping Tracker</h2>
+                  <h2 className="text-base font-bold text-brand-red">🚨 Kidnapping Tracker</h2>
                   <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
                     Continuous GPS tracking with offline queue, network triangulation fallback, and real-time guardian visibility. Auto-activates on kidnapping/armed robbery SOS.
                   </p>
@@ -466,7 +466,7 @@ function SafetyPageInner() {
               <div className="neu-card-sm rounded-2xl p-4 flex items-center justify-between gap-4 hover:opacity-90 transition-opacity cursor-pointer border border-red-900/40">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-bold text-red-400">🚨 Report Emergency</h2>
+                    <h2 className="text-base font-bold text-brand-red">🚨 Report Emergency</h2>
                     {activeEmergencyCount > 0 && (
                       <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white leading-none">
                         {activeEmergencyCount} active
@@ -511,7 +511,7 @@ function SafetyPageInner() {
 
               <button
                 onClick={onUpdateStatus}
-                className="mt-3 px-4 py-2.5 rounded-xl neu-btn-active text-primary font-semibold"
+                className="mt-3 px-4 py-2.5 rounded-xl mod-chip mod-chip-active text-primary font-semibold"
               >
                 Update Live Status
               </button>
@@ -529,13 +529,13 @@ function SafetyPageInner() {
                 <div className="neu-socket rounded-xl p-1 flex gap-1">
                   <button
                     onClick={() => setVisibilityMode('normal')}
-                    className={`px-3 py-1.5 rounded-lg text-sm ${visibilityMode === 'normal' ? 'neu-btn-active text-primary' : ''}`}
+                    className={`px-3 py-1.5 rounded-lg text-sm ${visibilityMode === 'normal' ? 'mod-chip mod-chip-active text-primary' : ''}`}
                   >
                     Normal
                   </button>
                   <button
                     onClick={() => setVisibilityMode('silent')}
-                    className={`px-3 py-1.5 rounded-lg text-sm ${visibilityMode === 'silent' ? 'neu-btn-active text-red-500' : ''}`}
+                    className={`px-3 py-1.5 rounded-lg text-sm ${visibilityMode === 'silent' ? 'mod-chip mod-chip-active text-brand-red' : ''}`}
                   >
                     Silent
                   </button>
@@ -564,13 +564,13 @@ function SafetyPageInner() {
                   <>
                     <button
                       onClick={onResolveSos}
-                      className="px-4 py-2.5 rounded-xl neu-btn text-primary font-semibold"
+                      className="px-4 py-2.5 rounded-xl mod-chip text-primary font-semibold"
                     >
                       Resolve SOS
                     </button>
                     <button
                       onClick={onCancelSos}
-                      className="px-4 py-2.5 rounded-xl neu-btn text-red-500 font-semibold"
+                      className="px-4 py-2.5 rounded-xl mod-chip text-brand-red font-semibold"
                     >
                       Cancel SOS
                     </button>
@@ -587,12 +587,12 @@ function SafetyPageInner() {
               </div>
 
               {sos.error && (
-                <div className="mt-2 text-xs text-red-400">{sos.error}</div>
+                <div className="mt-2 text-xs text-brand-red">{sos.error}</div>
               )}
 
               {sos.lastSummary && (
                 <div className="mt-3 neu-socket rounded-xl p-3 border border-green-700/40">
-                  <p className="text-sm font-semibold text-green-400">Incident Recap</p>
+                  <p className="text-sm font-semibold text-primary">Incident Recap</p>
                   <div className="mt-2 grid grid-cols-2 gap-2 text-xs" style={{ color: 'var(--neu-text-muted)' }}>
                     <div>Duration: {Math.round(sos.lastSummary.durationMs / 1000)}s</div>
                     <div>Guardians notified: {sos.lastSummary.guardians.notifiedCount}/{sos.lastSummary.guardians.total}</div>
@@ -683,7 +683,7 @@ function SafetyPageInner() {
                   type="button"
                   onClick={loadLinkers}
                   disabled={linkersLoading}
-                  className="shrink-0 px-3 py-1.5 rounded-xl neu-btn text-xs font-medium"
+                  className="shrink-0 px-3 py-1.5 rounded-xl mod-chip text-xs font-medium"
                   style={{ color: 'var(--primary)', opacity: linkersLoading ? 0.6 : 1 }}
                 >
                   {linkersLoading ? 'Loading…' : linkers.length > 0 ? '↻ Refresh' : 'Load Linkers'}
@@ -722,7 +722,7 @@ function SafetyPageInner() {
                               type="button"
                               onClick={() => setGuardianForm((p) => ({ ...p, guardianId: linker._id }))}
                               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                                guardianForm.guardianId === linker._id ? 'neu-btn-active' : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                                guardianForm.guardianId === linker._id ? 'mod-chip mod-chip-active' : 'hover:bg-brand-surface dark:hover:bg-brand-black/80'
                               }`}
                             >
                               {linker.avatarUrl ? (
@@ -744,7 +744,7 @@ function SafetyPageInner() {
                                 </p>
                               </div>
                               {guardianForm.guardianId === linker._id && (
-                                <span className="material-symbols-outlined text-green-500" style={{ fontSize: '18px' }}>check_circle</span>
+                                <span className="material-symbols-outlined text-primary" style={{ fontSize: '18px' }}>check_circle</span>
                               )}
                             </button>
                           ))}
@@ -816,7 +816,7 @@ function SafetyPageInner() {
                   <button
                     type="submit"
                     disabled={!guardianForm.guardianId}
-                    className="px-4 py-2.5 rounded-xl neu-btn-active text-primary font-semibold disabled:opacity-50"
+                    className="px-4 py-2.5 rounded-xl mod-chip mod-chip-active text-primary font-semibold disabled:opacity-50"
                   >
                     Send Guardian Request
                   </button>
@@ -861,7 +861,7 @@ function SafetyPageInner() {
                       {g.status !== 'removed' && gId && (
                         <button
                           onClick={() => onRemoveGuardian(gId)}
-                          className="px-3 py-2 rounded-lg neu-btn text-red-500 text-sm"
+                          className="px-3 py-2 rounded-lg mod-chip text-brand-red text-sm"
                         >
                           Remove
                         </button>
@@ -893,13 +893,13 @@ function SafetyPageInner() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => onRespondRequest(r._id, 'accepted')}
-                          className="px-3 py-2 rounded-lg neu-btn-active text-primary text-sm"
+                          className="px-3 py-2 rounded-lg mod-chip mod-chip-active text-primary text-sm"
                         >
                           Accept
                         </button>
                         <button
                           onClick={() => onRespondRequest(r._id, 'rejected')}
-                          className="px-3 py-2 rounded-lg neu-btn text-red-500 text-sm"
+                          className="px-3 py-2 rounded-lg mod-chip text-brand-red text-sm"
                         >
                           Reject
                         </button>
@@ -912,7 +912,7 @@ function SafetyPageInner() {
 
             {loading && <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>Loading safety data...</p>}
             {error && (
-              <div className="neu-card-sm rounded-xl p-3 text-sm text-red-500">
+              <div className="neu-card-sm rounded-xl p-3 text-sm text-brand-red">
                 {error}
               </div>
             )}

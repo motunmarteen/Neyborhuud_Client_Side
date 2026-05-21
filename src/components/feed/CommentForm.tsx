@@ -120,7 +120,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                             <button
                                 type="button"
                                 onClick={addMediaUrl}
-                                className="text-xs neu-btn-active text-primary px-3 py-1 rounded-lg font-bold active:scale-95 transition-all"
+                                className="text-xs mod-chip mod-chip-active text-primary px-3 py-1 rounded-lg font-bold active:scale-95 transition-all"
                             >
                                 Add
                             </button>
@@ -158,7 +158,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                         <button
                             type="submit"
                             disabled={isCreating || (!body.trim() && mediaUrls.length === 0)}
-                            className="neu-btn-active text-primary px-4 py-1.5 rounded-2xl text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
+                            className="mod-chip mod-chip-active text-primary px-4 py-1.5 rounded-2xl text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
                         >
                             {isCreating ? (
                                 <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />

@@ -36,13 +36,13 @@ function NotificationCard({ notification, onRead }: { notification: Notification
     <div
       onClick={handleClick}
       className={`flex items-start gap-4 p-4 rounded-2xl cursor-pointer transition-colors ${
-        notification.isRead ? 'opacity-60 hover:opacity-80' : 'bg-blue-500/5 hover:bg-blue-500/10'
+        notification.isRead ? 'opacity-60 hover:opacity-80' : 'bg-brand-blue/5 hover:bg-brand-blue/10'
       }`}
     >
       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-        notification.isRead ? 'bg-gray-100' : 'bg-blue-500/10'
+        notification.isRead ? 'bg-brand-surface' : 'bg-brand-blue/10'
       }`}>
-        <span className={`material-symbols-outlined text-[20px] ${notification.isRead ? 'text-gray-400' : 'text-blue-500'}`}>
+        <span className={`material-symbols-outlined text-[20px] ${notification.isRead ? 'text-[var(--neu-text-muted)]' : 'text-brand-blue'}`}>
           {icon}
         </span>
       </div>
@@ -54,7 +54,7 @@ function NotificationCard({ notification, onRead }: { notification: Notification
         </p>
       </div>
       {!notification.isRead && (
-        <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-2" />
+        <div className="w-2 h-2 rounded-full bg-brand-blue flex-shrink-0 mt-2" />
       )}
     </div>
   );
@@ -102,7 +102,7 @@ export default function NotificationsPage() {
                 <button
                   onClick={() => markAllRead.mutate()}
                   disabled={markAllRead.isPending}
-                  className="text-sm text-blue-500 hover:text-blue-600 font-medium disabled:opacity-50"
+                  className="text-sm text-brand-blue hover:text-blue-600 font-medium disabled:opacity-50"
                 >
                   Mark all as read
                 </button>
@@ -117,8 +117,8 @@ export default function NotificationsPage() {
                   onClick={() => setFilter(f)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     filter === f
-                      ? 'bg-blue-500 text-white'
-                      : 'hover:bg-gray-100'
+                      ? 'bg-brand-blue text-white'
+                      : 'hover:bg-brand-surface'
                   }`}
                   style={filter !== f ? { color: 'var(--neu-text-muted)' } : undefined}
                 >
@@ -133,7 +133,7 @@ export default function NotificationsPage() {
                 <div className="p-8 text-center" style={{ color: 'var(--neu-text-muted)' }}>Loading notifications…</div>
               ) : notifications.length === 0 ? (
                 <div className="p-12 text-center flex flex-col items-center gap-3">
-                  <span className="material-symbols-outlined text-[48px] text-gray-300">notifications_none</span>
+                  <span className="material-symbols-outlined text-[48px] text-[var(--neu-text-muted)]">notifications_none</span>
                   <p style={{ color: 'var(--neu-text-muted)' }}>
                     {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
                   </p>

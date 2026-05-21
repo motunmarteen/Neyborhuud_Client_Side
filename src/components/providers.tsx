@@ -16,7 +16,10 @@ import { authService } from '@/services/auth.service';
 import { e2eeService } from '@/services/e2ee.service';
 import { I18nProvider } from '@/lib/i18n';
 import { useAuth } from '@/hooks/useAuth';
+import { SmartLocationSync } from '@/hooks/useSmartLocationSync';
+import { LocationSyncOrchestrator } from '@/components/location/LocationSyncOrchestrator';
 import NotificationPermissionPrompt from '@/components/NotificationPermissionPrompt';
+import { PageTransition } from '@/components/ui/PageTransition';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
 
@@ -260,8 +263,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <I18nProvider>
     <QueryClientProvider client={queryClient}>
       <SocketAuthenticator />
+      <SmartLocationSync />
+      <LocationSyncOrchestrator />
       <NotificationPermissionPrompt />
-      {children}
+      <PageTransition>{children}</PageTransition>
       <Toaster 
         position="top-right" 
         richColors 

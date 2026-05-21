@@ -177,7 +177,7 @@ export default function FakeCallPage() {
           <div className="text-3xl font-semibold">{callerName}</div>
           <div className="text-sm text-white/60 mt-1">{callerSubtitle}</div>
           {phase === 'in-call' && (
-            <div className="mt-4 text-base text-green-400 font-mono">{formatDuration(callDurationSec)}</div>
+            <div className="mt-4 text-base text-primary font-mono">{formatDuration(callDurationSec)}</div>
           )}
           {phase === 'ringing' && (
             <div className="mt-6 text-sm text-white/40 animate-pulse">Ringing…</div>
@@ -190,7 +190,7 @@ export default function FakeCallPage() {
               <button
                 type="button"
                 onClick={endCall}
-                className="w-16 h-16 rounded-full bg-red-600 hover:bg-red-500 flex items-center justify-center shadow-2xl"
+                className="w-16 h-16 rounded-full bg-red-600 hover:bg-brand-red flex items-center justify-center shadow-2xl"
                 aria-label="Decline"
               >
                 <span className="material-symbols-outlined text-white text-3xl">call_end</span>
@@ -198,7 +198,7 @@ export default function FakeCallPage() {
               <button
                 type="button"
                 onClick={acceptCall}
-                className="w-16 h-16 rounded-full bg-green-600 hover:bg-green-500 flex items-center justify-center shadow-2xl animate-pulse"
+                className="w-16 h-16 rounded-full bg-brand-green-dark hover:bg-primary flex items-center justify-center shadow-2xl animate-pulse"
                 aria-label="Accept"
               >
                 <span className="material-symbols-outlined text-white text-3xl">call</span>
@@ -209,7 +209,7 @@ export default function FakeCallPage() {
               <button
                 type="button"
                 onClick={endCall}
-                className="w-16 h-16 rounded-full bg-red-600 hover:bg-red-500 flex items-center justify-center shadow-2xl"
+                className="w-16 h-16 rounded-full bg-red-600 hover:bg-brand-red flex items-center justify-center shadow-2xl"
                 aria-label="End call"
               >
                 <span className="material-symbols-outlined text-white text-3xl">call_end</span>
@@ -239,7 +239,7 @@ export default function FakeCallPage() {
 
         <header className="mb-6">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-green-400 text-4xl">phone_in_talk</span>
+            <span className="material-symbols-outlined text-primary text-4xl">phone_in_talk</span>
             <div>
               <h1 className="text-2xl font-bold">Fake Call</h1>
               <p className="text-sm text-white/60">Stage an incoming call to leave a situation.</p>
@@ -248,15 +248,15 @@ export default function FakeCallPage() {
         </header>
 
         {phase === 'waiting' && (
-          <div className="rounded-xl border border-yellow-500/40 bg-yellow-950/40 p-4 mb-4 flex items-center justify-between">
+          <div className="rounded-xl border border-yellow-500/40 bg-primary950/40 p-4 mb-4 flex items-center justify-between">
             <div>
-              <div className="text-sm font-semibold text-yellow-200">Call coming in {secondsLeft}s…</div>
-              <div className="text-xs text-yellow-300/80">From {callerName}</div>
+              <div className="text-sm font-semibold text-primary200">Call coming in {secondsLeft}s…</div>
+              <div className="text-xs text-primary/80">From {callerName}</div>
             </div>
             <button
               type="button"
               onClick={cancelWait}
-              className="px-3 py-1.5 rounded-lg bg-yellow-700 hover:bg-yellow-600 text-white text-sm"
+              className="px-3 py-1.5 rounded-lg bg-primary700 hover:bg-brand-green-dark text-white text-sm"
             >
               Cancel
             </button>
@@ -276,7 +276,7 @@ export default function FakeCallPage() {
                   setCustomName('');
                 }}
                 className={`rounded-xl neu-card p-3 text-left ${
-                  callerName === c.name && !customName ? 'ring-2 ring-green-500' : ''
+                  callerName === c.name && !customName ? 'ring-2 ring-primary' : ''
                 }`}
               >
                 <div className="text-sm font-medium">{c.name}</div>
@@ -289,7 +289,7 @@ export default function FakeCallPage() {
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
             placeholder="Or type a custom name…"
-            className="mt-3 w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+            className="mt-3 w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-primary"
           />
         </section>
 
@@ -303,7 +303,7 @@ export default function FakeCallPage() {
                 onClick={() => setDelayMs(d.ms)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium ${
                   delayMs === d.ms
-                    ? 'bg-green-600 text-white'
+                    ? 'bg-brand-green-dark text-white'
                     : 'bg-white/5 text-white/70 hover:bg-white/10'
                 }`}
               >
@@ -317,7 +317,7 @@ export default function FakeCallPage() {
           type="button"
           onClick={startScheduled}
           disabled={phase === 'waiting'}
-          className="w-full rounded-xl bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-semibold py-3 text-base"
+          className="w-full rounded-xl bg-brand-green-dark hover:bg-primary disabled:opacity-50 text-white font-semibold py-3 text-base"
         >
           {delayMs === 0 ? 'Ring now' : `Schedule call`}
         </button>

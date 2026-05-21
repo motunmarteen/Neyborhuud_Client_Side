@@ -59,7 +59,7 @@ export default function JobCard({ job, onApply, onSave }: JobCardProps) {
     <div className="mod-card rounded-2xl p-4 hover:shadow-lg transition-all relative">
       {/* Boosted badge */}
       {(job as any).isBoosted && (
-        <div className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 shadow">
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary shadow">
           <span className="text-[11px]">🚀</span>
           <span className="text-black text-[9px] font-black uppercase tracking-wide">Boosted</span>
         </div>
@@ -149,7 +149,7 @@ export default function JobCard({ job, onApply, onSave }: JobCardProps) {
           {job.skills.slice(0, 4).map((skill) => (
             <span
               key={skill}
-              className="text-[11px] px-2 py-0.5 rounded-lg mod-btn"
+              className="text-[11px] px-2 py-0.5 rounded-lg mod-chip"
               style={{ color: "var(--neu-text-secondary)" }}
             >
               {skill}
@@ -191,7 +191,7 @@ export default function JobCard({ job, onApply, onSave }: JobCardProps) {
           {onSave && (
             <button
               onClick={() => onSave(jobId, !!(job as any).isSaved)}
-              className="p-1.5 rounded-lg mod-btn transition-all"
+              className="p-1.5 rounded-lg mod-chip transition-all"
               aria-label="Save job"
             >
               <span
@@ -210,7 +210,7 @@ export default function JobCard({ job, onApply, onSave }: JobCardProps) {
               className={`text-xs px-4 py-1.5 rounded-xl font-bold transition-all ${
                 job.hasApplied
                   ? "mod-inset opacity-60"
-                  : "mod-btn-active text-primary"
+                  : "mod-chip mod-chip-active text-primary"
               }`}
             >
               {job.hasApplied ? "Applied" : "Apply Now"}

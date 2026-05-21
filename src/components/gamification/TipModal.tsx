@@ -34,7 +34,7 @@ interface Props {
 const TIER_COLORS: Record<string, string> = {
   bronze:   "text-amber-700 bg-amber-100 border-amber-300",
   silver:   "text-slate-600 bg-slate-100 border-slate-300",
-  gold:     "text-yellow-700 bg-yellow-100 border-yellow-300",
+  gold:     "text-primary700 bg-primary100 border-yellow-300",
   platinum: "text-purple-700 bg-purple-100 border-purple-300",
 };
 
@@ -47,7 +47,7 @@ function TierBadge({ tier }: { tier?: string }) {
   const t = tier.toLowerCase();
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold capitalize ${TIER_COLORS[t] ?? "text-gray-600 bg-gray-100 border-gray-300"}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold capitalize ${TIER_COLORS[t] ?? "text-[var(--neu-text-secondary)] bg-brand-surface border-black/[0.08]"}`}
     >
       {TIER_ICONS[t] ?? "⭐"} {tier}
     </span>
@@ -102,18 +102,18 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
                   </div>
                 )}
                 {/* Coin icon overlay */}
-                <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs shadow-sm">
+                <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs shadow-sm">
                   🪙
                 </span>
               </div>
 
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Sending a tip to</p>
-                <h2 className="text-base font-black text-gray-900 leading-tight">
+                <p className="text-xs font-medium uppercase tracking-wide text-[var(--neu-text-muted)]">Sending a tip to</p>
+                <h2 className="text-base font-black text-[var(--neu-text-muted)] leading-tight">
                   {recipient.displayName}
                 </h2>
                 {recipient.username && (
-                  <p className="text-xs text-gray-400">@{recipient.username}</p>
+                  <p className="text-xs text-[var(--neu-text-muted)]">@{recipient.username}</p>
                 )}
                 <div className="mt-1">
                   <TierBadge tier={recipient.tier} />
@@ -123,7 +123,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
 
             <button
               onClick={onClose}
-              className="ml-2 rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+              className="ml-2 rounded-full p-2 text-[var(--neu-text-muted)] transition hover:bg-brand-surface hover:text-[var(--neu-text-secondary)]"
               aria-label="Close"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,15 +136,15 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
             /* ─── Success state ─── */
             <div className="py-4 text-center">
               <div className="mb-3 text-5xl animate-bounce">🎉</div>
-              <h3 className="text-lg font-black text-gray-900">Tip Sent!</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <h3 className="text-lg font-black text-[var(--neu-text-muted)]">Tip Sent!</h3>
+              <p className="mt-1 text-sm text-[var(--neu-text-muted)]">
                 You sent{" "}
                 <span className="font-bold text-amber-600">
                   🪙 {selected.toLocaleString()} HuudCoins
                 </span>{" "}
                 to {recipient.displayName}.
               </p>
-              <p className="mt-2 text-xs text-gray-400">
+              <p className="mt-2 text-xs text-[var(--neu-text-muted)]">
                 This goes directly into their wallet and strengthens community trust.
               </p>
               <button
@@ -168,7 +168,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
               </div>
 
               {/* ─── Amount selector ─── */}
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--neu-text-muted)]">
                 Choose an amount
               </p>
               <div className="grid grid-cols-2 gap-3 mb-5">
@@ -184,8 +184,8 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
                         ${isSelected
                           ? "border-amber-500 bg-amber-50 text-amber-800 shadow-md shadow-amber-100"
                           : affordable
-                            ? "border-gray-200 bg-white text-gray-700 hover:border-amber-300 hover:bg-amber-50"
-                            : "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
+                            ? "border-black/[0.08] bg-white text-[var(--neu-text-muted)] hover:border-primary hover:bg-primary/10"
+                            : "border-black/[0.08] bg-brand-surface text-[var(--neu-text-muted)] cursor-not-allowed"
                         }`}
                     >
                       {'popular' in opt && opt.popular && (
@@ -194,7 +194,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
                         </span>
                       )}
                       <span className="text-lg">🪙 {opt.label}</span>
-                      <span className={`mt-0.5 text-xs font-normal ${isSelected ? "text-amber-600" : "text-gray-400"}`}>
+                      <span className={`mt-0.5 text-xs font-normal ${isSelected ? "text-amber-600" : "text-[var(--neu-text-muted)]"}`}>
                         {opt.description}
                       </span>
                     </button>
@@ -211,7 +211,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
               )}
 
               {/* Trust economy note */}
-              <p className="mb-4 text-center text-xs text-gray-400 leading-relaxed">
+              <p className="mb-4 text-center text-xs text-[var(--neu-text-muted)] leading-relaxed">
                 Tips go directly into {recipient.displayName.split(" ")[0]}&apos;s wallet. No platform fee — it&apos;s community-to-community.
               </p>
 

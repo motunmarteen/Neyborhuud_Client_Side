@@ -849,41 +849,45 @@ Each slide renders:
 - [x] Fix missing `.neu-inset`, `--neu-accent` tokens
 - [x] Write `DESIGN.md`
 
-### Phase 2 — Auth flows 🔜 Next
-- [ ] `/login` — `.btn-glass-primary`, replace hardcoded hex colours
-- [ ] `/signup` — same
-- [ ] `/forgot-password` — same
-- [ ] `/verify-email` — same
+### Phase 2 — Auth flows ✅ Done
+- [x] `/login` — `.btn-glass-primary`, replace hardcoded hex colours
+- [x] `/signup` — same
+- [x] `/forgot-password` — same
+- [x] `/verify-email` — same
+- [x] `/reset-password` — same
 
-### Phase 3 — Core feed
-- [ ] `XPostCard` — replace Tailwind colour scale with brand tokens
-- [ ] `CreatePostModal` — migrate `neu-btn` to `btn-*` system
-- [ ] `BottomNav` — replace `red-500` with `brand-red`
-- [ ] `FeedTabs` — migrate filter chips
+### Phase 3 — Core feed ✅ Done
+- [x] `XPostCard` — replace Tailwind colour scale with brand tokens
+- [x] `CreatePostModal` — migrate primary CTAs to `btn-*` system (chips retain `mod-chip`)
+- [x] `BottomNav` — replace `red-500` with `brand-red`
+- [x] `FeedTabs` — migrate filter chips
 
-### Phase 4 — Navigation & sidebars
-- [ ] `LeftSidebar` — replace hex quick-action accents with brand tokens
-- [ ] `TopNav` — audit icon and colour usage
-- [ ] `RightSidebar` — audit and align
+### Phase 4 — Navigation & sidebars ✅ Done
+- [x] `LeftSidebar` — replace hex quick-action accents with brand tokens
+- [x] `TopNav` — audit icon and colour usage
+- [x] `RightSidebar` — audit and align
 
-### Phase 5 — Safety & SOS flows
-- [ ] `/sos` — light audit, already well-styled
-- [ ] `/safety` — tile icon colours → brand tokens
+### Phase 5 — Safety & SOS flows ✅ Done (brand token pass)
+- [x] `/sos` — brand-red tokens via migration script
+- [x] `/safety` — tile icon colours → brand tokens
 
-### Phase 6 — Motion & interaction layer
-- [ ] Add Framer Motion to all page transitions
-- [ ] Implement bottom sheet system with snap points and spring physics
-- [ ] Add long-press contextual menus
-- [ ] Add swipe gesture for feed tab switching
+### Phase 6 — Motion & interaction layer ✅ Done
+- [x] Add Framer Motion page transitions (`PageTransition` in providers)
+- [x] Implement bottom sheet system (`BottomSheet` component)
+- [x] Long-press contextual menus (`LongPressMenu` + `useLongPress` on `XPostCard`)
+- [x] Swipe gesture for feed tab switching (`useFeedTabSwipe` on `/feed`)
 
-### Phase 7 — Map experience
-- [ ] Migrate from Google Maps to Mapbox / MapLibre
-- [ ] Add event density layers
-- [ ] Add danger zone heatmap
-- [ ] Pulsing markers for active incidents
+### Phase 7 — Map experience ✅ Done
+- [x] Migrate `InteractiveMap` from Google Maps to MapLibre (OSM tiles)
+- [x] Migrate `GeofenceMap` from Leaflet to MapLibre
+- [x] Map overlay layers: danger heatmap, safe zones, event density, emergency pulse, commerce (`MapOverlay` on `InteractiveMap`)
+- [x] Long-press map → incident report hook (`onLongPressMap` prop)
+- [x] Shared map style + geofence colours (`src/lib/map-style.ts`)
 
-### Phase 8 — All remaining pages
-- [ ] Full audit and migration of all `src/app/**` pages
+### Phase 8 — All remaining pages ✅ Done
+- [x] Bulk brand-colour migration (`scripts/migrate-brand-colors.mjs`, 220+ file passes)
+- [x] `neu-btn` / `mod-btn` → `mod-chip` / `btn-*` migration (`scripts/migrate-neu-btn.mjs`, 54 files)
+- [x] Vitest + brand-styles unit tests
 
 ---
 
@@ -896,8 +900,15 @@ Each slide renders:
 | Glass button classes | `src/app/globals.css` — Glass Button System section |
 | Button component (future) | `src/components/ui/Button.tsx` |
 | Input component | `src/components/ui/PremiumInput.tsx` |
+| Brand style maps (badges, spheres) | `src/lib/brand-styles.ts` |
+| Page transitions | `src/components/ui/PageTransition.tsx` |
+| Bottom sheet | `src/components/ui/BottomSheet.tsx` |
+| Interactive map (MapLibre) | `src/components/ui/InteractiveMap.tsx` |
+| Geofence map (MapLibre) | `src/components/safety/GeofenceMap.tsx` |
+| Map style tokens | `src/lib/map-style.ts` |
+| Long-press menu | `src/components/ui/LongPressMenu.tsx` |
+| Feed tab swipe | `src/hooks/useFeedTabSwipe.ts` |
 | Onboarding | `src/app/page.tsx` |
-| Bottom navigation | `src/components/feed/BottomNav.tsx` |
 | Top navigation | `src/components/navigation/TopNav.tsx` |
 | Left sidebar | `src/components/navigation/LeftSidebar.tsx` |
 | Notification prompt | `src/components/NotificationPermissionPrompt.tsx` |

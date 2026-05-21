@@ -67,7 +67,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${jakarta.variable} font-display text-[#1A1A2E] transition-colors duration-200`}
+        className={`${jakarta.variable} font-display text-brand-black transition-colors duration-200`}
         suppressHydrationWarning
       >
         <Providers>

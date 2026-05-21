@@ -168,7 +168,7 @@ export default function CompleteProfilePage() {
                     </p>
                     <button
                         onClick={() => router.push('/feed')}
-                        className="neu-btn w-full py-5 rounded-2xl group transition-all active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
+                        className="mod-chip w-full py-5 rounded-2xl group transition-all active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
                     >
                         <span className="[color:var(--neu-text)] font-black uppercase tracking-widest group-hover:text-primary">
                             Enter the Huud
@@ -233,7 +233,7 @@ export default function CompleteProfilePage() {
                                 onClick={() => setFormData({ ...formData, gender: g })}
                                 className={`
                                     flex-grow py-3 rounded-xl text-[9px] uppercase font-black tracking-widest transition-all
-                                    ${formData.gender === g ? 'neu-socket text-brand-blue' : 'neu-btn'}
+                                    ${formData.gender === g ? 'neu-socket text-brand-blue' : 'mod-chip'}
                                 `}
                                 style={formData.gender !== g ? { color: 'var(--neu-text-muted)' } : undefined}
                             >
@@ -264,7 +264,7 @@ export default function CompleteProfilePage() {
                     disabled={loading || !isFormValid}
                     className={`
                         py-4.5 rounded-2xl mt-2 transition-all duration-200 cursor-pointer
-                        ${(loading || !isFormValid) ? 'neu-btn opacity-40 cursor-not-allowed' : 'neu-btn active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]'}
+                        ${(loading || !isFormValid) ? 'mod-chip opacity-40 cursor-not-allowed' : 'mod-chip active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]'}
                     `}
                 >
                     <span className="font-black uppercase tracking-widest text-sm" style={{ color: 'var(--neu-text)' }}>

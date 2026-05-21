@@ -1,71 +1,59 @@
 'use client';
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, OverlayView } from '@react-google-maps/api';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { OSM_MAP_STYLE } from '@/lib/map-style';
 
 interface MapLocation {
     lat: number;
     lng: number;
 }
 
+export type MapOverlayPoint = { lat: number; lng: number; id?: string; weight?: number };
+
+export type MapOverlay =
+    | { type: 'danger_heatmap'; points: MapOverlayPoint[] }
+    | { type: 'safe_zones'; points: MapOverlayPoint[] }
+    | { type: 'event_density'; points: MapOverlayPoint[] }
+    | { type: 'emergency_pulse'; points: MapOverlayPoint[] }
+    | { type: 'commerce'; points: MapOverlayPoint[] };
+
 interface InteractiveMapProps {
-    /** Initial center of the map */
     center: MapLocation;
-    /** Whether to allow dragging the marker to adjust location */
     draggable?: boolean;
-    /** Height of the map container */
     height?: string;
-    /** Callback when location changes (via marker drag) */
     onLocationChange?: (location: MapLocation) => void;
-    /** Zoom level (default 15) */
     zoom?: number;
-    /** Show a loading skeleton while map loads */
     showSkeleton?: boolean;
-    /** Additional CSS classes */
     className?: string;
-    /** Show accuracy circle */
     accuracyRadius?: number;
-    /** Optional React node to render on the map at `center` instead of the default blue-dot marker */
     customMarkerNode?: React.ReactNode;
-    /** When true, the customMarkerNode receives pointer events (clickable). Default false. */
     markerInteractive?: boolean;
-    /** Hint label shown at the bottom of the map when draggable. Default: 'Tap or drag to adjust' */
     dragHintLabel?: string;
+    overlays?: MapOverlay[];
+    onLongPressMap?: (location: MapLocation) => void;
 }
 
-const containerStyle = {
-    width: '100%',
-    borderRadius: '16px',
-};
+function pointsFeatureCollection(points: MapOverlayPoint[]): GeoJSON.FeatureCollection {
+    return {
+        type: 'FeatureCollection',
+        features: points.map((p, i) => ({
+            type: 'Feature',
+            properties: { id: p.id ?? `pt-${i}`, weight: p.weight ?? 1 },
+            geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+        })),
+    };
+}
 
-// Custom map styling for a clean, modern look
-const mapStyles = [
-    {
-        featureType: 'poi',
-        elementType: 'labels',
-        stylers: [{ visibility: 'off' }]
-    },
-    {
-        featureType: 'transit',
-        elementType: 'labels',
-        stylers: [{ visibility: 'off' }]
-    },
-    {
-        featureType: 'road',
-        elementType: 'labels.icon',
-        stylers: [{ visibility: 'off' }]
-    },
-    {
-        featureType: 'water',
-        elementType: 'geometry',
-        stylers: [{ color: '#e9e9e9' }]
-    },
-    {
-        featureType: 'water',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#9e9e9e' }]
-    }
-];
+const OVERLAY_PAINT: Record<MapOverlay['type'], { color: string; opacity: number; radius: number }> = {
+    danger_heatmap: { color: '#FF0000', opacity: 0.2, radius: 28 },
+    safe_zones: { color: '#00D431', opacity: 0.15, radius: 22 },
+    event_density: { color: '#0000FF', opacity: 0.2, radius: 20 },
+    emergency_pulse: { color: '#FF0000', opacity: 0.35, radius: 16 },
+    commerce: { color: '#006F35', opacity: 0.2, radius: 18 },
+};
 
 export function InteractiveMap({
     center,
@@ -79,169 +67,178 @@ export function InteractiveMap({
     customMarkerNode,
     markerInteractive = false,
     dragHintLabel = 'Tap or drag to adjust',
+    overlays = [],
+    onLongPressMap,
 }: InteractiveMapProps) {
-    const [markerPosition, setMarkerPosition] = useState<MapLocation>(center);
-    const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
-    const circleRef = useRef<google.maps.Circle | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<maplibregl.Map | null>(null);
+    const markerRef = useRef<maplibregl.Marker | null>(null);
+    const onLocationChangeRef = useRef(onLocationChange);
+    const onLongPressRef = useRef(onLongPressMap);
+    const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [ready, setReady] = useState(false);
+    const [error, setError] = useState(false);
+    const [markerEl, setMarkerEl] = useState<HTMLDivElement | null>(null);
+    const [markerPosition, setMarkerPosition] = useState(center);
 
-    // Load Google Maps script
-    const { isLoaded, loadError } = useJsApiLoader({
-        id: 'google-map-script',
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-        libraries: ['places'],
-    });
+    onLocationChangeRef.current = onLocationChange;
+    onLongPressRef.current = onLongPressMap;
 
-    // Update marker when center prop changes
     useEffect(() => {
         setMarkerPosition(center);
-        if (mapInstance) {
-            mapInstance.panTo(center);
-        }
-    }, [center.lat, center.lng, mapInstance]);
+    }, [center.lat, center.lng]);
 
-    // Handle accuracy circle
     useEffect(() => {
-        if (mapInstance && accuracyRadius) {
-            // Remove existing circle
-            if (circleRef.current) {
-                circleRef.current.setMap(null);
+        if (!containerRef.current) return;
+
+        let map: maplibregl.Map;
+        try {
+            map = new maplibregl.Map({
+                container: containerRef.current,
+                style: OSM_MAP_STYLE,
+                center: [center.lng, center.lat],
+                zoom,
+                attributionControl: { compact: true },
+            });
+            map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+
+            map.on('load', () => {
+                if (accuracyRadius) {
+                    map.addSource('accuracy', {
+                        type: 'geojson',
+                        data: pointGeoJson(center.lng, center.lat),
+                    });
+                    map.addLayer({
+                        id: 'accuracy-circle',
+                        type: 'circle',
+                        source: 'accuracy',
+                        paint: {
+                            'circle-radius': accuracyRadius / 0.5,
+                            'circle-color': '#0000FF',
+                            'circle-opacity': 0.12,
+                            'circle-stroke-color': '#0000FF',
+                            'circle-stroke-width': 2,
+                            'circle-stroke-opacity': 0.35,
+                        },
+                    });
+                }
+
+                overlays.forEach((layer, idx) => {
+                    const id = `overlay-${layer.type}-${idx}`;
+                    const paint = OVERLAY_PAINT[layer.type];
+                    map.addSource(id, { type: 'geojson', data: pointsFeatureCollection(layer.points) });
+                    map.addLayer({
+                        id: `${id}-circle`,
+                        type: 'circle',
+                        source: id,
+                        paint: {
+                            'circle-radius': paint.radius,
+                            'circle-color': paint.color,
+                            'circle-opacity': paint.opacity,
+                            'circle-blur': layer.type === 'danger_heatmap' ? 0.85 : 0.5,
+                        },
+                    });
+                });
+
+                setReady(true);
+            });
+
+            if (draggable) {
+                map.on('click', (e) => {
+                    const pos = { lat: e.lngLat.lat, lng: e.lngLat.lng };
+                    setMarkerPosition(pos);
+                    onLocationChangeRef.current?.(pos);
+                });
             }
 
-            // Create new accuracy circle
-            circleRef.current = new google.maps.Circle({
-                strokeColor: '#6B9FED',
-                strokeOpacity: 0.4,
-                strokeWeight: 2,
-                fillColor: '#6B9FED',
-                fillOpacity: 0.15,
-                map: mapInstance,
-                center: markerPosition,
-                radius: accuracyRadius,
+            map.on('mousedown', (e) => {
+                if (!onLongPressRef.current) return;
+                const pos = { lat: e.lngLat.lat, lng: e.lngLat.lng };
+                longPressTimer.current = setTimeout(() => onLongPressRef.current?.(pos), 500);
             });
+            map.on('mouseup', () => {
+                if (longPressTimer.current) clearTimeout(longPressTimer.current);
+            });
+            map.on('dragstart', () => {
+                if (longPressTimer.current) clearTimeout(longPressTimer.current);
+            });
+
+            mapRef.current = map;
+        } catch {
+            setError(true);
+            return;
         }
+
+        const el = document.createElement('div');
+        if (!customMarkerNode) {
+            el.className = 'w-6 h-6 rounded-full border-[3px] border-white bg-brand-blue shadow-lg';
+        } else {
+            el.style.pointerEvents = markerInteractive ? 'auto' : 'none';
+        }
+        setMarkerEl(el);
+
+        const marker = new maplibregl.Marker({
+            element: el,
+            draggable: draggable && (!customMarkerNode || markerInteractive),
+        })
+            .setLngLat([center.lng, center.lat])
+            .addTo(map);
+
+        marker.on('dragend', () => {
+            const ll = marker.getLngLat();
+            const pos = { lat: ll.lat, lng: ll.lng };
+            setMarkerPosition(pos);
+            onLocationChangeRef.current?.(pos);
+        });
+        markerRef.current = marker;
 
         return () => {
-            if (circleRef.current) {
-                circleRef.current.setMap(null);
-            }
+            if (longPressTimer.current) clearTimeout(longPressTimer.current);
+            marker.remove();
+            map.remove();
+            mapRef.current = null;
+            markerRef.current = null;
+            setMarkerEl(null);
         };
-    }, [mapInstance, accuracyRadius, markerPosition.lat, markerPosition.lng]);
-
-    const onMapLoad = useCallback((map: google.maps.Map) => {
-        setMapInstance(map);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const onMarkerDragEnd = useCallback((e: google.maps.MapMouseEvent) => {
-        if (e.latLng) {
-            const newPosition = {
-                lat: e.latLng.lat(),
-                lng: e.latLng.lng(),
-            };
-            setMarkerPosition(newPosition);
-            onLocationChange?.(newPosition);
-        }
-    }, [onLocationChange]);
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map || !ready) return;
+        markerRef.current?.setLngLat([markerPosition.lng, markerPosition.lat]);
+        map.easeTo({ center: [markerPosition.lng, markerPosition.lat], duration: 300 });
+        const src = map.getSource('accuracy') as maplibregl.GeoJSONSource | undefined;
+        src?.setData(pointGeoJson(markerPosition.lng, markerPosition.lat));
 
-    const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
-        if (draggable && e.latLng) {
-            const newPosition = {
-                lat: e.latLng.lat(),
-                lng: e.latLng.lng(),
-            };
-            setMarkerPosition(newPosition);
-            onLocationChange?.(newPosition);
-        }
-    }, [draggable, onLocationChange]);
+        overlays.forEach((layer, idx) => {
+            const id = `overlay-${layer.type}-${idx}`;
+            const s = map.getSource(id) as maplibregl.GeoJSONSource | undefined;
+            s?.setData(pointsFeatureCollection(layer.points));
+        });
+    }, [markerPosition, ready, overlays]);
 
-    // Loading skeleton
-    if (!isLoaded) {
-        if (showSkeleton) {
-            return (
-                <div 
-                    className={`neu-socket rounded-2xl animate-pulse flex items-center justify-center ${className}`}
-                    style={{ height }}
-                >
-                    <div className="flex flex-col items-center gap-2">
-                        <i className="bi bi-geo-alt text-2xl text-charcoal/20"></i>
-                        <span className="text-[10px] text-charcoal/30 font-medium uppercase tracking-wider">
-                            Loading Map...
-                        </span>
-                    </div>
-                </div>
-            );
-        }
-        return null;
-    }
-
-    // Error state
-    if (loadError) {
+    if (error) {
         return (
-            <div 
-                className={`neu-socket rounded-2xl flex items-center justify-center ${className}`}
-                style={{ height }}
-            >
-                <div className="flex flex-col items-center gap-2 text-center px-4">
-                    <i className="bi bi-exclamation-triangle text-2xl text-orange-400"></i>
-                    <span className="text-[10px] text-charcoal/50 font-medium">
-                        Could not load map
-                    </span>
-                </div>
+            <div className={`neu-socket rounded-2xl flex items-center justify-center ${className}`} style={{ height }}>
+                <span className="text-[10px] text-[var(--neu-text-muted)]">Could not load map</span>
             </div>
         );
     }
 
     return (
-        <div className={`relative ${className}`}>
-            <GoogleMap
-                mapContainerStyle={{ ...containerStyle, height }}
-                center={markerPosition}
-                zoom={zoom}
-                onLoad={onMapLoad}
-                onClick={onMapClick}
-                options={{
-                    styles: mapStyles,
-                    disableDefaultUI: true,
-                    zoomControl: true,
-                    zoomControlOptions: {
-                        position: google.maps.ControlPosition.RIGHT_BOTTOM,
-                    },
-                    gestureHandling: 'greedy',
-                    clickableIcons: false,
-                }}
-            >
-                {customMarkerNode ? (
-                    <OverlayView
-                        position={markerPosition}
-                        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                        getPixelPositionOffset={(w, h) => ({ x: -(w / 2), y: -h })}
-                    >
-                        <div style={{ pointerEvents: markerInteractive ? 'auto' : 'none' }}>
-                            {customMarkerNode}
-                        </div>
-                    </OverlayView>
-                ) : (
-                    <Marker
-                        position={markerPosition}
-                        draggable={draggable}
-                        onDragEnd={onMarkerDragEnd}
-                        animation={google.maps.Animation.DROP}
-                        icon={{
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 12,
-                            fillColor: '#6B9FED',
-                            fillOpacity: 1,
-                            strokeColor: '#ffffff',
-                            strokeWeight: 3,
-                        }}
-                    />
-                )}
-            </GoogleMap>
-
-            {/* Drag hint overlay */}
-            {draggable && (
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg pointer-events-none">
-                    <span className="text-[9px] font-bold text-charcoal/60 uppercase tracking-wider flex items-center gap-1.5">
-                        <i className="bi bi-hand-index-thumb text-brand-blue"></i>
+        <div className={`relative overflow-hidden rounded-2xl ${className}`} style={{ height }}>
+            {!ready && showSkeleton && (
+                <div className="absolute inset-0 z-10 neu-socket animate-pulse flex items-center justify-center">
+                    <span className="text-[10px] text-[var(--neu-text-muted)] uppercase tracking-wider">Loading map…</span>
+                </div>
+            )}
+            <div ref={containerRef} className="w-full h-full" />
+            {markerEl && customMarkerNode && createPortal(customMarkerNode, markerEl)}
+            {draggable && ready && (
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg pointer-events-none z-10">
+                    <span className="text-[9px] font-bold text-brand-black/60 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-sm text-brand-blue">touch_app</span>
                         {dragHintLabel}
                     </span>
                 </div>
@@ -250,42 +247,12 @@ export function InteractiveMap({
     );
 }
 
-// Compact version for inline display
-export function MiniMap({
-    center,
-    height = '120px',
-    className = '',
-    customMarkerNode,
-    draggable = false,
-    onLocationChange,
-    markerInteractive = false,
-    zoom = 14,
-    dragHintLabel,
-}: {
-    center: MapLocation;
-    height?: string;
-    className?: string;
-    customMarkerNode?: React.ReactNode;
-    draggable?: boolean;
-    onLocationChange?: (location: MapLocation) => void;
-    markerInteractive?: boolean;
-    zoom?: number;
-    dragHintLabel?: string;
-}) {
-    return (
-        <InteractiveMap
-            center={center}
-            draggable={draggable}
-            onLocationChange={onLocationChange}
-            height={height}
-            zoom={zoom}
-            showSkeleton={true}
-            className={className}
-            customMarkerNode={customMarkerNode}
-            markerInteractive={markerInteractive}
-            dragHintLabel={dragHintLabel}
-        />
-    );
+function pointGeoJson(lng: number, lat: number): GeoJSON.Feature {
+    return { type: 'Feature', geometry: { type: 'Point', coordinates: [lng, lat] }, properties: {} };
+}
+
+export function MiniMap(props: InteractiveMapProps & { height?: string }) {
+    return <InteractiveMap {...props} showSkeleton height={props.height ?? '120px'} />;
 }
 
 export default InteractiveMap;

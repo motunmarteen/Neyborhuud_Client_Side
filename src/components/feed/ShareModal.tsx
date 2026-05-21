@@ -231,22 +231,22 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative z-10 w-full max-w-sm rounded-t-3xl bg-white dark:bg-gray-900 pb-safe shadow-2xl sm:rounded-3xl">
+      <div className="relative z-10 w-full max-w-sm rounded-t-3xl bg-white dark:bg-brand-black pb-safe shadow-2xl sm:rounded-3xl">
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-gray-200 dark:bg-gray-700" />
+          <div className="h-1 w-10 rounded-full bg-brand-surface dark:bg-brand-black" />
         </div>
 
         <div className="px-5 pb-6 pt-2">
           {/* Header */}
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <p className="text-lg font-black text-gray-900 dark:text-white">Share Post</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Earn <span className="font-black text-amber-600">+5 HuudCoins</span> per share</p>
+              <p className="text-lg font-black text-[var(--neu-text-muted)] dark:text-white">Share Post</p>
+              <p className="text-xs text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">Earn <span className="font-black text-amber-600">+5 HuudCoins</span> per share</p>
             </div>
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-surface dark:bg-brand-black text-[var(--neu-text-muted)] hover:bg-brand-surface dark:hover:bg-brand-black/80 transition-colors"
               aria-label="Close"
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
@@ -268,7 +268,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
                     : p.icon
                   }
                 </div>
-                <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 text-center leading-tight">{p.label}</span>
+                <span className="text-[10px] font-bold text-[var(--neu-text-secondary)] dark:text-[var(--neu-text-muted)] text-center leading-tight">{p.label}</span>
               </button>
             ))}
           </div>
@@ -276,17 +276,17 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
           {/* Divider */}
           <div className="relative mb-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+              <div className="w-full border-t border-black/[0.08] dark:border-black/[0.08]" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white dark:bg-gray-900 px-3 text-xs text-gray-400">or</span>
+              <span className="bg-white dark:bg-brand-black px-3 text-xs text-[var(--neu-text-muted)]">or</span>
             </div>
           </div>
 
           {/* Copy link row */}
-          <div className="flex items-center gap-2 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-            <span className="material-symbols-outlined text-[18px] text-gray-400 shrink-0">link</span>
-            <p className="flex-1 truncate text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 rounded-2xl bg-brand-surface dark:bg-brand-black border border-black/[0.08] dark:border-black/[0.08] p-3">
+            <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)] shrink-0">link</span>
+            <p className="flex-1 truncate text-xs text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">
               {earnedLink ?? `neyborhuud.com/post/${postId}`}
             </p>
             <button
@@ -295,7 +295,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
               className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-black transition-colors ${
                 copied
                   ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-700'
+                  : 'bg-brand-black dark:bg-white text-white dark:text-[var(--neu-text-muted)] hover:bg-brand-black'
               }`}
             >
               {loading === 'copy' ? '…' : copied ? '✓ Copied' : 'Copy'}
@@ -314,7 +314,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
           )}
 
           {/* Points note */}
-          <p className="mt-3 text-center text-[10px] text-gray-400 dark:text-gray-500">
+          <p className="mt-3 text-center text-[10px] text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">
             Your personal referral link is attached to every share.
             New sign-ups via your link count toward your growth streak.
           </p>

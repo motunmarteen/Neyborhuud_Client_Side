@@ -56,7 +56,7 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
 
         {submitted ? (
           <div className="flex flex-col items-center gap-3 py-10 px-4">
-            <span className="material-symbols-outlined text-4xl text-green-400">check_circle</span>
+            <span className="material-symbols-outlined text-4xl text-primary">check_circle</span>
             <p className="text-sm font-medium" style={{ color: 'var(--neu-text)' }}>Thanks for reporting</p>
             <p className="text-xs text-center" style={{ color: 'var(--neu-text-muted)' }}>
               We&apos;ll review this post and take action if it violates our community guidelines.
@@ -76,10 +76,10 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
                     onClick={() => setSelectedReason(r.value)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
                       selectedReason === r.value
-                        ? 'bg-green-600/20 ring-1 ring-green-500/40'
+                        ? 'bg-brand-green-dark/20 ring-1 ring-primary/40'
                         : 'hover:bg-white/5'
                     }`}
-                    style={{ color: selectedReason === r.value ? 'var(--neu-accent, #22c55e)' : 'var(--neu-text)' }}
+                    style={{ color: selectedReason === r.value ? 'var(--neu-accent, #006F35)' : 'var(--neu-text)' }}
                   >
                     <span className="material-symbols-outlined text-[18px]">{r.icon}</span>
                     {r.label}
@@ -97,7 +97,7 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
                   placeholder="Add details (optional)"
                   rows={2}
                   maxLength={500}
-                  className="w-full text-sm rounded-xl px-3 py-2.5 resize-none neu-inset focus:outline-none focus:ring-1 focus:ring-green-500/40"
+                  className="w-full text-sm rounded-xl px-3 py-2.5 resize-none neu-inset focus:outline-none focus:ring-1 focus:ring-primary/40"
                   style={{ color: 'var(--neu-text)', backgroundColor: 'transparent' }}
                 />
               </div>
@@ -110,7 +110,7 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
                 disabled={!selectedReason || submitting}
                 className="w-full py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-40"
                 style={{
-                  backgroundColor: selectedReason ? 'var(--neu-accent, #22c55e)' : undefined,
+                  backgroundColor: selectedReason ? 'var(--neu-accent, #006F35)' : undefined,
                   color: selectedReason ? '#fff' : 'var(--neu-text-muted)',
                 }}
               >

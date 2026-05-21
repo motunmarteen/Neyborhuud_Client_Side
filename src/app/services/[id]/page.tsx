@@ -70,7 +70,7 @@ export default function ServiceDetailPage() {
           <div className="text-center py-20 px-4">
             <span className="material-symbols-outlined text-6xl mb-4" style={{ color: "var(--neu-text-muted)" }}>error</span>
             <p className="font-semibold mb-4" style={{ color: "var(--neu-text)" }}>Service not found</p>
-            <button onClick={() => router.back()} className="px-6 py-3 mod-btn rounded-xl font-semibold" style={{ color: "var(--neu-text)" }}>
+            <button onClick={() => router.back()} className="px-6 py-3 mod-chip rounded-xl font-semibold" style={{ color: "var(--neu-text)" }}>
               Go Back
             </button>
           </div>
@@ -106,7 +106,7 @@ export default function ServiceDetailPage() {
             <div className="px-4 pt-4 flex items-center gap-2">
               <button
                 onClick={() => router.back()}
-                className="p-2 rounded-full mod-btn transition-all"
+                className="p-2 rounded-full mod-chip transition-all"
                 style={{ color: "var(--neu-text-muted)" }}
               >
                 <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -251,14 +251,14 @@ export default function ServiceDetailPage() {
                   <div className="flex gap-3 pt-1">
                     <button
                       onClick={() => setShowBook(true)}
-                      className="flex-1 py-3.5 mod-btn-active text-primary rounded-2xl font-bold transition-all flex items-center justify-center gap-2"
+                      className="flex-1 py-3.5 mod-chip mod-chip-active text-primary rounded-2xl font-bold transition-all flex items-center justify-center gap-2"
                     >
                       <span className="material-symbols-outlined text-[20px]">calendar_add_on</span>
                       Book Service
                     </button>
                     <button
                       onClick={() => setShowRate(true)}
-                      className="py-3.5 px-5 mod-btn rounded-2xl font-bold transition-all flex items-center justify-center gap-2"
+                      className="py-3.5 px-5 mod-chip rounded-2xl font-bold transition-all flex items-center justify-center gap-2"
                       style={{ color: "var(--neu-text)" }}
                     >
                       <span className="material-symbols-outlined text-[20px]">star</span>
@@ -310,7 +310,7 @@ export default function ServiceDetailPage() {
                   </div>
                   <Link
                     href={`/profile/${service.provider?.username}`}
-                    className="px-3 py-1.5 mod-btn rounded-xl text-xs font-semibold transition-all"
+                    className="px-3 py-1.5 mod-chip rounded-xl text-xs font-semibold transition-all"
                     style={{ color: "var(--neu-text-muted)" }}
                   >
                     View Profile
@@ -359,7 +359,7 @@ export default function ServiceDetailPage() {
                   <button
                     onClick={() => reviews.fetchNextPage()}
                     disabled={reviews.isFetchingNextPage}
-                    className="mt-3 w-full py-2.5 mod-btn rounded-xl text-sm font-semibold disabled:opacity-50"
+                    className="mt-3 w-full py-2.5 mod-chip rounded-xl text-sm font-semibold disabled:opacity-50"
                     style={{ color: "var(--neu-text-muted)" }}
                   >
                     {reviews.isFetchingNextPage ? "Loading…" : "Load more reviews"}

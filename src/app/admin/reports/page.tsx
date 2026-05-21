@@ -8,26 +8,26 @@ import { Report } from '@/types/api';
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const STATUS_CHIP: Record<string, string> = {
-  pending:      'bg-amber-500/20 text-amber-300',
+  pending:      'bg-primary/20 text-amber-300',
   under_review: 'bg-sky-500/20   text-sky-300',
-  resolved:     'bg-emerald-500/20 text-emerald-300',
-  dismissed:    'bg-slate-500/20  text-slate-400',
+  resolved:     'bg-primary/20 text-primary',
+  dismissed:    'bg-slate-500/20  text-[var(--neu-text-muted)]',
 };
 
 const TARGET_CHIP: Record<string, string> = {
-  user:        'bg-violet-500/20 text-violet-300',
-  post:        'bg-blue-500/20   text-blue-300',
-  comment:     'bg-indigo-500/20 text-indigo-300',
+  user:        'bg-brand-blue500/20 text-brand-blue300',
+  post:        'bg-brand-blue/20   text-brand-blue',
+  comment:     'bg-brand-blue500/20 text-brand-blue300',
   message:     'bg-sky-500/20    text-sky-300',
-  marketplace: 'bg-amber-500/20  text-amber-300',
-  service:     'bg-teal-500/20   text-teal-300',
-  event:       'bg-rose-500/20   text-rose-300',
+  marketplace: 'bg-primary/20  text-amber-300',
+  service:     'bg-brand-green-dark/20   text-brand-green-dark',
+  event:       'bg-brand-red500/20   text-brand-red300',
 };
 
 const RESOLVE_ACTIONS = [
   { value: 'dismiss',  label: 'Dismiss',      color: 'bg-slate-600 hover:bg-slate-500' },
-  { value: 'warn',     label: 'Warn User',    color: 'bg-amber-600 hover:bg-amber-500' },
-  { value: 'remove',   label: 'Remove Content', color: 'bg-orange-600 hover:bg-orange-500' },
+  { value: 'warn',     label: 'Warn User',    color: 'bg-amber-600 hover:bg-primary' },
+  { value: 'remove',   label: 'Remove Content', color: 'bg-brand-red600 hover:bg-brand-red' },
   { value: 'suspend',  label: 'Suspend User', color: 'bg-red-700 hover:bg-red-600' },
 ] as const;
 
@@ -120,7 +120,7 @@ function ReviewPanel({
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-lg bg-white/10 px-3 py-1.5 text-xs font-bold text-emerald-300 hover:bg-white/20 transition-colors"
+                          className="rounded-lg bg-white/10 px-3 py-1.5 text-xs font-bold text-primary hover:bg-white/20 transition-colors"
                         >
                           Evidence {i + 1} ↗
                         </a>
@@ -201,7 +201,7 @@ function ReportRow({
       <td className="px-4 py-3 text-right">
         <button
           onClick={() => onReview((report as any)._id ? String((report as any)._id) : report.id)}
-          className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-bold text-white/60 hover:border-emerald-500/50 hover:text-emerald-300 transition-colors"
+          className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-bold text-white/60 hover:border-emerald-500/50 hover:text-primary transition-colors"
         >
           Review
         </button>
@@ -279,7 +279,7 @@ export default function AdminReportsPage() {
           </div>
         ) : isError ? (
           <div className="py-16 text-center text-white/50">
-            <span className="material-symbols-outlined text-[40px] text-red-400">error</span>
+            <span className="material-symbols-outlined text-[40px] text-brand-red">error</span>
             <p className="mt-2 text-sm">Could not load reports.</p>
           </div>
         ) : allReports.length === 0 ? (

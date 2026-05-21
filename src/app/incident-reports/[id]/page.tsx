@@ -59,7 +59,7 @@ function CommentItem({ comment, currentUserId, onDelete }: {
           <span className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>{authorName}</span>
           <span className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>{formatTimeAgo(comment.createdAt)}</span>
           {isOwner && (
-            <button onClick={() => onDelete(comment.id)} className="ml-auto text-xs text-red-400 hover:text-red-600">
+            <button onClick={() => onDelete(comment.id)} className="ml-auto text-xs text-brand-red hover:text-brand-red">
               Delete
             </button>
           )}
@@ -235,9 +235,9 @@ function IncidentDetailInner() {
   if (error || !incident) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-6">
-        <span className="material-symbols-outlined text-5xl text-red-400 mb-4">error</span>
+        <span className="material-symbols-outlined text-5xl text-brand-red mb-4">error</span>
         <p className="text-sm text-center mb-4" style={{ color: 'var(--neu-text)' }}>{error || 'Report not found'}</p>
-        <button onClick={() => router.push('/incident-reports')} className="px-6 py-2.5 neu-btn rounded-2xl text-sm font-bold text-primary">
+        <button onClick={() => router.push('/incident-reports')} className="px-6 py-2.5 mod-chip rounded-2xl text-sm font-bold text-primary">
           Back to Reports
         </button>
       </div>
@@ -289,7 +289,7 @@ function IncidentDetailInner() {
             {statusMeta.label}
           </span>
           {incident.isEscalated && (
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200">
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-red100 text-brand-red700 border border-orange-200">
               Escalated
             </span>
           )}
@@ -353,7 +353,7 @@ function IncidentDetailInner() {
       <div className="neu-card rounded-2xl p-4 flex items-center justify-around">
         <button
           onClick={() => handleInteract('witness')}
-          className={`flex flex-col items-center gap-1 transition-all ${incident.myInteractions?.includes('witness') ? 'text-blue-500' : ''}`}
+          className={`flex flex-col items-center gap-1 transition-all ${incident.myInteractions?.includes('witness') ? 'text-brand-blue' : ''}`}
           style={!incident.myInteractions?.includes('witness') ? { color: 'var(--neu-text-muted)' } : {}}
         >
           <span className="material-symbols-outlined text-2xl">visibility</span>
@@ -362,7 +362,7 @@ function IncidentDetailInner() {
         </button>
         <button
           onClick={() => handleInteract('confirm')}
-          className={`flex flex-col items-center gap-1 transition-all ${incident.myInteractions?.includes('confirm') ? 'text-green-500' : ''}`}
+          className={`flex flex-col items-center gap-1 transition-all ${incident.myInteractions?.includes('confirm') ? 'text-primary' : ''}`}
           style={!incident.myInteractions?.includes('confirm') ? { color: 'var(--neu-text-muted)' } : {}}
         >
           <span className="material-symbols-outlined text-2xl">check_circle</span>
@@ -371,7 +371,7 @@ function IncidentDetailInner() {
         </button>
         <button
           onClick={() => handleInteract('dispute')}
-          className={`flex flex-col items-center gap-1 transition-all ${incident.myInteractions?.includes('dispute') ? 'text-red-400' : ''}`}
+          className={`flex flex-col items-center gap-1 transition-all ${incident.myInteractions?.includes('dispute') ? 'text-brand-red' : ''}`}
           style={!incident.myInteractions?.includes('dispute') ? { color: 'var(--neu-text-muted)' } : {}}
         >
           <span className="material-symbols-outlined text-2xl">flag</span>
@@ -392,20 +392,20 @@ function IncidentDetailInner() {
             <>
               <button
                 onClick={() => setShowUpdateForm(v => !v)}
-                className="flex-1 py-2.5 neu-btn rounded-2xl text-sm font-semibold text-primary"
+                className="flex-1 py-2.5 mod-chip rounded-2xl text-sm font-semibold text-primary"
               >
                 Add Update
               </button>
               <button
                 onClick={handleEscalate}
-                className="flex-1 py-2.5 neu-btn rounded-2xl text-sm font-semibold"
+                className="flex-1 py-2.5 mod-chip rounded-2xl text-sm font-semibold"
                 style={{ color: 'var(--neu-text-muted)' }}
               >
                 Escalate
               </button>
               <button
                 onClick={handleResolve}
-                className="flex-1 py-2.5 neu-btn rounded-2xl text-sm font-semibold text-green-600"
+                className="flex-1 py-2.5 mod-chip rounded-2xl text-sm font-semibold text-brand-green-dark"
               >
                 Resolve
               </button>
@@ -427,10 +427,10 @@ function IncidentDetailInner() {
             style={{ color: 'var(--neu-text)', background: 'var(--neu-bg)' }}
           />
           <div className="flex gap-2">
-            <button type="button" onClick={() => setShowUpdateForm(false)} className="flex-1 py-2.5 neu-btn rounded-2xl text-sm" style={{ color: 'var(--neu-text-muted)' }}>
+            <button type="button" onClick={() => setShowUpdateForm(false)} className="flex-1 py-2.5 mod-chip rounded-2xl text-sm" style={{ color: 'var(--neu-text-muted)' }}>
               Cancel
             </button>
-            <button type="submit" disabled={submittingUpdate} className="flex-1 py-2.5 neu-btn-active rounded-2xl text-sm font-bold text-primary">
+            <button type="submit" disabled={submittingUpdate} className="flex-1 py-2.5 mod-chip mod-chip-active rounded-2xl text-sm font-bold text-primary">
               {submittingUpdate ? 'Posting...' : 'Post Update'}
             </button>
           </div>
@@ -480,7 +480,7 @@ function IncidentDetailInner() {
                 <input type="checkbox" checked={commentAnon} onChange={e => setCommentAnon(e.target.checked)} className="w-3.5 h-3.5 rounded" />
                 Post anonymously
               </label>
-              <button type="submit" disabled={submittingComment} className="px-5 py-2 neu-btn-active rounded-2xl text-xs font-bold text-primary">
+              <button type="submit" disabled={submittingComment} className="px-5 py-2 mod-chip mod-chip-active rounded-2xl text-xs font-bold text-primary">
                 {submittingComment ? 'Posting...' : 'Post'}
               </button>
             </div>

@@ -19,19 +19,19 @@ import EventShareSheet from "@/components/events/EventShareSheet";
 import { useAuth } from "@/hooks/useAuth";
 
 const TYPE_COLORS: Record<string, string> = {
-  community: "bg-blue-500/20 text-blue-400",
-  social: "bg-pink-500/20 text-pink-400",
-  sports: "bg-orange-500/20 text-orange-400",
-  cultural: "bg-purple-500/20 text-purple-400",
-  educational: "bg-teal-500/20 text-teal-400",
-  business: "bg-green-500/20 text-green-400",
-  other: "bg-gray-500/20 text-gray-400",
+  community: "bg-brand-blue/20 text-brand-blue",
+  social: "bg-brand-blue/20 text-pink-400",
+  sports: "bg-brand-red/20 text-brand-red",
+  cultural: "bg-brand-blue/20 text-brand-blue",
+  educational: "bg-brand-green-dark/20 text-teal-400",
+  business: "bg-primary/20 text-primary",
+  other: "bg-brand-surface/20 text-[var(--neu-text-muted)]",
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  active: "bg-green-500/20 text-green-400",
-  completed: "bg-gray-500/20 text-gray-300",
-  cancelled: "bg-red-500/20 text-red-400",
+  active: "bg-primary/20 text-primary",
+  completed: "bg-brand-surface/20 text-[var(--neu-text-muted)]",
+  cancelled: "bg-brand-red/20 text-brand-red",
 };
 
 const REPORT_REASONS = [
@@ -120,7 +120,7 @@ function CancelModal({
           <button
             onClick={() => reason.trim().length >= 5 && onConfirm(reason.trim())}
             disabled={isPending || reason.trim().length < 5}
-            className="flex-1 rounded-xl border border-amber-300/25 bg-amber-500/20 py-2.5 text-sm font-semibold text-amber-100 transition-colors hover:bg-amber-500/30 disabled:opacity-50"
+            className="flex-1 rounded-xl border border-amber-300/25 bg-primary/20 py-2.5 text-sm font-semibold text-amber-100 transition-colors hover:bg-primary/30 disabled:opacity-50"
           >
             {isPending ? "Cancelling…" : "Confirm Cancel"}
           </button>
@@ -158,7 +158,7 @@ function ReportModal({
                 value={r.value}
                 checked={reason === r.value}
                 onChange={() => setReason(r.value)}
-                className="accent-red-500"
+                className="accent-brand-red"
               />
               <span className="text-sm text-white/80">{r.label}</span>
             </label>
@@ -182,7 +182,7 @@ function ReportModal({
           <button
             onClick={() => onSubmit(reason, description.trim() || undefined)}
             disabled={isPending}
-            className="flex-1 rounded-xl border border-red-300/25 bg-red-500/20 py-2.5 text-sm font-semibold text-red-100 transition-colors hover:bg-red-500/30 disabled:opacity-50"
+            className="flex-1 rounded-xl border border-red-300/25 bg-brand-red/20 py-2.5 text-sm font-semibold text-red-100 transition-colors hover:bg-brand-red/30 disabled:opacity-50"
           >
             {isPending ? "Reporting…" : "Submit Report"}
           </button>
@@ -220,8 +220,8 @@ function AttendeesModal({
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center gap-3 animate-pulse">
-                  <div className="w-10 h-10 rounded-full bg-gray-800" />
-                  <div className="h-4 bg-gray-800 rounded w-32" />
+                  <div className="w-10 h-10 rounded-full bg-brand-black" />
+                  <div className="h-4 bg-brand-black rounded w-32" />
                 </div>
               ))}
             </div>
@@ -318,11 +318,11 @@ export default function EventDetailPage() {
           <TopNav />
           <div className="flex flex-1 items-center justify-center px-4 pb-20">
             <div className="mod-card max-w-md rounded-2xl px-6 py-10 text-center">
-              <p className="mb-4 text-red-300">Invalid event link</p>
+              <p className="mb-4 text-brand-red">Invalid event link</p>
               <button
                 type="button"
                 onClick={() => router.push("/events")}
-                className="rounded-xl mod-btn px-6 py-2.5 font-semibold text-slate-700 hover:text-slate-950"
+                className="rounded-xl mod-chip px-6 py-2.5 font-semibold text-slate-700 hover:text-slate-950"
               >
                 Back to Events
               </button>
@@ -376,7 +376,7 @@ export default function EventDetailPage() {
           <TopNav />
           <div className="flex flex-1 items-center justify-center px-4 pb-20">
             <div className="mod-card max-w-md rounded-2xl px-6 py-10 text-center">
-              <p className="mb-2 text-red-300">Event not found</p>
+              <p className="mb-2 text-brand-red">Event not found</p>
               {error ? (
                 <p className="mb-4 text-sm text-slate-600">
                   {error instanceof Error ? error.message : "Unable to load this event."}
@@ -384,7 +384,7 @@ export default function EventDetailPage() {
               ) : null}
               <button
                 onClick={() => router.back()}
-                className="rounded-xl mod-btn px-6 py-2.5 font-semibold text-slate-700 hover:text-slate-950"
+                className="rounded-xl mod-chip px-6 py-2.5 font-semibold text-slate-700 hover:text-slate-950"
               >
                 Go Back
               </button>
@@ -415,7 +415,7 @@ export default function EventDetailPage() {
       ? "radial-gradient(circle at 20% 22%, rgba(236,72,153,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(168,85,247,0.20), transparent 40%)"
       : eventType === "cultural"
         ? "radial-gradient(circle at 20% 22%, rgba(245,158,11,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(217,70,239,0.20), transparent 40%)"
-        : "radial-gradient(circle at 20% 22%, rgba(16,185,129,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(59,130,246,0.20), transparent 40%)";
+        : "radial-gradient(circle at 20% 22%, rgba(0,212,49,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(59,130,246,0.20), transparent 40%)";
 
   const eventTitle = typeof event.title === "string" ? event.title : "Event";
 
@@ -437,7 +437,7 @@ export default function EventDetailPage() {
             className="mt-3 flex flex-col gap-5 pb-6 md:items-center"
             style={{
               background:
-                "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)), radial-gradient(circle at 50% 0%, rgba(0,135,81,0.12), transparent 34%)",
+                "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)), radial-gradient(circle at 50% 0%, rgba(0,111,53,0.12), transparent 34%)",
               backdropFilter: "blur(18px) saturate(150%)",
               WebkitBackdropFilter: "blur(18px) saturate(150%)",
             }}
@@ -445,7 +445,7 @@ export default function EventDetailPage() {
             <div className="w-full min-w-0 px-4 pt-3 sm:mx-auto sm:max-w-[680px]">
             <article
               className={`feed-post-card relative w-full overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:rounded-[32px] sm:border ${
-                isCancelled ? "ring-2 ring-red-500/40" : ""
+                isCancelled ? "ring-2 ring-brand-red/40" : ""
               }`}
             >
               <div className="relative min-h-[90vh] overflow-hidden">
@@ -492,22 +492,22 @@ export default function EventDetailPage() {
 
                     <div className="flex items-center gap-1.5 flex-wrap justify-end">
                       <span
-                        className={`text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider ${TYPE_COLORS[eventType] ?? "bg-gray-500/20 text-gray-200"}`}
+                        className={`text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider ${TYPE_COLORS[eventType] ?? "bg-brand-surface/20 text-[var(--neu-text-muted)]"}`}
                       >
                         {eventType}
                       </span>
                       {event.status && (
                         <span
-                          className={`text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider ${STATUS_COLORS[event.status] ?? "bg-gray-500/20 text-gray-200"}`}
+                          className={`text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider ${STATUS_COLORS[event.status] ?? "bg-brand-surface/20 text-[var(--neu-text-muted)]"}`}
                         >
                           {event.status}
                         </span>
                       )}
                       {event.isFree ? (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/25 text-green-200 font-bold">Free</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-primary font-bold">Free</span>
                       ) : (
                         event.ticketPrice != null && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/25 text-amber-200 font-bold">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-white/90 font-bold">
                             ₦{event.ticketPrice.toLocaleString()}
                           </span>
                         )
@@ -541,8 +541,8 @@ export default function EventDetailPage() {
                     </div>
 
                     {isCancelled && event.cancelReason && (
-                      <div className="rounded-2xl border border-red-400/25 bg-red-500/15 p-3 backdrop-blur-md">
-                        <p className="mb-1 text-xs font-bold text-red-200">Cancellation reason</p>
+                      <div className="rounded-2xl border border-brand-red/25 bg-brand-red/15 p-3 backdrop-blur-md">
+                        <p className="mb-1 text-xs font-bold text-brand-red">Cancellation reason</p>
                         <p className="text-sm text-red-100">{event.cancelReason}</p>
                       </div>
                     )}
@@ -556,7 +556,7 @@ export default function EventDetailPage() {
                       }}
                     >
                       <div className="flex items-start gap-2">
-                        <span className="material-symbols-outlined mt-0.5 text-[19px] text-blue-300">calendar_month</span>
+                        <span className="material-symbols-outlined mt-0.5 text-[19px] text-brand-blue">calendar_month</span>
                         <div>
                           <p className="text-[11px] font-semibold text-white/45">Start</p>
                           <p className="text-sm font-semibold text-white">{formatDateTime(event.startDate)}</p>
@@ -573,7 +573,7 @@ export default function EventDetailPage() {
                       )}
                       {event.venue && (
                         <div className="flex items-start gap-2 sm:col-span-2">
-                          <span className="material-symbols-outlined mt-0.5 text-[19px] text-orange-300">location_on</span>
+                          <span className="material-symbols-outlined mt-0.5 text-[19px] text-brand-red300">location_on</span>
                           <div>
                             <p className="text-[11px] font-semibold text-white/45">Venue</p>
                             <p className="text-sm font-semibold text-white">{event.venue}</p>
@@ -585,7 +585,7 @@ export default function EventDetailPage() {
                           <span className="material-symbols-outlined mt-0.5 text-[19px] text-white/60">group</span>
                           <div>
                             <p className="text-[11px] font-semibold text-white/45">Attendees</p>
-                            <button onClick={() => setShowAttendees(true)} className="text-sm font-semibold text-blue-200 hover:underline">
+                            <button onClick={() => setShowAttendees(true)} className="text-sm font-semibold text-brand-blue hover:underline">
                               {attendeeCount}
                               {event.capacity ? ` / ${event.capacity}` : ""} going - View list
                             </button>
@@ -629,14 +629,14 @@ export default function EventDetailPage() {
                       <div className="grid gap-3 sm:grid-cols-3">
                         <Link
                           href={`/events/${eventId}/edit`}
-                          className="rounded-2xl border border-blue-300/25 bg-blue-500/15 py-3 text-center text-sm font-bold text-blue-100 backdrop-blur-md transition-all hover:bg-blue-500/25"
+                          className="rounded-2xl border border-blue-300/25 bg-brand-blue/15 py-3 text-center text-sm font-bold text-blue-100 backdrop-blur-md transition-all hover:bg-brand-blue/25"
                         >
                           Edit Event
                         </Link>
                         {!isCancelled && !isCompleted && (
                           <button
                             onClick={() => setShowCancelModal(true)}
-                            className="rounded-2xl border border-amber-300/25 bg-amber-500/15 py-3 text-sm font-bold text-amber-100 backdrop-blur-md transition-all hover:bg-amber-500/25"
+                            className="rounded-2xl border border-amber-300/25 bg-primary/15 py-3 text-sm font-bold text-amber-100 backdrop-blur-md transition-all hover:bg-primary/25"
                           >
                             Cancel Event
                           </button>
@@ -647,7 +647,7 @@ export default function EventDetailPage() {
                               deleteEvent.mutate(eventId);
                           }}
                           disabled={deleteEvent.isPending}
-                          className="rounded-2xl border border-red-300/25 bg-red-500/15 py-3 text-sm font-bold text-red-100 backdrop-blur-md transition-all hover:bg-red-500/25 disabled:opacity-50"
+                          className="rounded-2xl border border-red-300/25 bg-brand-red/15 py-3 text-sm font-bold text-red-100 backdrop-blur-md transition-all hover:bg-brand-red/25 disabled:opacity-50"
                         >
                           Delete
                         </button>

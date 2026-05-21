@@ -112,13 +112,13 @@ export function getOfferToast(
 export function getOfferPillClass(action: OfferAction): string {
   switch (action) {
     case "new":
-      return "bg-orange-900/50 text-orange-200";
+      return "bg-brand-red900/50 text-brand-red";
     case "accept":
-      return "bg-green-900/50 text-green-200";
+      return "bg-green-900/50 text-primary";
     case "reject":
-      return "bg-red-900/50 text-red-200";
+      return "bg-red-900/50 text-brand-red";
     case "counter":
-      return "bg-purple-900/50 text-purple-200";
+      return "bg-purple-900/50 text-white/90";
   }
 }
 

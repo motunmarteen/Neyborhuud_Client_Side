@@ -821,6 +821,12 @@ textarea.neu-input:focus-within::after {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+.mod-chip-active {
+  background: rgba(0, 212, 49, 0.12);
+  border: 1px solid rgba(0, 212, 49, 0.35);
+  color: var(--primary);
+  font-weight: 700;
+}
 
 /* ── Modern FAB ── */
 .mod-fab {
@@ -898,9 +904,10 @@ html:not(.dark) .mod-btn-active {
   background: rgba(0, 212, 49, 0.08);
   border-color: rgba(0, 212, 49, 0.2);
 }
-html:not(.dark) .mod-chip {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.07);
+html:not(.dark) .mod-chip-active {
+  background: rgba(0, 212, 49, 0.1);
+  border-color: rgba(0, 111, 53, 0.25);
+  color: var(--brand-green-dark);
 }
 html:not(.dark) .mod-divider {
   background: rgba(0, 0, 0, 0.07);

@@ -100,14 +100,14 @@ export default function CreateEventForm() {
           className={`relative h-48 cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed transition-colors ${
             coverPreview
               ? "border-transparent"
-              : "border-primary/30 bg-primary/[0.06] hover:border-primary/45 dark:border-emerald-400/25 dark:bg-emerald-500/10"
+              : "border-primary/30 bg-primary/[0.06] hover:border-primary/45 dark:border-primary/25 dark:bg-primary/10"
           }`}
         >
           {coverPreview ? (
             <img src={coverPreview} className="h-full w-full object-cover" alt="Cover preview" />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-2 text-[#3D5A3E] dark:text-white/55">
-              <span className="material-symbols-outlined text-4xl text-[#006F35]/60 dark:text-emerald-400/70">add_photo_alternate</span>
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-brand-green-dark/70 dark:text-white/55">
+              <span className="material-symbols-outlined text-4xl text-[#006F35]/60 dark:text-primary/70">add_photo_alternate</span>
               <span className="text-sm font-medium">Upload cover image (max 10MB)</span>
             </div>
           )}
@@ -122,7 +122,7 @@ export default function CreateEventForm() {
 
       <div>
         <label className={glassLabel}>
-          Event title <span className="text-red-500">*</span>
+          Event title <span className="text-brand-red">*</span>
         </label>
         <input
           required
@@ -135,7 +135,7 @@ export default function CreateEventForm() {
 
       <div>
         <label className={glassLabel}>
-          Description <span className="text-red-500">*</span>
+          Description <span className="text-brand-red">*</span>
         </label>
         <textarea
           required
@@ -149,7 +149,7 @@ export default function CreateEventForm() {
 
       <div>
         <label className={glassLabel}>
-          Event type <span className="text-red-500">*</span>
+          Event type <span className="text-brand-red">*</span>
         </label>
         <select
           value={type}
@@ -167,7 +167,7 @@ export default function CreateEventForm() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={glassLabel}>
-            Start date &amp; time <span className="text-red-500">*</span>
+            Start date &amp; time <span className="text-brand-red">*</span>
           </label>
           <input
             required
@@ -179,7 +179,7 @@ export default function CreateEventForm() {
         </div>
         <div>
           <label className={glassLabel}>
-            End date &amp; time <span className="text-red-500">*</span>
+            End date &amp; time <span className="text-brand-red">*</span>
           </label>
           <input required type="datetime-local" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} className={glassField} />
         </div>
@@ -209,7 +209,7 @@ export default function CreateEventForm() {
 
       <div>
         <div className="mb-3 flex items-center justify-between rounded-2xl border border-[var(--border-light)] bg-[var(--surface-light)]/80 px-4 py-3 dark:border-white/12 dark:bg-white/[0.05]">
-          <span className="text-sm font-medium text-[#3D5A3E] dark:text-white/65">Free event</span>
+          <span className="text-sm font-medium text-brand-green-dark/70 dark:text-white/65">Free event</span>
           <button
             type="button"
             role="switch"
@@ -279,7 +279,7 @@ export default function CreateEventForm() {
                 className="flex items-center gap-1 rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] px-3 py-1 text-sm font-medium text-[#2E502E] dark:border-white/12 dark:bg-white/[0.06] dark:text-white/85"
               >
                 #{t}
-                <button type="button" onClick={() => removeTag(t)} className="ml-0.5 text-[#3D5A3E] transition-colors hover:text-red-600 dark:text-white/50">
+                <button type="button" onClick={() => removeTag(t)} className="ml-0.5 text-brand-green-dark/70 transition-colors hover:text-brand-red dark:text-white/50">
                   ×
                 </button>
               </span>

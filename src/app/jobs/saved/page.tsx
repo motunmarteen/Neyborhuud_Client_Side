@@ -35,7 +35,7 @@ export default function SavedJobsPage() {
           <div className="flex items-center gap-3 mb-6">
             <Link
               href="/jobs"
-              className="p-2 rounded-xl mod-btn transition-all"
+              className="p-2 rounded-xl mod-chip transition-all"
               style={{ color: "var(--neu-text-muted)" }}
             >
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -101,7 +101,7 @@ export default function SavedJobsPage() {
               </p>
               <Link
                 href="/jobs"
-                className="px-6 py-2.5 rounded-xl font-bold text-sm mod-btn-active text-primary transition-all"
+                className="px-6 py-2.5 rounded-xl font-bold text-sm mod-chip mod-chip-active text-primary transition-all"
               >
                 Browse Jobs
               </Link>

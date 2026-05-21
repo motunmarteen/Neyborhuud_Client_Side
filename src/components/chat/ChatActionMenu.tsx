@@ -61,10 +61,10 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   return (
     <div className="fixed inset-0 z-[200] flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-sm rounded-t-2xl bg-gray-900 p-5 shadow-2xl sm:rounded-2xl">
+      <div className="relative z-10 w-full max-w-sm rounded-t-2xl bg-brand-black p-5 shadow-2xl sm:rounded-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <p className="font-semibold text-gray-100">{title}</p>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-100 text-xl leading-none">×</button>
+          <p className="font-semibold text-[var(--neu-text-muted)]">{title}</p>
+          <button onClick={onClose} className="text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)] text-xl leading-none">×</button>
         </div>
         {children}
       </div>
@@ -96,13 +96,13 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
 
   return (
     <Modal title="📍 Send Location" onClose={onClose}>
-      {loading && <p className="text-sm text-gray-400">Detecting location…</p>}
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {loading && <p className="text-sm text-[var(--neu-text-muted)]">Detecting location…</p>}
+      {error && <p className="text-sm text-brand-red">{error}</p>}
       {loc && (
-        <div className="mb-4 rounded-xl bg-gray-800 p-3 text-sm text-gray-200">
-          <p className="font-mono text-xs text-gray-400">{loc.lat.toFixed(5)}, {loc.lng.toFixed(5)}</p>
+        <div className="mb-4 rounded-xl bg-brand-black p-3 text-sm text-[var(--neu-text-muted)]">
+          <p className="font-mono text-xs text-[var(--neu-text-muted)]">{loc.lat.toFixed(5)}, {loc.lng.toFixed(5)}</p>
           <input
-            className="mt-2 w-full rounded bg-gray-700 px-3 py-1.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none"
+            className="mt-2 w-full rounded bg-brand-black px-3 py-1.5 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
             placeholder="Add address label (optional)"
             defaultValue={loc.address}
             onChange={(e) => setLoc((l) => l ? { ...l, address: e.target.value } : l)}
@@ -117,11 +117,11 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
           locationSnapshot: { latitude: loc.lat, longitude: loc.lng, address: loc.address },
           meta: { latitude: loc.lat, longitude: loc.lng, address: loc.address },
         })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-40"
+        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
       >
         Send Location
       </button>
-      {error && <button onClick={detect} className="mt-2 w-full text-center text-xs text-blue-400 hover:underline">Retry</button>}
+      {error && <button onClick={detect} className="mt-2 w-full text-center text-xs text-brand-blue hover:underline">Retry</button>}
     </Modal>
   );
 }
@@ -145,7 +145,7 @@ function PollModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onC
   return (
     <Modal title="📊 Create Poll" onClose={onClose}>
       <input
-        className="mb-3 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none"
+        className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
         placeholder="Poll question…"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
@@ -155,25 +155,25 @@ function PollModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onC
         {options.map((o, i) => (
           <div key={i} className="flex gap-2">
             <input
-              className="flex-1 rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none"
+              className="flex-1 rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
               placeholder={`Option ${i + 1}`}
               value={o}
               onChange={(e) => setOptions((prev) => prev.map((v, idx) => idx === i ? e.target.value : v))}
               maxLength={100}
             />
             {options.length > 2 && (
-              <button onClick={() => setOptions((prev) => prev.filter((_, idx) => idx !== i))} className="text-gray-500 hover:text-red-400">✕</button>
+              <button onClick={() => setOptions((prev) => prev.filter((_, idx) => idx !== i))} className="text-[var(--neu-text-muted)] hover:text-brand-red">✕</button>
             )}
           </div>
         ))}
       </div>
       {options.length < 6 && (
-        <button onClick={() => setOptions((prev) => [...prev, ''])} className="mb-3 text-xs text-blue-400 hover:underline">+ Add option</button>
+        <button onClick={() => setOptions((prev) => [...prev, ''])} className="mb-3 text-xs text-brand-blue hover:underline">+ Add option</button>
       )}
       <button
         disabled={!question.trim() || options.filter(Boolean).length < 2}
         onClick={submit}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-40"
+        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
       >
         Create Poll
       </button>
@@ -188,12 +188,12 @@ function ContactModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; 
 
   return (
     <Modal title="👤 Share Contact" onClose={onClose}>
-      <input className="mb-3 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
-      <input className="mb-4 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none" placeholder="Phone number" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} />
+      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
+      <input className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Phone number" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} />
       <button
         disabled={!name.trim() || !phone.trim()}
         onClick={() => onDone({ type: 'contact', content: `👤 ${name} · ${phone}`, meta: { name: name.trim(), phone: phone.trim() } })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-40"
+        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
       >
         Share Contact
       </button>
@@ -208,9 +208,9 @@ function SOSModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onCl
 
   return (
     <Modal title="🆘 Send SOS Context" onClose={onClose}>
-      <p className="mb-3 text-xs text-orange-300">This shares emergency context with chat participants.</p>
+      <p className="mb-3 text-xs text-brand-red300">This shares emergency context with chat participants.</p>
       <input
-        className="mb-3 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none"
+        className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
         placeholder="Emergency ID / Reference (optional)"
         value={ref}
         onChange={(e) => setRef(e.target.value)}
@@ -219,7 +219,7 @@ function SOSModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onCl
       <select
         value={severity}
         onChange={(e) => setSeverity(e.target.value)}
-        className="mb-4 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:outline-none"
+        className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] focus:outline-none"
       >
         <option value="low">Low</option>
         <option value="medium">Medium</option>
@@ -233,7 +233,7 @@ function SOSModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onCl
           emergencyRef: ref.trim() || undefined,
           meta: { severity },
         })}
-        className="w-full rounded-xl bg-red-600 py-2.5 text-sm font-medium text-white hover:bg-red-500"
+        className="w-full rounded-xl bg-red-600 py-2.5 text-sm font-medium text-white hover:bg-brand-red"
       >
         Send SOS
       </button>
@@ -249,14 +249,14 @@ function TrackingModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
   return (
     <Modal title="📡 Share Tracking Session" onClose={onClose}>
       <input
-        className="mb-3 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none"
+        className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
         placeholder="Tracking session ID"
         value={sessionRef}
         onChange={(e) => setSessionRef(e.target.value)}
         maxLength={24}
       />
-      <label className="mb-4 flex items-center gap-2 text-sm text-gray-300">
-        <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} className="accent-blue-500" />
+      <label className="mb-4 flex items-center gap-2 text-sm text-[var(--neu-text-muted)]">
+        <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} className="accent-brand-blue" />
         Share as live session
       </label>
       <button
@@ -267,7 +267,7 @@ function TrackingModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
           trackingSessionRef: sessionRef.trim(),
           meta: { live },
         })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-40"
+        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
       >
         Share Session
       </button>
@@ -282,9 +282,9 @@ function KidnappingModal({ onDone, onClose }: { onDone: (r: ActionResult) => voi
 
   return (
     <Modal title="🚨 Kidnapping Alert" onClose={onClose}>
-      <p className="mb-3 text-xs text-red-300">Only share with verified responders or family contacts.</p>
+      <p className="mb-3 text-xs text-brand-red">Only share with verified responders or family contacts.</p>
       <input
-        className="mb-3 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none"
+        className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
         placeholder="Tracking session reference"
         value={sessionRef}
         onChange={(e) => setSessionRef(e.target.value)}
@@ -293,7 +293,7 @@ function KidnappingModal({ onDone, onClose }: { onDone: (r: ActionResult) => voi
       <select
         value={status}
         onChange={(e) => setStatus(e.target.value)}
-        className="mb-4 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:outline-none"
+        className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] focus:outline-none"
       >
         <option value="active">Active / Ongoing</option>
         <option value="suspected">Suspected</option>
@@ -323,13 +323,13 @@ function EventModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; on
 
   return (
     <Modal title="📅 Share Event" onClose={onClose}>
-      <input className="mb-3 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none" placeholder="Event title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
-      <input className="mb-3 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none" placeholder="Event ID (optional)" value={eventId} onChange={(e) => setEventId(e.target.value)} maxLength={24} />
-      <input type="datetime-local" className="mb-4 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:outline-none" value={time} onChange={(e) => setTime(e.target.value)} />
+      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Event title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
+      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Event ID (optional)" value={eventId} onChange={(e) => setEventId(e.target.value)} maxLength={24} />
+      <input type="datetime-local" className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] focus:outline-none" value={time} onChange={(e) => setTime(e.target.value)} />
       <button
         disabled={!title.trim()}
         onClick={() => onDone({ type: 'event', content: `📅 ${title}`, meta: { eventId: eventId.trim() || undefined, title: title.trim(), time: time || undefined } })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-40"
+        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
       >
         Share Event
       </button>
@@ -345,13 +345,13 @@ function MarketplaceModal({ onDone, onClose }: { onDone: (r: ActionResult) => vo
 
   return (
     <Modal title="🛒 Share Item" onClose={onClose}>
-      <input className="mb-3 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none" placeholder="Item title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
-      <input className="mb-3 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none" placeholder="Item ID (optional)" value={itemId} onChange={(e) => setItemId(e.target.value)} maxLength={24} />
-      <input type="number" min="0" className="mb-4 w-full rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none" placeholder="Price (₦)" value={price} onChange={(e) => setPrice(e.target.value)} />
+      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Item title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
+      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Item ID (optional)" value={itemId} onChange={(e) => setItemId(e.target.value)} maxLength={24} />
+      <input type="number" min="0" className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Price (₦)" value={price} onChange={(e) => setPrice(e.target.value)} />
       <button
         disabled={!title.trim()}
         onClick={() => onDone({ type: 'marketplace', content: `🛒 ${title}${price ? ` — ₦${price}` : ''}`, meta: { itemId: itemId.trim() || undefined, title: title.trim(), price: price ? Number(price) : undefined } })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-40"
+        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
       >
         Share Item
       </button>
@@ -372,10 +372,10 @@ const MEDIA_ACTIONS = [
 const CONTEXT_ACTIONS: { key: ActiveModal & string; label: string; icon: string; color: string }[] = [
   { key: 'location',       label: 'Location',     icon: '📍', color: 'bg-green-700' },
   { key: 'event',          label: 'Event',        icon: '📅', color: 'bg-purple-700' },
-  { key: 'marketplace',    label: 'Marketplace',  icon: '🛒', color: 'bg-yellow-700' },
+  { key: 'marketplace',    label: 'Marketplace',  icon: '🛒', color: 'bg-primary700' },
   { key: 'contact',        label: 'Contact',      icon: '👤', color: 'bg-blue-700' },
-  { key: 'poll',           label: 'Poll',         icon: '📊', color: 'bg-cyan-700' },
-  { key: 'tracking',       label: 'Tracking',     icon: '📡', color: 'bg-indigo-700' },
+  { key: 'poll',           label: 'Poll',         icon: '📊', color: 'bg-brand-blue700' },
+  { key: 'tracking',       label: 'Tracking',     icon: '📡', color: 'bg-brand-blue700' },
   { key: 'kidnapping_info',label: 'Kidnapping',   icon: '🚨', color: 'bg-red-800' },
   { key: 'sos',            label: 'SOS',          icon: '🆘', color: 'bg-red-700' },
 ];
@@ -472,7 +472,7 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl font-bold transition-all duration-200 disabled:opacity-40 ${
             open
               ? 'rotate-45 bg-blue-600 text-white shadow-lg shadow-blue-900/50'
-              : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+              : 'bg-brand-black text-[var(--neu-text-muted)] hover:bg-brand-surface'
           }`}
         >
           +
@@ -480,50 +480,50 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
 
         {/* Action sheet */}
         {open && (
-          <div className="absolute bottom-14 left-0 z-50 w-72 overflow-hidden rounded-2xl border border-gray-700 bg-gray-900 shadow-2xl">
+          <div className="absolute bottom-14 left-0 z-50 w-72 overflow-hidden rounded-2xl border border-black/[0.08] bg-brand-black shadow-2xl">
 
             {/* MEDIA section */}
             <div className="px-4 pt-4 pb-2">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Media</p>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--neu-text-muted)]">Media</p>
               <div className="grid grid-cols-4 gap-2">
                 {MEDIA_ACTIONS.map((a) => (
                   <button
                     key={a.key}
                     type="button"
                     onClick={() => openFilePicker(a.key as keyof typeof ALLOWED_MIME, a.accept)}
-                    className="flex flex-col items-center gap-1 rounded-xl bg-gray-800 p-3 text-center transition-colors hover:bg-gray-700"
+                    className="flex flex-col items-center gap-1 rounded-xl bg-brand-black p-3 text-center transition-colors hover:bg-brand-black"
                   >
                     <span className="text-2xl">{a.icon}</span>
-                    <span className="text-[10px] text-gray-400">{a.label}</span>
+                    <span className="text-[10px] text-[var(--neu-text-muted)]">{a.label}</span>
                   </button>
                 ))}
                 {/* Voice note */}
                 <button
                   type="button"
                   onClick={() => { setOpen(false); setActiveModal('voice'); }}
-                  className="flex flex-col items-center gap-1 rounded-xl bg-gray-800 p-3 text-center transition-colors hover:bg-gray-700"
+                  className="flex flex-col items-center gap-1 rounded-xl bg-brand-black p-3 text-center transition-colors hover:bg-brand-black"
                 >
                   <span className="text-2xl">🎤</span>
-                  <span className="text-[10px] text-gray-400">Voice</span>
+                  <span className="text-[10px] text-[var(--neu-text-muted)]">Voice</span>
                 </button>
               </div>
             </div>
 
-            <div className="mx-4 my-1 h-px bg-gray-800" />
+            <div className="mx-4 my-1 h-px bg-brand-black" />
 
             {/* CONTEXT ACTIONS section */}
             <div className="px-4 pt-2 pb-4">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Context Actions</p>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--neu-text-muted)]">Context Actions</p>
               <div className="grid grid-cols-4 gap-2">
                 {CONTEXT_ACTIONS.map((a) => (
                   <button
                     key={a.key}
                     type="button"
                     onClick={() => { setOpen(false); setActiveModal(a.key as ActiveModal); }}
-                    className="flex flex-col items-center gap-1 rounded-xl bg-gray-800 p-3 text-center transition-colors hover:bg-gray-700"
+                    className="flex flex-col items-center gap-1 rounded-xl bg-brand-black p-3 text-center transition-colors hover:bg-brand-black"
                   >
                     <span className="text-2xl">{a.icon}</span>
-                    <span className="text-[10px] text-gray-400 leading-tight">{a.label}</span>
+                    <span className="text-[10px] text-[var(--neu-text-muted)] leading-tight">{a.label}</span>
                   </button>
                 ))}
               </div>

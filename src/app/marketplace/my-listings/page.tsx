@@ -35,7 +35,7 @@ function PendingOffersBadge({ product }: { product: Product }) {
         e.stopPropagation();
         router.push(`/marketplace/${productId}/offers`);
       }}
-      className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-300 hover:bg-amber-500/30 transition-colors"
+      className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-amber-300 hover:bg-primary/30 transition-colors"
     >
       <span>💰</span>
       {count} pending {count === 1 ? "offer" : "offers"}
@@ -67,7 +67,7 @@ function ListingWithOffers({
 
       {/* Active boost expiry notice */}
       {boostActive && (
-        <p className="mt-1 text-center text-[11px] text-amber-400/80">
+        <p className="mt-1 text-center text-[11px] text-primary/80">
           🚀 Boosted until{" "}
           {new Date(boostedUntil!).toLocaleDateString("en-NG", {
             day: "numeric",
@@ -81,7 +81,7 @@ function ListingWithOffers({
       <div className="mt-2 flex gap-2">
         <Link
           href={`/marketplace/${productId}/edit`}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-gray-700/50 px-3 py-1 text-xs font-semibold text-gray-300 hover:bg-gray-700 transition-colors"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-brand-black/50 px-3 py-1 text-xs font-semibold text-[var(--neu-text-muted)] hover:bg-brand-black transition-colors"
         >
           <span className="material-symbols-outlined text-sm">edit</span>
           Edit
@@ -90,8 +90,8 @@ function ListingWithOffers({
           onClick={() => onBoost(productId, productTitle, isBoosted, boostedUntil)}
           className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
             boostActive
-              ? "bg-amber-500/30 text-amber-300 hover:bg-amber-500/40"
-              : "bg-amber-500/15 text-amber-400 hover:bg-amber-500/25"
+              ? "bg-primary/30 text-amber-300 hover:bg-primary/40"
+              : "bg-primary/15 text-primary hover:bg-primary/25"
           }`}
         >
           <span className="material-symbols-outlined text-sm">rocket_launch</span>
@@ -133,15 +133,15 @@ export default function MyListingsPage() {
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+        <div className="flex-1 overflow-y-auto bg-brand-black text-white">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800">
+      <div className="sticky top-0 z-10 bg-brand-black border-b border-black/[0.08]">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
               <Link
                 href="/marketplace"
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-2"
+                className="flex items-center gap-2 text-[var(--neu-text-muted)] hover:text-white transition-colors mb-2"
               >
                 <svg
                   className="w-5 h-5"
@@ -162,7 +162,7 @@ export default function MyListingsPage() {
             </div>
             <Link
               href="/marketplace/create"
-              className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-primary hover:bg-brand-green-dark rounded-lg font-semibold transition-colors flex items-center gap-2"
             >
               <svg
                 className="w-5 h-5"
@@ -190,9 +190,9 @@ export default function MyListingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="animate-pulse">
-                <div className="aspect-square bg-gray-800 rounded-xl mb-3" />
-                <div className="h-4 bg-gray-800 rounded w-3/4 mb-2" />
-                <div className="h-6 bg-gray-800 rounded w-1/2" />
+                <div className="aspect-square bg-brand-black rounded-xl mb-3" />
+                <div className="h-4 bg-brand-black rounded w-3/4 mb-2" />
+                <div className="h-6 bg-brand-black rounded w-1/2" />
               </div>
             ))}
           </div>
@@ -201,10 +201,10 @@ export default function MyListingsPage() {
         {/* Error State */}
         {error && (
           <div className="text-center py-12">
-            <p className="text-red-400 mb-4">Failed to load your listings</p>
+            <p className="text-brand-red mb-4">Failed to load your listings</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+              className="px-6 py-3 bg-brand-black hover:bg-brand-black rounded-lg transition-colors"
             >
               Retry
             </button>
@@ -214,7 +214,7 @@ export default function MyListingsPage() {
         {/* Products Grid */}
         {!isLoading && !error && products.length > 0 && (
           <>
-            <div className="mb-4 text-gray-400">
+            <div className="mb-4 text-[var(--neu-text-muted)]">
               {products.length} {products.length === 1 ? "listing" : "listings"}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -245,7 +245,7 @@ export default function MyListingsPage() {
                 <button
                   onClick={() => fetchNextPage()}
                   disabled={isFetchingNextPage}
-                  className="px-8 py-3 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-900 disabled:text-gray-600 rounded-lg font-semibold transition-colors"
+                  className="px-8 py-3 bg-brand-black hover:bg-brand-black disabled:bg-brand-black disabled:text-[var(--neu-text-secondary)] rounded-lg font-semibold transition-colors"
                 >
                   {isFetchingNextPage ? "Loading..." : "Load More"}
                 </button>
@@ -258,7 +258,7 @@ export default function MyListingsPage() {
         {!isLoading && !error && products.length === 0 && (
           <div className="text-center py-12">
             <svg
-              className="w-24 h-24 mx-auto mb-4 text-gray-600"
+              className="w-24 h-24 mx-auto mb-4 text-[var(--neu-text-secondary)]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -270,15 +270,15 @@ export default function MyListingsPage() {
                 d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
               />
             </svg>
-            <h3 className="text-xl font-semibold mb-2 text-gray-400">
+            <h3 className="text-xl font-semibold mb-2 text-[var(--neu-text-muted)]">
               No listings yet
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-[var(--neu-text-muted)] mb-6">
               Start selling items in your neyborhuud
             </p>
             <Link
               href="/marketplace/create"
-              className="inline-block px-6 py-3 bg-green-500 hover:bg-green-600 rounded-lg font-semibold transition-colors"
+              className="inline-block px-6 py-3 bg-primary hover:bg-brand-green-dark rounded-lg font-semibold transition-colors"
             >
               Create Your First Listing
             </Link>

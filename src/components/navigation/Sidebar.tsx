@@ -117,16 +117,16 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
     const userInitial = userDisplayName[0]?.toUpperCase() || 'U';
 
     const userMenuContent = (
-        <div className="absolute bottom-full mb-2 left-0 w-full min-w-[260px] bg-white dark:bg-gray-950 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-gray-100 dark:border-gray-800 p-2 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-3 border-b border-gray-100 dark:border-gray-800">
-                <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{userDisplayName}</p>
-                <p className="text-xs text-gray-500 truncate">{userHandle}</p>
+        <div className="absolute bottom-full mb-2 left-0 w-full min-w-[260px] bg-white dark:bg-brand-surface rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-black/[0.08] dark:border-black/[0.08] p-2 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-3 border-b border-black/[0.08] dark:border-black/[0.08]">
+                <p className="font-bold text-sm text-[var(--neu-text-muted)] dark:text-white truncate">{userDisplayName}</p>
+                <p className="text-xs text-[var(--neu-text-muted)] truncate">{userHandle}</p>
             </div>
 
             <Link
                 href={user ? `/profile/${user.username}` : '/settings'}
                 onClick={() => setShowUserMenu(false)}
-                className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors text-gray-700 dark:text-gray-200"
+                className="flex items-center gap-3 w-full p-3 text-left hover:bg-brand-surface dark:hover:bg-brand-black/80 rounded-xl transition-colors text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]"
             >
                 <i className="bi bi-person text-xl" />
                 <span className="font-medium">View Profile</span>
@@ -135,7 +135,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
             <Link
                 href="/settings"
                 onClick={() => setShowUserMenu(false)}
-                className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors text-gray-700 dark:text-gray-200"
+                className="flex items-center gap-3 w-full p-3 text-left hover:bg-brand-surface dark:hover:bg-brand-black/80 rounded-xl transition-colors text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]"
             >
                 <i className="bi bi-gear text-xl" />
                 <span className="font-medium">Settings</span>
@@ -143,7 +143,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
 
             <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 w-full p-3 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors text-red-500"
+                className="flex items-center gap-3 w-full p-3 text-left hover:bg-brand-surface dark:hover:bg-brand-black/80 rounded-xl transition-colors text-brand-red"
             >
                 <i className="bi bi-box-arrow-right text-xl" />
                 <span className="font-medium">Log out {userHandle}</span>
@@ -163,7 +163,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
 
             {/* Drawer */}
             <aside
-                className={`fixed top-0 left-0 h-full w-[280px] bg-white dark:bg-gray-950 z-50 lg:hidden transform transition-transform duration-300 ease-out shadow-2xl ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 h-full w-[280px] bg-white dark:bg-brand-surface z-50 lg:hidden transform transition-transform duration-300 ease-out shadow-2xl ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="flex flex-col h-full px-4 py-4">
@@ -171,11 +171,11 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                     <div className="flex items-center justify-between mb-6">
                         <Link href="/feed" className="flex items-center gap-3" onClick={handleNavClick}>
                             <img src="/icon.png" alt="NeyborHuud" className="w-10 h-10 rounded-xl" />
-                            <span className="font-bold text-xl text-gray-900 dark:text-white">NeyborHuud</span>
+                            <span className="font-bold text-xl text-[var(--neu-text-muted)] dark:text-white">NeyborHuud</span>
                         </Link>
                         <button
                             onClick={onMobileClose}
-                            className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors"
+                            className="w-10 h-10 rounded-full hover:bg-brand-surface dark:hover:bg-brand-black/80 flex items-center justify-center transition-colors"
                             aria-label="Close menu"
                             title="Close menu"
                         >
@@ -196,8 +196,8 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                                 href={item.href}
                                 onClick={handleNavClick}
                                 className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-lg transition-all ${item.active
-                                    ? 'font-bold bg-gray-100 dark:bg-gray-800'
-                                    : 'font-normal hover:bg-gray-100 dark:hover:bg-gray-800'
+                                    ? 'font-bold bg-brand-surface dark:bg-brand-black'
+                                    : 'font-normal hover:bg-brand-surface dark:hover:bg-brand-black/80'
                                     }`}
                             >
                                 <i className={`bi ${item.active ? item.icon : item.iconOutline} text-2xl`} />
@@ -218,11 +218,11 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                     </nav>
 
                     {/* User Profile Section */}
-                    <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 relative user-menu-container">
+                    <div className="mt-auto pt-4 border-t border-black/[0.08] dark:border-black/[0.08] relative user-menu-container">
                         {showUserMenu && userMenuContent}
                         <button
                             onClick={() => setShowUserMenu(!showUserMenu)}
-                            className="flex items-center gap-3 p-3 w-full rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+                            className="flex items-center gap-3 p-3 w-full rounded-xl hover:bg-brand-surface dark:hover:bg-brand-black/80 transition-colors text-left"
                         >
                             <MapPinAvatar
                                 src={user?.avatarUrl}
@@ -231,10 +231,10 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                                 size="md"
                             />
                             <div className="flex-1 min-w-0">
-                                <p className="font-bold text-base truncate text-gray-900 dark:text-gray-100">{userDisplayName}</p>
-                                <p className="text-sm text-gray-500 truncate">{userHandle}</p>
+                                <p className="font-bold text-base truncate text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">{userDisplayName}</p>
+                                <p className="text-sm text-[var(--neu-text-muted)] truncate">{userHandle}</p>
                             </div>
-                            <i className="bi bi-three-dots text-gray-400" />
+                            <i className="bi bi-three-dots text-[var(--neu-text-muted)]" />
                         </button>
                     </div>
                 </div>
@@ -250,13 +250,13 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
         >
             {/* Logo & Toggle */}
             <div className="flex items-center justify-between h-14 px-3 mb-1">
-                <Link href="/feed" className="w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <Link href="/feed" className="w-12 h-12 rounded-full flex items-center justify-center hover:bg-brand-surface dark:hover:bg-brand-black/80 transition-colors">
                     <img src="/icon.png" alt="NeyborHuud" className="w-8 h-8 rounded-lg" />
                 </Link>
                 {!isCollapsed && (
                     <button
                         onClick={toggleCollapsed}
-                        className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors"
+                        className="w-8 h-8 rounded-full hover:bg-brand-surface dark:hover:bg-brand-black/80 flex items-center justify-center transition-colors"
                         title="Collapse sidebar"
                     >
                         <i className="bi bi-chevron-left text-lg" />
@@ -265,7 +265,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                 {isCollapsed && (
                     <button
                         onClick={toggleCollapsed}
-                        className="absolute top-4 left-[72px] w-6 h-6 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors shadow-md"
+                        className="absolute top-4 left-[72px] w-6 h-6 rounded-full bg-white dark:bg-brand-black border border-black/[0.08] dark:border-black/[0.08] hover:bg-brand-surface dark:hover:bg-brand-black/80 flex items-center justify-center transition-colors shadow-md"
                         title="Expand sidebar"
                     >
                         <i className="bi bi-chevron-right text-sm" />
@@ -281,7 +281,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                         href={item.href}
                         className={`flex items-center gap-4 px-4 py-3 rounded-full text-xl transition-colors ${item.active
                             ? 'font-bold'
-                            : 'font-normal hover:bg-gray-100 dark:hover:bg-gray-800'
+                            : 'font-normal hover:bg-brand-surface dark:hover:bg-brand-black/80'
                             } ${isCollapsed ? 'justify-center' : ''}`}
                         title={isCollapsed ? item.label : undefined}
                     >
@@ -306,7 +306,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                 {showUserMenu && !isCollapsed && userMenuContent}
                 <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className={`flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full ${isCollapsed ? 'justify-center' : ''
+                    className={`flex items-center gap-3 p-3 rounded-full hover:bg-brand-surface dark:hover:bg-brand-black/80 transition-colors w-full ${isCollapsed ? 'justify-center' : ''
                         }`}
                     title={isCollapsed ? 'Profile' : undefined}
                 >
@@ -319,8 +319,8 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                     {!isCollapsed && (
                         <>
                             <div className="flex-1 min-w-0 text-left">
-                                <p className="font-bold text-sm truncate text-gray-900 dark:text-gray-100">{userDisplayName}</p>
-                                <p className="text-xs text-gray-500 truncate">{userHandle}</p>
+                                <p className="font-bold text-sm truncate text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">{userDisplayName}</p>
+                                <p className="text-xs text-[var(--neu-text-muted)] truncate">{userHandle}</p>
                             </div>
                             <i className="bi bi-three-dots text-lg" />
                         </>

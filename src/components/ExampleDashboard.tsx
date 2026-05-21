@@ -35,7 +35,7 @@ export default function ExampleDashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black/[0.08] mx-auto mb-4"></div>
           <p>Loading...</p>
         </div>
       </div>
@@ -82,14 +82,14 @@ export default function ExampleDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-brand-surface">
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">NeyborHuud</h1>
-              <p className="text-sm text-gray-600">
+              <h1 className="text-2xl font-bold text-[var(--neu-text-muted)]">NeyborHuud</h1>
+              <p className="text-sm text-[var(--neu-text-secondary)]">
                 Welcome, {user?.firstName || user?.username}!
               </p>
             </div>
@@ -97,11 +97,11 @@ export default function ExampleDashboard() {
               {/* Notifications */}
               <button
                 onClick={() => router.push('/notifications')}
-                className="relative p-2 rounded-full hover:bg-gray-100"
+                className="relative p-2 rounded-full hover:bg-brand-surface"
               >
                 🔔
                 {unreadCount && unreadCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute top-0 right-0 bg-brand-red text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {unreadCount}
                   </span>
                 )}
@@ -116,13 +116,13 @@ export default function ExampleDashboard() {
                     className="h-8 w-8 rounded-full"
                   />
                 ) : (
-                  <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full bg-brand-surface flex items-center justify-center">
                     {user?.firstName?.[0] || user?.username?.[0] || '?'}
                   </div>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="text-sm text-gray-700 hover:text-gray-900"
+                  className="text-sm text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)]"
                 >
                   Logout
                 </button>
@@ -140,7 +140,7 @@ export default function ExampleDashboard() {
               value={newPostContent}
               onChange={(e) => setNewPostContent(e.target.value)}
               placeholder="What's on your mind?"
-              className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-black/[0.08] rounded-lg resize-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
               rows={3}
             />
             <div className="mt-3 flex justify-end">
@@ -159,7 +159,7 @@ export default function ExampleDashboard() {
         <div className="space-y-4">
           {postsLoading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black/[0.08] mx-auto"></div>
             </div>
           ) : (
             <>
@@ -177,7 +177,7 @@ export default function ExampleDashboard() {
                           className="h-10 w-10 rounded-full"
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full bg-brand-surface flex items-center justify-center">
                           {post.author.firstName?.[0] || post.author.username[0]}
                         </div>
                       )}
@@ -185,14 +185,14 @@ export default function ExampleDashboard() {
                         <p className="font-semibold">
                           {post.author.firstName} {post.author.lastName}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-[var(--neu-text-muted)]">
                           @{post.author.username}
                         </p>
                       </div>
                     </div>
 
                     {/* Post Content */}
-                    <p className="text-gray-800 mb-4">{post.content}</p>
+                    <p className="text-[var(--neu-text-muted)] mb-4">{post.content}</p>
 
                     {/* Post Media */}
                     {post.media && post.media.length > 0 && (
@@ -212,15 +212,15 @@ export default function ExampleDashboard() {
                       <button
                         onClick={() => handleLikePost(post.id)}
                         className={`flex items-center gap-2 ${
-                          post.isLiked ? 'text-red-500' : 'text-gray-600'
-                        } hover:text-red-500`}
+                          post.isLiked ? 'text-brand-red' : 'text-[var(--neu-text-secondary)]'
+                        } hover:text-brand-red`}
                       >
                         {post.isLiked ? '❤️' : '🤍'} {post.likes}
                       </button>
-                      <button className="flex items-center gap-2 text-gray-600 hover:text-blue-500">
+                      <button className="flex items-center gap-2 text-[var(--neu-text-secondary)] hover:text-brand-blue">
                         💬 {post.comments}
                       </button>
-                      <button className="flex items-center gap-2 text-gray-600 hover:text-green-500">
+                      <button className="flex items-center gap-2 text-[var(--neu-text-secondary)] hover:text-primary">
                         🔄 {post.shares}
                       </button>
                     </div>
@@ -233,7 +233,7 @@ export default function ExampleDashboard() {
                 <div className="text-center py-4">
                   <button
                     onClick={() => fetchNextPage()}
-                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                    className="px-6 py-2 bg-brand-surface text-[var(--neu-text-muted)] rounded-lg hover:bg-brand-surface"
                   >
                     Load More
                   </button>

@@ -56,22 +56,22 @@ export function BoostModal({
   if (boosted) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div className="w-full max-w-sm bg-[#1a1a2e] rounded-2xl border border-amber-500/40 shadow-2xl p-8 flex flex-col items-center gap-4 text-center">
+        <div className="w-full max-w-sm bg-brand-black rounded-2xl border border-amber-500/40 shadow-2xl p-8 flex flex-col items-center gap-4 text-center">
           <div className="text-5xl">🚀</div>
           <h2 className="text-xl font-bold text-white">
             {alreadyBoosted ? "Boost Extended!" : "Listing Boosted!"}
           </h2>
-          <p className="text-gray-400 text-sm">
-            <span className="text-amber-400 font-semibold">{productTitle}</span>{" "}
+          <p className="text-[var(--neu-text-muted)] text-sm">
+            <span className="text-primary font-semibold">{productTitle}</span>{" "}
             will appear at the top of search results for{" "}
             <span className="text-white font-semibold">{selectedDays} days</span>.
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[var(--neu-text-muted)]">
             {selected.coins} HuudCoins deducted
           </p>
           <button
             onClick={onClose}
-            className="mt-2 px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm transition-colors"
+            className="mt-2 px-6 py-2.5 rounded-xl bg-primary hover:bg-primary text-black font-bold text-sm transition-colors"
           >
             Done
           </button>
@@ -83,21 +83,21 @@ export function BoostModal({
   /* ── Main Modal ─────────────────────────────────────────────── */
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-[#1a1a2e] rounded-2xl border border-gray-700 shadow-2xl overflow-hidden">
+      <div className="w-full max-w-md bg-brand-black rounded-2xl border border-black/[0.08] shadow-2xl overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.08]">
           <div>
             <h2 className="text-lg font-bold text-white">
               {alreadyBoosted ? "Extend Boost" : "Boost Listing"} 🚀
             </h2>
-            <p className="text-sm text-gray-400 truncate max-w-[260px]">
+            <p className="text-sm text-[var(--neu-text-muted)] truncate max-w-[260px]">
               {productTitle}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-lg text-[var(--neu-text-muted)] hover:text-white hover:bg-brand-black transition-colors"
             aria-label="Close"
           >
             <span className="material-symbols-outlined text-xl">close</span>
@@ -108,7 +108,7 @@ export function BoostModal({
 
           {/* Current boost notice */}
           {alreadyBoosted && boostedUntil && (
-            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-300">
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 border border-amber-500/30 text-sm text-amber-300">
               <span>🔥</span>
               <span>
                 Currently boosted until{" "}
@@ -125,16 +125,16 @@ export function BoostModal({
           )}
 
           {/* HuudCoin wallet balance */}
-          <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#0f0f1e] border border-gray-700">
-            <span className="text-gray-400 text-sm">Your HuudCoins</span>
-            <span className={`font-bold text-base ${hasEnough ? "text-amber-400" : "text-red-400"}`}>
+          <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-brand-black border border-black/[0.08]">
+            <span className="text-[var(--neu-text-muted)] text-sm">Your HuudCoins</span>
+            <span className={`font-bold text-base ${hasEnough ? "text-primary" : "text-brand-red"}`}>
               🪙 {walletCoins.toLocaleString()}
             </span>
           </div>
 
           {/* Duration selector */}
           <div>
-            <p className="text-sm font-semibold text-gray-300 mb-3">Select Duration</p>
+            <p className="text-sm font-semibold text-[var(--neu-text-muted)] mb-3">Select Duration</p>
             <div className="grid grid-cols-2 gap-2">
               {BOOST_OPTIONS.map((opt) => {
                 const affordable = walletCoins >= opt.coins;
@@ -145,19 +145,19 @@ export function BoostModal({
                     onClick={() => setSelectedDays(opt.days)}
                     className={`relative p-3 rounded-xl border text-left transition-all ${
                       isSelected
-                        ? "border-amber-400 bg-amber-400/10 text-white"
+                        ? "border-primary bg-primary/10 text-white"
                         : affordable
-                        ? "border-gray-600 bg-[#0f0f1e] text-gray-400 hover:border-gray-500"
-                        : "border-gray-700 bg-[#0f0f1e] text-gray-600 cursor-default"
+                        ? "border-black/[0.08] bg-brand-black text-[var(--neu-text-muted)] hover:border-black/[0.08]"
+                        : "border-black/[0.08] bg-brand-black text-[var(--neu-text-secondary)] cursor-default"
                     }`}
                   >
                     {opt.popular && (
-                      <span className="absolute -top-2 right-2 text-[10px] font-black bg-amber-500 text-black px-1.5 py-0.5 rounded-full leading-tight">
+                      <span className="absolute -top-2 right-2 text-[10px] font-black bg-primary text-black px-1.5 py-0.5 rounded-full leading-tight">
                         POPULAR
                       </span>
                     )}
                     <div className="font-semibold">{opt.label}</div>
-                    <div className={`text-sm flex items-center gap-1 ${isSelected ? "text-amber-400" : affordable ? "text-gray-500" : "text-gray-700"}`}>
+                    <div className={`text-sm flex items-center gap-1 ${isSelected ? "text-primary" : affordable ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}`}>
                       🪙 {opt.coins.toLocaleString()} coins
                     </div>
                   </button>
@@ -168,7 +168,7 @@ export function BoostModal({
 
           {/* Insufficient coins notice */}
           {!hasEnough && (
-            <p className="text-xs text-red-400 text-center">
+            <p className="text-xs text-brand-red text-center">
               You need{" "}
               <strong>{selected.coins - walletCoins} more HuudCoins</strong> to
               boost for {selected.label.toLowerCase()}. Earn coins by posting,
@@ -177,8 +177,8 @@ export function BoostModal({
           )}
 
           {/* Summary row */}
-          <div className="rounded-xl bg-[#0f0f1e] border border-gray-700 px-4 py-3 flex items-center justify-between">
-            <span className="text-gray-400 text-sm">Cost</span>
+          <div className="rounded-xl bg-brand-black border border-black/[0.08] px-4 py-3 flex items-center justify-between">
+            <span className="text-[var(--neu-text-muted)] text-sm">Cost</span>
             <span className="font-bold text-white text-lg flex items-center gap-1">
               🪙 {selected.coins.toLocaleString()} HuudCoins
             </span>
@@ -188,7 +188,7 @@ export function BoostModal({
           <button
             onClick={handleBoost}
             disabled={isPending || !hasEnough}
-            className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-sm transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-xl bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-sm transition-colors flex items-center justify-center gap-2"
           >
             {isPending ? (
               <>
@@ -203,7 +203,7 @@ export function BoostModal({
             )}
           </button>
 
-          <p className="text-center text-xs text-gray-600">
+          <p className="text-center text-xs text-[var(--neu-text-secondary)]">
             Boosted listings appear at the top of the marketplace. No real money is charged.
           </p>
         </div>

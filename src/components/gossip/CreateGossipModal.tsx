@@ -134,7 +134,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
                     <button
                         onClick={handleClose}
                         disabled={isSubmitting}
-                        className="neu-btn w-8 h-8 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50"
+                        className="btn-ghost w-8 h-8 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50"
                     >
                         <span className="material-symbols-outlined text-xl" style={{ color: 'var(--neu-text)' }}>close</span>
                     </button>
@@ -144,7 +144,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     {/* Error Message */}
                     {error && (
-                        <div className="p-3 neu-socket rounded-xl text-red-400 text-sm">
+                        <div className="p-3 neu-socket rounded-xl text-brand-red text-sm">
                             {error}
                         </div>
                     )}
@@ -251,7 +251,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isSubmitting}
-                                className="w-full py-3 neu-btn rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                                className="w-full py-3 btn-ghost rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-50"
                                 style={{ color: 'var(--neu-text-muted)' }}
                             >
                                 <span className="material-symbols-outlined text-[20px]">add_photo_alternate</span>
@@ -286,7 +286,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
                                         <button
                                             type="button"
                                             onClick={() => removeTag(tag)}
-                                            className="ml-1 hover:text-red-400"
+                                            className="ml-1 hover:text-brand-red"
                                             disabled={isSubmitting}
                                         >
                                             &times;
@@ -311,7 +311,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
                                     type="button"
                                     onClick={addTag}
                                     disabled={!tagInput.trim() || isSubmitting}
-                                    className="px-3 py-2 neu-btn rounded-xl text-sm text-primary disabled:opacity-50"
+                                    className="px-3 py-2 mod-chip rounded-xl text-sm text-primary disabled:opacity-50"
                                 >
                                     Add
                                 </button>
@@ -347,7 +347,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
                             type="button"
                             onClick={handleClose}
                             disabled={isSubmitting}
-                            className="flex-1 px-4 py-3 neu-btn rounded-2xl font-bold transition-colors disabled:opacity-50"
+                            className="flex-1 px-4 py-3 mod-chip rounded-2xl font-bold transition-colors disabled:opacity-50"
                             style={{ color: 'var(--neu-text)' }}
                         >
                             Cancel
@@ -355,7 +355,7 @@ export function CreateGossipModal({ isOpen, onClose, onSuccess, defaultDiscussio
                         <button
                             type="submit"
                             disabled={isSubmitting || !title.trim() || !body.trim()}
-                            className="flex-1 px-4 py-3 neu-btn-active rounded-2xl font-bold text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className="flex-1 px-4 py-3 mod-chip mod-chip-active rounded-2xl font-bold text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                         >
                             {isSubmitting ? (
                                 <>

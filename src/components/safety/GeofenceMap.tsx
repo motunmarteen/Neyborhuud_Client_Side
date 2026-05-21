@@ -1,197 +1,139 @@
 'use client';
 
-/**
- * GeofenceMap — Leaflet-based interactive map for geofence management.
- *
- * Features:
- *  — Displays all user geofences as labelled circles
- *  — Color-coded by zone type (green / amber / red)
- *  — Clicking the map fires onMapClick(lat, lng) to prefill the creation form
- *  — Shows a "pending" circle preview while the user is editing radius / position
- *  — Tooltips show geofence name + status on hover
- *
- * Must be loaded via next/dynamic({ ssr: false }) to avoid SSR window errors.
- */
-
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Geofence, GeofenceType } from '@/services/safety.service';
+import { OSM_MAP_STYLE, GEOFENCE_COLORS } from '@/lib/map-style';
 
-// Leaflet is loaded at runtime — we avoid the "window is not defined" SSR error
-// by importing dynamically inside useEffect.
+function circleRing(lng: number, lat: number, radiusMeters: number, steps = 64): GeoJSON.Polygon {
+    const coords: [number, number][] = [];
+    const earth = 6371000;
+    for (let i = 0; i <= steps; i++) {
+        const angle = (i / steps) * 2 * Math.PI;
+        const dx = radiusMeters * Math.cos(angle);
+        const dy = radiusMeters * Math.sin(angle);
+        const dLng = (dx / (earth * Math.cos((lat * Math.PI) / 180))) * (180 / Math.PI);
+        const dLat = (dy / earth) * (180 / Math.PI);
+        coords.push([lng + dLng, lat + dLat]);
+    }
+    return { type: 'Polygon', coordinates: [coords] };
+}
 
-const TYPE_COLORS: Record<GeofenceType, string> = {
-  safe_zone: '#22c55e',
-  alert_zone: '#f59e0b',
-  restricted_zone: '#ef4444',
-};
+function fencesToGeoJson(
+    geofences: Geofence[],
+    pending?: { lat: number; lng: number; radius: number; type: GeofenceType } | null
+): GeoJSON.FeatureCollection {
+    const features: GeoJSON.Feature[] = geofences.map((fence) => ({
+        type: 'Feature',
+        properties: {
+            label: fence.label,
+            type: fence.type,
+            pending: false,
+            fill: GEOFENCE_COLORS[fence.type]?.fill ?? GEOFENCE_COLORS.safe_zone.fill,
+            stroke: GEOFENCE_COLORS[fence.type]?.stroke ?? GEOFENCE_COLORS.safe_zone.stroke,
+        },
+        geometry: circleRing(fence.longitude, fence.latitude, fence.radiusMeters),
+    }));
 
-const TYPE_FILL: Record<GeofenceType, string> = {
-  safe_zone: '#22c55e',
-  alert_zone: '#f59e0b',
-  restricted_zone: '#ef4444',
-};
+    if (pending) {
+        const colors = GEOFENCE_COLORS[pending.type] ?? GEOFENCE_COLORS.safe_zone;
+        features.push({
+            type: 'Feature',
+            properties: { label: 'Preview', type: pending.type, pending: true, fill: colors.fill, stroke: colors.stroke },
+            geometry: circleRing(pending.lng, pending.lat, pending.radius),
+        });
+    }
+
+    return { type: 'FeatureCollection', features };
+}
 
 interface Props {
-  geofences: Geofence[];
-  onMapClick?: (lat: number, lng: number) => void;
-  pendingPin?: { lat: number; lng: number } | null;
-  pendingRadius?: number;
-  pendingType?: GeofenceType;
+    geofences: Geofence[];
+    onMapClick?: (lat: number, lng: number) => void;
+    pendingPin?: { lat: number; lng: number } | null;
+    pendingRadius?: number;
+    pendingType?: GeofenceType;
 }
 
 export default function GeofenceMap({
-  geofences,
-  onMapClick,
-  pendingPin,
-  pendingRadius = 200,
-  pendingType = 'safe_zone',
+    geofences,
+    onMapClick,
+    pendingPin,
+    pendingRadius = 200,
+    pendingType = 'safe_zone',
 }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const pendingCircleRef = useRef<any>(null);
-  const pendingMarkerRef = useRef<any>(null);
-  const fenceLayersRef = useRef<any[]>([]);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<maplibregl.Map | null>(null);
+    const onMapClickRef = useRef(onMapClick);
+    onMapClickRef.current = onMapClick;
 
-  // ── Initial map setup ────────────────────────────────────────────────
+    useEffect(() => {
+        if (!containerRef.current || mapRef.current) return;
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+        const map = new maplibregl.Map({
+            container: containerRef.current,
+            style: OSM_MAP_STYLE,
+            center: [3.3792, 6.5244],
+            zoom: 13,
+            attributionControl: false,
+        });
+        map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
-    // Dynamic import — prevents SSR crash
-    import('leaflet').then((L) => {
-      // Fix default icon paths broken by webpack
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-      });
+        map.on('load', () => {
+            map.addSource('geofences', { type: 'geojson', data: fencesToGeoJson([]) });
+            map.addLayer({
+                id: 'geofence-fill',
+                type: 'fill',
+                source: 'geofences',
+                paint: {
+                    'fill-color': ['get', 'fill'],
+                    'fill-opacity': ['case', ['get', 'pending'], 0.22, 0.15],
+                },
+            });
+            map.addLayer({
+                id: 'geofence-outline',
+                type: 'line',
+                source: 'geofences',
+                paint: {
+                    'line-color': ['get', 'stroke'],
+                    'line-width': 2,
+                    'line-dasharray': ['case', ['get', 'pending'], ['literal', [2, 2]], ['literal', [1, 0]]],
+                },
+            });
+        });
 
-      if (mapRef.current) return; // Already initialised
+        map.on('click', (e) => {
+            onMapClickRef.current?.(e.lngLat.lat, e.lngLat.lng);
+        });
 
-      // Default centre: Lagos, Nigeria
-      const map = L.map(containerRef.current!, {
-        center: [6.5244, 3.3792],
-        zoom: 13,
-        zoomControl: true,
-      });
+        mapRef.current = map;
+        return () => {
+            map.remove();
+            mapRef.current = null;
+        };
+    }, []);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19,
-      }).addTo(map);
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map) return;
 
-      map.on('click', (e: any) => {
-        onMapClick?.(e.latlng.lat, e.latlng.lng);
-      });
+        const apply = () => {
+            const src = map.getSource('geofences') as maplibregl.GeoJSONSource | undefined;
+            src?.setData(
+                fencesToGeoJson(
+                    geofences,
+                    pendingPin ? { lat: pendingPin.lat, lng: pendingPin.lng, radius: pendingRadius, type: pendingType } : null
+                )
+            );
+            if (pendingPin) {
+                map.easeTo({ center: [pendingPin.lng, pendingPin.lat], duration: 400 });
+            }
+        };
 
-      mapRef.current = map;
-    });
+        if (map.isStyleLoaded()) apply();
+        else map.once('load', apply);
+    }, [geofences, pendingPin, pendingRadius, pendingType]);
 
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ── Draw geofences ───────────────────────────────────────────────────
-
-  useEffect(() => {
-    if (!mapRef.current) return;
-
-    import('leaflet').then((L) => {
-      // Remove old fence layers
-      fenceLayersRef.current.forEach((layer) => layer.remove());
-      fenceLayersRef.current = [];
-
-      for (const fence of geofences) {
-        const color = TYPE_COLORS[fence.type] ?? '#6b7280';
-        const fill = TYPE_FILL[fence.type] ?? '#6b7280';
-
-        const circle = L.circle([fence.latitude, fence.longitude], {
-          radius: fence.radiusMeters,
-          color,
-          fillColor: fill,
-          fillOpacity: 0.15,
-          weight: 2,
-        })
-          .addTo(mapRef.current)
-          .bindTooltip(
-            `<strong>${fence.label}</strong><br/>${(fence.type ?? 'unknown').replace(/_/g, ' ')} · ${fence.radiusMeters}m<br/>Status: ${fence.lastStatus ?? 'unknown'}`,
-            { sticky: true },
-          );
-
-        // Small pin at centre
-        const marker = L.circleMarker([fence.latitude, fence.longitude], {
-          radius: 5,
-          color,
-          fillColor: color,
-          fillOpacity: 1,
-          weight: 1,
-        }).addTo(mapRef.current);
-
-        fenceLayersRef.current.push(circle, marker);
-      }
-    });
-  }, [geofences]);
-
-  // ── Pending preview circle ────────────────────────────────────────────
-
-  useEffect(() => {
-    if (!mapRef.current) return;
-
-    import('leaflet').then((L) => {
-      // Remove old pending layers
-      if (pendingCircleRef.current) {
-        pendingCircleRef.current.remove();
-        pendingCircleRef.current = null;
-      }
-      if (pendingMarkerRef.current) {
-        pendingMarkerRef.current.remove();
-        pendingMarkerRef.current = null;
-      }
-
-      if (!pendingPin) return;
-
-      const color = TYPE_COLORS[pendingType] ?? '#6b7280';
-
-      pendingCircleRef.current = L.circle([pendingPin.lat, pendingPin.lng], {
-        radius: pendingRadius,
-        color,
-        fillColor: color,
-        fillOpacity: 0.2,
-        weight: 2,
-        dashArray: '6 4',
-      }).addTo(mapRef.current);
-
-      pendingMarkerRef.current = L.circleMarker([pendingPin.lat, pendingPin.lng], {
-        radius: 6,
-        color,
-        fillColor: color,
-        fillOpacity: 1,
-        weight: 2,
-      }).addTo(mapRef.current);
-
-      // Pan map to the pending pin
-      mapRef.current.panTo([pendingPin.lat, pendingPin.lng]);
-    });
-  }, [pendingPin, pendingRadius, pendingType]);
-
-  return (
-    <>
-      {/* Leaflet CSS loaded inline to avoid FOUC */}
-      { }
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
-      />
-      <div
-        ref={containerRef}
-        className="h-80 w-full bg-gray-800"
-      />
-    </>
-  );
+    return <div ref={containerRef} className="h-80 w-full rounded-2xl overflow-hidden bg-brand-surface" />;
 }

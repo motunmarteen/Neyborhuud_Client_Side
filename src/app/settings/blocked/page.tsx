@@ -43,10 +43,10 @@ export default function BlockedUsersPage() {
                     <div className="flex flex-col gap-3">
                         {[1, 2, 3].map((i) => (
                             <div key={i} className="animate-pulse flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--neu-card-bg)' }}>
-                                <div className="w-11 h-11 rounded-full bg-gray-300 dark:bg-gray-700" />
+                                <div className="w-11 h-11 rounded-full bg-brand-surface dark:bg-brand-black" />
                                 <div className="flex-1 space-y-2">
-                                    <div className="h-4 w-28 bg-gray-300 dark:bg-gray-700 rounded" />
-                                    <div className="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded" />
+                                    <div className="h-4 w-28 bg-brand-surface dark:bg-brand-black rounded" />
+                                    <div className="h-3 w-20 bg-brand-surface dark:bg-brand-black rounded" />
                                 </div>
                             </div>
                         ))}
@@ -123,7 +123,7 @@ function BlockedUserItem({ user }: { user: any }) {
             <button
                 onClick={() => unblockUser()}
                 disabled={isPending}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all hover:bg-red-50 dark:hover:bg-red-950/20 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all hover:bg-brand-red/10 dark:hover:bg-brand-red/20 disabled:opacity-50"
                 style={{ borderColor: 'var(--neu-shadow-dark)', color: 'var(--neu-text)' }}
             >
                 {isPending ? 'Unblocking...' : 'Unblock'}

@@ -40,7 +40,7 @@ export default function MyFavoritesPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => router.back()}
-                className="p-2 rounded-full mod-btn transition-all"
+                className="p-2 rounded-full mod-chip transition-all"
                 style={{ color: "var(--neu-text-muted)" }}
               >
                 <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -92,7 +92,7 @@ export default function MyFavoritesPage() {
                 <button
                   onClick={() => fetchNextPage()}
                   disabled={isFetchingNextPage}
-                  className="px-8 py-3 mod-btn disabled:opacity-50 rounded-xl font-semibold transition-all text-sm"
+                  className="px-8 py-3 mod-chip disabled:opacity-50 rounded-xl font-semibold transition-all text-sm"
                   style={{ color: "var(--neu-text)" }}
                 >
                   {isFetchingNextPage ? "Loading…" : "Load More"}
@@ -110,7 +110,7 @@ export default function MyFavoritesPage() {
                 </p>
                 <Link
                   href="/services"
-                  className="inline-block px-6 py-3 mod-btn-active text-primary rounded-xl font-semibold transition-all"
+                  className="inline-block px-6 py-3 mod-chip mod-chip-active text-primary rounded-xl font-semibold transition-all"
                 >
                   Browse Services
                 </Link>

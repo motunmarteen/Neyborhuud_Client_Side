@@ -142,7 +142,7 @@ export default function LoginPage() {
         <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
             <form onSubmit={handleSubmit} className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
                 <div className="grid shrink-0 grid-cols-[1fr_auto] gap-2 rounded-[1.15rem] bg-white/70 p-1.5 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-                    <div className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-white shadow-[0_12px_24px_rgba(0,135,81,0.24)]">
+                    <div className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-white shadow-[0_12px_24px_rgba(0,111,53,0.24)]">
                         <i className="bi bi-shield-lock-fill text-lg" aria-hidden />
                         <span className="text-[10px] font-black uppercase tracking-widest">Huud Login</span>
                     </div>
@@ -167,18 +167,18 @@ export default function LoginPage() {
                                 <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
                                 <div className="p-4">
                                     <div className="mb-4 flex items-center justify-between gap-3">
-                                        <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-primary text-white shadow-[0_16px_34px_rgba(0,135,81,0.3)]">
+                                        <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-primary text-white shadow-[0_16px_34px_rgba(0,111,53,0.3)]">
                                             <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-primary shadow-md">N</span>
                                             <Image src="/icon.png" alt="NeyborHuud" fill sizes="48px" className="object-cover" priority />
                                         </div>
-                                        <div className="rounded-full border border-charcoal/5 bg-[#F8FAFC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
+                                        <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
                                             NeyborHuud Pass
                                         </div>
                                     </div>
                                     <p className="mb-1 text-[9px] font-black uppercase tracking-[0.24em] text-primary">{loginStatus}</p>
-                                    <h1 className="truncate text-2xl font-black tracking-tighter text-[#1A1A2E]">Welcome back</h1>
-                                    <p className="truncate text-[11px] font-semibold text-[#64748B]">{loginIdentity}</p>
-                                    <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[#475569]">
+                                    <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">Welcome back</h1>
+                                    <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{loginIdentity}</p>
+                                    <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[var(--neu-text-secondary)]">
                                         <i className="bi bi-broadcast-pin text-brand-blue" aria-hidden />
                                         <span className="truncate">Your Huud stays attached after login</span>
                                     </div>
@@ -191,13 +191,13 @@ export default function LoginPage() {
                         <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
                         <div className="flex flex-col gap-3 p-3.5">
                             <div className="flex items-center gap-3">
-                                <div className="flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)]">
+                                <div className="flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
                                     <i className="bi bi-fingerprint text-xl" aria-hidden />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">Secure entry</p>
-                                    <h2 className="truncate text-[1.3rem] font-black tracking-tighter text-[#1A1A2E]">Open your Huud</h2>
-                                    <p className="truncate text-[11px] font-medium text-[#6B7280]">Continue to feed, messages, safety and local updates.</p>
+                                    <h2 className="truncate text-[1.3rem] font-black tracking-tighter text-brand-black">Open your Huud</h2>
+                                    <p className="truncate text-[11px] font-medium text-[var(--neu-text-muted)]">Continue to feed, messages, safety and local updates.</p>
                                 </div>
                             </div>
 
@@ -240,7 +240,7 @@ export default function LoginPage() {
                             {formError && (
                                 <div
                                     role="alert"
-                                    className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-[#991B1B]"
+                                    className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-brand-red"
                                 >
                                     {formError}
                                 </div>
@@ -250,7 +250,7 @@ export default function LoginPage() {
                                 <button
                                     type="submit"
                                     disabled={!canLogin}
-                                    className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${canLogin ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] active:scale-[0.98]' : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'}`}
+                                    className="btn-glass-primary h-[50px] w-full gap-2"
                                 >
                                     {loading ? (
                                         <>
@@ -266,7 +266,7 @@ export default function LoginPage() {
                                 </button>
                                 <Link
                                     href="/signup"
-                                    className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-charcoal/5 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)] transition-all"
+                                    className="btn-secondary h-[50px] w-full gap-2 no-underline"
                                 >
                                     Join
                                     <i className="bi bi-person-plus" aria-hidden />

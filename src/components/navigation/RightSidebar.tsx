@@ -118,11 +118,11 @@ export default function RightSidebar() {
                                         </div>
                                     ) : (
                                         <div className="aspect-square rounded-xl mb-2 neu-card-sm flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-[32px] text-gray-300">shopping_bag</span>
+                                            <span className="material-symbols-outlined text-[32px] text-[var(--neu-text-muted)]">shopping_bag</span>
                                         </div>
                                     )}
                                     <h4 className="text-sm font-medium truncate" style={{ color: 'var(--neu-text)' }}>{item.title ?? item.name}</h4>
-                                    <p className={`text-xs font-bold ${isFree ? 'text-green-500' : 'text-primary'}`}>
+                                    <p className={`text-xs font-bold ${isFree ? 'text-primary' : 'text-primary'}`}>
                                         {price}
                                     </p>
                                 </Link>

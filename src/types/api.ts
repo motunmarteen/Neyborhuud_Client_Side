@@ -42,6 +42,21 @@ export type ContentType =
 /** Supported languages */
 export type AppLanguage = "en" | "ha" | "yo" | "ig" | "pcm";
 
+export interface FeedPlaceContext {
+  id: string;
+  kind: string;
+  kindLabel: string;
+  label: string;
+  lga?: string;
+  state?: string;
+  ward?: string;
+  neighborhood?: string;
+  formattedAddress?: string;
+  distanceKm: number;
+  lat: number;
+  lng: number;
+}
+
 export interface FeedMeta {
   feedType: "chronological" | "ranked" | "smart" | "trending";
   boostedCategories: string[];
@@ -49,6 +64,8 @@ export interface FeedMeta {
   pinnedCount?: number;
   feedTab?: FeedTab;
   localLgas?: string[];
+  biasedLga?: string | null;
+  placeContext?: FeedPlaceContext | null;
   blendRatio?: {
     local: number;
     extended: number;

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type L from 'leaflet';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
+import { COINS_UPDATED_EVENT } from '@/lib/gamification-events';
 
 export type TimePeriod = 'night' | 'dawn' | 'morning' | 'afternoon' | 'sunset' | 'evening';
 export type WeatherCondition = 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'snow';
@@ -253,7 +254,7 @@ export default function AmbientProfileCard({
       const markerIcon = Leaflet.divIcon({
         html: `<div style="
           width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-          background:#008751;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+          background:#006F35;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
           border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);
         "><div style="
           width:10px;height:10px;background:#fff;border-radius:50%;
@@ -280,22 +281,37 @@ export default function AmbientProfileCard({
   }, [mounted, lat, lng]);
 
   // Fetch hero stats (NeyburH Score + HuudCoins)
-  useEffect(() => {
+  const fetchHeroStats = useCallback(() => {
     if (!userId) return;
-    let cancelled = false;
     import('@/services/gamification.service').then(({ gamificationService }) => {
       gamificationService.getHeroStats().then((res) => {
-        if (!cancelled && res.data) {
+        if (res.data) {
           setHeroStats(res.data);
         }
       }).catch(() => {
-        if (!cancelled) {
-          setHeroStats({ trustScore: 0, totalHuudCoins: 0 });
-        }
+        setHeroStats({ trustScore: 0, totalHuudCoins: 0 });
       });
     });
-    return () => { cancelled = true; };
   }, [userId]);
+
+  useEffect(() => {
+    fetchHeroStats();
+  }, [fetchHeroStats]);
+
+  useEffect(() => {
+    const onCoinsUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<{ totalHuudCoins?: number }>).detail;
+      if (detail?.totalHuudCoins != null) {
+        setHeroStats((prev) =>
+          prev ? { ...prev, totalHuudCoins: detail.totalHuudCoins! } : { trustScore: 0, totalHuudCoins: detail.totalHuudCoins! },
+        );
+      } else {
+        fetchHeroStats();
+      }
+    };
+    window.addEventListener(COINS_UPDATED_EVENT, onCoinsUpdated);
+    return () => window.removeEventListener(COINS_UPDATED_EVENT, onCoinsUpdated);
+  }, [fetchHeroStats]);
 
   const timePeriod = getTimePeriod(currentHour);
   const firstName = displayName.split(' ')[0];
@@ -381,7 +397,7 @@ export default function AmbientProfileCard({
             <div
               className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full"
               style={{
-                background: '#22c55e',
+                background: '#006F35',
                 border: '2.5px solid rgba(0,20,10,0.8)',
                 boxShadow: '0 0 8px rgba(34,197,94,0.5)',
               }}
@@ -421,7 +437,7 @@ export default function AmbientProfileCard({
             <div
               className="flex-1 flex flex-col items-center justify-center py-2.5 rounded-2xl backdrop-blur-xl transition-all duration-200 hover:scale-[1.02]"
               style={{
-                background: 'rgba(0,135,81,0.2)',
+                background: 'rgba(0,111,53,0.2)',
                 border: '1px solid rgba(52,211,153,0.2)',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
               }}
@@ -434,7 +450,7 @@ export default function AmbientProfileCard({
                   {heroStats.trustScore}
                 </p>
               </div>
-              <p className="text-[9px] font-bold uppercase mt-1.5 text-emerald-300/60 text-center" style={{ letterSpacing: '0.08em' }}>
+              <p className="text-[9px] font-bold uppercase mt-1.5 text-primary/60 text-center" style={{ letterSpacing: '0.08em' }}>
                 NeyburH Score
               </p>
             </div>

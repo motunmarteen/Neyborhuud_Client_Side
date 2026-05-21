@@ -32,7 +32,7 @@ function statusBadge(status: Trip['status']) {
     planned: { bg: '#fef9c3', text: '#ca8a04', label: 'Planned' },
     active: { bg: '#dcfce7', text: '#16a34a', label: 'Active' },
     completed: { bg: '#dbeafe', text: '#2563eb', label: 'Completed' },
-    cancelled: { bg: '#f3f4f6', text: '#6b7280', label: 'Cancelled' },
+    cancelled: { bg: '#f3f4f6', text: 'var(--neu-text-muted)', label: 'Cancelled' },
     escalated: { bg: '#fef3c7', text: '#d97706', label: 'Escalated' },
     panic: { bg: '#fee2e2', text: '#dc2626', label: 'Panic / SOS' },
   };
@@ -225,7 +225,7 @@ function TripHistoryInner() {
                 <button
                   disabled={page <= 1 || loading}
                   onClick={() => load(page - 1)}
-                  className="px-4 py-2 rounded-xl neu-btn text-sm disabled:opacity-40"
+                  className="px-4 py-2 rounded-xl mod-chip text-sm disabled:opacity-40"
                   style={{ color: 'var(--neu-text)' }}
                 >
                   ← Prev
@@ -236,7 +236,7 @@ function TripHistoryInner() {
                 <button
                   disabled={page >= totalPages || loading}
                   onClick={() => load(page + 1)}
-                  className="px-4 py-2 rounded-xl neu-btn text-sm disabled:opacity-40"
+                  className="px-4 py-2 rounded-xl mod-chip text-sm disabled:opacity-40"
                   style={{ color: 'var(--neu-text)' }}
                 >
                   Next →

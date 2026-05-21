@@ -118,7 +118,7 @@ export function FYICard({ post, onComment }: FYICardProps) {
                 icon="favorite"
                 count={post.likes || undefined}
                 active={isLiked}
-                activeIconClass="text-pink-300"
+                activeIconClass="text-brand-blue"
                 filled
                 onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
             />
@@ -155,7 +155,7 @@ export function FYICard({ post, onComment }: FYICardProps) {
         <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 bg-gradient-to-b from-black/65 via-black/20 to-transparent px-4 pb-16 pt-4">
             <div className="pointer-events-auto flex items-center gap-1.5">
                 <span
-                    className="text-[9px] px-2 py-[3px] rounded-full font-bold tracking-wider uppercase text-amber-200"
+                    className="text-[9px] px-2 py-[3px] rounded-full font-bold tracking-wider uppercase text-white/90"
                     style={{ background: 'rgba(245,158,11,0.20)', border: '1px solid rgba(245,158,11,0.25)', backdropFilter: 'blur(12px)' }}
                 >
                     FYI
@@ -276,7 +276,7 @@ export function FYICard({ post, onComment }: FYICardProps) {
                         <span
                             className={`self-start text-[10px] px-2.5 py-1 rounded-full font-bold backdrop-blur-sm border ${
                                 ['found', 'returned', 'resolved'].includes(post.fyiStatus)
-                                    ? 'bg-green-500/25 text-green-200 border-green-400/20'
+                                    ? 'bg-primary/25 text-primary border-brand-green-dark/20'
                                     : 'bg-white/10 text-white/60 border-white/10'
                             }`}
                         >

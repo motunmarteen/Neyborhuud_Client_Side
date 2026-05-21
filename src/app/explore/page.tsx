@@ -260,7 +260,7 @@ function ExplorePageInner() {
               <button
                 type="button"
                 onClick={() => setQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center neu-btn transition-all"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center mod-chip transition-all"
                 aria-label="Clear search"
               >
                 <span className="material-symbols-outlined text-sm" style={{ color: 'var(--neu-text-muted)' }}>close</span>
@@ -426,7 +426,7 @@ function ExplorePageInner() {
                   <button
                     key={item.type}
                     onClick={() => handleBrowseType(item.type)}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-2xl neu-btn transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-2xl mod-chip transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
                   >
                     <span className="material-symbols-outlined text-xl text-primary">{item.icon}</span>
                     <span className="text-sm font-medium" style={{ color: 'var(--neu-text)' }}>{item.label}</span>
@@ -513,7 +513,7 @@ function ExplorePageInner() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                             <div className="absolute bottom-0 left-0 right-0 p-4">
                               <div className="flex items-center gap-2 mb-1.5">
-                                <span className="px-2 py-0.5 rounded-full bg-red-500/90 text-white text-[10px] font-bold uppercase">Live</span>
+                                <span className="px-2 py-0.5 rounded-full bg-brand-red/90 text-white text-[10px] font-bold uppercase">Live</span>
                                 <span className="text-[11px] text-white/80">{newsArticles[0].source}</span>
                               </div>
                               <h3 className="text-base font-bold text-white leading-snug line-clamp-2">{newsArticles[0].title}</h3>
@@ -522,7 +522,7 @@ function ExplorePageInner() {
                         ) : (
                           <div className="p-4 bg-gradient-to-r from-primary/10 to-brand-blue/10">
                             <div className="flex items-center gap-2 mb-1.5">
-                              <span className="px-2 py-0.5 rounded-full bg-red-500/90 text-white text-[10px] font-bold uppercase">News</span>
+                              <span className="px-2 py-0.5 rounded-full bg-brand-red/90 text-white text-[10px] font-bold uppercase">News</span>
                               <span className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>{newsArticles[0].source}</span>
                             </div>
                             <h3 className="text-base font-bold leading-snug line-clamp-2" style={{ color: 'var(--neu-text)' }}>{newsArticles[0].title}</h3>

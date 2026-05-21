@@ -29,6 +29,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { contentService } from '@/services/content.service';
 import { fyiService } from '@/services/fyi.service';
 import { getCurrentLocation } from '@/lib/geolocation';
+import { triggerSmartLocationSync } from '@/hooks/useSmartLocationSync';
 import { isUserInNigeria } from '@/lib/nigeriaCheck';
 import { useTranslation } from '@/lib/i18n';
 import { FeedTab, Post, ContentType } from '@/types/api';
@@ -38,8 +39,10 @@ import { usePinPost } from '@/hooks/useGamification';
 import { BoostModal } from '@/components/gamification/BoostModal';
 import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
 import { FeedDiscoveryBlock } from '@/components/feed/FeedDiscoveryBlock';
+import { FrequentPlaceContextBanner } from '@/components/feed/FrequentPlaceContextBanner';
 import { mergeDiscoveryIntoFeed, type DiscoveryFeedItem } from '@/lib/feedDiscoveryMerge';
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
+import { useFeedTabSwipe } from '@/hooks/useFeedTabSwipe';
 
 function XFeedInner() {
     const router = useRouter();
@@ -60,6 +63,7 @@ function XFeedInner() {
     const mainRef = useRef<HTMLElement>(null);
     const lastScrollY = useRef(0);
     const [navHidden, setNavHidden] = useState(false);
+    const feedSwipe = useFeedTabSwipe(feedTab, setFeedTab);
 
     // Derive contentTypeFilter from URL search params (set by sidebar / search overlay)
     const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'help_request', 'job', 'event', 'marketplace', 'emergency'];
@@ -125,6 +129,7 @@ function XFeedInner() {
                 const loc = await getCurrentLocation();
                 if (loc) {
                     setLocation({ lat: loc.lat, lng: loc.lng });
+                    triggerSmartLocationSync(loc.lat, loc.lng, loc.accuracy);
                 } else {
                     setLocationError('Location access required for feed');
                 }
@@ -210,6 +215,7 @@ function XFeedInner() {
         [posts, gossipPosts],
     );
     const missedAlerts = feedData?.pages?.[0]?.meta?.missedAlerts ?? null;
+    const placeContext = feedData?.pages?.[0]?.meta?.placeContext ?? null;
 
     /** Mixed marketplace / events / jobs when not using a content-type sidebar filter */
     const discoveryEnabled = !contentTypeFilter;
@@ -385,7 +391,7 @@ function XFeedInner() {
             </Suspense>
 
             {/* Main scroll area: TopNav + Feed */}
-            <main ref={mainRef} className="flex flex-1 flex-col overflow-y-auto scroll-smooth md:snap-y md:snap-proximity">
+            <main ref={mainRef} className="flex flex-1 flex-col overflow-y-auto scroll-smooth md:snap-y md:snap-proximity" onTouchStart={feedSwipe.onTouchStart} onTouchEnd={feedSwipe.onTouchEnd}>
                 {/* Top Navigation — scrolls with content */}
                 <TopNav />
 
@@ -398,7 +404,7 @@ function XFeedInner() {
                             {/* Active content-type filter chip */}
                             {contentTypeFilter && (
                                 <div className="flex items-center gap-2">
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold mod-btn-active text-primary">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold mod-chip mod-chip-active text-primary">
                                         {t(`contentType.${contentTypeFilter}`)}
                                         <button
                                             onClick={() => router.replace('/feed')}
@@ -417,12 +423,16 @@ function XFeedInner() {
                                 onTabChange={(tab) => setFeedTab(tab)}
                             />
 
+                            {feedTab === 'your_huud' && placeContext && (
+                                <FrequentPlaceContextBanner context={placeContext} />
+                            )}
+
                             {/* FYI Subtype Filter — only when FYI type active */}
                             {contentTypeFilter === 'fyi' && (
                                 <div className="flex gap-2 overflow-x-auto no-scrollbar">
                                     {['all', 'safety_notice', 'lost_found', 'community_announcement', 'local_news', 'alert'].map(st => (
                                         <button key={st} onClick={() => setFyiSubtypeFilter(st === 'all' ? '' : st)}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${fyiSubtypeFilter === (st === 'all' ? '' : st) ? 'mod-btn-active text-primary' : 'mod-btn'}`}>
+                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${fyiSubtypeFilter === (st === 'all' ? '' : st) ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'}`}>
                                             {st === 'all' ? 'All' : st.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                                         </button>
                                     ))}
@@ -430,9 +440,9 @@ function XFeedInner() {
                             )}
 
                         {missedAlerts && missedAlerts.count > 0 && (
-                            <div className="mod-card rounded-2xl px-4 py-3 border border-orange-500/15">
+                            <div className="mod-card rounded-2xl px-4 py-3 border border-brand-red/15">
                                 <div className="flex items-start gap-3">
-                                    <div className="mod-inset rounded-xl size-10 shrink-0 flex items-center justify-center text-orange-500">
+                                    <div className="mod-inset rounded-xl size-10 shrink-0 flex items-center justify-center text-brand-red">
                                         <span className="material-symbols-outlined text-xl">warning</span>
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -469,7 +479,7 @@ function XFeedInner() {
                                 <button
                                     onClick={() => refetchFeed()}
                                     disabled={isRefetching}
-                                    className="mt-2 px-6 py-2.5 mod-btn rounded-xl text-sm font-bold disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+                                    className="mt-2 px-6 py-2.5 mod-chip rounded-xl text-sm font-bold disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
                                     style={{ color: 'var(--neu-text)' }}
                                 >
                                     {isRefetching ? (
@@ -504,7 +514,7 @@ function XFeedInner() {
                         <div
                             className="mt-3 flex flex-col gap-5 pb-4 md:items-center"
                             style={{
-                                background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)), radial-gradient(circle at 50% 0%, rgba(0,135,81,0.12), transparent 34%)',
+                                background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)), radial-gradient(circle at 50% 0%, rgba(0,111,53,0.12), transparent 34%)',
                                 backdropFilter: 'blur(18px) saturate(150%)',
                                 WebkitBackdropFilter: 'blur(18px) saturate(150%)',
                             }}
@@ -675,14 +685,14 @@ function XFeedInner() {
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => setDeletingPostId(null)}
-                                className="px-4 py-2 rounded-xl text-sm font-bold mod-btn"
+                                className="px-4 py-2 rounded-xl text-sm font-bold mod-chip"
                                 style={{ color: 'var(--neu-text-muted)' }}
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleDeletePost}
-                                className="px-4 py-2 rounded-xl text-sm font-bold bg-red-500/20 text-red-400 mod-btn hover:bg-red-500/30 transition-colors"
+                                className="px-4 py-2 rounded-xl text-sm font-bold bg-brand-red/20 text-brand-red mod-chip hover:bg-brand-red/30 transition-colors"
                             >
                                 Delete
                             </button>

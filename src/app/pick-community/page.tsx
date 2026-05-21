@@ -195,7 +195,7 @@ function PickCommunityContent() {
 
         {/* ── Top Chrome Bar ── */}
         <div className="grid shrink-0 grid-cols-[1fr_auto] gap-2 rounded-[1.15rem] bg-white/70 p-1.5 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-          <div className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-white shadow-[0_12px_24px_rgba(0,135,81,0.24)]">
+          <div className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-white shadow-[0_12px_24px_rgba(0,111,53,0.24)]">
             <i className="bi bi-geo-alt-fill text-lg" aria-hidden />
             <span className="text-[10px] font-black uppercase tracking-widest">
               {isChangingCommunity ? 'Change Area' : 'Pick Neyborhuud'}
@@ -233,26 +233,26 @@ function PickCommunityContent() {
                 <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
                 <div className="p-4">
                   <div className="mb-3 flex items-center justify-between gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-[0_10px_20px_rgba(0,135,81,0.3)]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-[0_10px_20px_rgba(0,111,53,0.3)]">
                       <i className="bi bi-map-fill text-sm" aria-hidden />
                     </div>
-                    <div className="rounded-full border border-charcoal/5 bg-[#F8FAFC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
+                    <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
                       {isChangingCommunity ? 'Your Location' : 'Area Detected'}
                     </div>
                   </div>
                   <p className="mb-0.5 text-[9px] font-black uppercase tracking-[0.24em] text-primary">
                     {isChangingCommunity ? 'Current location' : 'Detected location'}
                   </p>
-                  <h2 className="truncate text-xl font-black tracking-tighter text-[#1A1A2E]">
+                  <h2 className="truncate text-xl font-black tracking-tighter text-brand-black">
                     {displayLocation?.lga || '…'}, {displayLocation?.state || '…'}
                   </h2>
                   {ctx?.formattedAddress && !isChangingCommunity && (
-                    <p className="mt-1 truncate text-[10px] font-medium text-[#64748B]">
+                    <p className="mt-1 truncate text-[10px] font-medium text-[var(--neu-text-muted)]">
                       {ctx.formattedAddress}
                     </p>
                   )}
                   {ctx?.resolutionSource && ctx.resolutionSource !== 'centroid' && !isChangingCommunity && (
-                    <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-[#475569]">
+                    <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-[var(--neu-text-secondary)]">
                       <i className="bi bi-broadcast-pin text-brand-blue" aria-hidden />
                       <span className="truncate">
                         Via{' '}
@@ -279,17 +279,17 @@ function PickCommunityContent() {
 
               {/* Card header */}
               <div className="flex items-center gap-3">
-                <div className="flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)]">
+                <div className="flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
                   <i className="bi bi-house-heart-fill text-xl" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">
                     {isChangingCommunity ? 'Select new area' : 'Confirm your area'}
                   </p>
-                  <h1 className="truncate text-[1.3rem] font-black tracking-tighter text-[#1A1A2E]">
+                  <h1 className="truncate text-[1.3rem] font-black tracking-tighter text-brand-black">
                     {isChangingCommunity ? 'Change neyborhuud' : 'Choose neyborhuud'}
                   </h1>
-                  <p className="truncate text-[11px] font-medium text-[#6B7280]">
+                  <p className="truncate text-[11px] font-medium text-[var(--neu-text-muted)]">
                     {isChangingCommunity
                       ? 'Select a different ward or area after moving.'
                       : 'Pick the ward, LCDA, or area matching where you live.'}
@@ -304,11 +304,11 @@ function PickCommunityContent() {
                   onClick={() => { if (!loading) setDropdownOpen((v) => !v); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all cursor-pointer outline-none focus:outline-none ${
                     selectedId
-                      ? 'border-primary/30 bg-primary/5 shadow-[0_0_0_1px_rgba(0,135,81,0.12)]'
+                      ? 'border-primary/30 bg-primary/5 shadow-[0_0_0_1px_rgba(0,111,53,0.12)]'
                       : 'border-charcoal/5 bg-white shadow-[0_4px_16px_rgba(26,26,46,0.06)]'
                   }`}
                 >
-                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all ${selectedId ? 'bg-primary text-white' : 'bg-[#F1F5F9] text-[#94A3B8]'}`}>
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all ${selectedId ? 'bg-primary text-white' : 'bg-[#F1F5F9] text-[var(--neu-text-muted)]'}`}>
                     <i className={`bi ${selectedId ? 'bi-check-lg' : 'bi-geo'} text-sm`} aria-hidden />
                   </div>
                   {selectedId ? (
@@ -316,7 +316,7 @@ function PickCommunityContent() {
                       {selectedOption?.name}
                     </span>
                   ) : (
-                    <span className="flex-1 text-sm text-left text-[#94A3B8]">
+                    <span className="flex-1 text-sm text-left text-[var(--neu-text-muted)]">
                       {loading ? 'Loading areas…' : 'Select your area'}
                     </span>
                   )}
@@ -324,7 +324,7 @@ function PickCommunityContent() {
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary/20 border-t-primary shrink-0" aria-hidden />
                   ) : (
                     <i
-                      className={`bi bi-chevron-down text-[#94A3B8] text-xs transition-transform duration-200 shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`}
+                      className={`bi bi-chevron-down text-[var(--neu-text-muted)] text-xs transition-transform duration-200 shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`}
                       aria-hidden
                     />
                   )}
@@ -334,21 +334,21 @@ function PickCommunityContent() {
                   <div className="absolute z-50 left-0 right-0 mt-2 rounded-2xl overflow-hidden border border-charcoal/5 bg-white shadow-[0_20px_60px_rgba(26,26,46,0.22)]">
                     {/* Search input */}
                     <div className="px-3 pt-3 pb-2 border-b border-charcoal/5">
-                      <div className="flex items-center gap-2 rounded-xl border border-charcoal/5 bg-[#F8FAFC] px-3 py-2">
-                        <i className="bi bi-search text-xs text-[#94A3B8]" aria-hidden />
+                      <div className="flex items-center gap-2 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2">
+                        <i className="bi bi-search text-xs text-[var(--neu-text-muted)]" aria-hidden />
                         <input
                           type="text"
                           placeholder="Search areas…"
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
                           autoFocus
-                          className="w-full bg-transparent border-0 outline-none focus:outline-none text-sm text-[#1A1A2E] placeholder:text-[#94A3B8]"
+                          className="w-full bg-transparent border-0 outline-none focus:outline-none text-sm text-brand-black placeholder:text-[var(--neu-text-muted)]"
                         />
                         {search && (
                           <button
                             type="button"
                             onClick={() => setSearch('')}
-                            className="text-[#94A3B8] hover:text-[#1A1A2E] transition-colors"
+                            className="text-[var(--neu-text-muted)] hover:text-brand-black transition-colors"
                           >
                             <i className="bi bi-x-lg text-xs" />
                           </button>
@@ -359,7 +359,7 @@ function PickCommunityContent() {
                     {/* Options list */}
                     <ul className="max-h-56 overflow-y-auto py-1">
                       {filtered.length === 0 ? (
-                        <li className="px-4 py-5 text-center text-sm text-[#94A3B8]">
+                        <li className="px-4 py-5 text-center text-sm text-[var(--neu-text-muted)]">
                           No areas match &ldquo;{search}&rdquo;
                         </li>
                       ) : (
@@ -377,7 +377,7 @@ function PickCommunityContent() {
                                 className={`w-full text-left px-4 py-2.5 flex items-center gap-3 transition-colors ${
                                   isSelected
                                     ? 'bg-primary/10 text-primary'
-                                    : 'text-[#1A1A2E] hover:bg-[#F8FAFC]'
+                                    : 'text-brand-black hover:bg-brand-surface'
                                 }`}
                               >
                                 <div
@@ -390,7 +390,7 @@ function PickCommunityContent() {
                                   )}
                                 </div>
                                 <span className="text-sm font-medium flex-1 truncate">{o.name}</span>
-                                <span className="text-[10px] text-[#94A3B8] uppercase tracking-wide shrink-0">
+                                <span className="text-[10px] text-[var(--neu-text-muted)] uppercase tracking-wide shrink-0">
                                   {o.kind === 'ward' ? 'Ward' : o.kind === 'lcda' ? 'LCDA' : 'LGA'}
                                 </span>
                               </button>
@@ -421,7 +421,7 @@ function PickCommunityContent() {
               {error && (
                 <div
                   role="alert"
-                  className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-[#991B1B]"
+                  className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-brand-red"
                 >
                   {error}
                 </div>
@@ -435,8 +435,8 @@ function PickCommunityContent() {
                   onClick={() => void handleConfirm()}
                   className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${
                     selectedId && !submitting
-                      ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] active:scale-[0.98]'
-                      : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'
+                      ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)] active:scale-[0.98]'
+                      : 'border border-charcoal/5 bg-white text-[var(--neu-text-muted)] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'
                   }`}
                 >
                   {submitting ? (
@@ -453,7 +453,7 @@ function PickCommunityContent() {
                 </button>
                 <Link
                   href={isChangingCommunity ? '/settings' : '/feed'}
-                  className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-charcoal/5 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)] transition-all"
+                  className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-charcoal/5 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-brand-black shadow-[0_12px_30px_rgba(26,26,46,0.1)] transition-all"
                 >
                   {isChangingCommunity ? 'Cancel' : 'Skip'}
                   <i className="bi bi-x" aria-hidden />
@@ -463,7 +463,7 @@ function PickCommunityContent() {
           </div>
 
           {/* Footer note */}
-          <p className="shrink-0 px-1 pb-2 text-[10px] leading-relaxed text-[#94A3B8]">
+          <p className="shrink-0 px-1 pb-2 text-[10px] leading-relaxed text-[var(--neu-text-muted)]">
             Data sourced from public Nigerian administrative ward listings. Lagos includes official LCDA rows where seeded.{' '}
             <Link
               href="/info/nigeria-postal-codes"

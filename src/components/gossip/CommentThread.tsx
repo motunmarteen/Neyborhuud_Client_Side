@@ -117,7 +117,7 @@ export function CommentThread({
                                 {comment.slangEnrichment.meanings.map((m) => (
                                     <span
                                         key={m.term}
-                                        className="text-[11px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400"
+                                        className="text-[11px] px-1.5 py-0.5 rounded bg-primary/10 text-primary"
                                         title={`${m.term}: ${m.meaning}`}
                                     >
                                         {m.term} → {m.meaning}
@@ -133,10 +133,10 @@ export function CommentThread({
                                 <button
                                     onClick={() => onLikeComment(commentId)}
                                     disabled={isLikingCommentId === commentId}
-                                    className="group flex items-center gap-1 text-[12px] transition-colors hover:text-red-500 disabled:opacity-50 dark:hover:text-red-400"
+                                    className="group flex items-center gap-1 text-[12px] transition-colors hover:text-brand-red disabled:opacity-50 dark:hover:text-brand-red"
                                 >
                                     <span className={`material-symbols-outlined text-sm transition-colors ${
-                                        comment.isLiked ? 'fill-1 text-red-500 dark:text-red-400' : 'group-hover:text-red-500 dark:group-hover:text-red-400'
+                                        comment.isLiked ? 'fill-1 text-brand-red dark:text-brand-red' : 'group-hover:text-brand-red dark:group-hover:text-brand-red'
                                     }`}>
                                         favorite
                                     </span>
@@ -169,7 +169,7 @@ export function CommentThread({
                                 <button
                                     onClick={() => onDeleteComment(commentId)}
                                     disabled={isDeletingCommentId === commentId}
-                                    className="text-[12px] font-medium text-red-400/60 hover:text-red-400 transition-colors disabled:opacity-50"
+                                    className="text-[12px] font-medium text-brand-red/60 hover:text-brand-red transition-colors disabled:opacity-50"
                                 >
                                     {isDeletingCommentId === commentId ? 'Deleting...' : 'Delete'}
                                 </button>

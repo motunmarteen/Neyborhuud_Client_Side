@@ -93,7 +93,7 @@ function HelpRequestPageInner() {
                             {isError && (
                                 <div className="neu-card-sm rounded-2xl flex flex-col items-center justify-center py-12 px-5">
                                     <div className="w-14 h-14 neu-socket rounded-full flex items-center justify-center mb-4">
-                                        <span className="material-symbols-outlined text-3xl text-red-400">warning</span>
+                                        <span className="material-symbols-outlined text-3xl text-brand-red">warning</span>
                                     </div>
                                     <p className="text-sm text-center mb-2" style={{ color: 'var(--neu-text)' }}>
                                         Failed to load help requests
@@ -105,7 +105,7 @@ function HelpRequestPageInner() {
                                     )}
                                     <button
                                         onClick={() => refetch()}
-                                        className="mt-2 px-6 py-2.5 neu-btn rounded-2xl text-sm font-bold text-primary transition-all"
+                                        className="mt-2 px-6 py-2.5 mod-chip rounded-2xl text-sm font-bold text-primary transition-all"
                                     >
                                         Retry
                                     </button>
@@ -126,7 +126,7 @@ function HelpRequestPageInner() {
                                     </p>
                                     <button
                                         onClick={() => setIsCreateModalOpen(true)}
-                                        className="px-6 py-2.5 neu-btn-active rounded-2xl text-sm font-bold text-primary transition-all"
+                                        className="px-6 py-2.5 mod-chip mod-chip-active rounded-2xl text-sm font-bold text-primary transition-all"
                                     >
                                         Post Request
                                     </button>

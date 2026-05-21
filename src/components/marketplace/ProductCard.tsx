@@ -74,7 +74,7 @@ function GlassRoundAction({
     >
       <span
         className={`flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/35 shadow-[0_4px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-colors ${
-          active ? activeClass || "border-rose-400/40 bg-rose-500/35" : "hover:bg-black/45"
+          active ? activeClass || "border-rose-400/40 bg-brand-red500/35" : "hover:bg-black/45"
         }`}
       >
         <span
@@ -171,7 +171,7 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
     <>
       <article
         id={cardDomId}
-        className="group/card flex h-full flex-col overflow-hidden rounded-[22px] border border-[var(--border-light)] bg-white/92 shadow-[0_10px_36px_rgba(0,111,53,0.1),0_0_0_1px_rgba(255,255,255,0.8)_inset] backdrop-blur-xl transition-[transform,box-shadow,outline] duration-300 hover:border-primary/25 dark:border-white/[0.08] dark:bg-[rgba(16,22,30,0.65)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35),0_0_60px_-20px_rgba(16,185,129,0.15)] dark:hover:border-emerald-400/15"
+        className="group/card flex h-full flex-col overflow-hidden rounded-[22px] border border-[var(--border-light)] bg-white/92 shadow-[0_10px_36px_rgba(0,111,53,0.1),0_0_0_1px_rgba(255,255,255,0.8)_inset] backdrop-blur-xl transition-[transform,box-shadow,outline] duration-300 hover:border-primary/25 dark:border-white/[0.08] dark:bg-[rgba(16,22,30,0.65)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35),0_0_60px_-20px_rgba(0,212,49,0.15)] dark:hover:border-primary/15"
       >
         {/* Image + overlays (no separate detail page — info lives on card) */}
         <div
@@ -191,7 +191,7 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
                 className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[var(--surface-light)] via-white to-[#E9F6E6] px-3 dark:from-emerald-900/40 dark:via-slate-900 dark:to-slate-950"
                 aria-hidden
               >
-                <span className="material-symbols-outlined text-4xl text-[#006F35]/30 dark:text-emerald-300/40">image</span>
+                <span className="material-symbols-outlined text-4xl text-[#006F35]/30 dark:text-primary/40">image</span>
               </div>
             )}
 
@@ -206,12 +206,12 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
                 </span>
               )}
               {categoryLabel && (
-                <span className="rounded-full border border-emerald-400/25 bg-emerald-500/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.25)] backdrop-blur-md">
+                <span className="rounded-full border border-primary/25 bg-primary/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-100 shadow-[0_0_20px_rgba(0,212,49,0.25)] backdrop-blur-md">
                   {categoryLabel}
                 </span>
               )}
               {isActiveBoosted && (
-                <span className="flex items-center gap-0.5 rounded-full border border-amber-300/30 bg-amber-400/90 px-2 py-0.5 text-[9px] font-black text-slate-900 shadow-md">
+                <span className="flex items-center gap-0.5 rounded-full border border-amber-300/30 bg-primary/90 px-2 py-0.5 text-[9px] font-black text-slate-900 shadow-md">
                   <span>🚀</span>
                   BOOST
                 </span>
@@ -219,7 +219,7 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
             </div>
 
             {isSold && (
-              <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-red-400/35 bg-red-600/90 px-4 py-1.5 text-[11px] font-black uppercase tracking-widest text-white shadow-xl backdrop-blur-md">
+              <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-red/35 bg-red-600/90 px-4 py-1.5 text-[11px] font-black uppercase tracking-widest text-white shadow-xl backdrop-blur-md">
                 Sold
               </div>
             )}
@@ -242,7 +242,7 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
                 icon={isLiked ? "favorite" : "favorite_border"}
                 count={likesCount}
                 active={!!isLiked}
-                activeClass="border-rose-400/40 bg-rose-500/40"
+                activeClass="border-rose-400/40 bg-brand-red500/40"
                 label={isLiked ? "Unlike" : "Like"}
                 onClick={onLike}
                 disabled={toggleLike.isPending}
@@ -272,37 +272,37 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
         <div className="flex flex-1 flex-col gap-2 px-3 pb-3 pt-2.5">
           <div className="min-h-0 flex-1 space-y-1">
             <h2 className="line-clamp-2 text-[13px] font-bold leading-snug tracking-tight text-brand-black dark:text-white/95">{product.title}</h2>
-            <p className="text-[15px] font-extrabold tracking-tight text-[#006F35] drop-shadow-none dark:text-emerald-400 dark:drop-shadow-[0_0_12px_rgba(52,211,153,0.35)]">
+            <p className="text-[15px] font-extrabold tracking-tight text-[#006F35] drop-shadow-none dark:text-primary dark:drop-shadow-[0_0_12px_rgba(52,211,153,0.35)]">
               {formattedPrice}
               {product.negotiable && (
-                <span className="ml-1.5 text-[10px] font-semibold text-[#3D5A3E]/80 dark:text-white/45">· negotiable</span>
+                <span className="ml-1.5 text-[10px] font-semibold text-brand-green-dark/70/80 dark:text-white/45">· negotiable</span>
               )}
             </p>
             {locationLine ? (
-              <p className="flex items-start gap-1 text-[11px] leading-snug text-[#3D5A3E] dark:text-white/55">
-                <span className="material-symbols-outlined mt-0.5 shrink-0 text-[13px] text-primary dark:text-emerald-400/70">location_on</span>
+              <p className="flex items-start gap-1 text-[11px] leading-snug text-brand-green-dark/70 dark:text-white/55">
+                <span className="material-symbols-outlined mt-0.5 shrink-0 text-[13px] text-primary dark:text-primary/70">location_on</span>
                 <span className="line-clamp-2">{locationLine}</span>
               </p>
             ) : null}
             {(conditionReadable || categoryLabel) && (
-              <p className="text-[10px] leading-snug text-[#3D5A3E]/85 dark:text-white/50">
+              <p className="text-[10px] leading-snug text-brand-green-dark/70/85 dark:text-white/50">
                 {conditionReadable ? (
                   <>
                     <span className="font-semibold text-brand-black dark:text-white/75">Condition:</span>{" "}
-                    <span className="font-medium text-[#006F35] dark:text-emerald-400/90">{conditionReadable}</span>
+                    <span className="font-medium text-[#006F35] dark:text-primary/90">{conditionReadable}</span>
                   </>
                 ) : null}
-                {conditionReadable && categoryLabel ? <span className="text-[#3D5A3E]/50 dark:text-white/35"> · </span> : null}
+                {conditionReadable && categoryLabel ? <span className="text-brand-green-dark/70/50 dark:text-white/35"> · </span> : null}
                 {categoryLabel ? <span className="capitalize">{categoryLabel.toLowerCase()}</span> : null}
               </p>
             )}
             {product.createdAt ? (
-              <p className="text-[10px] text-[#3D5A3E]/70 dark:text-white/40">Posted {formatTimeAgo(product.createdAt)}</p>
+              <p className="text-[10px] text-brand-green-dark/70/70 dark:text-white/40">Posted {formatTimeAgo(product.createdAt)}</p>
             ) : null}
             {rawDescription ? (
               <div className="space-y-0.5 pt-0.5">
                 <p
-                  className={`text-[11px] leading-relaxed text-[#3D5A3E]/90 dark:text-white/45 whitespace-pre-wrap break-words ${
+                  className={`text-[11px] leading-relaxed text-brand-green-dark/70/90 dark:text-white/45 whitespace-pre-wrap break-words ${
                     !descExpanded && needsDescToggle ? "line-clamp-3" : ""
                   }`}
                 >
@@ -315,7 +315,7 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
                       e.stopPropagation();
                       setDescExpanded((v) => !v);
                     }}
-                    className="text-[10px] font-bold tracking-wide text-[#006F35] transition-colors hover:text-primary dark:text-emerald-400 dark:hover:text-emerald-300"
+                    className="text-[10px] font-bold tracking-wide text-[#006F35] transition-colors hover:text-primary dark:text-primary dark:hover:text-primary"
                     aria-expanded={descExpanded}
                   >
                     {descExpanded ? "Show less" : "Show more"}
@@ -331,7 +331,7 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
                 Your listing
               </p>
             ) : isSold ? (
-              <p className="rounded-full border border-[var(--border-light)] bg-white/60 py-2 text-center text-[11px] font-medium text-[#3D5A3E]/70 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/45">
+              <p className="rounded-full border border-[var(--border-light)] bg-white/60 py-2 text-center text-[11px] font-medium text-brand-green-dark/70/70 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/45">
                 No longer available
               </p>
             ) : (

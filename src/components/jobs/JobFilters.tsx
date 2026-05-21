@@ -37,7 +37,7 @@ function FilterRow({
             key={opt}
             onClick={() => onSelect(opt === "All" ? "All" : value)}
             className={`text-xs px-3 py-1.5 rounded-xl whitespace-nowrap font-semibold transition-all ${
-              isActive ? "mod-btn-active text-primary" : "mod-btn"
+              isActive ? "mod-chip mod-chip-active text-primary" : "mod-chip"
             }`}
             style={isActive ? {} : { color: "var(--neu-text-secondary)" }}
           >

@@ -98,7 +98,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                     <div className="flex items-center gap-4">
                         <button
                             onClick={onClose}
-                            className="neu-btn w-9 h-9 flex items-center justify-center rounded-xl transition-colors"
+                            className="mod-chip w-9 h-9 flex items-center justify-center rounded-xl transition-colors"
                         >
                             <span className="material-symbols-outlined text-xl" style={{ color: 'var(--neu-text-secondary)' }}>arrow_back</span>
                         </button>
@@ -116,7 +116,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                     ) : isError || !details ? (
                         <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
                             <div className="w-16 h-16 neu-socket rounded-full flex items-center justify-center mb-4">
-                                <span className="material-symbols-outlined text-3xl text-red-400">error</span>
+                                <span className="material-symbols-outlined text-3xl text-brand-red">error</span>
                             </div>
                             <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--neu-text)' }}>Failed to load post</h3>
                             <p className="text-sm max-w-xs" style={{ color: 'var(--neu-text-muted)' }}>
@@ -124,7 +124,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                             </p>
                             <button
                                 onClick={onClose}
-                                className="mt-6 px-6 py-2 neu-btn rounded-2xl font-bold text-primary transition-all active:scale-95"
+                                className="mt-6 px-6 py-2 mod-chip rounded-2xl font-bold text-primary transition-all active:scale-95"
                             >
                                 Back to Feed
                             </button>
@@ -147,7 +147,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                             @{(details.content.author as PostAuthor)?.username || 'user'}
                                         </div>
                                     </div>
-                                    <button className="neu-btn w-8 h-8 flex items-center justify-center rounded-xl transition-colors">
+                                    <button className="btn-ghost w-8 h-8 flex items-center justify-center rounded-xl transition-colors">
                                         <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>more_horiz</span>
                                     </button>
                                 </div>
@@ -184,9 +184,9 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                     )}
                                     {details.content.priority && details.content.priority !== 'normal' && (
                                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                                            details.content.priority === 'critical' ? 'bg-red-500/20 text-red-400' :
-                                            details.content.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                                            'bg-blue-500/20 text-blue-400'
+                                            details.content.priority === 'critical' ? 'bg-brand-red/20 text-brand-red' :
+                                            details.content.priority === 'high' ? 'bg-brand-red/20 text-brand-red' :
+                                            'bg-brand-blue/20 text-brand-blue'
                                         }`}>
                                             {details.content.priority.charAt(0).toUpperCase() + details.content.priority.slice(1)}
                                         </span>
@@ -197,7 +197,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                 {details.content.culturalContext && details.content.culturalContext.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 mb-3">
                                         {details.content.culturalContext.map((ctx: string, i: number) => (
-                                            <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-500/10 text-purple-400">
+                                            <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-brand-blue/10 text-brand-blue">
                                                 <span className="material-symbols-outlined text-[12px]">language</span>
                                                 {ctx}
                                             </span>
@@ -211,17 +211,17 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                         <span className="material-symbols-outlined text-[14px]" style={{ color: 'var(--neu-text-muted)' }}>group</span>
                                         <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>Audience:</span>
                                         {details.content.targetAudience.ageRange && (details.content.targetAudience.ageRange.min || details.content.targetAudience.ageRange.max) && (
-                                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 font-medium">
+                                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-teal-400 font-medium">
                                                 {details.content.targetAudience.ageRange.min || '?'}-{details.content.targetAudience.ageRange.max || '?'} yrs
                                             </span>
                                         )}
                                         {details.content.targetAudience.gender && details.content.targetAudience.gender !== 'all' && (
-                                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 font-medium capitalize">
+                                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-teal-400 font-medium capitalize">
                                                 {details.content.targetAudience.gender}
                                             </span>
                                         )}
                                         {details.content.targetAudience.interests && details.content.targetAudience.interests.map((interest: string, i: number) => (
-                                            <span key={i} className="text-[11px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 font-medium">
+                                            <span key={i} className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-teal-400 font-medium">
                                                 {interest}
                                             </span>
                                         ))}
@@ -232,7 +232,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                 {details.content.fyiStatus && details.content.fyiStatus !== 'active' && (
                                     <div className="mb-3">
                                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
-                                            details.content.fyiStatus === 'found' || details.content.fyiStatus === 'resolved' ? 'bg-green-500/15 text-green-400' : 'bg-gray-500/15 text-gray-400'
+                                            details.content.fyiStatus === 'found' || details.content.fyiStatus === 'resolved' ? 'bg-primary/15 text-primary' : 'bg-brand-surface/15 text-[var(--neu-text-muted)]'
                                         }`}>
                                             <span className="material-symbols-outlined text-[14px]">info</span>
                                             Status: {details.content.fyiStatus.charAt(0).toUpperCase() + details.content.fyiStatus.slice(1)}
@@ -242,13 +242,13 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
 
                                 {/* FYI Status Update (owner only) */}
                                 {details.content.contentType === 'fyi' && currentUserId && details.content.author?.id === currentUserId && (
-                                    <div className="mb-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                                    <div className="mb-3 p-3 rounded-xl bg-brand-blue/5 border border-brand-blue/10">
                                         <label className="flex items-center gap-1.5 mb-2">
-                                            <span className="material-symbols-outlined text-blue-400 text-[16px]">edit</span>
-                                            <span className="text-xs font-bold text-blue-400 uppercase">Update Status</span>
+                                            <span className="material-symbols-outlined text-brand-blue text-[16px]">edit</span>
+                                            <span className="text-xs font-bold text-brand-blue uppercase">Update Status</span>
                                         </label>
                                         <select
-                                            className="w-full text-sm rounded-lg px-3 py-2 border border-white/10 bg-black/20 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                                            className="w-full text-sm rounded-lg px-3 py-2 border border-white/10 bg-black/20 focus:outline-none focus:ring-2 focus:ring-brand-blue/40"
                                             style={{ color: 'var(--neu-text)' }}
                                             value={details.content.fyiStatus || 'active'}
                                             disabled={statusUpdating}
@@ -282,17 +282,17 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                             ))}
                                         </select>
                                         {statusUpdating && (
-                                            <p className="text-xs mt-1.5 text-blue-400 animate-pulse">Updating status…</p>
+                                            <p className="text-xs mt-1.5 text-brand-blue animate-pulse">Updating status…</p>
                                         )}
                                     </div>
                                 )}
 
                                 {/* Endorsements */}
                                 {details.content.endorsements && details.content.endorsements.length > 0 && (
-                                    <div className="mb-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                                    <div className="mb-3 p-3 rounded-xl bg-primary/5 border border-emerald-500/10">
                                         <div className="flex items-center gap-1.5 mb-2">
-                                            <span className="material-symbols-outlined text-emerald-400 text-[16px]">verified</span>
-                                            <span className="text-xs font-bold text-emerald-400 uppercase">Authority Endorsed</span>
+                                            <span className="material-symbols-outlined text-primary text-[16px]">verified</span>
+                                            <span className="text-xs font-bold text-primary uppercase">Authority Endorsed</span>
                                         </div>
                                         {details.content.endorsements.map((e: any, i: number) => (
                                             <div key={i} className="text-xs mb-1" style={{ color: 'var(--neu-text-muted)' }}>
@@ -307,7 +307,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                 {details.content.contentType === 'fyi' && (
                                     <div className="mb-3">
                                         <button
-                                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-primary/10 text-primary border border-emerald-500/20 hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                             onClick={async () => {
                                                 try {
                                                     await fyiService.endorseBulletin(
@@ -340,9 +340,9 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                         key={rsvpStatus}
                                                         disabled={rsvpLoading}
                                                         className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors disabled:opacity-50 ${
-                                                            rsvpStatus === 'going' ? 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20' :
-                                                            rsvpStatus === 'maybe' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 hover:bg-yellow-500/20' :
-                                                            'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20'
+                                                            rsvpStatus === 'going' ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' :
+                                                            rsvpStatus === 'maybe' ? 'bg-primary/10 text-primary400 border-yellow-500/20 hover:bg-primary/20' :
+                                                            'bg-brand-red/10 text-brand-red border-brand-red/20 hover:bg-brand-red/20'
                                                         }`}
                                                         onClick={async () => {
                                                             setRsvpLoading(true);
@@ -369,7 +369,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                         {details.content.fyiSubtype === 'safety_notice' && (
                                             <button
                                                 disabled={receiptLoading}
-                                                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors disabled:opacity-50"
+                                                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-brand-blue/10 text-brand-blue border border-brand-blue/20 hover:bg-brand-blue/20 transition-colors disabled:opacity-50"
                                                 onClick={async () => {
                                                     setReceiptLoading(true);
                                                     try {
@@ -394,8 +394,8 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                 disabled={pinLoading}
                                                 className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold border transition-colors disabled:opacity-50 ${
                                                     details.content.isPinned
-                                                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20'
-                                                        : 'bg-gray-500/10 text-gray-400 border-gray-500/20 hover:bg-gray-500/20'
+                                                        ? 'bg-primary/10 text-primary border-amber-500/20 hover:bg-primary/20'
+                                                        : 'bg-brand-surface/10 text-[var(--neu-text-muted)] border-black/[0.08]/20 hover:bg-brand-surface/20'
                                                 }`}
                                                 onClick={async () => {
                                                     setPinLoading(true);
@@ -424,7 +424,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                         {/* View Status History */}
                                         {details.content.contentType === 'fyi' && (
                                             <button
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-500/10 text-gray-400 border border-gray-500/20 hover:bg-gray-500/20 transition-colors"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-surface/10 text-[var(--neu-text-muted)] border border-black/[0.08]/20 hover:bg-brand-surface/20 transition-colors"
                                                 onClick={async () => {
                                                     setShowStatusHistory(true);
                                                     setStatusHistoryLoading(true);
@@ -505,7 +505,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                     <div className="neu-modal rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 neu-base" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
                             <h3 className="font-bold text-base" style={{ color: 'var(--neu-text)' }}>Edit History</h3>
-                            <button onClick={() => setShowEditHistory(false)} className="neu-btn w-8 h-8 flex items-center justify-center rounded-xl">
+                            <button onClick={() => setShowEditHistory(false)} className="btn-ghost w-8 h-8 flex items-center justify-center rounded-xl">
                                 <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>close</span>
                             </button>
                         </div>
@@ -552,7 +552,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                     <div className="neu-modal rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 neu-base" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
                             <h3 className="font-bold text-base" style={{ color: 'var(--neu-text)' }}>Status History</h3>
-                            <button onClick={() => setShowStatusHistory(false)} className="neu-btn w-8 h-8 flex items-center justify-center rounded-xl">
+                            <button onClick={() => setShowStatusHistory(false)} className="btn-ghost w-8 h-8 flex items-center justify-center rounded-xl">
                                 <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>close</span>
                             </button>
                         </div>
@@ -566,12 +566,12 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                             ) : (
                                 statusHistory.map((entry, idx) => (
                                     <div key={idx} className="neu-card-sm rounded-xl p-3 flex items-center gap-3">
-                                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-blue-400 text-[16px]">swap_horiz</span>
+                                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-brand-blue text-[16px]">swap_horiz</span>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-1.5 text-xs">
-                                                <span className="px-1.5 py-0.5 rounded bg-gray-500/15 font-medium" style={{ color: 'var(--neu-text-muted)' }}>
+                                                <span className="px-1.5 py-0.5 rounded bg-brand-surface/15 font-medium" style={{ color: 'var(--neu-text-muted)' }}>
                                                     {entry.previousStatus}
                                                 </span>
                                                 <span className="material-symbols-outlined text-[12px]" style={{ color: 'var(--neu-text-muted)' }}>arrow_forward</span>

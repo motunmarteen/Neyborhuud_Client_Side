@@ -27,7 +27,7 @@ function Ticks({ status }: { status: ChatMessage['status'] }) {
 // ─── Timestamp + ticks row ────────────────────────────────────────────────────
 function Meta({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
-    <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${mine ? 'text-blue-200' : 'text-gray-500'}`}>
+    <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${mine ? 'text-brand-blue' : 'text-[var(--neu-text-muted)]'}`}>
       <span>{timeStr(msg.createdAt)}</span>
       {mine && <Ticks status={msg.status} />}
     </div>
@@ -44,7 +44,7 @@ function CardShell({ icon, label, color, children, mine, msg }: {
         <span className="text-base">{icon}</span>
         <span className="text-[11px] font-bold uppercase tracking-wide text-white/70">{label}</span>
       </div>
-      <div className="bg-gray-900/80 px-3 pb-2 pt-1">
+      <div className="bg-brand-black/80 px-3 pb-2 pt-1">
         {children}
         <Meta msg={msg} mine={mine} />
       </div>
@@ -64,11 +64,11 @@ function LocationCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
     <CardShell icon="📍" label="Location" color="bg-green-900" mine={mine} msg={msg}>
       {lat && lng && (
-        <p className="font-mono text-[10px] text-green-300">{Number(lat).toFixed(5)}, {Number(lng).toFixed(5)}</p>
+        <p className="font-mono text-[10px] text-primary">{Number(lat).toFixed(5)}, {Number(lng).toFixed(5)}</p>
       )}
-      <p className="text-sm text-gray-100">{address}</p>
+      <p className="text-sm text-[var(--neu-text-muted)]">{address}</p>
       {mapsUrl && (
-        <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block text-xs text-green-400 hover:underline">
+        <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block text-xs text-primary hover:underline">
           Open in Maps →
         </a>
       )}
@@ -80,9 +80,9 @@ function EventCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const { title, time, eventId } = msg.meta ?? {};
   return (
     <CardShell icon="📅" label="Event" color="bg-purple-900" mine={mine} msg={msg}>
-      <p className="font-semibold text-sm text-gray-100">{title ?? msg.content}</p>
+      <p className="font-semibold text-sm text-[var(--neu-text-muted)]">{title ?? msg.content}</p>
       {time && <p className="text-xs text-purple-300">{new Date(time).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })}</p>}
-      {eventId && <p className="text-[10px] text-gray-500 mt-0.5">ID: {eventId}</p>}
+      {eventId && <p className="text-[10px] text-[var(--neu-text-muted)] mt-0.5">ID: {eventId}</p>}
     </CardShell>
   );
 }
@@ -90,10 +90,10 @@ function EventCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 function MarketplaceCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const { title, price, itemId } = msg.meta ?? {};
   return (
-    <CardShell icon="🛒" label="Marketplace" color="bg-yellow-900" mine={mine} msg={msg}>
-      <p className="font-semibold text-sm text-gray-100">{title ?? msg.content}</p>
-      {price !== undefined && <p className="text-xs text-yellow-300 font-bold">₦{price.toLocaleString()}</p>}
-      {itemId && <p className="text-[10px] text-gray-500 mt-0.5">Item: {itemId}</p>}
+    <CardShell icon="🛒" label="Marketplace" color="bg-primary900" mine={mine} msg={msg}>
+      <p className="font-semibold text-sm text-[var(--neu-text-muted)]">{title ?? msg.content}</p>
+      {price !== undefined && <p className="text-xs text-primary font-bold">₦{price.toLocaleString()}</p>}
+      {itemId && <p className="text-[10px] text-[var(--neu-text-muted)] mt-0.5">Item: {itemId}</p>}
     </CardShell>
   );
 }
@@ -102,9 +102,9 @@ function ContactCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const { name, phone } = msg.meta ?? {};
   return (
     <CardShell icon="👤" label="Contact" color="bg-blue-900" mine={mine} msg={msg}>
-      <p className="font-semibold text-sm text-gray-100">{name ?? msg.content}</p>
+      <p className="font-semibold text-sm text-[var(--neu-text-muted)]">{name ?? msg.content}</p>
       {phone && (
-        <a href={`tel:${phone}`} className="text-xs text-blue-300 hover:underline">{phone}</a>
+        <a href={`tel:${phone}`} className="text-xs text-brand-blue hover:underline">{phone}</a>
       )}
     </CardShell>
   );
@@ -113,18 +113,18 @@ function ContactCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 function PollCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const { question, options, votes } = msg.meta ?? {};
   return (
-    <CardShell icon="📊" label="Poll" color="bg-cyan-900" mine={mine} msg={msg}>
-      <p className="font-semibold text-sm text-gray-100 mb-2">{question ?? msg.content}</p>
+    <CardShell icon="📊" label="Poll" color="bg-brand-blue900" mine={mine} msg={msg}>
+      <p className="font-semibold text-sm text-[var(--neu-text-muted)] mb-2">{question ?? msg.content}</p>
       {options?.map((opt, i) => {
         const voters = votes?.[String(i)]?.length ?? 0;
         return (
-          <div key={i} className="mb-1.5 overflow-hidden rounded-lg bg-gray-800">
+          <div key={i} className="mb-1.5 overflow-hidden rounded-lg bg-brand-black">
             <div
-              className="h-7 flex items-center px-3 text-xs text-gray-200 bg-cyan-800/40"
+              className="h-7 flex items-center px-3 text-xs text-[var(--neu-text-muted)] bg-brand-blue800/40"
               style={{ minWidth: '100%' }}
             >
               {opt}
-              {voters > 0 && <span className="ml-auto text-cyan-300 text-[10px]">{voters} vote{voters !== 1 ? 's' : ''}</span>}
+              {voters > 0 && <span className="ml-auto text-brand-blue300 text-[10px]">{voters} vote{voters !== 1 ? 's' : ''}</span>}
             </div>
           </div>
         );
@@ -137,10 +137,10 @@ function TrackingCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const { live } = msg.meta ?? {};
   const sessionRef = msg.trackingSessionRef;
   return (
-    <CardShell icon="📡" label="Tracking Session" color="bg-indigo-900" mine={mine} msg={msg}>
-      {live && <span className="mb-1 inline-block rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] text-green-400">● LIVE</span>}
-      {sessionRef && <p className="text-xs text-indigo-300 font-mono">{sessionRef}</p>}
-      <p className="text-sm text-gray-100 mt-0.5">{msg.content}</p>
+    <CardShell icon="📡" label="Tracking Session" color="bg-brand-blue900" mine={mine} msg={msg}>
+      {live && <span className="mb-1 inline-block rounded-full bg-primary/20 px-2 py-0.5 text-[10px] text-primary">● LIVE</span>}
+      {sessionRef && <p className="text-xs text-brand-blue300 font-mono">{sessionRef}</p>}
+      <p className="text-sm text-[var(--neu-text-muted)] mt-0.5">{msg.content}</p>
     </CardShell>
   );
 }
@@ -148,12 +148,12 @@ function TrackingCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 function KidnappingCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const { status } = msg.meta ?? {};
   const sessionRef = msg.trackingSessionRef;
-  const statusColor = status === 'resolved' ? 'text-green-400' : status === 'suspected' ? 'text-yellow-400' : 'text-red-400';
+  const statusColor = status === 'resolved' ? 'text-primary' : status === 'suspected' ? 'text-primary400' : 'text-brand-red';
   return (
     <CardShell icon="🚨" label="Kidnapping Alert" color="bg-red-950" mine={mine} msg={msg}>
       {status && <p className={`text-xs font-bold uppercase ${statusColor}`}>{status}</p>}
-      {sessionRef && <p className="text-[10px] text-gray-400 font-mono mt-0.5">Session: {sessionRef}</p>}
-      <p className="text-sm text-gray-100 mt-0.5">{msg.content}</p>
+      {sessionRef && <p className="text-[10px] text-[var(--neu-text-muted)] font-mono mt-0.5">Session: {sessionRef}</p>}
+      <p className="text-sm text-[var(--neu-text-muted)] mt-0.5">{msg.content}</p>
     </CardShell>
   );
 }
@@ -161,12 +161,12 @@ function KidnappingCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 function SOSCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const { severity } = msg.meta ?? {};
   const sev = severity ?? 'high';
-  const sevColor = sev === 'critical' ? 'text-red-300' : sev === 'high' ? 'text-orange-400' : sev === 'medium' ? 'text-yellow-400' : 'text-blue-400';
+  const sevColor = sev === 'critical' ? 'text-brand-red' : sev === 'high' ? 'text-brand-red' : sev === 'medium' ? 'text-primary400' : 'text-brand-blue';
   return (
     <CardShell icon="🆘" label="SOS" color="bg-red-900" mine={mine} msg={msg}>
       <p className={`text-xs font-bold uppercase ${sevColor}`}>Severity: {sev}</p>
-      {msg.emergencyRef && <p className="text-[10px] text-gray-400 font-mono mt-0.5">Ref: {msg.emergencyRef}</p>}
-      <p className="text-sm text-gray-100 mt-0.5">{msg.content}</p>
+      {msg.emergencyRef && <p className="text-[10px] text-[var(--neu-text-muted)] font-mono mt-0.5">Ref: {msg.emergencyRef}</p>}
+      <p className="text-sm text-[var(--neu-text-muted)] mt-0.5">{msg.content}</p>
     </CardShell>
   );
 }
@@ -205,13 +205,13 @@ function AudioBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 
 function FileBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-gray-800 px-4 py-3 max-w-[280px]">
+    <div className="flex items-center gap-3 rounded-2xl bg-brand-black px-4 py-3 max-w-[280px]">
       <span className="text-2xl">📎</span>
       <div className="min-w-0 flex-1">
-        <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="block truncate text-sm text-blue-300 hover:underline">
+        <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="block truncate text-sm text-brand-blue hover:underline">
           {msg.content}
         </a>
-        <p className="text-[10px] text-gray-500 mt-0.5">Document</p>
+        <p className="text-[10px] text-[var(--neu-text-muted)] mt-0.5">Document</p>
       </div>
       <Meta msg={msg} mine={mine} />
     </div>
@@ -226,11 +226,11 @@ function TextBubble({ msg, mine, isPriority }: { msg: ChatMessage; mine: boolean
         ? 'border-2 border-red-600 bg-red-900/40'
         : mine
         ? 'bg-blue-700 text-white'
-        : 'bg-gray-800 text-gray-100'
+        : 'bg-brand-black text-[var(--neu-text-muted)]'
     }`}>
-      {isPriority && <p className="mb-1 text-[10px] font-bold uppercase text-red-300">🚨 Priority</p>}
+      {isPriority && <p className="mb-1 text-[10px] font-bold uppercase text-brand-red">🚨 Priority</p>}
       {msg.isDeleted
-        ? <p className="italic text-gray-400 text-sm">[deleted]</p>
+        ? <p className="italic text-[var(--neu-text-muted)] text-sm">[deleted]</p>
         : <p className="text-sm leading-relaxed">{msg.content}</p>
       }
       <Meta msg={msg} mine={mine} />

@@ -106,8 +106,8 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Download My Data</h2>
-        <p className="text-gray-600 text-sm">
+        <h2 className="text-2xl font-bold text-[var(--neu-text-muted)] mb-2">Download My Data</h2>
+        <p className="text-[var(--neu-text-secondary)] text-sm">
           Export all your personal data from NeyborHuud. This includes your profile, posts, messages, trips, and more.
         </p>
       </div>
@@ -126,7 +126,7 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
 
       {/* Format Selection */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-[var(--neu-text-muted)] mb-3">
           Export Format
         </label>
         <div className="grid grid-cols-3 gap-3">
@@ -134,39 +134,39 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
             onClick={() => setFormat('zip')}
             className={`p-4 border-2 rounded-lg flex flex-col items-center transition-all ${
               format === 'zip'
-                ? 'border-blue-500 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-brand-blue bg-blue-50 text-blue-700'
+                : 'border-black/[0.08] hover:border-black/[0.08]'
             }`}
           >
             <FileArchive className="w-8 h-8 mb-2" />
             <span className="font-medium">ZIP</span>
-            <span className="text-xs text-gray-500 mt-1">Complete archive</span>
+            <span className="text-xs text-[var(--neu-text-muted)] mt-1">Complete archive</span>
           </button>
 
           <button
             onClick={() => setFormat('json')}
             className={`p-4 border-2 rounded-lg flex flex-col items-center transition-all ${
               format === 'json'
-                ? 'border-blue-500 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-brand-blue bg-blue-50 text-blue-700'
+                : 'border-black/[0.08] hover:border-black/[0.08]'
             }`}
           >
             <FileText className="w-8 h-8 mb-2" />
             <span className="font-medium">JSON</span>
-            <span className="text-xs text-gray-500 mt-1">Structured data</span>
+            <span className="text-xs text-[var(--neu-text-muted)] mt-1">Structured data</span>
           </button>
 
           <button
             onClick={() => setFormat('csv')}
             className={`p-4 border-2 rounded-lg flex flex-col items-center transition-all ${
               format === 'csv'
-                ? 'border-blue-500 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-brand-blue bg-blue-50 text-blue-700'
+                : 'border-black/[0.08] hover:border-black/[0.08]'
             }`}
           >
             <Table className="w-8 h-8 mb-2" />
             <span className="font-medium">CSV</span>
-            <span className="text-xs text-gray-500 mt-1">Spreadsheet</span>
+            <span className="text-xs text-[var(--neu-text-muted)] mt-1">Spreadsheet</span>
           </button>
         </div>
       </div>
@@ -174,13 +174,13 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
       {/* CSV Type Selection */}
       {format === 'csv' && (
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-[var(--neu-text-muted)] mb-2">
             Data Type
           </label>
           <select
             value={csvType}
             onChange={(e) => setCsvType(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2 border border-black/[0.08] rounded-md focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
           >
             <option value="posts">Posts</option>
             <option value="comments">Comments</option>
@@ -215,7 +215,7 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
         <button
           onClick={handleEmailExport}
           disabled={loading}
-          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-brand-black text-white rounded-lg font-medium hover:bg-brand-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? (
             <>
@@ -245,7 +245,7 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
       </div>
 
       {/* Privacy Notice */}
-      <p className="mt-4 text-xs text-gray-500 text-center">
+      <p className="mt-4 text-xs text-[var(--neu-text-muted)] text-center">
         Your data export may take a few moments to generate. This feature complies with NDPR (Nigerian Data Protection Regulation).
       </p>
     </div>

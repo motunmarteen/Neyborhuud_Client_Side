@@ -204,7 +204,7 @@ export default function CreateServiceForm() {
               type="button"
               onClick={() => set("pricingType", value)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                form.pricingType === value ? "mod-btn-active text-primary" : "mod-btn"
+                form.pricingType === value ? "mod-chip mod-chip-active text-primary" : "mod-chip"
               }`}
               style={form.pricingType !== value ? { color: "var(--neu-text-muted)" } : {}}
             >
@@ -268,7 +268,7 @@ export default function CreateServiceForm() {
                   type="button"
                   onClick={() => toggleDay(day)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    active ? "mod-btn-active text-primary" : "mod-btn"
+                    active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
                   }`}
                   style={!active ? { color: "var(--neu-text-muted)" } : {}}
                 >
@@ -373,7 +373,7 @@ export default function CreateServiceForm() {
           !form.description.trim() ||
           selectedDays.length === 0
         }
-        className="w-full py-4 mod-btn-active text-primary disabled:opacity-50 font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
+        className="w-full py-4 mod-chip mod-chip-active text-primary disabled:opacity-50 font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
       >
         {createService.isPending ? (
           <>

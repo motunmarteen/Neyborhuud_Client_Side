@@ -176,7 +176,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                         <button
                             type="button"
                             onClick={onClose}
-                            className="neu-btn grid h-8 w-8 place-items-center rounded-full transition-colors"
+                            className="btn-ghost grid h-8 w-8 place-items-center rounded-full transition-colors"
                             aria-label="Close comments"
                         >
                             <span className="material-symbols-outlined text-[18px]" style={{ color: 'var(--neu-text-secondary)' }}>
@@ -193,7 +193,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                                 <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
                             </div>
                         ) : isPostError ? (
-                            <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-8 text-center text-sm text-red-700 dark:text-red-100">
+                            <div className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-8 text-center text-sm text-red-700 dark:text-red-100">
                                 Unable to load comments for this post.
                             </div>
                         ) : postDetails?.comments?.length ? (
@@ -213,7 +213,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                             <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
                         </div>
                     ) : isGossipError ? (
-                        <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-8 text-center text-sm text-red-700 dark:text-red-100">
+                        <div className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-8 text-center text-sm text-red-700 dark:text-red-100">
                             Unable to load comments for this discussion.
                         </div>
                     ) : gossipDetails?.comments?.length ? (

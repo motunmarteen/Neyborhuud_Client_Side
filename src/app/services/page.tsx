@@ -76,7 +76,7 @@ export default function ServicesPage() {
               </div>
               <Link
                 href="/services/create"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm mod-btn-active text-primary transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm mod-chip mod-chip-active text-primary transition-all"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
                 Offer Service
@@ -87,7 +87,7 @@ export default function ServicesPage() {
             <div className="flex gap-2 mb-4">
               <Link
                 href="/services/my-bookings"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-btn transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-chip transition-all"
                 style={{ color: "var(--neu-text-muted)" }}
               >
                 <span className="material-symbols-outlined text-[14px]">calendar_month</span>
@@ -95,7 +95,7 @@ export default function ServicesPage() {
               </Link>
               <Link
                 href="/services/my-favorites"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-btn transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold mod-chip transition-all"
                 style={{ color: "var(--neu-text-muted)" }}
               >
                 <span className="material-symbols-outlined text-[14px]">favorite</span>
@@ -112,7 +112,7 @@ export default function ServicesPage() {
                     key={cat}
                     onClick={() => setCategory(cat)}
                     className={`shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
-                      active ? "mod-btn-active text-primary" : "mod-btn"
+                      active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
                     }`}
                     style={active ? {} : { color: "var(--neu-text-muted)" }}
                   >
@@ -131,7 +131,7 @@ export default function ServicesPage() {
                     key={r.label}
                     onClick={() => setMinRating(r.value)}
                     className={`shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
-                      active ? "mod-btn-active text-primary" : "mod-btn"
+                      active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
                     }`}
                     style={active ? {} : { color: "var(--neu-text-muted)" }}
                   >
@@ -163,7 +163,7 @@ export default function ServicesPage() {
               <div className="text-center py-12">
                 <span className="material-symbols-outlined text-5xl mb-3" style={{ color: "var(--brand-red)" }}>error</span>
                 <p className="mb-4 font-semibold" style={{ color: "var(--neu-text-muted)" }}>Failed to load services</p>
-                <button onClick={() => refetch()} className="px-6 py-3 mod-btn rounded-xl font-semibold transition-all" style={{ color: "var(--neu-text)" }}>
+                <button onClick={() => refetch()} className="px-6 py-3 mod-chip rounded-xl font-semibold transition-all" style={{ color: "var(--neu-text)" }}>
                   Try Again
                 </button>
               </div>

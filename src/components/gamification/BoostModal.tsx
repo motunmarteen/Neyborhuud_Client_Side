@@ -25,10 +25,10 @@ interface Props {
 }
 
 const TYPE_META: Record<BoostType, { icon: string; color: string; gradient: string; verb: string }> = {
-  job:      { icon: "💼", color: "blue",   gradient: "from-blue-500 to-indigo-600",    verb: "Featured in job feed" },
+  job:      { icon: "💼", color: "blue",   gradient: "from-brand-blue to-indigo-600",    verb: "Featured in job feed" },
   service:  { icon: "🔧", color: "teal",   gradient: "from-teal-500 to-green-600",     verb: "Promoted in services" },
   event:    { icon: "🎉", color: "rose",   gradient: "from-rose-500 to-pink-600",      verb: "Spotlighted for the community" },
-  listing:  { icon: "🏷️",  color: "orange", gradient: "from-orange-500 to-amber-600",   verb: "Featured in marketplace" },
+  listing:  { icon: "🏷️",  color: "orange", gradient: "from-brand-red to-amber-600",   verb: "Featured in marketplace" },
   post:     { icon: "📌", color: "purple", gradient: "from-purple-500 to-violet-600",  verb: "Pinned to community feed" },
 };
 
@@ -121,8 +121,8 @@ export function BoostModal({
           {done ? (
             <div className="py-4 text-center">
               <div className="mb-3 text-5xl animate-bounce">🚀</div>
-              <h3 className="text-lg font-black text-gray-900">Boost Active!</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <h3 className="text-lg font-black text-[var(--neu-text-muted)]">Boost Active!</h3>
+              <p className="mt-1 text-sm text-[var(--neu-text-muted)]">
                 <span className="font-bold text-amber-600">🪙 {selectedOpt.coins.toLocaleString()} HuudCoins</span> deducted.
                 Your {type} is now featured for{" "}
                 <strong>{selectedDays} {selectedDays === 1 ? "day" : "days"}</strong>.
@@ -148,13 +148,13 @@ export function BoostModal({
               </div>
 
               {/* Boost perks */}
-              <div className="mb-4 rounded-2xl bg-gray-50 px-4 py-3">
-                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+              <div className="mb-4 rounded-2xl bg-brand-surface px-4 py-3">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--neu-text-muted)]">
                   What you get
                 </p>
                 <ul className="space-y-1">
                   {perks.map((perk) => (
-                    <li key={perk} className="flex items-center gap-2 text-sm text-gray-700">
+                    <li key={perk} className="flex items-center gap-2 text-sm text-[var(--neu-text-muted)]">
                       {perk}
                     </li>
                   ))}
@@ -162,7 +162,7 @@ export function BoostModal({
               </div>
 
               {/* Duration options */}
-              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-400">
+              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-[var(--neu-text-muted)]">
                 Choose duration
               </p>
               <div className={`grid gap-3 mb-5 ${options.length <= 2 ? "grid-cols-2" : "grid-cols-2"}`}>
@@ -178,17 +178,17 @@ export function BoostModal({
                         ${isSelected
                           ? `border-current bg-gradient-to-br ${meta.gradient} text-white shadow-lg`
                           : affordable
-                            ? "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
-                            : "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
+                            ? "border-black/[0.08] bg-white text-[var(--neu-text-muted)] hover:border-black/[0.08] hover:bg-brand-surface"
+                            : "border-black/[0.08] bg-brand-surface text-[var(--neu-text-muted)] cursor-not-allowed"
                         }`}
                     >
                       {opt.badge && (
-                        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-black text-white shadow">
+                        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-white shadow">
                           {opt.badge}
                         </span>
                       )}
                       <span className="text-base font-black">{opt.label}</span>
-                      <span className={`mt-0.5 text-xs ${isSelected ? "opacity-80" : "text-gray-400"}`}>
+                      <span className={`mt-0.5 text-xs ${isSelected ? "opacity-80" : "text-[var(--neu-text-muted)]"}`}>
                         🪙 {opt.coins.toLocaleString()} coins
                       </span>
                     </button>

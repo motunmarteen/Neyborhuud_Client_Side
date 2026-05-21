@@ -130,10 +130,10 @@ export default function EditEventPage() {
         <TopNav />
         <div className="flex flex-1 min-h-0 overflow-hidden">
           <LeftSidebar />
-          <div className="flex-1 min-h-0 overflow-y-auto bg-[#0f0f1e] animate-pulse">
+          <div className="flex-1 min-h-0 overflow-y-auto bg-brand-black animate-pulse">
             <div className="max-w-3xl mx-auto px-4 py-6 space-y-4 mt-20">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-12 bg-gray-800 rounded-xl" />
+                <div key={i} className="h-12 bg-brand-black rounded-xl" />
               ))}
             </div>
           </div>
@@ -151,13 +151,13 @@ export default function EditEventPage() {
         <TopNav />
         <div className="flex flex-1 min-h-0 overflow-hidden">
           <LeftSidebar />
-          <div className="flex-1 min-h-0 overflow-y-auto bg-[#0f0f1e] flex items-center justify-center text-white">
+          <div className="flex-1 min-h-0 overflow-y-auto bg-brand-black flex items-center justify-center text-white">
             <div className="text-center">
-              <span className="material-symbols-outlined text-red-400 text-5xl">lock</span>
-              <p className="mt-4 text-gray-400">You can only edit events you organized.</p>
+              <span className="material-symbols-outlined text-brand-red text-5xl">lock</span>
+              <p className="mt-4 text-[var(--neu-text-muted)]">You can only edit events you organized.</p>
               <button
                 onClick={() => router.back()}
-                className="mt-4 px-6 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+                className="mt-4 px-6 py-2 bg-brand-black rounded-lg hover:bg-brand-black transition-colors"
               >
                 Go Back
               </button>
@@ -175,13 +175,13 @@ export default function EditEventPage() {
       <TopNav />
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <LeftSidebar />
-        <div className="flex-1 min-h-0 overflow-y-auto pb-20 bg-[#0f0f1e] text-white">
+        <div className="flex-1 min-h-0 overflow-y-auto pb-20 bg-brand-black text-white">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800">
+          <div className="sticky top-0 z-10 bg-brand-black border-b border-black/[0.08]">
             <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
               <button
                 onClick={() => router.back()}
-                className="p-2 rounded-full hover:bg-gray-800 transition-colors text-gray-400"
+                className="p-2 rounded-full hover:bg-brand-black transition-colors text-[var(--neu-text-muted)]"
               >
                 <span className="material-symbols-outlined text-[20px]">arrow_back</span>
               </button>
@@ -192,17 +192,17 @@ export default function EditEventPage() {
           <form onSubmit={handleSubmit} className="max-w-2xl mx-auto px-4 py-6 space-y-5">
             {/* Cover image */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Cover Image</label>
+              <label className="block text-sm text-[var(--neu-text-muted)] mb-2">Cover Image</label>
               <div
                 onClick={() => fileRef.current?.click()}
                 className={`relative h-48 rounded-xl border-2 border-dashed cursor-pointer overflow-hidden transition-colors ${
-                  coverPreview ? "border-transparent" : "border-gray-700 hover:border-gray-500"
+                  coverPreview ? "border-transparent" : "border-black/[0.08] hover:border-black/[0.08]"
                 }`}
               >
                 {coverPreview ? (
                   <img src={coverPreview} className="w-full h-full object-cover" alt="cover" />
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-2">
+                  <div className="flex flex-col items-center justify-center h-full text-[var(--neu-text-muted)] gap-2">
                     <span className="material-symbols-outlined text-3xl">add_photo_alternate</span>
                     <span className="text-sm">Upload cover image (max 10MB)</span>
                   </div>
@@ -219,34 +219,34 @@ export default function EditEventPage() {
 
             {/* Title */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Event Title *</label>
+              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Event Title *</label>
               <input
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Description *</label>
+              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Description *</label>
               <textarea
                 required
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors resize-none"
               />
             </div>
 
             {/* Type */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Event Type</label>
+              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Event Type</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as typeof EVENT_TYPES[number])}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors"
               >
                 {EVENT_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -259,60 +259,60 @@ export default function EditEventPage() {
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1.5">Start Date & Time *</label>
+                <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Start Date & Time *</label>
                 <input
                   required
                   type="datetime-local"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1.5">End Date & Time</label>
+                <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">End Date & Time</label>
                 <input
                   type="datetime-local"
                   value={endDate}
                   min={startDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors"
                 />
               </div>
             </div>
 
             {/* Venue */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Venue</label>
+              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Venue</label>
               <input
                 value={venue}
                 onChange={(e) => setVenue(e.target.value)}
                 placeholder="e.g. Community Centre, Lagos Island"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>
 
             {/* Capacity */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Capacity (optional)</label>
+              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Capacity (optional)</label>
               <input
                 type="number"
                 min="1"
                 value={capacity}
                 onChange={(e) => setCapacity(e.target.value)}
                 placeholder="Leave blank for unlimited"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>
 
             {/* Free toggle + price */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-gray-400">Free Event</span>
+                <span className="text-sm text-[var(--neu-text-muted)]">Free Event</span>
                 <button
                   type="button"
                   onClick={() => setIsFree((v) => !v)}
                   className={`w-12 h-6 rounded-full relative transition-colors ${
-                    isFree ? "bg-green-600" : "bg-gray-700"
+                    isFree ? "bg-brand-green-dark" : "bg-brand-black"
                   }`}
                 >
                   <span
@@ -330,18 +330,18 @@ export default function EditEventPage() {
                   value={ticketPrice}
                   onChange={(e) => setTicketPrice(e.target.value)}
                   placeholder="Ticket price (₦)"
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
                 />
               )}
             </div>
 
             {/* Visibility */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Visibility</label>
+              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Visibility</label>
               <select
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as typeof VISIBILITY_OPTIONS[number])}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors"
               >
                 <option value="public">Public</option>
                 <option value="neighborhood">Neighborhood Only</option>
@@ -351,7 +351,7 @@ export default function EditEventPage() {
 
             {/* Tags */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Tags (optional)</label>
+              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Tags (optional)</label>
               <div className="flex gap-2">
                 <input
                   value={tagInput}
@@ -363,12 +363,12 @@ export default function EditEventPage() {
                     }
                   }}
                   placeholder="Add a tag and press Enter"
-                  className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="flex-1 bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
                 />
                 <button
                   type="button"
                   onClick={addTag}
-                  className="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-white transition-colors"
+                  className="px-4 py-3 bg-brand-black hover:bg-brand-surface rounded-xl text-white transition-colors"
                 >
                   Add
                 </button>
@@ -378,13 +378,13 @@ export default function EditEventPage() {
                   {tags.map((t) => (
                     <span
                       key={t}
-                      className="flex items-center gap-1 bg-gray-800 text-gray-300 rounded-full px-3 py-1 text-sm"
+                      className="flex items-center gap-1 bg-brand-black text-[var(--neu-text-muted)] rounded-full px-3 py-1 text-sm"
                     >
                       #{t}
                       <button
                         type="button"
                         onClick={() => removeTag(t)}
-                        className="text-gray-500 hover:text-red-400 transition-colors ml-0.5"
+                        className="text-[var(--neu-text-muted)] hover:text-brand-red transition-colors ml-0.5"
                       >
                         ×
                       </button>
@@ -398,7 +398,7 @@ export default function EditEventPage() {
             <button
               type="submit"
               disabled={updateEvent.isPending}
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 rounded-xl font-bold text-white transition-colors"
+              className="w-full py-3.5 bg-blue-600 hover:bg-brand-blue disabled:opacity-50 rounded-xl font-bold text-white transition-colors"
             >
               {updateEvent.isPending ? "Saving…" : "Save Changes"}
             </button>

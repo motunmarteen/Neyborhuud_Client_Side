@@ -40,17 +40,17 @@ const EMERGENCY_TYPES: Array<{ value: EmergencyType; label: string; icon: string
 ];
 
 const SEVERITY_LEVELS = [
-  { value: 'low',      label: 'Low',      color: 'text-green-400',  bg: 'bg-green-900/30 border-green-700' },
-  { value: 'medium',   label: 'Medium',   color: 'text-yellow-400', bg: 'bg-yellow-900/30 border-yellow-700' },
-  { value: 'high',     label: 'High',     color: 'text-orange-400', bg: 'bg-orange-900/30 border-orange-700' },
-  { value: 'critical', label: 'Critical', color: 'text-red-400',    bg: 'bg-red-900/30 border-red-700' },
+  { value: 'low',      label: 'Low',      color: 'text-primary',  bg: 'bg-green-900/30 border-green-700' },
+  { value: 'medium',   label: 'Medium',   color: 'text-primary400', bg: 'bg-primary900/30 border-yellow-700' },
+  { value: 'high',     label: 'High',     color: 'text-brand-red', bg: 'bg-brand-red900/30 border-orange-700' },
+  { value: 'critical', label: 'Critical', color: 'text-brand-red',    bg: 'bg-red-900/30 border-red-700' },
 ] as const;
 
 const STATUS_BADGE: Record<Emergency['status'], string> = {
-  active:      'bg-red-900/50 text-red-300 border border-red-700',
-  responding:  'bg-orange-900/50 text-orange-300 border border-orange-700',
-  resolved:    'bg-green-900/50 text-green-300 border border-green-700',
-  false_alarm: 'bg-gray-700 text-gray-400 border border-gray-600',
+  active:      'bg-red-900/50 text-brand-red border border-red-700',
+  responding:  'bg-brand-red900/50 text-brand-red300 border border-orange-700',
+  resolved:    'bg-green-900/50 text-primary border border-green-700',
+  false_alarm: 'bg-brand-black text-[var(--neu-text-muted)] border border-black/[0.08]',
 };
 
 const SOURCE_LABEL: Record<EmergencySource, { icon: string; label: string }> = {
@@ -61,10 +61,10 @@ const SOURCE_LABEL: Record<EmergencySource, { icon: string; label: string }> = {
 };
 
 const DISPATCH_BADGE: Record<DispatchStatus, string> = {
-  pending:      'bg-yellow-900/40 text-yellow-300 border border-yellow-700',
-  sent:         'bg-green-900/40 text-green-300 border border-green-700',
-  failed:       'bg-red-900/40 text-red-300 border border-red-700',
-  not_required: 'bg-gray-800 text-gray-500 border border-gray-700',
+  pending:      'bg-primary900/40 text-primary border border-yellow-700',
+  sent:         'bg-green-900/40 text-primary border border-green-700',
+  failed:       'bg-red-900/40 text-brand-red border border-red-700',
+  not_required: 'bg-brand-black text-[var(--neu-text-muted)] border border-black/[0.08]',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -218,7 +218,7 @@ export default function EmergencyPage() {
             {/* Header */}
             <div className="neu-card-sm rounded-2xl p-4">
               <div className="flex items-center gap-2">
-                <Link href="/safety" className="text-sm text-blue-400 hover:underline">← Safety</Link>
+                <Link href="/safety" className="text-sm text-brand-blue hover:underline">← Safety</Link>
               </div>
               <h1 className="mt-2 text-xl font-bold text-[var(--neu-text)]">🚨 Report Emergency</h1>
               <p className="mt-1 text-sm text-[var(--neu-text-muted)]">
@@ -229,9 +229,9 @@ export default function EmergencyPage() {
             {/* Active Emergencies panel */}
             {(activeLoading || active.length > 0) && (
               <div className="neu-card-sm rounded-2xl p-5 border border-red-800/50">
-                <h2 className="mb-3 font-semibold text-red-300">🔴 Active Emergencies</h2>
+                <h2 className="mb-3 font-semibold text-brand-red">🔴 Active Emergencies</h2>
                 {activeLoading ? (
-                  <p className="text-sm text-gray-500">Loading…</p>
+                  <p className="text-sm text-[var(--neu-text-muted)]">Loading…</p>
                 ) : (
                   <div className="flex flex-col gap-2">
                     {active.map((em) => {
@@ -241,12 +241,12 @@ export default function EmergencyPage() {
                         <div key={em._id} className="flex items-center gap-3 rounded-xl border border-red-800/40 bg-red-950/20 px-4 py-3">
                           <span className="text-lg">{typeInfo?.icon ?? '⚠️'}</span>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-100 text-sm">{typeInfo?.label ?? em.type}</p>
-                            <p className="text-xs text-gray-500 truncate">{em.description || em.location?.address || '—'}</p>
+                            <p className="font-medium text-[var(--neu-text-muted)] text-sm">{typeInfo?.label ?? em.type}</p>
+                            <p className="text-xs text-[var(--neu-text-muted)] truncate">{em.description || em.location?.address || '—'}</p>
                           </div>
                           <div className="flex flex-col items-end gap-1">
                             {src && (
-                              <span className="rounded-full bg-gray-800 border border-gray-700 px-2 py-0.5 text-xs text-gray-400">
+                              <span className="rounded-full bg-brand-black border border-black/[0.08] px-2 py-0.5 text-xs text-[var(--neu-text-muted)]">
                                 {src.icon} {src.label}
                               </span>
                             )}
@@ -269,16 +269,16 @@ export default function EmergencyPage() {
             {/* Success banner */}
             {submitted && (
               <div className="rounded-2xl border border-green-700 bg-green-900/30 p-4">
-                <p className="font-semibold text-green-300">✅ Emergency reported successfully</p>
-                <p className="mt-1 text-sm text-green-400">
+                <p className="font-semibold text-primary">✅ Emergency reported successfully</p>
+                <p className="mt-1 text-sm text-primary">
                   Assigned agency: <strong>{submitted.assignedAgency || '—'}</strong>
                   {submitted.agencyNotified && (
-                    <span className="ml-2 text-green-300">· Agency notified ✓</span>
+                    <span className="ml-2 text-primary">· Agency notified ✓</span>
                   )}
                 </p>
-                <p className="mt-1 text-xs text-green-500">Emergency ID: {submitted._id}</p>
+                <p className="mt-1 text-xs text-primary">Emergency ID: {submitted._id}</p>
                 <button
-                  className="mt-2 text-xs text-green-400 underline"
+                  className="mt-2 text-xs text-primary underline"
                   onClick={() => setSubmitted(null)}
                 >
                   Dismiss
@@ -304,8 +304,8 @@ export default function EmergencyPage() {
                         onClick={() => setType(t.value)}
                         className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition-colors ${
                           type === t.value
-                            ? 'border-blue-500 bg-blue-900/40 text-blue-200'
-                            : 'border-gray-700 bg-gray-800/40 text-gray-300 hover:border-gray-500'
+                            ? 'border-brand-blue bg-blue-900/40 text-brand-blue'
+                            : 'border-black/[0.08] bg-brand-black/40 text-[var(--neu-text-muted)] hover:border-black/[0.08]'
                         }`}
                       >
                         <span>{t.icon}</span>
@@ -314,7 +314,7 @@ export default function EmergencyPage() {
                     ))}
                   </div>
                   <p className="mt-2 text-xs text-[var(--neu-text-muted)]">
-                    Will notify: <strong className="text-blue-400">{selectedType.agency}</strong>
+                    Will notify: <strong className="text-brand-blue">{selectedType.agency}</strong>
                   </p>
                 </div>
 
@@ -330,7 +330,7 @@ export default function EmergencyPage() {
                         type="button"
                         onClick={() => setSeverity(s.value)}
                         className={`flex-1 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
-                          severity === s.value ? s.bg + ' ' + s.color : 'border-gray-700 bg-gray-800/40 text-gray-400'
+                          severity === s.value ? s.bg + ' ' + s.color : 'border-black/[0.08] bg-brand-black/40 text-[var(--neu-text-muted)]'
                         }`}
                       >
                         {s.label}
@@ -338,7 +338,7 @@ export default function EmergencyPage() {
                     ))}
                   </div>
                   {(severity === 'high' || severity === 'critical') && (
-                    <p className="mt-1 text-xs text-orange-400">
+                    <p className="mt-1 text-xs text-brand-red">
                       ⚡ Agency will be automatically notified for {severity} severity
                     </p>
                   )}
@@ -347,7 +347,7 @@ export default function EmergencyPage() {
                 {/* Description */}
                 <div>
                   <label className="mb-1 block text-sm font-medium text-[var(--neu-text-muted)]">
-                    Description <span className="text-gray-500">(optional)</span>
+                    Description <span className="text-[var(--neu-text-muted)]">(optional)</span>
                   </label>
                   <textarea
                     value={description}
@@ -355,26 +355,26 @@ export default function EmergencyPage() {
                     rows={3}
                     maxLength={500}
                     placeholder="Brief description of the situation…"
-                    className="w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-xl border border-black/[0.08] bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:border-brand-blue focus:outline-none"
                   />
                 </div>
 
                 {/* Reporter contact */}
                 <div>
                   <label className="mb-1 block text-sm font-medium text-[var(--neu-text-muted)]">
-                    Your Contact Number <span className="text-gray-500">(optional, shared with agency)</span>
+                    Your Contact Number <span className="text-[var(--neu-text-muted)]">(optional, shared with agency)</span>
                   </label>
                   <input
                     type="tel"
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
                     placeholder="+234 800 000 0000"
-                    className="w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-xl border border-black/[0.08] bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:border-brand-blue focus:outline-none"
                   />
                 </div>
 
                 {submitError && (
-                  <p className="rounded-xl bg-red-900/30 px-3 py-2 text-sm text-red-400">{submitError}</p>
+                  <p className="rounded-xl bg-red-900/30 px-3 py-2 text-sm text-brand-red">{submitError}</p>
                 )}
 
                 <button
@@ -392,9 +392,9 @@ export default function EmergencyPage() {
               <h2 className="mb-4 font-semibold text-[var(--neu-text)]">Recent Emergencies</h2>
 
               {historyLoading ? (
-                <p className="text-sm text-gray-500">Loading…</p>
+                <p className="text-sm text-[var(--neu-text-muted)]">Loading…</p>
               ) : history.length === 0 ? (
-                <p className="text-sm text-gray-500">No recent emergencies.</p>
+                <p className="text-sm text-[var(--neu-text-muted)]">No recent emergencies.</p>
               ) : (
                 <div className="flex flex-col gap-3">
                   {history.map((em) => {
@@ -402,13 +402,13 @@ export default function EmergencyPage() {
                     return (
                       <div
                         key={em._id}
-                        className="flex flex-col gap-2 rounded-xl border border-gray-700 bg-gray-800/40 p-4"
+                        className="flex flex-col gap-2 rounded-xl border border-black/[0.08] bg-brand-black/40 p-4"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{typeInfo?.icon ?? '⚠️'}</span>
                             <div>
-                              <p className="font-medium text-gray-100">
+                              <p className="font-medium text-[var(--neu-text-muted)]">
                                 {typeInfo?.label ?? em.type}
                                 {em.severity && (
                                   <span className={`ml-2 text-xs ${SEVERITY_LEVELS.find((s) => s.value === em.severity)?.color ?? ''}`}>
@@ -417,7 +417,7 @@ export default function EmergencyPage() {
                                 )}
                               </p>
                               {em.description && (
-                                <p className="text-xs text-gray-400 mt-0.5">{em.description}</p>
+                                <p className="text-xs text-[var(--neu-text-muted)] mt-0.5">{em.description}</p>
                               )}
                             </div>
                           </div>
@@ -427,14 +427,14 @@ export default function EmergencyPage() {
                         </div>
 
                         {/* Agency + source + dispatch info */}
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--neu-text-muted)]">
                           {em.assignedAgency && (
                             <span className="flex items-center gap-1">
-                              🏛️ <strong className="text-blue-400">{em.assignedAgency}</strong>
+                              🏛️ <strong className="text-brand-blue">{em.assignedAgency}</strong>
                             </span>
                           )}
                           {em.source && SOURCE_LABEL[em.source] && (
-                            <span className="rounded-full bg-gray-800 border border-gray-700 px-2 py-0.5">
+                            <span className="rounded-full bg-brand-black border border-black/[0.08] px-2 py-0.5">
                               {SOURCE_LABEL[em.source].icon} {SOURCE_LABEL[em.source].label}
                             </span>
                           )}
@@ -445,7 +445,7 @@ export default function EmergencyPage() {
                             </span>
                           )}
                           {em.agencyNotified ? (
-                            <span className="text-green-400">✓ Agency notified</span>
+                            <span className="text-primary">✓ Agency notified</span>
                           ) : null}
                           <span className="ml-auto">{new Date(em.createdAt).toLocaleString()}</span>
                         </div>
@@ -457,14 +457,14 @@ export default function EmergencyPage() {
                               <button
                                 onClick={() => handleEscalate(em._id)}
                                 disabled={escalating === em._id}
-                                className="flex-1 rounded-lg bg-orange-700 py-1.5 text-xs font-medium text-white hover:bg-orange-600 disabled:opacity-50"
+                                className="flex-1 rounded-lg bg-brand-red700 py-1.5 text-xs font-medium text-white hover:bg-brand-red600 disabled:opacity-50"
                               >
                                 {escalating === em._id ? 'Escalating…' : '📢 Escalate to Agency'}
                               </button>
                             )}
                             <button
                               onClick={() => handleResolve(em._id)}
-                              className="flex-1 rounded-lg bg-gray-700 py-1.5 text-xs font-medium text-gray-200 hover:bg-gray-600"
+                              className="flex-1 rounded-lg bg-brand-black py-1.5 text-xs font-medium text-[var(--neu-text-muted)] hover:bg-brand-surface"
                             >
                               ✓ Resolve
                             </button>
@@ -482,7 +482,7 @@ export default function EmergencyPage() {
                                   loadReplay(em._id);
                                 }
                               }}
-                              className="w-full rounded-lg border border-gray-600 py-1.5 text-xs font-medium text-gray-300 hover:border-blue-500 hover:text-blue-400 transition-colors"
+                              className="w-full rounded-lg border border-black/[0.08] py-1.5 text-xs font-medium text-[var(--neu-text-muted)] hover:border-brand-blue hover:text-brand-blue transition-colors"
                             >
                               {replayLoading[em._id]
                                 ? '⏳ Loading timeline…'
@@ -492,9 +492,9 @@ export default function EmergencyPage() {
                             </button>
 
                             {replayOpen[em._id] && !replayLoading[em._id] && (
-                              <div className="mt-2 rounded-xl border border-gray-700 bg-gray-900 p-3">
+                              <div className="mt-2 rounded-xl border border-black/[0.08] bg-brand-black p-3">
                                 {!replayData[em._id] ? (
-                                  <p className="text-xs text-red-400">Failed to load timeline.</p>
+                                  <p className="text-xs text-brand-red">Failed to load timeline.</p>
                                 ) : (
                                   <>
                                     {/* Summary stats */}
@@ -505,16 +505,16 @@ export default function EmergencyPage() {
                                         { label: 'Chat Messages', value: replayData[em._id]!.summary.chatMessages },
                                         { label: 'System Events', value: replayData[em._id]!.summary.systemEvents },
                                       ].map(({ label, value }) => (
-                                        <div key={label} className="rounded-lg bg-gray-800 p-2 text-center">
-                                          <p className="text-base font-bold text-blue-400">{value}</p>
-                                          <p className="text-[10px] text-gray-500">{label}</p>
+                                        <div key={label} className="rounded-lg bg-brand-black p-2 text-center">
+                                          <p className="text-base font-bold text-brand-blue">{value}</p>
+                                          <p className="text-[10px] text-[var(--neu-text-muted)]">{label}</p>
                                         </div>
                                       ))}
                                     </div>
 
                                     {/* Clock drift warning */}
                                     {replayData[em._id]!.summary.clockDriftFlaggedPings > 0 && (
-                                      <div className="mb-3 rounded-lg bg-yellow-950/40 p-2 text-xs text-yellow-300">
+                                      <div className="mb-3 rounded-lg bg-primary950/40 p-2 text-xs text-primary">
                                         ⚠️ {replayData[em._id]!.summary.clockDriftFlaggedPings} location ping(s) flagged for clock drift — timestamps may be inaccurate.
                                       </div>
                                     )}
@@ -531,26 +531,26 @@ export default function EmergencyPage() {
                                             key={idx}
                                             className={`flex items-start gap-2 rounded-lg px-2 py-1.5 ${
                                               entry.clockDriftFlagged
-                                                ? 'bg-yellow-950/30 border border-yellow-800/40'
-                                                : 'bg-gray-800/60'
+                                                ? 'bg-primary950/30 border border-yellow-800/40'
+                                                : 'bg-brand-black/60'
                                             }`}
                                           >
                                             <span className="shrink-0 text-sm">{icon}</span>
                                             <div className="min-w-0 flex-1">
-                                              <p className="truncate text-xs text-gray-200">
+                                              <p className="truncate text-xs text-[var(--neu-text-muted)]">
                                                 {entry.data?.content
                                                   ?? entry.data?.event
                                                   ?? entry.data?.address
                                                   ?? `${entry.source} · ${entry.type.replace('_', ' ')}`}
                                               </p>
-                                              <p className="text-[10px] text-gray-500">
+                                              <p className="text-[10px] text-[var(--neu-text-muted)]">
                                                 {new Date(entry.timestamp).toLocaleTimeString('en-NG', {
                                                   hour: '2-digit',
                                                   minute: '2-digit',
                                                   second: '2-digit',
                                                 })}
                                                 {entry.clockDriftFlagged && (
-                                                  <span className="ml-1 text-yellow-400">⚠️ drift</span>
+                                                  <span className="ml-1 text-primary400">⚠️ drift</span>
                                                 )}
                                               </p>
                                             </div>

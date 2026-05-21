@@ -126,7 +126,7 @@ export default function VerifyLocationPage() {
 
         {/* ── Top Chrome Bar ── */}
         <div className="grid shrink-0 grid-cols-[1fr_auto] gap-2 rounded-[1.15rem] bg-white/70 p-1.5 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-          <div className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-white shadow-[0_12px_24px_rgba(0,135,81,0.24)]">
+          <div className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-white shadow-[0_12px_24px_rgba(0,111,53,0.24)]">
             <i className="bi bi-broadcast-pin text-lg" aria-hidden />
             <span className="text-[10px] font-black uppercase tracking-widest">Verify Location</span>
           </div>
@@ -152,20 +152,20 @@ export default function VerifyLocationPage() {
                 <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
                 <div className="p-4">
                   <div className="mb-3 flex items-center justify-between gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-[0_10px_20px_rgba(0,135,81,0.3)]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-[0_10px_20px_rgba(0,111,53,0.3)]">
                       <i className="bi bi-pin-map-fill text-sm" aria-hidden />
                     </div>
-                    <div className="rounded-full border border-charcoal/5 bg-[#F8FAFC] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
+                    <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
                       Assigned Area
                     </div>
                   </div>
                   <p className="mb-0.5 text-[9px] font-black uppercase tracking-[0.24em] text-primary">
                     Your neyborhuud
                   </p>
-                  <h2 className="truncate text-xl font-black tracking-tighter text-[#1A1A2E]">
+                  <h2 className="truncate text-xl font-black tracking-tighter text-brand-black">
                     {comm?.name || '…'}
                   </h2>
-                  <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-[#475569]">
+                  <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-[var(--neu-text-secondary)]">
                     <i className="bi bi-shield-check text-brand-blue" aria-hidden />
                     <span className="truncate">GPS check required to verify residency</span>
                   </div>
@@ -181,17 +181,17 @@ export default function VerifyLocationPage() {
 
               {/* Card header */}
               <div className="flex items-center gap-3">
-                <div className="flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)]">
+                <div className="flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
                   <i className="bi bi-crosshair text-xl" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">
                     Almost there
                   </p>
-                  <h1 className="truncate text-[1.3rem] font-black tracking-tighter text-[#1A1A2E]">
+                  <h1 className="truncate text-[1.3rem] font-black tracking-tighter text-brand-black">
                     Confirm your area
                   </h1>
-                  <p className="truncate text-[11px] font-medium text-[#6B7280]">
+                  <p className="truncate text-[11px] font-medium text-[var(--neu-text-muted)]">
                     A quick GPS check anchors your account to your neyborhuud.
                   </p>
                 </div>
@@ -202,9 +202,9 @@ export default function VerifyLocationPage() {
                 <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-brand-blue/10">
                   <i className="bi bi-info-circle text-brand-blue text-sm" aria-hidden />
                 </div>
-                <p className="text-[11px] font-medium leading-relaxed text-[#475569]">
+                <p className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
                   Your device location is compared to a reference point for{' '}
-                  <strong className="text-[#1A1A2E]">{comm?.name || 'your area'}</strong>{' '}
+                  <strong className="text-brand-black">{comm?.name || 'your area'}</strong>{' '}
                   (LGA centroid or map center), within a generous radius. No location data is stored.
                 </p>
               </div>
@@ -213,7 +213,7 @@ export default function VerifyLocationPage() {
               {error && (
                 <div
                   role="alert"
-                  className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-[#991B1B]"
+                  className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-brand-red"
                 >
                   {error}
                 </div>
@@ -237,8 +237,8 @@ export default function VerifyLocationPage() {
                 onClick={() => void handleVerify()}
                 className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${
                   !submitting && communityId
-                    ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] active:scale-[0.98]'
-                    : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'
+                    ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)] active:scale-[0.98]'
+                    : 'border border-charcoal/5 bg-white text-[var(--neu-text-muted)] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'
                 }`}
               >
                 {submitting ? (

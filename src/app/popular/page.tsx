@@ -39,7 +39,7 @@ export default function PopularPage() {
         <main className="flex-1 overflow-y-auto px-4 py-6">
           <div className="mx-auto flex w-full max-w-[920px] flex-col gap-6 pb-24">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-[32px] text-orange-500">local_fire_department</span>
+              <span className="material-symbols-outlined text-[32px] text-brand-red">local_fire_department</span>
               <h1 className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>Trending Nearby</h1>
             </div>
             <p className="text-sm -mt-4" style={{ color: 'var(--neu-text-muted)' }}>
@@ -54,7 +54,7 @@ export default function PopularPage() {
               </div>
             ) : posts.length === 0 ? (
               <div className="flex flex-col items-center gap-4 py-16">
-                <span className="material-symbols-outlined text-[64px] text-gray-300">local_fire_department</span>
+                <span className="material-symbols-outlined text-[64px] text-[var(--neu-text-muted)]">local_fire_department</span>
                 <p className="text-lg font-medium" style={{ color: 'var(--neu-text-muted)' }}>Nothing trending yet</p>
                 <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>Check back soon</p>
               </div>
@@ -63,7 +63,7 @@ export default function PopularPage() {
                 {posts.map((post: any, idx: number) => (
                   <div key={post.id ?? post._id} className="relative">
                     {idx < 3 && (
-                      <div className="absolute -top-2 -left-2 z-10 w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                      <div className="absolute -top-2 -left-2 z-10 w-7 h-7 rounded-full bg-brand-red flex items-center justify-center text-white text-xs font-bold shadow-md">
                         {idx + 1}
                       </div>
                     )}

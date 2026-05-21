@@ -163,40 +163,40 @@ export const INCIDENT_CATEGORY_META: Record<
   IncidentCategory,
   { label: string; icon: string; color: string }
 > = {
-  crime:          { label: "Crime",            icon: "local_police",    color: "text-red-500" },
-  fire:           { label: "Fire",             icon: "local_fire_department", color: "text-orange-500" },
-  flood:          { label: "Flood",            icon: "water",           color: "text-blue-500" },
-  accident:       { label: "Accident",         icon: "car_crash",       color: "text-yellow-500" },
-  public_health:  { label: "Public Health",    icon: "health_and_safety", color: "text-green-500" },
-  infrastructure: { label: "Infrastructure",   icon: "construction",    color: "text-amber-500" },
-  utility:        { label: "Utility Failure",  icon: "power_off",       color: "text-purple-500" },
-  environmental:  { label: "Environmental",    icon: "eco",             color: "text-teal-500" },
-  suspicious:     { label: "Suspicious",       icon: "visibility",      color: "text-indigo-500" },
-  missing_person: { label: "Missing Person",   icon: "person_search",   color: "text-pink-500" },
-  other:          { label: "Other",            icon: "report",          color: "text-gray-500" },
+  crime:          { label: "Crime",            icon: "local_police",    color: "text-brand-red" },
+  fire:           { label: "Fire",             icon: "local_fire_department", color: "text-brand-red" },
+  flood:          { label: "Flood",            icon: "water",           color: "text-brand-blue" },
+  accident:       { label: "Accident",         icon: "car_crash",       color: "text-primary" },
+  public_health:  { label: "Public Health",    icon: "health_and_safety", color: "text-primary" },
+  infrastructure: { label: "Infrastructure",   icon: "construction",    color: "text-primary" },
+  utility:        { label: "Utility Failure",  icon: "power_off",       color: "text-brand-blue" },
+  environmental:  { label: "Environmental",    icon: "eco",             color: "text-brand-green-dark" },
+  suspicious:     { label: "Suspicious",       icon: "visibility",      color: "text-brand-blue500" },
+  missing_person: { label: "Missing Person",   icon: "person_search",   color: "text-brand-blue" },
+  other:          { label: "Other",            icon: "report",          color: "text-[var(--neu-text-muted)]" },
 };
 
 export const INCIDENT_SEVERITY_META: Record<
   IncidentSeverity,
   { label: string; bgClass: string; textClass: string; borderClass: string }
 > = {
-  low:      { label: "Low",      bgClass: "bg-green-100 dark:bg-green-900/30",   textClass: "text-green-700 dark:text-green-400",  borderClass: "border-green-300 dark:border-green-700" },
-  medium:   { label: "Medium",   bgClass: "bg-yellow-100 dark:bg-yellow-900/30", textClass: "text-yellow-700 dark:text-yellow-400", borderClass: "border-yellow-300 dark:border-yellow-700" },
-  high:     { label: "High",     bgClass: "bg-orange-100 dark:bg-orange-900/30", textClass: "text-orange-700 dark:text-orange-400", borderClass: "border-orange-300 dark:border-orange-700" },
-  critical: { label: "Critical", bgClass: "bg-red-100 dark:bg-red-900/30",       textClass: "text-red-700 dark:text-red-400",       borderClass: "border-red-300 dark:border-red-700" },
+  low:      { label: "Low",      bgClass: "bg-green-100 dark:bg-green-900/30",   textClass: "text-green-700 dark:text-primary",  borderClass: "border-green-300 dark:border-green-700" },
+  medium:   { label: "Medium",   bgClass: "bg-primary100 dark:bg-primary900/30", textClass: "text-primary700 dark:text-primary400", borderClass: "border-yellow-300 dark:border-yellow-700" },
+  high:     { label: "High",     bgClass: "bg-brand-red100 dark:bg-brand-red900/30", textClass: "text-brand-red700 dark:text-brand-red", borderClass: "border-orange-300 dark:border-orange-700" },
+  critical: { label: "Critical", bgClass: "bg-red-100 dark:bg-red-900/30",       textClass: "text-red-700 dark:text-brand-red",       borderClass: "border-red-300 dark:border-red-700" },
 };
 
 export const INCIDENT_STATUS_META: Record<
   IncidentStatus,
   { label: string; bgClass: string; textClass: string }
 > = {
-  open:         { label: "Open",         bgClass: "bg-blue-100 dark:bg-blue-900/30",   textClass: "text-blue-700 dark:text-blue-400" },
-  under_review: { label: "Under Review", bgClass: "bg-yellow-100 dark:bg-yellow-900/30", textClass: "text-yellow-700 dark:text-yellow-400" },
-  escalated:    { label: "Escalated",    bgClass: "bg-orange-100 dark:bg-orange-900/30", textClass: "text-orange-700 dark:text-orange-400" },
-  in_progress:  { label: "In Progress",  bgClass: "bg-purple-100 dark:bg-purple-900/30", textClass: "text-purple-700 dark:text-purple-400" },
-  resolved:     { label: "Resolved",     bgClass: "bg-green-100 dark:bg-green-900/30",  textClass: "text-green-700 dark:text-green-400" },
-  closed:       { label: "Closed",       bgClass: "bg-gray-100 dark:bg-gray-800",       textClass: "text-gray-600 dark:text-gray-400" },
-  disputed:     { label: "Disputed",     bgClass: "bg-red-100 dark:bg-red-900/30",      textClass: "text-red-700 dark:text-red-400" },
+  open:         { label: "Open",         bgClass: "bg-blue-100 dark:bg-blue-900/30",   textClass: "text-blue-700 dark:text-brand-blue" },
+  under_review: { label: "Under Review", bgClass: "bg-primary100 dark:bg-primary900/30", textClass: "text-primary700 dark:text-primary400" },
+  escalated:    { label: "Escalated",    bgClass: "bg-brand-red100 dark:bg-brand-red900/30", textClass: "text-brand-red700 dark:text-brand-red" },
+  in_progress:  { label: "In Progress",  bgClass: "bg-purple-100 dark:bg-purple-900/30", textClass: "text-purple-700 dark:text-brand-blue" },
+  resolved:     { label: "Resolved",     bgClass: "bg-green-100 dark:bg-green-900/30",  textClass: "text-green-700 dark:text-primary" },
+  closed:       { label: "Closed",       bgClass: "bg-brand-surface dark:bg-brand-black",       textClass: "text-[var(--neu-text-secondary)] dark:text-[var(--neu-text-muted)]" },
+  disputed:     { label: "Disputed",     bgClass: "bg-red-100 dark:bg-red-900/30",      textClass: "text-red-700 dark:text-brand-red" },
 };
 
 // ── News types ────────────────────────────────────────────────────────────────

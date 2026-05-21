@@ -39,7 +39,7 @@ export default function MarketplacePage() {
               className="h-10 w-10 animate-spin rounded-full border-2 border-primary/30 border-t-[#006F35]"
               aria-hidden
             />
-            <p className="text-sm font-medium text-[#3D5A3E]">Loading marketplace…</p>
+            <p className="text-sm font-medium text-brand-green-dark/70">Loading marketplace…</p>
           </div>
         </div>
       }
@@ -112,11 +112,11 @@ function MarketplacePageInner() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/35 bg-gradient-to-br from-primary/20 to-[#006F35]/15 shadow-[0_0_24px_rgba(0,212,49,0.2)]">
-                      <span className="material-symbols-outlined text-[22px] text-[#006F35] dark:text-emerald-300">storefront</span>
+                      <span className="material-symbols-outlined text-[22px] text-[#006F35] dark:text-primary">storefront</span>
                     </span>
                     <div>
                       <h1 className="text-xl font-bold tracking-tight text-brand-black dark:text-white sm:text-2xl">Marketplace</h1>
-                      <p className="text-[11px] font-medium text-[#3D5A3E] dark:text-white/45 sm:text-xs">Buy & sell near you</p>
+                      <p className="text-[11px] font-medium text-brand-green-dark/70 dark:text-white/45 sm:text-xs">Buy & sell near you</p>
                     </div>
                   </div>
                 </div>
@@ -140,7 +140,7 @@ function MarketplacePageInner() {
                       onClick={() => setSelectedCategory(category)}
                       className={`whitespace-nowrap rounded-full border px-3.5 py-2 text-xs font-semibold transition-all sm:text-[13px] ${
                         active
-                          ? "border-primary/40 bg-primary text-white shadow-[0_4px_16px_rgba(0,212,49,0.3)] dark:border-emerald-400/35 dark:bg-emerald-500/25 dark:text-emerald-100 dark:shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                          ? "border-primary/40 bg-primary text-white shadow-[0_4px_16px_rgba(0,212,49,0.3)] dark:border-primary/35 dark:bg-primary/25 dark:text-emerald-100 dark:shadow-[0_0_20px_rgba(0,212,49,0.2)]"
                           : "border-[var(--border-light)] bg-[var(--surface-light)] text-[#2E502E] hover:border-primary/25 hover:bg-white dark:border-white/10 dark:bg-white/[0.06] dark:text-white/55 dark:hover:border-white/15 dark:hover:bg-white/[0.1] dark:hover:text-white/80"
                       }`}
                     >
@@ -164,9 +164,9 @@ function MarketplacePageInner() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-light)] bg-white/70 px-3 py-1.5 text-[11px] font-semibold text-[#2E502E] shadow-[0_2px_12px_rgba(0,111,53,0.06)] backdrop-blur-md transition-colors hover:border-primary/30 hover:text-[#006F35] dark:border-white/10 dark:bg-white/[0.05] dark:text-white/70 dark:hover:border-emerald-400/20 dark:hover:text-emerald-200"
+                  className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-light)] bg-white/70 px-3 py-1.5 text-[11px] font-semibold text-[#2E502E] shadow-[0_2px_12px_rgba(0,111,53,0.06)] backdrop-blur-md transition-colors hover:border-primary/30 hover:text-[#006F35] dark:border-white/10 dark:bg-white/[0.05] dark:text-white/70 dark:hover:border-primary/20 dark:hover:text-white/90"
                 >
-                  <span className="material-symbols-outlined text-[15px] text-[#006F35] dark:text-emerald-400/80">{l.icon}</span>
+                  <span className="material-symbols-outlined text-[15px] text-[#006F35] dark:text-primary/80">{l.icon}</span>
                   {l.label}
                 </Link>
               ))}
@@ -182,7 +182,7 @@ function MarketplacePageInner() {
                     <div className="aspect-[4/5] bg-[var(--surface-light)] dark:bg-white/10" />
                     <div className="space-y-2 p-3">
                       <div className="h-3 rounded bg-[var(--surface-light)] dark:bg-white/10" />
-                      <div className="h-4 w-2/3 rounded bg-primary/20 dark:bg-emerald-500/20" />
+                      <div className="h-4 w-2/3 rounded bg-primary/20 dark:bg-primary/20" />
                     </div>
                   </div>
                 ))}
@@ -190,8 +190,8 @@ function MarketplacePageInner() {
             )}
 
             {error && (
-              <div className="rounded-2xl border border-[var(--border-light)] bg-white/90 px-4 py-10 text-center dark:border-red-500/25 dark:bg-red-500/10">
-                <p className="mb-4 text-red-600 dark:text-red-200">Failed to load products</p>
+              <div className="rounded-2xl border border-[var(--border-light)] bg-white/90 px-4 py-10 text-center dark:border-brand-red/25 dark:bg-brand-red/10">
+                <p className="mb-4 text-red-600 dark:text-brand-red">Failed to load products</p>
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
@@ -230,7 +230,7 @@ function MarketplacePageInner() {
                       type="button"
                       onClick={() => fetchNextPage()}
                       disabled={isFetchingNextPage}
-                      className="rounded-full border border-[var(--border-light)] bg-white/80 px-8 py-3 text-sm font-semibold text-brand-black shadow-sm backdrop-blur-xl transition-all hover:border-primary/30 hover:bg-white disabled:opacity-40 dark:border-white/12 dark:bg-white/[0.07] dark:text-white/90 dark:hover:border-emerald-400/25 dark:hover:bg-emerald-500/10"
+                      className="rounded-full border border-[var(--border-light)] bg-white/80 px-8 py-3 text-sm font-semibold text-brand-black shadow-sm backdrop-blur-xl transition-all hover:border-primary/30 hover:bg-white disabled:opacity-40 dark:border-white/12 dark:bg-white/[0.07] dark:text-white/90 dark:hover:border-primary/25 dark:hover:bg-primary/10"
                     >
                       {isFetchingNextPage ? "Loading…" : "Load more"}
                     </button>
@@ -241,9 +241,9 @@ function MarketplacePageInner() {
 
             {!isLoading && !error && products.length === 0 && (
               <div className="rounded-3xl border border-[var(--border-light)] bg-white/85 px-6 py-16 text-center shadow-[0_8px_32px_rgba(0,111,53,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
-                <span className="material-symbols-outlined text-5xl text-[#3D5A3E]/35 dark:text-white/25">shopping_bag</span>
+                <span className="material-symbols-outlined text-5xl text-brand-green-dark/70/35 dark:text-white/25">shopping_bag</span>
                 <h3 className="mt-4 text-lg font-semibold text-brand-black dark:text-white/80">No products found</h3>
-                <p className="mt-2 text-sm text-[#3D5A3E] dark:text-white/45">
+                <p className="mt-2 text-sm text-brand-green-dark/70 dark:text-white/45">
                   {selectedCategory !== "All" ? `Nothing in ${selectedCategory} yet.` : "Be the first to list something nearby."}
                 </p>
                 <Link

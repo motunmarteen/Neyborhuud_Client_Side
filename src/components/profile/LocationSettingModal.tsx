@@ -128,7 +128,7 @@ export function LocationSettingModal({ isOpen, onClose, currentLocation }: Locat
           </h2>
           <button
             onClick={onClose}
-            className="neu-btn-circle p-2"
+            className="btn-ghost-circle p-2"
             disabled={isLoading}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
@@ -155,7 +155,7 @@ export function LocationSettingModal({ isOpen, onClose, currentLocation }: Locat
         <button
           onClick={handleGetCurrentLocation}
           disabled={isLoading}
-          className="w-full neu-btn rounded-2xl p-4 mb-6 flex items-center justify-center gap-2 font-semibold text-primary transition-colors hover:bg-primary/5"
+          className="w-full btn-ghost rounded-2xl p-4 mb-6 flex items-center justify-center gap-2 font-semibold text-primary transition-colors hover:bg-primary/5"
         >
           <span className="material-symbols-outlined">my_location</span>
           {isLoading && useGPS ? 'Getting Location...' : 'Use Current Location (GPS)'}
@@ -258,7 +258,7 @@ export function LocationSettingModal({ isOpen, onClose, currentLocation }: Locat
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="flex-1 neu-btn rounded-2xl px-6 py-3 font-semibold transition-colors"
+            className="flex-1 mod-chip rounded-2xl px-6 py-3 font-semibold transition-colors"
             style={{ color: 'var(--neu-text-muted)' }}
           >
             Cancel
@@ -266,7 +266,7 @@ export function LocationSettingModal({ isOpen, onClose, currentLocation }: Locat
           <button
             onClick={handleSave}
             disabled={isLoading || !latitude || !longitude}
-            className="flex-1 neu-btn-raised rounded-2xl px-6 py-3 font-semibold text-white transition-all disabled:opacity-50"
+            className="flex-1 mod-chip-raised rounded-2xl px-6 py-3 font-semibold text-white transition-all disabled:opacity-50"
             style={{ background: 'var(--primary)' }}
           >
             {isLoading ? 'Saving...' : 'Save Location'}

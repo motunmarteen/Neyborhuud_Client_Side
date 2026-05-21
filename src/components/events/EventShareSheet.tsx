@@ -35,7 +35,7 @@ function ShareActionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="neu-btn flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold transition-all disabled:opacity-50 active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+      className="mod-chip flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold transition-all disabled:opacity-50 active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
       style={{ color: "var(--neu-text)" }}
     >
       <span
@@ -79,7 +79,7 @@ function PlatformChips({
             const url = platforms[key];
             if (url) onOpen(url, payload);
           }}
-          className="neu-btn rounded-full px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
+          className="mod-chip rounded-full px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
           style={{ color: "var(--neu-text)" }}
         >
           {label}
@@ -193,7 +193,7 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl neu-btn transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl mod-chip transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
             aria-label="Close"
           >
             <span className="material-symbols-outlined text-xl" style={{ color: "var(--neu-text-muted)" }}>
@@ -212,14 +212,14 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
           </div>
         ) : isError ? (
           <div className="space-y-4 py-4 text-center">
-            <p className="text-sm font-medium text-red-600 dark:text-red-400">
+            <p className="text-sm font-medium text-red-600 dark:text-brand-red">
               Something went wrong while loading share data.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="neu-btn rounded-xl px-4 py-2 text-sm font-semibold text-primary transition-all"
+                className="mod-chip rounded-xl px-4 py-2 text-sm font-semibold text-primary transition-all"
               >
                 Retry
               </button>
@@ -236,7 +236,7 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
         ) : share ? (
           <>
             {share.clientFallback ? (
-              <p className="mb-3 rounded-xl border border-amber-400/35 bg-amber-500/[0.12] px-3 py-2 text-xs leading-relaxed text-amber-950 dark:text-amber-100">
+              <p className="mb-3 rounded-xl border border-primary/35 bg-primary/[0.12] px-3 py-2 text-xs leading-relaxed text-amber-950 dark:text-amber-100">
                 Share service is unavailable (404/503). Showing links built from this page until the API is ready.
               </p>
             ) : null}

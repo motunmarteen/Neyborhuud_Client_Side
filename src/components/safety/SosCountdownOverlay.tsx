@@ -38,12 +38,12 @@ export default function SosCountdownOverlay({
     >
       <div className="relative flex h-56 w-56 items-center justify-center">
         <span className="absolute inset-0 rounded-full bg-red-600/30 animate-ping" />
-        <span className="absolute inset-2 rounded-full border-4 border-red-500/70" />
+        <span className="absolute inset-2 rounded-full border-4 border-brand-red/70" />
         <div className="relative flex flex-col items-center">
-          <span className="text-7xl font-black tabular-nums text-red-400 drop-shadow">
+          <span className="text-7xl font-black tabular-nums text-brand-red drop-shadow">
             {secondsRemaining}
           </span>
-          <span className="mt-1 text-xs uppercase tracking-widest text-red-200/80">
+          <span className="mt-1 text-xs uppercase tracking-widest text-brand-red/80">
             seconds
           </span>
         </div>
@@ -55,7 +55,7 @@ export default function SosCountdownOverlay({
       >
         SOS arming…
       </h2>
-      <p className="mt-2 max-w-sm text-center text-sm text-gray-300">
+      <p className="mt-2 max-w-sm text-center text-sm text-[var(--neu-text-muted)]">
         Guardians and emergency services will be alerted when the countdown ends.
         Tap Cancel if this was a mistake.
       </p>
@@ -69,7 +69,7 @@ export default function SosCountdownOverlay({
         {cancelling ? "Cancelling…" : "Cancel SOS"}
       </button>
 
-      <p className="mt-4 text-xs text-gray-500">
+      <p className="mt-4 text-xs text-[var(--neu-text-muted)]">
         No alerts have been sent yet.
       </p>
     </div>

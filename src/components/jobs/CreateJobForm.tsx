@@ -288,7 +288,7 @@ export default function CreateJobForm() {
               <button
                 type="button"
                 onClick={() => removeFromList(skills, setSkills, idx)}
-                className="p-2 rounded-xl mod-btn shrink-0"
+                className="p-2 rounded-xl mod-chip shrink-0"
                 style={{ color: "var(--brand-red)" }}
               >
                 <span className="material-symbols-outlined text-[18px]">remove</span>
@@ -327,7 +327,7 @@ export default function CreateJobForm() {
               <button
                 type="button"
                 onClick={() => removeFromList(requirements, setRequirements, idx)}
-                className="p-2 rounded-xl mod-btn shrink-0"
+                className="p-2 rounded-xl mod-chip shrink-0"
                 style={{ color: "var(--brand-red)" }}
               >
                 <span className="material-symbols-outlined text-[18px]">remove</span>
@@ -367,7 +367,7 @@ export default function CreateJobForm() {
       <button
         type="submit"
         disabled={createJob.isPending}
-        className="w-full py-4 rounded-2xl font-bold text-base transition-all mod-btn-active text-primary disabled:opacity-60"
+        className="w-full py-4 rounded-2xl font-bold text-base transition-all mod-chip mod-chip-active text-primary disabled:opacity-60"
       >
         {createJob.isPending ? (
           <span className="flex items-center justify-center gap-2">

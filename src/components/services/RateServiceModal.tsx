@@ -41,7 +41,7 @@ export default function RateServiceModal({ serviceId, serviceTitle, onClose }: P
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full mod-btn transition-all"
+            className="p-2 rounded-full mod-chip transition-all"
             style={{ color: "var(--neu-text-muted)" }}
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
@@ -76,7 +76,7 @@ export default function RateServiceModal({ serviceId, serviceTitle, onClose }: P
           <button
             type="submit"
             disabled={rateService.isPending || rating === 0}
-            className="w-full py-3.5 mod-btn-active text-primary disabled:opacity-50 rounded-xl font-bold transition-all"
+            className="w-full py-3.5 mod-chip mod-chip-active text-primary disabled:opacity-50 rounded-xl font-bold transition-all"
           >
             {rateService.isPending ? "Submitting…" : "Submit Review"}
           </button>

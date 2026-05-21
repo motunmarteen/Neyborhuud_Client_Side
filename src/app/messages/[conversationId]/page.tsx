@@ -135,37 +135,37 @@ function KeyBundlePanel({ conversationId, onClose }: KeyBundlePanelProps) {
   };
 
   return (
-    <div className="shrink-0 border-b border-gray-700 bg-gray-900 p-4">
+    <div className="shrink-0 border-b border-black/[0.08] bg-brand-black p-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-gray-200">🔐 Encryption Keys</p>
-        <button onClick={onClose} className="text-xs text-gray-400 hover:text-gray-200">
+        <p className="text-sm font-semibold text-[var(--neu-text-muted)]">🔐 Encryption Keys</p>
+        <button onClick={onClose} className="text-xs text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)]">
           Close
         </button>
       </div>
 
       {loading ? (
-        <p className="mt-2 text-xs text-gray-500">Loading key bundle…</p>
+        <p className="mt-2 text-xs text-[var(--neu-text-muted)]">Loading key bundle…</p>
       ) : !bundle ? (
-        <p className="mt-2 text-xs text-red-400">Failed to load keys.</p>
+        <p className="mt-2 text-xs text-brand-red">Failed to load keys.</p>
       ) : (
         <div className="mt-2 flex flex-col gap-3">
           {bundle.missingKeys.length > 0 && (
-            <div className="rounded-lg bg-yellow-950/40 p-2 text-xs text-yellow-300">
+            <div className="rounded-lg bg-primary950/40 p-2 text-xs text-primary">
               ⚠️ {bundle.missingKeys.length} participant(s) have not registered an encryption key.
               Messages may not be end-to-end encrypted.
             </div>
           )}
           {Object.entries(bundle.bundle).map(([uid, info]) => (
-            <div key={uid} className="rounded-lg border border-gray-700 bg-gray-800 p-3">
-              <p className="text-xs text-gray-400">User: <span className="font-mono text-gray-200">{uid}</span></p>
-              <p className="mt-1 break-all font-mono text-[10px] text-green-400">
+            <div key={uid} className="rounded-lg border border-black/[0.08] bg-brand-black p-3">
+              <p className="text-xs text-[var(--neu-text-muted)]">User: <span className="font-mono text-[var(--neu-text-muted)]">{uid}</span></p>
+              <p className="mt-1 break-all font-mono text-[10px] text-primary">
                 {info.publicKey.slice(0, 40)}…
               </p>
               <div className="mt-2 flex gap-2">
                 <input
                   type="text"
                   placeholder="Paste fingerprint to verify…"
-                  className="flex-1 rounded bg-gray-700 px-2 py-1 text-[10px] text-gray-200 placeholder-gray-500"
+                  className="flex-1 rounded bg-brand-black px-2 py-1 text-[10px] text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)]"
                   value={fingerprints[uid] ?? ''}
                   onChange={(e) =>
                     setFingerprints((prev) => ({ ...prev, [uid]: e.target.value.trim() }))
@@ -174,7 +174,7 @@ function KeyBundlePanel({ conversationId, onClose }: KeyBundlePanelProps) {
                 <button
                   disabled={verifying === uid}
                   onClick={() => handleVerify(uid)}
-                  className="rounded bg-blue-600 px-2 py-1 text-[10px] font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+                  className="rounded bg-blue-600 px-2 py-1 text-[10px] font-medium text-white hover:bg-brand-blue disabled:opacity-50"
                 >
                   {verifying === uid ? '…' : 'Verify'}
                 </button>
@@ -297,7 +297,7 @@ function OfferActionBar({
   return (
     <div className="shrink-0 border-b border-amber-900/40 bg-amber-950/20 px-4 py-3">
       <div className="flex items-center justify-between gap-3 mb-2">
-        <p className="text-xs font-semibold text-amber-200">
+        <p className="text-xs font-semibold text-white/90">
           You received an offer of {formatNGN(offer.offerAmount)} from {buyerName}.
           {offer.counterOfferAmount != null && (
             <span className="ml-2 text-purple-300">
@@ -308,7 +308,7 @@ function OfferActionBar({
         {pendingCount > 1 && (
           <button
             onClick={() => router.push(`/marketplace/${productId}/offers`)}
-            className="shrink-0 rounded-full bg-amber-800/40 px-2 py-0.5 text-[10px] font-semibold text-amber-200 hover:bg-amber-800/60 transition-colors"
+            className="shrink-0 rounded-full bg-amber-800/40 px-2 py-0.5 text-[10px] font-semibold text-white/90 hover:bg-amber-800/60 transition-colors"
           >
             +{pendingCount - 1} more
           </button>
@@ -320,7 +320,7 @@ function OfferActionBar({
           <button
             onClick={handleAccept}
             disabled={accept.isPending || reject.isPending}
-            className="flex-1 rounded-full bg-green-700 py-1.5 text-xs font-semibold text-white hover:bg-green-600 disabled:opacity-50 transition-colors"
+            className="flex-1 rounded-full bg-green-700 py-1.5 text-xs font-semibold text-white hover:bg-brand-green-dark disabled:opacity-50 transition-colors"
           >
             {accept.isPending ? '…' : 'Accept'}
           </button>
@@ -341,7 +341,7 @@ function OfferActionBar({
       ) : (
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">₦</span>
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[var(--neu-text-muted)]">₦</span>
             <input
               type="number"
               value={counterAmount}
@@ -349,12 +349,12 @@ function OfferActionBar({
               placeholder="Counter amount"
               min="0"
               step="1000"
-              className="w-full rounded-lg border border-gray-600 bg-gray-800 py-1.5 pl-5 pr-2 text-xs text-white focus:border-purple-500 focus:outline-none"
+              className="w-full rounded-lg border border-black/[0.08] bg-brand-black py-1.5 pl-5 pr-2 text-xs text-white focus:border-brand-blue focus:outline-none"
             />
           </div>
           <button
             onClick={() => { setShowCounter(false); setCounterAmount(''); }}
-            className="rounded-full bg-gray-700 px-3 py-1.5 text-xs font-semibold hover:bg-gray-600 transition-colors"
+            className="rounded-full bg-brand-black px-3 py-1.5 text-xs font-semibold hover:bg-brand-surface transition-colors"
           >
             ✕
           </button>
@@ -783,23 +783,23 @@ export default function ConversationPage() {
             className={`flex shrink-0 items-center justify-between border-b px-4 py-3 ${
               isIncident
                 ? 'border-red-800/60 bg-red-950/20'
-                : 'border-gray-700 bg-gray-900'
+                : 'border-black/[0.08] bg-brand-black'
             }`}
           >
             <div className="flex items-center gap-3">
               <button
                 onClick={() => router.push('/messages')}
-                className="text-gray-400 hover:text-gray-200"
+                className="text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)]"
                 aria-label="Back"
               >
                 ←
               </button>
               <div>
-                <p className={`font-semibold ${isIncident ? 'text-red-200' : 'text-gray-100'}`}>
+                <p className={`font-semibold ${isIncident ? 'text-brand-red' : 'text-[var(--neu-text-muted)]'}`}>
                   {displayName}
                 </p>
                 {conv && (
-                  <p className="text-xs capitalize text-gray-500">{convSubtitle(conv)}</p>
+                  <p className="text-xs capitalize text-[var(--neu-text-muted)]">{convSubtitle(conv)}</p>
                 )}
               </div>
             </div>
@@ -807,7 +807,7 @@ export default function ConversationPage() {
             <button
               onClick={() => setShowKeyPanel((s) => !s)}
               className={`rounded-full p-1.5 text-lg transition-colors ${
-                showKeyPanel ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-200'
+                showKeyPanel ? 'bg-blue-600 text-white' : 'text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)]'
               }`}
               title="Encryption keys"
             >
@@ -830,10 +830,10 @@ export default function ConversationPage() {
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-blue-200">
+                <p className="truncate text-xs font-semibold text-brand-blue">
                   🛍️ Marketplace
                 </p>
-                <p className="truncate text-sm font-medium text-gray-100">
+                <p className="truncate text-sm font-medium text-[var(--neu-text-muted)]">
                   {conv.context.productTitle ?? 'Product'}
                 </p>
               </div>
@@ -845,7 +845,7 @@ export default function ConversationPage() {
               {conv.context.productId && (
                 <Link
                   href={`/marketplace?product=${encodeURIComponent(String(conv.context.productId))}`}
-                  className="shrink-0 rounded-full border border-blue-500/60 px-3 py-1 text-xs font-medium text-blue-200 hover:bg-blue-900/40"
+                  className="shrink-0 rounded-full border border-brand-blue/60 px-3 py-1 text-xs font-medium text-brand-blue hover:bg-blue-900/40"
                 >
                   View
                 </Link>
@@ -879,7 +879,7 @@ export default function ConversationPage() {
                 {[...Array(8)].map((_, i) => (
                   <div
                     key={i}
-                    className={`h-10 w-2/3 animate-pulse rounded-2xl bg-gray-800 ${
+                    className={`h-10 w-2/3 animate-pulse rounded-2xl bg-brand-black ${
                       i % 2 === 0 ? 'self-start' : 'self-end'
                     }`}
                   />
@@ -887,7 +887,7 @@ export default function ConversationPage() {
               </div>
             ) : messages.length === 0 ? (
               <div className="flex h-full items-center justify-center">
-                <p className="text-sm text-gray-500">No messages yet. Say hello 👋</p>
+                <p className="text-sm text-[var(--neu-text-muted)]">No messages yet. Say hello 👋</p>
               </div>
             ) : (
               <div className="flex flex-col gap-1">
@@ -895,11 +895,11 @@ export default function ConversationPage() {
                   <div key={date}>
                     {/* Date divider */}
                     <div className="my-4 flex items-center gap-3">
-                      <div className="h-px flex-1 bg-gray-700" />
-                      <span className="rounded-full bg-gray-800 px-3 py-0.5 text-[11px] text-gray-400">
+                      <div className="h-px flex-1 bg-brand-black" />
+                      <span className="rounded-full bg-brand-black px-3 py-0.5 text-[11px] text-[var(--neu-text-muted)]">
                         {date}
                       </span>
-                      <div className="h-px flex-1 bg-gray-700" />
+                      <div className="h-px flex-1 bg-brand-black" />
                     </div>
 
                     {msgs.map((msg, msgIdx) => {
@@ -931,7 +931,7 @@ export default function ConversationPage() {
                             : null;
                         const parsed = structuredEvent ?? parseLegacyOfferMessage(c);
                         let display = c;
-                        let pillClass = 'bg-blue-900/40 text-blue-200';
+                        let pillClass = 'bg-blue-900/40 text-brand-blue';
 
                         if (parsed) {
                           pillClass = getOfferPillClass(parsed.action);
@@ -975,12 +975,12 @@ export default function ConversationPage() {
           </div>
 
           {/* Input */}
-          <div className="shrink-0 border-t border-gray-700 bg-gray-900 px-4 py-3">
+          <div className="shrink-0 border-t border-black/[0.08] bg-brand-black px-4 py-3">
             {/* Upload progress bar */}
             {uploadProgress !== null && (
-              <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-700">
+              <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-brand-black">
                 <div
-                  className="h-full rounded-full bg-blue-500 transition-all"
+                  className="h-full rounded-full bg-brand-blue transition-all"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -1002,12 +1002,12 @@ export default function ConversationPage() {
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
-                  className="max-h-[200px] w-full resize-none rounded-xl border border-gray-600 bg-gray-800 px-4 py-2.5 text-sm text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                  className="max-h-[200px] w-full resize-none rounded-xl border border-black/[0.08] bg-brand-black px-4 py-2.5 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:border-brand-blue focus:outline-none"
                 />
                 {inputText.length > 8000 && (
                   <span
                     className={`absolute bottom-2 right-3 text-[10px] ${
-                      inputText.length >= 10000 ? 'text-red-400' : 'text-orange-400'
+                      inputText.length >= 10000 ? 'text-brand-red' : 'text-brand-red'
                     }`}
                   >
                     {10000 - inputText.length} left
@@ -1017,7 +1017,7 @@ export default function ConversationPage() {
               <button
                 onClick={handleSend}
                 disabled={!inputText.trim() || sending}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-blue-500 disabled:opacity-50"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-brand-blue disabled:opacity-50"
                 aria-label="Send message"
               >
                 {sending ? (

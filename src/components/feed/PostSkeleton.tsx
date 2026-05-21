@@ -7,7 +7,7 @@ export function PostSkeleton() {
     return (
         <div className="relative mx-auto h-[90vh] w-full overflow-hidden rounded-none border-y border-white/10 bg-[#030a0b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.45)] animate-pulse sm:max-w-[480px] sm:rounded-[32px] sm:border">
             <div className="absolute inset-0">
-                <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl" />
+                <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
                 <div className="absolute -right-24 top-1/3 h-80 w-80 rounded-full bg-teal-300/10 blur-3xl" />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/85" />
             </div>

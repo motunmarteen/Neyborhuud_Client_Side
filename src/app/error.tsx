@@ -22,7 +22,7 @@ export default function GlobalError({ error, reset }: ErrorPageProps) {
       <div className="flex flex-col items-center gap-6 max-w-sm text-center">
         {/* Icon */}
         <div className="w-20 h-20 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-          <span className="material-symbols-outlined text-[42px] text-red-500">error</span>
+          <span className="material-symbols-outlined text-[42px] text-brand-red">error</span>
         </div>
 
         {/* Copy */}
@@ -32,7 +32,7 @@ export default function GlobalError({ error, reset }: ErrorPageProps) {
             We hit an unexpected error. This has been noted and we&apos;re looking into it.
           </p>
           {error.digest && (
-            <p className="text-[11px] font-mono text-gray-400 mt-1">
+            <p className="text-[11px] font-mono text-[var(--neu-text-muted)] mt-1">
               Error ID: {error.digest}
             </p>
           )}

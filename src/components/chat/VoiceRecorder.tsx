@@ -30,7 +30,7 @@ function Waveform() {
         <div
           key={i}
           style={{ animationDelay: `${(i * 60) % 400}ms`, height: `${height}%` }}
-          className="w-1 rounded-full bg-red-400 animate-bounce"
+          className="w-1 rounded-full bg-brand-red animate-bounce"
         />
       ))}
     </div>
@@ -150,24 +150,24 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60" onClick={state === 'recording' ? undefined : onClose} />
 
-      <div className="relative z-10 w-full max-w-sm rounded-t-2xl bg-gray-900 p-6 shadow-2xl sm:rounded-2xl">
+      <div className="relative z-10 w-full max-w-sm rounded-t-2xl bg-brand-black p-6 shadow-2xl sm:rounded-2xl">
         {/* Header */}
         <div className="mb-5 flex items-center justify-between">
-          <p className="font-semibold text-gray-100">
+          <p className="font-semibold text-[var(--neu-text-muted)]">
             {state === 'idle' ? '🎤 Record Voice Note' : state === 'recording' ? '🔴 Recording…' : '🎤 Preview'}
           </p>
           {state !== 'recording' && (
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-100 text-xl leading-none">×</button>
+            <button onClick={onClose} className="text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)] text-xl leading-none">×</button>
           )}
         </div>
 
         {/* Idle */}
         {state === 'idle' && (
           <div className="flex flex-col items-center gap-4 py-4">
-            <p className="text-sm text-gray-400 text-center">Tap the mic to start recording. Max 60 seconds.</p>
+            <p className="text-sm text-[var(--neu-text-muted)] text-center">Tap the mic to start recording. Max 60 seconds.</p>
             <button
               onClick={startRecording}
-              className="flex h-20 w-20 items-center justify-center rounded-full bg-red-600 text-4xl shadow-lg hover:bg-red-500 active:scale-95 transition-all"
+              className="flex h-20 w-20 items-center justify-center rounded-full bg-red-600 text-4xl shadow-lg hover:bg-brand-red active:scale-95 transition-all"
             >
               🎤
             </button>
@@ -186,13 +186,13 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
                     animationDelay: `${(i * 83) % 600}ms`,
                     height: `${25 + ((i * 37) % 75)}%`,
                   }}
-                  className="w-1 flex-shrink-0 rounded-full bg-red-400 animate-pulse"
+                  className="w-1 flex-shrink-0 rounded-full bg-brand-red animate-pulse"
                 />
               ))}
             </div>
 
             <p className="text-2xl font-mono font-bold text-white tabular-nums">{fmt(elapsed)}</p>
-            <p className="text-xs text-gray-500">Max 1 min · tap to stop</p>
+            <p className="text-xs text-[var(--neu-text-muted)]">Max 1 min · tap to stop</p>
 
             <button
               onClick={stopRecording}
@@ -207,18 +207,18 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
         {state === 'preview' && audioUrl && (
           <div className="flex flex-col gap-4">
             <audio controls src={audioUrl} className="w-full rounded-xl" />
-            <p className="text-center text-sm text-gray-400">Duration: {fmt(elapsed)}</p>
+            <p className="text-center text-sm text-[var(--neu-text-muted)]">Duration: {fmt(elapsed)}</p>
 
             <div className="flex gap-3">
               <button
                 onClick={discard}
-                className="flex-1 rounded-xl bg-gray-700 py-3 text-sm font-medium text-gray-200 hover:bg-gray-600 transition-colors"
+                className="flex-1 rounded-xl bg-brand-black py-3 text-sm font-medium text-[var(--neu-text-muted)] hover:bg-brand-surface transition-colors"
               >
                 Delete
               </button>
               <button
                 onClick={handleSend}
-                className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-500 transition-colors"
+                className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-brand-blue transition-colors"
               >
                 Send
               </button>

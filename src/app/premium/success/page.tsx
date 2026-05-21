@@ -29,12 +29,12 @@ function SuccessInner() {
 
   if (!reference) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f0f1e] text-white px-4">
+      <div className="min-h-screen flex items-center justify-center bg-brand-black text-white px-4">
         <div className="text-center">
-          <p className="text-gray-400 mb-6">No transaction reference found.</p>
+          <p className="text-[var(--neu-text-muted)] mb-6">No transaction reference found.</p>
           <Link
             href="/gamification/wallet"
-            className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-sm transition-colors"
+            className="px-6 py-3 bg-brand-black hover:bg-brand-surface rounded-xl text-sm transition-colors"
           >
             View Wallet
           </Link>
@@ -44,46 +44,46 @@ function SuccessInner() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0f0f1e] text-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-brand-black text-white px-4">
       <div className="w-full max-w-sm text-center">
 
         {/* Loading */}
         {isLoading && (
           <>
-            <div className="w-16 h-16 border-4 border-gray-700 border-t-amber-400 rounded-full animate-spin mx-auto mb-6" />
+            <div className="w-16 h-16 border-4 border-black/[0.08] border-t-primary rounded-full animate-spin mx-auto mb-6" />
             <h1 className="text-xl font-bold mb-2">Confirming Transaction</h1>
-            <p className="text-gray-400 text-sm">Just a moment…</p>
+            <p className="text-[var(--neu-text-muted)] text-sm">Just a moment…</p>
           </>
         )}
 
         {/* Success */}
         {!isLoading && isSuccess && (
           <>
-            <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
               <span className="text-5xl">🪙</span>
             </div>
-            <h1 className="text-2xl font-bold mb-2 text-amber-400">
+            <h1 className="text-2xl font-bold mb-2 text-primary">
               HuudCoins Spent!
             </h1>
             {payment?.coinsSpent && (
-              <p className="text-gray-300 text-base font-semibold mb-1">
+              <p className="text-[var(--neu-text-muted)] text-base font-semibold mb-1">
                 {payment.coinsSpent} HuudCoins deducted
               </p>
             )}
             {payment?.description && (
-              <p className="text-gray-400 text-sm mb-6">{payment.description}</p>
+              <p className="text-[var(--neu-text-muted)] text-sm mb-6">{payment.description}</p>
             )}
-            <p className="text-gray-500 text-xs mb-8 font-mono">{reference}</p>
+            <p className="text-[var(--neu-text-muted)] text-xs mb-8 font-mono">{reference}</p>
             <div className="flex gap-3 justify-center">
               <Link
                 href="/gamification/wallet"
-                className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-sm transition-colors"
+                className="px-5 py-2.5 bg-brand-black hover:bg-brand-surface rounded-xl text-sm transition-colors"
               >
                 View Wallet
               </Link>
               <Link
                 href="/feed"
-                className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-sm font-bold transition-colors"
+                className="px-5 py-2.5 bg-primary hover:bg-primary text-black rounded-xl text-sm font-bold transition-colors"
               >
                 Go to Feed
               </Link>
@@ -94,15 +94,15 @@ function SuccessInner() {
         {/* Failure / error */}
         {!isLoading && !isSuccess && (
           <>
-            <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-6">
-              <span className="material-symbols-outlined text-red-400 text-5xl">
+            <div className="w-20 h-20 rounded-full bg-brand-red/20 flex items-center justify-center mx-auto mb-6">
+              <span className="material-symbols-outlined text-brand-red text-5xl">
                 cancel
               </span>
             </div>
-            <h1 className="text-2xl font-bold mb-2 text-red-400">
+            <h1 className="text-2xl font-bold mb-2 text-brand-red">
               {isError ? "Transaction Not Found" : "Transaction Failed"}
             </h1>
-            <p className="text-gray-400 text-sm mb-8">
+            <p className="text-[var(--neu-text-muted)] text-sm mb-8">
               {isError
                 ? "We could not find this transaction. If coins were deducted, contact support."
                 : "The transaction did not complete. Your coins have not been deducted."}
@@ -110,13 +110,13 @@ function SuccessInner() {
             <div className="flex gap-3 justify-center">
               <Link
                 href="/gamification/wallet"
-                className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-sm transition-colors"
+                className="px-5 py-2.5 bg-brand-black hover:bg-brand-surface rounded-xl text-sm transition-colors"
               >
                 View Wallet
               </Link>
               <a
                 href="mailto:support@neyborhuud.com"
-                className="px-5 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-xl text-sm transition-colors"
+                className="px-5 py-2.5 bg-brand-red/20 hover:bg-brand-red/30 text-brand-red rounded-xl text-sm transition-colors"
               >
                 Contact Support
               </a>
@@ -132,8 +132,8 @@ export default function PaymentSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#0f0f1e]">
-          <div className="w-16 h-16 border-4 border-gray-700 border-t-amber-400 rounded-full animate-spin" />
+        <div className="min-h-screen flex items-center justify-center bg-brand-black">
+          <div className="w-16 h-16 border-4 border-black/[0.08] border-t-primary rounded-full animate-spin" />
         </div>
       }
     >

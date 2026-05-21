@@ -27,37 +27,37 @@ const STATUS_META: Record<
 > = {
   pending: {
     label: "Pending",
-    color: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+    color: "bg-primary/15 text-amber-300 border-amber-500/30",
     ring: "ring-amber-500/30",
     icon: "schedule",
   },
   accepted: {
     label: "Accepted",
-    color: "bg-green-500/15 text-green-300 border-green-500/30",
-    ring: "ring-green-500/30",
+    color: "bg-primary/15 text-primary border-primary/30",
+    ring: "ring-primary/30",
     icon: "check_circle",
   },
   rejected: {
     label: "Declined",
-    color: "bg-red-500/15 text-red-300 border-red-500/30",
-    ring: "ring-red-500/30",
+    color: "bg-brand-red/15 text-brand-red border-brand-red/30",
+    ring: "ring-brand-red/30",
     icon: "cancel",
   },
   countered: {
     label: "Countered",
-    color: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+    color: "bg-brand-blue/15 text-purple-300 border-purple-500/30",
     ring: "ring-purple-500/30",
     icon: "swap_horiz",
   },
   expired: {
     label: "Expired",
-    color: "bg-gray-500/15 text-gray-300 border-gray-500/30",
+    color: "bg-brand-surface/15 text-[var(--neu-text-muted)] border-black/[0.08]/30",
     ring: "ring-gray-500/30",
     icon: "timer_off",
   },
   cancelled: {
     label: "Cancelled",
-    color: "bg-gray-600/15 text-gray-400 border-gray-600/30",
+    color: "bg-brand-surface/15 text-[var(--neu-text-muted)] border-black/[0.08]/30",
     ring: "ring-gray-600/30",
     icon: "block",
   },
@@ -168,11 +168,11 @@ export default function MyOffersPage() {
         <TopNav />
         <div className="flex flex-1 overflow-hidden">
           <LeftSidebar />
-          <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white p-6">
+          <div className="flex-1 overflow-y-auto bg-brand-black text-white p-6">
             <div className="max-w-4xl mx-auto">
               <div className="animate-pulse space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-36 bg-gray-800 rounded-2xl" />
+                  <div key={i} className="h-36 bg-brand-black rounded-2xl" />
                 ))}
               </div>
             </div>
@@ -189,13 +189,13 @@ export default function MyOffersPage() {
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+        <div className="flex-1 overflow-y-auto bg-brand-black text-white">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4"
+            className="flex items-center gap-2 text-[var(--neu-text-muted)] hover:text-white transition-colors mb-4"
           >
             <span className="material-symbols-outlined text-[20px]">
               arrow_back
@@ -203,12 +203,12 @@ export default function MyOffersPage() {
             Back
           </button>
           <div className="flex items-center gap-3 mb-2">
-            <span className="material-symbols-outlined text-green-400 text-3xl">
+            <span className="material-symbols-outlined text-primary text-3xl">
               local_offer
             </span>
             <h1 className="text-3xl font-bold">My Offers</h1>
           </div>
-          <p className="text-gray-400 mt-2">
+          <p className="text-[var(--neu-text-muted)] mt-2">
             Track every negotiation — accept, counter, or follow up in chat.
           </p>
         </div>
@@ -217,26 +217,26 @@ export default function MyOffersPage() {
         <div className="flex gap-3 mb-6 flex-wrap">
           <button
             onClick={() => router.push("/marketplace/my-orders")}
-            className="px-5 py-2.5 bg-gray-800/50 hover:bg-gray-700/50 rounded-full transition-all border border-gray-700"
+            className="px-5 py-2.5 bg-brand-black/50 hover:bg-brand-black/50 rounded-full transition-all border border-black/[0.08]"
           >
             My Orders
           </button>
           <button
             onClick={() => router.push("/marketplace/my-sales")}
-            className="px-5 py-2.5 bg-gray-800/50 hover:bg-gray-700/50 rounded-full transition-all border border-gray-700"
+            className="px-5 py-2.5 bg-brand-black/50 hover:bg-brand-black/50 rounded-full transition-all border border-black/[0.08]"
           >
             My Sales
           </button>
           <button
             onClick={() => router.push("/marketplace/my-offers")}
-            className="px-5 py-2.5 bg-green-500 text-white rounded-full font-semibold"
+            className="px-5 py-2.5 bg-primary text-white rounded-full font-semibold"
           >
             My Offers
           </button>
         </div>
 
         {/* All / Sent / Received Tabs */}
-        <div className="flex gap-2 mb-4 bg-gray-900/50 p-1.5 rounded-2xl border border-gray-800">
+        <div className="flex gap-2 mb-4 bg-brand-black/50 p-1.5 rounded-2xl border border-black/[0.08]">
           {(
             [
               { id: "all" as const, label: "All", count: sentOffers.length + receivedOffers.length },
@@ -253,14 +253,14 @@ export default function MyOffersPage() {
               }}
               className={`flex-1 py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
                 tab === t.id
-                  ? "bg-green-500 text-white"
-                  : "text-gray-400 hover:text-white"
+                  ? "bg-primary text-white"
+                  : "text-[var(--neu-text-muted)] hover:text-white"
               }`}
             >
               <span>{t.label}</span>
               <span
                 className={`text-[11px] px-1.5 rounded-full ${
-                  tab === t.id ? "bg-white/20" : "bg-gray-800"
+                  tab === t.id ? "bg-white/20" : "bg-brand-black"
                 }`}
               >
                 {t.count}
@@ -284,14 +284,14 @@ export default function MyOffersPage() {
                 className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium border transition-all whitespace-nowrap ${
                   active
                     ? "bg-white text-[#0f0f1e] border-white"
-                    : "bg-gray-900/40 text-gray-300 border-gray-700 hover:border-gray-500"
+                    : "bg-brand-black/40 text-[var(--neu-text-muted)] border-black/[0.08] hover:border-black/[0.08]"
                 }`}
               >
                 {meta && (
                   <span
                     aria-hidden="true"
                     className={`material-symbols-outlined text-[16px] ${
-                      active ? "text-[#0f0f1e]" : "text-gray-400"
+                      active ? "text-[#0f0f1e]" : "text-[var(--neu-text-muted)]"
                     }`}
                   >
                     {meta.icon}
@@ -300,7 +300,7 @@ export default function MyOffersPage() {
                 <span>{label}</span>
                 <span
                   className={`text-[11px] px-1.5 rounded-full ${
-                    active ? "bg-[#0f0f1e]/20" : "bg-gray-800"
+                    active ? "bg-brand-black/20" : "bg-brand-black"
                   }`}
                 >
                   {counts[s] ?? 0}
@@ -333,7 +333,7 @@ export default function MyOffersPage() {
               <button
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
-                className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-semibold transition-colors"
+                className="w-full py-3 bg-brand-black hover:bg-brand-black rounded-lg font-semibold transition-colors"
               >
                 {isFetchingNextPage ? "Loading..." : "Load More"}
               </button>
@@ -386,17 +386,17 @@ function EmptyState({
 
   return (
     <div className="text-center py-12">
-      <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-800/50 flex items-center justify-center">
-        <span className="material-symbols-outlined text-gray-500 text-[48px]">
+      <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-brand-black/50 flex items-center justify-center">
+        <span className="material-symbols-outlined text-[var(--neu-text-muted)] text-[48px]">
           {isFiltered ? "filter_list_off" : "handshake"}
         </span>
       </div>
       <h3 className="text-xl font-semibold mb-2">{titleMap[statusFilter]}</h3>
-      <p className="text-gray-400 mb-6">{subMap[statusFilter]}</p>
+      <p className="text-[var(--neu-text-muted)] mb-6">{subMap[statusFilter]}</p>
       {!isFiltered && (tab === "sent" || tab === "all") && (
         <button
           onClick={() => router.push("/marketplace")}
-          className="px-6 py-3 bg-green-500 hover:bg-green-600 rounded-full font-semibold transition-all text-white"
+          className="px-6 py-3 bg-primary hover:bg-brand-green-dark rounded-full font-semibold transition-all text-white"
         >
           Browse Marketplace
         </button>
@@ -485,11 +485,11 @@ function OfferCard({
 
   return (
     <div
-      className={`bg-gray-900 rounded-2xl p-5 border border-gray-800/50 ring-1 ring-inset ${meta.ring}`}
+      className={`bg-brand-black rounded-2xl p-5 border border-black/[0.08]/50 ring-1 ring-inset ${meta.ring}`}
     >
       <div className="flex gap-4">
         {/* Product Image */}
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gray-800/50 flex-shrink-0">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-brand-black/50 flex-shrink-0">
           {offer.product?.images?.[0] ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -499,7 +499,7 @@ function OfferCard({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="material-symbols-outlined text-gray-600 text-[32px]">
+              <span className="material-symbols-outlined text-[var(--neu-text-secondary)] text-[32px]">
                 inventory_2
               </span>
             </div>
@@ -511,7 +511,7 @@ function OfferCard({
           <div className="flex items-start justify-between gap-2">
             <h3
               onClick={() => router.push(`/marketplace?product=${encodeURIComponent(offer.productId)}`)}
-              className="font-semibold text-base sm:text-lg truncate text-white hover:text-green-400 cursor-pointer transition-colors"
+              className="font-semibold text-base sm:text-lg truncate text-white hover:text-primary cursor-pointer transition-colors"
             >
               {offer.product?.title || "Product"}
             </h3>
@@ -533,8 +533,8 @@ function OfferCard({
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border mr-1 ${
                   tab === "sent"
-                    ? "bg-blue-500/15 text-blue-300 border-blue-500/30"
-                    : "bg-orange-500/15 text-orange-300 border-orange-500/30"
+                    ? "bg-brand-blue/15 text-brand-blue border-brand-blue/30"
+                    : "bg-brand-red/15 text-brand-red300 border-brand-red/30"
                 }`}
               >
                 <span aria-hidden className="material-symbols-outlined text-[12px]">
@@ -556,7 +556,7 @@ function OfferCard({
             <PriceCell
               label={tab === "sent" ? "Your offer" : "Buyer's offer"}
               value={offerAmt}
-              accent="text-green-300"
+              accent="text-primary"
             />
             {counterAmt > 0 && (
               <PriceCell
@@ -599,7 +599,7 @@ function OfferCard({
 
       {/* Outcome banner */}
       {offer.status === "accepted" && (
-        <div className="mt-4 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/30 text-sm text-green-200 flex items-center gap-2">
+        <div className="mt-4 px-3 py-2 rounded-lg bg-primary/10 border border-primary/30 text-sm text-primary flex items-center gap-2">
           <span className="material-symbols-outlined text-[18px]">handshake</span>
           {tab === "sent"
             ? `Your offer has been accepted at ${formatNGN(finalAmt)}. You can proceed with the next steps.`
@@ -607,22 +607,22 @@ function OfferCard({
         </div>
       )}
       {offer.status === "rejected" && tab === "sent" && (
-        <div className="mt-4 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-200">
+        <div className="mt-4 px-3 py-2 rounded-lg bg-brand-red/10 border border-brand-red/20 text-sm text-brand-red">
           Your offer was declined by the seller. You can send a new offer or browse similar items.
         </div>
       )}
       {offer.status === "rejected" && tab === "received" && (
-        <div className="mt-4 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-200">
+        <div className="mt-4 px-3 py-2 rounded-lg bg-brand-red/10 border border-brand-red/20 text-sm text-brand-red">
           You declined the buyer's offer.
         </div>
       )}
       {offer.status === "countered" && tab === "sent" && (
-        <div className="mt-4 px-3 py-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-sm text-purple-200">
+        <div className="mt-4 px-3 py-2 rounded-lg bg-brand-blue/10 border border-purple-500/30 text-sm text-white/90">
           You received a counteroffer of {formatNGN(counterAmt)}. You can accept the counter or send a new offer.
         </div>
       )}
       {offer.status === "countered" && tab === "received" && (
-        <div className="mt-4 px-3 py-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-sm text-purple-200">
+        <div className="mt-4 px-3 py-2 rounded-lg bg-brand-blue/10 border border-purple-500/30 text-sm text-white/90">
           You sent a counteroffer of {formatNGN(counterAmt)}. Awaiting the buyer's response.
         </div>
       )}
@@ -633,20 +633,20 @@ function OfferCard({
           <button
             onClick={() => handleResponse("accept")}
             disabled={respondToOffer.isPending}
-            className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-600 rounded-full font-semibold transition-all text-sm sm:text-base"
+            className="flex-1 py-2.5 bg-primary hover:bg-brand-green-dark disabled:bg-brand-surface rounded-full font-semibold transition-all text-sm sm:text-base"
           >
             Accept
           </button>
           <button
             onClick={() => setSelectedOffer(offer.id)}
-            className="flex-1 py-2.5 bg-purple-500 hover:bg-purple-600 rounded-full font-semibold transition-all text-sm sm:text-base"
+            className="flex-1 py-2.5 bg-brand-blue hover:bg-purple-600 rounded-full font-semibold transition-all text-sm sm:text-base"
           >
             Counter
           </button>
           <button
             onClick={() => handleResponse("reject")}
             disabled={respondToOffer.isPending}
-            className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 disabled:bg-gray-600 rounded-full font-semibold transition-all text-sm sm:text-base"
+            className="flex-1 py-2.5 bg-brand-red hover:bg-red-600 disabled:bg-brand-surface rounded-full font-semibold transition-all text-sm sm:text-base"
           >
             Decline
           </button>
@@ -655,7 +655,7 @@ function OfferCard({
 
       {/* Counter input form */}
       {canSellerAct && selectedOffer === offer.id && (
-        <div className="mt-4 p-4 bg-gray-800/50 rounded-xl border border-gray-700">
+        <div className="mt-4 p-4 bg-brand-black/50 rounded-xl border border-black/[0.08]">
           <label className="block text-sm font-medium mb-2 text-white">
             Counter offer amount
           </label>
@@ -672,7 +672,7 @@ function OfferCard({
               value={counterAmount}
               onChange={(e) => setCounterAmount(e.target.value)}
               placeholder="Enter counter amount"
-              className="w-full pl-8 pr-4 py-2.5 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white"
+              className="w-full pl-8 pr-4 py-2.5 bg-brand-black/50 border border-black/[0.08] rounded-lg focus:outline-none focus:border-primary text-white"
               min="0"
               step="1000"
             />
@@ -683,14 +683,14 @@ function OfferCard({
                 setSelectedOffer(null);
                 setCounterAmount("");
               }}
-              className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-full font-semibold transition-all"
+              className="flex-1 py-2.5 bg-brand-black hover:bg-brand-surface rounded-full font-semibold transition-all"
             >
               Cancel
             </button>
             <button
               onClick={() => handleResponse("counter")}
               disabled={respondToOffer.isPending || !counterAmount}
-              className="flex-1 py-2.5 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-600 rounded-full font-semibold transition-all"
+              className="flex-1 py-2.5 bg-brand-blue hover:bg-purple-600 disabled:bg-brand-surface rounded-full font-semibold transition-all"
             >
               {respondToOffer.isPending ? "Sending..." : "Send Counter"}
             </button>
@@ -704,7 +704,7 @@ function OfferCard({
           <button
             onClick={handleAcceptCounter}
             disabled={makeOffer.isPending}
-            className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-600 rounded-full font-semibold transition-all text-sm sm:text-base"
+            className="flex-1 py-2.5 bg-primary hover:bg-brand-green-dark disabled:bg-brand-surface rounded-full font-semibold transition-all text-sm sm:text-base"
           >
             {makeOffer.isPending
               ? "Sending..."
@@ -712,7 +712,7 @@ function OfferCard({
           </button>
           <button
             onClick={() => router.push(`/marketplace?product=${encodeURIComponent(offer.productId)}`)}
-            className="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-full font-semibold transition-all text-sm sm:text-base"
+            className="flex-1 py-2.5 bg-brand-black hover:bg-brand-black border border-black/[0.08] rounded-full font-semibold transition-all text-sm sm:text-base"
           >
             Send a new offer
           </button>
@@ -724,7 +724,7 @@ function OfferCard({
         {offer.conversationId && (
           <button
             onClick={() => router.push(`/messages/${offer.conversationId}`)}
-            className="flex flex-1 items-center justify-center gap-2 rounded-full border border-blue-600/50 py-2 text-sm font-medium text-blue-300 hover:bg-blue-900/30 transition-colors"
+            className="flex flex-1 items-center justify-center gap-2 rounded-full border border-blue-600/50 py-2 text-sm font-medium text-brand-blue hover:bg-blue-900/30 transition-colors"
           >
             <span className="material-symbols-outlined text-[16px]">chat</span>
             {tab === "sent"
@@ -740,7 +740,7 @@ function OfferCard({
                 `/marketplace?product=${encodeURIComponent(offer.productId)}&offerId=${encodeURIComponent(offer.id)}`
               )
             }
-            className="flex-1 py-2 bg-green-500 hover:bg-green-600 rounded-full font-semibold transition-all text-white text-sm"
+            className="flex-1 py-2 bg-primary hover:bg-brand-green-dark rounded-full font-semibold transition-all text-white text-sm"
           >
             Complete Purchase →
           </button>
@@ -762,7 +762,7 @@ function PriceCell({
   muted?: boolean;
 }) {
   return (
-    <div className="rounded-lg bg-gray-800/40 border border-gray-700/40 px-2.5 py-1.5">
+    <div className="rounded-lg bg-brand-black/40 border border-black/[0.08]/40 px-2.5 py-1.5">
       <div className="text-[10px] uppercase tracking-wide text-white/40">
         {label}
       </div>

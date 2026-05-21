@@ -19,7 +19,7 @@ import { User } from '@/types/api';
 const ROLE_COLORS: Record<string, string> = {
   user:        'bg-slate-700 text-slate-200',
   moderator:   'bg-sky-700 text-sky-100',
-  admin:       'bg-violet-700 text-violet-100',
+  admin:       'bg-brand-blue700 text-brand-blue100',
   super_admin: 'bg-amber-600 text-amber-100',
 };
 
@@ -49,9 +49,9 @@ function SuspendModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#1a1a2e] p-6 shadow-2xl">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-brand-black p-6 shadow-2xl">
         <h3 className="mb-4 text-lg font-black text-white">Suspend @{user.username}</h3>
-        <label className="mb-1 block text-xs font-bold text-white/60">Reason <span className="text-red-400">*</span></label>
+        <label className="mb-1 block text-xs font-bold text-white/60">Reason <span className="text-brand-red">*</span></label>
         <textarea
           className="w-full rounded-xl bg-white/10 p-3 text-sm text-white placeholder-white/30 outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
           rows={3}
@@ -135,17 +135,17 @@ function UserRow({ user }: { user: User }) {
         {/* Verification */}
         <td className="hidden px-4 py-3 md:table-cell">
           {(user as any).emailVerified || (user as any).isVerified ? (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
               <span className="material-symbols-outlined text-[14px]">mark_email_read</span> Verified
             </span>
           ) : (
-            <span className="text-xs text-amber-400/70">Unverified</span>
+            <span className="text-xs text-primary/70">Unverified</span>
           )}
         </td>
 
         {/* Status */}
         <td className="hidden px-4 py-3 md:table-cell">
-          <span className={`text-xs font-bold ${isSuspended ? 'text-red-400' : 'text-emerald-400'}`}>
+          <span className={`text-xs font-bold ${isSuspended ? 'text-brand-red' : 'text-primary'}`}>
             {isSuspended ? 'Suspended' : 'Active'}
           </span>
         </td>
@@ -168,7 +168,7 @@ function UserRow({ user }: { user: User }) {
             {menuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-full z-50 mt-1 w-52 overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a2e] shadow-2xl">
+                <div className="absolute right-0 top-full z-50 mt-1 w-52 overflow-hidden rounded-2xl border border-white/10 bg-brand-black shadow-2xl">
                   {/* Verify / Unverify */}
                   <button
                     onClick={() => { user.identityVerified ? unverify.mutate(uid) : verify.mutate(uid); setMenuOpen(false); }}
@@ -182,7 +182,7 @@ function UserRow({ user }: { user: User }) {
                   {isSuspended ? (
                     <button
                       onClick={() => { unsuspend.mutate(uid); setMenuOpen(false); }}
-                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-emerald-400 hover:bg-white/5 transition-colors"
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-primary hover:bg-white/5 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[16px]">lock_open</span>
                       Unsuspend
@@ -190,7 +190,7 @@ function UserRow({ user }: { user: User }) {
                   ) : (
                     <button
                       onClick={() => { setShowSuspend(true); setMenuOpen(false); }}
-                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-amber-400 hover:bg-white/5 transition-colors"
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-primary hover:bg-white/5 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[16px]">block</span>
                       Suspend
@@ -221,7 +221,7 @@ function UserRow({ user }: { user: User }) {
                       }
                       setMenuOpen(false);
                     }}
-                    className="flex w-full items-center gap-3 border-t border-white/10 px-4 py-3 text-sm text-red-400 hover:bg-white/5 transition-colors"
+                    className="flex w-full items-center gap-3 border-t border-white/10 px-4 py-3 text-sm text-brand-red hover:bg-white/5 transition-colors"
                   >
                     <span className="material-symbols-outlined text-[16px]">delete_forever</span>
                     Delete Account
@@ -331,7 +331,7 @@ export default function AdminUsersPage() {
           </div>
         ) : isError ? (
           <div className="py-16 text-center text-white/50">
-            <span className="material-symbols-outlined text-[40px] text-red-400">error</span>
+            <span className="material-symbols-outlined text-[40px] text-brand-red">error</span>
             <p className="mt-2 text-sm">Could not load users.</p>
           </div>
         ) : allUsers.length === 0 ? (

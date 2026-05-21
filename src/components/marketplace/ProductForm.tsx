@@ -192,7 +192,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       {/* Title */}
       <div>
         <label className={glassLabel}>
-          Title <span className="text-red-500">*</span>
+          Title <span className="text-brand-red">*</span>
         </label>
         <input
           type="text"
@@ -202,14 +202,14 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           maxLength={100}
           className={`${glassField} ${errors.title ? glassFieldError : ""}`}
         />
-        {errors.title && <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.title}</p>}
-        <p className="mt-1 text-xs text-[#3D5A3E]/70 dark:text-white/40">{title.length}/100</p>
+        {errors.title && <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.title}</p>}
+        <p className="mt-1 text-xs text-brand-green-dark/70/70 dark:text-white/40">{title.length}/100</p>
       </div>
 
       {/* Description */}
       <div>
         <label className={glassLabel}>
-          Description <span className="text-red-500">*</span>
+          Description <span className="text-brand-red">*</span>
         </label>
         <textarea
           value={description}
@@ -219,7 +219,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           className={`${glassField} resize-none ${errors.description ? glassFieldError : ""}`}
         />
         {errors.description && (
-          <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.description}</p>
+          <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.description}</p>
         )}
       </div>
 
@@ -227,7 +227,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className={glassLabel}>
-            Price (₦) <span className="text-red-500">*</span>
+            Price (₦) <span className="text-brand-red">*</span>
           </label>
           <input
             type="number"
@@ -238,12 +238,12 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             step="0.01"
             className={`${glassField} ${errors.price ? glassFieldError : ""}`}
           />
-          {errors.price && <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.price}</p>}
+          {errors.price && <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.price}</p>}
         </div>
 
         <div>
           <label className={glassLabel}>
-            Category <span className="text-red-500">*</span>
+            Category <span className="text-brand-red">*</span>
           </label>
           <select
             value={category}
@@ -258,7 +258,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             ))}
           </select>
           {errors.category && (
-            <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.category}</p>
+            <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.category}</p>
           )}
         </div>
       </div>
@@ -275,7 +275,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               className={`rounded-2xl border-2 px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
                 condition === cond.value
                   ? "border-transparent bg-gradient-to-r from-primary to-[#006F35] text-white shadow-[0_8px_20px_rgba(0,212,49,0.28)] dark:from-emerald-500 dark:to-teal-600"
-                  : "border-[var(--border-light)] bg-white/75 text-[#3D5A3E] hover:border-primary/35 dark:border-white/12 dark:bg-white/[0.06] dark:text-white/75"
+                  : "border-[var(--border-light)] bg-white/75 text-brand-green-dark/70 hover:border-primary/35 dark:border-white/12 dark:bg-white/[0.06] dark:text-white/75"
               }`}
             >
               {cond.label}
@@ -287,7 +287,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       {/* Images */}
       <div>
         <label className={glassLabel}>
-          Images <span className="text-red-500">*</span>
+          Images <span className="text-brand-red">*</span>
         </label>
         <input
           type="file"
@@ -299,14 +299,14 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         />
         <label
           htmlFor="product-images"
-          className="block w-full cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-primary/[0.06] px-4 py-8 text-center text-sm font-medium text-[#3D5A3E] transition-colors hover:border-primary/50 hover:bg-primary/[0.1] dark:border-emerald-400/25 dark:bg-emerald-500/10 dark:text-white/70"
+          className="block w-full cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-primary/[0.06] px-4 py-8 text-center text-sm font-medium text-brand-green-dark/70 transition-colors hover:border-primary/50 hover:bg-primary/[0.1] dark:border-primary/25 dark:bg-primary/10 dark:text-white/70"
         >
-          <span className="material-symbols-outlined mx-auto mb-2 block text-4xl text-[#006F35]/60 dark:text-emerald-400/70">
+          <span className="material-symbols-outlined mx-auto mb-2 block text-4xl text-[#006F35]/60 dark:text-primary/70">
             add_photo_alternate
           </span>
           Click to upload images (max 5)
         </label>
-        {errors.images && <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-300">{errors.images}</p>}
+        {errors.images && <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.images}</p>}
 
         {(images.length > 0 || imageUrls.length > 0) && (
           <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
@@ -316,7 +316,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(idx, true)}
-                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-red-500 text-white shadow-md transition-colors hover:bg-red-600"
+                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-brand-red text-white shadow-md transition-colors hover:bg-red-600"
                   aria-label="Remove image"
                 >
                   <span className="material-symbols-outlined text-[16px]">close</span>
@@ -329,7 +329,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(idx, false)}
-                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-red-500 text-white shadow-md transition-colors hover:bg-red-600"
+                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-brand-red text-white shadow-md transition-colors hover:bg-red-600"
                   aria-label="Remove image"
                 >
                   <span className="material-symbols-outlined text-[16px]">close</span>
@@ -356,9 +356,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
       {!isEditing && (
         <div>
-          {locationLoading && <p className="text-sm font-medium text-[#3D5A3E] dark:text-white/55">Detecting your location…</p>}
+          {locationLoading && <p className="text-sm font-medium text-brand-green-dark/70 dark:text-white/55">Detecting your location…</p>}
           {!locationLoading && userLocation && !(userLocation.latitude === 0 && userLocation.longitude === 0) && (
-            <p className="rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3 text-sm font-medium text-[#006F35] dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+            <p className="rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3 text-sm font-medium text-[#006F35] dark:border-primary/20 dark:bg-primary/10 dark:text-primary">
               Location set
               {(userLocation as any).formattedAddress
                 ? `: ${(userLocation as any).formattedAddress}`
@@ -369,8 +369,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           )}
           {!locationLoading &&
             (!userLocation || (userLocation.latitude === 0 && userLocation.longitude === 0)) && (
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-400/40 bg-red-500/[0.08] p-4 dark:bg-red-500/10">
-                <p className="text-sm font-medium text-red-700 dark:text-red-200">
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-red/40 bg-brand-red/[0.08] p-4 dark:bg-brand-red/10">
+                <p className="text-sm font-medium text-red-700 dark:text-brand-red">
                   {locationError || "Location is required to create a listing."}
                 </p>
                 <button
@@ -382,7 +382,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 </button>
               </div>
             )}
-          {errors.location && <p className="mt-2 text-sm font-medium text-red-600 dark:text-red-300">{errors.location}</p>}
+          {errors.location && <p className="mt-2 text-sm font-medium text-red-600 dark:text-brand-red">{errors.location}</p>}
         </div>
       )}
 

@@ -138,7 +138,7 @@ export default function PanicPinPage() {
 
         <header className="mb-6">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-red-400 text-4xl">pin</span>
+            <span className="material-symbols-outlined text-brand-red text-4xl">pin</span>
             <div>
               <h1 className="text-2xl font-bold">Panic PIN</h1>
               <p className="text-sm text-white/60">A duress code that silently triggers SOS.</p>
@@ -146,7 +146,7 @@ export default function PanicPinPage() {
           </div>
         </header>
 
-        <div className="rounded-xl bg-amber-950/30 border border-amber-700/50 p-4 mb-6 text-sm text-amber-200">
+        <div className="rounded-xl bg-amber-950/30 border border-amber-700/50 p-4 mb-6 text-sm text-white/90">
           <strong className="block mb-1">How it works</strong>
           When you (or someone forcing you) enter this PIN on the lock screen, the app
           unlocks normally — but a silent SOS fires in the background and your guardians
@@ -159,7 +159,7 @@ export default function PanicPinPage() {
           <>
             <div className="rounded-xl neu-card p-4 mb-4 flex items-center gap-3">
               <span
-                className={`w-2.5 h-2.5 rounded-full ${pinSet ? 'bg-green-500' : 'bg-white/30'}`}
+                className={`w-2.5 h-2.5 rounded-full ${pinSet ? 'bg-primary' : 'bg-white/30'}`}
                 aria-hidden
               />
               <div className="flex-1">
@@ -209,7 +209,7 @@ export default function PanicPinPage() {
                     maxLength={6}
                     value={currentPin}
                     onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, ''))}
-                    className="mt-1 w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-base tracking-widest focus:outline-none focus:border-red-500"
+                    className="mt-1 w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-base tracking-widest focus:outline-none focus:border-brand-red"
                   />
                 </label>
               )}
@@ -226,7 +226,7 @@ export default function PanicPinPage() {
                       maxLength={6}
                       value={pin}
                       onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                      className="mt-1 w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-base tracking-widest focus:outline-none focus:border-red-500"
+                      className="mt-1 w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-base tracking-widest focus:outline-none focus:border-brand-red"
                     />
                   </label>
                   <label className="block">
@@ -239,19 +239,19 @@ export default function PanicPinPage() {
                       maxLength={6}
                       value={pinConfirm}
                       onChange={(e) => setPinConfirm(e.target.value.replace(/\D/g, ''))}
-                      className="mt-1 w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-base tracking-widest focus:outline-none focus:border-red-500"
+                      className="mt-1 w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-base tracking-widest focus:outline-none focus:border-brand-red"
                     />
                   </label>
                 </>
               )}
 
               {error && (
-                <div className="rounded-lg bg-red-950/40 border border-red-700/50 px-3 py-2 text-sm text-red-200">
+                <div className="rounded-lg bg-red-950/40 border border-red-700/50 px-3 py-2 text-sm text-brand-red">
                   {error}
                 </div>
               )}
               {success && (
-                <div className="rounded-lg bg-green-950/40 border border-green-700/50 px-3 py-2 text-sm text-green-200">
+                <div className="rounded-lg bg-green-950/40 border border-green-700/50 px-3 py-2 text-sm text-primary">
                   {success}
                 </div>
               )}
@@ -260,7 +260,7 @@ export default function PanicPinPage() {
                 type="submit"
                 disabled={busy}
                 className={`w-full rounded-xl font-semibold py-3 text-base text-white disabled:opacity-50 ${
-                  mode === 'remove' ? 'bg-red-600 hover:bg-red-500' : 'bg-blue-600 hover:bg-blue-500'
+                  mode === 'remove' ? 'bg-red-600 hover:bg-brand-red' : 'bg-blue-600 hover:bg-brand-blue'
                 }`}
               >
                 {busy ? 'Working…' : mode === 'set' ? 'Set Panic PIN' : mode === 'rotate' ? 'Update PIN' : 'Remove PIN'}

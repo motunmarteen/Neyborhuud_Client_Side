@@ -82,14 +82,14 @@ function ResetPasswordContent() {
                             <div className="absolute right-8 top-1/2 h-2 w-32 -rotate-12 rounded-full bg-brand-blue/14" aria-hidden />
                             <div className="relative flex h-32 w-32 items-center justify-center rounded-full border border-primary/12 bg-primary/[0.035]">
                                 <div className="absolute h-24 w-24 rounded-full border border-brand-amber/20 bg-brand-amber/[0.04]" aria-hidden />
-                                <div className={`relative flex h-20 w-20 items-center justify-center rounded-[2rem] text-white shadow-[0_24px_54px_rgba(0,135,81,0.3)] ${isError ? 'bg-brand-red' : 'bg-primary'}`}>
+                                <div className={`relative flex h-20 w-20 items-center justify-center rounded-[2rem] text-white shadow-[0_24px_54px_rgba(0,111,53,0.3)] ${isError ? 'bg-brand-red' : 'bg-primary'}`}>
                                     <i className={`bi ${icon} text-4xl`} aria-hidden />
                                 </div>
                             </div>
                             <div className="absolute bottom-5 left-1/2 w-[min(19rem,calc(100%-3rem))] -translate-x-1/2 rounded-2xl border border-white/85 bg-white/[0.9] px-4 py-3 shadow-[0_18px_40px_rgba(26,26,46,0.12)] backdrop-blur-xl">
                                 <p className={`text-[9px] font-black uppercase tracking-[0.24em] ${isError ? 'text-brand-red' : 'text-primary'}`}>{status}</p>
-                                <h1 className="truncate text-2xl font-black tracking-tighter text-[#1A1A2E]">{headline}</h1>
-                                <p className="truncate text-[11px] font-semibold text-[#64748B]">NeyborHuud account access</p>
+                                <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">{headline}</h1>
+                                <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">NeyborHuud account access</p>
                             </div>
                         </div>
                     </div>
@@ -105,7 +105,7 @@ function ResetPasswordContent() {
                                         {!isPassValid && password.length > 0 && <p className="px-1 text-[10px] text-[var(--neu-text-muted)]">{policy.message}</p>}
                                     </div>
                                     <PremiumInput label="Confirm Password" type="password" icon="bi-lock-fill" placeholder="Repeat password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} error={confirmPassword && !passwordsMatch ? "Passwords don't match" : undefined} success={passwordsMatch} successText={passwordsMatch ? 'Passwords match' : undefined} />
-                                    <button type="submit" disabled={!canSubmit} className={`flex h-[52px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${canSubmit ? 'bg-primary text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] active:scale-[0.98]' : 'border border-charcoal/5 bg-white text-[#94A3B8] shadow-[0_12px_30px_rgba(26,26,46,0.08)]'}`}>
+                                    <button type="submit" disabled={!canSubmit} className="btn-glass-primary h-[52px] w-full gap-2">
                                         {loading ? <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" aria-hidden /> : <i className="bi bi-shield-lock" aria-hidden />}
                                         Reset password
                                     </button>
@@ -115,7 +115,7 @@ function ResetPasswordContent() {
                             {step === 'success' && (
                                 <div className="flex flex-col gap-4">
                                     <div className="rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-primary">Your password has been updated. You can sign in with the new password.</div>
-                                    <button type="button" onClick={() => router.push('/login')} className="flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_34px_rgba(0,135,81,0.34)] transition-all active:scale-[0.98]">
+                                    <button type="button" onClick={() => router.push('/login')} className="btn-glass-primary h-[52px] w-full gap-2">
                                         Continue to login
                                         <i className="bi bi-arrow-right" aria-hidden />
                                     </button>
@@ -126,10 +126,10 @@ function ResetPasswordContent() {
                                 <div className="flex flex-col gap-4">
                                     <div className="rounded-2xl border border-brand-red/15 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-brand-red">{errorMessage || 'This reset link could not be used.'}</div>
                                     <div className="grid grid-cols-[0.9fr_1.1fr] gap-3">
-                                        <button type="button" onClick={() => setStep('form')} disabled={step === 'expired'} className={`flex h-[50px] items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black uppercase tracking-widest transition-all ${step === 'expired' ? 'border border-charcoal/5 bg-white text-[#94A3B8]' : 'border border-charcoal/5 bg-white text-[#1A1A2E] shadow-[0_12px_30px_rgba(26,26,46,0.1)]'}`}>
+                                        <button type="button" onClick={() => setStep('form')} disabled={step === 'expired'} className="btn-secondary h-[50px] w-full gap-2">
                                             Retry
                                         </button>
-                                        <button type="button" onClick={() => router.push('/forgot-password')} className="flex h-[50px] items-center justify-center gap-2 rounded-2xl bg-brand-blue px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_18px_34px_rgba(13,110,253,0.28)] transition-all active:scale-[0.98]">
+                                        <button type="button" onClick={() => router.push('/forgot-password')} className="btn-glass-primary h-[50px] w-full gap-2">
                                             New link
                                             <i className="bi bi-arrow-right" aria-hidden />
                                         </button>

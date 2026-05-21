@@ -105,10 +105,10 @@ export function LocationPicker({
 
     const accuracyQuality = accuracy ? getAccuracyQuality(accuracy) : null;
     const accuracyColors = {
-        excellent: 'text-green-500',
+        excellent: 'text-primary',
         good: 'text-primary',
-        fair: 'text-orange-400',
-        poor: 'text-red-400',
+        fair: 'text-brand-red',
+        poor: 'text-brand-red',
     };
     const isPremium = presentation === 'premium';
     const isSignupLocationMap = mapHeight === 'signup-location';
@@ -173,7 +173,7 @@ export function LocationPicker({
                     {isPremium && (
                         <>
                             <div className="absolute left-[10%] top-[22%] h-2.5 w-32 rotate-12 rounded-full bg-brand-blue/18 shadow-[0_0_24px_rgba(74,144,217,0.16)]" aria-hidden />
-                            <div className="absolute right-[8%] top-[41%] h-2.5 w-36 -rotate-12 rounded-full bg-primary/18 shadow-[0_0_24px_rgba(0,135,81,0.16)]" aria-hidden />
+                            <div className="absolute right-[8%] top-[41%] h-2.5 w-36 -rotate-12 rounded-full bg-primary/18 shadow-[0_0_24px_rgba(0,111,53,0.16)]" aria-hidden />
                             <div className="absolute bottom-[24%] left-[18%] h-2.5 w-40 -rotate-6 rounded-full bg-brand-amber/22 shadow-[0_0_24px_rgba(245,166,35,0.16)]" aria-hidden />
                             <div className="absolute inset-x-8 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/28 to-transparent" aria-hidden />
                             <div className="absolute inset-y-8 left-1/2 w-px bg-gradient-to-b from-transparent via-brand-blue/22 to-transparent" aria-hidden />
@@ -184,7 +184,7 @@ export function LocationPicker({
                             <div className="absolute h-48 w-48 rounded-full border border-primary/14 bg-primary/[0.035]" aria-hidden />
                             <div className="absolute h-32 w-32 rounded-full border border-brand-blue/18 bg-brand-blue/[0.035]" aria-hidden />
                             <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-[0_28px_62px_rgba(26,26,46,0.2)]">
-                                <span className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-black text-white shadow-[0_10px_22px_rgba(0,135,81,0.36)]">N</span>
+                                <span className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-black text-white shadow-[0_10px_22px_rgba(0,111,53,0.36)]">N</span>
                                 <i className="bi bi-geo-alt-fill text-5xl text-primary/70" aria-hidden />
                             </div>
                             <span className="sr-only">Location not available</span>
@@ -250,7 +250,7 @@ export function LocationPicker({
                                 const url = `https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
                                 window.open(url, '_blank');
                             }}
-                            className="shrink-0 ml-2 w-8 h-8 rounded-lg neu-btn flex items-center justify-center group"
+                            className="shrink-0 ml-2 w-8 h-8 rounded-lg btn-ghost flex items-center justify-center group"
                             title="Open in Google Maps"
                         >
                             <i className="bi bi-box-arrow-up-right text-xs text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
@@ -261,9 +261,9 @@ export function LocationPicker({
 
             {/* Error message */}
             {!isSignupLocationMap && error && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-50 border border-orange-200">
-                    <i className="bi bi-exclamation-triangle text-orange-500"></i>
-                    <span className="text-[10px] text-orange-600 font-medium">{error}</span>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-red50 border border-orange-200">
+                    <i className="bi bi-exclamation-triangle text-brand-red"></i>
+                    <span className="text-[10px] text-brand-red600 font-medium">{error}</span>
                 </div>
             )}
 

@@ -135,7 +135,7 @@ export function MarketplaceCommentsSheet({
               <button
                 type="button"
                 onClick={onClose}
-                className="neu-btn grid h-8 w-8 place-items-center rounded-full transition-colors"
+                className="btn-ghost grid h-8 w-8 place-items-center rounded-full transition-colors"
                 aria-label="Close"
               >
                 <span className="material-symbols-outlined text-[18px]" style={{ color: "var(--neu-text-secondary)" }}>

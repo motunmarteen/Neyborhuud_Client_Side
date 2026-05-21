@@ -169,7 +169,7 @@ function LocalNewsInner() {
                   key={tab}
                   onClick={() => handleTabChange(tab)}
                   className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all ${
-                    activeTab === tab ? 'neu-btn-active text-primary' : 'neu-btn'
+                    activeTab === tab ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'
                   }`}
                   style={activeTab !== tab ? { color: 'var(--neu-text-muted)' } : {}}
                 >
@@ -183,7 +183,7 @@ function LocalNewsInner() {
               <button
                 onClick={() => { setSelectedSourceIds([]); loadNews(activeTab, []); }}
                 className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  selectedSourceIds.length === 0 ? 'neu-btn-active text-primary' : 'neu-socket'
+                  selectedSourceIds.length === 0 ? 'mod-chip mod-chip-active text-primary' : 'neu-socket'
                 }`}
                 style={selectedSourceIds.length !== 0 ? { color: 'var(--neu-text-muted)' } : {}}
               >
@@ -194,7 +194,7 @@ function LocalNewsInner() {
                   key={src.id}
                   onClick={() => toggleSource(src.id)}
                   className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                    selectedSourceIds.includes(src.id) ? 'neu-btn-active text-primary' : 'neu-socket'
+                    selectedSourceIds.includes(src.id) ? 'mod-chip mod-chip-active text-primary' : 'neu-socket'
                   }`}
                   style={!selectedSourceIds.includes(src.id) ? { color: 'var(--neu-text-muted)' } : {}}
                 >
@@ -226,11 +226,11 @@ function LocalNewsInner() {
 
               {!loading && error && (
                 <div className="neu-card-sm rounded-2xl flex flex-col items-center justify-center py-12 px-5">
-                  <span className="material-symbols-outlined text-3xl text-red-400 mb-3">wifi_off</span>
+                  <span className="material-symbols-outlined text-3xl text-brand-red mb-3">wifi_off</span>
                   <p className="text-sm text-center mb-4" style={{ color: 'var(--neu-text)' }}>{error}</p>
                   <button
                     onClick={() => loadNews(activeTab, selectedSourceIds)}
-                    className="px-6 py-2.5 neu-btn rounded-2xl text-sm font-bold text-primary"
+                    className="px-6 py-2.5 mod-chip rounded-2xl text-sm font-bold text-primary"
                   >
                     Retry
                   </button>

@@ -48,7 +48,7 @@ export default function NeighborhoodPage() {
         <main className="flex-1 overflow-y-auto px-4 py-6">
           <div className="mx-auto flex w-full max-w-[920px] flex-col gap-6 pb-24">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-[32px] text-green-500">home_pin</span>
+              <span className="material-symbols-outlined text-[32px] text-primary">home_pin</span>
               <h1 className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>My Huud</h1>
             </div>
             <p className="text-sm -mt-4" style={{ color: 'var(--neu-text-muted)' }}>
@@ -63,7 +63,7 @@ export default function NeighborhoodPage() {
               </div>
             ) : posts.length === 0 ? (
               <div className="flex flex-col items-center gap-4 py-16">
-                <span className="material-symbols-outlined text-[64px] text-gray-300">home_pin</span>
+                <span className="material-symbols-outlined text-[64px] text-[var(--neu-text-muted)]">home_pin</span>
                 <p className="text-lg font-medium" style={{ color: 'var(--neu-text-muted)' }}>Nothing in your area yet</p>
                 <p className="text-sm text-center max-w-xs" style={{ color: 'var(--neu-text-muted)' }}>
                   Be the first to share something in your neyborhuud

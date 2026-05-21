@@ -12,8 +12,8 @@ const TIERS = [
     name: "Bronze",
     coinsRequired: 0,
     borderColor: "border-amber-700",
-    badgeClass: "bg-amber-900/40 text-amber-400",
-    progressColor: "bg-amber-500",
+    badgeClass: "bg-amber-900/40 text-primary",
+    progressColor: "bg-primary",
     icon: "🥉",
     features: [
       "Basic feed access",
@@ -46,8 +46,8 @@ const TIERS = [
     name: "Gold",
     coinsRequired: 2000,
     borderColor: "border-yellow-400",
-    badgeClass: "bg-yellow-900/40 text-yellow-400",
-    progressColor: "bg-yellow-400",
+    badgeClass: "bg-primary900/40 text-primary400",
+    progressColor: "bg-primary400",
     icon: "🥇",
     features: [
       "Everything in Silver",
@@ -63,9 +63,9 @@ const TIERS = [
     id: "platinum" as const,
     name: "Platinum",
     coinsRequired: 10000,
-    borderColor: "border-purple-400",
-    badgeClass: "bg-purple-900/40 text-purple-400",
-    progressColor: "bg-purple-400",
+    borderColor: "border-brand-blue",
+    badgeClass: "bg-purple-900/40 text-brand-blue",
+    progressColor: "bg-brand-blue",
     icon: "💎",
     features: [
       "Everything in Gold",
@@ -111,11 +111,11 @@ export function PremiumCards({ currentTier }: Props) {
     <div className="space-y-8">
 
       {/* ── Earn-based explanation banner ─────────────────────────────── */}
-      <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-6 py-5 flex items-start gap-4">
+      <div className="rounded-2xl border border-amber-500/30 bg-primary/5 px-6 py-5 flex items-start gap-4">
         <span className="text-3xl mt-0.5">🪙</span>
         <div>
           <h3 className="font-bold text-amber-300 text-base">Tiers are earned, not bought</h3>
-          <p className="text-gray-400 text-sm mt-1 leading-relaxed">
+          <p className="text-[var(--neu-text-muted)] text-sm mt-1 leading-relaxed">
             NeyborHuud is free for everyone. Your tier badge is automatically upgraded as you
             accumulate HuudCoins through platform activity — no payment, no subscription.
             Stay active, help your neighbours, and watch your tier grow.
@@ -124,14 +124,14 @@ export function PremiumCards({ currentTier }: Props) {
       </div>
 
       {/* ── Current balance + progress bar ────────────────────────────── */}
-      <div className="rounded-2xl border border-gray-700 bg-[#1a1a2e] px-6 py-5 space-y-4">
+      <div className="rounded-2xl border border-black/[0.08] bg-brand-black px-6 py-5 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-400">Your HuudCoins balance</p>
-            <p className="text-3xl font-bold text-amber-400">🪙 {balance.toLocaleString()}</p>
+            <p className="text-sm text-[var(--neu-text-muted)]">Your HuudCoins balance</p>
+            <p className="text-3xl font-bold text-primary">🪙 {balance.toLocaleString()}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-400">Current tier</p>
+            <p className="text-sm text-[var(--neu-text-muted)]">Current tier</p>
             <p className="text-xl font-bold text-white">
               {activeTierDef.icon} {activeTierDef.name}
             </p>
@@ -141,14 +141,14 @@ export function PremiumCards({ currentTier }: Props) {
         {/* Progress to next tier */}
         {nextTierDef && (
           <div>
-            <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+            <div className="flex justify-between text-xs text-[var(--neu-text-muted)] mb-1.5">
               <span>{activeTierDef.name}</span>
               <span>
                 {nextTierDef.coinsRequired - balance} coins to {nextTierDef.name}
               </span>
               <span>{nextTierDef.name}</span>
             </div>
-            <div className="h-2.5 rounded-full bg-gray-800 overflow-hidden">
+            <div className="h-2.5 rounded-full bg-brand-black overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${nextTierDef.progressColor}`}
                 style={{
@@ -161,13 +161,13 @@ export function PremiumCards({ currentTier }: Props) {
                 }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1.5">
+            <p className="text-xs text-[var(--neu-text-muted)] mt-1.5">
               {nextTierDef.howToEarn}
             </p>
           </div>
         )}
         {!nextTierDef && (
-          <p className="text-sm text-purple-400 font-semibold text-center">
+          <p className="text-sm text-brand-blue font-semibold text-center">
             💎 You&apos;ve reached the highest tier — Platinum!
           </p>
         )}
@@ -183,16 +183,16 @@ export function PremiumCards({ currentTier }: Props) {
           return (
             <div
               key={tier.id}
-              className={`relative flex flex-col rounded-2xl border-2 bg-[#1a1a2e] p-5 transition-all ${
+              className={`relative flex flex-col rounded-2xl border-2 bg-brand-black p-5 transition-all ${
                 isCurrent
                   ? `${tier.borderColor} ring-2 ring-offset-2 ring-offset-[#0f0f1e] ring-${tier.borderColor.replace("border-", "")}`
                   : isUnlocked
                     ? tier.borderColor
-                    : "border-gray-800 opacity-60"
+                    : "border-black/[0.08] opacity-60"
               }`}
             >
               {tier.popular && isNext && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-blue-500 text-xs font-bold text-white whitespace-nowrap">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-brand-blue text-xs font-bold text-white whitespace-nowrap">
                   Next Goal
                 </div>
               )}
@@ -203,12 +203,12 @@ export function PremiumCards({ currentTier }: Props) {
                   {tier.icon} {tier.name}
                 </div>
                 {isCurrent && (
-                  <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                     Active
                   </span>
                 )}
                 {isUnlocked && !isCurrent && (
-                  <span className="text-xs font-bold text-gray-400 bg-gray-700/40 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold text-[var(--neu-text-muted)] bg-brand-black/40 px-2 py-0.5 rounded-full">
                     Earned
                   </span>
                 )}
@@ -221,7 +221,7 @@ export function PremiumCards({ currentTier }: Props) {
                 ) : (
                   <span className="text-lg font-bold text-white">
                     🪙 {tier.coinsRequired.toLocaleString()}
-                    <span className="text-sm font-normal text-gray-400"> coins</span>
+                    <span className="text-sm font-normal text-[var(--neu-text-muted)]"> coins</span>
                   </span>
                 )}
               </div>
@@ -229,8 +229,8 @@ export function PremiumCards({ currentTier }: Props) {
               {/* Features list */}
               <ul className="space-y-1.5 flex-1 mb-4">
                 {tier.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
-                    <span className="material-symbols-outlined text-green-400 text-base mt-0.5">
+                  <li key={f} className="flex items-start gap-2 text-sm text-[var(--neu-text-muted)]">
+                    <span className="material-symbols-outlined text-primary text-base mt-0.5">
                       check_circle
                     </span>
                     {f}
@@ -241,10 +241,10 @@ export function PremiumCards({ currentTier }: Props) {
               {/* Status footer */}
               <div className={`text-center py-2 rounded-xl text-xs font-semibold ${
                 isCurrent
-                  ? "bg-green-500/10 text-green-400"
+                  ? "bg-primary/10 text-primary"
                   : isUnlocked
-                    ? "bg-gray-700/40 text-gray-300"
-                    : "bg-gray-800 text-gray-500"
+                    ? "bg-brand-black/40 text-[var(--neu-text-muted)]"
+                    : "bg-brand-black text-[var(--neu-text-muted)]"
               }`}>
                 {isCurrent
                   ? "✓ Your current tier"
@@ -258,24 +258,24 @@ export function PremiumCards({ currentTier }: Props) {
       </div>
 
       {/* ── How to earn more HuudCoins ────────────────────────────────── */}
-      <div className="rounded-2xl border border-gray-700 bg-[#1a1a2e] px-6 py-5">
+      <div className="rounded-2xl border border-black/[0.08] bg-brand-black px-6 py-5">
         <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-amber-400">bolt</span>
+          <span className="material-symbols-outlined text-primary">bolt</span>
           How to earn more HuudCoins
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {EARN_ACTIONS.map((action) => (
             <div
               key={action.label}
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-[#0f0f1e] border border-gray-800 text-center"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-brand-black border border-black/[0.08] text-center"
             >
               <span className="text-2xl">{action.icon}</span>
-              <span className="text-xs text-gray-400 leading-tight">{action.label}</span>
-              <span className="text-xs font-bold text-amber-400">{action.coins}</span>
+              <span className="text-xs text-[var(--neu-text-muted)] leading-tight">{action.label}</span>
+              <span className="text-xs font-bold text-primary">{action.coins}</span>
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-600 mt-4 text-center">
+        <p className="text-xs text-[var(--neu-text-secondary)] mt-4 text-center">
           Coins are awarded daily with caps to keep the economy fair.
           Check in every day for streak bonuses!
         </p>

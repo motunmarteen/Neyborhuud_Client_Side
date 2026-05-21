@@ -82,7 +82,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                     {isAuthor && (
                         <button
                             onClick={handleDelete}
-                            className="rounded-full p-1.5 text-[var(--neu-text-muted)] transition-colors hover:bg-red-400/10 hover:text-red-600 dark:hover:text-red-300"
+                            className="rounded-full p-1.5 text-[var(--neu-text-muted)] transition-colors hover:bg-brand-red/10 hover:text-brand-red dark:hover:text-brand-red"
                             title="Delete comment"
                         >
                             <span className="material-symbols-outlined text-sm">delete</span>
@@ -117,7 +117,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                 <div className="mt-3 flex items-center gap-6 text-[var(--neu-text-muted)]">
                     <button
                         onClick={handleLike}
-                        className={`group flex items-center gap-2 transition-colors ${comment.isLiked ? 'text-pink-500 dark:text-pink-400' : 'hover:text-pink-500 dark:hover:text-pink-400'}`}
+                        className={`group flex items-center gap-2 transition-colors ${comment.isLiked ? 'text-brand-blue dark:text-pink-400' : 'hover:text-brand-blue dark:hover:text-pink-400'}`}
                     >
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center group-hover:bg-pink-400/10 transition-colors`}>
                             <span className={`material-symbols-outlined text-[18px] ${comment.isLiked ? 'fill-1' : ''}`}>favorite</span>

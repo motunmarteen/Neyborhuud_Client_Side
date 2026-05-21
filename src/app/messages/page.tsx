@@ -96,7 +96,7 @@ function ConvAvatar({ conv }: { conv: Conversation }) {
   }
   return (
     <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-semibold ${
-      isIncident ? 'bg-red-900/70 text-red-200' : isEmoji ? 'bg-gray-700 text-xl' : 'bg-blue-700 text-sm text-white'
+      isIncident ? 'bg-red-900/70 text-brand-red' : isEmoji ? 'bg-brand-black text-xl' : 'bg-blue-700 text-sm text-white'
     }`}>
       {initials}
     </div>
@@ -153,19 +153,19 @@ function NewChatModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 pt-20" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-900 p-4 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl border border-black/[0.08] bg-brand-black p-4 shadow-xl">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-semibold text-gray-100">New Message</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-200 text-lg leading-none">✕</button>
+          <h2 className="font-semibold text-[var(--neu-text-muted)]">New Message</h2>
+          <button onClick={onClose} className="text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)] text-lg leading-none">✕</button>
         </div>
-        <input ref={inputRef} type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search people…" className="w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
+        <input ref={inputRef} type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search people…" className="w-full rounded-xl border border-black/[0.08] bg-brand-black px-4 py-2.5 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:border-brand-blue focus:outline-none" />
         <div className="mt-3 flex max-h-72 flex-col overflow-y-auto">
-          {searching && <p className="py-4 text-center text-sm text-gray-400">Searching…</p>}
-          {!searching && query.trim() && results.length === 0 && <p className="py-4 text-center text-sm text-gray-400">No users found.</p>}
+          {searching && <p className="py-4 text-center text-sm text-[var(--neu-text-muted)]">Searching…</p>}
+          {!searching && query.trim() && results.length === 0 && <p className="py-4 text-center text-sm text-[var(--neu-text-muted)]">No users found.</p>}
           {!searching && results.map((u) => {
             const uid = u._id ?? u.id;
             return (
-              <button key={uid} onClick={() => startChat(uid)} disabled={!!startingId} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-gray-800 disabled:opacity-60">
+              <button key={uid} onClick={() => startChat(uid)} disabled={!!startingId} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-brand-black disabled:opacity-60">
                 {u.avatarUrl ? (
                   <img src={u.avatarUrl} alt={u.name} className="h-9 w-9 rounded-full object-cover" />
                 ) : (
@@ -174,10 +174,10 @@ function NewChatModal({ onClose }: { onClose: () => void }) {
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-gray-200">{u.name || u.username}</p>
-                  {u.name && u.username && <p className="truncate text-xs text-gray-500">@{u.username}</p>}
+                  <p className="truncate text-sm font-medium text-[var(--neu-text-muted)]">{u.name || u.username}</p>
+                  {u.name && u.username && <p className="truncate text-xs text-[var(--neu-text-muted)]">@{u.username}</p>}
                 </div>
-                {startingId === uid && <span className="ml-auto text-xs text-blue-400">Opening…</span>}
+                {startingId === uid && <span className="ml-auto text-xs text-brand-blue">Opening…</span>}
               </button>
             );
           })}
@@ -253,7 +253,7 @@ export default function MessagesPage() {
                 <button
                   onClick={() => setShowNewChat(true)}
                   title="New message"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-blue-500"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-brand-blue"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
@@ -267,7 +267,7 @@ export default function MessagesPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search conversations…"
-                className="w-full rounded-xl border border-[var(--neu-border)] bg-[var(--neu-card)] px-4 py-2.5 text-sm text-[var(--neu-text)] placeholder-[var(--neu-text-muted)] focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-xl border border-[var(--neu-border)] bg-[var(--neu-card)] px-4 py-2.5 text-sm text-[var(--neu-text)] placeholder-[var(--neu-text-muted)] focus:border-brand-blue focus:outline-none"
               />
 
               {/* List */}
@@ -284,7 +284,7 @@ export default function MessagesPage() {
                     {search ? 'No conversations match your search.' : 'No conversations yet.'}
                   </p>
                   {!search && (
-                    <button onClick={() => setShowNewChat(true)} className="mt-3 rounded-full bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-500">
+                    <button onClick={() => setShowNewChat(true)} className="mt-3 rounded-full bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-brand-blue">
                       Start a conversation
                     </button>
                   )}
@@ -311,10 +311,10 @@ export default function MessagesPage() {
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <p className={`truncate text-sm font-semibold ${isIncident ? 'text-red-200' : 'text-[var(--neu-text)]'}`}>
+                            <p className={`truncate text-sm font-semibold ${isIncident ? 'text-brand-red' : 'text-[var(--neu-text)]'}`}>
                               {getDisplayName(conv)}
                               {conv.isMuted && <span className="ml-1.5 text-xs opacity-50">🔇</span>}
-                              {conv.isPinned && <span className="ml-1 text-xs text-yellow-400">📌</span>}
+                              {conv.isPinned && <span className="ml-1 text-xs text-primary400">📌</span>}
                             </p>
                             {lastTime && (
                               <span className="shrink-0 text-xs text-[var(--neu-text-muted)]">{timeAgo(lastTime)}</span>
@@ -324,7 +324,7 @@ export default function MessagesPage() {
                           {/* Context badge — e.g. "Marketplace • iPhone 13" */}
                           {conv.contextType === 'marketplace' && (conv.contextLabel || conv.context?.productTitle) && (
                             <div className="mt-0.5 flex items-center gap-1.5">
-                              <span className="inline-flex items-center gap-1 rounded-full bg-teal-900/40 px-2 py-0.5 text-[10px] font-medium text-teal-200">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-teal-900/40 px-2 py-0.5 text-[10px] font-medium text-white/90">
                                 <span>🛍️</span>
                                 <span className="truncate max-w-[200px]">
                                   {conv.contextLabel ?? `Marketplace • ${conv.context?.productTitle}`}
@@ -341,7 +341,7 @@ export default function MessagesPage() {
                           {/* Jobs context badge — e.g. "Job • Frontend Developer" */}
                           {conv.contextType === 'jobs' && (conv.contextLabel || conv.context?.jobTitle) && (
                             <div className="mt-0.5 flex items-center gap-1.5">
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-900/40 px-2 py-0.5 text-[10px] font-medium text-emerald-200">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-900/40 px-2 py-0.5 text-[10px] font-medium text-white/90">
                                 <span>💼</span>
                                 <span className="truncate max-w-[200px]">
                                   {conv.contextLabel ?? `Job • ${conv.context?.jobTitle}`}

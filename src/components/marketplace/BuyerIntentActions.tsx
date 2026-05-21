@@ -71,7 +71,7 @@ function MakeOfferDialog({
             <button
               type="button"
               onClick={onClose}
-              className="neu-btn grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors"
+              className="mod-chip grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors"
               aria-label="Close"
             >
               <span className="material-symbols-outlined text-[20px]" style={{ color: "var(--neu-text-secondary)" }}>
@@ -80,10 +80,10 @@ function MakeOfferDialog({
             </button>
           </div>
 
-          <p className="mb-1 text-sm font-medium text-[#3D5A3E] dark:text-white/65">
+          <p className="mb-1 text-sm font-medium text-brand-green-dark/70 dark:text-white/65">
             Listed price
           </p>
-          <p className="mb-4 text-lg font-extrabold tabular-nums text-[#006F35] dark:text-emerald-300">
+          <p className="mb-4 text-lg font-extrabold tabular-nums text-[#006F35] dark:text-primary">
             {listedPriceLabel}
           </p>
 
@@ -91,7 +91,7 @@ function MakeOfferDialog({
             Your offer amount
           </label>
           <div className="relative">
-            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-semibold text-[#006F35] dark:text-emerald-400">
+            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-semibold text-[#006F35] dark:text-primary">
               ₦
             </span>
             <input
@@ -103,12 +103,12 @@ function MakeOfferDialog({
               value={offerAmount}
               onChange={(e) => onOfferAmountChange(e.target.value)}
               placeholder="0"
-              className="min-h-[52px] w-full rounded-2xl border-2 border-[var(--border-light)] bg-[var(--surface-light)] py-3 pl-10 pr-4 text-base font-semibold tabular-nums text-brand-black shadow-inner placeholder:text-[#3D5A3E]/40 transition-shadow focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 dark:border-white/15 dark:bg-white/5 dark:text-white dark:placeholder:text-white/30 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/15"
+              className="min-h-[52px] w-full rounded-2xl border-2 border-[var(--border-light)] bg-[var(--surface-light)] py-3 pl-10 pr-4 text-base font-semibold tabular-nums text-brand-black shadow-inner placeholder:text-brand-green-dark/70/40 transition-shadow focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 dark:border-white/15 dark:bg-white/5 dark:text-white dark:placeholder:text-white/30 dark:focus:border-primary dark:focus:ring-emerald-400/15"
               min="0"
               step="1000"
             />
           </div>
-          <p className="mt-2 text-xs leading-relaxed text-[#3D5A3E] dark:text-white/50">
+          <p className="mt-2 text-xs leading-relaxed text-brand-green-dark/70 dark:text-white/50">
             The seller will be notified and can accept, reject, or counter your offer.
           </p>
         </div>
@@ -236,8 +236,8 @@ export function BuyerIntentActions({
     }
     return (
       <div className="mt-6 space-y-3" aria-busy="true" aria-label="Loading account">
-        <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800" />
-        <div className="h-11 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800" />
+        <div className="h-12 w-full animate-pulse rounded-lg bg-brand-surface dark:bg-brand-black" />
+        <div className="h-11 w-full animate-pulse rounded-lg bg-brand-surface dark:bg-brand-black" />
       </div>
     );
   }
@@ -252,7 +252,7 @@ export function BuyerIntentActions({
             e.stopPropagation();
             router.push("/login");
           }}
-          className="w-full rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] py-2.5 text-center text-xs font-semibold text-[#006F35] shadow-[0_2px_12px_rgba(0,111,53,0.08)] backdrop-blur-xl transition-transform active:scale-[0.98] hover:bg-white dark:border-white/15 dark:bg-white/[0.08] dark:text-white dark:shadow-[0_0_24px_rgba(16,185,129,0.12)] dark:hover:bg-white/[0.12]"
+          className="w-full rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] py-2.5 text-center text-xs font-semibold text-[#006F35] shadow-[0_2px_12px_rgba(0,111,53,0.08)] backdrop-blur-xl transition-transform active:scale-[0.98] hover:bg-white dark:border-white/15 dark:bg-white/[0.08] dark:text-white dark:shadow-[0_0_24px_rgba(0,212,49,0.12)] dark:hover:bg-white/[0.12]"
         >
           Log in to buy
         </button>
@@ -262,7 +262,7 @@ export function BuyerIntentActions({
       <div className="mt-6 space-y-3">
         <button
           onClick={() => router.push("/login")}
-          className="w-full py-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
+          className="w-full py-4 bg-primary hover:bg-brand-green-dark text-white font-semibold rounded-lg transition-colors"
         >
           Login to Buy
         </button>
@@ -344,7 +344,7 @@ export function BuyerIntentActions({
               void handleRequestToBuy();
             }}
             disabled={busy}
-            className="relative flex min-h-[44px] w-full min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full border border-primary/35 bg-gradient-to-r from-primary/18 to-[#006F35]/14 px-2.5 py-2.5 text-xs font-bold tracking-tight text-[#006F35] shadow-[0_4px_18px_rgba(0,212,49,0.18)] backdrop-blur-xl transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px] sm:px-3 dark:border-emerald-400/25 dark:from-emerald-500/25 dark:to-teal-500/20 dark:text-emerald-100 dark:shadow-[0_0_28px_rgba(16,185,129,0.18)]"
+            className="relative flex min-h-[44px] w-full min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full border border-primary/35 bg-gradient-to-r from-primary/18 to-[#006F35]/14 px-2.5 py-2.5 text-xs font-bold tracking-tight text-[#006F35] shadow-[0_4px_18px_rgba(0,212,49,0.18)] backdrop-blur-xl transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px] sm:px-3 dark:border-primary/25 dark:from-emerald-500/25 dark:to-teal-500/20 dark:text-emerald-100 dark:shadow-[0_0_28px_rgba(0,212,49,0.18)]"
           >
             {createOrder.isPending || makeOffer.isPending ? (
               <span className="material-symbols-outlined animate-spin shrink-0 text-[18px]">progress_activity</span>
@@ -394,7 +394,7 @@ export function BuyerIntentActions({
         type="button"
         onClick={() => void handleRequestToBuy()}
         disabled={createOrder.isPending || makeOffer.isPending}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 py-4 font-semibold text-white transition-colors hover:bg-green-600 disabled:bg-gray-600"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-4 font-semibold text-white transition-colors hover:bg-brand-green-dark disabled:bg-brand-surface"
       >
         {createOrder.isPending ? (
           <>
@@ -429,7 +429,7 @@ export function BuyerIntentActions({
         type="button"
         onClick={() => void handleContactSeller()}
         disabled={contactingSeller}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-500 py-3 font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -441,14 +441,14 @@ export function BuyerIntentActions({
         <button
           type="button"
           onClick={() => router.push("/marketplace/my-orders")}
-          className="flex-1 rounded-lg bg-gray-800 px-4 py-2 text-sm text-white transition-colors hover:bg-gray-700"
+          className="flex-1 rounded-lg bg-brand-black px-4 py-2 text-sm text-white transition-colors hover:bg-brand-black"
         >
           My Orders
         </button>
         <button
           type="button"
           onClick={() => router.push("/marketplace/my-offers")}
-          className="flex-1 rounded-lg bg-gray-800 px-4 py-2 text-sm text-white transition-colors hover:bg-gray-700"
+          className="flex-1 rounded-lg bg-brand-black px-4 py-2 text-sm text-white transition-colors hover:bg-brand-black"
         >
           My Offers
         </button>

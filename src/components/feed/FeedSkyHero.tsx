@@ -414,7 +414,7 @@ function NewsTicker({ items, theme }: { items: NewsItem[]; theme: SkyTheme }) {
         <div className="flex items-center gap-1.5 mb-0.5">
           <span
             className="shrink-0 text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md"
-            style={{ background: '#ef4444', color: '#fff' }}
+            style={{ background: '#FF0000', color: '#fff' }}
           >
             LIVE
           </span>

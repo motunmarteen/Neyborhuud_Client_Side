@@ -5,36 +5,16 @@
  */
 
 import { MediaItem, Post, PostAuthor } from '@/types/api';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { useFollow } from '@/hooks/useFollow';
 import { chatService } from '@/services/chat.service';
 import ShareModal from './ShareModal';
-
-// ── Ambient sphere palettes (text-only mode background glow) ──────────────────
-const SPHERE_PALETTES: Record<string, [string, string, string]> = {
-    post:         ['rgba(99,102,241,0.45)',  'rgba(168,85,247,0.35)',  'rgba(59,130,246,0.25)'],
-    event:        ['rgba(139,92,246,0.45)',  'rgba(99,102,241,0.35)',  'rgba(236,72,153,0.25)'],
-    marketplace:  ['rgba(16,185,129,0.45)',  'rgba(5,150,105,0.35)',   'rgba(20,184,166,0.25)'],
-    emergency:    ['rgba(239,68,68,0.50)',   'rgba(249,115,22,0.40)',  'rgba(234,179,8,0.25)'],
-    fyi:          ['rgba(245,158,11,0.45)',  'rgba(234,179,8,0.35)',   'rgba(249,115,22,0.25)'],
-    help_request: ['rgba(16,185,129,0.45)',  'rgba(5,150,105,0.35)',   'rgba(34,197,94,0.25)'],
-    gossip:       ['rgba(236,72,153,0.45)',  'rgba(168,85,247,0.35)',  'rgba(239,68,68,0.25)'],
-    job:          ['rgba(59,130,246,0.45)',  'rgba(99,102,241,0.35)',  'rgba(14,165,233,0.25)'],
-};
-
-// ── Content type badge config ──────────────────────────────────────────────────
-const TYPE_BADGE: Record<string, { label: string; cls: string }> = {
-    event:        { label: 'EVENT',     cls: 'bg-purple-500/20 text-purple-200 border-purple-400/25' },
-    marketplace:  { label: 'MARKET',    cls: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/25' },
-    emergency:    { label: 'EMERGENCY', cls: 'bg-red-500/25 text-red-200 border-red-400/30' },
-    fyi:          { label: 'FYI',       cls: 'bg-amber-500/20 text-amber-200 border-amber-400/25' },
-    help_request: { label: 'HELP',      cls: 'bg-green-500/20 text-green-200 border-green-400/25' },
-    gossip:       { label: 'GOSSIP',    cls: 'bg-pink-500/20 text-pink-200 border-pink-400/25' },
-    job:          { label: 'JOB',       cls: 'bg-blue-500/20 text-blue-200 border-blue-400/25' },
-};
+import { SPHERE_PALETTES, TYPE_BADGE, EMERGENCY_ACTION_CLS } from '@/lib/brand-styles';
+import { useLongPress } from '@/hooks/useLongPress';
+import { LongPressMenu, type LongPressMenuItem } from '@/components/ui/LongPressMenu';
 
 const CARD_HEIGHT = '90vh';
 
@@ -89,12 +69,12 @@ function GlassBtn({ icon, count, active, activeIconClass, onClick, label, filled
 // ── Emergency action buttons ───────────────────────────────────────────────────
 function EmergencyActions({ post, onEmergencyAction }: { post: Post; onEmergencyAction: (a: string) => void }) {
     const actions = [
-        { key: 'acknowledge', icon: 'visibility', label: 'Seen', active: post.isAcknowledged, cls: 'bg-blue-500/25 text-blue-200 border-blue-400/30' },
-        { key: 'aware', icon: 'notifications_active', label: 'Aware', active: post.isAware, cls: 'bg-amber-500/25 text-amber-200 border-amber-400/30' },
-        { key: 'nearby', icon: 'location_on', label: 'Nearby', active: post.isNearby, cls: 'bg-green-500/25 text-green-200 border-green-400/30' },
-        { key: 'safe', icon: 'shield', label: 'Safe', active: post.isSafe, cls: 'bg-emerald-500/25 text-emerald-200 border-emerald-400/30' },
-        { key: 'confirm', icon: 'check_circle', label: 'Confirm', active: post.confirmDisputeAction === 'confirm', cls: 'bg-teal-500/25 text-teal-200 border-teal-400/30' },
-        { key: 'dispute', icon: 'cancel', label: 'Dispute', active: post.confirmDisputeAction === 'dispute', cls: 'bg-red-500/25 text-red-200 border-red-400/30' },
+        { key: 'acknowledge', icon: 'visibility', label: 'Seen', active: post.isAcknowledged, cls: EMERGENCY_ACTION_CLS.acknowledge },
+        { key: 'aware', icon: 'notifications_active', label: 'Aware', active: post.isAware, cls: EMERGENCY_ACTION_CLS.aware },
+        { key: 'nearby', icon: 'location_on', label: 'Nearby', active: post.isNearby, cls: EMERGENCY_ACTION_CLS.nearby },
+        { key: 'safe', icon: 'shield', label: 'Safe', active: post.isSafe, cls: EMERGENCY_ACTION_CLS.safe },
+        { key: 'confirm', icon: 'check_circle', label: 'Confirm', active: post.confirmDisputeAction === 'confirm', cls: EMERGENCY_ACTION_CLS.confirm },
+        { key: 'dispute', icon: 'cancel', label: 'Dispute', active: post.confirmDisputeAction === 'dispute', cls: EMERGENCY_ACTION_CLS.dispute },
     ].filter(a => !post.availableActions || post.availableActions.includes(a.key));
 
     return (
@@ -151,7 +131,10 @@ export function XPostCard({
     const [imageError, setImageError] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [showShare, setShowShare] = useState(false);
+    const [longPressOpen, setLongPressOpen] = useState(false);
     const router = useRouter();
+
+    const longPress = useLongPress(() => setLongPressOpen(true));
 
     const author = post.author as PostAuthor;
     const authorName = author?.name || 'Anonymous';
@@ -228,6 +211,47 @@ export function XPostCard({
         if (!target.closest('button') && !target.closest('a')) onCardClick?.();
     };
 
+    const longPressItems: LongPressMenuItem[] = useMemo(() => {
+        const postId = post.id ?? (post as { _id?: string })._id ?? '';
+        const items: LongPressMenuItem[] = [
+            { id: 'save', label: 'Save post', icon: 'bookmark', onSelect: onSave },
+            { id: 'share', label: 'Share', icon: 'share', onSelect: () => setShowShare(true) },
+            { id: 'comment', label: 'Comment', icon: 'chat_bubble', onSelect: onComment },
+        ];
+        if (onReport && postId) {
+            items.push({ id: 'report', label: 'Report', icon: 'flag', danger: true, onSelect: () => onReport(postId) });
+        }
+        if (isOwnerPost && onEdit) {
+            items.push({ id: 'edit', label: 'Edit', icon: 'edit', onSelect: () => onEdit(post) });
+        }
+        if (isOwnerPost && onDelete && postId) {
+            items.push({ id: 'delete', label: 'Delete', icon: 'delete', danger: true, onSelect: () => onDelete(postId) });
+        }
+        if (onPin && postId) {
+            items.push({ id: 'pin', label: 'Pin post', icon: 'push_pin', onSelect: () => onPin(postId) });
+        }
+        return items;
+    }, [post, onSave, onComment, onReport, onEdit, onDelete, onPin, isOwnerPost]);
+
+    const articleGestureProps = {
+        onPointerDown: longPress.onPointerDown,
+        onPointerUp: longPress.onPointerUp,
+        onPointerLeave: longPress.onPointerLeave,
+        onPointerCancel: longPress.onPointerCancel,
+        onContextMenu: longPress.onContextMenu,
+        onClick: (e: React.MouseEvent) => {
+            if (longPress.didLongPress()) {
+                longPress.resetLongPress();
+                return;
+            }
+            handleCardClick(e);
+        },
+    };
+
+    const longPressMenu = (
+        <LongPressMenu open={longPressOpen} onClose={() => setLongPressOpen(false)} items={longPressItems} />
+    );
+
     // ── Shared: Top utility layer ─────────────────────────────────────────────
     const authorHeader = (
         <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 px-4 pt-4 pb-20 bg-gradient-to-b from-black/60 via-black/18 to-transparent">
@@ -280,12 +304,12 @@ export function XPostCard({
                                 </button>
                             )}
                             {isOwner && onDelete && (
-                                <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-red-400 transition-colors hover:bg-white/8">
+                                <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-brand-red transition-colors hover:bg-white/8">
                                     <span className="material-symbols-outlined text-[17px]">delete</span> Delete
                                 </button>
                             )}
                             {isOwner && onPin && (
-                                <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-amber-400 transition-colors hover:bg-white/8">
+                                <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-primary transition-colors hover:bg-white/8">
                                     <span className="material-symbols-outlined text-[17px]">push_pin</span> {post.isPinned ? 'Extend Pin' : 'Pin to Feed'}
                                 </button>
                             )}
@@ -313,7 +337,7 @@ export function XPostCard({
                 icon="favorite"
                 count={post.likes || undefined}
                 active={post.isLiked === true}
-                activeIconClass="text-pink-300"
+                activeIconClass="text-brand-blue"
                 filled
                 onClick={(e) => { e.stopPropagation(); onLike(); }}
             />
@@ -339,7 +363,7 @@ export function XPostCard({
                     icon="thumb_up"
                     count={(post.helpfulCount || 0) || undefined}
                     active={post.isHelpful === true}
-                    activeIconClass="text-emerald-300"
+                    activeIconClass="text-primary"
                     filled
                     onClick={(e) => { e.stopPropagation(); onHelpful(); }}
                 />
@@ -372,7 +396,7 @@ export function XPostCard({
                             <button
                                 onClick={(e) => { e.stopPropagation(); toggleFollow(); }}
                                 disabled={isFollowPending}
-                                className="absolute -bottom-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-black/30 bg-emerald-400 text-black shadow-lg transition-transform hover:scale-110 active:scale-95"
+                                className="absolute -bottom-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-black/30 bg-primary text-black shadow-lg transition-transform hover:scale-110 active:scale-95"
                             >
                                 <span className="material-symbols-outlined text-[11px] font-bold">add</span>
                             </button>
@@ -431,10 +455,10 @@ export function XPostCard({
             {(post as any).eventTime && <span className="text-[11px] text-white/65">⏰ {(post as any).eventTime}</span>}
             {(post as any).venue?.name && <span className="text-[11px] text-white/65">📍 {(post as any).venue.name}</span>}
             {(post as any).ticketInfo === 'paid' && (post as any).ticketPrice && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 font-bold">₦{Number((post as any).ticketPrice).toLocaleString()}</span>
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-blue/30 text-white/90 font-bold">₦{Number((post as any).ticketPrice).toLocaleString()}</span>
             )}
             {(post as any).ticketInfo === 'free' && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-500/30 text-green-300 font-bold">FREE</span>
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/30 text-primary font-bold">FREE</span>
             )}
             {(post as any).eventCategory && (
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{(post as any).eventCategory}</span>
@@ -447,17 +471,17 @@ export function XPostCard({
             className="flex flex-wrap items-center gap-2 p-3 rounded-2xl"
             style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
         >
-            {(post as any).price != null && <span className="text-base font-bold text-emerald-300">₦{Number((post as any).price).toLocaleString()}</span>}
-            {(post as any).isNegotiable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 font-medium">Negotiable</span>}
+            {(post as any).price != null && <span className="text-base font-bold text-primary">₦{Number((post as any).price).toLocaleString()}</span>}
+            {(post as any).isNegotiable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/20 text-white/90 font-medium">Negotiable</span>}
             {(post as any).itemCondition && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 font-medium capitalize">
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/20 text-white/90 font-medium capitalize">
                     {(post as any).itemCondition === 'used' ? 'Tokunbo' : (post as any).itemCondition}
                 </span>
             )}
             {(post as any).itemCategory && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium">{(post as any).itemCategory}</span>}
             {(post as any).deliveryOption && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{(post as any).deliveryOption}</span>}
             {(post as any).availability && (post as any).availability !== 'available' && (
-                <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${(post as any).availability === 'sold' ? 'bg-red-500/30 text-red-300' : 'bg-yellow-500/30 text-yellow-300'}`}>
+                <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${(post as any).availability === 'sold' ? 'bg-brand-red/30 text-brand-red' : 'bg-primary/30 text-primary'}`}>
                     {(post as any).availability === 'sold' ? 'SOLD' : 'RESERVED'}
                 </span>
             )}
@@ -489,10 +513,10 @@ export function XPostCard({
     ) : null;
 
     const safetyAlertPill = isSafetyAlert ? (
-        <div className="absolute left-4 top-[64px] z-30 flex items-center gap-1.5 rounded-full border border-orange-400/30 bg-orange-500/25 px-3 py-1.5 backdrop-blur-md">
-            <span className="material-symbols-outlined text-[14px] text-orange-300">warning</span>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-orange-100">Safety Alert</span>
-            {severityLabel && <span className="rounded-full bg-orange-500/30 px-1.5 py-0.5 text-[10px] font-bold text-orange-100">{severityLabel}</span>}
+        <div className="absolute left-4 top-[64px] z-30 flex items-center gap-1.5 rounded-full border border-brand-red/30 bg-brand-red/25 px-3 py-1.5 backdrop-blur-md">
+            <span className="material-symbols-outlined text-[14px] text-brand-red300">warning</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-red100">Safety Alert</span>
+            {severityLabel && <span className="rounded-full bg-brand-red/30 px-1.5 py-0.5 text-[10px] font-bold text-brand-red100">{severityLabel}</span>}
         </div>
     ) : null;
 
@@ -538,10 +562,10 @@ export function XPostCard({
                 aria-hidden
                 className="absolute inset-0 opacity-70"
                 style={{
-                    background: 'radial-gradient(circle at 84% 44%, rgba(0,255,190,0.18), transparent 28%), radial-gradient(circle at 8% 88%, rgba(0,135,81,0.20), transparent 34%)',
+                    background: 'radial-gradient(circle at 84% 44%, rgba(0,255,190,0.18), transparent 28%), radial-gradient(circle at 8% 88%, rgba(0,111,53,0.20), transparent 34%)',
                 }}
             />
-            <div aria-hidden className="pointer-events-none absolute -right-24 bottom-8 h-72 w-72 rounded-full border border-emerald-300/20 blur-[0.3px]" />
+            <div aria-hidden className="pointer-events-none absolute -right-24 bottom-8 h-72 w-72 rounded-full border border-primary/30/20 blur-[0.3px]" />
         </div>
     ) : null;
 
@@ -550,17 +574,17 @@ export function XPostCard({
         return (
             <>
             <article
-                className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-orange-500/50' : ''}`}
-                style={{ background: '#030a0b', height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
-                onClick={handleCardClick}
+                className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-brand-red/50' : ''}`}
+                style={{ background: 'var(--brand-black)', height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
+                {...articleGestureProps}
             >
                 {/* Ambient sphere background */}
                 <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
                     <div className="absolute -top-28 -left-28 h-[360px] w-[360px] rounded-full animate-soft-float" style={{ background: spheres[0], filter: 'blur(96px)' }} />
                     <div className="absolute top-[28%] -right-24 h-[340px] w-[340px] rounded-full" style={{ background: spheres[1], filter: 'blur(88px)' }} />
                     <div className="absolute -bottom-24 left-[8%] h-[320px] w-[320px] rounded-full animate-soft-float" style={{ background: spheres[2], filter: 'blur(82px)', animationDelay: '1.2s' }} />
-                    <div className="absolute -right-24 bottom-20 h-80 w-80 rounded-full border border-emerald-300/20" />
-                    <div className="absolute -right-10 bottom-16 h-96 w-96 rounded-full border border-teal-300/15" />
+                    <div className="absolute -right-24 bottom-20 h-80 w-80 rounded-full border border-primary/30/20" />
+                    <div className="absolute -right-10 bottom-16 h-96 w-96 rounded-full border border-brand-green-dark/30/15" />
                 </div>
                 {/* Subtle vignette */}
                 <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 38%, transparent 26%, rgba(0,0,0,0.62) 100%), linear-gradient(180deg, rgba(0,0,0,0.60), transparent 30%, rgba(0,0,0,0.86))' }} />
@@ -581,9 +605,9 @@ export function XPostCard({
                     {post.priority && post.priority !== 'normal' && (
                         <span
                             className={`self-start text-[10px] px-2.5 py-1 rounded-full font-bold backdrop-blur-sm border ${
-                                post.priority === 'critical' ? 'bg-red-500/25 text-red-200 border-red-400/25' :
-                                post.priority === 'high' ? 'bg-orange-500/25 text-orange-200 border-orange-400/25' :
-                                'bg-blue-500/25 text-blue-200 border-blue-400/25'
+                                post.priority === 'critical' ? 'bg-brand-red/25 text-brand-red border-brand-red/25' :
+                                post.priority === 'high' ? 'bg-brand-red/25 text-brand-red border-brand-red/25' :
+                                'bg-brand-blue/25 text-brand-blue border-brand-blue/25'
                             }`}
                         >
                             {post.priority.charAt(0).toUpperCase() + post.priority.slice(1)} Priority
@@ -593,7 +617,7 @@ export function XPostCard({
                     {/* Main text */}
                     <p
                         className={`whitespace-pre-wrap break-words font-black tracking-[-0.035em] text-white ${textSizeClass}`}
-                        style={{ textShadow: '0 3px 34px rgba(0,0,0,0.65), 0 0 34px rgba(16,185,129,0.18)' }}
+                        style={{ textShadow: '0 3px 34px rgba(0,0,0,0.65), 0 0 34px rgba(0,212,49,0.18)' }}
                     >
                         {textContent}
                     </p>
@@ -605,7 +629,7 @@ export function XPostCard({
                     {post.culturalContext && post.culturalContext.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
                             {post.culturalContext.map((ctx, i) => (
-                                <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-500/20 text-purple-200 border border-purple-400/20 backdrop-blur-sm">
+                                <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-brand-blue/20 text-white/90 border border-brand-blue/20 backdrop-blur-sm">
                                     <span className="material-symbols-outlined text-[12px]">language</span>
                                     {ctx}
                                 </span>
@@ -618,7 +642,7 @@ export function XPostCard({
                     {post.fyiStatus && post.fyiStatus !== 'active' && (
                         <span className={`self-start text-[10px] px-2.5 py-1 rounded-full font-bold backdrop-blur-sm border ${
                             ['found','returned','resolved'].includes(post.fyiStatus)
-                                ? 'bg-green-500/25 text-green-200 border-green-400/20'
+                                ? 'bg-primary/25 text-primary border-brand-green-dark/20'
                                 : 'bg-white/10 text-white/60 border-white/10'
                         }`}>
                             {post.fyiStatus.charAt(0).toUpperCase() + post.fyiStatus.slice(1)}
@@ -626,7 +650,7 @@ export function XPostCard({
                     )}
 
                     {post.expiresAt && (
-                        <span className="self-start text-[10px] px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-200 font-medium border border-yellow-400/20 backdrop-blur-sm">
+                        <span className="self-start text-[10px] px-2.5 py-1 rounded-full bg-primary/20 text-primary200 font-medium border border-yellow-400/20 backdrop-blur-sm">
                             Expires {new Date(post.expiresAt).toLocaleDateString()}
                         </span>
                     )}
@@ -648,6 +672,7 @@ export function XPostCard({
             {showShare && (
                 <ShareModal postId={post.id ?? (post as any)._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
             )}
+            {longPressMenu}
             </>
         );
     }
@@ -657,9 +682,9 @@ export function XPostCard({
         return (
             <>
             <article
-                className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-orange-500/50' : ''}`}
+                className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-brand-red/50' : ''}`}
                 style={{ height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
-                onClick={handleCardClick}
+                {...articleGestureProps}
             >
                 {mediaBackground}
 
@@ -681,6 +706,7 @@ export function XPostCard({
             {showShare && (
                 <ShareModal postId={post.id ?? (post as any)._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
             )}
+            {longPressMenu}
             </>
         );
     }
@@ -689,9 +715,9 @@ export function XPostCard({
     return (
         <>
         <article
-            className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-orange-500/50' : ''}`}
+            className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-brand-red/50' : ''}`}
             style={{ height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
-            onClick={handleCardClick}
+            {...articleGestureProps}
         >
             {mediaBackground}
 
@@ -713,6 +739,7 @@ export function XPostCard({
         {showShare && (
             <ShareModal postId={post.id ?? (post as any)._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
         )}
+        {longPressMenu}
         </>
     );
 }

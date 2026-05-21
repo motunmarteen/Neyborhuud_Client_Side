@@ -32,13 +32,13 @@ function txIcon(type: string) {
 }
 
 function txColor(amount: number) {
-  return amount >= 0 ? "text-yellow-400" : "text-red-400";
+  return amount >= 0 ? "text-primary400" : "text-brand-red";
 }
 
 function txBg(amount: number) {
   return amount >= 0
-    ? "bg-yellow-500/15 text-yellow-400"
-    : "bg-red-500/15 text-red-400";
+    ? "bg-primary/15 text-primary400"
+    : "bg-brand-red/15 text-brand-red";
 }
 
 function formatDate(iso: string) {
@@ -55,15 +55,15 @@ function formatDate(iso: string) {
 
 function EarnRow({ icon, label, amount }: { icon: string; label: string; amount: string }) {
   return (
-    <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2">
+    <div className="flex items-center gap-2 bg-brand-black/50 rounded-lg px-3 py-2">
       <span
-        className="material-symbols-outlined text-[16px] text-purple-400 shrink-0"
+        className="material-symbols-outlined text-[16px] text-brand-blue shrink-0"
         style={{ fontVariationSettings: "'FILL' 1" }}
       >
         {icon}
       </span>
-      <p className="flex-1 text-xs text-gray-300 truncate">{label}</p>
-      <span className="text-xs font-bold text-yellow-400 shrink-0">{amount}</span>
+      <p className="flex-1 text-xs text-[var(--neu-text-muted)] truncate">{label}</p>
+      <span className="text-xs font-bold text-primary400 shrink-0">{amount}</span>
     </div>
   );
 }
@@ -121,23 +121,23 @@ export default function WalletPage() {
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
 
-        <div className="flex-1 overflow-y-auto bg-[#0f0f1e] text-white">
+        <div className="flex-1 overflow-y-auto bg-brand-black text-white">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-[#1a1a2e] border-b border-gray-800 backdrop-blur-md bg-opacity-95">
+          <div className="sticky top-0 z-10 bg-brand-black border-b border-black/[0.08] backdrop-blur-md bg-opacity-95">
             <div className="max-w-3xl mx-auto px-4 py-4">
               <div className="flex items-center gap-3">
                 <Link
                   href="/gamification"
-                  className="p-1.5 rounded-lg hover:bg-gray-800 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-brand-black transition-colors"
                   aria-label="Back to Gamification"
                 >
-                  <span className="material-symbols-outlined text-[20px] text-gray-400">arrow_back</span>
+                  <span className="material-symbols-outlined text-[20px] text-[var(--neu-text-muted)]">arrow_back</span>
                 </Link>
                 <div>
                   <h1 className="text-xl font-bold flex items-center gap-2">
                     <span>🪙</span> HuudCoins Wallet
                   </h1>
-                  <p className="text-xs text-gray-400 mt-0.5">Your coin balance &amp; history</p>
+                  <p className="text-xs text-[var(--neu-text-muted)] mt-0.5">Your coin balance &amp; history</p>
                 </div>
               </div>
             </div>
@@ -146,30 +146,30 @@ export default function WalletPage() {
           <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
             {/* Balance card */}
             <div className="bg-gradient-to-br from-yellow-500/20 via-yellow-400/10 to-transparent border border-yellow-500/30 rounded-2xl p-6">              {wallet.isLoading ? (
-                <div className="h-16 animate-pulse bg-gray-800 rounded-xl" />
+                <div className="h-16 animate-pulse bg-brand-black rounded-xl" />
               ) : wallet.isError ? (
-                <p className="text-sm text-gray-500 text-center py-4">
+                <p className="text-sm text-[var(--neu-text-muted)] text-center py-4">
                   Balance unavailable — backend coming soon
                 </p>
               ) : (
                 <>
-                  <p className="text-sm text-yellow-400/80 font-semibold uppercase tracking-widest mb-1">
+                  <p className="text-sm text-primary400/80 font-semibold uppercase tracking-widest mb-1">
                     Current Balance
                   </p>
-                  <p className="text-5xl font-extrabold text-yellow-300 tabular-nums">
+                  <p className="text-5xl font-extrabold text-primary tabular-nums">
                     {balance.toLocaleString()}
-                    <span className="text-2xl ml-2 text-yellow-500/60">HC</span>
+                    <span className="text-2xl ml-2 text-primary/60">HC</span>
                   </p>
                   <div className="flex gap-6 mt-4 pt-4 border-t border-yellow-500/20">
                     <div>
-                      <p className="text-xs text-gray-500">Total Earned</p>
-                      <p className="text-base font-bold text-green-400 tabular-nums">
+                      <p className="text-xs text-[var(--neu-text-muted)]">Total Earned</p>
+                      <p className="text-base font-bold text-primary tabular-nums">
                         +{totalEarned.toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Total Spent</p>
-                      <p className="text-base font-bold text-red-400 tabular-nums">
+                      <p className="text-xs text-[var(--neu-text-muted)]">Total Spent</p>
+                      <p className="text-base font-bold text-brand-red tabular-nums">
                         -{totalSpent.toLocaleString()}
                       </p>
                     </div>
@@ -179,15 +179,15 @@ export default function WalletPage() {
             </div>
 
             {/* Main Tab Navigation */}
-            <div className="flex gap-1 rounded-2xl bg-[#1a1a2e] border border-gray-800 p-1">
+            <div className="flex gap-1 rounded-2xl bg-brand-black border border-black/[0.08] p-1">
               {(["activity", "spends"] as MainTab[]).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setMainTab(tab)}
                   className={`flex-1 rounded-xl py-2 text-sm font-bold transition-colors capitalize ${
                     mainTab === tab
-                      ? "bg-amber-500 text-white shadow"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-primary text-white shadow"
+                      : "text-[var(--neu-text-muted)] hover:text-white"
                   }`}
                 >
                   {tab === "activity" ? "🪙 Activity" : "💸 Coin Spends"}
@@ -198,16 +198,16 @@ export default function WalletPage() {
             {mainTab === "activity" && (
               <>
             {/* How to earn */}
-            <div className="bg-[#1a1a2e] border border-gray-800 rounded-xl p-4">
+            <div className="bg-brand-black border border-black/[0.08] rounded-xl p-4">
               <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-purple-400" style={{ fontVariationSettings: "'FILL' 1" }}>
+                <span className="material-symbols-outlined text-[18px] text-brand-blue" style={{ fontVariationSettings: "'FILL' 1" }}>
                   tips_and_updates
                 </span>
                 Ways to Earn HuudCoins
               </h2>
 
               {/* Category: Daily & Social */}
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Daily &amp; Social</p>
+              <p className="text-[11px] font-bold text-[var(--neu-text-muted)] uppercase tracking-widest mb-2">Daily &amp; Social</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {[
                   { icon: "today", label: "Daily check-in", amount: "+10 HC" },
@@ -224,7 +224,7 @@ export default function WalletPage() {
               </div>
 
               {/* Category: Marketplace */}
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Marketplace</p>
+              <p className="text-[11px] font-bold text-[var(--neu-text-muted)] uppercase tracking-widest mb-2">Marketplace</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {[
                   { icon: "storefront", label: "List an item", amount: "+10 HC" },
@@ -236,7 +236,7 @@ export default function WalletPage() {
               </div>
 
               {/* Category: Events & Jobs */}
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Events &amp; Jobs</p>
+              <p className="text-[11px] font-bold text-[var(--neu-text-muted)] uppercase tracking-widest mb-2">Events &amp; Jobs</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {[
                   { icon: "event", label: "Create an event", amount: "+15 HC" },
@@ -249,7 +249,7 @@ export default function WalletPage() {
               </div>
 
               {/* Category: Services */}
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Services</p>
+              <p className="text-[11px] font-bold text-[var(--neu-text-muted)] uppercase tracking-widest mb-2">Services</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {[
                   { icon: "handyman", label: "Book a service", amount: "+10 HC" },
@@ -260,7 +260,7 @@ export default function WalletPage() {
               </div>
 
               {/* Category: Achievements */}
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Achievements</p>
+              <p className="text-[11px] font-bold text-[var(--neu-text-muted)] uppercase tracking-widest mb-2">Achievements</p>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { icon: "military_tech", label: "Earn a badge", amount: "+50 HC" },
@@ -275,12 +275,12 @@ export default function WalletPage() {
             </div>
 
             {/* Ways to Spend */}
-            <div className="bg-[#1a1a2e] border border-amber-500/20 rounded-xl p-4">
+            <div className="bg-brand-black border border-amber-500/20 rounded-xl p-4">
               <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                 <span className="text-lg">🪙</span>
                 Ways to Spend HuudCoins
               </h2>
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Boost &amp; Visibility</p>
+              <p className="text-[11px] font-bold text-[var(--neu-text-muted)] uppercase tracking-widest mb-2">Boost &amp; Visibility</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {[
                   { icon: "storefront",   label: "Boost marketplace listing",  amount: "300–1,500 HC" },
@@ -289,24 +289,24 @@ export default function WalletPage() {
                   { icon: "event",        label: "Boost an event",              amount: "150–300 HC"   },
                   { icon: "push_pin",     label: "Pin a post to your feed",     amount: "100–300 HC"   },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-start gap-2 rounded-lg bg-amber-500/10 p-2">
-                    <span className="material-symbols-outlined text-[18px] text-amber-400 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  <div key={item.label} className="flex items-start gap-2 rounded-lg bg-primary/10 p-2">
+                    <span className="material-symbols-outlined text-[18px] text-primary mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>
                       {item.icon}
                     </span>
                     <div className="min-w-0">
-                      <p className="text-[11px] text-gray-300 leading-tight">{item.label}</p>
-                      <p className="text-[11px] font-bold text-amber-400">{item.amount}</p>
+                      <p className="text-[11px] text-[var(--neu-text-muted)] leading-tight">{item.label}</p>
+                      <p className="text-[11px] font-bold text-primary">{item.amount}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Community</p>
+              <p className="text-[11px] font-bold text-[var(--neu-text-muted)] uppercase tracking-widest mb-2">Community</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 p-2">
+                <div className="flex items-start gap-2 rounded-lg bg-primary/10 p-2">
                   <span className="text-[18px]">🎁</span>
                   <div className="min-w-0">
-                    <p className="text-[11px] text-gray-300 leading-tight">Tip a neighbour</p>
-                    <p className="text-[11px] font-bold text-amber-400">50 / 100 / 200 / 500 HC</p>
+                    <p className="text-[11px] text-[var(--neu-text-muted)] leading-tight">Tip a neighbour</p>
+                    <p className="text-[11px] font-bold text-primary">50 / 100 / 200 / 500 HC</p>
                   </div>
                 </div>
               </div>
@@ -324,7 +324,7 @@ export default function WalletPage() {
                       className={`text-xs px-3 py-1 rounded-full font-semibold transition-colors capitalize ${
                         filter === f
                           ? "bg-purple-600 text-white"
-                          : "text-gray-400 hover:text-white hover:bg-gray-800"
+                          : "text-[var(--neu-text-muted)] hover:text-white hover:bg-brand-black"
                       }`}
                     >
                       {f}
@@ -336,18 +336,18 @@ export default function WalletPage() {
               {txQuery.isLoading ? (
                 <div className="space-y-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-14 animate-pulse bg-gray-800 rounded-xl" />
+                    <div key={i} className="h-14 animate-pulse bg-brand-black rounded-xl" />
                   ))}
                 </div>
               ) : txQuery.isError || displayedTxs.length === 0 ? (
-                <div className="bg-[#1a1a2e] border border-gray-800 rounded-xl p-10 text-center">
+                <div className="bg-brand-black border border-black/[0.08] rounded-xl p-10 text-center">
                   <span
-                    className="material-symbols-outlined text-[40px] text-gray-700 mb-3 block"
+                    className="material-symbols-outlined text-[40px] text-[var(--neu-text-muted)] mb-3 block"
                     style={{ fontVariationSettings: "'FILL' 1" }}
                   >
                     receipt_long
                   </span>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-[var(--neu-text-muted)] text-sm">
                     {txQuery.isError
                       ? "Transaction history unavailable — backend coming soon"
                       : "No transactions yet. Start earning HuudCoins!"}
@@ -355,7 +355,7 @@ export default function WalletPage() {
                   {txQuery.isError ? null : (
                     <Link
                       href="/gamification"
-                      className="mt-4 inline-block text-xs text-purple-400 hover:underline"
+                      className="mt-4 inline-block text-xs text-brand-blue hover:underline"
                     >
                       View your achievements →
                     </Link>
@@ -366,7 +366,7 @@ export default function WalletPage() {
                   {displayedTxs.map((tx: any, i: number) => (
                     <div
                       key={tx.id ?? tx._id ?? i}
-                      className="bg-[#1a1a2e] border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3"
+                      className="bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 flex items-center gap-3"
                     >
                       <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${txBg(tx.amount ?? 0)}`}>
                         <span
@@ -381,7 +381,7 @@ export default function WalletPage() {
                           {tx.description ?? tx.type ?? "Transaction"}
                         </p>
                         {tx.createdAt && (
-                          <p className="text-xs text-gray-500">{formatDate(tx.createdAt)}</p>
+                          <p className="text-xs text-[var(--neu-text-muted)]">{formatDate(tx.createdAt)}</p>
                         )}
                       </div>
                       <span className={`text-sm font-extrabold tabular-nums shrink-0 ${txColor(tx.amount ?? 0)}`}>
@@ -399,17 +399,17 @@ export default function WalletPage() {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="px-3 py-1.5 text-xs rounded-lg bg-gray-800 text-gray-400 disabled:opacity-40 hover:bg-gray-700 transition-colors"
+                    className="px-3 py-1.5 text-xs rounded-lg bg-brand-black text-[var(--neu-text-muted)] disabled:opacity-40 hover:bg-brand-black transition-colors"
                   >
                     Previous
                   </button>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-[var(--neu-text-muted)]">
                     {page} / {totalPages}
                   </span>
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="px-3 py-1.5 text-xs rounded-lg bg-gray-800 text-gray-400 disabled:opacity-40 hover:bg-gray-700 transition-colors"
+                    className="px-3 py-1.5 text-xs rounded-lg bg-brand-black text-[var(--neu-text-muted)] disabled:opacity-40 hover:bg-brand-black transition-colors"
                   >
                     Next
                   </button>
@@ -426,7 +426,7 @@ export default function WalletPage() {
                   <h2 className="text-sm font-semibold text-white">Boost &amp; Payment History</h2>
                   <Link
                     href="/premium"
-                    className="text-xs text-amber-400 hover:text-amber-300 transition"
+                    className="text-xs text-primary hover:text-amber-300 transition"
                   >
                     Full history →
                   </Link>
@@ -435,16 +435,16 @@ export default function WalletPage() {
                 {paymentsQuery.isLoading && (
                   <div className="space-y-2">
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="h-14 animate-pulse bg-gray-800 rounded-xl" />
+                      <div key={i} className="h-14 animate-pulse bg-brand-black rounded-xl" />
                     ))}
                   </div>
                 )}
 
                 {!paymentsQuery.isLoading && allPayments.length === 0 && (
-                  <div className="bg-[#1a1a2e] border border-gray-800 rounded-xl p-10 text-center">
+                  <div className="bg-brand-black border border-black/[0.08] rounded-xl p-10 text-center">
                     <span className="text-4xl mb-3 block">🚀</span>
-                    <p className="text-gray-500 text-sm">No boosts or payments yet.</p>
-                    <p className="text-xs text-gray-600 mt-2">
+                    <p className="text-[var(--neu-text-muted)] text-sm">No boosts or payments yet.</p>
+                    <p className="text-xs text-[var(--neu-text-secondary)] mt-2">
                       Spend HuudCoins to boost jobs, services, or events.
                     </p>
                   </div>
@@ -455,9 +455,9 @@ export default function WalletPage() {
                     {allPayments.map((p) => (
                       <div
                         key={p.id ?? p.reference}
-                        className="bg-[#1a1a2e] border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3"
+                        className="bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 flex items-center gap-3"
                       >
-                        <div className="w-10 h-10 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0 text-lg">
+                        <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0 text-lg">
                           {PAYMENT_TYPE_ICONS[p.type] ?? "🪙"}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -465,23 +465,23 @@ export default function WalletPage() {
                             {PAYMENT_TYPE_LABELS[p.type] ?? p.type}
                           </p>
                           {p.description && (
-                            <p className="text-xs text-gray-500 truncate">{p.description}</p>
+                            <p className="text-xs text-[var(--neu-text-muted)] truncate">{p.description}</p>
                           )}
-                          <p className="text-xs text-gray-600">
+                          <p className="text-xs text-[var(--neu-text-secondary)]">
                             {new Date(p.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                         <div className="flex flex-col items-end shrink-0">
-                          <span className="text-sm font-black text-red-400">
+                          <span className="text-sm font-black text-brand-red">
                             -🪙 {p.coinsSpent.toLocaleString()}
                           </span>
                           <span
                             className={`text-xs capitalize ${
                               p.status === "completed"
-                                ? "text-green-500"
+                                ? "text-primary"
                                 : p.status === "refunded"
-                                ? "text-amber-400"
-                                : "text-red-500"
+                                ? "text-primary"
+                                : "text-brand-red"
                             }`}
                           >
                             {p.status}
@@ -494,7 +494,7 @@ export default function WalletPage() {
                       <button
                         onClick={() => paymentsQuery.fetchNextPage()}
                         disabled={paymentsQuery.isFetchingNextPage}
-                        className="w-full py-2 text-xs text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-xl transition"
+                        className="w-full py-2 text-xs text-[var(--neu-text-muted)] hover:text-white bg-brand-black hover:bg-brand-black rounded-xl transition"
                       >
                         {paymentsQuery.isFetchingNextPage ? "Loading…" : "Load More"}
                       </button>

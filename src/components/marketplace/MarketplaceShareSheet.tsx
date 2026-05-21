@@ -131,7 +131,7 @@ export function MarketplaceShareSheet({ open, onClose, productId, title }: Marke
             <button
               type="button"
               onClick={onClose}
-              className="neu-btn grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors"
+              className="mod-chip grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors"
               aria-label="Close"
             >
               <span className="material-symbols-outlined text-[20px]" style={{ color: "var(--neu-text-secondary)" }}>
@@ -145,7 +145,7 @@ export function MarketplaceShareSheet({ open, onClose, productId, title }: Marke
               <button
                 type="button"
                 onClick={() => void nativeShare()}
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-primary/35 bg-gradient-to-r from-primary/15 to-[#006F35]/12 py-3 text-sm font-bold text-[#006F35] shadow-[0_8px_24px_rgba(0,212,49,0.2)] transition-transform active:scale-[0.98] dark:border-emerald-400/30 dark:from-emerald-500/20 dark:to-teal-600/15 dark:text-emerald-200"
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-primary/35 bg-gradient-to-r from-primary/15 to-[#006F35]/12 py-3 text-sm font-bold text-[#006F35] shadow-[0_8px_24px_rgba(0,212,49,0.2)] transition-transform active:scale-[0.98] dark:border-primary/30 dark:from-emerald-500/20 dark:to-teal-600/15 dark:text-white/90"
               >
                 <span className="material-symbols-outlined text-[20px]">ios_share</span>
                 Share…
@@ -154,7 +154,7 @@ export function MarketplaceShareSheet({ open, onClose, productId, title }: Marke
             <button
               type="button"
               onClick={() => void copyLink()}
-              className="neu-btn flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-transform active:scale-[0.98]"
+              className="btn-ghost flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-transform active:scale-[0.98]"
               style={{ color: "var(--neu-text)" }}
             >
               <span className="material-symbols-outlined text-[20px]" style={{ color: "var(--neu-text-secondary)" }}>

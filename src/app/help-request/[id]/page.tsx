@@ -24,18 +24,18 @@ import {
 type HelpStatus = 'open' | 'in_progress' | 'fulfilled' | 'closed';
 
 const CATEGORY_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  financial: { label: 'Financial', color: 'text-green-400 bg-green-400/10', icon: 'account_balance_wallet' },
-  medical:   { label: 'Medical',   color: 'text-red-400 bg-red-400/10',     icon: 'local_hospital' },
-  food:      { label: 'Food',      color: 'text-orange-400 bg-orange-400/10',icon: 'restaurant' },
-  shelter:   { label: 'Shelter',   color: 'text-blue-400 bg-blue-400/10',   icon: 'home' },
+  financial: { label: 'Financial', color: 'text-primary bg-primary/10', icon: 'account_balance_wallet' },
+  medical:   { label: 'Medical',   color: 'text-brand-red bg-brand-red/10',     icon: 'local_hospital' },
+  food:      { label: 'Food',      color: 'text-brand-red bg-brand-red/10',icon: 'restaurant' },
+  shelter:   { label: 'Shelter',   color: 'text-brand-blue bg-brand-blue/10',   icon: 'home' },
   emergency: { label: 'Emergency', color: 'text-pink-400 bg-pink-400/10',   icon: 'emergency' },
 };
 
 const STATUS_CONFIG: Record<HelpStatus, { label: string; color: string; icon: string }> = {
-  open:        { label: 'Open',        color: 'text-emerald-400 bg-emerald-400/10', icon: 'radio_button_unchecked' },
-  in_progress: { label: 'In Progress', color: 'text-blue-400 bg-blue-400/10',       icon: 'pending' },
-  fulfilled:   { label: 'Fulfilled',   color: 'text-purple-400 bg-purple-400/10',   icon: 'check_circle' },
-  closed:      { label: 'Closed',      color: 'text-gray-400 bg-gray-400/10',       icon: 'cancel' },
+  open:        { label: 'Open',        color: 'text-primary bg-primary/10', icon: 'radio_button_unchecked' },
+  in_progress: { label: 'In Progress', color: 'text-brand-blue bg-brand-blue/10',       icon: 'pending' },
+  fulfilled:   { label: 'Fulfilled',   color: 'text-brand-blue bg-brand-blue/10',   icon: 'check_circle' },
+  closed:      { label: 'Closed',      color: 'text-[var(--neu-text-muted)] bg-brand-surface/10',       icon: 'cancel' },
 };
 
 function formatNaira(amount: number | string | undefined): string {
@@ -93,14 +93,14 @@ function OfferForm({ postId, onDone }: { postId: string; onDone: () => void }) {
         <button
           type="button"
           onClick={onDone}
-          className="px-4 py-2.5 rounded-2xl text-sm font-medium neu-btn transition-all"
+          className="px-4 py-2.5 rounded-2xl text-sm font-medium mod-chip transition-all"
           style={{ color: 'var(--neu-text-muted)' }}
         >
           Cancel
         </button>
       </div>
       <p className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>
-        If the requestor confirms your help, you earn <span className="font-bold text-amber-500">+5 HuudCoins</span> (max 3 per week).
+        If the requestor confirms your help, you earn <span className="font-bold text-primary">+5 HuudCoins</span> (max 3 per week).
       </p>
     </form>
   );
@@ -121,10 +121,10 @@ function OfferRow({
   const reject = useRejectHelpOffer(postId);
 
   const statusColors: Record<string, string> = {
-    pending:   'text-yellow-500 bg-yellow-500/10',
-    confirmed: 'text-emerald-500 bg-emerald-500/10',
-    rejected:  'text-red-400 bg-red-400/10',
-    expired:   'text-gray-400 bg-gray-400/10',
+    pending:   'text-primary bg-primary/10',
+    confirmed: 'text-primary bg-primary/10',
+    rejected:  'text-brand-red bg-brand-red/10',
+    expired:   'text-[var(--neu-text-muted)] bg-brand-surface/10',
   };
 
   return (
@@ -149,13 +149,13 @@ function OfferRow({
       <p className="text-[13px] leading-5" style={{ color: 'var(--neu-text)' }}>{offer.message}</p>
 
       {offer.offeredAmount && (
-        <p className="text-[12px] font-semibold text-green-400">
+        <p className="text-[12px] font-semibold text-primary">
           Offering: {formatNaira(offer.offeredAmount)}
         </p>
       )}
 
       {offer.coinsAwarded && (
-        <p className="text-[11px] text-amber-500">+5 HuudCoins awarded ✓</p>
+        <p className="text-[11px] text-primary">+5 HuudCoins awarded ✓</p>
       )}
 
       <p className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>{formatTimeAgo(offer.createdAt)}</p>
@@ -173,7 +173,7 @@ function OfferRow({
           <button
             onClick={() => reject.mutate(offer.id)}
             disabled={reject.isPending}
-            className="px-3 py-2 rounded-xl text-[12px] font-medium text-red-400 neu-btn transition-all disabled:opacity-50"
+            className="px-3 py-2 rounded-xl text-[12px] font-medium text-brand-red mod-chip transition-all disabled:opacity-50"
           >
             Reject
           </button>
@@ -219,9 +219,9 @@ export default function HelpRequestDetailPage() {
         <div className="flex flex-1 overflow-hidden">
           <Suspense fallback={<div className="w-64" />}><LeftSidebar /></Suspense>
           <main className="flex-1 overflow-y-auto flex flex-col items-center justify-center gap-4">
-            <span className="material-symbols-outlined text-4xl text-red-400">error</span>
+            <span className="material-symbols-outlined text-4xl text-brand-red">error</span>
             <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>Help request not found</p>
-            <button onClick={() => router.back()} className="px-5 py-2 rounded-2xl neu-btn text-sm">Go Back</button>
+            <button onClick={() => router.back()} className="px-5 py-2 rounded-2xl mod-chip text-sm">Go Back</button>
           </main>
         </div>
         <BottomNav />
@@ -343,12 +343,12 @@ export default function HelpRequestDetailPage() {
                       <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--neu-shadow-light)' }}>
                         <div
                           className="h-full rounded-full transition-all"
-                          style={{ width: `${progressPct ?? 0}%`, background: (progressPct ?? 0) >= 100 ? '#22c55e' : 'var(--primary)' }}
+                          style={{ width: `${progressPct ?? 0}%`, background: (progressPct ?? 0) >= 100 ? '#006F35' : 'var(--primary)' }}
                         />
                       </div>
                       <div className="flex justify-between text-[11px]">
-                        <span style={{ color: 'var(--neu-text-muted)' }}>Received: <span className="font-semibold text-green-400">{formatNaira(amountReceived)}</span></span>
-                        <span className="font-semibold" style={{ color: (progressPct ?? 0) >= 100 ? '#22c55e' : 'var(--primary)' }}>{progressPct ?? 0}%</span>
+                        <span style={{ color: 'var(--neu-text-muted)' }}>Received: <span className="font-semibold text-primary">{formatNaira(amountReceived)}</span></span>
+                        <span className="font-semibold" style={{ color: (progressPct ?? 0) >= 100 ? '#006F35' : 'var(--primary)' }}>{progressPct ?? 0}%</span>
                       </div>
                     </>
                   )}
@@ -367,7 +367,7 @@ export default function HelpRequestDetailPage() {
                           <p className="text-[13px] font-mono font-bold tracking-wider" style={{ color: 'var(--neu-text)' }}>
                             {accountDetails.accountNumber}
                           </p>
-                          <button onClick={handleCopyAccount} className="neu-btn rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all">
+                          <button onClick={handleCopyAccount} className="mod-chip rounded-lg px-2 py-0.5 text-[11px] font-medium transition-all">
                             {copied ? '✓ Copied' : 'Copy'}
                           </button>
                         </div>
@@ -382,13 +382,13 @@ export default function HelpRequestDetailPage() {
                     </p>
                   )}
                   {/* HC Payment — Coming Soon */}
-                  <div className="mt-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-amber-400/40 bg-amber-400/5">
-                    <span className="text-amber-400 text-lg">🪙</span>
+                  <div className="mt-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-primary/40 bg-primary/5">
+                    <span className="text-primary text-lg">🪙</span>
                     <div className="flex-1">
-                      <p className="text-[12px] font-bold text-amber-500">Pay with HuudCoins</p>
+                      <p className="text-[12px] font-bold text-primary">Pay with HuudCoins</p>
                       <p className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>Coming soon — HuudCoins will be exchangeable for Naira</p>
                     </div>
-                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-400/10 text-amber-500">SOON</span>
+                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-primary/10 text-primary">SOON</span>
                   </div>
                 </div>
 
@@ -403,7 +403,7 @@ export default function HelpRequestDetailPage() {
                           onClick={() => updateStatus.mutate(s)}
                           disabled={helpStatus === s || updateStatus.isPending}
                           className={`px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all disabled:opacity-50 ${
-                            helpStatus === s ? 'font-bold border-2' : 'neu-btn'
+                            helpStatus === s ? 'font-bold border-2' : 'mod-chip'
                           }`}
                           style={helpStatus === s ? { borderColor: 'var(--primary)', color: 'var(--primary)' } : { color: 'var(--neu-text-muted)' }}
                         >
@@ -442,7 +442,7 @@ export default function HelpRequestDetailPage() {
               {/* Already offered badge */}
               {!isOwner && offersData?.myOffer && (
                 <div className="neu-card-sm rounded-xl p-3 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-emerald-400 text-[18px]">check_circle</span>
+                  <span className="material-symbols-outlined text-primary text-[18px]">check_circle</span>
                   <div>
                     <p className="text-[13px] font-semibold" style={{ color: 'var(--neu-text)' }}>You offered to help</p>
                     <p className="text-[11px] capitalize" style={{ color: 'var(--neu-text-muted)' }}>

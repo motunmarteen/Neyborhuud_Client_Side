@@ -22,14 +22,14 @@ import { formatNGN } from "@/lib/marketplaceMessages";
 
 function StatusBadge({ status }: { status: string }) {
   const cfg: Record<string, { bg: string; label: string }> = {
-    pending:   { bg: "bg-amber-500/20 text-amber-300",   label: "Pending" },
-    countered: { bg: "bg-purple-500/20 text-purple-300", label: "Countered" },
-    accepted:  { bg: "bg-green-500/20 text-green-300",   label: "Accepted" },
-    rejected:  { bg: "bg-red-500/20 text-red-300",       label: "Declined" },
-    expired:   { bg: "bg-gray-600/30 text-gray-400",     label: "Expired" },
-    cancelled: { bg: "bg-gray-600/30 text-gray-400",     label: "Cancelled" },
+    pending:   { bg: "bg-primary/20 text-amber-300",   label: "Pending" },
+    countered: { bg: "bg-brand-blue/20 text-purple-300", label: "Countered" },
+    accepted:  { bg: "bg-primary/20 text-primary",   label: "Accepted" },
+    rejected:  { bg: "bg-brand-red/20 text-brand-red",       label: "Declined" },
+    expired:   { bg: "bg-brand-surface/30 text-[var(--neu-text-muted)]",     label: "Expired" },
+    cancelled: { bg: "bg-brand-surface/30 text-[var(--neu-text-muted)]",     label: "Cancelled" },
   };
-  const { bg, label } = cfg[status] ?? { bg: "bg-gray-600/30 text-gray-400", label: status };
+  const { bg, label } = cfg[status] ?? { bg: "bg-brand-surface/30 text-[var(--neu-text-muted)]", label: status };
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${bg}`}>
       {label}
@@ -86,7 +86,7 @@ function OfferRow({
   };
 
   return (
-    <div className="rounded-2xl border border-gray-800/60 bg-gray-900 p-4">
+    <div className="rounded-2xl border border-black/[0.08]/60 bg-brand-black p-4">
       {/* Buyer row */}
       <div className="flex items-center gap-3">
         {buyerAvatar ? (
@@ -98,7 +98,7 @@ function OfferRow({
         )}
         <div className="flex-1 min-w-0">
           <p className="truncate font-semibold text-white">{buyerName}</p>
-          <p className="text-xs text-gray-400">{timeAgo(offer.createdAt)}</p>
+          <p className="text-xs text-[var(--neu-text-muted)]">{timeAgo(offer.createdAt)}</p>
         </div>
         <StatusBadge status={offer.status} />
       </div>
@@ -106,8 +106,8 @@ function OfferRow({
       {/* Amounts */}
       <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
         {productPrice != null && (
-          <span className="text-gray-400">
-            Listed: <span className="font-medium text-gray-300">{formatNGN(productPrice)}</span>
+          <span className="text-[var(--neu-text-muted)]">
+            Listed: <span className="font-medium text-[var(--neu-text-muted)]">{formatNGN(productPrice)}</span>
           </span>
         )}
         <span className="text-amber-300 font-semibold">
@@ -126,7 +126,7 @@ function OfferRow({
           <button
             onClick={() => accept.mutate(offerId)}
             disabled={accept.isPending || reject.isPending}
-            className="flex-1 rounded-full bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-500 disabled:opacity-50 transition-colors"
+            className="flex-1 rounded-full bg-brand-green-dark py-2 text-sm font-semibold text-white hover:bg-primary disabled:opacity-50 transition-colors"
           >
             {accept.isPending ? "…" : "Accept"}
           </button>
@@ -148,10 +148,10 @@ function OfferRow({
 
       {/* Counter form */}
       {canAct && showCounter && (
-        <div className="mt-4 space-y-3 rounded-xl bg-gray-800/50 p-3">
-          <p className="text-sm font-medium text-gray-300">Your counter offer</p>
+        <div className="mt-4 space-y-3 rounded-xl bg-brand-black/50 p-3">
+          <p className="text-sm font-medium text-[var(--neu-text-muted)]">Your counter offer</p>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">₦</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--neu-text-muted)] text-sm">₦</span>
             <input
               type="number"
               value={counterAmount}
@@ -159,13 +159,13 @@ function OfferRow({
               placeholder="Enter amount"
               min="0"
               step="1000"
-              className="w-full rounded-lg border border-gray-700 bg-gray-900 py-2 pl-7 pr-3 text-sm text-white focus:border-purple-500 focus:outline-none"
+              className="w-full rounded-lg border border-black/[0.08] bg-brand-black py-2 pl-7 pr-3 text-sm text-white focus:border-brand-blue focus:outline-none"
             />
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => { setShowCounter(false); setCounterAmount(""); }}
-              className="flex-1 rounded-full bg-gray-700 py-2 text-sm font-semibold hover:bg-gray-600 transition-colors"
+              className="flex-1 rounded-full bg-brand-black py-2 text-sm font-semibold hover:bg-brand-surface transition-colors"
             >
               Cancel
             </button>
@@ -184,7 +184,7 @@ function OfferRow({
       {offer.conversationId && (
         <button
           onClick={() => router.push(`/messages/${offer.conversationId}`)}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-blue-600/40 py-2 text-sm font-medium text-blue-300 hover:bg-blue-900/30 transition-colors"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-blue-600/40 py-2 text-sm font-medium text-brand-blue hover:bg-blue-900/30 transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -220,13 +220,13 @@ export default function ProductOffersPage() {
   const offers  = data?.offers ?? [];
 
   return (
-    <div className="min-h-screen bg-[#0f0f1e] text-white">
+    <div className="min-h-screen bg-brand-black text-white">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-gray-800 bg-[#1a1a2e]">
+      <div className="sticky top-0 z-10 border-b border-black/[0.08] bg-brand-black">
         <div className="mx-auto max-w-2xl px-4 py-4">
           <button
             onClick={() => router.back()}
-            className="mb-2 flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+            className="mb-2 flex items-center gap-2 text-sm text-[var(--neu-text-muted)] hover:text-white transition-colors"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -241,7 +241,7 @@ export default function ProductOffersPage() {
                 className="h-10 w-10 rounded-lg object-cover"
               />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-700 text-lg">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-black text-lg">
                 🛍️
               </div>
             )}
@@ -250,7 +250,7 @@ export default function ProductOffersPage() {
                 {product?.title ?? "Product"} — Offers
               </h1>
               {product?.price != null && (
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--neu-text-muted)]">
                   Listed at ₦{product.price.toLocaleString()}
                 </p>
               )}
@@ -268,8 +268,8 @@ export default function ProductOffersPage() {
               onClick={() => setStatusFilter(value)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
                 statusFilter === value
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  ? "bg-brand-green-dark text-white"
+                  : "bg-brand-black text-[var(--neu-text-muted)] hover:bg-brand-black"
               }`}
             >
               {label}
@@ -281,7 +281,7 @@ export default function ProductOffersPage() {
         {isLoading && (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 animate-pulse rounded-2xl bg-gray-800" />
+              <div key={i} className="h-32 animate-pulse rounded-2xl bg-brand-black" />
             ))}
           </div>
         )}
@@ -290,14 +290,14 @@ export default function ProductOffersPage() {
         {!isLoading && offers.length === 0 && (
           <div className="py-16 text-center">
             <p className="mb-2 text-4xl">🤝</p>
-            <p className="text-gray-400">
+            <p className="text-[var(--neu-text-muted)]">
               {statusFilter
                 ? `No ${statusFilter} offers for this listing.`
                 : "No offers yet on this listing."}
             </p>
             <Link
               href={`/marketplace?product=${encodeURIComponent(productId)}`}
-              className="mt-4 inline-block rounded-full bg-green-600 px-5 py-2 text-sm font-semibold hover:bg-green-500 transition-colors"
+              className="mt-4 inline-block rounded-full bg-brand-green-dark px-5 py-2 text-sm font-semibold hover:bg-primary transition-colors"
             >
               View listing
             </Link>
@@ -307,7 +307,7 @@ export default function ProductOffersPage() {
         {/* Offer list */}
         {!isLoading && offers.length > 0 && (
           <div className="space-y-3">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--neu-text-muted)]">
               {offers.length} {offers.length === 1 ? "offer" : "offers"}
             </p>
             {offers.map((offer) => (
