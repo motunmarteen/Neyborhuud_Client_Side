@@ -551,7 +551,7 @@ function SignupPageContent() {
                                         type="button"
                                         onClick={() => handleVerifyCode()}
                                         disabled={verificationCode.length !== 6 || isVerifying}
-                                        className="btn-glass-primary h-[50px] w-full gap-2"
+                                        className="btn-glass-primary btn-paired h-[50px] w-full gap-2"
                                     >
                                         {isVerifying ? (
                                             <>
@@ -713,7 +713,7 @@ function SignupPageContent() {
                                             type="button"
                                             onClick={fetchLocation}
                                             disabled={isResolving}
-                                            className="btn-secondary h-[50px] w-full gap-2 disabled:opacity-40"
+                                            className="btn-secondary h-[50px] w-full gap-2 text-sm font-bold disabled:opacity-40"
                                         >
                                             <i className={`bi ${isResolving ? 'bi-arrow-repeat animate-spin' : 'bi-broadcast'}`} aria-hidden />
                                             {isResolving ? 'Scanning' : 'Scan Huud'}
@@ -721,7 +721,7 @@ function SignupPageContent() {
                                         <button
                                             type="button"
                                             onClick={() => setSignupStage('identity')}
-                                            className="btn-glass-primary h-[50px] w-full gap-2"
+                                            className="btn-glass-primary btn-paired h-[50px] w-full gap-2 !normal-case !font-bold !tracking-normal !text-sm"
                                         >
                                             Confirm Huud
                                             <i className="bi bi-arrow-right" aria-hidden />
@@ -811,7 +811,7 @@ function SignupPageContent() {
                                             type="button"
                                             onClick={() => setSignupStage('security')}
                                             disabled={!canContinueIdentity}
-                                            className="btn-glass-primary h-[50px] w-full gap-2"
+                                            className="btn-glass-primary btn-paired h-[50px] w-full gap-2"
                                         >
                                             Reserve ID
                                             <i className="bi bi-arrow-right" aria-hidden />
@@ -921,7 +921,7 @@ function SignupPageContent() {
                                     <button
                                         type="submit"
                                         disabled={!canSubmit}
-                                        className="btn-glass-primary h-[50px] w-full gap-2"
+                                        className="btn-glass-primary btn-paired h-[50px] w-full gap-2"
                                     >
                                         {loading ? (
                                             <>

@@ -991,6 +991,14 @@ html:not(.dark) .mod-fab:hover {
   box-shadow: none;
 }
 
+/* Side-by-side with btn-secondary — match label size/casing (see end of file for !important overrides) */
+.btn-glass-primary.btn-paired {
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+  padding: 0.875rem 1rem;
+}
+
 /* Danger — brand red */
 .btn-glass-danger {
   background: radial-gradient(circle at 38% 32%, #FF4D4D 0%, #FF0000 50%, #B30000 100%);
@@ -1137,4 +1145,13 @@ html:not(.dark) .mod-fab:hover {
     font-size: 0.75em;
     color: #666;
   }
+}
+
+/* Paired CTAs — must win over .btn-glass-primary uppercase (Tailwind load order) */
+button.btn-glass-primary.btn-paired {
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  padding: 0.875rem 1rem !important;
 }
