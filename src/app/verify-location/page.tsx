@@ -13,6 +13,7 @@ import {
 } from '@/lib/communityContext';
 import { geoService } from '@/services/geo.service';
 import { authService } from '@/services/auth.service';
+import { getAppEntryRoute } from '@/lib/onboarding';
 
 export default function VerifyLocationPage() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function VerifyLocationPage() {
         /* ignore */
       }
       if (!getNeedsGpsLocationVerification()) {
-        router.replace('/feed');
+        router.replace(getAppEntryRoute());
         return;
       }
       if (!getCommunityIdForApi()) {
@@ -95,12 +96,12 @@ export default function VerifyLocationPage() {
       if (data?.alreadyVerified) {
         clearGpsVerificationGate();
         await authService.syncCommunityFromProfile();
-        router.replace('/feed');
+        router.replace(getAppEntryRoute());
         return;
       }
       clearGpsVerificationGate();
       await authService.syncCommunityFromProfile();
-      router.replace('/feed');
+      router.replace(getAppEntryRoute());
     } catch (e: unknown) {
       const msg =
         e && typeof e === 'object' && 'message' in e

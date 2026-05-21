@@ -1,51 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
+import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 
-const slides = [
-    {
-        id: 'sos',
-        title: 'One-Tap SOS',
-        subtitle: 'Trigger an emergency alert in 2 seconds. Trusted guardians and responders are notified instantly.',
-        icon: 'bi-exclamation-octagon-fill',
-        accentColor: '#FF0000',
-    },
-    {
-        id: 'sentinel',
-        title: 'Sentinel AI',
-        subtitle: 'Your street\'s always-on intelligence. Sentinel AI detects threats, monitors safety patterns, and keeps you ahead of danger.',
-        icon: 'bi-cpu-fill',
-        accentColor: '#0000FF',
-    },
-    {
-        id: 'feed',
-        title: 'Hyperlocal Feed',
-        subtitle: 'Posts, FYI alerts, local jobs, events & marketplace — everything happening on your street, in real time.',
-        icon: 'bi-newspaper',
-        accentColor: '#00D431',
-    },
-    {
-        id: 'community',
-        title: 'Your Voice Matters',
-        subtitle: 'Join the conversation. Build your Reputation. Lead your street.',
-        icon: 'bi-people-fill',
-        accentColor: '#006F35',
-    },
-    {
-        id: 'identity',
-        title: 'Identity is Power',
-        subtitle: 'Build your Trust Score. Unlock the Huud Economy.',
-        icon: 'bi-patch-check-fill',
-        accentColor: '#0000FF',
-    },
-];
+/** Poster v1 — swap for `<video>` background in a later pass (Bamboo-style). */
+const LANDING_POSTER = '/onboarding/hero-your-huud.png';
 
-export default function Home() {
+const HEADLINE_LINES = ['Your Huud.', 'Your People.', 'Your Safety.'];
+
+export default function LandingPage() {
     const router = useRouter();
-    const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -53,186 +21,51 @@ export default function Home() {
             router.replace('/feed');
         }
     }, [router]);
-    const [isAnimating, setIsAnimating] = useState(false);
-    const [isPressed, setIsPressed] = useState(false);
-
-    const activeSlide = slides[currentSlide];
-
-    const nextSlide = () => {
-        if (isAnimating) return;
-        if (currentSlide < slides.length - 1) {
-            setIsAnimating(true);
-            setTimeout(() => {
-                setCurrentSlide((prev) => prev + 1);
-                setIsAnimating(false);
-            }, 300);
-        } else {
-            router.push('/signup');
-        }
-    };
-
-    const goToSlide = (idx: number) => {
-        if (idx !== currentSlide && !isAnimating) {
-            setIsAnimating(true);
-            setTimeout(() => {
-                setCurrentSlide(idx);
-                setIsAnimating(false);
-            }, 300);
-        }
-    };
 
     return (
-        <div className="neu-base min-h-[100dvh] flex flex-col items-center justify-between py-10 px-6 overflow-hidden relative">
-            {/* Ambient glow — stronger on SOS for dramatic urgency */}
-            <div
-                className={`absolute top-[-30%] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[160px] pointer-events-none transition-all duration-1000 ${activeSlide.id === 'sos' ? 'opacity-[0.18]' : 'opacity-[0.06]'}`}
-                style={{ backgroundColor: activeSlide.accentColor }}
+        <div className="relative min-h-[100dvh] overflow-hidden bg-brand-black">
+            <Image
+                src={LANDING_POSTER}
+                alt=""
+                fill
+                priority
+                className="object-cover object-center"
+                sizes="100vw"
             />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/50 to-black/75" aria-hidden />
 
-            {/* ── Main Content ── */}
-            <div className="grow flex flex-col items-center justify-center w-full max-w-md z-10 gap-10">
-                {/* Raised Icon Container */}
-                <div className="relative flex items-center justify-center">
-                    {activeSlide.id === 'sos' ? (
-                        /* ── Premium SOS — neumorphic card + polished glass-red button ── */
-                        <div
-                            className={`
-                                neu-card-raised rounded-[2.5rem] w-56 h-56 flex items-center justify-center
-                                animate-neu-float transition-all duration-500
-                                ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}
-                            `}
+            <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-6 pb-10 pt-12">
+                <header className="flex flex-col items-center pt-2">
+                    <NeyborHuudLogo variant="light" width={200} priority />
+                </header>
+
+                <div className="flex-1" />
+
+                <div className="mb-10 flex flex-col gap-1">
+                    {HEADLINE_LINES.map((line) => (
+                        <h1
+                            key={line}
+                            className="text-[2.65rem] font-black leading-[0.95] tracking-tight text-primary"
                         >
-                            {/* Polished red SOS button — same socket size as other slides */}
-                            <div
-                                className="relative w-36 h-36 rounded-full flex items-center justify-center overflow-hidden"
-                                style={{
-                                    background: 'radial-gradient(circle at 38% 32%, #FF4D4D 0%, #FF0000 50%, #B30000 100%)',
-                                    boxShadow: '0 10px 40px rgba(255,0,0,0.55), 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.18)',
-                                }}
-                            >
-                                {/* Glass specular highlight */}
-                                <div
-                                    className="absolute top-3 left-5 w-14 h-7 rounded-full pointer-events-none"
-                                    style={{ background: 'linear-gradient(150deg, rgba(255,255,255,0.28) 0%, transparent 100%)' }}
-                                />
-                                <span
-                                    className="material-symbols-outlined fill-1 text-white select-none relative z-10"
-                                    style={{ fontSize: '5rem', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.45))' }}
-                                >
-                                    sos
-                                </span>
-                            </div>
-                        </div>
-                    ) : (
-                        /* ── All other slides: neumorphic card + glassy polished circle ── */
-                        <div
-                            className={`
-                                neu-card-raised rounded-[2.5rem] w-56 h-56 flex items-center justify-center
-                                animate-neu-float transition-all duration-500
-                                ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}
-                            `}
-                        >
-                            {/* Polished glass circle — same treatment as SOS */}
-                            <div
-                                className="relative w-36 h-36 rounded-full flex items-center justify-center overflow-hidden"
-                                style={{
-                                    background: `radial-gradient(circle at 38% 32%, ${activeSlide.accentColor}CC 0%, ${activeSlide.accentColor} 50%, ${activeSlide.accentColor}CC 100%)`,
-                                    boxShadow: `0 10px 40px ${activeSlide.accentColor}55, 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.22)`,
-                                }}
-                            >
-                                {/* Glass specular highlight */}
-                                <div
-                                    className="absolute top-3 left-5 w-14 h-7 rounded-full pointer-events-none"
-                                    style={{ background: 'linear-gradient(150deg, rgba(255,255,255,0.32) 0%, transparent 100%)' }}
-                                />
-                                <i
-                                    className={`bi ${activeSlide.icon} text-white select-none relative z-10`}
-                                    style={{ fontSize: '4.5rem', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.35))' }}
-                                />
-                            </div>
-                        </div>
-                    )}
+                            {line}
+                        </h1>
+                    ))}
                 </div>
 
-                {/* Text */}
-                <div
-                    className={`
-                        text-center flex flex-col gap-3 transition-all duration-500 delay-75
-                        ${isAnimating ? 'translate-y-5 opacity-0' : 'translate-y-0 opacity-100'}
-                    `}
-                >
-                    <h1
-                        className="text-3xl font-semibold tracking-tight"
-                        style={{ color: 'var(--neu-text)' }}
+                <div className="flex gap-3">
+                    <Link
+                        href="/signup"
+                        className="btn-glass-primary flex h-[52px] flex-1 items-center justify-center rounded-2xl text-sm font-bold !normal-case !tracking-normal"
                     >
-                        {activeSlide.title}
-                    </h1>
-                    <p
-                        className="leading-relaxed max-w-xs mx-auto text-base"
-                        style={{ color: 'var(--neu-text-secondary)' }}
-                    >
-                        {activeSlide.subtitle}
-                    </p>
-                </div>
-            </div>
-
-            {/* ── Footer ── */}
-            <div className="w-full max-w-md flex flex-col gap-7 z-20">
-                {/* Neumorphic Indicator Track */}
-                <div className="flex justify-center">
-                    <div className="neu-track rounded-full px-5 py-2.5 flex gap-3 items-center">
-                        {slides.map((slide, idx) => (
-                            <button
-                                key={slide.id}
-                                onClick={() => goToSlide(idx)}
-                                className={`
-                                    rounded-full transition-all duration-500 cursor-pointer
-                                    ${currentSlide === idx
-                                        ? 'w-8 h-2.5 neu-dot-active'
-                                        : 'w-2.5 h-2.5 neu-dot hover:scale-110'
-                                    }
-                                `}
-                                style={currentSlide === idx ? { backgroundColor: slide.accentColor } : undefined}
-                                aria-label={`Go to slide ${idx + 1}`}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                {/* CTA Button */}
-                <button
-                    onClick={nextSlide}
-                    onMouseDown={() => setIsPressed(true)}
-                    onMouseUp={() => setIsPressed(false)}
-                    onMouseLeave={() => setIsPressed(false)}
-                    onTouchStart={() => setIsPressed(true)}
-                    onTouchEnd={() => setIsPressed(false)}
-                    className={`
-                        w-full py-5 rounded-2xl flex items-center justify-center
-                        transition-all duration-150 cursor-pointer
-                        ${isPressed ? 'neu-btn-active' : 'neu-btn'}
-                    `}
-                >
-                    <span
-                        className="font-black uppercase tracking-[0.25em] text-sm"
-                        style={{ color: 'var(--neu-text)' }}
-                    >
-                        {currentSlide === slides.length - 1 ? 'Get Started' : 'Continue'}
-                    </span>
-                </button>
-
-                {/* Login Link */}
-                <p className="text-center pb-2">
-                    <span className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-                        Already have an account?{' '}
-                    </span>
+                        Create account
+                    </Link>
                     <Link
                         href="/login"
-                        className="text-brand-blue font-semibold text-sm hover:underline transition-colors"
+                        className="flex h-[52px] flex-1 items-center justify-center rounded-2xl border border-white/15 bg-primary/90 text-sm font-bold text-white shadow-[0_12px_32px_rgba(0,111,53,0.35)] transition-transform active:scale-[0.98]"
                     >
-                        Log in
+                        Sign In
                     </Link>
-                </p>
+                </div>
             </div>
         </div>
     );

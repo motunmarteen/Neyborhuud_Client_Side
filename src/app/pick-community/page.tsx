@@ -9,6 +9,7 @@ import {
   getStoredPickerContext,
   getNeedsCommunitySelection,
 } from '@/lib/communityContext';
+import { getAppEntryRoute } from '@/lib/onboarding';
 
 type PickerOption = {
   id: string;
@@ -178,7 +179,7 @@ function PickCommunityContent() {
       }
 
       const needsGps = res.data?.needsGpsLocationVerification === true;
-      router.replace(needsGps ? '/verify-location' : '/feed');
+      router.replace(needsGps ? '/verify-location' : getAppEntryRoute());
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Request failed.');
     } finally {

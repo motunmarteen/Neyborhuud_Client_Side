@@ -9,11 +9,13 @@ import { getCurrentLocation } from '@/lib/geolocation';
 import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
 import { fetchAPI } from '@/lib/api';
 import { persistAuthSessionPayload, getNeedsCommunitySelection } from '@/lib/communityContext';
+import { getAppEntryRoute } from '@/lib/onboarding';
 import apiClient from '@/lib/api-client';
 import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValidation';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
 import { toast } from 'sonner';
+import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 
 function SignupPageContent() {
     const router = useRouter();
@@ -580,7 +582,7 @@ function SignupPageContent() {
             <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
                 <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
                     <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-                        <span className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">NeyborHuud</span>
+                        <NeyborHuudLogo variant="dark" width={120} />
                         <span className="rounded-full bg-primary/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">Ready</span>
                     </div>
                     <div className="flex min-h-0 flex-1 flex-col py-3">
@@ -596,7 +598,7 @@ function SignupPageContent() {
                                 </div>
                                 <div className="absolute bottom-5 left-1/2 w-[min(19rem,calc(100%-3rem))] -translate-x-1/2 rounded-2xl border border-white/85 bg-white/[0.9] px-4 py-3 shadow-[0_18px_40px_rgba(26,26,46,0.12)] backdrop-blur-xl">
                                     <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">Account secured</p>
-                                    <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">Welcome, NeyborHuud</h1>
+                                    <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">Welcome, neybor</h1>
                                     <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{identityHandle} · {huudName}</p>
                                 </div>
                             </div>
@@ -621,11 +623,11 @@ function SignupPageContent() {
                                             router.push('/pick-community');
                                             return;
                                         }
-                                        router.push('/feed');
+                                        router.push(getAppEntryRoute());
                                     }}
                                     className="btn-glass-primary h-[52px] w-full gap-2"
                                 >
-                                    Enter NeyborHuud
+                                    Enter your Huud
                                     <i className="bi bi-arrow-right" aria-hidden />
                                 </button>
                             </div>

@@ -34,7 +34,8 @@ function snoozePrompt(days = SNOOZE_DAYS) {
 
 // Routes where the notification prompt must NEVER appear
 const EXCLUDED_ROUTES = [
-  '/',               // onboarding / landing slides
+  '/',               // Bamboo-style landing
+  '/onboarding',     // post-signup product tour
   '/welcome',
   '/login',
   '/signup',

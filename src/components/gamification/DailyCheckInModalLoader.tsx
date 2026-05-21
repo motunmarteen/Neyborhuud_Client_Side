@@ -14,6 +14,7 @@ export default function DailyCheckInModalLoader() {
   const { isAuthenticated } = useAuth();
   const isAuthRoute = [
     "/",
+    "/onboarding",
     "/login",
     "/signup",
     "/forgot-password",
