@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { toast } from 'sonner';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import Link from 'next/link';
+import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { fetchAPI } from '@/lib/api';
 import apiClient from '@/lib/api-client';
@@ -167,12 +167,11 @@ export default function LoginPage() {
                                 <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
                                 <div className="p-4">
                                     <div className="mb-4 flex items-center justify-between gap-3">
-                                        <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-primary text-white shadow-[0_16px_34px_rgba(0,111,53,0.3)]">
-                                            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-primary shadow-md">N</span>
-                                            <Image src="/icon.png" alt="NeyborHuud" fill sizes="48px" className="object-cover" priority />
+                                        <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-primary shadow-[0_16px_34px_rgba(0,111,53,0.3)]">
+                                            <NeyborHuudLogo variant="on-dark" layout="mark" markSize={40} priority />
                                         </div>
-                                        <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
-                                            NeyborHuud Pass
+                                        <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black lowercase tracking-[0.12em] text-primary">
+                                            neyborhuud pass
                                         </div>
                                     </div>
                                     <p className="mb-1 text-[9px] font-black uppercase tracking-[0.24em] text-primary">{loginStatus}</p>

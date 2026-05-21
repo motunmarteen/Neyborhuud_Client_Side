@@ -35,8 +35,8 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/50 to-black/75" aria-hidden />
 
             <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-6 pb-10 pt-12">
-                <header className="flex flex-col items-center pt-2">
-                    <NeyborHuudLogo variant="light" width={200} priority />
+                <header className="flex flex-col items-center pt-4">
+                    <NeyborHuudLogo variant="on-dark" layout="stacked" markSize={64} wordmarkWidth={200} priority />
                 </header>
 
                 <div className="flex-1" />
