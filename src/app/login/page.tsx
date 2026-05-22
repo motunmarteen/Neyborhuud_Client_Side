@@ -168,7 +168,7 @@ export default function LoginPage() {
                                 <div className="p-4">
                                     <div className="mb-4 flex items-center justify-between gap-3">
                                         <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-primary shadow-[0_16px_34px_rgba(0,111,53,0.3)]">
-                                            <NeyborHuudLogo variant="on-dark" layout="mark" markSize={40} priority />
+                                            <NeyborHuudLogo layout="mark" size="md" priority />
                                         </div>
                                         <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black lowercase tracking-[0.12em] text-primary">
                                             neyborhuud pass

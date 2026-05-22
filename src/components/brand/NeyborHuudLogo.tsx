@@ -1,87 +1,121 @@
 import Image from 'next/image';
+import type { ReactNode } from 'react';
+import { BRAND_MARK_SRC } from '@/lib/brand-assets';
+
+const MARK = BRAND_MARK_SRC;
+const MARK_ASPECT = 409 / 503;
+
+type LogoTone = 'light' | 'dark' | 'primary' | 'hero';
+type LogoSize = 'hero' | 'lg' | 'md' | 'sm';
 
 type NeyborHuudLogoProps = {
-    /**
-     * `on-dark` — mark + wordmark over photo/dark UI (black in assets blends away).
-     * `on-light` — compact lockup on neu/light screens (dark brand chip).
-     */
-    variant?: 'on-dark' | 'on-light';
-    /** Stacked mark over wordmark (Bamboo-style), or mark / wordmark only */
-    layout?: 'stacked' | 'mark' | 'wordmark';
+    layout?: 'inline' | 'stacked' | 'mark' | 'wordmark';
+    shell?: 'glass' | 'solid' | 'none';
+    /** Tuned lockups — hero for landing header */
+    size?: LogoSize;
     className?: string;
     markSize?: number;
-    wordmarkWidth?: number;
+    textSize?: number;
+    tone?: LogoTone;
     priority?: boolean;
 };
 
-const MARK = '/brand/neyborhuud-mark-light.png';
-const WORDMARK = '/brand/neyborhuud-wordmark-light.png';
+const toneClass: Record<LogoTone, string> = {
+    light: 'text-white',
+    dark: 'text-brand-black',
+    primary: 'text-[#00D431]',
+    hero: 'brand-wordmark-hero text-[#00D431]',
+};
 
-/**
- * Official neyborhuud brand lockup — mark (pin + H) + lowercase wordmark asset.
- * Never render camelCase "NeyborHuud" as UI type.
- */
+const markClass: Record<LogoTone, string> = {
+    light: 'drop-shadow-[0_6px_28px_rgba(0,0,0,0.65)] brightness-110 contrast-105',
+    dark: 'drop-shadow-[0_4px_16px_rgba(26,26,46,0.2)]',
+    primary: 'drop-shadow-[0_4px_16px_rgba(0,111,53,0.35)]',
+    hero: 'brand-mark-hero',
+};
+
+/** Pin at ~2× original hero size; text scaled to match. */
+const SIZE_PRESETS: Record<LogoSize, { markSize: number; textSize: number }> = {
+    hero: { markSize: 116, textSize: 28 },
+    lg: { markSize: 56, textSize: 22 },
+    md: { markSize: 44, textSize: 17 },
+    sm: { markSize: 36, textSize: 15 },
+};
+
+/** home-pi pin + Plus Jakarta Sans `neyborhuud` (always lowercase). */
 export function NeyborHuudLogo({
-    variant = 'on-dark',
-    layout = 'stacked',
+    layout = 'inline',
+    shell = 'none',
+    size = 'lg',
     className = '',
-    markSize = 56,
-    wordmarkWidth = 168,
+    markSize: markSizeProp,
+    textSize: textSizeProp,
+    tone = 'light',
     priority = false,
 }: NeyborHuudLogoProps) {
-    const wordmarkHeight = Math.round(wordmarkWidth * 0.2);
-    const onDark = variant === 'on-dark';
-    const blend = onDark ? 'mix-blend-screen' : '';
+    const preset = SIZE_PRESETS[size];
+    const markSize = markSizeProp ?? preset.markSize;
+    const typeSize = textSizeProp ?? preset.textSize;
+    const markWidth = Math.round(markSize * MARK_ASPECT);
+
+    const shellClass =
+        shell === 'glass'
+            ? 'rounded-full border border-white/10 bg-black/35 px-3 py-1.5 backdrop-blur-sm'
+            : shell === 'solid'
+              ? 'rounded-xl bg-brand-black px-3 py-1.5'
+              : '';
 
     const mark = (
         <Image
             src={MARK}
             alt=""
-            width={markSize}
+            width={markWidth}
             height={markSize}
             priority={priority}
             aria-hidden
-            className={`h-auto object-contain ${blend}`}
-            style={{ width: markSize, height: markSize }}
+            className={`block shrink-0 object-contain ${markClass[tone]}`}
+            style={{ height: markSize, width: 'auto', minHeight: markSize, maxWidth: 'none' }}
         />
     );
 
     const wordmark = (
-        <Image
-            src={WORDMARK}
-            alt="neyborhuud"
-            width={wordmarkWidth}
-            height={wordmarkHeight}
-            priority={priority}
-            className={`h-auto object-contain ${blend}`}
-            style={{ width: wordmarkWidth, maxWidth: '100%' }}
-        />
+        <span
+            className={`brand-wordmark leading-[0.95] ${toneClass[tone]}`}
+            style={{ fontSize: typeSize }}
+            aria-label="neyborhuud"
+        >
+            neyborhuud
+        </span>
+    );
+
+    const wrap = (children: ReactNode, extra = '') => (
+        <div className={`inline-flex ${shellClass} ${extra} ${className}`.trim()}>{children}</div>
     );
 
     if (layout === 'mark') {
-        return (
-            <div className={`inline-flex ${onDark ? '' : 'rounded-2xl bg-brand-black px-3 py-2'} ${className}`}>
-                {mark}
-            </div>
-        );
+        return wrap(mark, 'items-center');
     }
 
     if (layout === 'wordmark') {
-        return (
-            <div className={`inline-flex ${onDark ? '' : 'rounded-2xl bg-brand-black px-4 py-2'} ${className}`}>
+        return wrap(wordmark, 'items-center');
+    }
+
+    if (layout === 'stacked') {
+        return wrap(
+            <>
+                <span className="inline-flex shrink-0 items-center">{mark}</span>
                 {wordmark}
-            </div>
+            </>,
+            'flex-col items-center gap-1.5',
         );
     }
 
-    return (
-        <div
-            className={`inline-flex flex-col items-center gap-2 ${
-                onDark ? '' : 'rounded-[1.25rem] bg-brand-black px-5 py-3 shadow-[0_12px_32px_rgba(26,26,46,0.12)]'
-            } ${className}`}
-        >
-            {mark}
-            {wordmark}
-        </div>
+    /* Pin cap aligns with text cap-height; extra pin point hangs below baseline */
+    return wrap(
+        <>
+            <span className="inline-flex shrink-0 items-end pb-[0.06em]">{mark}</span>
+            <span className="inline-flex items-center pb-[0.12em]">{wordmark}</span>
+        </>,
+        'items-end gap-2 sm:gap-2.5',
     );
 }

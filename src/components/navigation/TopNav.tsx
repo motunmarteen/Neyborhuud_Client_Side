@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { GlobalSearch } from '@/components/GlobalSearch';
+import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { useUnreadCount } from '@/hooks/useNotifications';
 
 export default function TopNav() {
@@ -30,22 +30,13 @@ export default function TopNav() {
       </button>
 
       {/* Logo */}
-      <Link href="/feed" className="flex items-center shrink-0 cursor-pointer">
-        <span className="relative mr-2 h-7 w-7 overflow-hidden rounded-xl bg-white/80">
-          <Image
-            src="/icon.png"
-            alt="NeyborHuud"
-            fill
-            sizes="28px"
-            className="object-cover"
-            priority
-          />
-        </span>
-        <h2
-          className={`text-lg font-extrabold leading-tight tracking-[-0.02em] ${isOnFeed ? 'text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.4)]' : 'text-primary'}`}
-        >
-          NeyborHuud
-        </h2>
+      <Link href="/feed" className="flex shrink-0 items-center cursor-pointer">
+        <NeyborHuudLogo
+          layout="inline"
+          size="sm"
+          tone={isOnFeed ? 'light' : 'primary'}
+          priority
+        />
       </Link>
 
       {/* Spacer */}

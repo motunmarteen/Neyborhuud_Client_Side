@@ -2,12 +2,12 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import { fetchAPI } from '@/lib/api';
 import apiClient from '@/lib/api-client';
 import { persistAuthSessionPayload } from '@/lib/communityContext';
 import { OTPInput } from '@/components/ui/OTPInput';
 import { PremiumInput } from '@/components/ui/PremiumInput';
+import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 
 type Step = 'code-entry' | 'verifying' | 'success' | 'error' | 'expired';
 
@@ -182,12 +182,7 @@ function VerifyEmailContent() {
                     <button type="button" onClick={() => router.push('/login')} className="flex h-8 w-8 items-center justify-center rounded-xl text-charcoal/55 transition-colors hover:text-primary" aria-label="Login" title="Login">
                         <i className="bi bi-arrow-left" aria-hidden />
                     </button>
-                    <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-primary">
-                        <span className="relative h-5 w-5 overflow-hidden rounded-lg bg-white">
-                            <Image src="/icon.png" alt="NeyborHuud" fill sizes="20px" className="object-cover" priority />
-                        </span>
-                        NeyborHuud
-                    </span>
+                    <NeyborHuudLogo layout="inline" size="sm" tone="primary" />
                     <span className="flex h-8 w-8 items-center justify-center rounded-xl text-primary"><i className="bi bi-envelope-check" aria-hidden /></span>
                 </div>
 

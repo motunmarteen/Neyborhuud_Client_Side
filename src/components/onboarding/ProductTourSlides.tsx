@@ -89,7 +89,7 @@ export function ProductTourSlides({ onComplete, onSkip }: ProductTourSlidesProps
             ) : null}
 
             <div className="absolute left-0 right-0 top-8 z-20 flex justify-center px-6">
-                <NeyborHuudLogo variant="on-light" layout="stacked" markSize={48} wordmarkWidth={140} />
+                <NeyborHuudLogo layout="inline" size="lg" tone="dark" />
             </div>
 
             <div

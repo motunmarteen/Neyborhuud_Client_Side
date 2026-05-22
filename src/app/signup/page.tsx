@@ -582,7 +582,7 @@ function SignupPageContent() {
             <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
                 <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
                     <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-                        <NeyborHuudLogo variant="on-light" layout="wordmark" wordmarkWidth={112} />
+                        <NeyborHuudLogo layout="inline" size="sm" tone="primary" />
                         <span className="rounded-full bg-primary/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">Ready</span>
                     </div>
                     <div className="flex min-h-0 flex-1 flex-col py-3">

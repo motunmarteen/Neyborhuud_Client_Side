@@ -15,28 +15,37 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "NeyborHuud - Your Huud Operating System",
-    template: "%s | NeyborHuud",
+    default: "neyborhuud — Your Huud Operating System",
+    template: "%s | neyborhuud",
   },
   description: "Digital infrastructure for the modern African Huud. Safety, trust, and local prosperity — hyperlocal feed, SOS alerts, marketplace, and more.",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "NeyborHuud",
+    statusBarStyle: "black-translucent",
+    title: "neyborhuud",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "NeyborHuud",
-    title: "NeyborHuud - Your Huud Operating System",
+    siteName: "neyborhuud",
+    title: "neyborhuud — Your Huud Operating System",
     description: "Digital infrastructure for the modern African Huud. Safety, trust, and local prosperity.",
   },
   twitter: {
     card: "summary",
-    title: "NeyborHuud",
+    title: "neyborhuud",
     description: "Digital infrastructure for the modern African Huud.",
   },
   robots: {
@@ -46,7 +55,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#11d473",
+  themeColor: "#006F35",
   width: "device-width",
   initialScale: 1,
 };

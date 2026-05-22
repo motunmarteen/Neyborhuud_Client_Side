@@ -11,6 +11,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { GlobalSearch } from '@/components/GlobalSearch';
+import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 interface SidebarProps {
@@ -170,8 +171,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                     {/* Header with close button */}
                     <div className="flex items-center justify-between mb-6">
                         <Link href="/feed" className="flex items-center gap-3" onClick={handleNavClick}>
-                            <img src="/icon.png" alt="NeyborHuud" className="w-10 h-10 rounded-xl" />
-                            <span className="font-bold text-xl text-[var(--neu-text-muted)] dark:text-white">NeyborHuud</span>
+                            <NeyborHuudLogo layout="inline" size="md" tone="primary" />
                         </Link>
                         <button
                             onClick={onMobileClose}
@@ -250,8 +250,8 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
         >
             {/* Logo & Toggle */}
             <div className="flex items-center justify-between h-14 px-3 mb-1">
-                <Link href="/feed" className="w-12 h-12 rounded-full flex items-center justify-center hover:bg-brand-surface dark:hover:bg-brand-black/80 transition-colors">
-                    <img src="/icon.png" alt="NeyborHuud" className="w-8 h-8 rounded-lg" />
+                <Link href="/feed" className="flex h-12 w-12 items-center justify-center rounded-full transition-colors hover:bg-brand-surface dark:hover:bg-brand-black/80">
+                    <NeyborHuudLogo layout="mark" size="sm" tone="primary" />
                 </Link>
                 {!isCollapsed && (
                     <button

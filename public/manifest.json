@@ -1,17 +1,29 @@
 {
-    "name": "NeyborHuud",
-    "short_name": "NeyborHuud",
-    "description": "The Ultimate Neighborhood Operating System",
+    "name": "neyborhuud",
+    "short_name": "neyborhuud",
+    "description": "Hyperlocal safety, community, and commerce — built for your street.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0f172a",
-    "theme_color": "#0f172a",
+    "background_color": "#060908",
+    "theme_color": "#006F35",
     "icons": [
         {
-            "src": "/icon.png",
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-512.png",
             "sizes": "512x512",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ]
 }
