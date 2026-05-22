@@ -105,7 +105,7 @@ export function LandingPage() {
             </div>
 
             <div className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-md flex-col">
-                <header className="relative flex h-[50svh] shrink-0 flex-col items-center justify-start px-6 pt-[max(calc(env(safe-area-inset-top)+0.75rem),1.25rem)]">
+                <header className="relative flex flex-1 flex-col items-center justify-start px-6 pt-[max(calc(env(safe-area-inset-top)+0.75rem),1.25rem)]">
                     <div
                         className="landing-logo-halo pointer-events-none absolute left-1/2 top-[max(env(safe-area-inset-top),0.75rem)] h-40 w-[min(100%,20rem)] -translate-x-1/2"
                         aria-hidden
@@ -113,7 +113,7 @@ export function LandingPage() {
                     <NeyborHuudLogo layout="stacked" size="hero" tone="hero" priority />
                 </header>
 
-                <div className="flex min-h-[50svh] flex-1 flex-col px-6 pb-[max(calc(env(safe-area-inset-bottom)+0.5rem),1.25rem)]">
+                <div className="flex flex-1 flex-col px-6 pb-[max(calc(env(safe-area-inset-bottom)+0.5rem),1.25rem)]">
                     <div>
                         <div className="landing-headline-stack">
                             {HEADLINE_LINES.map((line) => (

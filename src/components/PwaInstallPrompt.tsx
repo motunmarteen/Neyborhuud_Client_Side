@@ -102,6 +102,7 @@ export default function PwaInstallPrompt() {
     const androidDevice = isAndroidDevice();
     const inAppBrowser = isInAppBrowser();
     const lightSheet = useLightInstallSheet(pathname);
+    const canOfferIosGuide = iosDevice && !isPwaInstalled();
 
     useEffect(() => {
         if (isPwaInstalled()) markPwaInstalled();
@@ -120,7 +121,7 @@ export default function PwaInstallPrompt() {
 
     useEffect(() => {
         if (!isInstallRoute(pathname)) return;
-        if (!shouldOfferPwaInstall()) return;
+        if (!shouldOfferPwaInstall() && !canOfferIosGuide) return;
 
         try {
             if (sessionStorage.getItem(SESSION_KEY) === '1') return;
@@ -137,7 +138,8 @@ export default function PwaInstallPrompt() {
         if (!iosDevice && !canNativeInstall && !androidDevice) return;
 
         const timer = window.setTimeout(() => {
-            if (isPwaInstalled() || !shouldOfferPwaInstall()) return;
+            if (isPwaInstalled()) return;
+            if (!shouldOfferPwaInstall() && !canOfferIosGuide) return;
             try {
                 sessionStorage.setItem(SESSION_KEY, '1');
             } catch {
@@ -148,11 +150,12 @@ export default function PwaInstallPrompt() {
         }, delay);
 
         return () => window.clearTimeout(timer);
-    }, [pathname, canNativeInstall, iosDevice, androidDevice]);
+    }, [pathname, canNativeInstall, iosDevice, androidDevice, canOfferIosGuide]);
 
-    const dismiss = useCallback((snoozeDays = 7) => {
+    const dismiss = useCallback((mode: 'session' | 'short' | 'long' = 'short') => {
         setVisible(false);
-        snoozePwaInstallPrompt(snoozeDays);
+        if (mode === 'session') return;
+        snoozePwaInstallPrompt(mode === 'long' ? 14 : 3);
     }, []);
 
     const handleAndroidInstall = useCallback(async () => {
@@ -286,7 +289,7 @@ export default function PwaInstallPrompt() {
 
                     <button
                         type="button"
-                        onClick={() => dismiss(iosSafari ? 14 : 7)}
+                        onClick={() => dismiss(iosSafari || showAndroidManual ? 'session' : 'short')}
                         className={
                             iosSafari || showAndroidManual
                                 ? 'landing-btn-primary flex h-[52px] w-full items-center justify-center text-sm font-bold transition-transform'
