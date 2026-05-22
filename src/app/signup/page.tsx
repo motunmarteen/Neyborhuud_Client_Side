@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { OTPInput } from '@/components/ui/OTPInput';
@@ -15,7 +16,17 @@ import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValid
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
 import { toast } from 'sonner';
+import { AuthBrandHeader } from '@/components/auth/AuthBrandHeader';
+import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
+
+const SIGNUP_MAP_DEFAULT = { lat: 6.6059, lng: 3.2771 };
+
+const SIGNUP_STAGE_LABELS = {
+    location: 'Street',
+    identity: '@name',
+    security: 'Secure',
+} as const;
 
 function SignupPageContent() {
     const router = useRouter();
@@ -38,8 +49,7 @@ function SignupPageContent() {
     const [resolvedAddress, setResolvedAddress] = useState<LocationAddress | null>(null);
     const [locError, setLocError] = useState<string | null>(null);
     const [isResolving, setIsResolving] = useState(false);
-    
-    // Resend verification email state
+    const [locationSheetCollapsed, setLocationSheetCollapsed] = useState(false);
     const [resendCooldown, setResendCooldown] = useState(0);
     const [isResending, setIsResending] = useState(false);
     
@@ -64,6 +74,16 @@ function SignupPageContent() {
     }, [formData.username]);
 
     // Resend cooldown timer
+    useEffect(() => {
+        if (step !== 'form') return;
+        document.documentElement.setAttribute('data-auth', 'signup-map');
+        return () => {
+            if (document.documentElement.getAttribute('data-auth') === 'signup-map') {
+                document.documentElement.removeAttribute('data-auth');
+            }
+        };
+    }, [step]);
+
     useEffect(() => {
         if (resendCooldown > 0) {
             const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
@@ -106,17 +126,13 @@ function SignupPageContent() {
     const huudName = resolvedAddress?.neighborhood || resolvedAddress?.lga || (location ? 'Huud point captured' : 'Finding your Huud');
     const huudRegion = [resolvedAddress?.lga, resolvedAddress?.state].filter(Boolean).join(', ') ||
         (location ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : 'Choose your area on the map');
-    const huudStatus = location ? 'Locality attached' : 'Awaiting location';
+    const huudStatus = location ? 'Your street is set' : 'Find your street';
     const huudSignal = location
         ? resolvedAddress?.source === 'backend'
-            ? 'Verified by NeyborHuud Geo'
-            : 'GPS point captured'
-        : 'Scan to attach your locality';
-    const identityHandle = formData.username.trim() ? `@${formData.username.trim()}` : '@your_huud_name';
-    const identityEmail = formData.email.trim() || 'your@email.com';
-    const identityStatus = canContinueIdentity ? 'Identity reserved' : 'Choose your NeyborHuud name';
-    const securityStatus = isPassValid ? 'Keys strengthened' : 'Protect your Huud';
-    const consentStatus = formData.acceptTermsAndPrivacy ? 'Consent confirmed' : 'Consent required';
+            ? 'Verified by neyborhuud'
+            : 'Location saved'
+        : 'Tap below to use GPS or the map';
+    const identityHandle = formData.username.trim() ? `@${formData.username.trim()}` : '@your_name';
 
     // Handle resend verification code
     const handleResendVerification = async () => {
@@ -460,31 +476,9 @@ function SignupPageContent() {
     if (step === 'verify-email') {
         return (
             <div className="fixed-app neu-base overflow-hidden">
-                <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
-                    <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-                        <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-white shadow-[0_12px_24px_rgba(0,111,53,0.22)]">
-                                <i className="bi bi-envelope-check-fill text-sm" aria-hidden />
-                            </div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">Verify email</span>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setStep('form');
-                                setVerificationCode('');
-                                setVerificationError(null);
-                                setVerificationNotice(null);
-                            }}
-                            className="flex h-8 w-8 items-center justify-center rounded-xl text-charcoal/55 transition-colors hover:text-primary"
-                            aria-label="Back to signup"
-                            title="Back"
-                        >
-                            <i className="bi bi-pencil-square" aria-hidden />
-                        </button>
-                    </div>
-
-                    <div className="flex min-h-0 flex-1 flex-col py-3">
+                <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-2 sm:px-6">
+                    <AuthBrandHeader compact subtitle="Check your email for the code." />
+                    <div className="flex min-h-0 flex-1 flex-col py-2">
                         <div className="-mx-5 min-h-0 flex-1 overflow-hidden bg-white/[0.76] shadow-inner sm:-mx-6">
                             <div className="relative flex h-full min-h-[120px] items-center justify-center overflow-hidden px-6">
                                 <div className="absolute left-4 top-7 h-2 w-36 rotate-12 rounded-full bg-brand-blue/16" aria-hidden />
@@ -501,8 +495,8 @@ function SignupPageContent() {
                                                 One-time code
                                             </div>
                                         </div>
-                                        <p className="mb-1 text-[9px] font-black uppercase tracking-[0.24em] text-primary">{verificationError ? 'Delivery needs attention' : 'Inbox secured'}</p>
-                                        <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">Check your email</h1>
+                                        <p className="mb-1 text-[9px] font-black uppercase tracking-[0.24em] text-primary">{verificationError ? 'Try again' : 'Almost there'}</p>
+                                        <h2 className="truncate text-2xl font-black tracking-tighter text-brand-black">Check your email</h2>
                                         <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{formData.email}</p>
                                         <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[var(--neu-text-secondary)]">
                                             <i className="bi bi-geo-alt-fill text-primary" aria-hidden />
@@ -544,7 +538,7 @@ function SignupPageContent() {
                                         type="button"
                                         onClick={handleResendVerification}
                                         disabled={resendCooldown > 0 || isResending}
-                                        className="btn-secondary h-[50px] w-full gap-2"
+                                        className="auth-btn auth-btn-secondary"
                                     >
                                         <i className={`bi ${isResending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
                                         {isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}
@@ -553,11 +547,11 @@ function SignupPageContent() {
                                         type="button"
                                         onClick={() => handleVerifyCode()}
                                         disabled={verificationCode.length !== 6 || isVerifying}
-                                        className="btn-glass-primary btn-paired h-[50px] w-full gap-2"
+                                        className="auth-btn auth-btn-primary"
                                     >
                                         {isVerifying ? (
                                             <>
-                                                <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" aria-hidden />
+                                                <span className="h-4 w-4 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
                                                 Verifying
                                             </>
                                         ) : (
@@ -568,6 +562,18 @@ function SignupPageContent() {
                                         )}
                                     </button>
                                 </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setStep('form');
+                                        setVerificationCode('');
+                                        setVerificationError(null);
+                                        setVerificationNotice(null);
+                                    }}
+                                    className="text-center text-xs font-semibold text-[var(--neu-text-muted)] transition-colors hover:text-primary"
+                                >
+                                    Edit signup details
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -580,12 +586,9 @@ function SignupPageContent() {
     if (step === 'success') {
         return (
             <div className="fixed-app neu-base overflow-hidden">
-                <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
-                    <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-                        <NeyborHuudLogo layout="inline" size="sm" tone="primary" />
-                        <span className="rounded-full bg-primary/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">Ready</span>
-                    </div>
-                    <div className="flex min-h-0 flex-1 flex-col py-3">
+                <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-2 sm:px-6">
+                    <AuthBrandHeader compact subtitle="You&apos;re in. Welcome to the Huud." />
+                    <div className="flex min-h-0 flex-1 flex-col py-2">
                         <div className="-mx-5 min-h-0 flex-1 overflow-hidden bg-white/[0.76] shadow-inner sm:-mx-6">
                             <div className="relative flex h-full items-center justify-center overflow-hidden px-6">
                                 <div className="absolute left-4 top-8 h-2 w-36 rotate-12 rounded-full bg-primary/16" aria-hidden />
@@ -597,8 +600,8 @@ function SignupPageContent() {
                                     </div>
                                 </div>
                                 <div className="absolute bottom-5 left-1/2 w-[min(19rem,calc(100%-3rem))] -translate-x-1/2 rounded-2xl border border-white/85 bg-white/[0.9] px-4 py-3 shadow-[0_18px_40px_rgba(26,26,46,0.12)] backdrop-blur-xl">
-                                    <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">Account secured</p>
-                                    <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">Welcome, neybor</h1>
+                                    <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">You&apos;re in</p>
+                                    <h2 className="truncate text-2xl font-black tracking-tighter text-brand-black">Welcome, Neybor</h2>
                                     <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{identityHandle} · {huudName}</p>
                                 </div>
                             </div>
@@ -618,6 +621,7 @@ function SignupPageContent() {
                                     </div>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => {
                                         if (getNeedsCommunitySelection()) {
                                             router.push('/pick-community');
@@ -625,7 +629,7 @@ function SignupPageContent() {
                                         }
                                         router.push(getAppEntryRoute());
                                     }}
-                                    className="btn-glass-primary h-[52px] w-full gap-2"
+                                    className="auth-btn auth-btn-primary"
                                 >
                                     Enter your Huud
                                     <i className="bi bi-arrow-right" aria-hidden />
@@ -639,313 +643,306 @@ function SignupPageContent() {
     }
 
     return (
-        <div className="fixed-app neu-base overflow-hidden">
-            <form onSubmit={handleSubmit} className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
-                <div className="grid shrink-0 grid-cols-3 gap-2 rounded-[1.15rem] bg-white/70 p-1.5 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-                    {signupStages.map((item, index) => {
-                        const isActive = signupStage === item.id;
-                        const isDone = index < activeStageIndex;
-                        const canOpen = index <= activeStageIndex || item.id === 'identity' || (item.id === 'security' && canContinueIdentity);
+        <form onSubmit={handleSubmit} className="auth-signup-page fixed-app overflow-hidden">
+            <div className="auth-signup-map-layer">
+                <LocationPicker
+                    initialLocation={location}
+                    accuracy={gpsAccuracy}
+                    onLocationSelect={handleLocationSelect}
+                    isDetecting={isResolving && !location}
+                    error={locError}
+                    onRetry={fetchLocation}
+                    mapHeight="signup-fullscreen"
+                    defaultCenter={SIGNUP_MAP_DEFAULT}
+                    readOnly={signupStage !== 'location'}
+                    label="Huud point"
+                    presentation="premium"
+                />
+                <div
+                    className={`auth-signup-map-scrim${signupStage !== 'location' ? ' auth-signup-map-scrim--dim' : ''}${signupStage === 'location' && locationSheetCollapsed ? ' auth-signup-map-scrim--sheet-collapsed' : ''}`}
+                    aria-hidden
+                />
+            </div>
 
-                        return (
-                            <button
-                                key={item.id}
-                                type="button"
-                                onClick={() => {
-                                    if (item.id === 'security' && !canContinueIdentity) return;
-                                    if (canOpen) setSignupStage(item.id);
-                                }}
-                                disabled={!canOpen}
-                                className={`flex h-11 items-center justify-center rounded-2xl px-2 transition-all ${isActive ? 'bg-primary text-white shadow-[0_12px_24px_rgba(0,111,53,0.24)]' : 'text-charcoal/45'} ${!canOpen ? 'opacity-40' : ''}`}
-                                aria-label={item.label}
-                                title={item.label}
-                            >
-                                <i className={`bi ${isDone ? 'bi-check-circle-fill' : item.icon} text-lg`} aria-hidden />
-                                <span className="sr-only">{item.label}</span>
-                            </button>
-                        );
-                    })}
+            <div className="auth-signup-chrome">
+                <div className="auth-signup-top">
+                    <NeyborHuudLogo layout="wordmark" size="md" textSize={22} tone="light" />
+                    <div className="auth-signup-progress" role="tablist" aria-label="Signup progress">
+                        {signupStages.map((item, index) => {
+                            const isActive = signupStage === item.id;
+                            const isDone = index < activeStageIndex;
+                            const canOpen =
+                                signupStage === 'location'
+                                    ? item.id === 'location'
+                                    : index <= activeStageIndex ||
+                                      item.id === 'identity' ||
+                                      (item.id === 'security' && canContinueIdentity);
+
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    role="tab"
+                                    onClick={() => {
+                                        if (item.id === 'security' && !canContinueIdentity) return;
+                                        if (canOpen) setSignupStage(item.id);
+                                    }}
+                                    disabled={!canOpen}
+                                    className={`auth-signup-progress__dot${isActive ? ' auth-signup-progress__dot--active' : ''}${isDone ? ' auth-signup-progress__dot--done' : ''}${!canOpen ? ' auth-signup-progress__dot--disabled' : ''}`}
+                                    aria-current={isActive ? 'step' : undefined}
+                                    aria-label={`Step ${index + 1}: ${SIGNUP_STAGE_LABELS[item.id]}`}
+                                />
+                            );
+                        })}
+                    </div>
                 </div>
 
                 {referralCodeInput.trim() ? (
-                    <div className="mt-3 shrink-0 rounded-2xl border border-primary/20 bg-primary/10 px-4 py-2.5">
-                        <p className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
-                            <span className="font-black text-primary">Invite link active:</span> {referralCodeInput.trim()} can unlock HuudCoins when your account is created.
+                    <div className="mt-2 shrink-0 rounded-xl border border-white/20 bg-black/35 px-3 py-2 backdrop-blur-md">
+                        <p className="text-[10px] font-medium leading-relaxed text-white/80">
+                            Invite: <span className="font-bold text-[var(--landing-green,#00d431)]">{referralCodeInput.trim()}</span>
                         </p>
                     </div>
                 ) : null}
+            </div>
 
-                <div className="flex min-h-0 flex-1 flex-col py-3">
-                    {signupStage === 'location' && (
-                        <section className="flex h-full min-h-0 flex-col gap-3 animate-in fade-in slide-in-from-bottom-3 duration-300">
-                            <div className="-mx-5 min-h-0 flex-1 sm:-mx-6">
-                                <LocationPicker
-                                    initialLocation={location}
-                                    accuracy={gpsAccuracy}
-                                    onLocationSelect={handleLocationSelect}
-                                    isDetecting={isResolving && !location}
-                                    error={locError}
-                                    onRetry={fetchLocation}
-                                    mapHeight="signup-location"
-                                    label="Huud point"
-                                    presentation="premium"
+            <div className="auth-signup-map-spacer" aria-hidden />
+
+            {signupStage === 'location' && (
+                <SignupBottomSheet
+                    ariaLabel="Your street"
+                    stageKey="location"
+                    onCollapsedChange={setLocationSheetCollapsed}
+                    peek={
+                        <div className="auth-signup-location-peek">
+                            <span className="auth-signup-location-peek__icon" aria-hidden>
+                                <i className="bi bi-geo-alt-fill" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <p className="auth-signup-location-peek__label">{huudStatus}</p>
+                                <p className="auth-signup-location-peek__name truncate">{huudName}</p>
+                            </div>
+                            <span className="auth-signup-location-peek__chevron" aria-hidden>
+                                <i className={`bi ${locationSheetCollapsed ? 'bi-chevron-up' : 'bi-chevron-down'}`} />
+                            </span>
+                        </div>
+                    }
+                >
+                        <div className="mb-3 flex items-center gap-3">
+                            <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
+                                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-primary shadow-md">N</span>
+                                <i className="bi bi-geo-alt-fill text-xl" aria-hidden />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="mb-1 flex items-center gap-2">
+                                    <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">{huudStatus}</p>
+                                    <span className="h-1 w-1 rounded-full bg-brand-blue/60" aria-hidden />
+                                    <p className="truncate text-[9px] font-bold uppercase tracking-wider text-brand-blue">{huudSignal}</p>
+                                </div>
+                                <h2 className="truncate text-[1.35rem] font-black tracking-tighter text-brand-black">{huudName}</h2>
+                                <p className="truncate text-[11px] font-medium text-[var(--neu-text-muted)]">{huudRegion}</p>
+                            </div>
+                        </div>
+                        {locError ? (
+                            <div className="mb-3 flex items-start gap-2 rounded-xl border border-brand-red/15 bg-brand-red/10 px-3 py-2 text-[11px] font-semibold leading-relaxed text-brand-red">
+                                <i className="bi bi-exclamation-circle-fill mt-0.5 shrink-0" aria-hidden />
+                                <span>{locError}</span>
+                            </div>
+                        ) : null}
+                        <p className="mb-3 text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
+                            Tap or drag the map to adjust
+                        </p>
+                        <div className="grid grid-cols-1 gap-2.5 min-[390px]:grid-cols-2">
+                            <button
+                                type="button"
+                                onClick={fetchLocation}
+                                disabled={isResolving}
+                                className="auth-btn auth-btn-secondary disabled:opacity-40"
+                            >
+                                <i className={`bi ${isResolving ? 'bi-arrow-repeat animate-spin' : 'bi-broadcast'}`} aria-hidden />
+                                {isResolving ? 'Finding…' : 'Use my location'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSignupStage('identity')}
+                                className="auth-btn auth-btn-primary"
+                            >
+                                Continue
+                                <i className="bi bi-arrow-right" aria-hidden />
+                            </button>
+                        </div>
+                        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
+                            Already on the Huud?{' '}
+                            <Link href="/login">Enter your Huud</Link>
+                        </p>
+                </SignupBottomSheet>
+            )}
+
+            {signupStage === 'identity' && (
+                <SignupBottomSheet ariaLabel="Pick your @name" stageKey="identity" tall>
+                        <div className="auth-signup-sheet__head">
+                            <h2 className="auth-signup-sheet__title">Pick your @name</h2>
+                            <p className="auth-signup-sheet__hint truncate">{huudName}</p>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <div className="grid grid-cols-2 gap-3">
+                                <PremiumInput
+                                    label="Username"
+                                    icon="bi-person"
+                                    placeholder="e.g. nancy_surulere"
+                                    className="py-0.5"
+                                    value={formData.username}
+                                    onChange={e => setFormData({ ...formData, username: e.target.value })}
+                                    validationStatus={usernameValidation.status}
+                                    error={usernameValidation.errorMessage || undefined}
+                                    successText={usernameValidation.status === 'valid' ? 'Username available' : undefined}
+                                />
+                                <PremiumInput
+                                    label="Email"
+                                    type="email"
+                                    icon="bi-envelope"
+                                    placeholder="nancy@example.com"
+                                    className="py-0.5"
+                                    value={formData.email}
+                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                    validationStatus={emailValidation.status}
+                                    error={emailValidation.errorMessage || undefined}
+                                    successText={emailValidation.status === 'valid' ? 'Email available' : undefined}
                                 />
                             </div>
+                            <PremiumInput
+                                label="Invite"
+                                icon="bi-gift"
+                                placeholder="Username or invite code"
+                                className="py-0.5"
+                                value={referralCodeInput}
+                                onChange={(e) => setReferralCodeInput(e.target.value)}
+                            />
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setSignupStage('location')}
+                                    className="auth-btn auth-btn-secondary"
+                                >
+                                    <i className="bi bi-arrow-left" aria-hidden />
+                                    Back
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setSignupStage('security')}
+                                    disabled={!canContinueIdentity}
+                                    className="auth-btn auth-btn-primary"
+                                >
+                                    Continue
+                                    <i className="bi bi-arrow-right" aria-hidden />
+                                </button>
+                            </div>
+                            <p className="auth-signin-link auth-signin-link--sheet border-t border-charcoal/8 pt-3">
+                                Already on the Huud?{' '}
+                                <Link href="/login">Enter your Huud</Link>
+                            </p>
+                        </div>
+                </SignupBottomSheet>
+            )}
 
-                            <div className="shrink-0 overflow-hidden rounded-[1.7rem] border border-white/85 bg-white/[0.94] shadow-[0_28px_70px_rgba(26,26,46,0.18)] backdrop-blur-2xl">
-                                <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
-                                <div className="p-3.5">
-                                    <div className="mb-3 flex items-center gap-3">
-                                        <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
-                                            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-primary shadow-md">N</span>
-                                            <i className="bi bi-geo-alt-fill text-xl" aria-hidden />
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="mb-1 flex items-center gap-2">
-                                                <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">{huudStatus}</p>
-                                                <span className="h-1 w-1 rounded-full bg-brand-blue/60" aria-hidden />
-                                                <p className="truncate text-[9px] font-bold uppercase tracking-wider text-brand-blue">{huudSignal}</p>
-                                            </div>
-                                            <h2 className="truncate text-[1.35rem] font-black tracking-tighter text-brand-black">{huudName}</h2>
-                                            <p className="truncate text-[11px] font-medium text-[var(--neu-text-muted)]">{huudRegion}</p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-3 min-[390px]:grid-cols-2">
-                                        <button
-                                            type="button"
-                                            onClick={fetchLocation}
-                                            disabled={isResolving}
-                                            className="btn-secondary h-[50px] w-full gap-2 text-sm font-bold disabled:opacity-40"
-                                        >
-                                            <i className={`bi ${isResolving ? 'bi-arrow-repeat animate-spin' : 'bi-broadcast'}`} aria-hidden />
-                                            {isResolving ? 'Scanning' : 'Scan Huud'}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setSignupStage('identity')}
-                                            className="btn-glass-primary btn-paired h-[50px] w-full gap-2 !normal-case !font-bold !tracking-normal !text-sm"
-                                        >
-                                            Confirm Huud
+            {signupStage === 'security' && (
+                <SignupBottomSheet ariaLabel="Secure your Huud" stageKey="security" tall>
+                        <div className="auth-signup-sheet__head">
+                            <h2 className="auth-signup-sheet__title">Secure your Huud</h2>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <PremiumInput
+                                label="Secure Password"
+                                type="password"
+                                icon="bi-lock"
+                                placeholder="12+ chars, mixed case, number"
+                                className="py-1"
+                                value={formData.password}
+                                onChange={e => setFormData({ ...formData, password: e.target.value })}
+                            />
+                            <PasswordStrengthMeter
+                                password={formData.password}
+                                email={formData.email}
+                                username={formData.username}
+                                showChecklist={false}
+                            />
+                            {!isPassValid && formData.password.length > 0 && (
+                                <p className="px-1 text-[10px] text-[var(--neu-text-muted)]">
+                                    {passwordPolicy.ok ? '' : passwordPolicy.message}
+                                </p>
+                            )}
+
+                            <div className="flex flex-col gap-2 rounded-2xl border border-charcoal/10 bg-white/[0.92] px-3 py-3 shadow-[0_12px_32px_rgba(26,26,46,0.08)]">
+                                <label className="flex cursor-pointer items-start gap-3">
+                                    <input
+                                        type="checkbox"
+                                        id="acceptTermsAndPrivacy"
+                                        className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                                        checked={formData.acceptTermsAndPrivacy}
+                                        onChange={e =>
+                                            setFormData({
+                                                ...formData,
+                                                acceptTermsAndPrivacy: e.target.checked,
+                                            })
+                                        }
+                                    />
+                                    <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
+                                        I agree to the <span className="font-black text-brand-blue">Community Rules</span> and <span className="font-black text-brand-blue">Terms of Service</span>, and I have read the <span className="font-black text-brand-blue">Privacy Policy</span>. I consent to the processing of my personal data needed to run my account, including under Nigerian data protection law (<span className="font-black text-brand-black">NDPA / NDPR</span>).
+                                    </span>
+                                </label>
+                                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2.5">
+                                    <input
+                                        type="checkbox"
+                                        className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-primary"
+                                        checked={formData.optionalProcessing}
+                                        onChange={e =>
+                                            setFormData({
+                                                ...formData,
+                                                optionalProcessing: e.target.checked,
+                                            })
+                                        }
+                                    />
+                                    <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
+                                        Product updates, offers, analytics, and limited partner use as described in the Privacy Policy.
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div className="grid grid-cols-[0.78fr_1.22fr] gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setSignupStage('identity')}
+                                    className="auth-btn auth-btn-secondary"
+                                >
+                                    <i className="bi bi-arrow-left" aria-hidden />
+                                    Back
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={!canSubmit}
+                                    className="auth-btn auth-btn-primary"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="h-4 w-4 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                                            Joining…
+                                        </>
+                                    ) : (
+                                        <>
+                                            Join neyborhuud
                                             <i className="bi bi-arrow-right" aria-hidden />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                    )}
-
-                    {signupStage === 'identity' && (
-                        <section className="flex h-full min-h-0 flex-col gap-3 animate-in fade-in slide-in-from-bottom-3 duration-300">
-                            <div className="-mx-5 min-h-0 flex-1 overflow-hidden bg-white/[0.76] shadow-inner sm:-mx-6">
-                                <div className="relative flex h-full min-h-[104px] items-center justify-center overflow-hidden px-6">
-                                    <div className="absolute left-4 top-6 h-2 w-36 rotate-12 rounded-full bg-brand-purple/16" aria-hidden />
-                                    <div className="absolute right-4 top-1/2 h-2 w-32 -rotate-12 rounded-full bg-primary/14" aria-hidden />
-                                    <div className="absolute bottom-6 left-12 h-2 w-40 -rotate-6 rounded-full bg-brand-blue/14" aria-hidden />
-                                    <div className="relative w-full max-w-[19rem] overflow-hidden rounded-[1.6rem] border border-white/85 bg-white/[0.92] shadow-[0_26px_64px_rgba(26,26,46,0.16)] backdrop-blur-xl">
-                                        <div className="h-1.5 bg-gradient-to-r from-brand-purple via-brand-blue to-primary" aria-hidden />
-                                        <div className="p-4">
-                                            <div className="mb-4 flex items-center justify-between gap-3">
-                                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-purple text-white shadow-[0_16px_34px_rgba(142,111,191,0.3)]">
-                                                    <i className="bi bi-person-badge text-xl" aria-hidden />
-                                                </div>
-                                                <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-brand-purple">
-                                                    NeyborHuud ID
-                                                </div>
-                                            </div>
-                                            <p className="mb-1 text-[9px] font-black uppercase tracking-[0.24em] text-primary">{identityStatus}</p>
-                                            <h2 className="truncate text-2xl font-black tracking-tighter text-brand-black">{identityHandle}</h2>
-                                            <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{identityEmail}</p>
-                                            <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[var(--neu-text-secondary)]">
-                                                <i className="bi bi-geo-alt-fill text-primary" aria-hidden />
-                                                <span className="truncate">{huudName}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="shrink-0 overflow-hidden rounded-[1.7rem] border border-white/85 bg-white/[0.94] shadow-[0_28px_70px_rgba(26,26,46,0.18)] backdrop-blur-2xl">
-                                <div className="h-1.5 bg-gradient-to-r from-brand-purple via-brand-blue to-primary" aria-hidden />
-                                <div className="flex flex-col gap-3 p-3.5">
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <PremiumInput
-                                            label="Username"
-                                            icon="bi-person"
-                                            placeholder="e.g. nancy_surulere"
-                                            className="py-0.5"
-                                            value={formData.username}
-                                            onChange={e => setFormData({ ...formData, username: e.target.value })}
-                                            validationStatus={usernameValidation.status}
-                                            error={usernameValidation.errorMessage || undefined}
-                                            successText={usernameValidation.status === 'valid' ? 'Username available' : undefined}
-                                        />
-                                        <PremiumInput
-                                            label="Email"
-                                            type="email"
-                                            icon="bi-envelope"
-                                            placeholder="nancy@example.com"
-                                            className="py-0.5"
-                                            value={formData.email}
-                                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                            validationStatus={emailValidation.status}
-                                            error={emailValidation.errorMessage || undefined}
-                                            successText={emailValidation.status === 'valid' ? 'Email available' : undefined}
-                                        />
-                                    </div>
-                                    <PremiumInput
-                                        label="Invite"
-                                        icon="bi-gift"
-                                        placeholder="Username or invite code"
-                                        className="py-0.5"
-                                        value={referralCodeInput}
-                                        onChange={(e) => setReferralCodeInput(e.target.value)}
-                                    />
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => setSignupStage('location')}
-                                            className="btn-secondary h-[50px] w-full gap-2"
-                                        >
-                                            <i className="bi bi-arrow-left" aria-hidden />
-                                            Huud Map
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setSignupStage('security')}
-                                            disabled={!canContinueIdentity}
-                                            className="btn-glass-primary btn-paired h-[50px] w-full gap-2"
-                                        >
-                                            Reserve ID
-                                            <i className="bi bi-arrow-right" aria-hidden />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                    )}
-
-                    {signupStage === 'security' && (
-                        <section className="flex h-full min-h-0 flex-col gap-3 animate-in fade-in slide-in-from-bottom-3 duration-300">
-                            <div className="-mx-5 min-h-0 flex-1 overflow-hidden bg-white/[0.76] shadow-inner sm:-mx-6">
-                                <div className="relative flex h-full min-h-[92px] items-center justify-center overflow-hidden px-6">
-                                    <div className="absolute left-8 top-6 h-2 w-36 rotate-12 rounded-full bg-brand-amber/18" aria-hidden />
-                                    <div className="absolute right-6 top-1/2 h-2 w-32 -rotate-12 rounded-full bg-primary/14" aria-hidden />
-                                    <div className="absolute inset-x-12 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/24 to-transparent" aria-hidden />
-                                    <div className="relative flex h-28 w-28 items-center justify-center rounded-full border border-primary/12 bg-primary/[0.035]">
-                                        <div className="absolute h-20 w-20 rounded-full border border-brand-amber/20 bg-brand-amber/[0.04]" aria-hidden />
-                                        <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-primary text-white shadow-[0_22px_48px_rgba(0,111,53,0.32)]">
-                                            <i className="bi bi-shield-lock-fill text-3xl" aria-hidden />
-                                        </div>
-                                    </div>
-                                    <div className="absolute bottom-4 left-1/2 w-[min(19rem,calc(100%-3rem))] -translate-x-1/2 rounded-2xl border border-white/85 bg-white/[0.9] px-4 py-2 shadow-[0_18px_40px_rgba(26,26,46,0.12)] backdrop-blur-xl">
-                                        <div className="flex items-center justify-between gap-3">
-                                            <div className="min-w-0">
-                                                <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">{securityStatus}</p>
-                                                <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{consentStatus}</p>
-                                            </div>
-                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-surface text-primary">
-                                                <i className="bi bi-key-fill" aria-hidden />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="shrink-0 overflow-hidden rounded-[1.7rem] border border-white/85 bg-white/[0.94] shadow-[0_28px_70px_rgba(26,26,46,0.18)] backdrop-blur-2xl">
-                                <div className="h-1.5 bg-gradient-to-r from-primary via-brand-amber to-brand-blue" aria-hidden />
-                                <div className="flex flex-col gap-3 p-3.5">
-                                    <PremiumInput
-                                        label="Secure Password"
-                                        type="password"
-                                        icon="bi-lock"
-                                        placeholder="12+ chars, mixed case, number"
-                                        className="py-1"
-                                        value={formData.password}
-                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                    />
-                                    <PasswordStrengthMeter
-                                        password={formData.password}
-                                        email={formData.email}
-                                        username={formData.username}
-                                        showChecklist={false}
-                                    />
-                                    {!isPassValid && formData.password.length > 0 && (
-                                        <p className="px-1 text-[10px] text-[var(--neu-text-muted)]">
-                                            {passwordPolicy.ok ? '' : passwordPolicy.message}
-                                        </p>
+                                        </>
                                     )}
-
-                                <div className="flex flex-col gap-2 rounded-2xl border border-charcoal/10 bg-white/[0.92] px-3 py-3 shadow-[0_12px_32px_rgba(26,26,46,0.08)]">
-                                    <label className="flex cursor-pointer items-start gap-3">
-                                        <input
-                                            type="checkbox"
-                                            id="acceptTermsAndPrivacy"
-                                            className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-                                            checked={formData.acceptTermsAndPrivacy}
-                                            onChange={e =>
-                                                setFormData({
-                                                    ...formData,
-                                                    acceptTermsAndPrivacy: e.target.checked,
-                                                })
-                                            }
-                                        />
-                                        <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
-                                            I agree to the <span className="font-black text-brand-blue">Community Rules</span> and <span className="font-black text-brand-blue">Terms of Service</span>, and I have read the <span className="font-black text-brand-blue">Privacy Policy</span>. I consent to the processing of my personal data needed to run my account, including under Nigerian data protection law (<span className="font-black text-brand-black">NDPA / NDPR</span>).
-                                        </span>
-                                    </label>
-                                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2.5">
-                                        <input
-                                            type="checkbox"
-                                            className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-primary"
-                                            checked={formData.optionalProcessing}
-                                            onChange={e =>
-                                                setFormData({
-                                                    ...formData,
-                                                    optionalProcessing: e.target.checked,
-                                                })
-                                            }
-                                        />
-                                        <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
-                                            Product updates, offers, analytics, and limited partner use as described in the Privacy Policy.
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <div className="grid grid-cols-[0.78fr_1.22fr] gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => setSignupStage('identity')}
-                                        className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-charcoal/5 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-brand-black shadow-[0_12px_30px_rgba(26,26,46,0.1)] transition-all"
-                                    >
-                                        <i className="bi bi-arrow-left" aria-hidden />
-                                        NeyborHuud ID
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={!canSubmit}
-                                        className="btn-glass-primary btn-paired h-[50px] w-full gap-2"
-                                    >
-                                        {loading ? (
-                                            <>
-                                                <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" aria-hidden />
-                                                Opening Huud
-                                            </>
-                                        ) : (
-                                            <>
-                                                Open My Huud
-                                                <i className="bi bi-stars" aria-hidden />
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                                </div>
+                                </button>
                             </div>
-                        </section>
-                    )}
-                </div>
-
-            </form>
-        </div>
+                            <p className="auth-signin-link auth-signin-link--sheet border-t border-charcoal/8 pt-3">
+                                Already on the Huud?{' '}
+                                <Link href="/login">Enter your Huud</Link>
+                            </p>
+                        </div>
+                </SignupBottomSheet>
+            )}
+        </form>
     );
 }
 

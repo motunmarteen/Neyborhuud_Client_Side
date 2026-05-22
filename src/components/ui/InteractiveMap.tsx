@@ -32,6 +32,10 @@ interface InteractiveMapProps {
     customMarkerNode?: React.ReactNode;
     markerInteractive?: boolean;
     dragHintLabel?: string;
+    /** Floating pill at map bottom — off for fullscreen signup where hint lives in the sheet */
+    showDragHint?: boolean;
+    /** MapLibre zoom control corner — bottom-right is hidden under signup sheets */
+    navigationControlPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
     overlays?: MapOverlay[];
     onLongPressMap?: (location: MapLocation) => void;
 }
@@ -67,6 +71,8 @@ export function InteractiveMap({
     customMarkerNode,
     markerInteractive = false,
     dragHintLabel = 'Tap or drag to adjust',
+    showDragHint = true,
+    navigationControlPosition = 'bottom-right',
     overlays = [],
     onLongPressMap,
 }: InteractiveMapProps) {
@@ -100,7 +106,10 @@ export function InteractiveMap({
                 zoom,
                 attributionControl: { compact: true },
             });
-            map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+            map.addControl(
+                new maplibregl.NavigationControl({ showCompass: false }),
+                navigationControlPosition,
+            );
 
             map.on('load', () => {
                 if (accuracyRadius) {
@@ -235,7 +244,7 @@ export function InteractiveMap({
             )}
             <div ref={containerRef} className="w-full h-full" />
             {markerEl && customMarkerNode && createPortal(customMarkerNode, markerEl)}
-            {draggable && ready && (
+            {draggable && ready && showDragHint && (
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg pointer-events-none z-10">
                     <span className="text-[9px] font-bold text-brand-black/60 uppercase tracking-wider flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-sm text-brand-blue">touch_app</span>

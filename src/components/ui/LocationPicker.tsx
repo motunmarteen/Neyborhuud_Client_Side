@@ -32,6 +32,8 @@ interface LocationPickerProps {
     readOnly?: boolean;
     /** Visual treatment for feature-led signup surfaces */
     presentation?: 'default' | 'premium';
+    /** Fallback map centre when no GPS yet (fullscreen signup) */
+    defaultCenter?: MapLocation;
 }
 
 export function LocationPicker({
@@ -46,6 +48,7 @@ export function LocationPicker({
     label = 'Your Location',
     readOnly = false,
     presentation = 'default',
+    defaultCenter,
 }: LocationPickerProps) {
     const [currentLocation, setCurrentLocation] = useState<MapLocation | null>(initialLocation || null);
     const [address, setAddress] = useState<LocationAddress | null>(null);
@@ -112,8 +115,12 @@ export function LocationPicker({
     };
     const isPremium = presentation === 'premium';
     const isSignupLocationMap = mapHeight === 'signup-location';
-    const resolvedMapHeight = isSignupLocationMap ? '100%' : mapHeight;
-    const mapHeightClass = isSignupLocationMap
+    const isSignupFullscreenMap = mapHeight === 'signup-fullscreen';
+    const isSignupMap = isSignupLocationMap || isSignupFullscreenMap;
+    const mapDisplayLocation =
+        currentLocation ?? (isSignupFullscreenMap && defaultCenter ? defaultCenter : null);
+    const resolvedMapHeight = isSignupMap ? '100%' : mapHeight;
+    const mapHeightClass = isSignupMap
         ? 'min-h-0 flex-1'
         : mapHeight === 'clamp(300px, 48dvh, 470px)'
         ? 'h-[clamp(300px,48dvh,470px)]'
@@ -121,12 +128,21 @@ export function LocationPicker({
             ? 'h-[160px]'
             : 'h-[180px]';
     const emptyMapClass = `${isPremium ? 'location-picker-premium-map relative overflow-hidden bg-white/[0.78] shadow-inner' : 'neu-socket rounded-2xl'} ${mapHeightClass} flex items-center justify-center`;
-    const rootClass = isSignupLocationMap ? 'flex h-full min-h-0 flex-col gap-2' : 'flex flex-col gap-3';
+    const rootClass = isSignupFullscreenMap
+        ? 'absolute inset-0 h-full w-full'
+        : isSignupLocationMap
+          ? 'flex h-full min-h-0 flex-col gap-2'
+          : 'flex flex-col gap-3';
+    const mapClassName = isSignupFullscreenMap
+        ? 'h-full w-full min-h-0 flex-1 !rounded-none !shadow-none !ring-0'
+        : isPremium
+          ? `${isSignupLocationMap ? 'min-h-0 flex-1' : ''} overflow-hidden rounded-2xl shadow-[0_18px_44px_rgba(26,26,46,0.16)] ring-1 ring-black/5`
+          : 'shadow-lg';
 
     return (
         <div className={rootClass}>
             {/* Label with accuracy indicator */}
-            {!isSignupLocationMap && (
+            {!isSignupMap && (
                 <div className="flex items-center justify-between px-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--neu-text-muted)]">
                         {label}
@@ -143,7 +159,7 @@ export function LocationPicker({
             )}
 
             {/* Map or detecting state */}
-            {isDetecting && !currentLocation ? (
+            {isDetecting && !currentLocation && !isSignupFullscreenMap ? (
                 <div className={emptyMapClass}>
                     {isPremium && (
                         <div className="absolute inset-x-10 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" aria-hidden />
@@ -158,15 +174,17 @@ export function LocationPicker({
                         </span>
                     </div>
                 </div>
-            ) : currentLocation ? (
+            ) : mapDisplayLocation ? (
                 <InteractiveMap
-                    center={currentLocation}
+                    center={mapDisplayLocation}
                     draggable={!readOnly}
                     height={resolvedMapHeight}
                     onLocationChange={handleLocationChange}
                     zoom={16}
                     accuracyRadius={accuracy && accuracy < 500 ? accuracy : undefined}
-                    className={isPremium ? `${isSignupLocationMap ? 'min-h-0 flex-1' : ''} overflow-hidden rounded-2xl shadow-[0_18px_44px_rgba(26,26,46,0.16)] ring-1 ring-black/5` : 'shadow-lg'}
+                    className={mapClassName}
+                    showDragHint={!isSignupFullscreenMap}
+                    navigationControlPosition={isSignupFullscreenMap ? 'top-right' : 'bottom-right'}
                 />
             ) : (
                 <div className={emptyMapClass}>
@@ -179,7 +197,7 @@ export function LocationPicker({
                             <div className="absolute inset-y-8 left-1/2 w-px bg-gradient-to-b from-transparent via-brand-blue/22 to-transparent" aria-hidden />
                         </>
                     )}
-                    {isSignupLocationMap ? (
+                    {isSignupMap && !isSignupFullscreenMap ? (
                         <div className="relative z-10 flex flex-col items-center justify-center">
                             <div className="absolute h-48 w-48 rounded-full border border-primary/14 bg-primary/[0.035]" aria-hidden />
                             <div className="absolute h-32 w-32 rounded-full border border-brand-blue/18 bg-brand-blue/[0.035]" aria-hidden />
@@ -219,7 +237,7 @@ export function LocationPicker({
             )}
 
             {/* Address display */}
-            {!isSignupLocationMap && (
+            {!isSignupMap && (
                 <div className={`
                 flex items-center justify-between p-3 rounded-xl transition-all
                 ${currentLocation ? 'neu-socket ring-1 ring-primary/20' : 'neu-socket'}
@@ -260,7 +278,7 @@ export function LocationPicker({
             )}
 
             {/* Error message */}
-            {!isSignupLocationMap && error && (
+            {!isSignupMap && error && (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-red50 border border-orange-200">
                     <i className="bi bi-exclamation-triangle text-brand-red"></i>
                     <span className="text-[10px] text-brand-red600 font-medium">{error}</span>
@@ -268,7 +286,7 @@ export function LocationPicker({
             )}
 
             {/* Instructions when draggable */}
-            {!isSignupLocationMap && !readOnly && currentLocation && (
+            {!isSignupMap && !readOnly && currentLocation && (
                 <p className="text-[9px] text-center text-[var(--neu-text-muted)]">
                     Not accurate? Tap on the map or drag the pin to adjust your location.
                 </p>
