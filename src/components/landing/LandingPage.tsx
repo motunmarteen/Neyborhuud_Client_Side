@@ -112,7 +112,7 @@ export function LandingPage() {
                     </div>
                 </header>
 
-                <div className="landing-page-body flex min-h-0 flex-1 flex-col px-6 pb-[max(calc(env(safe-area-inset-bottom)+0.65rem),1.125rem)]">
+                <div className="landing-page-body flex min-h-0 flex-1 flex-col px-6 pb-[max(0.65rem,1.125rem)]">
                     <div className="landing-page-copy">
                         <div className="landing-headline-stack">
                             {HEADLINE_LINES.map((line) => (

@@ -265,11 +265,17 @@ html[data-landing='true'] body {
   overflow: hidden;
   overscroll-behavior: none;
   height: 100%;
+  min-height: 100svh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
 }
 
 html[data-landing='true'] .app-shell {
   max-width: none;
-  min-height: var(--app-height);
+  min-height: 100svh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  height: 100%;
 }
 
 .landing-page {
@@ -294,11 +300,15 @@ html[data-landing='true'] .app-shell {
   inset: 0;
   z-index: 0;
   width: 100%;
-  height: var(--app-height);
-  min-height: var(--app-height);
+  /* inset:0 fills the screen — avoid JS --app-height which leaves an iOS bottom gap */
+  height: 100%;
+  min-height: 100svh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
   overflow: hidden;
   background-color: var(--landing-bg);
   touch-action: manipulation;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /** Short phones — shrink type within the bottom half so CTAs stay visible */
