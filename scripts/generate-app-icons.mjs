@@ -11,7 +11,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 const markPath = path.join(root, 'public/brand/neyborhuud-mark-light.png');
 const BLACK_THRESHOLD = 28;
-const BG = '#060908';
 
 async function loadTransparentMark() {
     const { data, info } = await sharp(markPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -41,7 +40,7 @@ async function renderSquareIcon(markBuffer, size, paddingRatio = 0.14) {
     const top = Math.round((size - height) / 2);
 
     return sharp({
-        create: { width: size, height: size, channels: 4, background: BG },
+        create: { width: size, height: size, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
     })
         .composite([{ input: resized, left, top }])
         .png()
