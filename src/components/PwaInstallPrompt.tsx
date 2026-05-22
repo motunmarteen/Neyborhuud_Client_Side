@@ -102,7 +102,6 @@ export default function PwaInstallPrompt() {
     const androidDevice = isAndroidDevice();
     const inAppBrowser = isInAppBrowser();
     const lightSheet = useLightInstallSheet(pathname);
-    const canOfferIosGuide = iosDevice && !isPwaInstalled();
 
     useEffect(() => {
         if (isPwaInstalled()) markPwaInstalled();
@@ -120,6 +119,7 @@ export default function PwaInstallPrompt() {
     }, []);
 
     useEffect(() => {
+        const canOfferIosGuide = iosDevice && !isPwaInstalled();
         if (!isInstallRoute(pathname)) return;
         if (!shouldOfferPwaInstall() && !canOfferIosGuide) return;
 
@@ -150,7 +150,7 @@ export default function PwaInstallPrompt() {
         }, delay);
 
         return () => window.clearTimeout(timer);
-    }, [pathname, canNativeInstall, iosDevice, androidDevice, canOfferIosGuide]);
+    }, [pathname, canNativeInstall, iosDevice, androidDevice]);
 
     const dismiss = useCallback((mode: 'session' | 'short' | 'long' = 'short') => {
         setVisible(false);
