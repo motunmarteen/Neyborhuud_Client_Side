@@ -533,15 +533,15 @@ function SignupPageContent() {
                                     </div>
                                 )}
 
-                                <div className="grid grid-cols-[0.86fr_1.14fr] gap-3">
+                                <div className="auth-signup-actions">
                                     <button
                                         type="button"
                                         onClick={handleResendVerification}
                                         disabled={resendCooldown > 0 || isResending}
                                         className="auth-btn auth-btn-secondary"
                                     >
-                                        <i className={`bi ${isResending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
-                                        {isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}
+                                        <i className={`bi shrink-0 ${isResending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
+                                        <span>{isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
                                     </button>
                                     <button
                                         type="button"
@@ -551,13 +551,13 @@ function SignupPageContent() {
                                     >
                                         {isVerifying ? (
                                             <>
-                                                <span className="h-4 w-4 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
-                                                Verifying
+                                                <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                                                <span>Verifying</span>
                                             </>
                                         ) : (
                                             <>
-                                                Verify
-                                                <i className="bi bi-arrow-right" aria-hidden />
+                                                <span>Verify</span>
+                                                <i className="bi bi-arrow-right shrink-0" aria-hidden />
                                             </>
                                         )}
                                     </button>
@@ -752,23 +752,23 @@ function SignupPageContent() {
                         <p className="mb-3 text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
                             Tap or drag the map to adjust
                         </p>
-                        <div className="grid grid-cols-1 gap-2.5 min-[390px]:grid-cols-2">
+                        <div className="auth-signup-actions">
                             <button
                                 type="button"
                                 onClick={fetchLocation}
                                 disabled={isResolving}
                                 className="auth-btn auth-btn-secondary disabled:opacity-40"
                             >
-                                <i className={`bi ${isResolving ? 'bi-arrow-repeat animate-spin' : 'bi-broadcast'}`} aria-hidden />
-                                {isResolving ? 'Finding…' : 'Use my location'}
+                                <i className={`bi shrink-0 ${isResolving ? 'bi-arrow-repeat animate-spin' : 'bi-broadcast'}`} aria-hidden />
+                                <span>{isResolving ? 'Finding…' : 'Use my location'}</span>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setSignupStage('identity')}
                                 className="auth-btn auth-btn-primary"
                             >
-                                Continue
-                                <i className="bi bi-arrow-right" aria-hidden />
+                                <span>Continue</span>
+                                <i className="bi bi-arrow-right shrink-0" aria-hidden />
                             </button>
                         </div>
                         <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
@@ -785,31 +785,29 @@ function SignupPageContent() {
                             <p className="auth-signup-sheet__hint truncate">{huudName}</p>
                         </div>
                         <div className="flex flex-col gap-3">
-                            <div className="grid grid-cols-2 gap-3">
-                                <PremiumInput
-                                    label="Username"
-                                    icon="bi-person"
-                                    placeholder="e.g. nancy_surulere"
-                                    className="py-0.5"
-                                    value={formData.username}
-                                    onChange={e => setFormData({ ...formData, username: e.target.value })}
-                                    validationStatus={usernameValidation.status}
-                                    error={usernameValidation.errorMessage || undefined}
-                                    successText={usernameValidation.status === 'valid' ? 'Username available' : undefined}
-                                />
-                                <PremiumInput
-                                    label="Email"
-                                    type="email"
-                                    icon="bi-envelope"
-                                    placeholder="nancy@example.com"
-                                    className="py-0.5"
-                                    value={formData.email}
-                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                    validationStatus={emailValidation.status}
-                                    error={emailValidation.errorMessage || undefined}
-                                    successText={emailValidation.status === 'valid' ? 'Email available' : undefined}
-                                />
-                            </div>
+                            <PremiumInput
+                                label="Username"
+                                icon="bi-person"
+                                placeholder="e.g. nancy_surulere"
+                                className="py-0.5"
+                                value={formData.username}
+                                onChange={e => setFormData({ ...formData, username: e.target.value })}
+                                validationStatus={usernameValidation.status}
+                                error={usernameValidation.errorMessage || undefined}
+                                successText={usernameValidation.status === 'valid' ? 'Username available' : undefined}
+                            />
+                            <PremiumInput
+                                label="Email"
+                                type="email"
+                                icon="bi-envelope"
+                                placeholder="nancy@example.com"
+                                className="py-0.5"
+                                value={formData.email}
+                                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                validationStatus={emailValidation.status}
+                                error={emailValidation.errorMessage || undefined}
+                                successText={emailValidation.status === 'valid' ? 'Email available' : undefined}
+                            />
                             <PremiumInput
                                 label="Invite"
                                 icon="bi-gift"
@@ -818,14 +816,14 @@ function SignupPageContent() {
                                 value={referralCodeInput}
                                 onChange={(e) => setReferralCodeInput(e.target.value)}
                             />
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="auth-signup-actions">
                                 <button
                                     type="button"
                                     onClick={() => setSignupStage('location')}
                                     className="auth-btn auth-btn-secondary"
                                 >
-                                    <i className="bi bi-arrow-left" aria-hidden />
-                                    Back
+                                    <i className="bi bi-arrow-left shrink-0" aria-hidden />
+                                    <span>Back</span>
                                 </button>
                                 <button
                                     type="button"
@@ -833,8 +831,8 @@ function SignupPageContent() {
                                     disabled={!canContinueIdentity}
                                     className="auth-btn auth-btn-primary"
                                 >
-                                    Continue
-                                    <i className="bi bi-arrow-right" aria-hidden />
+                                    <span>Continue</span>
+                                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
                                 </button>
                             </div>
                             <p className="auth-signin-link auth-signin-link--sheet border-t border-charcoal/8 pt-3">
@@ -908,14 +906,14 @@ function SignupPageContent() {
                                 </label>
                             </div>
 
-                            <div className="grid grid-cols-[0.78fr_1.22fr] gap-3">
+                            <div className="auth-signup-actions">
                                 <button
                                     type="button"
                                     onClick={() => setSignupStage('identity')}
                                     className="auth-btn auth-btn-secondary"
                                 >
-                                    <i className="bi bi-arrow-left" aria-hidden />
-                                    Back
+                                    <i className="bi bi-arrow-left shrink-0" aria-hidden />
+                                    <span>Back</span>
                                 </button>
                                 <button
                                     type="submit"
@@ -924,13 +922,13 @@ function SignupPageContent() {
                                 >
                                     {loading ? (
                                         <>
-                                            <span className="h-4 w-4 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
-                                            Joining…
+                                            <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                                            <span>Joining…</span>
                                         </>
                                     ) : (
                                         <>
-                                            Join neyborhuud
-                                            <i className="bi bi-arrow-right" aria-hidden />
+                                            <span>Join neyborhuud</span>
+                                            <i className="bi bi-arrow-right shrink-0" aria-hidden />
                                         </>
                                     )}
                                 </button>
