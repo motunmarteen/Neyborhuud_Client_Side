@@ -407,6 +407,164 @@ html[data-landing='true'] .app-shell {
   transform: scale(0.98);
 }
 
+/** PWA install sheet — matches landing dark + green brand */
+.pwa-install-overlay {
+  background: rgba(6, 9, 8, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.pwa-install-sheet {
+  background: linear-gradient(180deg, #0c1410 0%, #060908 100%);
+  border-top: 1px solid rgba(0, 212, 49, 0.22);
+  box-shadow:
+    0 -24px 80px rgba(0, 0, 0, 0.55),
+    0 0 60px rgba(0, 212, 49, 0.08);
+}
+
+.pwa-install-sheet::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(100%, 20rem);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 49, 0.65), transparent);
+}
+
+.pwa-install-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.875rem 1rem;
+}
+
+.pwa-install-step-num {
+  display: flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(0, 212, 49, 0.16);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #00d431;
+}
+
+.pwa-install-benefit {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.pwa-install-handle {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.pwa-install-title {
+  color: #00d431;
+}
+
+.pwa-install-body {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.pwa-install-step-title {
+  color: #fff;
+}
+
+.pwa-install-step-body {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.pwa-install-callout {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.pwa-install-callout strong {
+  color: #fff;
+}
+
+.pwa-install-callout-warn {
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+}
+
+.pwa-install-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/** Light appearance — feed & users with light system theme (landing stays dark) */
+.pwa-install-sheet--light {
+  background: linear-gradient(180deg, #ffffff 0%, #e9f6e6 100%);
+  border-top: 1px solid rgba(0, 111, 53, 0.18);
+  box-shadow:
+    0 -24px 80px rgba(0, 111, 53, 0.14),
+    0 0 40px rgba(0, 212, 49, 0.06);
+}
+
+.pwa-install-sheet--light::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 49, 0.45), transparent);
+}
+
+.pwa-install-overlay--light {
+  background: rgba(233, 246, 230, 0.82);
+}
+
+.pwa-install-sheet--light .pwa-install-handle {
+  background: rgba(26, 26, 26, 0.15);
+}
+
+.pwa-install-sheet--light .pwa-install-title {
+  color: #006f35;
+}
+
+.pwa-install-sheet--light .pwa-install-body {
+  color: rgba(26, 26, 26, 0.68);
+}
+
+.pwa-install-sheet--light .pwa-install-step {
+  border: 1px solid rgba(0, 111, 53, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.pwa-install-sheet--light .pwa-install-step-title {
+  color: #1a1a1a;
+}
+
+.pwa-install-sheet--light .pwa-install-step-body {
+  color: rgba(26, 26, 26, 0.58);
+}
+
+.pwa-install-sheet--light .pwa-install-benefit {
+  color: rgba(26, 26, 26, 0.72);
+}
+
+.pwa-install-sheet--light .pwa-install-callout {
+  border: 1px solid rgba(0, 111, 53, 0.16);
+  background: rgba(255, 255, 255, 0.85);
+  color: rgba(26, 26, 26, 0.72);
+}
+
+.pwa-install-sheet--light .pwa-install-callout strong {
+  color: #1a1a1a;
+}
+
+.pwa-install-sheet--light .pwa-install-footer {
+  border-top: 1px solid rgba(0, 111, 53, 0.12);
+}
+
 .dark body,
 html.dark body {
   color: #E9F6E6;

@@ -23,6 +23,25 @@ export function isIosDevice(): boolean {
     );
 }
 
+export function isAndroidDevice(): boolean {
+    if (typeof window === 'undefined') return false;
+    return /Android/i.test(navigator.userAgent);
+}
+
+/** Safari on iOS — only browser that supports Add to Home Screen. */
+export function isIosSafari(): boolean {
+    if (!isIosDevice()) return false;
+    const ua = navigator.userAgent;
+    const isOtherBrowser = /CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/i.test(ua);
+    return !isOtherBrowser && /Safari/i.test(ua);
+}
+
+export function isInAppBrowser(): boolean {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent;
+    return /FBAN|FBAV|Instagram|Twitter|Line\//i.test(ua);
+}
+
 /** Running inside the installed PWA (home-screen app). */
 export function isPwaInstalled(): boolean {
     if (typeof window === 'undefined') return false;

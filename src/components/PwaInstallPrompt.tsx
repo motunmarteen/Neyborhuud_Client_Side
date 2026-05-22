@@ -1,167 +1,301 @@
 'use client';
 
 /**
- * Bottom sheet prompting first-time mobile visitors to install neyborhuud as a PWA.
- * Hidden when already running as installed app, after install, or while snoozed.
+ * Branded install sheet for first-time mobile visitors.
+ * iOS: Safari Add to Home Screen steps. Android: native beforeinstallprompt.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { usePwaInstall } from '@/hooks/usePwaInstall';
-import { APP_ICON_192 } from '@/lib/brand-assets';
 import {
+    isAndroidDevice,
+    isInAppBrowser,
+    isIosSafari,
     isPwaInstalled,
     markPwaInstalled,
     shouldOfferPwaInstall,
     snoozePwaInstallPrompt,
 } from '@/lib/pwa-install';
 
-const SHOW_DELAY_MS = 2800;
+const SHOW_DELAY_MS = 4500;
+const ANDROID_MANUAL_DELAY_MS = 8000;
+const SESSION_KEY = 'neyborhuud_pwa_install_session';
 
-/** Entry routes where install makes sense for new visitors. */
-const INSTALL_ROUTES = ['/', '/feed', '/explore', '/login', '/signup'];
+function useLightInstallSheet(pathname: string): boolean {
+    const isLanding = pathname === '/';
+    const [light, setLight] = useState(false);
+
+    useEffect(() => {
+        if (isLanding) {
+            setLight(false);
+            return;
+        }
+
+        const mq = window.matchMedia('(prefers-color-scheme: light)');
+        const sync = () => setLight(mq.matches);
+        sync();
+        mq.addEventListener('change', sync);
+        return () => mq.removeEventListener('change', sync);
+    }, [isLanding]);
+
+    return !isLanding && light;
+}
+
+/** Landing first — avoid interrupting auth flows. */
+const INSTALL_ROUTES = ['/', '/feed'];
 
 function isInstallRoute(pathname: string): boolean {
     return INSTALL_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 }
+
+const IOS_STEPS = [
+    {
+        num: 1,
+        title: 'Tap Share',
+        body: 'Use the Share button in Safari’s bottom bar',
+        icon: 'ios_share',
+    },
+    {
+        num: 2,
+        title: 'Add to Home Screen',
+        body: 'Scroll the menu and choose this option',
+        icon: 'add_box',
+    },
+    {
+        num: 3,
+        title: 'Tap Add',
+        body: 'Open neyborhuud from your home screen',
+        icon: 'home',
+    },
+] as const;
+
+const ANDROID_MANUAL_STEPS = [
+    {
+        num: 1,
+        title: 'Open the menu',
+        body: 'Tap the three dots in Chrome’s top bar',
+        icon: 'more_vert',
+    },
+    {
+        num: 2,
+        title: 'Install app',
+        body: 'Choose Install app or Add to Home screen',
+        icon: 'download',
+    },
+] as const;
+
+const ANDROID_BENEFITS = [
+    'Full-screen app — no browser bars',
+    'Faster launch from your home screen',
+    'Safety alerts when the browser is closed',
+] as const;
 
 export default function PwaInstallPrompt() {
     const pathname = usePathname();
     const { canNativeInstall, iosDevice, install } = usePwaInstall();
     const [visible, setVisible] = useState(false);
     const [installing, setInstalling] = useState(false);
-    const sheetRef = useRef<HTMLDivElement>(null);
+    const [androidManual, setAndroidManual] = useState(false);
+    const iosSafari = iosDevice && isIosSafari();
+    const androidDevice = isAndroidDevice();
+    const inAppBrowser = isInAppBrowser();
+    const lightSheet = useLightInstallSheet(pathname);
 
     useEffect(() => {
         if (isPwaInstalled()) markPwaInstalled();
     }, []);
 
     useEffect(() => {
+        const onVisible = () => {
+            if (isPwaInstalled()) {
+                markPwaInstalled();
+                setVisible(false);
+            }
+        };
+        document.addEventListener('visibilitychange', onVisible);
+        return () => document.removeEventListener('visibilitychange', onVisible);
+    }, []);
+
+    useEffect(() => {
         if (!isInstallRoute(pathname)) return;
         if (!shouldOfferPwaInstall()) return;
 
-        // Android: wait for native install prompt when possible; iOS always eligible.
-        if (!iosDevice && !canNativeInstall) return;
+        try {
+            if (sessionStorage.getItem(SESSION_KEY) === '1') return;
+        } catch {
+            /* ignore */
+        }
+
+        const delay =
+            androidDevice && !iosDevice && !canNativeInstall
+                ? ANDROID_MANUAL_DELAY_MS
+                : SHOW_DELAY_MS;
+
+        // iOS always eligible. Android: native prompt or manual fallback after longer delay.
+        if (!iosDevice && !canNativeInstall && !androidDevice) return;
 
         const timer = window.setTimeout(() => {
             if (isPwaInstalled() || !shouldOfferPwaInstall()) return;
+            try {
+                sessionStorage.setItem(SESSION_KEY, '1');
+            } catch {
+                /* ignore */
+            }
+            setAndroidManual(androidDevice && !canNativeInstall);
             setVisible(true);
-        }, SHOW_DELAY_MS);
+        }, delay);
 
         return () => window.clearTimeout(timer);
-    }, [pathname, canNativeInstall, iosDevice]);
+    }, [pathname, canNativeInstall, iosDevice, androidDevice]);
 
-    const dismiss = useCallback(() => {
+    const dismiss = useCallback((snoozeDays = 7) => {
         setVisible(false);
-        snoozePwaInstallPrompt();
+        snoozePwaInstallPrompt(snoozeDays);
     }, []);
 
-    const handleInstall = useCallback(async () => {
-        if (iosDevice) {
-            dismiss();
-            return;
-        }
+    const handleAndroidInstall = useCallback(async () => {
         setInstalling(true);
         try {
             const accepted = await install();
             setVisible(false);
-            if (!accepted) snoozePwaInstallPrompt(7);
+            if (!accepted) snoozePwaInstallPrompt(3);
         } finally {
             setInstalling(false);
         }
-    }, [dismiss, install, iosDevice]);
+    }, [install]);
 
     if (!visible) return null;
 
+    const showIosSteps = iosDevice && !inAppBrowser;
+    const showAndroidManual = androidDevice && !iosDevice && androidManual;
+
     return (
-        <div className="fixed inset-0 z-[9998] flex items-end justify-center bg-black/65 backdrop-blur-sm">
+        <div
+            className={`pwa-install-overlay fixed inset-0 z-[9998] flex items-end justify-center${lightSheet ? ' pwa-install-overlay--light' : ''}`}
+            role="presentation"
+        >
             <div
-                ref={sheetRef}
-                className="w-full max-w-lg rounded-t-3xl bg-white px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 shadow-2xl"
+                className={`pwa-install-sheet relative flex max-h-[min(88dvh,720px)] w-full max-w-lg flex-col rounded-t-[1.75rem] pt-5${lightSheet ? ' pwa-install-sheet--light' : ''}`}
                 role="dialog"
                 aria-labelledby="pwa-install-title"
                 aria-modal="true"
             >
-                <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-brand-surface" />
+                <div className="pwa-install-handle mx-auto mb-4 h-1 w-10 shrink-0 rounded-full" />
 
-                <div className="mb-5 flex flex-col items-center text-center">
-                    <div className="mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-[#060908] shadow-[0_12px_40px_rgba(0,212,49,0.25)]">
-                        <Image
-                            src={APP_ICON_192}
-                            alt=""
-                            width={80}
-                            height={80}
-                            className="h-full w-full object-cover"
+                <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-4">
+                    <div className="mb-5 flex flex-col items-center text-center">
+                        <NeyborHuudLogo
+                            layout="mark"
+                            size="md"
+                            tone={lightSheet ? 'dark' : 'hero'}
                         />
+                        <h2
+                            id="pwa-install-title"
+                            className="pwa-install-title brand-wordmark mt-3 text-[1.35rem]"
+                        >
+                            install neyborhuud
+                        </h2>
+                        <p className="pwa-install-body mt-2 max-w-[19rem] text-sm leading-relaxed">
+                            Get the full-screen Huud experience — safety alerts, faster access, and
+                            a native app feel on your phone.
+                        </p>
                     </div>
-                    <h2 id="pwa-install-title" className="text-xl font-bold text-[var(--neu-text-muted)]">
-                        Install neyborhuud
-                    </h2>
-                    <p className="mt-2 max-w-[18rem] text-sm leading-relaxed text-[var(--neu-text-secondary)]">
-                        Add the app to your home screen for faster access, safety alerts, and a full-screen
-                        Huud experience.
-                    </p>
+
+                    {inAppBrowser ? (
+                        <div className="pwa-install-callout-warn mb-5 rounded-2xl px-4 py-3 text-sm leading-relaxed">
+                            Open this page in <strong>Safari</strong> (tap the browser menu → Open
+                            in Safari) to add neyborhuud to your home screen.
+                        </div>
+                    ) : null}
+
+                    {showIosSteps ? (
+                        <div className="mb-5 space-y-2.5">
+                            {!iosSafari ? (
+                                <div className="pwa-install-callout mb-3 rounded-2xl px-4 py-3 text-sm">
+                                    For install, open{' '}
+                                    <strong>app.neyborhuud.com</strong> in <strong>Safari</strong>.
+                                </div>
+                            ) : null}
+                            {IOS_STEPS.map((step) => (
+                                <div key={step.num} className="pwa-install-step">
+                                    <span className="pwa-install-step-num">{step.num}</span>
+                                    <div className="min-w-0 flex-1 text-left">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-[20px] text-[#00D431]">
+                                                {step.icon}
+                                            </span>
+                                            <p className="pwa-install-step-title text-sm font-bold">
+                                                {step.title}
+                                            </p>
+                                        </div>
+                                        <p className="pwa-install-step-body mt-0.5 text-xs leading-relaxed">
+                                            {step.body}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : showAndroidManual ? (
+                        <div className="mb-5 space-y-2.5">
+                            {ANDROID_MANUAL_STEPS.map((step) => (
+                                <div key={step.num} className="pwa-install-step">
+                                    <span className="pwa-install-step-num">{step.num}</span>
+                                    <div className="min-w-0 flex-1 text-left">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-[20px] text-[#00D431]">
+                                                {step.icon}
+                                            </span>
+                                            <p className="pwa-install-step-title text-sm font-bold">
+                                                {step.title}
+                                            </p>
+                                        </div>
+                                        <p className="pwa-install-step-body mt-0.5 text-xs leading-relaxed">
+                                            {step.body}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : !iosDevice ? (
+                        <ul className="mb-5 space-y-2.5">
+                            {ANDROID_BENEFITS.map((line) => (
+                                <li key={line} className="pwa-install-benefit">
+                                    <span className="material-symbols-outlined text-[18px] text-[#00D431]">
+                                        check_circle
+                                    </span>
+                                    {line}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : null}
                 </div>
 
-                {iosDevice ? (
-                    <ol className="mb-6 space-y-2 text-left text-sm text-[var(--neu-text-secondary)]">
-                        <li className="flex gap-3">
-                            <span className="font-bold text-primary">1.</span>
-                            <span>
-                                Tap <strong>Share</strong>{' '}
-                                <span className="inline-block align-middle text-base" aria-hidden>
-                                    ⎙
-                                </span>{' '}
-                                in Safari&apos;s toolbar
-                            </span>
-                        </li>
-                        <li className="flex gap-3">
-                            <span className="font-bold text-primary">2.</span>
-                            <span>
-                                Choose <strong>Add to Home Screen</strong>
-                            </span>
-                        </li>
-                        <li className="flex gap-3">
-                            <span className="font-bold text-primary">3.</span>
-                            <span>
-                                Tap <strong>Add</strong> — open neyborhuud from your home screen
-                            </span>
-                        </li>
-                    </ol>
-                ) : (
-                    <ul className="mb-6 space-y-2 text-sm text-[var(--neu-text-secondary)]">
-                        {[
-                            'Opens full-screen like a native app',
-                            'Faster launch from your home screen',
-                            'Safety alerts even when the browser is closed',
-                        ].map((line) => (
-                            <li key={line} className="flex items-center gap-2">
-                                <span className="material-symbols-outlined text-[18px] text-primary">check_circle</span>
-                                {line}
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                <div className="pwa-install-footer shrink-0 px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
+                    {!iosDevice && canNativeInstall ? (
+                        <button
+                            type="button"
+                            onClick={handleAndroidInstall}
+                            disabled={installing}
+                            className="landing-btn-primary mb-3 flex h-[52px] w-full items-center justify-center text-sm font-bold transition-transform disabled:opacity-50"
+                        >
+                            {installing ? 'Installing…' : 'Install app'}
+                        </button>
+                    ) : null}
 
-                {!iosDevice ? (
                     <button
                         type="button"
-                        onClick={handleInstall}
-                        disabled={installing || !canNativeInstall}
-                        className="landing-btn-primary mb-3 flex h-[52px] w-full items-center justify-center text-sm font-bold transition-transform disabled:opacity-60"
+                        onClick={() => dismiss(iosSafari ? 14 : 7)}
+                        className={
+                            iosSafari || showAndroidManual
+                                ? 'landing-btn-primary flex h-[52px] w-full items-center justify-center text-sm font-bold transition-transform'
+                                : 'landing-btn-secondary flex h-[48px] w-full items-center justify-center text-sm font-bold transition-transform'
+                        }
                     >
-                        {installing ? 'Installing…' : 'Install app'}
+                        {iosSafari ? 'Got it' : showAndroidManual ? 'Got it' : 'Maybe later'}
                     </button>
-                ) : null}
-
-                <button
-                    type="button"
-                    onClick={dismiss}
-                    className="w-full rounded-2xl py-3 text-sm font-medium text-[var(--neu-text-muted)] transition-colors hover:text-[var(--neu-text-secondary)]"
-                >
-                    {iosDevice ? 'Got it' : 'Not now'}
-                </button>
+                </div>
             </div>
         </div>
     );
