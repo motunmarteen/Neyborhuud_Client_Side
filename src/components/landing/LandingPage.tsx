@@ -10,7 +10,7 @@ const LANDING_VIDEO = '/video/background-video.mp4';
 /** Add `public/video/landing-poster.jpg` (first frame, ~120 KB) for instant paint. */
 const LANDING_POSTER = '/video/landing-poster.jpg';
 
-const HEADLINE_LINES = ['Safety.', 'People.', 'Huud.'];
+const HEADLINE_LINES = ['Safety.', 'Neybor.', 'Huud.'];
 
 export function LandingPage() {
     const router = useRouter();
@@ -104,17 +104,16 @@ export function LandingPage() {
                 />
             </div>
 
-            <div className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-md flex-col">
-                <header className="relative flex flex-1 flex-col items-center justify-start px-6 pt-[max(calc(env(safe-area-inset-top)+0.75rem),1.25rem)]">
-                    <div
-                        className="landing-logo-halo pointer-events-none absolute left-1/2 top-[max(env(safe-area-inset-top),0.75rem)] h-40 w-[min(100%,20rem)] -translate-x-1/2"
-                        aria-hidden
-                    />
-                    <NeyborHuudLogo layout="stacked" size="hero" tone="hero" priority />
+            <div className="landing-page-shell relative z-10 mx-auto flex h-full min-h-0 w-full max-w-md flex-col">
+                <header className="landing-page-header relative flex min-h-0 flex-1 flex-col items-center justify-center px-6">
+                    <div className="landing-page-header-brand relative">
+                        <div className="landing-logo-halo pointer-events-none absolute inset-0 -z-10" aria-hidden />
+                        <NeyborHuudLogo layout="stacked" size="hero" tone="hero" priority />
+                    </div>
                 </header>
 
-                <div className="flex flex-1 flex-col px-6 pb-[max(calc(env(safe-area-inset-bottom)+0.5rem),1.25rem)]">
-                    <div>
+                <div className="landing-page-body flex min-h-0 flex-1 flex-col px-6 pb-[max(calc(env(safe-area-inset-bottom)+0.65rem),1.125rem)]">
+                    <div className="landing-page-copy">
                         <div className="landing-headline-stack">
                             {HEADLINE_LINES.map((line) => (
                                 <h1 key={line} className="landing-headline landing-headline--white">
@@ -123,22 +122,22 @@ export function LandingPage() {
                             ))}
                         </div>
                         <p className="landing-subcopy">
-                            Hyperlocal safety, community, and commerce — built for your street.
+                            Know what&apos;s happening on your street. Before everyone else does.
                         </p>
                     </div>
 
-                    <div className="mt-auto flex gap-3 pt-6">
+                    <div className="landing-page-actions mt-auto">
                         <Link
                             href="/signup"
-                            className="landing-btn-primary flex h-[54px] flex-[1.55] items-center justify-center text-sm font-bold transition-transform"
+                            className="landing-btn-primary landing-btn font-bold transition-transform"
                         >
-                            Create account
+                            Join neyborhuud
                         </Link>
                         <Link
                             href="/login"
-                            className="landing-btn-secondary flex h-[54px] flex-1 items-center justify-center text-sm font-bold transition-transform"
+                            className="landing-btn-secondary landing-btn font-bold transition-transform"
                         >
-                            Sign In
+                            Enter your Huud
                         </Link>
                     </div>
                 </div>

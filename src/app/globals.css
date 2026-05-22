@@ -278,8 +278,18 @@ html[data-landing='true'] .app-shell {
   --landing-green-deep: #006f35;
   --landing-green-soft: rgba(0, 212, 49, 0.28);
   --landing-green-deep-soft: rgba(0, 111, 53, 0.42);
+  --landing-blue: #0000ff;
   --landing-blue-whisper: rgba(0, 0, 255, 0.08);
   --landing-text-on-green: #0a1a0f;
+  /* Headlines live in the bottom 50% */
+  --landing-headline-size: clamp(3.5rem, min(28vw, 7.25svh), 9rem);
+  --landing-headline-leading: 0.84;
+  --landing-headline-gap: clamp(0, 0.12svh, 0.0625rem);
+  --landing-subcopy-size: clamp(0.8125rem, 2.35vw, 0.875rem);
+  --landing-subcopy-mt: clamp(0.5rem, 0.85svh, 0.625rem);
+  --landing-btn-height: clamp(50px, 7.25svh, 56px);
+  --landing-actions-pt: clamp(0.625rem, 1.25svh, 1.125rem);
+  --landing-logo-scale: 1;
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -289,6 +299,67 @@ html[data-landing='true'] .app-shell {
   overflow: hidden;
   background-color: var(--landing-bg);
   touch-action: manipulation;
+}
+
+/** Short phones — shrink type within the bottom half so CTAs stay visible */
+@media (max-height: 680px) {
+  .landing-page {
+    --landing-headline-size: clamp(3rem, min(25vw, 6.5svh), 7rem);
+    --landing-logo-scale: 0.92;
+    --landing-actions-pt: clamp(0.5rem, 1svh, 0.875rem);
+  }
+}
+
+@media (max-height: 600px) {
+  .landing-page {
+    --landing-headline-size: clamp(2.75rem, min(22vw, 6svh), 6.25rem);
+    --landing-logo-scale: 0.85;
+  }
+}
+
+/** Tall phones — maximum display size in the bottom half */
+@media (min-height: 820px) {
+  .landing-page {
+    --landing-headline-size: clamp(6rem, min(28vw, 7.75svh), 9rem);
+  }
+}
+
+.landing-page-shell {
+  height: 100%;
+  min-height: 0;
+}
+
+.landing-page-header {
+  flex: 1 1 0;
+  min-height: 0;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.landing-page-header-brand {
+  transform: scale(var(--landing-logo-scale));
+  transform-origin: center center;
+}
+
+.landing-logo-halo {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 212, 49, 0.16) 0%,
+    rgba(0, 0, 255, 0.04) 42%,
+    transparent 68%
+  );
+  inset: -2.5rem -3rem;
+}
+
+.landing-page-body {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+/** Only shrink headlines on very short screens when stacked CTAs need the room */
+@media (max-height: 620px) {
+  .landing-page-body .landing-headline {
+    font-size: clamp(2.5rem, min(22vw, 5.75svh), 5.75rem);
+  }
 }
 
 .landing-page-media {
@@ -326,26 +397,17 @@ html[data-landing='true'] .app-shell {
     to bottom,
     rgba(6, 9, 8, 0.72) 0%,
     rgba(6, 9, 8, 0.38) 42%,
-    rgba(6, 9, 8, 0.55) 68%,
-    rgba(6, 9, 8, 0.92) 100%
+    rgba(6, 9, 8, 0.42) 68%,
+    rgba(6, 9, 8, 0.72) 100%
   );
 }
 
 .landing-scrim-bottom {
   background: linear-gradient(
     to top,
-    rgba(0, 111, 53, 0.35) 0%,
-    rgba(6, 9, 8, 0.85) 38%,
+    rgba(0, 111, 53, 0.16) 0%,
+    rgba(6, 9, 8, 0.38) 42%,
     transparent 100%
-  );
-}
-
-.landing-logo-halo {
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 212, 49, 0.16) 0%,
-    rgba(0, 0, 255, 0.04) 42%,
-    transparent 68%
   );
 }
 
@@ -357,53 +419,92 @@ html[data-landing='true'] .app-shell {
   );
 }
 
-/** Bamboo-style stacked headline — large display, tight leading, flat color */
+/** Bamboo-style stacked headline — scales with viewport width + height */
 .landing-headline-stack {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: var(--landing-headline-gap);
 }
 
 .landing-headline {
   color: var(--landing-green);
-  font-size: clamp(3.5rem, 14.5vw, 5rem);
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size: var(--landing-headline-size);
   font-weight: 900;
-  line-height: 0.88;
-  letter-spacing: -0.035em;
+  font-synthesis: weight;
+  line-height: var(--landing-headline-leading);
+  letter-spacing: -0.055em;
+  -webkit-text-stroke: 0.028em rgba(255, 255, 255, 0.18);
+  paint-order: stroke fill;
 }
 
 .landing-headline--white {
   color: white;
+  text-shadow:
+    0 2px 24px rgba(0, 0, 0, 0.45),
+    0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .landing-subcopy {
   color: rgba(255, 255, 255, 0.62);
-  font-size: 0.875rem;
+  font-size: var(--landing-subcopy-size);
   font-weight: 500;
   line-height: 1.55;
-  max-width: 16rem;
-  margin-top: 1rem;
+  max-width: min(17rem, 90vw);
+  margin-top: var(--landing-subcopy-mt);
+}
+
+.landing-page-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding-top: var(--landing-actions-pt);
+  flex-shrink: 0;
+}
+
+.landing-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--landing-btn-height);
+  min-height: var(--landing-btn-height);
+  padding-inline: 1.25rem;
+  border-radius: 1rem;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .landing-btn-primary {
   background-color: var(--landing-green, #00d431);
   color: var(--landing-text-on-green, #0a1a0f);
-  border-radius: 1rem;
+  box-shadow:
+    0 0 28px rgba(0, 212, 49, 0.35),
+    0 4px 14px rgba(0, 0, 0, 0.25);
 }
 
 .landing-btn-primary:active {
   transform: scale(0.98);
+  box-shadow:
+    0 0 18px rgba(0, 212, 49, 0.28),
+    0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .landing-btn-secondary {
-  border: none;
-  background-color: var(--landing-green-deep, #006f35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background-color: rgba(0, 111, 53, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: white;
-  border-radius: 1rem;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.22);
 }
 
 .landing-btn-secondary:active {
   transform: scale(0.98);
+  background-color: rgba(0, 111, 53, 0.68);
+  border-color: rgba(255, 255, 255, 0.24);
 }
 
 /** PWA install sheet — matches landing dark + green brand */

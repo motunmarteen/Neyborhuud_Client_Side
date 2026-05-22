@@ -1,53 +1,42 @@
 'use client';
 
 /**
- * Branded install sheet for first-time mobile visitors.
+ * Branded install sheet — shown after value moments (post-onboarding / feed).
  * iOS: Safari Add to Home Screen steps. Android: native beforeinstallprompt.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
+import { useAuth } from '@/hooks/useAuth';
 import { usePwaInstall } from '@/hooks/usePwaInstall';
 import {
+    canShowPwaInstallPrompt,
     isAndroidDevice,
     isInAppBrowser,
     isIosSafari,
     isPwaInstalled,
     markPwaInstalled,
-    shouldOfferPwaInstall,
     snoozePwaInstallPrompt,
 } from '@/lib/pwa-install';
 
-const SHOW_DELAY_MS = 4500;
-const ANDROID_MANUAL_DELAY_MS = 8000;
+/** Wait until user has scanned the feed after login/onboarding. */
+const SHOW_DELAY_MS = 6000;
+const ANDROID_MANUAL_DELAY_MS = 9000;
 const SESSION_KEY = 'neyborhuud_pwa_install_session';
 
-function useLightInstallSheet(pathname: string): boolean {
-    const isLanding = pathname === '/';
+function useLightInstallSheet(): boolean {
     const [light, setLight] = useState(false);
 
     useEffect(() => {
-        if (isLanding) {
-            setLight(false);
-            return;
-        }
-
         const mq = window.matchMedia('(prefers-color-scheme: light)');
         const sync = () => setLight(mq.matches);
         sync();
         mq.addEventListener('change', sync);
         return () => mq.removeEventListener('change', sync);
-    }, [isLanding]);
+    }, []);
 
-    return !isLanding && light;
-}
-
-/** Landing first — avoid interrupting auth flows. */
-const INSTALL_ROUTES = ['/', '/feed'];
-
-function isInstallRoute(pathname: string): boolean {
-    return INSTALL_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+    return light;
 }
 
 const IOS_STEPS = [
@@ -94,6 +83,8 @@ const ANDROID_BENEFITS = [
 
 export default function PwaInstallPrompt() {
     const pathname = usePathname();
+    const { user } = useAuth();
+    const isAuthenticated = Boolean(user?.id);
     const { canNativeInstall, iosDevice, install } = usePwaInstall();
     const [visible, setVisible] = useState(false);
     const [installing, setInstalling] = useState(false);
@@ -101,7 +92,7 @@ export default function PwaInstallPrompt() {
     const iosSafari = iosDevice && isIosSafari();
     const androidDevice = isAndroidDevice();
     const inAppBrowser = isInAppBrowser();
-    const lightSheet = useLightInstallSheet(pathname);
+    const lightSheet = useLightInstallSheet();
 
     useEffect(() => {
         if (isPwaInstalled()) markPwaInstalled();
@@ -119,9 +110,7 @@ export default function PwaInstallPrompt() {
     }, []);
 
     useEffect(() => {
-        const canOfferIosGuide = iosDevice && !isPwaInstalled();
-        if (!isInstallRoute(pathname)) return;
-        if (!shouldOfferPwaInstall() && !canOfferIosGuide) return;
+        if (!canShowPwaInstallPrompt(pathname, isAuthenticated)) return;
 
         try {
             if (sessionStorage.getItem(SESSION_KEY) === '1') return;
@@ -134,12 +123,11 @@ export default function PwaInstallPrompt() {
                 ? ANDROID_MANUAL_DELAY_MS
                 : SHOW_DELAY_MS;
 
-        // iOS always eligible. Android: native prompt or manual fallback after longer delay.
         if (!iosDevice && !canNativeInstall && !androidDevice) return;
 
         const timer = window.setTimeout(() => {
+            if (!canShowPwaInstallPrompt(pathname, isAuthenticated)) return;
             if (isPwaInstalled()) return;
-            if (!shouldOfferPwaInstall() && !canOfferIosGuide) return;
             try {
                 sessionStorage.setItem(SESSION_KEY, '1');
             } catch {
@@ -150,12 +138,12 @@ export default function PwaInstallPrompt() {
         }, delay);
 
         return () => window.clearTimeout(timer);
-    }, [pathname, canNativeInstall, iosDevice, androidDevice]);
+    }, [pathname, canNativeInstall, iosDevice, androidDevice, isAuthenticated]);
 
-    const dismiss = useCallback((mode: 'session' | 'short' | 'long' = 'short') => {
+    const dismiss = useCallback((mode: 'session' | 'snooze' = 'snooze') => {
         setVisible(false);
         if (mode === 'session') return;
-        snoozePwaInstallPrompt(mode === 'long' ? 14 : 3);
+        snoozePwaInstallPrompt(7);
     }, []);
 
     const handleAndroidInstall = useCallback(async () => {
@@ -289,7 +277,7 @@ export default function PwaInstallPrompt() {
 
                     <button
                         type="button"
-                        onClick={() => dismiss(iosSafari || showAndroidManual ? 'session' : 'short')}
+                        onClick={() => dismiss(iosSafari || showAndroidManual ? 'session' : 'snooze')}
                         className={
                             iosSafari || showAndroidManual
                                 ? 'landing-btn-primary flex h-[52px] w-full items-center justify-center text-sm font-bold transition-transform'

@@ -79,6 +79,11 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var EXT='nkbihfbeogaeaoehlefnkodbefgpgknn';var isNoise=function(v){var s=String(v||'');return s.indexOf('MetaMask')!==-1||s.indexOf('Failed to connect to MetaMask')!==-1||s.indexOf(EXT)!==-1||s.indexOf('chrome-extension://'+EXT)!==-1;};window.addEventListener('error',function(event){var parts=[event&&event.message,event&&event.filename,event&&event.error&&event.error.message,event&&event.error&&event.error.stack].filter(Boolean).join(' ');if(isNoise(parts)){event.preventDefault();if(event.stopImmediatePropagation){event.stopImmediatePropagation();}}},true);window.addEventListener('unhandledrejection',function(event){var reason=event&&event.reason;var parts=[reason&&reason.message,reason&&reason.stack,reason].filter(Boolean).join(' ');if(isNoise(parts)){event.preventDefault();if(event.stopImmediatePropagation){event.stopImmediatePropagation();}}},true);}());`,
+          }}
+        />
       </head>
       <body
         className={`${jakarta.variable} app-body font-display text-brand-black transition-colors duration-200`}
