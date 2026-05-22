@@ -384,7 +384,7 @@ function XFeedInner() {
 
 
     return (
-        <div className="relative flex h-screen w-full overflow-hidden text-white neu-base">
+        <div className="relative flex h-app w-full max-w-[100vw] overflow-hidden text-white neu-base">
             {/* Left Sidebar */}
             <Suspense fallback={<div className="w-64" />}>
                 <LeftSidebar />
@@ -395,7 +395,7 @@ function XFeedInner() {
                 {/* Top Navigation — scrolls with content */}
                 <TopNav />
 
-                <div className="flex flex-col pb-20">
+                <div className="flex flex-col pb-[var(--app-nav-bottom)]">
                         {/* Full-width ambient sky hero — pulled up behind the transparent TopNav */}
                         <div className="-mt-[60px]">
                           <FeedSkyHero />

@@ -19,6 +19,11 @@ export function LandingPage() {
     const [posterOk, setPosterOk] = useState(true);
 
     useEffect(() => {
+        document.documentElement.setAttribute('data-landing', 'true');
+        return () => document.documentElement.removeAttribute('data-landing');
+    }, []);
+
+    useEffect(() => {
         if (typeof window === 'undefined') return;
         if (apiClient.isAuthenticated()) {
             router.replace('/feed');
@@ -56,60 +61,59 @@ export function LandingPage() {
     }, []);
 
     return (
-        <div className="landing-page relative min-h-[100dvh] overflow-hidden">
-            <div className="absolute inset-0 bg-[#060908]" aria-hidden />
+        <div className="landing-page">
+            <div className="landing-page-media" aria-hidden>
+                <div className="absolute inset-0 bg-[#060908]" />
 
-            {posterOk ? (
-                <img
-                    src={LANDING_POSTER}
-                    alt=""
-                    aria-hidden
-                    className="landing-video absolute inset-0 h-full w-full"
-                    onError={() => setPosterOk(false)}
+                {posterOk ? (
+                    <img
+                        src={LANDING_POSTER}
+                        alt=""
+                        className="landing-video absolute inset-0 h-full w-full"
+                        onError={() => setPosterOk(false)}
+                    />
+                ) : null}
+
+                <video
+                    ref={videoRef}
+                    className={`landing-video absolute inset-0 h-full w-full transition-opacity duration-700 ${
+                        videoReady ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                >
+                    <source src={LANDING_VIDEO} type="video/mp4" />
+                </video>
+
+                <div className="landing-glow-top absolute inset-0" />
+                <div className="landing-glow-bottom absolute inset-0" />
+                <div className="landing-glow-blue absolute inset-0" />
+
+                <div className="landing-scrim absolute inset-0" />
+                <div className="landing-scrim-bottom absolute inset-x-0 bottom-0 h-1/2" />
+
+                <div
+                    className="pointer-events-none absolute inset-0 opacity-[0.035] mix-blend-overlay"
+                    style={{
+                        backgroundImage:
+                            'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
+                    }}
                 />
-            ) : null}
+            </div>
 
-            <video
-                ref={videoRef}
-                className={`landing-video absolute inset-0 h-full w-full transition-opacity duration-700 ${
-                    videoReady ? 'opacity-100' : 'opacity-0'
-                }`}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                aria-hidden
-            >
-                <source src={LANDING_VIDEO} type="video/mp4" />
-            </video>
-
-            <div className="landing-glow-top absolute inset-0" aria-hidden />
-            <div className="landing-glow-bottom absolute inset-0" aria-hidden />
-            <div className="landing-glow-blue absolute inset-0" aria-hidden />
-
-            <div className="landing-scrim absolute inset-0" aria-hidden />
-            <div className="landing-scrim-bottom absolute inset-x-0 bottom-0 h-1/2" aria-hidden />
-
-            <div
-                className="pointer-events-none absolute inset-0 opacity-[0.035] mix-blend-overlay"
-                style={{
-                    backgroundImage:
-                        'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
-                }}
-                aria-hidden
-            />
-
-            <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-md flex-col">
-                <header className="relative flex h-[50dvh] shrink-0 flex-col items-center justify-start px-6 pt-[max(2.75rem,env(safe-area-inset-top))]">
+            <div className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-md flex-col">
+                <header className="relative flex h-[50svh] shrink-0 flex-col items-center justify-start px-6 pt-[max(calc(env(safe-area-inset-top)+0.75rem),1.25rem)]">
                     <div
-                        className="landing-logo-halo pointer-events-none absolute left-1/2 top-8 h-40 w-[min(100%,20rem)] -translate-x-1/2"
+                        className="landing-logo-halo pointer-events-none absolute left-1/2 top-[max(env(safe-area-inset-top),0.75rem)] h-40 w-[min(100%,20rem)] -translate-x-1/2"
                         aria-hidden
                     />
                     <NeyborHuudLogo layout="stacked" size="hero" tone="hero" priority />
                 </header>
 
-                <div className="flex min-h-[50dvh] flex-1 flex-col px-6 pb-[max(1.75rem,env(safe-area-inset-bottom))]">
+                <div className="flex min-h-[50svh] flex-1 flex-col px-6 pb-[max(calc(env(safe-area-inset-bottom)+0.5rem),1.25rem)]">
                     <div>
                         <div className="landing-headline-stack">
                             {HEADLINE_LINES.map((line) => (

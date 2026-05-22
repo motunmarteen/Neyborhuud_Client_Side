@@ -18,7 +18,7 @@ export default function TopNav() {
 
   return (
     <header
-      className={`relative z-20 flex items-center gap-3 whitespace-nowrap px-4 py-2.5 ${isTransparent ? 'bg-transparent' : 'bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]'}`}
+      className={`relative z-20 flex items-center gap-3 whitespace-nowrap px-4 pb-2.5 pt-[max(0.625rem,var(--safe-top))] ${isTransparent ? 'bg-transparent' : 'bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]'}`}
     >
       {/* Mobile hamburger */}
       <button

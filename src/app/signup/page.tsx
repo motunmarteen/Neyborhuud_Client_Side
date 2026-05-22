@@ -459,7 +459,7 @@ function SignupPageContent() {
     // Email Verification Screen - OTP Code Entry (Simplified)
     if (step === 'verify-email') {
         return (
-            <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
+            <div className="fixed-app neu-base overflow-hidden">
                 <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
                     <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
                         <div className="flex items-center gap-2">
@@ -579,7 +579,7 @@ function SignupPageContent() {
     // Success Screen (after verification or skip)
     if (step === 'success') {
         return (
-            <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
+            <div className="fixed-app neu-base overflow-hidden">
                 <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
                     <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
                         <NeyborHuudLogo layout="inline" size="sm" tone="primary" />
@@ -639,7 +639,7 @@ function SignupPageContent() {
     }
 
     return (
-        <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
+        <div className="fixed-app neu-base overflow-hidden">
             <form onSubmit={handleSubmit} className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
                 <div className="grid shrink-0 grid-cols-3 gap-2 rounded-[1.15rem] bg-white/70 p-1.5 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
                     {signupStages.map((item, index) => {

@@ -115,14 +115,14 @@ export default function VerifyLocationPage() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base flex items-center justify-center">
+      <div className="fixed-app neu-base flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
+    <div className="fixed-app neu-base overflow-hidden">
       <div className="mx-auto flex h-full w-full max-w-md flex-col px-5 pb-4 pt-4 sm:px-6">
 
         {/* ── Top Chrome Bar ── */}

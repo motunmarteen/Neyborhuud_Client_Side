@@ -191,7 +191,7 @@ function PickCommunityContent() {
   const selectedOption = options.find((o) => o.id === selectedId);
 
   return (
-    <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
+    <div className="fixed-app neu-base overflow-hidden">
       <div className="mx-auto flex h-full w-full max-w-md flex-col px-5 pb-4 pt-4 sm:px-6">
 
         {/* ── Top Chrome Bar ── */}

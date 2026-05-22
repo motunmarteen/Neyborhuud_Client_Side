@@ -65,7 +65,7 @@ function ResetPasswordContent() {
     const icon = step === 'success' ? 'bi-shield-check' : isError ? 'bi-exclamation-triangle-fill' : 'bi-lock-fill';
 
     return (
-        <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
+        <div className="fixed-app neu-base overflow-hidden">
             <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
                 <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
                     <button type="button" onClick={() => router.push('/login')} className="flex h-8 w-8 items-center justify-center rounded-xl text-charcoal/55 transition-colors hover:text-primary" aria-label="Login" title="Login">

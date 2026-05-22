@@ -139,7 +139,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="fixed inset-0 h-[100dvh] w-[100vw] neu-base overflow-hidden">
+        <div className="fixed-app neu-base overflow-hidden">
             <form onSubmit={handleSubmit} className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
                 <div className="grid shrink-0 grid-cols-[1fr_auto] gap-2 rounded-[1.15rem] bg-white/70 p-1.5 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
                     <div className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-white shadow-[0_12px_24px_rgba(0,111,53,0.24)]">

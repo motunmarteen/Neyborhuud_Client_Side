@@ -3,9 +3,12 @@
     "short_name": "neyborhuud",
     "description": "Hyperlocal safety, community, and commerce — built for your street.",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "display_override": ["standalone", "minimal-ui"],
+    "orientation": "portrait-primary",
     "background_color": "#060908",
-    "theme_color": "#006F35",
+    "theme_color": "#060908",
     "icons": [
         {
             "src": "/icon-192.png",

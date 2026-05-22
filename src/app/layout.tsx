@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { AppViewport } from "@/components/AppViewport";
 import DailyCheckInModal from "@/components/gamification/DailyCheckInModalLoader";
 import TextSizeApplier from "@/components/TextSizeApplier";
 
@@ -55,9 +56,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#006F35",
-  width: "device-width",
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#060908' },
+    { media: '(prefers-color-scheme: dark)', color: '#060908' },
+  ],
+  width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -76,16 +81,17 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${jakarta.variable} font-display text-brand-black transition-colors duration-200`}
+        className={`${jakarta.variable} app-body font-display text-brand-black transition-colors duration-200`}
         suppressHydrationWarning
       >
+        <AppViewport />
         <Providers>
           <a href="#main-content" className="skip-to-content">
             Skip to main content
           </a>
           <TextSizeApplier />
           <DailyCheckInModal />
-          <div id="main-content" className="mx-auto w-full max-w-[1400px] relative">
+          <div id="main-content" className="app-shell">
             {children}
           </div>
         </Providers>

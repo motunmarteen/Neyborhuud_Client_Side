@@ -19,6 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { SmartLocationSync } from '@/hooks/useSmartLocationSync';
 import { LocationSyncOrchestrator } from '@/components/location/LocationSyncOrchestrator';
 import NotificationPermissionPrompt from '@/components/NotificationPermissionPrompt';
+import PwaInstallPrompt from '@/components/PwaInstallPrompt';
 import { PageTransition } from '@/components/ui/PageTransition';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
@@ -266,6 +267,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <SmartLocationSync />
       <LocationSyncOrchestrator />
       <NotificationPermissionPrompt />
+      <PwaInstallPrompt />
       <PageTransition>{children}</PageTransition>
       <Toaster 
         position="top-right" 

@@ -83,7 +83,7 @@ export function BottomNav({ hidden }: BottomNavProps) {
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="pointer-events-auto mx-3 mb-3 max-w-lg mx-auto rounded-[26px] border border-[var(--border-light)] bg-white/76 px-1.5 py-1 shadow-[0_12px_40px_rgba(0,111,53,0.12),0_0_0_1px_rgba(255,255,255,0.9)_inset] backdrop-blur-2xl dark:border-white/12 dark:bg-[rgba(12,18,24,0.55)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.05)_inset,0_0_48px_-8px_rgba(0,212,49,0.12)]">
+      <div className="pointer-events-auto mx-3 mb-[max(0.75rem,var(--safe-bottom))] max-w-lg mx-auto rounded-[26px] border border-[var(--border-light)] bg-white/76 px-1.5 py-1 shadow-[0_12px_40px_rgba(0,111,53,0.12),0_0_0_1px_rgba(255,255,255,0.9)_inset] backdrop-blur-2xl dark:border-white/12 dark:bg-[rgba(12,18,24,0.55)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.05)_inset,0_0_48px_-8px_rgba(0,212,49,0.12)]">
         <div className="flex h-[52px] items-center justify-around">
         {/* Home */}
         <Link
