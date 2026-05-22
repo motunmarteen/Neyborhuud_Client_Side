@@ -7,6 +7,8 @@ export type ValidationStatus = 'idle' | 'checking' | 'valid' | 'invalid' | 'take
 interface PremiumInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     icon?: string;
+    /** Fixed prefix shown inside the field (e.g. @ for usernames) */
+    prefix?: string;
     error?: string;
     success?: boolean;
     /** Validation status for real-time feedback */
@@ -15,16 +17,28 @@ interface PremiumInputProps extends React.InputHTMLAttributes<HTMLInputElement> 
     helperText?: string;
     /** Success message shown below input */
     successText?: string;
+    /** Override default taken-state copy */
+    takenText?: string;
+    /** Override default invalid-state copy */
+    invalidText?: string;
+    /** Override default checking-state copy */
+    checkingText?: string;
+    inputRef?: React.Ref<HTMLInputElement>;
 }
 
 export const PremiumInput: React.FC<PremiumInputProps> = ({
     label,
     icon,
+    prefix,
     error,
     success,
     validationStatus = 'idle',
     helperText,
     successText,
+    takenText,
+    invalidText,
+    checkingText,
+    inputRef,
     className = '',
     type,
     ...props
@@ -71,13 +85,22 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
             return { text: error, color: 'text-brand-red' };
         }
         if (validationStatus === 'taken') {
-            return { text: 'This email is already registered', color: 'text-brand-red' };
+            return {
+                text: takenText ?? 'Already taken — try another',
+                color: 'text-brand-red',
+            };
         }
         if (validationStatus === 'invalid') {
-            return { text: 'Please enter a valid email address', color: 'text-brand-red' };
+            return {
+                text: invalidText ?? 'Please check this field',
+                color: 'text-brand-red',
+            };
         }
         if (validationStatus === 'checking') {
-            return { text: 'Checking availability...', color: 'text-brand-blue' };
+            return {
+                text: checkingText ?? 'Checking availability…',
+                color: 'text-brand-blue',
+            };
         }
         if (successText && (success || validationStatus === 'valid')) {
             return { text: successText, color: 'text-primary' };
@@ -106,7 +129,17 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
                 {icon && (
                     <i className={`bi ${icon} text-lg mr-3 group-focus-within:text-brand-blue transition-colors`} style={{ color: 'var(--neu-text-muted)' }}></i>
                 )}
+                {prefix ? (
+                    <span
+                        className="mr-0.5 shrink-0 text-lg font-bold tracking-tight group-focus-within:text-primary transition-colors"
+                        style={{ color: 'var(--neu-text-muted)' }}
+                        aria-hidden
+                    >
+                        {prefix}
+                    </span>
+                ) : null}
                 <input
+                    ref={inputRef}
                     type={inputType}
                     className="bg-transparent w-full py-3 placeholder:opacity-40 focus:outline-none font-light"
                     style={{ color: 'var(--neu-text)' }}

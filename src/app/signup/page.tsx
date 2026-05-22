@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PremiumInput } from '@/components/ui/PremiumInput';
@@ -50,6 +50,10 @@ function SignupPageContent() {
     const [locError, setLocError] = useState<string | null>(null);
     const [isResolving, setIsResolving] = useState(false);
     const [locationSheetCollapsed, setLocationSheetCollapsed] = useState(false);
+    const [identitySheetCollapsed, setIdentitySheetCollapsed] = useState(false);
+    const [showInviteField, setShowInviteField] = useState(false);
+    const usernameInputRef = useRef<HTMLInputElement>(null);
+    const chromeRef = useRef<HTMLDivElement>(null);
     const [resendCooldown, setResendCooldown] = useState(0);
     const [isResending, setIsResending] = useState(false);
     
@@ -97,21 +101,8 @@ function SignupPageContent() {
         username: formData.username,
     });
     const isPassValid = passwordPolicy.ok;
-    const isEmailPendingOrBlocked =
-        emailValidation.status === 'invalid' ||
-        emailValidation.status === 'taken' ||
-        emailValidation.status === 'checking';
-    const isUsernamePendingOrBlocked =
-        usernameValidation.status === 'invalid' ||
-        usernameValidation.status === 'taken' ||
-        usernameValidation.status === 'checking';
     const canContinueIdentity =
-        formData.username.trim().length > 0 &&
-        formData.email.trim().length > 0 &&
-        emailValidation.isFormatValid &&
-        usernameValidation.isFormatValid &&
-        !isEmailPendingOrBlocked &&
-        !isUsernamePendingOrBlocked;
+        usernameValidation.status === 'valid' && emailValidation.status === 'valid';
     const canSubmit =
         canContinueIdentity &&
         isPassValid &&
@@ -133,6 +124,52 @@ function SignupPageContent() {
             : 'Location saved'
         : 'Tap below to use GPS or the map';
     const identityHandle = formData.username.trim() ? `@${formData.username.trim()}` : '@your_name';
+
+    const syncSignupLayout = useCallback(() => {
+        const chromeH = chromeRef.current?.getBoundingClientRect().height;
+        if (chromeH && chromeH > 0) {
+            document.documentElement.style.setProperty('--signup-chrome-h', `${Math.ceil(chromeH)}px`);
+        }
+    }, []);
+
+    const handleUsernameChange = (value: string) => {
+        setFormData({
+            ...formData,
+            username: value.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+        });
+    };
+
+    const identityContinueHint = (() => {
+        if (canContinueIdentity) return null;
+        if (usernameValidation.status === 'checking' || emailValidation.status === 'checking') {
+            return { text: 'Checking availability…', checking: true };
+        }
+        if (usernameValidation.status === 'taken') {
+            return { text: usernameValidation.errorMessage ?? 'That @name is already taken', checking: false };
+        }
+        if (emailValidation.status === 'taken') {
+            return { text: emailValidation.errorMessage ?? 'Email already registered', checking: false };
+        }
+        if (!formData.username.trim()) {
+            return { text: 'Choose your @name to continue', checking: false };
+        }
+        if (!usernameValidation.isFormatValid) {
+            return { text: 'Use letters, numbers, and underscores (3–30 chars)', checking: false };
+        }
+        if (usernameValidation.status !== 'valid') {
+            return { text: 'Choose an available @name to continue', checking: false };
+        }
+        if (!formData.email.trim()) {
+            return { text: 'Enter your email to continue', checking: false };
+        }
+        if (!emailValidation.isFormatValid) {
+            return { text: 'Enter a valid email address', checking: false };
+        }
+        if (emailValidation.status !== 'valid') {
+            return { text: 'Use an email that isn\'t already registered', checking: false };
+        }
+        return { text: 'Complete @name and email to continue', checking: false };
+    })();
 
     // Handle resend verification code
     const handleResendVerification = async () => {
@@ -304,7 +341,33 @@ function SignupPageContent() {
         } catch {
             setReferralCodeInput(raw.trim());
         }
+        setShowInviteField(true);
     }, [searchParams]);
+
+    useEffect(() => {
+        if (signupStage !== 'identity') return;
+        const timer = window.setTimeout(() => {
+            usernameInputRef.current?.focus({ preventScroll: true });
+        }, 320);
+        return () => window.clearTimeout(timer);
+    }, [signupStage]);
+
+    useEffect(() => {
+        syncSignupLayout();
+        const chromeEl = chromeRef.current;
+        if (!chromeEl) return;
+
+        const observer = new ResizeObserver(syncSignupLayout);
+        observer.observe(chromeEl);
+        window.addEventListener('resize', syncSignupLayout);
+        window.visualViewport?.addEventListener('resize', syncSignupLayout);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', syncSignupLayout);
+            window.visualViewport?.removeEventListener('resize', syncSignupLayout);
+        };
+    }, [signupStage, referralCodeInput, syncSignupLayout]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -644,7 +707,14 @@ function SignupPageContent() {
 
     return (
         <form onSubmit={handleSubmit} className="auth-signup-page fixed-app overflow-hidden">
-            <div className="auth-signup-map-layer">
+            <div
+                className={[
+                    'auth-signup-map-layer',
+                    signupStage !== 'location' ? 'auth-signup-map-layer--readonly' : '',
+                ]
+                    .filter(Boolean)
+                    .join(' ')}
+            >
                 <LocationPicker
                     initialLocation={location}
                     accuracy={gpsAccuracy}
@@ -659,12 +729,22 @@ function SignupPageContent() {
                     presentation="premium"
                 />
                 <div
-                    className={`auth-signup-map-scrim${signupStage !== 'location' ? ' auth-signup-map-scrim--dim' : ''}${signupStage === 'location' && locationSheetCollapsed ? ' auth-signup-map-scrim--sheet-collapsed' : ''}`}
+                    className={[
+                        'auth-signup-map-scrim',
+                        signupStage === 'location'
+                            ? locationSheetCollapsed
+                                ? ' auth-signup-map-scrim--sheet-collapsed'
+                                : ''
+                            : ' auth-signup-map-scrim--preview',
+                        signupStage === 'identity' && identitySheetCollapsed
+                            ? ' auth-signup-map-scrim--sheet-collapsed'
+                            : '',
+                    ].join('')}
                     aria-hidden
                 />
             </div>
 
-            <div className="auth-signup-chrome">
+            <div ref={chromeRef} className="auth-signup-chrome">
                 <div className="auth-signup-top">
                     <NeyborHuudLogo layout="wordmark" size="md" textSize={22} tone="light" />
                     <div className="auth-signup-progress" role="tablist" aria-label="Signup progress">
@@ -695,6 +775,9 @@ function SignupPageContent() {
                             );
                         })}
                     </div>
+                    <p className="auth-signup-progress__label">
+                        Step {activeStageIndex + 1} of 3 · {SIGNUP_STAGE_LABELS[signupStage]}
+                    </p>
                 </div>
 
                 {referralCodeInput.trim() ? (
@@ -779,43 +862,27 @@ function SignupPageContent() {
             )}
 
             {signupStage === 'identity' && (
-                <SignupBottomSheet ariaLabel="Pick your @name" stageKey="identity" tall>
-                        <div className="auth-signup-sheet__head">
-                            <h2 className="auth-signup-sheet__title">Pick your @name</h2>
-                            <p className="auth-signup-sheet__hint truncate">{huudName}</p>
+                <SignupBottomSheet
+                    ariaLabel="Pick your @name"
+                    stageKey="identity"
+                    keyboardAware
+                    onCollapsedChange={setIdentitySheetCollapsed}
+                    peek={
+                        <div className="auth-signup-identity-peek">
+                            <span className="auth-signup-identity-peek__avatar" aria-hidden>
+                                @
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <p className="auth-signup-identity-peek__label">Pick your @name</p>
+                                <p className="auth-signup-identity-peek__name truncate">{identityHandle}</p>
+                            </div>
+                            <span className="auth-signup-identity-peek__chevron" aria-hidden>
+                                <i className={`bi ${identitySheetCollapsed ? 'bi-chevron-up' : 'bi-chevron-down'}`} />
+                            </span>
                         </div>
-                        <div className="flex flex-col gap-3">
-                            <PremiumInput
-                                label="Username"
-                                icon="bi-person"
-                                placeholder="e.g. nancy_surulere"
-                                className="py-0.5"
-                                value={formData.username}
-                                onChange={e => setFormData({ ...formData, username: e.target.value })}
-                                validationStatus={usernameValidation.status}
-                                error={usernameValidation.errorMessage || undefined}
-                                successText={usernameValidation.status === 'valid' ? 'Username available' : undefined}
-                            />
-                            <PremiumInput
-                                label="Email"
-                                type="email"
-                                icon="bi-envelope"
-                                placeholder="nancy@example.com"
-                                className="py-0.5"
-                                value={formData.email}
-                                onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                validationStatus={emailValidation.status}
-                                error={emailValidation.errorMessage || undefined}
-                                successText={emailValidation.status === 'valid' ? 'Email available' : undefined}
-                            />
-                            <PremiumInput
-                                label="Invite"
-                                icon="bi-gift"
-                                placeholder="Username or invite code"
-                                className="py-0.5"
-                                value={referralCodeInput}
-                                onChange={(e) => setReferralCodeInput(e.target.value)}
-                            />
+                    }
+                    footer={
+                        <div>
                             <div className="auth-signup-actions">
                                 <button
                                     type="button"
@@ -835,20 +902,107 @@ function SignupPageContent() {
                                     <i className="bi bi-arrow-right shrink-0" aria-hidden />
                                 </button>
                             </div>
-                            <p className="auth-signin-link auth-signin-link--sheet border-t border-charcoal/8 pt-3">
-                                Already on the Huud?{' '}
-                                <Link href="/login">Enter your Huud</Link>
+                            {identityContinueHint ? (
+                                <p
+                                    className={`auth-signup-continue-hint${identityContinueHint.checking ? ' auth-signup-continue-hint--checking' : ''}`}
+                                    role="status"
+                                    aria-live="polite"
+                                >
+                                    {identityContinueHint.text}
+                                </p>
+                            ) : null}
+                        </div>
+                    }
+                >
+                    <div className="auth-signup-identity-card">
+                        <span className="auth-signup-identity-card__avatar" aria-hidden>
+                            @
+                        </span>
+                        <div className="min-w-0 flex-1">
+                            <p className="auth-signup-identity-card__eyebrow">Your Huud identity</p>
+                            <p className="auth-signup-identity-card__handle truncate">{identityHandle}</p>
+                            <p className="auth-signup-identity-card__meta truncate">
+                                Joining · {huudName}
+                                {huudRegion ? ` · ${huudRegion}` : ''}
                             </p>
                         </div>
+                        {usernameValidation.status === 'valid' ? (
+                            <span className="auth-signup-identity-card__badge">Available</span>
+                        ) : null}
+                    </div>
+
+                    <p className="auth-signup-sheet-subcopy mb-3 text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
+                        This is how neighbors find you on the Huud
+                    </p>
+
+                    <div className="auth-signup-sheet-fields flex flex-col gap-3">
+                        <PremiumInput
+                            label="@name"
+                            prefix="@"
+                            placeholder="nancy_surulere"
+                            className="py-0.5"
+                            value={formData.username}
+                            onChange={(e) => handleUsernameChange(e.target.value)}
+                            inputRef={usernameInputRef}
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                            spellCheck={false}
+                            inputMode="text"
+                            autoComplete="username"
+                            validationStatus={usernameValidation.status}
+                            error={usernameValidation.errorMessage || undefined}
+                            successText="Username available"
+                            takenText="This @name is already taken"
+                            invalidText="Letters, numbers, and underscores only (3–30 chars)"
+                            checkingText="Checking @name…"
+                            helperText="Letters, numbers, underscores · 3–30 chars"
+                        />
+                        <PremiumInput
+                            label="Email"
+                            type="email"
+                            icon="bi-envelope"
+                            placeholder="nancy@example.com"
+                            className="py-0.5"
+                            value={formData.email}
+                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            autoComplete="email"
+                            inputMode="email"
+                            validationStatus={emailValidation.status}
+                            error={emailValidation.errorMessage || undefined}
+                            successText={emailValidation.status === 'valid' ? 'Email available' : undefined}
+                            takenText="This email is already registered"
+                            invalidText="Please enter a valid email address"
+                            checkingText="Checking email…"
+                        />
+                        {showInviteField ? (
+                            <PremiumInput
+                                label="Invite"
+                                icon="bi-gift"
+                                placeholder="Username or invite code"
+                                className="py-0.5"
+                                value={referralCodeInput}
+                                onChange={(e) => setReferralCodeInput(e.target.value)}
+                            />
+                        ) : (
+                            <button
+                                type="button"
+                                className="auth-signup-invite-toggle"
+                                onClick={() => setShowInviteField(true)}
+                            >
+                                <i className="bi bi-gift" aria-hidden />
+                                Have an invite code?
+                            </button>
+                        )}
+                    </div>
                 </SignupBottomSheet>
             )}
 
             {signupStage === 'security' && (
-                <SignupBottomSheet ariaLabel="Secure your Huud" stageKey="security" tall>
+                <SignupBottomSheet ariaLabel="Secure your Huud" stageKey="security">
                         <div className="auth-signup-sheet__head">
                             <h2 className="auth-signup-sheet__title">Secure your Huud</h2>
                         </div>
-                        <div className="flex flex-col gap-3">
+                        <div className="auth-signup-sheet-fields flex flex-col gap-3">
                             <PremiumInput
                                 label="Secure Password"
                                 type="password"
