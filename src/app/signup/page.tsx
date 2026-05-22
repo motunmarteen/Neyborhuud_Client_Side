@@ -810,6 +810,33 @@ function SignupPageContent() {
                             </span>
                         </div>
                     }
+                    footer={
+                        <div>
+                            <div className="auth-signup-actions">
+                                <button
+                                    type="button"
+                                    onClick={fetchLocation}
+                                    disabled={isResolving}
+                                    className="auth-btn auth-btn-secondary disabled:opacity-40"
+                                >
+                                    <i className={`bi shrink-0 ${isResolving ? 'bi-arrow-repeat animate-spin' : 'bi-broadcast'}`} aria-hidden />
+                                    <span>{isResolving ? 'Finding…' : 'Use my location'}</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setSignupStage('identity')}
+                                    className="auth-btn auth-btn-primary"
+                                >
+                                    <span>Continue</span>
+                                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                </button>
+                            </div>
+                            <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
+                                Already on the Huud?{' '}
+                                <Link href="/login">Enter your Huud</Link>
+                            </p>
+                        </div>
+                    }
                 >
                         <div className="mb-3 flex items-center gap-3">
                             <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
@@ -832,31 +859,8 @@ function SignupPageContent() {
                                 <span>{locError}</span>
                             </div>
                         ) : null}
-                        <p className="mb-3 text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
+                        <p className="mb-0 text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
                             Tap or drag the map to adjust
-                        </p>
-                        <div className="auth-signup-actions">
-                            <button
-                                type="button"
-                                onClick={fetchLocation}
-                                disabled={isResolving}
-                                className="auth-btn auth-btn-secondary disabled:opacity-40"
-                            >
-                                <i className={`bi shrink-0 ${isResolving ? 'bi-arrow-repeat animate-spin' : 'bi-broadcast'}`} aria-hidden />
-                                <span>{isResolving ? 'Finding…' : 'Use my location'}</span>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setSignupStage('identity')}
-                                className="auth-btn auth-btn-primary"
-                            >
-                                <span>Continue</span>
-                                <i className="bi bi-arrow-right shrink-0" aria-hidden />
-                            </button>
-                        </div>
-                        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
-                            Already on the Huud?{' '}
-                            <Link href="/login">Enter your Huud</Link>
                         </p>
                 </SignupBottomSheet>
             )}
@@ -998,7 +1002,45 @@ function SignupPageContent() {
             )}
 
             {signupStage === 'security' && (
-                <SignupBottomSheet ariaLabel="Secure your Huud" stageKey="security">
+                <SignupBottomSheet
+                    ariaLabel="Secure your Huud"
+                    stageKey="security"
+                    footer={
+                        <div>
+                            <div className="auth-signup-actions">
+                                <button
+                                    type="button"
+                                    onClick={() => setSignupStage('identity')}
+                                    className="auth-btn auth-btn-secondary"
+                                >
+                                    <i className="bi bi-arrow-left shrink-0" aria-hidden />
+                                    <span>Back</span>
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={!canSubmit}
+                                    className="auth-btn auth-btn-primary"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                                            <span>Joining…</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Join neyborhuud</span>
+                                            <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                            <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
+                                Already on the Huud?{' '}
+                                <Link href="/login">Enter your Huud</Link>
+                            </p>
+                        </div>
+                    }
+                >
                         <div className="auth-signup-sheet__head">
                             <h2 className="auth-signup-sheet__title">Secure your Huud</h2>
                         </div>
@@ -1024,7 +1066,7 @@ function SignupPageContent() {
                                 </p>
                             )}
 
-                            <div className="flex flex-col gap-2 rounded-2xl border border-charcoal/10 bg-white/[0.92] px-3 py-3 shadow-[0_12px_32px_rgba(26,26,46,0.08)]">
+                            <div className="flex flex-col gap-2 rounded-2xl border border-charcoal/10 bg-[#f8faf8] px-3 py-3">
                                 <label className="flex cursor-pointer items-start gap-3">
                                     <input
                                         type="checkbox"
@@ -1059,38 +1101,6 @@ function SignupPageContent() {
                                     </span>
                                 </label>
                             </div>
-
-                            <div className="auth-signup-actions">
-                                <button
-                                    type="button"
-                                    onClick={() => setSignupStage('identity')}
-                                    className="auth-btn auth-btn-secondary"
-                                >
-                                    <i className="bi bi-arrow-left shrink-0" aria-hidden />
-                                    <span>Back</span>
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={!canSubmit}
-                                    className="auth-btn auth-btn-primary"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
-                                            <span>Joining…</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>Join neyborhuud</span>
-                                            <i className="bi bi-arrow-right shrink-0" aria-hidden />
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                            <p className="auth-signin-link auth-signin-link--sheet border-t border-charcoal/8 pt-3">
-                                Already on the Huud?{' '}
-                                <Link href="/login">Enter your Huud</Link>
-                            </p>
                         </div>
                 </SignupBottomSheet>
             )}
