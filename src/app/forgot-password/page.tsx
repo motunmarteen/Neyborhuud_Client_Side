@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { fetchAPI } from '@/lib/api';
 import { useEmailValidation } from '@/hooks/useEmailValidation';
 import { toast } from 'sonner';
+import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
+import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 
 function forgotPasswordBody(email: string) {
     const normalized = email.trim().toLowerCase();
@@ -28,7 +30,6 @@ function isNetworkError(message: string): boolean {
 type Step = 'form' | 'sent' | 'error';
 
 export default function ForgotPasswordPage() {
-    const router = useRouter();
     const [step, setStep] = useState<Step>('form');
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
@@ -111,84 +112,102 @@ export default function ForgotPasswordPage() {
     const isSent = step === 'sent';
     const isError = step === 'error';
 
-    return (
-        <div className="fixed-app neu-base overflow-hidden">
-            <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-4 sm:px-6">
-                <div className="flex h-11 shrink-0 items-center justify-between rounded-[1.15rem] bg-white/70 px-3 shadow-[0_14px_40px_rgba(26,26,46,0.08)] backdrop-blur-xl">
-                    <button type="button" onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-xl text-charcoal/55 transition-colors hover:text-primary" aria-label="Back" title="Back">
-                        <i className="bi bi-arrow-left" aria-hidden />
-                    </button>
-                    <span className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">Password help</span>
-                    <button type="button" onClick={() => router.push('/login')} className="flex h-8 w-8 items-center justify-center rounded-xl text-charcoal/55 transition-colors hover:text-primary" aria-label="Login" title="Login">
-                        <i className="bi bi-box-arrow-in-right" aria-hidden />
-                    </button>
-                </div>
+    const hero = (
+        <AuthFlowHero
+            icon={isError ? 'bi-exclamation-triangle-fill' : isSent ? 'bi-envelope-check-fill' : 'bi-key-fill'}
+            eyebrow={isError ? 'Request failed' : isSent ? 'Inbox next' : 'Account recovery'}
+            title={isError ? 'Try again' : isSent ? 'Check your inbox' : 'Reset password'}
+            meta={email || 'Use your account email'}
+            error={isError}
+        />
+    );
 
-                <div className="flex min-h-0 flex-1 flex-col py-3">
-                    <div className="-mx-5 min-h-0 flex-1 overflow-hidden bg-white/[0.76] shadow-inner sm:-mx-6">
-                        <div className="relative flex h-full items-center justify-center overflow-hidden px-6">
-                            <div className="absolute left-4 top-7 h-2 w-36 rotate-12 rounded-full bg-brand-blue/16" aria-hidden />
-                            <div className="absolute right-6 top-1/2 h-2 w-32 -rotate-12 rounded-full bg-primary/14" aria-hidden />
-                            <div className="absolute bottom-8 left-12 h-2 w-40 -rotate-6 rounded-full bg-brand-amber/18" aria-hidden />
-                            <div className="relative w-full max-w-[19rem] overflow-hidden rounded-[1.6rem] border border-white/85 bg-white/[0.92] shadow-[0_26px_64px_rgba(26,26,46,0.16)] backdrop-blur-xl">
-                                <div className={`h-1.5 ${isError ? 'bg-brand-red' : 'bg-gradient-to-r from-brand-blue via-primary to-brand-amber'}`} aria-hidden />
-                                <div className="p-4">
-                                    <div className="mb-4 flex items-center justify-between gap-3">
-                                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-[0_16px_34px_rgba(0,111,53,0.25)] ${isError ? 'bg-brand-red' : isSent ? 'bg-primary' : 'bg-brand-blue'}`}>
-                                            <i className={`bi ${isError ? 'bi-exclamation-triangle-fill' : isSent ? 'bi-envelope-check-fill' : 'bi-key-fill'} text-xl`} aria-hidden />
-                                        </div>
-                                        <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">NeyborHuud</div>
-                                    </div>
-                                    <p className={`mb-1 text-[9px] font-black uppercase tracking-[0.24em] ${isError ? 'text-brand-red' : 'text-primary'}`}>{isError ? 'Request failed' : isSent ? 'Inbox next' : 'Account recovery'}</p>
-                                    <h1 className="truncate text-2xl font-black tracking-tighter text-brand-black">{isError ? 'Try again' : isSent ? 'Check your inbox' : 'Reset password'}</h1>
-                                    <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{email || 'Use your account email'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="shrink-0 overflow-hidden rounded-[1.7rem] border border-white/85 bg-white/[0.94] shadow-[0_28px_70px_rgba(26,26,46,0.18)] backdrop-blur-2xl">
-                        <div className={`h-1.5 ${isError ? 'bg-brand-red' : 'bg-gradient-to-r from-brand-blue via-primary to-brand-amber'}`} aria-hidden />
-                        <div className="p-4">
-                            {step === 'form' && (
-                                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                                    <PremiumInput label="Email Address" type="email" icon="bi-envelope" placeholder="nancy@example.com" value={email} onChange={event => setEmail(event.target.value)} validationStatus={emailValidation.status} error={emailValidation.status === 'invalid' ? 'Please enter a valid email' : undefined} />
-                                    <button type="submit" disabled={loading || !emailValidation.isFormatValid} className="btn-glass-primary h-[52px] w-full gap-2">
-                                        {loading ? <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" aria-hidden /> : <i className="bi bi-send" aria-hidden />}
-                                        Send reset link
-                                    </button>
-                                </form>
-                            )}
-
-                            {step === 'sent' && (
-                                <div className="flex flex-col gap-4">
-                                    <div className="rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-primary">If an account exists for {email}, a reset link has been sent.</div>
-                                    <div className="grid grid-cols-[0.9fr_1.1fr] gap-3">
-                                        <button type="button" onClick={handleResend} disabled={resendCooldown > 0 || loading} className="btn-secondary h-[50px] w-full gap-2">
-                                            {loading ? <i className="bi bi-arrow-repeat animate-spin" aria-hidden /> : <i className="bi bi-send" aria-hidden />}
-                                            {loading ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}
-                                        </button>
-                                        <button type="button" onClick={() => router.push('/login')} className="btn-glass-primary h-[50px] w-full gap-2">
-                                            Login
-                                            <i className="bi bi-arrow-right" aria-hidden />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {step === 'error' && (
-                                <div className="flex flex-col gap-4">
-                                    <div className="rounded-2xl border border-brand-red/15 bg-brand-red/10 px-4 py-3 text-[11px] font-semibold leading-relaxed text-brand-red">{errorMessage || 'We could not process your request. Please try again.'}</div>
-                                    <button type="button" onClick={() => setStep('form')} className="btn-glass-primary h-[52px] w-full gap-2">
-                                        Try again
-                                        <i className="bi bi-arrow-right" aria-hidden />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+    const footer =
+        step === 'form' ? (
+            <button
+                type="submit"
+                form="forgot-password-form"
+                disabled={loading || !emailValidation.isFormatValid}
+                className="auth-btn auth-btn-primary"
+            >
+                {loading ? (
+                    <>
+                        <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                        <span>Sending…</span>
+                    </>
+                ) : (
+                    <>
+                        <span>Send reset link</span>
+                        <i className="bi bi-send shrink-0" aria-hidden />
+                    </>
+                )}
+            </button>
+        ) : step === 'sent' ? (
+            <div className="auth-signup-actions">
+                <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendCooldown > 0 || loading}
+                    className="auth-btn auth-btn-secondary"
+                >
+                    <i className={`bi shrink-0 ${loading ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
+                    <span>{loading ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
+                </button>
+                <Link href="/login" className="auth-btn auth-btn-primary no-underline">
+                    <span>Back to login</span>
+                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                </Link>
             </div>
-        </div>
+        ) : (
+            <button type="button" onClick={() => setStep('form')} className="auth-btn auth-btn-primary">
+                <span>Try again</span>
+                <i className="bi bi-arrow-right shrink-0" aria-hidden />
+            </button>
+        );
+
+    return (
+        <AuthFlowPage
+            ariaLabel="Reset password"
+            stageKey={`forgot-${step}`}
+            stepLabel="Password help"
+            backHref="/login"
+            hero={hero}
+            footer={footer}
+            keyboardAware={step === 'form'}
+        >
+            {step === 'form' && (
+                <form id="forgot-password-form" onSubmit={handleSubmit} className="auth-signup-sheet-fields flex flex-col gap-3">
+                    <PremiumInput
+                        label="Email"
+                        type="email"
+                        icon="bi-envelope"
+                        placeholder="nancy@example.com"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        validationStatus={emailValidation.status}
+                        invalidText="Please enter a valid email"
+                        autoComplete="email"
+                        inputMode="email"
+                    />
+                    <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
+                        We&apos;ll email you a link to reset your password
+                    </p>
+                </form>
+            )}
+
+            {step === 'sent' && (
+                <div className="auth-flow-notice auth-flow-notice--success">
+                    <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+                    <span>If an account exists for {email}, a reset link has been sent.</span>
+                </div>
+            )}
+
+            {step === 'error' && errorMessage ? (
+                <div className="auth-flow-notice auth-flow-notice--error" role="alert">
+                    <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                    <span>{errorMessage}</span>
+                </div>
+            ) : null}
+        </AuthFlowPage>
     );
 }

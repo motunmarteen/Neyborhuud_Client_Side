@@ -16,7 +16,8 @@ import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValid
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
 import { toast } from 'sonner';
-import { AuthBrandHeader } from '@/components/auth/AuthBrandHeader';
+import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
+import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 
@@ -535,173 +536,135 @@ function SignupPageContent() {
         }
     };
 
-    // Email Verification Screen - OTP Code Entry (Simplified)
+    // Email Verification Screen - OTP Code Entry
     if (step === 'verify-email') {
         return (
-            <div className="fixed-app neu-base overflow-hidden">
-                <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-2 sm:px-6">
-                    <AuthBrandHeader compact subtitle="Check your email for the code." />
-                    <div className="flex min-h-0 flex-1 flex-col py-2">
-                        <div className="-mx-5 min-h-0 flex-1 overflow-hidden bg-white/[0.76] shadow-inner sm:-mx-6">
-                            <div className="relative flex h-full min-h-[120px] items-center justify-center overflow-hidden px-6">
-                                <div className="absolute left-4 top-7 h-2 w-36 rotate-12 rounded-full bg-brand-blue/16" aria-hidden />
-                                <div className="absolute right-6 top-1/2 h-2 w-32 -rotate-12 rounded-full bg-primary/14" aria-hidden />
-                                <div className="absolute bottom-7 left-12 h-2 w-40 -rotate-6 rounded-full bg-brand-amber/18" aria-hidden />
-                                <div className="relative w-full max-w-[19rem] overflow-hidden rounded-[1.6rem] border border-white/85 bg-white/[0.92] shadow-[0_26px_64px_rgba(26,26,46,0.16)] backdrop-blur-xl">
-                                    <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
-                                    <div className="p-4">
-                                        <div className="mb-4 flex items-center justify-between gap-3">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_16px_34px_rgba(0,111,53,0.3)]">
-                                                <i className="bi bi-shield-check text-xl" aria-hidden />
-                                            </div>
-                                            <div className="rounded-full border border-charcoal/5 bg-brand-surface px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-primary">
-                                                One-time code
-                                            </div>
-                                        </div>
-                                        <p className="mb-1 text-[9px] font-black uppercase tracking-[0.24em] text-primary">{verificationError ? 'Try again' : 'Almost there'}</p>
-                                        <h2 className="truncate text-2xl font-black tracking-tighter text-brand-black">Check your email</h2>
-                                        <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{formData.email}</p>
-                                        <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[var(--neu-text-secondary)]">
-                                            <i className="bi bi-geo-alt-fill text-primary" aria-hidden />
-                                            <span className="truncate">{huudName}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="shrink-0 overflow-hidden rounded-[1.7rem] border border-white/85 bg-white/[0.94] shadow-[0_28px_70px_rgba(26,26,46,0.18)] backdrop-blur-2xl">
-                            <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
-                            <div className="flex flex-col gap-4 p-4">
-                                <OTPInput
-                                    length={6}
-                                    value={verificationCode}
-                                    onChange={setVerificationCode}
-                                    onComplete={handleVerifyCode}
-                                    disabled={isVerifying}
-                                    error={!!verificationError}
-                                    autoFocus={true}
-                                />
-
-                                {verificationError && (
-                                    <div className="flex items-start gap-2 rounded-2xl border border-brand-red/15 bg-brand-red/10 px-3 py-2.5 text-[11px] font-semibold leading-relaxed text-brand-red">
-                                        <i className="bi bi-exclamation-circle-fill mt-0.5 shrink-0" aria-hidden />
-                                        <span>{verificationError}</span>
-                                    </div>
-                                )}
-                                {verificationNotice && !verificationError && (
-                                    <div className="flex items-start gap-2 rounded-2xl border border-primary/15 bg-primary/10 px-3 py-2.5 text-[11px] font-semibold leading-relaxed text-primary">
-                                        <i className="bi bi-check-circle-fill mt-0.5 shrink-0" aria-hidden />
-                                        <span>{verificationNotice}</span>
-                                    </div>
-                                )}
-
-                                <div className="auth-signup-actions">
-                                    <button
-                                        type="button"
-                                        onClick={handleResendVerification}
-                                        disabled={resendCooldown > 0 || isResending}
-                                        className="auth-btn auth-btn-secondary"
-                                    >
-                                        <i className={`bi shrink-0 ${isResending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
-                                        <span>{isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleVerifyCode()}
-                                        disabled={verificationCode.length !== 6 || isVerifying}
-                                        className="auth-btn auth-btn-primary"
-                                    >
-                                        {isVerifying ? (
-                                            <>
-                                                <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
-                                                <span>Verifying</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span>Verify</span>
-                                                <i className="bi bi-arrow-right shrink-0" aria-hidden />
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setStep('form');
-                                        setVerificationCode('');
-                                        setVerificationError(null);
-                                        setVerificationNotice(null);
-                                    }}
-                                    className="text-center text-xs font-semibold text-[var(--neu-text-muted)] transition-colors hover:text-primary"
-                                >
-                                    Edit signup details
-                                </button>
-                            </div>
-                        </div>
+            <AuthFlowPage
+                ariaLabel="Verify email"
+                stageKey="signup-verify-email"
+                stepLabel="Verify email"
+                onBackClick={() => {
+                    setStep('form');
+                    setVerificationCode('');
+                    setVerificationError(null);
+                    setVerificationNotice(null);
+                }}
+                backLabel="Edit signup details"
+                keyboardAware
+                hero={
+                    <AuthFlowHero
+                        icon="bi-shield-check"
+                        eyebrow={verificationError ? 'Try again' : 'Almost there'}
+                        title="Check your email"
+                        meta={`${formData.email} · ${huudName}`}
+                        error={!!verificationError}
+                    />
+                }
+                footer={
+                    <div className="auth-signup-actions">
+                        <button
+                            type="button"
+                            onClick={handleResendVerification}
+                            disabled={resendCooldown > 0 || isResending}
+                            className="auth-btn auth-btn-secondary"
+                        >
+                            <i className={`bi shrink-0 ${isResending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
+                            <span>{isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleVerifyCode()}
+                            disabled={verificationCode.length !== 6 || isVerifying}
+                            className="auth-btn auth-btn-primary"
+                        >
+                            {isVerifying ? (
+                                <>
+                                    <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                                    <span>Verifying</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>Verify</span>
+                                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                </>
+                            )}
+                        </button>
                     </div>
+                }
+            >
+                <div className="flex flex-col gap-3">
+                    <OTPInput
+                        length={6}
+                        value={verificationCode}
+                        onChange={setVerificationCode}
+                        onComplete={handleVerifyCode}
+                        disabled={isVerifying}
+                        error={!!verificationError}
+                        autoFocus
+                    />
+                    {verificationError ? (
+                        <div className="auth-flow-notice auth-flow-notice--error" role="alert">
+                            <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                            <span>{verificationError}</span>
+                        </div>
+                    ) : verificationNotice ? (
+                        <div className="auth-flow-notice auth-flow-notice--success">
+                            <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+                            <span>{verificationNotice}</span>
+                        </div>
+                    ) : (
+                        <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
+                            Enter the 6-digit code from your inbox
+                        </p>
+                    )}
                 </div>
-            </div>
+            </AuthFlowPage>
         );
     }
 
-    // Success Screen (after verification or skip)
+    // Success Screen (after verification)
     if (step === 'success') {
         return (
-            <div className="fixed-app neu-base overflow-hidden">
-                <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-hidden px-5 pb-4 pt-2 sm:px-6">
-                    <AuthBrandHeader compact subtitle="You&apos;re in. Welcome to the Huud." />
-                    <div className="flex min-h-0 flex-1 flex-col py-2">
-                        <div className="-mx-5 min-h-0 flex-1 overflow-hidden bg-white/[0.76] shadow-inner sm:-mx-6">
-                            <div className="relative flex h-full items-center justify-center overflow-hidden px-6">
-                                <div className="absolute left-4 top-8 h-2 w-36 rotate-12 rounded-full bg-primary/16" aria-hidden />
-                                <div className="absolute right-8 top-1/2 h-2 w-32 -rotate-12 rounded-full bg-brand-amber/18" aria-hidden />
-                                <div className="relative flex h-32 w-32 items-center justify-center rounded-full border border-primary/12 bg-primary/[0.035]">
-                                    <div className="absolute h-24 w-24 rounded-full border border-brand-blue/20 bg-brand-blue/[0.04]" aria-hidden />
-                                    <div className="relative flex h-20 w-20 items-center justify-center rounded-[2rem] bg-primary text-white shadow-[0_24px_54px_rgba(0,111,53,0.32)]">
-                                        <i className="bi bi-person-check-fill text-4xl" aria-hidden />
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-5 left-1/2 w-[min(19rem,calc(100%-3rem))] -translate-x-1/2 rounded-2xl border border-white/85 bg-white/[0.9] px-4 py-3 shadow-[0_18px_40px_rgba(26,26,46,0.12)] backdrop-blur-xl">
-                                    <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">You&apos;re in</p>
-                                    <h2 className="truncate text-2xl font-black tracking-tighter text-brand-black">Welcome, Neybor</h2>
-                                    <p className="truncate text-[11px] font-semibold text-[var(--neu-text-muted)]">{identityHandle} · {huudName}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="shrink-0 overflow-hidden rounded-[1.7rem] border border-white/85 bg-white/[0.94] shadow-[0_28px_70px_rgba(26,26,46,0.18)] backdrop-blur-2xl">
-                            <div className="h-1.5 bg-gradient-to-r from-primary via-brand-blue to-brand-amber" aria-hidden />
-                            <div className="flex flex-col gap-4 p-4">
-                                <div className="flex items-center justify-between rounded-2xl border border-charcoal/5 bg-brand-surface px-4 py-3">
-                                    <div>
-                                        <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
-                                        <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Signup reward unlocked</p>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-primary">
-                                        <span className="text-3xl font-black leading-none">20</span>
-                                        <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (getNeedsCommunitySelection()) {
-                                            router.push('/pick-community');
-                                            return;
-                                        }
-                                        router.push(getAppEntryRoute());
-                                    }}
-                                    className="auth-btn auth-btn-primary"
-                                >
-                                    Enter your Huud
-                                    <i className="bi bi-arrow-right" aria-hidden />
-                                </button>
-                            </div>
-                        </div>
+            <AuthFlowPage
+                ariaLabel="Welcome to the Huud"
+                stageKey="signup-success"
+                stepLabel="You're in"
+                hero={
+                    <AuthFlowHero
+                        icon="bi-person-check-fill"
+                        eyebrow="You're in"
+                        title="Welcome, Neybor"
+                        meta={`${identityHandle} · ${huudName}`}
+                    />
+                }
+                footer={
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (getNeedsCommunitySelection()) {
+                                router.push('/pick-community');
+                                return;
+                            }
+                            router.push(getAppEntryRoute());
+                        }}
+                        className="auth-btn auth-btn-primary"
+                    >
+                        <span>Enter your Huud</span>
+                        <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                    </button>
+                }
+            >
+                <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
+                    <div>
+                        <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
+                        <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Signup reward unlocked</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-primary">
+                        <span className="text-3xl font-black leading-none">20</span>
+                        <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
                     </div>
                 </div>
-            </div>
+            </AuthFlowPage>
         );
     }
 
