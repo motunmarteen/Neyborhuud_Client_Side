@@ -2,27 +2,18 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import apiClient from '@/lib/api-client';
-import { ProductTourSlides } from '@/components/onboarding/ProductTourSlides';
-import { hasCompletedProductTour, markProductTourComplete } from '@/lib/onboarding';
 
+/** Legacy route — product tour now lives on the feed as FeedWelcomeSheet. */
 export default function OnboardingPage() {
     const router = useRouter();
 
     useEffect(() => {
-        if (!apiClient.isAuthenticated()) {
-            router.replace('/');
-            return;
-        }
-        if (hasCompletedProductTour()) {
-            router.replace('/feed');
-        }
+        router.replace('/feed');
     }, [router]);
 
-    const finishTour = () => {
-        markProductTourComplete();
-        router.replace('/feed');
-    };
-
-    return <ProductTourSlides onComplete={finishTour} onSkip={finishTour} />;
+    return (
+        <div className="auth-signup-page fixed-app flex items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
+        </div>
+    );
 }

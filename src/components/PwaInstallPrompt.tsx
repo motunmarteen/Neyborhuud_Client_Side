@@ -10,6 +10,8 @@ import { usePathname } from 'next/navigation';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { useAuth } from '@/hooks/useAuth';
 import { usePwaInstall } from '@/hooks/usePwaInstall';
+import { isAccountSetupIncomplete } from '@/lib/appShellGates';
+import { SETUP_MILESTONE_EVENT } from '@/lib/onboarding';
 import {
     canShowPwaInstallPrompt,
     isAndroidDevice,
@@ -89,6 +91,7 @@ export default function PwaInstallPrompt() {
     const [visible, setVisible] = useState(false);
     const [installing, setInstalling] = useState(false);
     const [androidManual, setAndroidManual] = useState(false);
+    const [setupReady, setSetupReady] = useState(false);
     const iosSafari = iosDevice && isIosSafari();
     const androidDevice = isAndroidDevice();
     const inAppBrowser = isInAppBrowser();
@@ -96,6 +99,13 @@ export default function PwaInstallPrompt() {
 
     useEffect(() => {
         if (isPwaInstalled()) markPwaInstalled();
+    }, []);
+
+    useEffect(() => {
+        const sync = () => setSetupReady(!isAccountSetupIncomplete());
+        sync();
+        window.addEventListener(SETUP_MILESTONE_EVENT, sync);
+        return () => window.removeEventListener(SETUP_MILESTONE_EVENT, sync);
     }, []);
 
     useEffect(() => {
@@ -110,6 +120,7 @@ export default function PwaInstallPrompt() {
     }, []);
 
     useEffect(() => {
+        if (!setupReady) return;
         if (!canShowPwaInstallPrompt(pathname, isAuthenticated)) return;
 
         try {
@@ -138,7 +149,7 @@ export default function PwaInstallPrompt() {
         }, delay);
 
         return () => window.clearTimeout(timer);
-    }, [pathname, canNativeInstall, iosDevice, androidDevice, isAuthenticated]);
+    }, [pathname, canNativeInstall, iosDevice, androidDevice, isAuthenticated, setupReady]);
 
     const dismiss = useCallback((mode: 'session' | 'snooze' = 'snooze') => {
         setVisible(false);

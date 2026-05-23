@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
 
 describe('SignupBottomSheet', () => {
@@ -12,20 +12,27 @@ describe('SignupBottomSheet', () => {
             },
         );
 
-        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
-            width: 390,
-            height: 320,
-            top: 500,
-            left: 0,
-            right: 390,
-            bottom: 820,
-            x: 0,
-            y: 500,
-            toJSON: () => ({}),
-        } as DOMRect);
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+            this: HTMLElement,
+        ) {
+            const isPeekZone = this.classList?.contains('auth-signup-bottom-sheet__peek-zone');
+            const height = isPeekZone ? 96 : 320;
+            return {
+                width: 390,
+                height,
+                top: 500,
+                left: 0,
+                right: 390,
+                bottom: 500 + height,
+                x: 0,
+                y: 500,
+                toJSON: () => ({}),
+            } as DOMRect;
+        });
     });
 
     afterEach(() => {
+        cleanup();
         vi.restoreAllMocks();
     });
 

@@ -1,3 +1,4 @@
+import { isAccountSetupIncomplete } from '@/lib/appShellGates';
 import { hasCompletedProductTour } from '@/lib/onboarding';
 
 /** Persists across browser sessions on this device. */
@@ -136,9 +137,9 @@ export function getAuthenticatedFeedVisitCount(): number {
     }
 }
 
-/** User has completed onboarding or loaded the feed while signed in. */
+/** User finished first-feed welcome — not merely landed on /feed during signup. */
 export function hasPwaInstallIntent(): boolean {
-    return hasCompletedProductTour() || getAuthenticatedFeedVisitCount() >= 1;
+    return hasCompletedProductTour();
 }
 
 function isEligibleDeviceAndInstallState(): boolean {
@@ -159,6 +160,7 @@ export function canShowPwaInstallPrompt(pathname: string, isAuthenticated: boole
     if (!isEligibleDeviceAndInstallState()) return false;
     if (!isAuthenticated) return false;
     if (pathname !== '/feed') return false;
+    if (isAccountSetupIncomplete()) return false;
     if (!hasPwaInstallIntent()) return false;
     if (isPwaInstallSnoozed()) return false;
     if (getPwaInstallState() === 'dismissed' && getPwaSessionCount() < REOFFER_MIN_SESSIONS) {

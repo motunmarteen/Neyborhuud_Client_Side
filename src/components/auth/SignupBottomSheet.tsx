@@ -10,6 +10,7 @@ import {
 import {
     useCallback,
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
     type PointerEvent,
@@ -124,6 +125,10 @@ export function SignupBottomSheet({
         snapTo(collapsed);
     }, [collapsed, collapseOffset, snapTo]);
 
+    useLayoutEffect(() => {
+        measureSheet();
+    }, [stageKey, measureSheet]);
+
     useEffect(() => {
         const el = sheetRef.current;
         const bodyEl = bodyRef.current;
@@ -187,12 +192,16 @@ export function SignupBottomSheet({
     );
 
     const handleHandlePointerUp = (event: PointerEvent<HTMLButtonElement>) => {
-        if (dragMovedRef.current || collapseOffset <= 0) return;
-        if (Math.abs(event.clientY - pointerStartYRef.current) < 8) {
+        if (collapseOffset <= 0) return;
+
+        const movedPx = Math.abs(event.clientY - pointerStartYRef.current);
+        if (movedPx < 8 && !dragMovedRef.current) {
             const nextCollapsed = !collapsed;
             setCollapsedState(nextCollapsed);
             animate(y, signupSheetTranslateY(nextCollapsed, collapseOffset), SHEET_SPRING);
         }
+
+        dragMovedRef.current = false;
     };
 
     const canCollapse = collapseOffset > 0;

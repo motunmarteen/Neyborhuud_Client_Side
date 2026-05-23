@@ -10,7 +10,7 @@ import { getCurrentLocation } from '@/lib/geolocation';
 import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
 import { fetchAPI } from '@/lib/api';
 import { persistAuthSessionPayload, getNeedsCommunitySelection } from '@/lib/communityContext';
-import { getAppEntryRoute } from '@/lib/onboarding';
+import { getPostSetupRoute } from '@/lib/onboarding';
 import apiClient from '@/lib/api-client';
 import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValidation';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
@@ -517,19 +517,21 @@ function SignupPageContent() {
 
             // Show email verification screen
             setStep('verify-email');
-        } catch (error: any) {
-            // Provide more helpful error messages
-            let friendlyMsg = error.message;
-            if (error.message.includes('Failed to create user')) {
+        } catch (error: unknown) {
+            const err = error as { message?: string; status?: number; responseData?: { message?: string } };
+            const backendMsg = err.responseData?.message?.trim();
+            let friendlyMsg = backendMsg || err.message || 'Registration failed';
+
+            if (friendlyMsg.includes('Failed to create user')) {
                 friendlyMsg = "Registration failed. Please check:\n- All required fields are filled\n- Email is valid and not already registered\n- Username is available\n- Password meets requirements";
-            } else if (error.message.includes('query of #<IncomingMessage>')) {
+            } else if (friendlyMsg.includes('query of #<IncomingMessage>')) {
                 friendlyMsg = "The backend server is currently having trouble processing requests. Our engineers are on it!";
-            } else if (error.message.includes('500')) {
+            } else if (err.status && err.status >= 500 && !backendMsg) {
                 friendlyMsg = "Server error occurred. Please try again or contact support if the issue persists.";
-            } else if (error.message.includes('Load failed') || error.message.includes('Failed to fetch')) {
+            } else if (friendlyMsg.includes('Load failed') || friendlyMsg.includes('Failed to fetch')) {
                 friendlyMsg = "Could not reach the server. Please check your connection and try again.";
             }
-            
+
             toast.error(`Registration Error: ${friendlyMsg}`);
         } finally {
             setLoading(false);
@@ -645,11 +647,11 @@ function SignupPageContent() {
                                 router.push('/pick-community');
                                 return;
                             }
-                            router.push(getAppEntryRoute());
+                            router.push(getPostSetupRoute());
                         }}
                         className="auth-btn auth-btn-primary"
                     >
-                        <span>Enter your Huud</span>
+                        <span>{getNeedsCommunitySelection() ? 'Pick your Huud' : 'Continue'}</span>
                         <i className="bi bi-arrow-right shrink-0" aria-hidden />
                     </button>
                 }

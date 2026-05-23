@@ -43,6 +43,7 @@ import { FrequentPlaceContextBanner } from '@/components/feed/FrequentPlaceConte
 import { mergeDiscoveryIntoFeed, type DiscoveryFeedItem } from '@/lib/feedDiscoveryMerge';
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
 import { useFeedTabSwipe } from '@/hooks/useFeedTabSwipe';
+import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
 
 function XFeedInner() {
     const router = useRouter();
@@ -716,6 +717,8 @@ function XFeedInner() {
                     onClose={() => setPinningPostId(null)}
                 />
             )}
+
+            <FeedWelcomeSheet />
         </div>
     );
 }

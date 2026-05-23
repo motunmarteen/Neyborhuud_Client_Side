@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { isAccountSetupIncomplete, isOnboardingOrAuthRoute } from "@/lib/appShellGates";
 
 const DailyCheckInModal = dynamic(
   () => import("@/components/gamification/DailyCheckInModal"),
@@ -12,18 +13,10 @@ const DailyCheckInModal = dynamic(
 export default function DailyCheckInModalLoader() {
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();
-  const isAuthRoute = [
-    "/",
-    "/onboarding",
-    "/login",
-    "/signup",
-    "/forgot-password",
-    "/reset-password",
-    "/verify-email",
-    "/welcome",
-  ].some((route) => pathname === route || pathname.startsWith(`${route}/`));
 
-  if (isAuthRoute || !isAuthenticated) return null;
+  if (!isAuthenticated) return null;
+  if (isOnboardingOrAuthRoute(pathname)) return null;
+  if (isAccountSetupIncomplete()) return null;
 
   return <DailyCheckInModal />;
 }

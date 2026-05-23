@@ -2,9 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { fetchAPI } from '@/lib/api';
 import { toast } from 'sonner';
+import { getAuthSetupProgress } from '@/lib/authSetupFlow';
+import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
+import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
+import { AuthSheetStageHeader } from '@/components/auth/AuthSheetStageHeader';
 
 const TOKEN_KEY = 'neyborhuud_access_token';
 
@@ -17,6 +22,7 @@ function clearAuth() {
 
 export default function CompleteProfilePage() {
     const router = useRouter();
+    const setupProgress = getAuthSetupProgress('profile');
     const [step, setStep] = useState<'form' | 'success'>('form');
     const [loading, setLoading] = useState(false);
     const [hasToken, setHasToken] = useState<boolean | null>(null);
@@ -30,31 +36,37 @@ export default function CompleteProfilePage() {
 
     const isPhoneValid = /^(?:\+234|0)[789][01]\d{8}$/.test(formData.phone);
     const isFormValid = formData.firstName && formData.lastName;
+    const displayName =
+        formData.firstName && formData.lastName
+            ? `${formData.firstName} ${formData.lastName}`
+            : 'Your profile';
 
     useEffect(() => {
         const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
         const userData = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_user') : null;
-        
+
         setHasToken(!!token);
-        
+
         if (!token) {
             router.replace('/login');
             return;
         }
-        
-        // Check if user is verified before allowing profile completion
+
         if (userData) {
             try {
                 const user = JSON.parse(userData);
-                const isVerified = user.emailVerified === true || user.isVerified === true || user.email_verified === true || user.verificationStatus === 'verified';
-                
+                const isVerified =
+                    user.emailVerified === true ||
+                    user.isVerified === true ||
+                    user.email_verified === true ||
+                    user.verificationStatus === 'verified';
+
                 if (!isVerified) {
                     toast.error('Please verify your email before completing your profile.');
                     router.replace('/verify-email');
                     return;
                 }
             } catch (e) {
-                // ignore malformed JSON
                 void e;
             }
         }
@@ -75,213 +87,271 @@ export default function CompleteProfilePage() {
         try {
             await fetchAPI('/auth/complete-profile', {
                 method: 'POST',
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData),
             });
 
             setStep('success');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Complete-profile error:', error);
-            const msg = error?.message || '';
-            const status = error?.status;
+            const err = error as { message?: string; status?: number };
+            const msg = err?.message || '';
+            const status = err?.status;
             const msgLower = msg.toLowerCase();
 
-            // Check if user is actually verified before redirecting
             const storedUser = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_user') : null;
             let userVerified = false;
             if (storedUser) {
                 try {
                     const user = JSON.parse(storedUser);
-                    userVerified = user.emailVerified === true || user.isVerified === true || user.email_verified === true;
+                    userVerified =
+                        user.emailVerified === true ||
+                        user.isVerified === true ||
+                        user.email_verified === true;
                 } catch (e) {
-                    // ignore malformed JSON
                     void e;
                 }
             }
 
-            // Priority 1: Handle 403 error for unverified email (NEW: Backend requirement)
-            // Check status code first, then message content
-            if (status === 403 || msgLower.includes('verify your email') || msgLower.includes('verification') || msgLower.includes('email not verified')) {
+            if (
+                status === 403 ||
+                msgLower.includes('verify your email') ||
+                msgLower.includes('verification') ||
+                msgLower.includes('email not verified')
+            ) {
                 toast.error(msg || 'Please verify your email before completing your profile.');
                 router.push('/verify-email');
                 return;
             }
 
-            // Priority 2: Handle "user not active" - but check if user is actually verified first
-            // If user IS verified but getting this error, it's likely a token issue, not verification issue
-            if (msgLower.includes('user not active') || msgLower.includes('account isn\'t active') || msgLower.includes('account is not active')) {
-                // If user is verified but getting "user not active", it's likely a token/session issue
+            if (
+                msgLower.includes('user not active') ||
+                msgLower.includes("account isn't active") ||
+                msgLower.includes('account is not active')
+            ) {
                 if (userVerified && status === 401) {
                     clearAuth();
                     toast.error('Your session expired. Please log in again.');
                     router.push('/login');
                     return;
                 }
-                
+
                 if (status === 403) {
                     toast.error('Please verify your email before completing your profile.');
                     router.push('/verify-email');
                     return;
                 }
-                toast.error('Your account isn\'t active yet. Please verify your email first.');
+                toast.error("Your account isn't active yet. Please verify your email first.");
                 router.push('/verify-email');
                 return;
             }
 
-            // Priority 3: Handle 401 authentication errors (token issues)
-            if (status === 401 || msgLower.includes('authentication required') || msgLower.includes('session is invalid') || msgLower.includes('expired') || msgLower.includes('invalid token')) {
+            if (
+                status === 401 ||
+                msgLower.includes('authentication required') ||
+                msgLower.includes('session is invalid') ||
+                msgLower.includes('expired') ||
+                msgLower.includes('invalid token')
+            ) {
                 clearAuth();
                 toast.error(msg || 'Your session is invalid or expired. Please log in again.');
                 router.push('/login');
                 return;
             }
 
-            // Generic error
             toast.error(`Profile Error: ${msg}`);
         } finally {
             setLoading(false);
         }
     };
 
-    if (hasToken === false) {
+    if (hasToken === false || hasToken === null) {
         return (
-            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6">
-                <div className="w-10 h-10 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin" />
-                <p className="text-sm mt-4" style={{ color: 'var(--neu-text-secondary)' }}>Redirecting to login…</p>
+            <div className="auth-signup-page fixed-app flex items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
             </div>
         );
     }
 
     if (step === 'success') {
         return (
-            <div className="h-[100dvh] neu-base flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500 overflow-hidden">
-                <div className="neu-card-raised rounded-[2.5rem] w-full max-w-sm p-8 flex flex-col items-center">
-                    <div className="w-20 h-20 rounded-full neu-socket flex items-center justify-center mb-6">
-                        <i className="bi bi-gift text-4xl text-brand-blue"></i>
+            <AuthFlowPage
+                ariaLabel="Profile complete"
+                stageKey="complete-profile-success"
+                stepLabel="Profile complete"
+                hero={
+                    <AuthFlowHero
+                        icon="bi-gift-fill"
+                        eyebrow="Identity unlocked"
+                        title="Profile complete"
+                        meta="You are now a Tier 1 Neyborh"
+                    />
+                }
+                footer={
+                    <div className="auth-signup-actions">
+                        <button
+                            type="button"
+                            onClick={() => router.push('/feed')}
+                            className="auth-btn auth-btn-primary"
+                        >
+                            <span>Enter the Huud</span>
+                            <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                        </button>
                     </div>
-                    <h1 className="text-xl font-semibold mb-4" style={{ color: 'var(--neu-text)' }}>Identity Unlocked!</h1>
-                    <div className="flex items-center gap-2 mb-6">
-                        <span className="text-4xl font-black text-primary">100</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--neu-text-muted)' }}>HuudCoins Unlocked</span>
+                }
+            >
+                <div className="flex flex-col gap-3">
+                    <div className="auth-flow-notice auth-flow-notice--success">
+                        <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+                        <span>Your trust score has increased. Welcome to the Huud.</span>
                     </div>
-                    <p className="text-xs mb-8 leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
-                        Your trust score has increased. You are now a **Tier 1 Neyborh**.
-                    </p>
-                    <button
-                        onClick={() => router.push('/feed')}
-                        className="mod-chip w-full py-5 rounded-2xl group transition-all active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]"
-                    >
-                        <span className="[color:var(--neu-text)] font-black uppercase tracking-widest group-hover:text-primary">
-                            Enter the Huud
-                        </span>
-                    </button>
+                    <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
+                        <div>
+                            <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
+                            <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Profile completion reward</p>
+                        </div>
+                        <div className="flex items-center gap-2 text-primary">
+                            <span className="text-3xl font-black leading-none">100</span>
+                            <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </AuthFlowPage>
         );
     }
 
     return (
-        <div className="h-[100dvh] neu-base overflow-hidden">
-        <div className="h-full flex flex-col p-6 max-w-md mx-auto w-full">
-            {/* Progress Header */}
-            <div className="mt-4 mb-6 flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold tracking-tight leading-none" style={{ color: 'var(--neu-text)' }}>Complete Profile</h1>
-                    <p className="text-[11px] font-light mt-1" style={{ color: 'var(--neu-text-muted)' }}>Unlock your 100 HuudCoin reward.</p>
-                </div>
-                <div className="neu-card-raised rounded-full w-12 h-12 flex items-center justify-center relative">
-                    <span className="text-[9px] font-black text-brand-blue">80%</span>
-                    <div className="absolute inset-0 border-2 border-brand-blue/20 rounded-full border-t-brand-blue animate-spin-slow"></div>
-                </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-3">
-                    <PremiumInput
-                        label="First Name"
-                        placeholder="John"
-                        className="py-0.5"
-                        value={formData.firstName}
-                        onChange={e => setFormData({ ...formData, firstName: e.target.value })}
-                    />
-                    <PremiumInput
-                        label="Last Name"
-                        placeholder="Doe"
-                        className="py-0.5"
-                        value={formData.lastName}
-                        onChange={e => setFormData({ ...formData, lastName: e.target.value })}
-                    />
-                </div>
-
-                <PremiumInput
-                    label="Phone (Nigerian)"
-                    type="tel"
-                    icon="bi-telephone"
-                    placeholder="08012345678"
-                    className="py-0.5"
-                    value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                    error={formData.phone && !isPhoneValid ? 'Invalid format' : undefined}
+        <form onSubmit={handleSubmit}>
+            <AuthFlowPage
+                ariaLabel="Complete profile"
+                stageKey="complete-profile-form"
+                progress={setupProgress}
+                keyboardAware
+                peek={
+                    <div className="auth-signup-identity-peek">
+                        <span className="auth-signup-identity-peek__avatar" aria-hidden>
+                            {formData.firstName.trim() ? formData.firstName.trim().charAt(0).toUpperCase() : 'N'}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                            <p className="auth-signup-identity-peek__label">Complete profile</p>
+                            <p className="auth-signup-identity-peek__name truncate">{displayName}</p>
+                        </div>
+                        <span className="auth-signup-identity-peek__chevron" aria-hidden>
+                            <i className="bi bi-chevron-up" />
+                        </span>
+                    </div>
+                }
+                footer={
+                    <div>
+                        <div className="auth-signup-actions">
+                            <button
+                                type="submit"
+                                disabled={loading || !isFormValid}
+                                className="auth-btn auth-btn-primary"
+                            >
+                                {loading ? (
+                                    <>
+                                        <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                                        <span>Processing…</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Claim 100 HuudCoins</span>
+                                        <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                    </>
+                                )}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => router.push('/feed')}
+                                className="auth-btn auth-btn-secondary"
+                            >
+                                <i className="bi bi-skip-forward shrink-0" aria-hidden />
+                                <span>I&apos;ll do this later</span>
+                            </button>
+                        </div>
+                        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
+                            Already complete? <Link href="/feed">Enter the Huud</Link>
+                        </p>
+                    </div>
+                }
+            >
+                <AuthSheetStageHeader
+                    icon="bi-person-badge-fill"
+                    eyebrow="Unlock your reward"
+                    title={displayName}
+                    meta="100 HuudCoins when you finish"
+                    signal="Tier 1 Neyborh"
+                    badge=""
                 />
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-widest ml-4" style={{ color: 'var(--neu-text-muted)' }}>Gender</label>
-                    <div className="flex gap-3">
-                        {['male', 'female', 'other'].map(g => (
-                            <button
-                                key={g}
-                                type="button"
-                                onClick={() => setFormData({ ...formData, gender: g })}
-                                className={`
-                                    flex-grow py-3 rounded-xl text-[9px] uppercase font-black tracking-widest transition-all
-                                    ${formData.gender === g ? 'neu-socket text-brand-blue' : 'mod-chip'}
-                                `}
-                                style={formData.gender !== g ? { color: 'var(--neu-text-muted)' } : undefined}
-                            >
-                                {g}
-                            </button>
-                        ))}
+                <div className="auth-signup-sheet-fields flex max-h-[38dvh] flex-col gap-3 overflow-y-auto overscroll-contain">
+                    <div className="grid grid-cols-2 gap-3">
+                        <PremiumInput
+                            label="First Name"
+                            placeholder="John"
+                            className="py-0.5"
+                            value={formData.firstName}
+                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        />
+                        <PremiumInput
+                            label="Last Name"
+                            placeholder="Doe"
+                            className="py-0.5"
+                            value={formData.lastName}
+                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        />
+                    </div>
+
+                    <PremiumInput
+                        label="Phone (Nigerian)"
+                        type="tel"
+                        icon="bi-telephone"
+                        placeholder="08012345678"
+                        className="py-0.5"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        error={formData.phone && !isPhoneValid ? 'Invalid format' : undefined}
+                    />
+
+                    <div className="flex flex-col gap-1.5">
+                        <label className="ml-1 text-[10px] font-bold uppercase tracking-widest text-[var(--neu-text-muted)]">
+                            Gender
+                        </label>
+                        <div className="flex gap-2">
+                            {['male', 'female', 'other'].map((g) => (
+                                <button
+                                    key={g}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, gender: g })}
+                                    className={`flex-1 rounded-xl border py-3 text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                        formData.gender === g
+                                            ? 'border-primary bg-primary/10 text-primary'
+                                            : 'border-charcoal/10 bg-white text-[var(--neu-text-muted)]'
+                                    }`}
+                                >
+                                    {g}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <PremiumInput
+                        label="Date of Birth"
+                        type="date"
+                        icon="bi-calendar-event"
+                        className="py-0.5"
+                        value={formData.dob}
+                        onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                    />
+
+                    <div className="auth-flow-notice auth-flow-notice--info">
+                        <i className="bi bi-shield-check shrink-0" aria-hidden />
+                        <span>
+                            Verified profiles help build a safer NeyborHuud. We never share your personal ID details.
+                        </span>
                     </div>
                 </div>
-
-                <PremiumInput
-                    label="Date of Birth"
-                    type="date"
-                    icon="bi-calendar-event"
-                    className="py-0.5"
-                    value={formData.dob}
-                    onChange={e => setFormData({ ...formData, dob: e.target.value })}
-                />
-
-                <div className="mt-2 p-4 neu-socket rounded-2xl flex items-center gap-3">
-                    <i className="bi bi-info-circle text-brand-blue text-lg leading-none"></i>
-                    <p className="text-[9px] leading-tight font-light uppercase tracking-wide" style={{ color: 'var(--neu-text-secondary)' }}>
-                        Verified profiles help build a safer NeyborHuud.
-                        We never share your personal ID details.
-                    </p>
-                </div>
-
-                <button
-                    disabled={loading || !isFormValid}
-                    className={`
-                        py-4.5 rounded-2xl mt-2 transition-all duration-200 cursor-pointer
-                        ${(loading || !isFormValid) ? 'mod-chip opacity-40 cursor-not-allowed' : 'mod-chip active:shadow-[inset_4px_4px_10px_var(--neu-shadow-dark),inset_-4px_-4px_10px_var(--neu-shadow-light)]'}
-                    `}
-                >
-                    <span className="font-black uppercase tracking-widest text-sm" style={{ color: 'var(--neu-text)' }}>
-                        {loading ? 'Processing...' : 'Claim 100 HuudCoins'}
-                    </span>
-                </button>
-
-                <button
-                    type="button"
-                    onClick={() => router.push('/feed')}
-                    className="text-[9px] font-black uppercase tracking-[0.2em] transition-colors mt-auto hover:opacity-70"
-                    style={{ color: 'var(--neu-text-muted)' }}
-                >
-                    I'll do this later
-                </button>
-            </form>
-        </div>
-        </div>
+            </AuthFlowPage>
+        </form>
     );
 }

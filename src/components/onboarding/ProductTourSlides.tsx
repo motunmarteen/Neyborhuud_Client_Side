@@ -1,45 +1,56 @@
 'use client';
 
-import React, { useState } from 'react';
-import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
+import { useState } from 'react';
+import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
+import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 
-const slides = [
+const TOUR_SLIDES = [
     {
         id: 'sos',
+        stepLabel: 'Safety',
+        eyebrow: 'Safety first',
         title: 'One-Tap SOS',
-        subtitle: 'Trigger an emergency alert in 2 seconds. Trusted guardians and responders are notified instantly.',
+        meta: 'Help reaches your street in seconds',
         icon: 'bi-exclamation-octagon-fill',
-        accentColor: '#FF0000',
-    },
-    {
-        id: 'sentinel',
-        title: 'Sentinel AI',
-        subtitle: "Your street's always-on intelligence. Sentinel AI detects threats, monitors safety patterns, and keeps you ahead of danger.",
-        icon: 'bi-cpu-fill',
-        accentColor: '#0000FF',
+        error: true,
+        highlight: 'Trigger an emergency alert instantly — guardians and responders are notified with your location.',
+        tip: 'The red SOS button lives on your feed and safety tab.',
     },
     {
         id: 'feed',
+        stepLabel: 'Your feed',
+        eyebrow: 'Street intelligence',
         title: 'Hyperlocal Feed',
-        subtitle: 'Posts, FYI alerts, local jobs, events & marketplace — everything happening on your street, in real time.',
+        meta: 'Know before everyone else',
         icon: 'bi-newspaper',
-        accentColor: '#00D431',
+        error: false,
+        highlight:
+            'Posts, FYI alerts, jobs, events, and marketplace listings — everything happening on your street, in real time.',
+        tip: 'Sentinel AI surfaces what matters most near you.',
     },
     {
         id: 'community',
-        title: 'Your Voice Matters',
-        subtitle: 'Join the conversation. Build your Reputation. Lead your street.',
+        stepLabel: 'Community',
+        eyebrow: 'Your voice',
+        title: 'Lead Your Street',
+        meta: 'Reputation builds trust',
         icon: 'bi-people-fill',
-        accentColor: '#006F35',
+        error: false,
+        highlight: 'Join conversations, support neighbours, and grow your standing in the Huud.',
+        tip: 'Verified profiles keep the neighbourhood safer for everyone.',
     },
     {
-        id: 'identity',
-        title: 'Identity is Power',
-        subtitle: 'Build your Trust Score. Unlock the Huud Economy.',
-        icon: 'bi-patch-check-fill',
-        accentColor: '#0000FF',
+        id: 'economy',
+        stepLabel: 'HuudCoins',
+        eyebrow: 'Huud economy',
+        title: 'Earn as You Participate',
+        meta: 'Trust unlocks rewards',
+        icon: 'bi-coin',
+        error: false,
+        highlight: 'HuudCoins, trust score, and tiers reward helpful neighbours — no subscription required.',
+        tip: 'You already earned coins from signup. Daily check-ins add more.',
     },
-];
+] as const;
 
 type ProductTourSlidesProps = {
     onComplete: () => void;
@@ -48,147 +59,94 @@ type ProductTourSlidesProps = {
 
 export function ProductTourSlides({ onComplete, onSkip }: ProductTourSlidesProps) {
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [isAnimating, setIsAnimating] = useState(false);
-    const [isPressed, setIsPressed] = useState(false);
+    const slide = TOUR_SLIDES[currentSlide];
+    const isLast = currentSlide === TOUR_SLIDES.length - 1;
 
-    const activeSlide = slides[currentSlide];
-
-    const nextSlide = () => {
-        if (isAnimating) return;
-        if (currentSlide < slides.length - 1) {
-            setIsAnimating(true);
-            setTimeout(() => {
-                setCurrentSlide((prev) => prev + 1);
-                setIsAnimating(false);
-            }, 300);
-        } else {
+    const goNext = () => {
+        if (isLast) {
             onComplete();
+            return;
+        }
+        setCurrentSlide((prev) => prev + 1);
+    };
+
+    const goBack = () => {
+        if (currentSlide > 0) {
+            setCurrentSlide((prev) => prev - 1);
         }
     };
 
-    const goToSlide = (idx: number) => {
-        if (idx !== currentSlide && !isAnimating) {
-            setIsAnimating(true);
-            setTimeout(() => {
-                setCurrentSlide(idx);
-                setIsAnimating(false);
-            }, 300);
-        }
+    const handleSkip = () => {
+        (onSkip ?? onComplete)();
     };
 
     return (
-        <div className="neu-base relative flex min-h-[100dvh] flex-col items-center justify-between overflow-hidden px-6 py-10">
-            {onSkip ? (
-                <button
-                    type="button"
-                    onClick={onSkip}
-                    className="absolute right-6 top-6 z-30 rounded-full px-4 py-2 text-sm font-semibold text-[var(--neu-text-muted)] transition-colors hover:text-[var(--neu-text)]"
-                >
-                    Skip
-                </button>
-            ) : null}
-
-            <div className="absolute left-0 right-0 top-8 z-20 flex justify-center px-6">
-                <NeyborHuudLogo layout="inline" size="lg" tone="dark" />
-            </div>
-
-            <div
-                className={`pointer-events-none absolute left-1/2 top-[-30%] h-[500px] w-[500px] -translate-x-1/2 rounded-full blur-[160px] transition-all duration-1000 ${activeSlide.id === 'sos' ? 'opacity-[0.18]' : 'opacity-[0.06]'}`}
-                style={{ backgroundColor: activeSlide.accentColor }}
+        <AuthFlowPage
+            ariaLabel={`Product tour — ${slide.title}`}
+            stageKey={`onboarding-${slide.id}`}
+            stepLabel="Quick tour"
+            progress={{
+                active: currentSlide + 1,
+                total: TOUR_SLIDES.length,
+                stepLabel: slide.stepLabel,
+            }}
+            onBackClick={currentSlide > 0 ? goBack : undefined}
+            backLabel="Previous slide"
+            peek={
+                <div className="auth-signup-location-peek">
+                    <span className="auth-signup-location-peek__icon" aria-hidden>
+                        <i className={`bi ${slide.icon}`} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                        <p className="auth-signup-location-peek__label">
+                            Step {currentSlide + 1} of {TOUR_SLIDES.length}
+                        </p>
+                        <p className="auth-signup-location-peek__name truncate">{slide.title}</p>
+                    </div>
+                    <span className="auth-signup-location-peek__chevron" aria-hidden>
+                        <i className="bi bi-chevron-up" />
+                    </span>
+                </div>
+            }
+            footer={
+                <div className="auth-signup-actions">
+                    <button type="button" onClick={goNext} className="auth-btn auth-btn-primary">
+                        <span>{isLast ? 'Enter your Huud' : 'Continue'}</span>
+                        <i className={`bi ${isLast ? 'bi-arrow-right' : 'bi-arrow-right'} shrink-0`} aria-hidden />
+                    </button>
+                    {!isLast ? (
+                        <button type="button" onClick={handleSkip} className="auth-btn auth-btn-secondary">
+                            <i className="bi bi-skip-forward shrink-0" aria-hidden />
+                            <span>Skip tour</span>
+                        </button>
+                    ) : null}
+                </div>
+            }
+            footerLink={
+                <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
+                    {isLast
+                        ? 'You are ready for your street feed — welcome to the Huud.'
+                        : 'Skip anytime — explore SOS, feed, and marketplace from the app.'}
+                </p>
+            }
+        >
+            <AuthFlowHero
+                icon={slide.icon}
+                eyebrow={slide.eyebrow}
+                title={slide.title}
+                meta={slide.meta}
+                error={slide.error}
             />
 
-            <div className="z-10 flex w-full max-w-md grow flex-col items-center justify-center gap-10">
-                <div className="relative flex items-center justify-center">
-                    {activeSlide.id === 'sos' ? (
-                        <div
-                            className={`neu-card-raised flex h-56 w-56 items-center justify-center rounded-[2.5rem] transition-all duration-500 animate-neu-float ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}`}
-                        >
-                            <div
-                                className="relative flex h-36 w-36 items-center justify-center overflow-hidden rounded-full"
-                                style={{
-                                    background: 'radial-gradient(circle at 38% 32%, #FF4D4D 0%, #FF0000 50%, #B30000 100%)',
-                                    boxShadow: '0 10px 40px rgba(255,0,0,0.55), 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.18)',
-                                }}
-                            >
-                                <div
-                                    className="pointer-events-none absolute left-5 top-3 h-7 w-14 rounded-full"
-                                    style={{ background: 'linear-gradient(150deg, rgba(255,255,255,0.28) 0%, transparent 100%)' }}
-                                />
-                                <span
-                                    className="material-symbols-outlined relative z-10 select-none fill-1 text-white"
-                                    style={{ fontSize: '5rem', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.45))' }}
-                                >
-                                    sos
-                                </span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div
-                            className={`neu-card-raised flex h-56 w-56 items-center justify-center rounded-[2.5rem] transition-all duration-500 animate-neu-float ${isAnimating ? 'scale-90 opacity-0' : 'scale-100 opacity-100'}`}
-                        >
-                            <div
-                                className="relative flex h-36 w-36 items-center justify-center overflow-hidden rounded-full"
-                                style={{
-                                    background: `radial-gradient(circle at 38% 32%, ${activeSlide.accentColor}CC 0%, ${activeSlide.accentColor} 50%, ${activeSlide.accentColor}CC 100%)`,
-                                    boxShadow: `0 10px 40px ${activeSlide.accentColor}55, 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.22)`,
-                                }}
-                            >
-                                <div
-                                    className="pointer-events-none absolute left-5 top-3 h-7 w-14 rounded-full"
-                                    style={{ background: 'linear-gradient(150deg, rgba(255,255,255,0.32) 0%, transparent 100%)' }}
-                                />
-                                <i
-                                    className={`bi ${activeSlide.icon} relative z-10 select-none text-white`}
-                                    style={{ fontSize: '4.5rem', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.35))' }}
-                                />
-                            </div>
-                        </div>
-                    )}
+            <div className="auth-signup-sheet-fields flex flex-col gap-3">
+                <div className="auth-flow-notice auth-flow-notice--info">
+                    <i className={`bi ${slide.icon} shrink-0`} aria-hidden />
+                    <span>{slide.highlight}</span>
                 </div>
-
-                <div
-                    className={`flex flex-col gap-3 text-center transition-all duration-500 delay-75 ${isAnimating ? 'translate-y-5 opacity-0' : 'translate-y-0 opacity-100'}`}
-                >
-                    <h1 className="text-3xl font-semibold tracking-tight" style={{ color: 'var(--neu-text)' }}>
-                        {activeSlide.title}
-                    </h1>
-                    <p className="mx-auto max-w-xs text-base leading-relaxed" style={{ color: 'var(--neu-text-secondary)' }}>
-                        {activeSlide.subtitle}
-                    </p>
-                </div>
+                <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
+                    {slide.tip}
+                </p>
             </div>
-
-            <div className="z-20 flex w-full max-w-md flex-col gap-7">
-                <div className="flex justify-center">
-                    <div className="neu-track flex items-center gap-3 rounded-full px-5 py-2.5">
-                        {slides.map((slide, idx) => (
-                            <button
-                                key={slide.id}
-                                type="button"
-                                onClick={() => goToSlide(idx)}
-                                className={`cursor-pointer rounded-full transition-all duration-500 ${currentSlide === idx ? 'neu-dot-active h-2.5 w-8' : 'neu-dot h-2.5 w-2.5 hover:scale-110'}`}
-                                style={currentSlide === idx ? { backgroundColor: slide.accentColor } : undefined}
-                                aria-label={`Go to slide ${idx + 1}`}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                <button
-                    type="button"
-                    onClick={nextSlide}
-                    onMouseDown={() => setIsPressed(true)}
-                    onMouseUp={() => setIsPressed(false)}
-                    onMouseLeave={() => setIsPressed(false)}
-                    onTouchStart={() => setIsPressed(true)}
-                    onTouchEnd={() => setIsPressed(false)}
-                    className={`flex w-full cursor-pointer items-center justify-center rounded-2xl py-5 transition-all duration-150 ${isPressed ? 'neu-btn-active' : 'neu-btn'}`}
-                >
-                    <span className="text-sm font-black uppercase tracking-[0.25em]" style={{ color: 'var(--neu-text)' }}>
-                        {currentSlide === slides.length - 1 ? 'Enter your Huud' : 'Continue'}
-                    </span>
-                </button>
-            </div>
-        </div>
+        </AuthFlowPage>
     );
 }

@@ -19,6 +19,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import apiClient from '@/lib/api-client';
+import { isAccountSetupIncomplete, isOnboardingOrAuthRoute } from '@/lib/appShellGates';
 
 const SNOOZE_KEY = 'nh_push_prompt_snoozed_until';
 const SNOOZE_DAYS = 3;
@@ -32,24 +33,9 @@ function snoozePrompt(days = SNOOZE_DAYS) {
   }
 }
 
-// Routes where the notification prompt must NEVER appear
-const EXCLUDED_ROUTES = [
-  '/',               // Bamboo-style landing
-  '/onboarding',     // post-signup product tour
-  '/welcome',
-  '/login',
-  '/signup',
-  '/forgot-password',
-  '/reset-password',
-  '/verify-email',
-  '/pick-community',
-  '/complete-profile',
-];
-
+// Routes where the notification prompt must NEVER appear — see appShellGates.ts
 function isExcludedRoute(pathname: string): boolean {
-  return EXCLUDED_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`),
-  );
+  return isOnboardingOrAuthRoute(pathname);
 }
 
 export default function NotificationPermissionPrompt() {
@@ -66,8 +52,9 @@ export default function NotificationPermissionPrompt() {
   }, [isRegistering]);
 
   useEffect(() => {
-    // Never show on excluded routes
+    // Never show on excluded routes or during incomplete account setup
     if (isExcludedRoute(pathname)) return;
+    if (isAccountSetupIncomplete()) return;
     // Never show to unauthenticated users
     if (!apiClient.isAuthenticated()) return;
     // Already subscribed or browser permission granted — never show
