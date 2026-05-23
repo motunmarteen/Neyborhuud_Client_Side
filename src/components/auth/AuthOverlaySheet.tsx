@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
 
 type AuthOverlaySheetProps = {
@@ -15,7 +16,7 @@ type AuthOverlaySheetProps = {
 
 /**
  * Modal bottom sheet with auth signup drag physics — collapse to peek, expand back up.
- * Used on top of existing pages (e.g. feed welcome) where AuthFlowPage is not the shell.
+ * Portals to document.body so fixed positioning is never broken by feed layout ancestors.
  */
 export function AuthOverlaySheet({
     open,
@@ -26,7 +27,12 @@ export function AuthOverlaySheet({
     footer,
     children,
 }: AuthOverlaySheetProps) {
+    const [mounted, setMounted] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         if (!open) {
@@ -46,9 +52,9 @@ export function AuthOverlaySheet({
         };
     }, [open, collapsed]);
 
-    if (!open) return null;
+    if (!open || !mounted) return null;
 
-    return (
+    return createPortal(
         <div className="auth-overlay-sheet-host" role="presentation">
             <button
                 type="button"
@@ -62,17 +68,17 @@ export function AuthOverlaySheet({
                 onClick={onDismiss}
             />
 
-            <div className="auth-overlay-sheet-host__sheet">
-                <SignupBottomSheet
-                    ariaLabel={ariaLabel}
-                    stageKey={stageKey}
-                    peek={peek}
-                    footer={footer}
-                    onCollapsedChange={setCollapsed}
-                >
-                    {children}
-                </SignupBottomSheet>
-            </div>
-        </div>
+            <SignupBottomSheet
+                overlay
+                ariaLabel={ariaLabel}
+                stageKey={stageKey}
+                peek={peek}
+                footer={footer}
+                onCollapsedChange={setCollapsed}
+            >
+                {children}
+            </SignupBottomSheet>
+        </div>,
+        document.body,
     );
 }

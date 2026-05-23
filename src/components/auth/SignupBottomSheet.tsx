@@ -37,6 +37,8 @@ type SignupBottomSheetProps = {
     footer?: ReactNode;
     /** Adjust available height when the on-screen keyboard opens. */
     keyboardAware?: boolean;
+    /** Pin to viewport bottom (feed overlays) instead of auth-page flex layout. */
+    overlay?: boolean;
     onCollapsedChange?: (collapsed: boolean) => void;
     children: ReactNode;
 };
@@ -47,6 +49,7 @@ export function SignupBottomSheet({
     peek,
     footer,
     keyboardAware = false,
+    overlay = false,
     onCollapsedChange,
     children,
 }: SignupBottomSheetProps) {
@@ -110,16 +113,35 @@ export function SignupBottomSheet({
     useEffect(() => {
         skipSnapRef.current = true;
         setCollapsedState(false);
-        y.set(typeof window !== 'undefined' ? window.innerHeight : 480);
-        const entry = animate(y, 0, {
-            ...SHEET_SPRING,
-            onComplete: () => {
-                skipSnapRef.current = false;
-                scheduleMeasure();
-            },
-        });
-        return () => entry.stop();
-    }, [stageKey, setCollapsedState, y, scheduleMeasure]);
+
+        let entryAnimation: ReturnType<typeof animate> | null = null;
+
+        const startEntry = () => {
+            const sheetHeight = sheetRef.current?.getBoundingClientRect().height ?? 0;
+            const entryY = overlay
+                ? Math.max(sheetHeight, 280)
+                : typeof window !== 'undefined'
+                  ? window.innerHeight
+                  : 480;
+            y.set(entryY);
+            entryAnimation?.stop();
+            entryAnimation = animate(y, 0, {
+                ...SHEET_SPRING,
+                onComplete: () => {
+                    skipSnapRef.current = false;
+                    scheduleMeasure();
+                },
+            });
+        };
+
+        startEntry();
+        const remeasureRaf = overlay ? requestAnimationFrame(startEntry) : null;
+
+        return () => {
+            if (remeasureRaf !== null) cancelAnimationFrame(remeasureRaf);
+            entryAnimation?.stop();
+        };
+    }, [stageKey, overlay, setCollapsedState, y, scheduleMeasure]);
 
     useEffect(() => {
         snapTo(collapsed);
@@ -149,6 +171,22 @@ export function SignupBottomSheet({
             }
         };
     }, [stageKey, scheduleMeasure]);
+
+    useEffect(() => {
+        if (!overlay || typeof window === 'undefined') return;
+
+        const viewport = window.visualViewport;
+        const onViewportChange = () => scheduleMeasure();
+        viewport?.addEventListener('resize', onViewportChange);
+        viewport?.addEventListener('scroll', onViewportChange);
+        window.addEventListener('resize', onViewportChange);
+
+        return () => {
+            viewport?.removeEventListener('resize', onViewportChange);
+            viewport?.removeEventListener('scroll', onViewportChange);
+            window.removeEventListener('resize', onViewportChange);
+        };
+    }, [overlay, stageKey, scheduleMeasure]);
 
     useEffect(() => {
         if (!keyboardAware || typeof window === 'undefined') return;
@@ -212,6 +250,7 @@ export function SignupBottomSheet({
             ref={sheetRef}
             className={[
                 'auth-signup-bottom-sheet',
+                overlay ? 'auth-signup-bottom-sheet--overlay' : '',
                 collapsed ? 'auth-signup-bottom-sheet--collapsed' : '',
                 isDragging ? 'auth-signup-bottom-sheet--dragging' : '',
                 peek ? 'auth-signup-bottom-sheet--with-peek' : '',
