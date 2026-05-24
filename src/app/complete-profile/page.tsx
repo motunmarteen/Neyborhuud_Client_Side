@@ -4,12 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PremiumInput } from '@/components/ui/PremiumInput';
-import { fetchAPI } from '@/lib/api';
+import { authService } from '@/services/auth.service';
+import { getApiErrorMessage, getApiErrorStatus } from '@/lib/apiErrors';
+import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 import { toast } from 'sonner';
 import { getAuthSetupProgress } from '@/lib/authSetupFlow';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthSheetStageHeader } from '@/components/auth/AuthSheetStageHeader';
+import { useMyGamificationStats } from '@/hooks/useGamification';
 
 const TOKEN_KEY = 'neyborhuud_access_token';
 
@@ -26,6 +29,11 @@ export default function CompleteProfilePage() {
     const [step, setStep] = useState<'form' | 'success'>('form');
     const [loading, setLoading] = useState(false);
     const [hasToken, setHasToken] = useState<boolean | null>(null);
+    const { data: gamificationStats } = useMyGamificationStats();
+    const profileCoinBalance =
+        typeof gamificationStats?.totalHuudCoins === 'number'
+            ? gamificationStats.totalHuudCoins
+            : null;
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -85,17 +93,14 @@ export default function CompleteProfilePage() {
         setLoading(true);
 
         try {
-            await fetchAPI('/auth/complete-profile', {
-                method: 'POST',
-                body: JSON.stringify(formData),
-            });
-
+            const response = await authService.completeProfile(formData);
+            if (!response.success) {
+                throw new Error(response.message || 'Profile update failed.');
+            }
             setStep('success');
         } catch (error: unknown) {
-            console.error('Complete-profile error:', error);
-            const err = error as { message?: string; status?: number };
-            const msg = err?.message || '';
-            const status = err?.status;
+            const msg = getApiErrorMessage(error, 'Profile update failed.');
+            const status = getApiErrorStatus(error);
             const msgLower = msg.toLowerCase();
 
             const storedUser = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_user') : null;
@@ -165,11 +170,7 @@ export default function CompleteProfilePage() {
     };
 
     if (hasToken === false || hasToken === null) {
-        return (
-            <div className="auth-signup-page fixed-app flex items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
-            </div>
-        );
+        return <AuthFlowLoading />;
     }
 
     if (step === 'success') {
@@ -210,10 +211,17 @@ export default function CompleteProfilePage() {
                             <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Profile completion reward</p>
                         </div>
                         <div className="flex items-center gap-2 text-primary">
-                            <span className="text-3xl font-black leading-none">100</span>
+                            <span className="text-3xl font-black leading-none">
+                                {profileCoinBalance ?? '—'}
+                            </span>
                             <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
                         </div>
                     </div>
+                    {profileCoinBalance === null ? (
+                        <p className="text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
+                            Reward will appear in your wallet shortly
+                        </p>
+                    ) : null}
                 </div>
             </AuthFlowPage>
         );
@@ -284,7 +292,7 @@ export default function CompleteProfilePage() {
                     badge=""
                 />
 
-                <div className="auth-signup-sheet-fields flex max-h-[38dvh] flex-col gap-3 overflow-y-auto overscroll-contain">
+                <div className="auth-signup-sheet-fields flex max-h-[44dvh] flex-col gap-4 overflow-y-auto overscroll-contain pb-1">
                     <div className="grid grid-cols-2 gap-3">
                         <PremiumInput
                             label="First Name"

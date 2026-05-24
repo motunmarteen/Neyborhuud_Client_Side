@@ -2,28 +2,26 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { fetchAPI } from '@/lib/api';
-import apiClient from '@/lib/api-client';
-import { persistAuthSessionPayload } from '@/lib/communityContext';
+import { resolvePostAuthRoute } from '@/lib/authSession';
+import { authService } from '@/services/auth.service';
+import { getApiErrorMessage } from '@/lib/apiErrors';
 import { OTPInput } from '@/components/ui/OTPInput';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
+import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
+import { useMyGamificationStats } from '@/hooks/useGamification';
 
 type Step = 'code-entry' | 'verifying' | 'success' | 'error' | 'expired';
 
-type VerifyPayload = {
-    user?: { username?: string } | unknown;
-    community?: unknown;
-    assignedCommunityId?: string | null;
-    needsCommunitySelection?: boolean;
-    needsGpsLocationVerification?: boolean;
-    pickerContext?: { state: string; lga: string; locationKey?: string; hint?: string };
-    token?: string;
-    access_token?: string;
-    accessToken?: string;
-    session?: { access_token?: string; refresh_token?: string };
-};
+function setUsernameFromPayload(user: unknown, setUsername: (v: string) => void) {
+    const u = user as { username?: string } | undefined;
+    if (u?.username) setUsername(u.username);
+}
+
+function resolveNextRouteFromSession(): string {
+    return resolvePostAuthRoute();
+}
 
 function VerifyEmailContent() {
     const router = useRouter();
@@ -40,6 +38,11 @@ function VerifyEmailContent() {
     const [resendCooldown, setResendCooldown] = useState(0);
     const [isResending, setIsResending] = useState(false);
     const [nextRoute, setNextRoute] = useState('/feed');
+    const { data: gamificationStats } = useMyGamificationStats();
+    const verifyCoinBalance =
+        typeof gamificationStats?.totalHuudCoins === 'number'
+            ? gamificationStats.totalHuudCoins
+            : null;
 
     useEffect(() => {
         if (token) void verifyWithToken(token);
@@ -51,45 +54,9 @@ function VerifyEmailContent() {
         return () => clearTimeout(timer);
     }, [resendCooldown]);
 
-    const applyVerificationPayload = (payload: VerifyPayload) => {
-        const sessionToken =
-            typeof payload.session === 'object' && payload.session?.access_token
-                ? payload.session.access_token
-                : undefined;
-        const accessToken = payload.token ?? payload.access_token ?? payload.accessToken ?? sessionToken ?? null;
-
-        if (accessToken) {
-            localStorage.setItem('neyborhuud_access_token', accessToken);
-            apiClient.setToken(accessToken);
-        }
-
-        if (payload.session?.refresh_token) {
-            localStorage.setItem('neyborhuud_refresh_token', payload.session.refresh_token);
-        }
-
-        if (payload.user) {
-            localStorage.setItem('neyborhuud_user', JSON.stringify(payload.user));
-        }
-
-        const user = payload.user as { username?: string } | undefined;
-        if (user?.username) setUsername(user.username);
-
-        persistAuthSessionPayload({
-            user: payload.user,
-            community: payload.community,
-            assignedCommunityId: payload.assignedCommunityId,
-            needsCommunitySelection: payload.needsCommunitySelection,
-            needsGpsLocationVerification: payload.needsGpsLocationVerification,
-            pickerContext: payload.pickerContext ?? null,
-        });
-
-        if (payload.needsCommunitySelection) {
-            setNextRoute('/pick-community');
-        } else if (payload.needsGpsLocationVerification) {
-            setNextRoute('/verify-location');
-        } else {
-            setNextRoute('/feed');
-        }
+    const applyVerificationPayload = (user: unknown) => {
+        setUsernameFromPayload(user, setUsername);
+        setNextRoute(resolveNextRouteFromSession());
     };
 
     const verifyWithToken = async (verificationToken: string) => {
@@ -97,14 +64,14 @@ function VerifyEmailContent() {
         setErrorMessage('');
 
         try {
-            const response = await fetchAPI('/auth/verify-email', {
-                method: 'POST',
-                body: JSON.stringify({ token: verificationToken }),
-            });
-            if (response.data) applyVerificationPayload(response.data as VerifyPayload);
+            const response = await authService.verifyEmailWithToken(verificationToken);
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to verify email. Please try again.');
+            }
+            applyVerificationPayload(response.data?.user);
             setStep('success');
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Failed to verify email. Please try again.';
+            const message = getApiErrorMessage(error, 'Failed to verify email. Please try again.');
             if (message.toLowerCase().includes('expired')) {
                 setStep('expired');
                 setErrorMessage('This verification link has expired. Please request a new code.');
@@ -125,14 +92,14 @@ function VerifyEmailContent() {
         setErrorMessage('');
 
         try {
-            const response = await fetchAPI('/auth/verify-email', {
-                method: 'POST',
-                body: JSON.stringify({ email: email.trim().toLowerCase(), code: codeToVerify }),
-            });
-            if (response.data) applyVerificationPayload(response.data as VerifyPayload);
+            const response = await authService.verifyEmailWithCode(email, codeToVerify);
+            if (!response.success) {
+                throw new Error(response.message || 'Verification failed. Please try again.');
+            }
+            applyVerificationPayload(response.data?.user);
             setStep('success');
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Verification failed. Please try again.';
+            const message = getApiErrorMessage(error, 'Verification failed. Please try again.');
             const normalized = message.toLowerCase();
             if (normalized.includes('expired')) {
                 setErrorMessage('Code expired. Please request a new one.');
@@ -159,14 +126,11 @@ function VerifyEmailContent() {
         setErrorMessage('');
 
         try {
-            await fetchAPI('/auth/resend-verification', {
-                method: 'POST',
-                body: JSON.stringify({ email: email.trim().toLowerCase() }),
-            });
+            await authService.resendVerificationEmail(email);
             setResendCooldown(60);
             setVerificationCode('');
         } catch (error: unknown) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to resend code. Please try again.');
+            setErrorMessage(getApiErrorMessage(error, 'Failed to resend code. Please try again.'));
         } finally {
             setIsResending(false);
         }
@@ -336,10 +300,17 @@ function VerifyEmailContent() {
                             <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Email verification reward</p>
                         </div>
                         <div className="flex items-center gap-2 text-primary">
-                            <span className="text-3xl font-black leading-none">10</span>
+                            <span className="text-3xl font-black leading-none">
+                                {verifyCoinBalance ?? '—'}
+                            </span>
                             <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
                         </div>
                     </div>
+                    {verifyCoinBalance === null ? (
+                        <p className="text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
+                            Your wallet balance will appear once rewards sync
+                        </p>
+                    ) : null}
                 </div>
             )}
 
@@ -355,13 +326,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
     return (
-        <Suspense
-            fallback={
-                <div className="auth-signup-page fixed-app flex items-center justify-center">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
-                </div>
-            }
-        >
+        <Suspense fallback={<AuthFlowLoading />}>
             <VerifyEmailContent />
         </Suspense>
     );

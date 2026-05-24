@@ -8,18 +8,21 @@ import { OTPInput } from '@/components/ui/OTPInput';
 import { LocationPicker } from '@/components/ui/LocationPicker';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
-import { fetchAPI } from '@/lib/api';
-import { persistAuthSessionPayload, getNeedsCommunitySelection } from '@/lib/communityContext';
+import { resolvePostVerifyRoute } from '@/lib/authSession';
+import { getNeedsCommunitySelection } from '@/lib/communityContext';
 import { getPostSetupRoute } from '@/lib/onboarding';
-import apiClient from '@/lib/api-client';
+import { authService } from '@/services/auth.service';
 import { useEmailValidation, useUsernameValidation } from '@/hooks/useEmailValidation';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
 import { toast } from 'sonner';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
+import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
+import { LEGAL_LINKS } from '@/components/legal/LegalDocumentPage';
+import { useMyGamificationStats } from '@/hooks/useGamification';
 
 const SIGNUP_MAP_DEFAULT = { lat: 6.6059, lng: 3.2771 };
 
@@ -67,6 +70,11 @@ function SignupPageContent() {
     // Email & Username validation hooks
     const emailValidation = useEmailValidation({ debounceMs: 600, checkAvailability: true });
     const usernameValidation = useUsernameValidation({ debounceMs: 600, checkAvailability: true });
+    const { data: gamificationStats } = useMyGamificationStats();
+    const signupCoinBalance =
+        typeof gamificationStats?.totalHuudCoins === 'number'
+            ? gamificationStats.totalHuudCoins
+            : null;
 
     // Validate email when it changes
     useEffect(() => {
@@ -104,6 +112,7 @@ function SignupPageContent() {
     const isPassValid = passwordPolicy.ok;
     const canContinueIdentity =
         usernameValidation.status === 'valid' && emailValidation.status === 'valid';
+    const canContinueLocation = location !== null && !isResolving;
     const canSubmit =
         canContinueIdentity &&
         isPassValid &&
@@ -180,10 +189,7 @@ function SignupPageContent() {
         setVerificationError(null);
         setVerificationNotice(null);
         try {
-            await fetchAPI('/auth/resend-verification', {
-                method: 'POST',
-                body: JSON.stringify({ email: formData.email.trim().toLowerCase() })
-            });
+            await authService.resendVerificationEmail(formData.email);
             setResendCooldown(60); // 60 second cooldown
             setVerificationCode(''); // Clear any entered code
             setVerificationNotice('A fresh verification code is on its way.');
@@ -209,76 +215,35 @@ function SignupPageContent() {
         setVerificationNotice(null);
         
         try {
-            // Get current token — used to preserve existing auth if no new token returned
-            const currentToken = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
-            
-            const response = await fetchAPI('/auth/verify-email', {
-                method: 'POST',
-                body: JSON.stringify({ 
-                    email: formData.email.trim().toLowerCase(),
-                    code: codeToVerify 
-                })
-            });
-            
-            // Store/update authentication tokens if provided
-            if (response.data) {
-                const d = response.data;
-                
-                // Check for tokens in various possible locations
-                const sessionToken = typeof d.session === 'object' && d.session?.access_token ? d.session.access_token : undefined;
-                const accessToken = d.token ?? d.access_token ?? d.accessToken ?? sessionToken ?? null;
-                
-                if (accessToken) {
-                    localStorage.setItem('neyborhuud_access_token', accessToken);
-                }
-                
-                if (d.session?.refresh_token) {
-                    localStorage.setItem('neyborhuud_refresh_token', d.session.refresh_token);
-                }
-                
-                const vd = d as {
-                    user?: unknown;
-                    community?: unknown;
-                    assignedCommunityId?: string | null;
-                    needsCommunitySelection?: boolean;
-                    needsGpsLocationVerification?: boolean;
-                    pickerContext?: { state: string; lga: string; locationKey?: string; hint?: string };
-                };
-                persistAuthSessionPayload({
-                    user: vd.user,
-                    community: vd.community,
-                    assignedCommunityId: vd.assignedCommunityId,
-                    needsCommunitySelection: vd.needsCommunitySelection,
-                    needsGpsLocationVerification: vd.needsGpsLocationVerification,
-                    pickerContext: vd.pickerContext ?? null,
-                });
-                const tok = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
-                if (tok) apiClient.setToken(tok);
-                if (vd.needsCommunitySelection) {
-                    router.push('/pick-community');
-                    return;
-                }
-                if (vd.needsGpsLocationVerification) {
-                    router.push('/verify-location');
-                    return;
-                }
+            const response = await authService.verifyEmailWithCode(
+                formData.email,
+                codeToVerify,
+            );
+
+            if (!response.success) {
+                throw new Error(response.message || 'Verification failed. Please try again.');
             }
-            
+
+            const gateRoute = resolvePostVerifyRoute();
+            if (gateRoute) {
+                router.push(gateRoute);
+                return;
+            }
+
             setStep('success');
-        } catch (error: any) {
-            
-            // Provide helpful error messages
-            if (error.message.includes('expired')) {
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Verification failed. Please try again.';
+            if (message.includes('expired')) {
                 setVerificationError('Code expired. Please request a new one.');
-            } else if (error.message.includes('invalid') || error.message.includes('incorrect')) {
+            } else if (message.includes('invalid') || message.includes('incorrect')) {
                 setVerificationError('Invalid code. Please check and try again.');
-            } else if (error.message.includes('attempts')) {
+            } else if (message.includes('attempts')) {
                 setVerificationError('Too many attempts. Please request a new code.');
             } else {
-                setVerificationError(error.message || 'Verification failed. Please try again.');
+                setVerificationError(message || 'Verification failed. Please try again.');
             }
-            
-            setVerificationCode(''); // Clear code on error
+
+            setVerificationCode('');
         } finally {
             setIsVerifying(false);
         }
@@ -468,41 +433,12 @@ function SignupPageContent() {
                 // Invalid state — sanitization should have removed these fields
             }
 
-            const response = await fetchAPI('/auth/create-account', {
-                method: 'POST',
-                body: JSON.stringify(sanitizedPayload)
-            });
+            const response = await authService.register(
+                sanitizedPayload as import('@/types/api').RegisterPayload,
+            );
 
-            // Store authentication tokens and user data
-            // Backend may return { data: { user, token, community } } or { data: { user, session: { access_token }, community } }
             if (response.success && response.data) {
-                const d = response.data;
-                const user = d.user;
-                const community = d.community;
-
-                const sessionToken = typeof d.session === 'object' && d.session?.access_token ? d.session.access_token : undefined;
-                const accessToken = d.token ?? d.access_token ?? d.accessToken ?? sessionToken ?? null;
-
-                if (accessToken) {
-                    localStorage.setItem('neyborhuud_access_token', accessToken);
-                    apiClient.setToken(accessToken);
-                }
-
-                const ext = d as {
-                    assignedCommunityId?: string | null;
-                    needsCommunitySelection?: boolean;
-                    needsGpsLocationVerification?: boolean;
-                    pickerContext?: { state: string; lga: string; locationKey?: string; hint?: string };
-                    emailDelivery?: { sent?: boolean; message?: string; canResend?: boolean };
-                };
-                persistAuthSessionPayload({
-                    user,
-                    community,
-                    assignedCommunityId: ext.assignedCommunityId,
-                    needsCommunitySelection: ext.needsCommunitySelection,
-                    needsGpsLocationVerification: ext.needsGpsLocationVerification,
-                    pickerContext: ext.pickerContext ?? null,
-                });
+                const ext = response.data;
 
                 if (ext.emailDelivery?.sent === false) {
                     setVerificationError(ext.emailDelivery.message || 'Account created, but the verification email could not be sent. Please request a new code.');
@@ -513,14 +449,17 @@ function SignupPageContent() {
                     setVerificationError(null);
                     setResendCooldown(60);
                 }
+            } else if (!response.success) {
+                throw new Error(response.message || 'Registration failed');
             }
 
             // Show email verification screen
             setStep('verify-email');
         } catch (error: unknown) {
-            const err = error as { message?: string; status?: number; responseData?: { message?: string } };
-            const backendMsg = err.responseData?.message?.trim();
+            const err = error as { message?: string; status?: number; response?: { status?: number; data?: { message?: string } } };
+            const backendMsg = err.response?.data?.message?.trim();
             let friendlyMsg = backendMsg || err.message || 'Registration failed';
+            const status = err.status ?? err.response?.status;
 
             if (friendlyMsg.includes('Failed to create user')) {
                 friendlyMsg = "Registration failed. Please check:\n- All required fields are filled\n- Email is valid and not already registered\n- Username is available\n- Password meets requirements";
@@ -662,10 +601,17 @@ function SignupPageContent() {
                         <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Signup reward unlocked</p>
                     </div>
                     <div className="flex items-center gap-2 text-primary">
-                        <span className="text-3xl font-black leading-none">20</span>
+                        <span className="text-3xl font-black leading-none">
+                            {signupCoinBalance ?? '—'}
+                        </span>
                         <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
                     </div>
                 </div>
+                {signupCoinBalance === null ? (
+                    <p className="text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
+                        Your wallet balance will appear once rewards sync
+                    </p>
+                ) : null}
             </AuthFlowPage>
         );
     }
@@ -790,12 +736,18 @@ function SignupPageContent() {
                                 <button
                                     type="button"
                                     onClick={() => setSignupStage('identity')}
-                                    className="auth-btn auth-btn-primary"
+                                    disabled={!canContinueLocation}
+                                    className="auth-btn auth-btn-primary disabled:opacity-40"
                                 >
                                     <span>Continue</span>
                                     <i className="bi bi-arrow-right shrink-0" aria-hidden />
                                 </button>
                             </div>
+                            {!canContinueLocation ? (
+                                <p className="mt-2 text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
+                                    Use GPS or tap the map to set your street before continuing
+                                </p>
+                            ) : null}
                             <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
                                 Already on the Huud?{' '}
                                 <Link href="/login">Enter your Huud</Link>
@@ -1046,7 +998,19 @@ function SignupPageContent() {
                                         }
                                     />
                                     <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
-                                        I agree to the <span className="font-black text-brand-blue">Community Rules</span> and <span className="font-black text-brand-blue">Terms of Service</span>, and I have read the <span className="font-black text-brand-blue">Privacy Policy</span>. I consent to the processing of my personal data needed to run my account, including under Nigerian data protection law (<span className="font-black text-brand-black">NDPA / NDPR</span>).
+                                        I agree to the{' '}
+                                        <Link href={LEGAL_LINKS.communityRules} className="font-black text-brand-blue underline-offset-2 hover:underline">
+                                            Community Rules
+                                        </Link>{' '}
+                                        and{' '}
+                                        <Link href={LEGAL_LINKS.termsOfService} className="font-black text-brand-blue underline-offset-2 hover:underline">
+                                            Terms of Service
+                                        </Link>
+                                        , and I have read the{' '}
+                                        <Link href={LEGAL_LINKS.privacyPolicy} className="font-black text-brand-blue underline-offset-2 hover:underline">
+                                            Privacy Policy
+                                        </Link>
+                                        . I consent to the processing of my personal data needed to run my account, including under Nigerian data protection law (<span className="font-black text-brand-black">NDPA / NDPR</span>).
                                     </span>
                                 </label>
                                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2.5">
@@ -1062,7 +1026,11 @@ function SignupPageContent() {
                                         }
                                     />
                                     <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
-                                        Product updates, offers, analytics, and limited partner use as described in the Privacy Policy.
+                                        Product updates, offers, analytics, and limited partner use as described in the{' '}
+                                        <Link href={LEGAL_LINKS.privacyPolicy} className="font-black text-brand-blue underline-offset-2 hover:underline">
+                                            Privacy Policy
+                                        </Link>
+                                        .
                                     </span>
                                 </label>
                             </div>
@@ -1075,13 +1043,7 @@ function SignupPageContent() {
 
 export default function SignupPage() {
     return (
-        <Suspense
-            fallback={
-                <div className="h-[100dvh] neu-base flex items-center justify-center">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
-                </div>
-            }
-        >
+        <Suspense fallback={<AuthFlowLoading />}>
             <SignupPageContent />
         </Suspense>
     );

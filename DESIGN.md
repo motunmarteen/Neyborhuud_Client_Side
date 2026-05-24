@@ -340,10 +340,19 @@ Used on the main feed and dark / blurred surfaces.
 | `.mod-modal` | Full modal dialog |
 | `.mod-btn` | ⚠️ Deprecated — migrate to `btn-*` |
 
-### Auth Glass — `/login`, `/signup`, `/forgot-password` only
-```
-bg-white/[0.94] backdrop-blur-2xl border border-white/85 rounded-2xl
-```
+### Auth — landing-aligned flows (`AuthFlowPage`, `auth-btn-*`)
+
+Used on `/login`, `/signup`, `/forgot-password`, `/reset-password`, `/verify-email`, post-auth gates (`/pick-community`, `/verify-location`, `/complete-profile`, `/setup-complete`), and legal pages under `/info/*`.
+
+Shared primitives: `AuthFlowBackdrop` (landing video), `SignupBottomSheet`, `AuthFlowHero`, `AuthSheetStageHeader`, `AuthFlowLoading`.
+
+CTA classes mirror landing: `.auth-btn-primary` / `.auth-btn-secondary` (same green palette and active-scale as `.landing-btn-*`).
+
+Session routing: `src/lib/authSession.ts` — token validation, safe `?next=` handling, post-login gate resolution, `applyAuthVerificationPayload`.
+
+All auth pages use `authService` + `apiClient` (not raw `fetchAPI`).
+
+Legal links during signup: `/info/community-rules`, `/info/terms-of-service`, `/info/privacy-policy`.
 
 ### Card interactions (all variants)
 Cards must respond to touch with:
@@ -849,12 +858,13 @@ Each slide renders:
 - [x] Fix missing `.neu-inset`, `--neu-accent` tokens
 - [x] Write `DESIGN.md`
 
-### Phase 2 — Auth flows ✅ Done
-- [x] `/login` — `.btn-glass-primary`, replace hardcoded hex colours
-- [x] `/signup` — same
-- [x] `/forgot-password` — same
-- [x] `/verify-email` — same
-- [x] `/reset-password` — same
+### Phase 2 — Auth flows ✅ Done (stabilized)
+- [x] Landing-aligned auth shell (`AuthFlowPage`, `AuthFlowBackdrop`, `SignupBottomSheet`)
+- [x] `/login`, `/signup`, `/forgot-password`, `/verify-email`, `/reset-password`
+- [x] Post-auth gates migrated to shared auth shell
+- [x] Session hardening (`authSession.ts`: token validation, `?next=`, gate-aware redirects)
+- [x] Legal info pages linked from signup consent
+- [x] Unified auth Suspense loader (`AuthFlowLoading`)
 
 ### Phase 3 — Core feed ✅ Done
 - [x] `XPostCard` — replace Tailwind colour scale with brand tokens

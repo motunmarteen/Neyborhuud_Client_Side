@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
+import { resolvePostAuthRoute, validateStoredSession } from '@/lib/authSession';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 
 const LANDING_VIDEO = '/video/background-video.mp4';
@@ -25,9 +26,24 @@ export function LandingPage() {
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        if (apiClient.isAuthenticated()) {
-            router.replace('/feed');
+
+        let cancelled = false;
+
+        async function redirectIfAuthenticated() {
+            if (!apiClient.isAuthenticated()) return;
+
+            const validation = await validateStoredSession();
+            if (cancelled) return;
+
+            if (validation === 'valid') {
+                router.replace(resolvePostAuthRoute());
+            }
         }
+
+        void redirectIfAuthenticated();
+        return () => {
+            cancelled = true;
+        };
     }, [router]);
 
     useEffect(() => {

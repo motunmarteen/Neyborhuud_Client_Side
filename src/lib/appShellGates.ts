@@ -18,6 +18,9 @@ export const ONBOARDING_EXCLUDED_ROUTES = [
   '/pick-community',
   '/verify-location',
   '/complete-profile',
+  '/info/community-rules',
+  '/info/terms-of-service',
+  '/info/privacy-policy',
 ] as const;
 
 export function isOnboardingOrAuthRoute(pathname: string): boolean {

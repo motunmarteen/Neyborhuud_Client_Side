@@ -5,6 +5,12 @@
 
 import apiClient from "@/lib/api-client";
 import {
+  extractAccessToken,
+  extractRefreshToken,
+  applyAuthVerificationPayload,
+  type AuthVerificationPayload,
+} from "@/lib/authSession";
+import {
   persistAuthSessionPayload,
   applyProfileMeCommunity,
   type PickerContext,
@@ -22,15 +28,39 @@ import {
 let lastSessionTouchAt = 0;
 const SESSION_TOUCH_MIN_MS = 4 * 60 * 1000;
 
-type AuthSessionData = {
+type AuthSessionData = AuthVerificationPayload & {
   user: User;
-  token: string;
-  community?: CommunitySummary | null;
-  assignedCommunityId?: string | null;
-  needsCommunitySelection?: boolean;
-  needsGpsLocationVerification?: boolean;
-  pickerContext?: PickerContext | null;
 };
+
+type RegisterResponseData = AuthSessionData & {
+  emailDelivery?: {
+    sent?: boolean;
+    message?: string;
+    canResend?: boolean;
+  };
+};
+
+function persistLoginSession(data: AuthSessionData): boolean {
+  const token = extractAccessToken(data);
+  if (!token) return false;
+
+  apiClient.setToken(token);
+  if (typeof window !== "undefined") {
+    const refreshToken = extractRefreshToken(data);
+    if (refreshToken) {
+      localStorage.setItem("neyborhuud_refresh_token", refreshToken);
+    }
+    persistAuthSessionPayload({
+      user: data.user,
+      community: data.community,
+      assignedCommunityId: data.assignedCommunityId,
+      needsCommunitySelection: data.needsCommunitySelection,
+      needsGpsLocationVerification: data.needsGpsLocationVerification,
+      pickerContext: data.pickerContext ?? null,
+    });
+  }
+  return true;
+}
 
 /**
  * Try a list of (method, path) combinations for updating the user's profile.
@@ -93,24 +123,13 @@ export const authService = {
       delete (sanitizedPayload.location as any).communityName;
     }
 
-    const response = await apiClient.post<AuthSessionData>(
+    const response = await apiClient.post<RegisterResponseData>(
       "/auth/create-account",
       sanitizedPayload,
     );
 
     if (response.success && response.data) {
-      apiClient.setToken(response.data.token);
-      if (typeof window !== "undefined") {
-        persistAuthSessionPayload({
-          user: response.data.user,
-          community: response.data.community,
-          assignedCommunityId: response.data.assignedCommunityId,
-          needsCommunitySelection: response.data.needsCommunitySelection,
-          needsGpsLocationVerification:
-            response.data.needsGpsLocationVerification,
-          pickerContext: response.data.pickerContext ?? null,
-        });
-      }
+      persistLoginSession(response.data);
     }
 
     return response;
@@ -119,24 +138,27 @@ export const authService = {
   /**
    * Login user
    */
-  async login(identifier: string, password: string) {
+  async login(
+    identifier: string,
+    password: string,
+    options?: { deviceLocation?: { lat?: number; lng?: number } },
+  ) {
     const response = await apiClient.post<AuthSessionData>("/auth/login", {
       identifier,
       password,
+      ...(options?.deviceLocation && {
+        deviceLocation: options.deviceLocation,
+      }),
     });
 
     if (response.success && response.data) {
-      apiClient.setToken(response.data.token);
-      if (typeof window !== "undefined") {
-        persistAuthSessionPayload({
-          user: response.data.user,
-          community: response.data.community,
-          assignedCommunityId: response.data.assignedCommunityId,
-          needsCommunitySelection: response.data.needsCommunitySelection,
-          needsGpsLocationVerification:
-            response.data.needsGpsLocationVerification,
-          pickerContext: response.data.pickerContext ?? null,
-        });
+      const stored = persistLoginSession(response.data);
+      if (!stored) {
+        return {
+          ...response,
+          success: false,
+          message: "Login succeeded but no session token was returned.",
+        };
       }
     }
 
@@ -389,10 +411,39 @@ export const authService = {
   },
 
   /**
-   * Verify email with token
+   * Verify email with link token
    */
+  async verifyEmailWithToken(token: string) {
+    const response = await apiClient.post<AuthVerificationPayload>(
+      "/auth/verify-email",
+      { token },
+    );
+    if (response.success && response.data) {
+      applyAuthVerificationPayload(response.data);
+    }
+    return response;
+  },
+
+  /**
+   * Verify email with 6-digit OTP code
+   */
+  async verifyEmailWithCode(email: string, code: string) {
+    const response = await apiClient.post<AuthVerificationPayload>(
+      "/auth/verify-email",
+      {
+        email: email.trim().toLowerCase(),
+        code,
+      },
+    );
+    if (response.success && response.data) {
+      applyAuthVerificationPayload(response.data);
+    }
+    return response;
+  },
+
+  /** @deprecated Use verifyEmailWithToken */
   async verifyEmail(token: string) {
-    return await apiClient.post("/auth/verify-email", { token });
+    return this.verifyEmailWithToken(token);
   },
 
   /**
@@ -405,6 +456,19 @@ export const authService = {
       });
     }
     return await apiClient.post("/auth/resend-verification");
+  },
+
+  /**
+   * Complete optional profile enrichment after signup
+   */
+  async completeProfile(data: {
+    firstName: string;
+    lastName: string;
+    phone?: string;
+    gender?: string;
+    dob?: string;
+  }) {
+    return await apiClient.post("/auth/complete-profile", data);
   },
 
   /**

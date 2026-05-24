@@ -11,6 +11,7 @@ import {
 } from '@/lib/communityContext';
 import { getPostSetupRoute } from '@/lib/onboarding';
 import { getAuthSetupProgress } from '@/lib/authSetupFlow';
+import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthSheetStageHeader } from '@/components/auth/AuthSheetStageHeader';
 
@@ -341,8 +342,8 @@ function PickCommunityContent() {
                 />
               </button>
 
-              {dropdownOpen && (
-                <div className="absolute z-50 left-0 right-0 mt-2 overflow-hidden rounded-2xl border border-charcoal/5 bg-white shadow-[0_20px_60px_rgba(26,26,46,0.22)]">
+              {dropdownOpen ? (
+                <div className="mt-2 overflow-hidden rounded-2xl border border-charcoal/5 bg-white shadow-[0_8px_24px_rgba(26,26,46,0.12)]">
                   <div className="border-b border-charcoal/5 px-3 pb-2 pt-3">
                     <div className="flex items-center gap-2 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2">
                       <i className="bi bi-search text-xs text-[var(--neu-text-muted)]" aria-hidden />
@@ -367,7 +368,7 @@ function PickCommunityContent() {
                     </div>
                   </div>
 
-                  <ul className="max-h-56 overflow-y-auto py-1">
+                  <ul className="max-h-48 overflow-y-auto py-1 sm:max-h-56">
                     {filtered.length === 0 ? (
                       <li className="px-4 py-5 text-center text-sm text-[var(--neu-text-muted)]">
                         No areas match &ldquo;{search}&rdquo;
@@ -410,7 +411,7 @@ function PickCommunityContent() {
                     )}
                   </ul>
                 </div>
-              )}
+              ) : null}
             </div>
 
             {seedRequired ? (
@@ -444,13 +445,7 @@ function PickCommunityContent() {
 
 export default function PickCommunityPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="auth-signup-page fixed-app flex items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
-        </div>
-      }
-    >
+    <Suspense fallback={<AuthFlowLoading />}>
       <PickCommunityContent />
     </Suspense>
   );

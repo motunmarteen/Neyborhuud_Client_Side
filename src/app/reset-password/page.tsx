@@ -4,11 +4,13 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { PremiumInput } from '@/components/ui/PremiumInput';
-import { fetchAPI } from '@/lib/api';
+import { authService } from '@/services/auth.service';
+import { getApiErrorMessage } from '@/lib/apiErrors';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
+import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 
 type Step = 'form' | 'success' | 'error' | 'expired';
 
@@ -43,13 +45,13 @@ function ResetPasswordContent() {
         setErrorMessage('');
 
         try {
-            await fetchAPI('/auth/reset-password', {
-                method: 'POST',
-                body: JSON.stringify({ token, newPassword: password }),
-            });
+            const response = await authService.resetPassword(token, password);
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to reset password.');
+            }
             setStep('success');
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Failed to reset password. Please try again.';
+            const message = getApiErrorMessage(error, 'Failed to reset password. Please try again.');
             if (message.toLowerCase().includes('expired') || message.toLowerCase().includes('invalid')) {
                 setStep('expired');
                 setErrorMessage('This reset link has expired. Please request a new one.');
@@ -176,13 +178,7 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
     return (
-        <Suspense
-            fallback={
-                <div className="auth-signup-page fixed-app flex items-center justify-center">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
-                </div>
-            }
-        >
+        <Suspense fallback={<AuthFlowLoading />}>
             <ResetPasswordContent />
         </Suspense>
     );

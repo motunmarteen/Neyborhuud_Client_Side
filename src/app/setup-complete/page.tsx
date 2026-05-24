@@ -11,6 +11,7 @@ import {
 import { hasCompletedProductTour } from '@/lib/onboarding';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
+import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 import { useMyGamificationStats } from '@/hooks/useGamification';
 
 type StoredUser = {
@@ -75,11 +76,7 @@ export default function SetupCompletePage() {
   }, [router]);
 
   if (!ready) {
-    return (
-      <div className="auth-signup-page fixed-app flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue/30 border-t-brand-blue" />
-      </div>
-    );
+    return <AuthFlowLoading />;
   }
 
   const handleName = user?.username ? `@${user.username}` : 'Neybor';

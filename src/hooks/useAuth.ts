@@ -58,10 +58,12 @@ export function useAuth() {
     mutationFn: ({
       identifier,
       password,
+      deviceLocation,
     }: {
       identifier: string;
       password: string;
-    }) => authService.login(identifier, password),
+      deviceLocation?: { lat?: number; lng?: number };
+    }) => authService.login(identifier, password, { deviceLocation }),
     onSuccess: async () => {
       // Always refetch /profile/me so role/isAdmin from MongoDB is current (login payload may omit them).
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });

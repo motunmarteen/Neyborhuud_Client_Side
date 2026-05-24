@@ -3,24 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PremiumInput } from '@/components/ui/PremiumInput';
-import { fetchAPI } from '@/lib/api';
+import { authService } from '@/services/auth.service';
+import { getApiErrorMessage, getApiErrorStatus } from '@/lib/apiErrors';
 import { useEmailValidation } from '@/hooks/useEmailValidation';
 import { toast } from 'sonner';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
-
-function forgotPasswordBody(email: string) {
-    const normalized = email.trim().toLowerCase();
-    return JSON.stringify({ email: normalized, identifier: normalized });
-}
-
-function getErrorStatus(error: unknown): number | undefined {
-    if (error && typeof error === 'object' && 'status' in error) {
-        const status = (error as { status?: number }).status;
-        return typeof status === 'number' ? status : undefined;
-    }
-    return undefined;
-}
 
 function isNetworkError(message: string): boolean {
     const normalized = message.toLowerCase();
@@ -48,10 +36,7 @@ export default function ForgotPasswordPage() {
     }, [resendCooldown]);
 
     const requestReset = async () => {
-        await fetchAPI('/auth/forgot-password', {
-            method: 'POST',
-            body: forgotPasswordBody(email),
-        });
+        await authService.requestPasswordReset(email);
     };
 
     const handleSubmit = async (event: React.FormEvent) => {
@@ -66,8 +51,8 @@ export default function ForgotPasswordPage() {
             setStep('sent');
             setResendCooldown(60);
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Something went wrong.';
-            const status = getErrorStatus(error);
+            const message = getApiErrorMessage(error, 'Something went wrong.');
+            const status = getApiErrorStatus(error);
 
             if (status === 429 || (status !== undefined && status >= 400 && status < 500)) {
                 setErrorMessage(message);

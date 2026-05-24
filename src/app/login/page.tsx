@@ -1,20 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
-import { fetchAPI } from '@/lib/api';
 import apiClient from '@/lib/api-client';
-import {
-    persistAuthSessionPayload,
-    getNeedsCommunitySelection,
-    getNeedsGpsLocationVerification,
-} from '@/lib/communityContext';
+import { resolvePostAuthRoute, validateStoredSession } from '@/lib/authSession';
+import { useAuth } from '@/hooks/useAuth';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
+import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 
 function friendlyLoginMessage(raw: string): string {
     const m = raw.toLowerCase();
@@ -30,28 +27,19 @@ function friendlyLoginMessage(raw: string): string {
     if (m.includes('not found') || m.includes('no user') || m.includes('does not exist')) {
         return 'No account found with this email. You can create one from Join neyborhuud.';
     }
+    if (m.includes('no session token')) {
+        return 'Sign-in succeeded but no session was returned. Please try again.';
+    }
     return raw || 'Something went wrong. Please try again.';
 }
 
-type LoginResponseData = {
-    session?: {
-        access_token?: string;
-        accessToken?: string;
-        refresh_token?: string;
-        refreshToken?: string;
-    };
-    token?: string;
-    user?: unknown;
-    community?: unknown;
-    assignedCommunityId?: string | null;
-    needsCommunitySelection?: boolean;
-    needsGpsLocationVerification?: boolean;
-    pickerContext?: { state: string; lga: string; locationKey?: string; hint?: string } | null;
-};
-
-export default function LoginPage() {
+function LoginPageContent() {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
+    const searchParams = useSearchParams();
+    const nextParam = searchParams.get('next');
+    const { login, isLoggingIn } = useAuth();
+
+    const [checkingSession, setCheckingSession] = useState(true);
     const [formError, setFormError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         email: '',
@@ -59,79 +47,75 @@ export default function LoginPage() {
     });
 
     useEffect(() => {
-        if (!apiClient.isAuthenticated()) return;
-        if (getNeedsCommunitySelection()) {
-            router.replace('/pick-community');
-            return;
-        }
-        if (getNeedsGpsLocationVerification()) {
-            router.replace('/verify-location');
-            return;
-        }
-        router.replace('/feed');
-    }, [router]);
+        let cancelled = false;
 
+        async function restoreSession() {
+            if (!apiClient.isAuthenticated()) {
+                if (!cancelled) setCheckingSession(false);
+                return;
+            }
+
+            const validation = await validateStoredSession();
+            if (cancelled) return;
+
+            if (validation === 'valid') {
+                router.replace(resolvePostAuthRoute(nextParam));
+                return;
+            }
+
+            if (validation === 'invalid') {
+                if (!cancelled) setCheckingSession(false);
+                return;
+            }
+
+            // Network error — show login form; do not auto-redirect on stale cache.
+            if (!cancelled) setCheckingSession(false);
+        }
+
+        void restoreSession();
+        return () => {
+            cancelled = true;
+        };
+    }, [router, nextParam]);
+
+    const loading = isLoggingIn;
     const canLogin = formData.email.trim().length > 0 && formData.password.length > 0 && !loading;
     const loginIdentity = formData.email.trim() || 'you@example.com';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormError(null);
-        setLoading(true);
 
         try {
             const deviceLocation = await getCurrentLocation();
-
-            const response = await fetchAPI('/auth/login', {
-                method: 'POST',
-                body: JSON.stringify({
-                    identifier: formData.email,
-                    password: formData.password,
-                    deviceLocation: {
-                        lat: deviceLocation?.lat,
-                        lng: deviceLocation?.lng,
-                    },
-                }),
+            const response = await login({
+                identifier: formData.email.trim(),
+                password: formData.password,
+                deviceLocation: {
+                    lat: deviceLocation?.lat,
+                    lng: deviceLocation?.lng,
+                },
             });
 
-            const data = response.data as LoginResponseData | undefined;
-            const accessToken =
-                data?.session?.access_token ?? data?.session?.accessToken ?? data?.token;
-            const user = data?.user;
-            const refreshToken = data?.session?.refresh_token ?? data?.session?.refreshToken;
-
-            if (response.success && accessToken) {
-                localStorage.setItem('neyborhuud_access_token', accessToken);
-                if (refreshToken) {
-                    localStorage.setItem('neyborhuud_refresh_token', refreshToken);
-                }
-                persistAuthSessionPayload({
-                    user,
-                    community: data?.community,
-                    assignedCommunityId: data?.assignedCommunityId,
-                    needsCommunitySelection: data?.needsCommunitySelection,
-                    needsGpsLocationVerification: data?.needsGpsLocationVerification,
-                    pickerContext: data?.pickerContext ?? null,
-                });
-                apiClient.setToken(accessToken);
+            if (!response.success || !apiClient.isAuthenticated()) {
+                const msg = friendlyLoginMessage(response.message || 'Login failed. Please try again.');
+                setFormError(msg);
+                toast.error(msg, { duration: 5000 });
+                return;
             }
 
-            if (getNeedsCommunitySelection()) {
-                router.push('/pick-community');
-            } else if (getNeedsGpsLocationVerification()) {
-                router.push('/verify-location');
-            } else {
-                router.push('/feed');
-            }
+            router.push(resolvePostAuthRoute(nextParam));
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
             const friendlyMsg = friendlyLoginMessage(message);
             setFormError(friendlyMsg);
             toast.error(friendlyMsg, { duration: 5000 });
-        } finally {
-            setLoading(false);
         }
     };
+
+    if (checkingSession) {
+        return <AuthFlowLoading />;
+    }
 
     return (
         <form onSubmit={handleSubmit}>
@@ -221,5 +205,13 @@ export default function LoginPage() {
                 </div>
             </AuthFlowPage>
         </form>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<AuthFlowLoading />}>
+            <LoginPageContent />
+        </Suspense>
     );
 }
