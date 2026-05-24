@@ -10,7 +10,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { socialService } from '@/services/social.service';
 import { useAuth } from '@/hooks/useAuth';
-import { useFollow, useFollowCounts, useMyMilestoneStatus, type MilestoneInfo } from '@/hooks/useFollow';
+import { useFollow, useFollowCounts, useFollowers, useMyMilestoneStatus, type MilestoneInfo } from '@/hooks/useFollow';
 import type { MilestonePayload } from '@/hooks/useFollow';
 import dynamic from 'next/dynamic';
 
@@ -24,7 +24,6 @@ import { XPostCard } from '@/components/feed/XPostCard';
 import { ReportModal } from '@/components/feed/ReportModal';
 import { PostSkeleton } from '@/components/feed/PostSkeleton';
 import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
-import { MiniMap } from '@/components/ui/InteractiveMap';
 import { Post } from '@/types/api';
 import { contentService } from '@/services/content.service';
 import { chatService } from '@/services/chat.service';
@@ -33,9 +32,17 @@ import { useState, useEffect, useRef } from 'react';
 import { useTipUser } from '@/hooks/useGamification';
 import { TipModal } from '@/components/gamification/TipModal';
 import { useInView } from 'react-intersection-observer';
-import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import apiClient from '@/lib/api-client';
-import TopNav from '@/components/navigation/TopNav';
+import { normalizeAuthUser, resolveUserAvatarUrl } from '@/lib/userAvatar';
+import { shareProfileUrl, resolveProfileDisplayName, resolveProfilePersonalName, resolveProfileMapCenter, PROFILE_MAP_DEFAULT, type ProfileNameSource } from '@/lib/profileSnapHelpers';
+import { authService } from '@/services/auth.service';
+import { ProfileSnapHero } from '@/components/profile/snap/ProfileSnapHero';
+import { ProfileSnapStatsRow } from '@/components/profile/snap/ProfileSnapStatsRow';
+import { ProfileSnapPlusCard } from '@/components/profile/snap/ProfileSnapPlusCard';
+import { ProfileSnapHub } from '@/components/profile/snap/ProfileSnapHub';
+import { ProfileSnapFriends } from '@/components/profile/snap/ProfileSnapFriends';
+import { ProfileAuthShell, ProfileAuthSheet } from '@/components/profile/ProfileAuthShell';
+import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
@@ -59,6 +66,7 @@ export default function ProfilePage() {
   const [reportingPostId, setReportingPostId] = useState<string | null>(null);
   const [isSettingLocation, setIsSettingLocation] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isSavingDraggedLocation, setIsSavingDraggedLocation] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
@@ -91,8 +99,9 @@ export default function ProfilePage() {
       await uploadProfilePicture({ file });
       queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      toast.success('Profile photo updated');
     } catch {
-      toast.error('Could not upload image. Please try again.');
+      // useAuth mutation onError already surfaces API errors via handleApiError
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -130,6 +139,7 @@ export default function ProfilePage() {
           });
           queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
           queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+          toast.success('Location updated');
         } catch (err) {
           console.error('Failed to update location:', err);
         } finally {
@@ -144,19 +154,39 @@ export default function ProfilePage() {
     );
   };
 
-  // Fetch user profile by username
+  // Fetch user profile — own profile uses /profile/me so first/last name are included
   const {
     data: profileData,
     isLoading,
     error,
   } = useQuery({
     queryKey: ['userProfile', username],
-    queryFn: () => socialService.getUserByUsername(username),
+    queryFn: async () => {
+      if (apiClient.isAuthenticated()) {
+        try {
+          const res = await apiClient.get<{ user: import('@/types/api').User }>('/profile/me');
+          if (
+            res.success &&
+            res.data?.user &&
+            res.data.user.username?.toLowerCase() === username.toLowerCase()
+          ) {
+            return { ...res, data: normalizeAuthUser(res.data.user) };
+          }
+        } catch {
+          /* fall through to public profile lookup */
+        }
+      }
+
+      return socialService.getUserByUsername(username);
+    },
     enabled: !!username,
   });
 
   const profile = profileData?.data;
-  const isOwnProfile = currentUser?.username === username;
+  const cachedProfileUser = authService.getCachedUser();
+  const isOwnProfile =
+    currentUser?.username?.toLowerCase() === username.toLowerCase() ||
+    cachedProfileUser?.username?.toLowerCase() === username.toLowerCase();
 
   // Follow functionality - only enable if not own profile and user is authenticated
   const shouldEnableFollow = !isOwnProfile && !!currentUser && !!profile?.id;
@@ -208,6 +238,24 @@ export default function ProfilePage() {
   const followerCount = countsData?.data?.followerCount ?? 0;
   const followingCount = countsData?.data?.followingCount ?? 0;
 
+  const { data: followersData } = useFollowers(profile?.id, 1, 12);
+  const followerPreview =
+    ((followersData as { data?: { followers?: Array<{
+      _id: string;
+      username: string;
+      avatarUrl?: string;
+      profilePicture?: string;
+      firstName?: string;
+      lastName?: string;
+    }> } })?.data?.followers ?? []).map((user) => ({
+      id: user._id,
+      username: user.username,
+      avatarUrl: user.avatarUrl,
+      profilePicture: user.profilePicture,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    })) ?? [];
+
   // Block functionality
   const {
     isBlocked,
@@ -230,7 +278,7 @@ export default function ProfilePage() {
   // Trust activity log for this user's profile (public view)
   const { data: trustProfileData } = useUserTrustProfile(profileId, { enabled: !!profileId });
 
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
+
   const [startingChat, setStartingChat] = useState(false);
   const [showTipModal, setShowTipModal] = useState(false);
   const tipUser = useTipUser();
@@ -336,35 +384,21 @@ export default function ProfilePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
-        <div className="absolute inset-x-0 top-0 z-30 pointer-events-none"><div className="pointer-events-auto"><TopNav /></div></div>
+      <div className="profile-auth-page-root relative flex h-screen w-full flex-col overflow-hidden neu-base">
         <div className="flex flex-1 overflow-hidden">
-          <LeftSidebar />
-          <div className="flex-1 overflow-y-auto">
-        {/* Header Skeleton */}
-        <div className="neu-base sticky top-0 z-10 shadow-[0_2px_8px_var(--neu-shadow-dark)]">
-          <div className="flex items-center gap-8 px-4 h-14">
-            <div className="w-8 h-8 rounded-full neu-socket animate-pulse" />
-            <div className="w-32 h-6 neu-socket rounded-xl animate-pulse" />
+          <div className="hidden lg:block">
+            <LeftSidebar />
           </div>
-        </div>
-
-        {/* Profile Skeleton */}
-        <div className="max-w-2xl mx-auto px-4 py-8">
-          <div className="flex items-start gap-6 mb-6">
-            <div className="w-32 h-32 rounded-full neu-socket animate-pulse flex-shrink-0" />
-            <div className="flex-1 space-y-3 pt-4">
-              <div className="w-48 h-8 neu-socket rounded-xl animate-pulse" />
-              <div className="w-32 h-5 neu-socket rounded-xl animate-pulse" />
+          <div className="profile-auth-scroll flex-1 overflow-y-auto p-4">
+            <div className="mx-auto max-w-lg space-y-4 pt-8">
+              <div className="h-48 animate-pulse rounded-2xl bg-[#E9F6E6]" />
+              <div className="h-32 animate-pulse rounded-2xl bg-white" />
+              <div className="h-24 animate-pulse rounded-2xl bg-white" />
             </div>
           </div>
-          <div className="space-y-2">
-            <div className="w-full h-4 neu-socket rounded-xl animate-pulse" />
-            <div className="w-3/4 h-4 neu-socket rounded-xl animate-pulse" />
+          <div className="hidden lg:block">
+            <RightSidebar />
           </div>
-        </div>
-          </div>
-          <RightSidebar />
         </div>
         <BottomNav />
       </div>
@@ -374,43 +408,69 @@ export default function ProfilePage() {
   // Error state
   if (error || !profile) {
     return (
-      <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
-        <div className="absolute inset-x-0 top-0 z-30 pointer-events-none"><div className="pointer-events-auto"><TopNav /></div></div>
+      <div className="profile-auth-page-root relative flex h-screen w-full flex-col overflow-hidden neu-base">
         <div className="flex flex-1 overflow-hidden">
-          <LeftSidebar />
-          <div className="flex-1 overflow-y-auto flex items-center justify-center">
-        <div className="text-center px-4">
-          <div className="w-24 h-24 rounded-full neu-socket flex items-center justify-center mx-auto mb-6">
-            <i className="bi bi-person-x text-5xl text-[var(--neu-text-muted)]" />
+          <div className="hidden lg:block">
+            <LeftSidebar />
           </div>
-          <h1 className="text-3xl font-bold mb-3 text-slate-900">
-            User Not Found
-          </h1>
-          <p className="mb-6 max-w-md text-[var(--neu-text-muted)]">
-            The user @{username} doesn't exist or their profile is unavailable.
-          </p>
-          <button
-            onClick={() => router.back()}
-            className="mod-chip rounded-2xl px-6 py-2.5 font-semibold text-primary transition-colors"
-          >
-            Go Back
-          </button>
-        </div>
+          <div className="profile-auth-scroll flex flex-1 items-center justify-center overflow-y-auto px-4">
+            <div className="text-center">
+              <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[#E9F6E6]">
+                <i className="bi bi-person-x text-5xl text-[var(--neu-text-muted)]" />
+              </div>
+              <h1 className="mb-3 text-3xl font-bold text-slate-900">User Not Found</h1>
+              <p className="mx-auto mb-6 max-w-md text-[var(--neu-text-muted)]">
+                The user @{username} doesn&apos;t exist or their profile is unavailable.
+              </p>
+            </div>
           </div>
-          <RightSidebar />
+          <div className="hidden lg:block">
+            <RightSidebar />
+          </div>
         </div>
         <BottomNav />
       </div>
     );
   }
 
-  // Get display name
-  const displayName =
-    profile.firstName && profile.lastName
-      ? `${profile.firstName} ${profile.lastName}`
-      : profile.firstName || profile.username;
+  // Merge name fields — profile payload wins, then auth session/cache
+  const profileNameSource: ProfileNameSource = {
+    ...(cachedProfileUser as ProfileNameSource | null),
+    ...(currentUser as ProfileNameSource | null),
+    ...(profile as ProfileNameSource),
+    username: profile?.username ?? currentUser?.username ?? cachedProfileUser?.username ?? username,
+    firstName: profile?.firstName ?? currentUser?.firstName ?? cachedProfileUser?.firstName,
+    lastName: profile?.lastName ?? currentUser?.lastName ?? cachedProfileUser?.lastName,
+    middleName: profile?.middleName ?? currentUser?.middleName ?? cachedProfileUser?.middleName,
+    name:
+      (profile as ProfileNameSource)?.name ??
+      (currentUser as ProfileNameSource | undefined)?.name ??
+      (cachedProfileUser as ProfileNameSource | undefined)?.name,
+    fullName:
+      (profile as ProfileNameSource)?.fullName ??
+      (currentUser as ProfileNameSource | undefined)?.fullName ??
+      (cachedProfileUser as ProfileNameSource | undefined)?.fullName,
+    full_name:
+      (profile as ProfileNameSource)?.full_name ??
+      (currentUser as ProfileNameSource | undefined)?.full_name ??
+      (cachedProfileUser as ProfileNameSource | undefined)?.full_name,
+    displayName:
+      (profile as ProfileNameSource)?.displayName ??
+      (currentUser as ProfileNameSource | undefined)?.displayName ??
+      (cachedProfileUser as ProfileNameSource | undefined)?.displayName,
+  };
 
-  const userInitial = displayName[0]?.toUpperCase() || 'U';
+  const personalName = resolveProfilePersonalName(profileNameSource, username);
+  const displayName = resolveProfileDisplayName(profileNameSource, username);
+
+  const profileAvatarSrc = resolveUserAvatarUrl({
+    profilePicture: profile.profilePicture,
+    avatarUrl: profile.avatarUrl,
+  });
+  const profileInitial = displayName[0]?.toUpperCase() || 'U';
+  const anchoredMapCenter = resolveProfileMapCenter(profile);
+  const hasMapLocation = anchoredMapCenter != null;
+  const mapCenter = anchoredMapCenter ?? PROFILE_MAP_DEFAULT;
 
   const hist = profile as {
     usernameHistory?: Array<{
@@ -448,477 +508,268 @@ export default function ProfilePage() {
   const joinedLabel = profile.createdAt
     ? new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
     : 'Recently';
-  const primaryStatCards = [
-    { label: 'Linkers', value: followerCount.toLocaleString(), icon: 'group', tone: 'from-emerald-500/15 to-emerald-500/5 text-emerald-700' },
-    { label: 'Linking', value: followingCount.toLocaleString(), icon: 'share', tone: 'from-sky-500/15 to-sky-500/5 text-sky-700' },
-    { label: 'NeyburH Score', value: trustScore.toLocaleString(), icon: 'verified_user', tone: 'from-lime-500/15 to-lime-500/5 text-primary700' },
-    { label: 'HuudCoins', value: Number(huudCoins).toLocaleString(), icon: 'stars', tone: 'from-amber-500/20 to-amber-500/5 text-amber-700' },
-  ];
   const profileFacts = [
-    { label: 'Location', value: locationLabel || 'Neyborhuud pending', icon: 'location_on' },
     { label: 'Joined', value: joinedLabel, icon: 'calendar_month' },
     { label: 'Identity', value: profile.identityVerified ? 'Verified' : 'Pending', icon: profile.identityVerified ? 'verified' : 'shield' },
     { label: 'Role', value: profile.role?.replace('_', ' ') || 'user', icon: 'badge' },
   ];
 
+  const handleShareProfile = async () => {
+    const shared = await shareProfileUrl(profile.username, displayName);
+    if (shared) {
+      toast.success(
+        typeof navigator !== 'undefined' && 'share' in navigator
+          ? 'Profile shared'
+          : 'Profile link copied',
+      );
+    }
+  };
+
+  const handleCreatePost = () => {
+    if (isOwnProfile) {
+      setIsCreatePostOpen(true);
+      return;
+    }
+    router.push('/feed');
+  };
+
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
-      {/* Follower milestone celebration overlay — shown to follower who just followed, OR to profile owner detecting a new reward */}
+    <div className="profile-auth-page-root relative flex h-screen w-full flex-col overflow-hidden neu-base">
       {(ownerMilestone ?? pendingMilestone) && (
         <FollowerMilestoneCelebration
           milestone={(ownerMilestone ?? pendingMilestone)!}
           onDismiss={ownerMilestone ? () => setOwnerMilestone(null) : clearMilestone}
         />
       )}
-      {/* TopNav floats over the map cover */}
-      <div className="absolute inset-x-0 top-0 z-30 pointer-events-none">
-        <div className="pointer-events-auto">
-          <TopNav />
-        </div>
-      </div>
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
-        <div className="flex-1 overflow-y-auto">
-      {/* Profile Content — map fills from the very top, TopNav overlays it */}
-      <div className="w-full">
+        <div className="hidden lg:block">
+          <LeftSidebar />
+        </div>
+        <div className="profile-auth-scroll flex-1 overflow-y-auto">
+      <ProfileAuthShell>
+        <ProfileSnapHero
+          displayName={displayName}
+          personalName={personalName}
+          username={profile.username}
+          avatarUrl={profileAvatarSrc}
+          isOwnProfile={isOwnProfile}
+          uploading={isUploadingAvatar}
+          hasMapLocation={hasMapLocation}
+          mapCenter={mapCenter}
+          locationLabel={locationLabel}
+          onShare={handleShareProfile}
+          onMessage={!isOwnProfile ? handleStartChat : undefined}
+          messaging={startingChat}
+          onChangePhoto={isOwnProfile ? handleAvatarClick : undefined}
+          onSetLocation={isOwnProfile ? handleSetLocation : undefined}
+          onMapLocationChange={isOwnProfile ? handleMapLocationChange : undefined}
+          settingLocation={isSettingLocation}
+          savingMapLocation={isSavingDraggedLocation}
+          identityVerified={profile.identityVerified}
+          vouchCount={vouchStatus?.vouchCount}
+        />
 
-        <section className="relative min-h-[430px] overflow-hidden border-b border-emerald-950/10 bg-emerald-50">
-          <div className="absolute inset-0 overflow-hidden">
-            {profile.location?.latitude && profile.location?.longitude ? (
-              <MiniMap
-                center={{ lat: profile.location.latitude, lng: profile.location.longitude }}
-                height="430px"
-                className="w-full"
-                draggable={isOwnProfile}
-                markerInteractive={isOwnProfile}
-                onLocationChange={handleMapLocationChange}
-                dragHintLabel={isSavingDraggedLocation ? 'Saving location…' : 'Tap map to move pin · Tap pin to change photo'}
-                customMarkerNode={
-                  <MapPinAvatar
-                    src={profile.profilePicture || profile.avatarUrl}
-                    alt={displayName}
-                    fallbackInitial={userInitial}
-                    size="marker"
-                    onClick={isOwnProfile ? (e) => { e.stopPropagation(); handleAvatarClick(); } : undefined}
-                    className={isOwnProfile ? 'cursor-pointer' : ''}
-                  />
-                }
-              />
-            ) : (
-              <div className="h-full bg-[radial-gradient(circle_at_top_left,rgba(0,111,53,0.22),transparent_34%),linear-gradient(135deg,rgba(240,253,244,1),rgba(219,234,254,1))]" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-slate-950/70 pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-transparent pointer-events-none" />
-          </div>
-
-          <button
-            onClick={() => router.back()}
-            className="absolute top-16 left-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/85 text-emerald-700 shadow-lg backdrop-blur-md transition hover:bg-white"
-            aria-label="Go back"
-            type="button"
-          >
-            <i className="bi bi-arrow-left text-lg" />
-          </button>
-
-          {isOwnProfile && (
-            <button
-              onClick={handleSetLocation}
-              disabled={isSettingLocation}
-              className="absolute top-16 right-4 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/85 px-3.5 py-2 text-xs font-bold text-emerald-700 shadow-lg backdrop-blur-md transition hover:bg-white disabled:opacity-50"
-              type="button"
-            >
-              <span className="material-symbols-outlined text-[15px]">
-                {isSettingLocation ? 'hourglass_top' : 'my_location'}
-              </span>
-              {isSettingLocation ? 'Updating...' : 'Set Location'}
-            </button>
-          )}
-
-          <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-5 sm:px-6 lg:px-8">
-            <div className="mx-auto flex max-w-5xl flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div className="flex min-w-0 items-end gap-3 sm:gap-4">
-                <div className="relative shrink-0">
-              <MapPinAvatar
-                src={profile.profilePicture || profile.avatarUrl}
-                alt={displayName}
-                fallbackInitial={userInitial}
-                size="2xl"
-                onClick={isOwnProfile ? handleAvatarClick : undefined}
-                    className={isOwnProfile ? 'cursor-pointer drop-shadow-2xl' : 'drop-shadow-2xl'}
-              />
-                  {isOwnProfile && (
-                    <button
-                      onClick={handleAvatarClick}
-                      className="absolute -right-1 bottom-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-emerald-600 text-white shadow-lg"
-                      type="button"
-                      aria-label="Upload profile photo"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">photo_camera</span>
-                    </button>
-                  )}
-                </div>
-                <div className="min-w-0 pb-2 text-white">
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
-                    {profile.identityVerified && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2 py-1 text-[11px] font-bold text-emerald-100 ring-1 ring-emerald-200/30 backdrop-blur">
-                        <span className="material-symbols-outlined text-[13px]">verified</span>
-                        Verified
-                      </span>
-                    )}
-                    <span className="rounded-full bg-white/15 px-2 py-1 text-[11px] font-bold text-white/90 ring-1 ring-white/15 backdrop-blur">
-                      Level {level}
-                    </span>
-                    {/* Trust tier badge */}
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[11px] font-bold text-white/90 ring-1 ring-white/15 backdrop-blur">
-                      {profileTrustTier.icon} {profileTrustTier.label}
-                    </span>
-                    {/* Vouch count chip — shown when there are vouches */}
-                    {(vouchStatus?.vouchCount ?? 0) > 0 && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2 py-1 text-[11px] font-bold text-amber-100 ring-1 ring-amber-200/30 backdrop-blur">
-                        🤜 {vouchStatus!.vouchCount} {vouchStatus!.vouchCount === 1 ? 'vouch' : 'vouches'}
-                      </span>
-                    )}
-                  </div>
-                  <h1 className="truncate text-2xl font-black leading-tight sm:text-4xl">{displayName}</h1>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-white/80 sm:text-sm">
-                    <span>@{profile.username}</span>
-                    {locationLabel && (
-                      <span className="inline-flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px]">location_on</span>
-                        {locationLabel}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
-                {primaryStatCards.map((stat) => (
-                  <div key={stat.label} className="min-w-[98px] rounded-2xl border border-white/15 bg-white/15 px-3 py-2 text-white shadow-lg backdrop-blur-md">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-white/70">
-                      <span className="material-symbols-outlined text-[14px]">{stat.icon}</span>
-                      {stat.label}
-                    </div>
-                    <p className="mt-1 text-lg font-black leading-none tabular-nums">{stat.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {isOwnProfile && (
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-              disabled={isUploadingAvatar}
-              aria-label="Upload profile photo"
-            />
-          )}
-
-          {isUploadingAvatar && (
-            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 pointer-events-none">
-              <div className="px-4 py-2 rounded-full bg-white/95 text-xs font-semibold text-charcoal shadow-lg flex items-center gap-2">
-                <i className="bi bi-arrow-repeat animate-spin"></i>
-                Uploading photo…
-              </div>
-            </div>
-          )}
-        </section>
-
-        <section className="doodle-surface px-0 py-5">
-          <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            {isOwnProfile ? (
-              <>
-                <Link
-                  href="/settings"
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
-                >
-                  <i className="bi bi-pencil text-sm" />
-                  Edit Profile
-                </Link>
-                <button
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                  type="button"
-                >
-                  <span className="material-symbols-outlined text-[16px]">share</span>
-                  Share Profile
-                </button>
-              </>
-            ) : isLoadingStatus ? (
-              <div className="inline-flex flex-1 animate-pulse items-center justify-center rounded-2xl bg-slate-100 px-4 py-3">
-                <div className="h-4 w-24 rounded-full bg-slate-200" />
-              </div>
+        <ProfileAuthSheet>
+        {!isOwnProfile && (
+          <div className="auth-signup-actions auth-signup-actions--row">
+            {isLoadingStatus ? (
+              <div className="auth-btn auth-btn-secondary animate-pulse opacity-60">Loading…</div>
             ) : isBlocked ? (
               <button
                 onClick={() => toggleBlock()}
                 disabled={isBlockPending}
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-red-100 px-5 py-3 text-sm font-black text-red-600 transition hover:bg-red-200 disabled:opacity-50"
+                className="auth-btn auth-btn-secondary !border-red-200 !text-red-600"
                 type="button"
               >
-                <span className="material-symbols-outlined text-[16px]">block</span>
-                {isBlockPending ? 'Unblocking...' : 'Blocked'}
+                {isBlockPending ? 'Unblocking…' : 'Blocked'}
               </button>
             ) : isBlockedByThem ? (
-              <div className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-black text-[var(--neu-text-muted)]">
-                <span className="material-symbols-outlined text-[16px]">block</span>
-                Unavailable
-              </div>
+              <div className="auth-btn auth-btn-secondary cursor-not-allowed opacity-60">Unavailable</div>
             ) : (
               <>
                 <button
                   onClick={toggleFollow}
                   disabled={isFollowPending}
-                  className={`group inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
-                    isFollowing ? 'border border-slate-200 bg-white text-slate-700 hover:border-red-200 hover:bg-brand-red/10 hover:text-brand-red' : 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`auth-btn ${isFollowing ? 'auth-btn-secondary' : 'auth-btn-primary'} !min-h-[44px]`}
                   type="button"
                 >
-                  {isFollowPending ? (
-                    <>
-                      <i className="bi bi-hourglass-split animate-spin text-sm" />
-                      <span className="hidden group-hover:inline">{isFollowing ? 'Unlinking...' : 'Linking...'}</span>
-                      <span className="group-hover:hidden">{isFollowing ? 'HuudLinked' : 'HuudLink'}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="hidden group-hover:inline">{isFollowing ? 'Unlink' : 'HuudLink'}</span>
-                      <span className="group-hover:hidden">
-                        {isFollowing ? 'HuudLinked' : 'HuudLink'}
-                        {followsYou && !isFollowing && ' Back'}
-                      </span>
-                    </>
-                  )}
+                  {isFollowPending
+                    ? isFollowing
+                      ? 'Unlinking…'
+                      : 'Linking…'
+                    : isFollowing
+                      ? 'HuudLinked'
+                      : `HuudLink${followsYou && !isFollowing ? ' Back' : ''}`}
                 </button>
-                <button
-                  onClick={handleStartChat}
-                  disabled={startingChat}
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-black text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-50"
-                  type="button"
-                >
-                  {startingChat ? (
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  ) : (
-                    <span className="material-symbols-outlined text-[18px]">chat</span>
-                  )}
-                  {startingChat ? 'Opening...' : 'Message'}
-                </button>
-                {/* Tip neighbour with HuudCoins */}
                 <button
                   onClick={() => setShowTipModal(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-black text-amber-700 transition hover:bg-amber-100"
+                  className="auth-btn auth-btn-secondary !min-h-[44px]"
                   type="button"
-                  title="Send HuudCoins tip"
                 >
-                  🪙
+                  🪙 Tip
                 </button>
-                {/* More Actions */}
-                {!isBlockedByThem && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowMoreMenu(!showMoreMenu)}
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                      type="button"
-                      aria-label="More actions"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">more_horiz</span>
-                    </button>
-                    {showMoreMenu && (
-                      <>
-                        <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
-                        <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                          <button
-                            onClick={() => { toggleBlock(); setShowMoreMenu(false); }}
-                            disabled={isBlockPending}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium hover:bg-brand-red/10 dark:hover:bg-brand-red/20 text-red-600 dark:text-brand-red transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">{isBlocked ? 'lock_open' : 'block'}</span>
-                            {isBlocked ? 'Unblock NeyburH' : 'Block NeyburH'}
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
               </>
             )}
           </div>
+        )}
 
-          {/* ── Vouch Card ──────────────────────────────────────────── */}
-          {!isOwnProfile && !isBlocked && !isBlockedByThem && currentUser && (
-            <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-700">
-                      Community Trust
-                    </p>
-                    {/* ── Proximity badge ── */}
-                    {!vouchStatus?.hasVouched && (
-                      vouchStatus?.locationRequired ? (
-                        <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-100 border border-slate-300 px-2 py-0.5 text-[10px] font-bold text-[var(--neu-text-muted)]">
-                          <span className="material-symbols-outlined text-[12px]">location_off</span>
-                          Location needed
-                        </span>
-                      ) : vouchStatus?.withinRange === true ? (
-                        <span className="inline-flex items-center gap-0.5 rounded-full bg-green-100 border border-green-300 px-2 py-0.5 text-[10px] font-bold text-green-700">
-                          <span className="material-symbols-outlined text-[12px]">my_location</span>
-                          {vouchStatus.distanceMeters}m away ✓
-                        </span>
-                      ) : vouchStatus?.withinRange === false ? (
-                        <span className="inline-flex items-center gap-0.5 rounded-full bg-red-100 border border-red-300 px-2 py-0.5 text-[10px] font-bold text-red-600">
-                          <span className="material-symbols-outlined text-[12px]">location_off</span>
-                          {vouchStatus.distanceMeters != null ? `${vouchStatus.distanceMeters}m away` : 'Too far'} — 500m limit
-                        </span>
-                      ) : null
-                    )}
-                  </div>
-                  <p className="mt-0.5 text-sm font-semibold text-slate-800">
-                    {(vouchStatus?.vouchCount ?? 0) > 0
-                      ? `${vouchStatus!.vouchCount} NeyburH${vouchStatus!.vouchCount === 1 ? '' : 's'} vouch for @${profile.username}`
-                      : `@${profile.username} has no vouches yet`}
-                  </p>
-                  <p className="mt-0.5 text-xs text-[var(--neu-text-muted)]">
-                    {vouchStatus?.hasVouched
-                      ? 'You have vouched for this NeyburH. Their actions reflect on your trust.'
-                      : vouchStatus?.canVouch === false
-                      ? 'Reach Tree 🌳 tier to unlock vouching.'
-                      : vouchStatus?.locationRequired
-                      ? 'Both you and this NeyburH need location enabled to vouch.'
-                      : vouchStatus?.withinRange === false
-                      ? 'You must be within 500m to vouch — NeyborHuud is hyperlocal. Only vouch for neighbours you know in person.'
-                      : 'Vouching puts your own NeyburH Score at stake.'}
-                  </p>
-                </div>
-                <div className="shrink-0">
-                  {vouchStatus?.hasVouched ? (
-                    <button
-                      onClick={() => revokeMutation.mutate()}
-                      disabled={isVouchPending}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-100 px-3.5 py-2 text-sm font-black text-amber-700 transition hover:border-red-300 hover:bg-brand-red/10 hover:text-brand-red disabled:opacity-50"
-                      type="button"
-                      title="Revoke your vouch"
-                    >
-                      {isVouchPending ? (
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                      ) : (
-                        <>🤜 Vouched</>
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        if (vouchStatus?.canVouch === false) {
-                          toast.error('You need Tree 🌳 tier (300+ NeyburH Score) to vouch for others', {
-                            description: 'Keep contributing, completing jobs, and getting verified to level up.',
-                          });
-                          return;
-                        }
-                        if (vouchStatus?.locationRequired) {
-                          toast.error('Location required to vouch', {
-                            description: 'Both you and this NeyburH need location enabled. Enable it in your profile settings.',
-                          });
-                          return;
-                        }
-                        if (vouchStatus?.withinRange === false) {
-                          toast.error(`You are ${vouchStatus.distanceMeters}m away — vouching requires you to be within 500m`, {
-                            description: 'NeyborHuud is hyperlocal. You can only vouch for genuine neighbours nearby.',
-                          });
-                          return;
-                        }
-                        vouchMutation.mutate();
-                      }}
-                      disabled={isVouchPending}
-                      className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-black text-white shadow-md transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                        vouchStatus?.canVouch === false || vouchStatus?.locationRequired || vouchStatus?.withinRange === false
-                          ? 'bg-brand-surface shadow-gray-400/25 cursor-pointer hover:bg-brand-surface'
-                          : 'bg-primary shadow-amber-500/25 hover:bg-amber-600'
-                      }`}
-                      type="button"
-                      title={
-                        vouchStatus?.canVouch === false ? 'Reach Tree 🌳 tier to unlock vouching'
-                        : vouchStatus?.locationRequired ? 'Location required'
-                        : vouchStatus?.withinRange === false ? `Too far away (${vouchStatus.distanceMeters}m — limit is 500m)`
-                        : 'Vouch for this NeyburH'
-                      }
-                    >
-                      {isVouchPending ? (
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                      ) : vouchStatus?.canVouch === false ? (
-                        <><span className="material-symbols-outlined text-[15px]">lock</span> Vouch</>
-                      ) : vouchStatus?.locationRequired ? (
-                        <><span className="material-symbols-outlined text-[15px]">location_off</span> Vouch</>
-                      ) : vouchStatus?.withinRange === false ? (
-                        <><span className="material-symbols-outlined text-[15px]">location_off</span> Vouch</>
-                      ) : (
-                        <>🤜 Vouch</>
-                      )}
-                    </button>
+        <ProfileSnapStatsRow
+          username={profile.username}
+          dateOfBirth={profile.dateOfBirth}
+          huudCoins={huudCoins}
+          followerCount={followerCount}
+          followingCount={followingCount}
+        />
+
+        <ProfileSnapPlusCard
+          isOwnProfile={isOwnProfile}
+          trustScore={trustScore}
+          trustLabel={profileTrustTier.label}
+          level={level}
+        />
+
+        <ProfileSnapHub
+          isOwnProfile={isOwnProfile}
+          onCreatePost={handleCreatePost}
+          onSetLocation={isOwnProfile ? handleSetLocation : undefined}
+          showPinPrompt={!hasMapLocation}
+        />
+
+        {!isOwnProfile && !isBlocked && !isBlockedByThem && currentUser && (
+          <div className="auth-flow-hero-card flex-col !items-stretch gap-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="auth-flow-hero-card__eyebrow mb-0">Community Trust</p>
+                  {!vouchStatus?.hasVouched && (
+                    vouchStatus?.locationRequired ? (
+                      <span className="inline-flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--surface-muted,#f4f4f5)] px-2 py-0.5 text-[10px] font-bold text-[var(--neu-text-muted)]">
+                        <span className="material-symbols-outlined text-[12px]">location_off</span>
+                        Location needed
+                      </span>
+                    ) : vouchStatus?.withinRange === true ? (
+                      <span className="inline-flex items-center gap-0.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                        <span className="material-symbols-outlined text-[12px]">my_location</span>
+                        {vouchStatus.distanceMeters}m away ✓
+                      </span>
+                    ) : vouchStatus?.withinRange === false ? (
+                      <span className="inline-flex items-center gap-0.5 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">
+                        <span className="material-symbols-outlined text-[12px]">location_off</span>
+                        {vouchStatus.distanceMeters != null ? `${vouchStatus.distanceMeters}m away` : 'Too far'} — 500m limit
+                      </span>
+                    ) : null
                   )}
                 </div>
+                <p className="auth-flow-hero-card__title !text-base">
+                  {(vouchStatus?.vouchCount ?? 0) > 0
+                    ? `${vouchStatus!.vouchCount} NeyborH${vouchStatus!.vouchCount === 1 ? '' : 's'} vouch for @${profile.username}`
+                    : `@${profile.username} has no vouches yet`}
+                </p>
+                <p className="auth-flow-hero-card__meta">
+                  {vouchStatus?.hasVouched
+                    ? 'You have vouched for this NeyborH. Their actions reflect on your trust.'
+                    : vouchStatus?.canVouch === false
+                      ? 'Reach Tree 🌳 tier to unlock vouching.'
+                      : vouchStatus?.locationRequired
+                        ? 'Both you and this NeyborH need location enabled to vouch.'
+                        : vouchStatus?.withinRange === false
+                          ? 'You must be within 500m to vouch — NeyborHuud is hyperlocal.'
+                          : 'Vouching puts your own NeyburH Score at stake.'}
+                </p>
               </div>
-              {/* Trust tier progress bar */}
-              {(vouchStatus?.vouchesNeeded ?? 0) > 0 && !vouchStatus?.hasVouched && (
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-amber-600 mb-1">
-                    <span>Progress to Tree 🌳 tier</span>
-                    <span>{vouchStatus?.vouchCount ?? 0} / 3 vouches</span>
-                  </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-amber-200">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-500"
-                      style={{ width: `${Math.min(100, ((vouchStatus?.vouchCount ?? 0) / 3) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-            <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-                  <span className="material-symbols-outlined text-[20px]">person_pin_circle</span>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">About this NeyburH</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-700">
-                    {profile.bio || `${displayName} is part of the ${locationLabel || 'NeyborHuud'} community.`}
-                  </p>
-                </div>
+              <div className="flex shrink-0 flex-col gap-2">
+                {vouchStatus?.hasVouched ? (
+                  <button
+                    onClick={() => revokeMutation.mutate()}
+                    disabled={isVouchPending}
+                    className="auth-btn auth-btn-secondary !min-h-[40px] !w-auto px-4"
+                    type="button"
+                  >
+                    {isVouchPending ? '…' : '🤜 Vouched'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (vouchStatus?.canVouch === false) {
+                        toast.error('You need Tree 🌳 tier (300+ NeyburH Score) to vouch for others', {
+                          description: 'Keep contributing, completing jobs, and getting verified to level up.',
+                        });
+                        return;
+                      }
+                      if (vouchStatus?.locationRequired) {
+                        toast.error('Location required to vouch', {
+                          description: 'Both you and this NeyborH need location enabled. Enable it in your profile settings.',
+                        });
+                        return;
+                      }
+                      if (vouchStatus?.withinRange === false) {
+                        toast.error(`You are ${vouchStatus.distanceMeters}m away — vouching requires you to be within 500m`, {
+                          description: 'NeyborHuud is hyperlocal. You can only vouch for genuine neighbours nearby.',
+                        });
+                        return;
+                      }
+                      vouchMutation.mutate();
+                    }}
+                    disabled={isVouchPending}
+                    className="auth-btn auth-btn-primary !min-h-[40px] !w-auto px-4"
+                    type="button"
+                  >
+                    {isVouchPending ? '…' : '🤜 Vouch'}
+                  </button>
+                )}
+                {!isBlockedByThem && (
+                  <button
+                    onClick={() => toggleBlock()}
+                    disabled={isBlockPending}
+                    className="auth-btn auth-btn-secondary !min-h-[36px] !w-auto px-3 text-xs"
+                    type="button"
+                  >
+                    {isBlocked ? 'Unblock' : 'Block'}
+                  </button>
+                )}
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              {profileFacts.map((fact) => (
-                <div key={fact.label} className="rounded-2xl border border-slate-200 bg-white p-3">
-                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">
-                    <span className="material-symbols-outlined text-[14px] text-emerald-600">{fact.icon}</span>
-                    {fact.label}
-                  </div>
-                  <p className="mt-1 truncate text-sm font-bold capitalize text-slate-800">{fact.value}</p>
+            {(vouchStatus?.vouchesNeeded ?? 0) > 0 && !vouchStatus?.hasVouched && (
+              <div>
+                <div className="mb-1 flex items-center justify-between text-[10px] font-bold text-[var(--neu-text-muted)]">
+                  <span>Progress to Tree 🌳 tier</span>
+                  <span>{vouchStatus?.vouchCount ?? 0} / 3 vouches</span>
                 </div>
-              ))}
-            </div>
+                <progress
+                  className="h-1.5 w-full overflow-hidden rounded-full accent-[var(--landing-green-deep,#006f35)]"
+                  value={Math.min(100, ((vouchStatus?.vouchCount ?? 0) / 3) * 100)}
+                  max={100}
+                  aria-label="Vouch progress to Tree tier"
+                />
+              </div>
+            )}
           </div>
+        )}
 
-          <div className="mt-4 space-y-3">
+        <ProfileSnapFriends
+          username={profile.username}
+          isOwnProfile={isOwnProfile}
+          followers={followerPreview}
+          followerCount={followerCount}
+        />
+
+        <div className="auth-flow-hero-card flex-col !items-stretch gap-3">
+          <p className="auth-flow-hero-card__eyebrow mb-0">About this NeyburH</p>
+          <p className="auth-flow-hero-card__meta m-0 leading-6">
+            {profile.bio || `${displayName} is part of the ${locationLabel || 'NeyborHuud'} community.`}
+          </p>
+        </div>
+
+        {(showHandleHistory || (!isOwnProfile && (followsYou || isMutual))) && (
+          <div className="flex flex-col gap-2">
             {showHandleHistory ? (
-              <div
-                className="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-left"
-              >
-                <h3 className="mb-2 text-[11px] font-black uppercase tracking-wider text-[var(--neu-text-muted)]">
-                  Handle history
-                </h3>
+              <div className="auth-flow-hero-card flex-col !items-stretch gap-2">
+                <p className="auth-flow-hero-card__eyebrow mb-0">Handle history</p>
                 {renameAudit.length > 0 ? (
-                  <ul className="space-y-2 text-xs text-slate-700">
+                  <ul className="space-y-2 text-xs text-[var(--brand-black,#1a1a1a)]">
                     {renameAudit.map((row, idx) => (
                       <li key={`${row.previousUsername}-${row.newUsername}-${idx}`}>
-                        <span className="font-mono text-primary">@{row.previousUsername}</span>
+                        <span className="font-mono text-[var(--landing-green-deep,#006f35)]">@{row.previousUsername}</span>
                         {' → '}
                         <span className="font-mono">@{row.newUsername}</span>
                         {row.changedAt ? (
@@ -930,11 +781,11 @@ export default function ProfilePage() {
                     ))}
                   </ul>
                 ) : hist.usernameTimeline && hist.usernameTimeline.length > 0 ? (
-                  <ul className="space-y-1.5 text-xs text-slate-700">
+                  <ul className="space-y-1.5 text-xs text-[var(--brand-black,#1a1a1a)]">
                     {hist.usernameTimeline.map((row, idx) => (
                       <li key={`${row.username}-${idx}`}>
                         <span className="font-mono font-semibold">@{row.username}</span>
-                        <span className="text-[10px] opacity-70 block">
+                        <span className="block text-[10px] opacity-70">
                           {new Date(row.effectiveFrom).toLocaleDateString()}
                           {row.effectiveTo
                             ? ` – ${new Date(row.effectiveTo).toLocaleDateString()}`
@@ -946,7 +797,6 @@ export default function ProfilePage() {
                 ) : null}
               </div>
             ) : null}
-
             {!isOwnProfile && (followsYou || isMutual) && (
               <div className="flex flex-wrap gap-2">
                 {isMutual ? (
@@ -962,57 +812,44 @@ export default function ProfilePage() {
                 ) : null}
               </div>
             )}
-
           </div>
-          </div>
-        </section>
+        )}
 
         {/* ══════ Two-Column Layout ══════ */}
-        <div className="doodle-surface-muted flex flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:px-8">
+        <div className="profile-auth-content flex flex-col gap-4 lg:flex-row lg:gap-6">
 
-          <aside className="w-full flex-shrink-0 space-y-4 lg:w-80">
-            <div className="overflow-hidden rounded-[28px] border border-emerald-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-              <div className="bg-gradient-to-br from-emerald-600 to-teal-500 p-5 text-white">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/70">TrustOS</p>
-                  <span className="material-symbols-outlined text-[20px]">verified_user</span>
-                </div>
-                <p className="mt-5 text-5xl font-black leading-none tabular-nums">{trustScore}</p>
-                <p className="mt-1 text-sm font-semibold text-white/75">NeyburH Score</p>
-                <p className="mt-2 text-xs font-semibold text-white/80">
+        {/* TrustOS detail — desktop sidebar; Huud+ card above covers the mobile summary */}
+          <aside className="hidden w-full flex-shrink-0 space-y-4 lg:block lg:w-80">
+            <div className="auth-flow-hero-card flex-col !items-stretch gap-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="auth-flow-hero-card__eyebrow mb-0">TrustOS</p>
+                <span className="material-symbols-outlined text-[1.25rem] text-[var(--landing-green-deep,#006f35)]">verified_user</span>
+              </div>
+              <div>
+                <p className="text-4xl font-black leading-none tabular-nums text-[var(--brand-black,#1a1a1a)]">{trustScore}</p>
+                <p className="mt-1 text-sm font-semibold text-[var(--neu-text-muted)]">NeyburH Score</p>
+                <p className="mt-1 text-xs font-semibold text-[var(--brand-black,#1a1a1a)]">
                   {profileTrustTier.icon} {profileTrustTier.label}
                   {nextTrustTier ? ` · ${Math.max(0, nextTrustTier.minScore - trustScore)} pts to ${nextTrustTier.label}` : ' · Top tier reached'}
                 </p>
-                {/* Marketplace badge */}
                 {profilePrivileges.marketplaceBadge && (
-                  <div className="mt-2">
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black ${profilePrivileges.marketplaceBadgeColor}`}>
-                      {profileTrustTier.icon} {profilePrivileges.marketplaceBadge}
-                    </span>
-                  </div>
+                  <span className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black ${profilePrivileges.marketplaceBadgeColor}`}>
+                    {profileTrustTier.icon} {profilePrivileges.marketplaceBadge}
+                  </span>
                 )}
               </div>
-              <div className="p-5">
+              <div>
                 <div className="mb-2 flex items-center justify-between text-xs font-bold text-[var(--neu-text-muted)]">
                   <span>Community trust</span>
                   <span>{scorePercent}%</span>
                 </div>
                 <progress
-                  className="h-2 w-full overflow-hidden rounded-full accent-emerald-500"
+                  className="h-2 w-full overflow-hidden rounded-full accent-[var(--landing-green-deep,#006f35)]"
                   value={scorePercent}
                   max={100}
                   aria-label="Community trust progress"
                 />
-                <div className="mt-5 grid grid-cols-2 gap-2">
-                  <div className="rounded-2xl bg-emerald-50 p-3 text-center">
-                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700/60">Level</p>
-                    <p className="mt-1 text-xl font-black text-emerald-700">{level}</p>
-                  </div>
-                  <div className="rounded-2xl bg-amber-50 p-3 text-center">
-                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-amber-700/60">Coins</p>
-                    <p className="mt-1 text-xl font-black text-amber-700">{Number(huudCoins).toLocaleString()}</p>
-                  </div>
-                </div>
+              </div>
 
                 {/* Voucher list */}
                 {voucherList.length > 0 && (
@@ -1091,55 +928,57 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 )}
-              </div>
             </div>
 
-            <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Profile Snapshot</p>
-              <div className="mt-4 space-y-3">
+            <div className="auth-flow-hero-card flex-col !items-stretch gap-3">
+              <p className="auth-flow-hero-card__eyebrow mb-0">Profile Snapshot</p>
+              <div className="space-y-2">
                 {profileFacts.map((fact) => (
-                  <div key={`side-${fact.label}`} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-600 shadow-sm">
-                      <span className="material-symbols-outlined text-[18px]">{fact.icon}</span>
-                    </div>
+                  <div key={`side-${fact.label}`} className="auth-signup-location-peek">
+                    <span className="auth-signup-location-peek__icon" aria-hidden>
+                      <span className="material-symbols-outlined text-[1rem]">{fact.icon}</span>
+                    </span>
                     <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">{fact.label}</p>
-                      <p className="truncate text-sm font-bold capitalize text-slate-800">{fact.value}</p>
+                      <p className="auth-signup-location-peek__label">{fact.label}</p>
+                      <p className="auth-signup-location-peek__name capitalize">{fact.value}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Verification</p>
-              <div className="mt-4 space-y-3">
+            <div className="auth-flow-hero-card flex-col !items-stretch gap-3">
+              <p className="auth-flow-hero-card__eyebrow mb-0">Verification</p>
+              <div className="space-y-2">
                 {[
                   { label: 'Location anchored', done: !!profile.location?.latitude },
                   { label: 'Identity confirmed', done: !!profile.identityVerified },
                   { label: 'Community ready', done: !!profile.assignedCommunityId || !!locationLabel },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-3">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-full ${item.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-[var(--neu-text-muted)]'}`}>
-                      <span className="material-symbols-outlined text-[17px]">{item.done ? 'check' : 'pending'}</span>
+                  <div key={item.label} className="auth-signup-location-peek">
+                    <span className="auth-signup-location-peek__icon" aria-hidden>
+                      <span className="material-symbols-outlined text-[1rem]">{item.done ? 'check' : 'pending'}</span>
+                    </span>
+                    <div>
+                      <p className="auth-signup-location-peek__label">Status</p>
+                      <p className="auth-signup-location-peek__name">{item.label}</p>
                     </div>
-                    <span className="text-sm font-bold text-slate-700">{item.label}</span>
                   </div>
                 ))}
               </div>
             </div>
           </aside>
 
-          <main className="min-w-0 flex-1 space-y-6">
-            <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
-              <div className="mb-5 flex items-center justify-between gap-4">
+          <main className="min-w-0 flex-1 space-y-4">
+            <section className="auth-flow-hero-card flex-col !items-stretch gap-4">
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Badges</p>
-                  <h2 className="mt-1 text-xl font-black text-slate-900">Neyborhuud credibility</h2>
+                  <p className="auth-flow-hero-card__eyebrow mb-0">Badges</p>
+                  <h2 className="auth-flow-hero-card__title !text-lg">Neyborhuud credibility</h2>
                 </div>
                 <Link
                   href={isOwnProfile ? "/gamification?tab=badges" : `/gamification`}
-                  className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-emerald-700 hover:bg-emerald-100 transition-colors"
+                  className="auth-btn auth-btn-secondary !min-h-[36px] !w-auto px-3 text-xs"
                 >
                   View All
                 </Link>
@@ -1213,7 +1052,7 @@ export default function ProfilePage() {
 
             {/* ── Gamification Quick Links (own profile only) ── */}
             {isOwnProfile && (
-              <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+              <section className="auth-flow-hero-card flex-col !items-stretch gap-4">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)] mb-4">Your HuudCoins Activity</p>
                 <div className="grid grid-cols-2 gap-3">
                   <Link
@@ -1246,7 +1085,7 @@ export default function ProfilePage() {
 
             {/* ── Jobs posted by this user ── */}
             {userJobs.length > 0 && (
-              <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+              <section className="auth-flow-hero-card flex-col !items-stretch gap-4">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Jobs</p>
@@ -1281,7 +1120,7 @@ export default function ProfilePage() {
 
             {/* ── Events organised by this user ── */}
             {userEvents.length > 0 && (
-              <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+              <section className="auth-flow-hero-card flex-col !items-stretch gap-4">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Events</p>
@@ -1315,7 +1154,7 @@ export default function ProfilePage() {
 
             {/* ── Services offered by this user ── */}
             {userServices.length > 0 && (
-              <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+              <section className="auth-flow-hero-card flex-col !items-stretch gap-4">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Services</p>
@@ -1350,7 +1189,7 @@ export default function ProfilePage() {
               </section>
             )}
 
-            <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+            <section className="auth-flow-hero-card flex-col !items-stretch gap-4">
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Activity</p>
@@ -1388,7 +1227,7 @@ export default function ProfilePage() {
               </p>
               <button
                 onClick={() => window.location.reload()}
-                className="rounded-2xl bg-emerald-600 px-6 py-2.5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+                className="auth-btn auth-btn-primary !w-auto px-6"
                 type="button"
               >
                 Retry
@@ -1412,7 +1251,7 @@ export default function ProfilePage() {
                 {isOwnProfile && (
                   <Link
                     href="/feed"
-                    className="mt-6 inline-flex rounded-2xl bg-emerald-600 px-6 py-2.5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+                    className="auth-btn auth-btn-primary !w-auto px-6 mt-6 inline-flex"
                   >
                     Create Your First Post
                   </Link>
@@ -1458,8 +1297,20 @@ export default function ProfilePage() {
             </section>
           </main>
         </div>
+        </ProfileAuthSheet>
 
-      </div>
+        {isOwnProfile && (
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+            disabled={isUploadingAvatar}
+            aria-label="Upload profile photo"
+          />
+        )}
+      </ProfileAuthShell>
 
       {/* Report Modal */}
       {reportingPostId && (
@@ -1486,7 +1337,9 @@ export default function ProfilePage() {
 
 
         </div>
-        <RightSidebar />
+        <div className="hidden lg:block">
+          <RightSidebar />
+        </div>
       </div>
       <BottomNav />
 
@@ -1509,6 +1362,17 @@ export default function ProfilePage() {
             tipUser.mutate({ recipientId: profile.id, amount })
           }
           onClose={() => setShowTipModal(false)}
+        />
+      )}
+
+      {isOwnProfile && (
+        <CreatePostModal
+          isOpen={isCreatePostOpen}
+          onClose={() => setIsCreatePostOpen(false)}
+          onSuccess={() => {
+            setIsCreatePostOpen(false);
+            queryClient.invalidateQueries({ queryKey: ['userPosts', userId] });
+          }}
         />
       )}
     </div>

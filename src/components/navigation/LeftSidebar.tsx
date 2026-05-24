@@ -5,8 +5,8 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
-import { getStoredCommunity } from '@/lib/communityContext';
-import AmbientProfileCard from './AmbientProfileCard';
+import { SidebarProfileLockup } from './SidebarProfileLockup';
+import { resolveUserAvatarUrl } from '@/lib/userAvatar';
 
 import { SIDEBAR_ACCENTS } from '@/lib/brand-styles';
 
@@ -57,78 +57,23 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
     return pathname?.startsWith(href);
   };
 
-  const userDisplayName = authUser
-    ? authUser.firstName && authUser.lastName
-      ? `${authUser.firstName} ${authUser.lastName}`
-      : authUser.firstName || authUser.username
-    : 'User';
-  const userInitial = userDisplayName[0]?.toUpperCase() || 'U';
-
-  // Backend may return location as nested object OR as flat fields (lga, state, etc.)
-  const u = user as any;
-  const community = getStoredCommunity();
-
-  const [userLocation, setUserLocation] = useState('');
-  useEffect(() => {
-    const loc = user?.location?.lga
-      || u?.lga
-      || user?.location?.state
-      || u?.state
-      || user?.location?.neighborhood
-      || u?.neighborhood
-      || (community?.lga && community?.state ? `${community.lga}, ${community.state}` : community?.lga || community?.state || community?.communityName || community?.name)
-      || '';
-    setUserLocation(loc);
-  }, [user, u?.lga, u?.state, u?.neighborhood]);
-
-  // Try user's lat/lng first, then fall back to community LGA centroid
-  const [fallbackCoords, setFallbackCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const resolvedLga = user?.location?.lga || u?.lga || community?.lga || '';
-  const resolvedState = user?.location?.state || u?.state || community?.state || '';
-  const resolvedLat = user?.location?.latitude || u?.latitude;
-  const resolvedLng = user?.location?.longitude || u?.longitude;
-
-  useEffect(() => {
-    // If user already has coordinates, no need for fallback
-    if (resolvedLat && resolvedLng) return;
-
-    // Try to get LGA centroid from backend geo API
-    if (resolvedLga && resolvedState) {
-      import('@/lib/api-client').then(({ default: apiClient }) => {
-        apiClient.get(`/geo/lga-centroid?lga=${encodeURIComponent(resolvedLga)}&state=${encodeURIComponent(resolvedState)}`)
-          .then((res: any) => {
-            if (res?.data?.latitude && res?.data?.longitude) {
-              setFallbackCoords({ lat: res.data.latitude, lng: res.data.longitude });
-            }
-          })
-          .catch(() => {});
-      });
-    }
-  }, [resolvedLat, resolvedLng, resolvedLga, resolvedState]);
-
-  // Derive coordinates for the ambient map pin
-  const userLat = resolvedLat || fallbackCoords?.lat;
-  const userLng = resolvedLng || fallbackCoords?.lng;
+  const profileAvatarSrc = resolveUserAvatarUrl({
+    profilePicture: authUser?.profilePicture,
+    avatarUrl: authUser?.avatarUrl,
+  });
 
   return (
     <div className="flex flex-col h-full">
-      {/* Ambient Profile Card — floats within sidebar padding like weather widget on right */}
-      <div className="pl-4 pr-6 pt-4">
-        <AmbientProfileCard
-          avatarUrl={authUser?.avatarUrl}
-          displayName={userDisplayName}
-          initial={userInitial}
-          username={authUser?.username || 'user'}
-          location={userLocation}
-          lat={userLat}
-          lng={userLng}
+      <div className="pl-4 pr-6 pt-6 pb-2">
+        <SidebarProfileLockup
+          avatarUrl={profileAvatarSrc}
+          username={authUser?.username || 'neybor'}
           profileHref={authUser ? `/profile/${authUser.username}` : '/settings'}
           onNavigate={onNavigate}
-          userId={authUser?.id}
         />
       </div>
 
-      <div className="pl-4 pr-6 pt-4 pb-6 flex flex-col gap-5 flex-1 min-h-0 overflow-y-auto">
+      <div className="pl-4 pr-6 pt-2 pb-6 flex flex-col gap-5 flex-1 min-h-0 overflow-y-auto">
 
         {/* Quick Actions */}
         <div className="flex flex-col gap-3">

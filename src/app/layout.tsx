@@ -7,6 +7,7 @@ import { Providers } from "@/components/providers";
 import { AppViewport } from "@/components/AppViewport";
 import DailyCheckInModal from "@/components/gamification/DailyCheckInModalLoader";
 import TextSizeApplier from "@/components/TextSizeApplier";
+import { ThemeSync } from "@/components/theme/ThemeSync";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -81,6 +82,11 @@ export default function RootLayout({
         />
         <script
           dangerouslySetInnerHTML={{
+            __html: `(function(){try{var m=window.matchMedia('(prefers-color-scheme: dark)');var d=document.documentElement;var a=function(x){d.classList.toggle('dark',x);d.style.colorScheme=x?'dark':'light';};a(m.matches);m.addEventListener('change',function(e){a(e.matches);});}catch(e){}}());`,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
             __html: `(function(){var EXT='nkbihfbeogaeaoehlefnkodbefgpgknn';var isNoise=function(v){var s=String(v||'');return s.indexOf('MetaMask')!==-1||s.indexOf('Failed to connect to MetaMask')!==-1||s.indexOf(EXT)!==-1||s.indexOf('chrome-extension://'+EXT)!==-1;};window.addEventListener('error',function(event){var parts=[event&&event.message,event&&event.filename,event&&event.error&&event.error.message,event&&event.error&&event.error.stack].filter(Boolean).join(' ');if(isNoise(parts)){event.preventDefault();if(event.stopImmediatePropagation){event.stopImmediatePropagation();}}},true);window.addEventListener('unhandledrejection',function(event){var reason=event&&event.reason;var parts=[reason&&reason.message,reason&&reason.stack,reason].filter(Boolean).join(' ');if(isNoise(parts)){event.preventDefault();if(event.stopImmediatePropagation){event.stopImmediatePropagation();}}},true);}());`,
           }}
         />
@@ -90,6 +96,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AppViewport />
+        <ThemeSync />
         <Providers>
           <a href="#main-content" className="skip-to-content">
             Skip to main content

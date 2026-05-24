@@ -22,6 +22,7 @@ import NotificationPermissionPrompt from '@/components/NotificationPermissionPro
 import PwaInstallPrompt from '@/components/PwaInstallPrompt';
 import { PwaInstallTracker } from '@/components/PwaInstallTracker';
 import { PageTransition } from '@/components/ui/PageTransition';
+import { SwipeBackProvider } from '@/contexts/SwipeBackContext';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
 
@@ -264,6 +265,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
     <QueryClientProvider client={queryClient}>
+      <SwipeBackProvider>
       <SocketAuthenticator />
       <SmartLocationSync />
       <LocationSyncOrchestrator />
@@ -271,6 +273,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <PwaInstallTracker />
       <PwaInstallPrompt />
       <PageTransition>{children}</PageTransition>
+      </SwipeBackProvider>
       <Toaster 
         position="top-right" 
         richColors 

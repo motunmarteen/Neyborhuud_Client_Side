@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:clean": "node scripts/dev-clean.mjs",
+    "dev:stable": "next dev",
     "dev:port": "node start-dev.js",
     "dev:3000": "set NEXT_DIST_DIR=.next-3000&& set PORT=3000&& next dev --turbopack --port 3000",
     "dev:3001": "set NEXT_DIST_DIR=.next-3001&& set PORT=3001&& next dev --turbopack --port 3001",

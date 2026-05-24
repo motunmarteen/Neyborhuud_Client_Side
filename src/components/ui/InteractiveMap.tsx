@@ -34,6 +34,10 @@ interface InteractiveMapProps {
     dragHintLabel?: string;
     /** Floating pill at map bottom — off for fullscreen signup where hint lives in the sheet */
     showDragHint?: boolean;
+    /** MapLibre +/- zoom control */
+    showNavigationControl?: boolean;
+    /** OpenStreetMap compact attribution (i) badge */
+    showAttribution?: boolean;
     /** MapLibre zoom control corner — bottom-right is hidden under signup sheets */
     navigationControlPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
     overlays?: MapOverlay[];
@@ -72,6 +76,8 @@ export function InteractiveMap({
     markerInteractive = false,
     dragHintLabel = 'Tap or drag to adjust',
     showDragHint = true,
+    showNavigationControl = true,
+    showAttribution = true,
     navigationControlPosition = 'bottom-right',
     overlays = [],
     onLongPressMap,
@@ -104,12 +110,14 @@ export function InteractiveMap({
                 style: OSM_MAP_STYLE,
                 center: [center.lng, center.lat],
                 zoom,
-                attributionControl: { compact: true },
+                attributionControl: showAttribution ? { compact: true } : false,
             });
-            map.addControl(
-                new maplibregl.NavigationControl({ showCompass: false }),
-                navigationControlPosition,
-            );
+            if (showNavigationControl) {
+                map.addControl(
+                    new maplibregl.NavigationControl({ showCompass: false }),
+                    navigationControlPosition,
+                );
+            }
 
             map.on('load', () => {
                 if (accuracyRadius) {

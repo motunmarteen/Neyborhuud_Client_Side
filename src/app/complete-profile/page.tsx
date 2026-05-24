@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { authService } from '@/services/auth.service';
 import { getApiErrorMessage, getApiErrorStatus } from '@/lib/apiErrors';
@@ -25,6 +26,8 @@ function clearAuth() {
 
 export default function CompleteProfilePage() {
     const router = useRouter();
+    const queryClient = useQueryClient();
+    const submittingRef = useRef(false);
     const setupProgress = getAuthSetupProgress('profile');
     const [step, setStep] = useState<'form' | 'success'>('form');
     const [loading, setLoading] = useState(false);
@@ -74,6 +77,14 @@ export default function CompleteProfilePage() {
                     router.replace('/verify-email');
                     return;
                 }
+
+                setFormData((prev) => ({
+                    firstName: user.firstName || prev.firstName,
+                    lastName: user.lastName || prev.lastName,
+                    phone: user.phoneNumber || user.phone || prev.phone,
+                    gender: user.gender || prev.gender,
+                    dob: user.dateOfBirth?.slice(0, 10) || prev.dob,
+                }));
             } catch (e) {
                 void e;
             }
@@ -82,6 +93,8 @@ export default function CompleteProfilePage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (submittingRef.current || loading) return;
+
         const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
 
         if (!token) {
@@ -90,6 +103,7 @@ export default function CompleteProfilePage() {
             return;
         }
 
+        submittingRef.current = true;
         setLoading(true);
 
         try {
@@ -97,6 +111,7 @@ export default function CompleteProfilePage() {
             if (!response.success) {
                 throw new Error(response.message || 'Profile update failed.');
             }
+            await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
             setStep('success');
         } catch (error: unknown) {
             const msg = getApiErrorMessage(error, 'Profile update failed.');
@@ -165,6 +180,7 @@ export default function CompleteProfilePage() {
 
             toast.error(`Profile Error: ${msg}`);
         } finally {
+            submittingRef.current = false;
             setLoading(false);
         }
     };

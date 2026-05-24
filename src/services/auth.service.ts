@@ -23,6 +23,8 @@ import {
   UserConsentRecord,
   ApiResponse,
 } from "@/types/api";
+import { normalizeAuthUser } from "@/lib/userAvatar";
+import { getApiErrorMessage, getApiErrorStatus } from "@/lib/apiErrors";
 
 /** Throttle session keepalive pings (rolling expiry on server). */
 let lastSessionTouchAt = 0;
@@ -104,6 +106,136 @@ async function tryProfileUpdate(data: Record<string, unknown>) {
   }
   // None of the candidates were found
   throw lastError ?? new Error("No profile-update endpoint available on backend");
+}
+
+/** Merge a profile upload response into the cached auth user. */
+function persistProfileUploadUser(userFragment?: Partial<User> | null): User | null {
+  if (typeof window === "undefined" || !userFragment) return null;
+
+  let current: User | null = null;
+  const stored = localStorage.getItem("neyborhuud_user");
+  if (stored) {
+    try {
+      current = JSON.parse(stored) as User;
+    } catch {
+      current = null;
+    }
+  }
+
+  const merged = normalizeAuthUser({ ...current, ...userFragment } as User);
+  localStorage.setItem("neyborhuud_user", JSON.stringify(merged));
+  return merged;
+}
+
+type CompleteProfileInput = {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  gender?: string;
+  dob?: string;
+};
+
+/** Backend expects camelCase on /auth/complete-profile (see auth.validation.ts). */
+function buildCompleteProfilePayload(data: CompleteProfileInput) {
+  const payload: Record<string, string> = {
+    firstName: data.firstName.trim(),
+    lastName: data.lastName.trim(),
+  };
+  const phone = data.phone?.trim();
+  if (phone) payload.phoneNumber = phone;
+  if (data.gender) payload.gender = data.gender;
+  if (data.dob) payload.dateOfBirth = data.dob;
+  return payload;
+}
+
+/** Fallback when profile was already rewarded or /auth/complete-profile is slow. */
+function buildIdentityProfilePayload(data: CompleteProfileInput) {
+  const payload: Record<string, string> = {
+    first_name: data.firstName.trim(),
+    last_name: data.lastName.trim(),
+  };
+  if (data.gender) payload.gender = data.gender;
+  if (data.dob) payload.date_of_birth = data.dob;
+  return payload;
+}
+
+async function syncCachedUserFromProfileMe(): Promise<User | null> {
+  try {
+    const res = await apiClient.get<{ user: User }>("/profile/me");
+    if (res.success && res.data?.user) {
+      return persistProfileUploadUser(res.data.user);
+    }
+  } catch {
+    /* offline */
+  }
+  return null;
+}
+
+async function completeProfileViaIdentity(data: CompleteProfileInput): Promise<ApiResponse<User>> {
+  const basePayload = buildIdentityProfilePayload(data);
+  const phone = data.phone?.trim();
+
+  try {
+    let response = await apiClient.patch<{ user: User }>(
+      "/identity/profile",
+      phone ? { ...basePayload, phone_number: phone } : basePayload,
+    );
+
+    if (
+      !response.success &&
+      phone &&
+      (response.message || "").toLowerCase().includes("password")
+    ) {
+      response = await apiClient.patch<{ user: User }>("/identity/profile", basePayload);
+    }
+
+    if (!response.success) {
+      return { success: false, message: response.message || "Profile update failed." };
+    }
+
+    const user = response.data?.user
+      ? persistProfileUploadUser(normalizeAuthUser(response.data.user))
+      : await syncCachedUserFromProfileMe();
+
+    return {
+      success: true,
+      message: response.message || "Profile updated successfully",
+      data: user ?? undefined,
+    };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      message: getApiErrorMessage(error, "Profile update failed."),
+    };
+  }
+}
+
+/** Reward endpoint can hang on auth sync — keep this short and fall back quickly. */
+const COMPLETE_PROFILE_TIMEOUT_MS = 12_000;
+
+async function tryCompleteProfileReward(
+  data: CompleteProfileInput,
+): Promise<"success" | "already_completed" | "failed"> {
+  try {
+    const response = await apiClient.post(
+      "/auth/complete-profile",
+      buildCompleteProfilePayload(data),
+      { timeout: COMPLETE_PROFILE_TIMEOUT_MS },
+    );
+
+    if (response.success) return "success";
+
+    const msg = (response.message || "").toLowerCase();
+    if (msg.includes("already completed")) return "already_completed";
+    return "failed";
+  } catch (error: unknown) {
+    const status = getApiErrorStatus(error);
+    const msg = getApiErrorMessage(error).toLowerCase();
+
+    if (status === 401 || status === 403) throw error;
+    if (status === 400 && msg.includes("already completed")) return "already_completed";
+    return "failed";
+  }
 }
 
 export const authService = {
@@ -315,68 +447,72 @@ export const authService = {
   },
 
   /**
-   * Upload profile picture.
-   *
-   * Backend does not expose a dedicated /auth/profile/picture endpoint,
-   * so we implement this in two steps:
-   *   1. Upload the binary to the generic /media/upload endpoint (returns a URL).
-   *   2. Update the user profile with avatarUrl + profilePicture pointing at that URL.
+   * Upload profile picture via POST /profile/avatar (multipart field: avatar).
    */
   async uploadProfilePicture(
     file: File,
     onProgress?: (progress: number) => void,
-  ) {
-    // Step 1: upload binary to the generic media endpoint
-    const uploadRes = await apiClient.uploadFiles<{ files: { url: string }[] }>(
-      "/media/upload",
-      [file],
-      undefined,
-      onProgress,
-    );
-    const uploadedUrl = uploadRes.data?.files?.[0]?.url;
-    if (!uploadedUrl) {
-      throw new Error("Upload succeeded but no URL was returned by the server");
+  ): Promise<ApiResponse<User>> {
+    const uploadRes = await apiClient.uploadFile<{
+      avatarUrl?: string;
+      user?: User;
+    }>("/profile/avatar", file, undefined, onProgress, "avatar");
+
+    if (!uploadRes.success) {
+      throw new Error(uploadRes.message || "Profile picture upload failed");
     }
 
-    // Step 2: write the URL onto the user profile
-    const updateRes = await tryProfileUpdate({
-      avatarUrl: uploadedUrl,
-      profilePicture: uploadedUrl,
+    const avatarUrl =
+      uploadRes.data?.avatarUrl ?? uploadRes.data?.user?.avatarUrl ?? undefined;
+    if (!avatarUrl) {
+      throw new Error("Upload succeeded but no avatar URL was returned by the server");
+    }
+
+    const merged = persistProfileUploadUser({
+      ...uploadRes.data?.user,
+      avatarUrl,
+      profilePicture: avatarUrl,
     });
 
-    // Mirror updateProfile() behaviour so localStorage stays consistent
-    if (updateRes.success && updateRes.data && typeof window !== "undefined") {
-      localStorage.setItem("neyborhuud_user", JSON.stringify(updateRes.data));
-    }
-
-    return updateRes;
+    return {
+      success: uploadRes.success,
+      message: uploadRes.message,
+      data: merged ?? normalizeAuthUser({ avatarUrl, profilePicture: avatarUrl } as User),
+    };
   },
 
   /**
-   * Upload cover photo. Same two-step pattern as uploadProfilePicture.
+   * Upload cover photo via POST /profile/cover (multipart field: cover).
    */
-  async uploadCoverPhoto(file: File, onProgress?: (progress: number) => void) {
-    const uploadRes = await apiClient.uploadFiles<{ files: { url: string }[] }>(
-      "/media/upload",
-      [file],
-      undefined,
-      onProgress,
-    );
-    const uploadedUrl = uploadRes.data?.files?.[0]?.url;
-    if (!uploadedUrl) {
-      throw new Error("Upload succeeded but no URL was returned by the server");
+  async uploadCoverPhoto(
+    file: File,
+    onProgress?: (progress: number) => void,
+  ): Promise<ApiResponse<User>> {
+    const uploadRes = await apiClient.uploadFile<{
+      coverPhoto?: string;
+      user?: User;
+    }>("/profile/cover", file, undefined, onProgress, "cover");
+
+    if (!uploadRes.success) {
+      throw new Error(uploadRes.message || "Cover photo upload failed");
     }
 
-    const updateRes = await tryProfileUpdate({
-      coverPhoto: uploadedUrl,
-      coverUrl: uploadedUrl,
+    const coverPhoto =
+      uploadRes.data?.coverPhoto ?? uploadRes.data?.user?.coverPhoto ?? undefined;
+    if (!coverPhoto) {
+      throw new Error("Upload succeeded but no cover photo URL was returned by the server");
+    }
+
+    const merged = persistProfileUploadUser({
+      ...uploadRes.data?.user,
+      coverPhoto,
     });
 
-    if (updateRes.success && updateRes.data && typeof window !== "undefined") {
-      localStorage.setItem("neyborhuud_user", JSON.stringify(updateRes.data));
-    }
-
-    return updateRes;
+    return {
+      success: uploadRes.success,
+      message: uploadRes.message,
+      data: merged ?? normalizeAuthUser({ coverPhoto } as User),
+    };
   },
 
   /**
@@ -459,16 +595,55 @@ export const authService = {
   },
 
   /**
-   * Complete optional profile enrichment after signup
+   * Complete optional profile enrichment after signup.
+   * Uses PATCH /identity/profile for updates; only calls /auth/complete-profile
+   * for first-time HuudCoin reward (skipped when name is already saved).
    */
-  async completeProfile(data: {
-    firstName: string;
-    lastName: string;
-    phone?: string;
-    gender?: string;
-    dob?: string;
-  }) {
-    return await apiClient.post("/auth/complete-profile", data);
+  async completeProfile(data: CompleteProfileInput): Promise<ApiResponse<User>> {
+    const persistLocal = () => {
+      persistProfileUploadUser({
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
+        phoneNumber: data.phone?.trim() || undefined,
+        gender: (data.gender as User["gender"]) || undefined,
+        dateOfBirth: data.dob || undefined,
+      });
+    };
+
+    const cached = this.getCachedUser();
+    const hasExistingName = !!(
+      cached?.firstName?.trim() &&
+      cached?.lastName?.trim()
+    );
+
+    if (!hasExistingName) {
+      const rewardResult = await tryCompleteProfileReward(data);
+      if (rewardResult === "success") {
+        persistLocal();
+        const synced = await syncCachedUserFromProfileMe();
+        return {
+          success: true,
+          message: "Profile completed successfully! 100 HuudCoins awarded.",
+          data: synced ?? undefined,
+        };
+      }
+    }
+
+    const fallback = await completeProfileViaIdentity(data);
+    if (fallback.success) {
+      return fallback;
+    }
+
+    const synced = await syncCachedUserFromProfileMe();
+    if (synced?.firstName?.trim() && synced?.lastName?.trim()) {
+      return {
+        success: true,
+        message: "Profile saved.",
+        data: synced,
+      };
+    }
+
+    return fallback;
   },
 
   /**
