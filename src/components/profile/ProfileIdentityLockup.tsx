@@ -52,14 +52,14 @@ export function ProfileIdentityLockup({
   const initial = resolveProfileAvatarInitial(avatarSource, handle);
   const resolvedAvatar = resolveUserAvatarUrl(avatarSource);
   const personalName = resolveProfilePersonalName(avatarSource, handle);
-  const displayName = resolveProfileDisplayName(avatarSource, handle);
-  const hasLegalName = Boolean(personalName) && displayName.toLowerCase() !== handle;
+  const resolvedDisplayName = resolveProfileDisplayName(avatarSource, handle);
+  const hasLegalName = Boolean(personalName) && resolvedDisplayName.toLowerCase() !== handle;
 
   if (!showPin) {
     return (
       <div className="flex flex-col items-center gap-0.5 text-center">
         <span className="brand-name text-[#00D431] leading-[0.95] font-extrabold" style={{ fontSize: 22 }}>
-          {displayName}
+          {resolvedDisplayName}
         </span>
         {hasLegalName ? (
           <span className="text-[12px] font-semibold text-white/70">@{handle}</span>
@@ -74,7 +74,7 @@ export function ProfileIdentityLockup({
         <div className="landing-logo-halo pointer-events-none absolute -inset-10 -z-10" aria-hidden />
         <BrandPinAvatar
           src={resolvedAvatar}
-          alt={displayName}
+          alt={resolvedDisplayName}
           fallbackInitial={initial}
           size={size}
           priority
@@ -106,7 +106,7 @@ export function ProfileIdentityLockup({
           className={`brand-name leading-[0.95] font-extrabold ${size === 'hero' ? 'brand-name-hero text-[#00D431]' : 'text-[#00D431]'}`}
           style={{ fontSize: size === 'hero' ? 28 : 22 }}
         >
-          {displayName}
+          {resolvedDisplayName}
         </span>
         {hasLegalName ? (
           <span className="text-[12px] font-semibold text-white/70">@{handle}</span>
