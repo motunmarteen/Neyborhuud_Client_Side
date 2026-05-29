@@ -12,8 +12,16 @@ export function AppViewport() {
         const root = document.documentElement;
 
         const syncHeight = () => {
-            const vh = window.visualViewport?.height ?? window.innerHeight;
+            const vv = window.visualViewport;
+            const vh = vv?.height ?? window.innerHeight;
             root.style.setProperty('--app-height', `${Math.round(vh)}px`);
+
+            // Safari / mobile browser bottom bar overlaps fixed UI when not in standalone PWA.
+            const bottomInset =
+                vv != null
+                    ? Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop))
+                    : 0;
+            root.style.setProperty('--viewport-bottom-inset', `${bottomInset}px`);
         };
 
         const syncStandalone = () => {
@@ -46,12 +54,14 @@ export function AppViewport() {
         window.addEventListener('resize', syncHeight);
         window.addEventListener('orientationchange', syncHeight);
         window.visualViewport?.addEventListener('resize', syncHeight);
+        window.visualViewport?.addEventListener('scroll', syncHeight);
         window.matchMedia('(display-mode: standalone)').addEventListener('change', syncStandalone);
 
         return () => {
             window.removeEventListener('resize', syncHeight);
             window.removeEventListener('orientationchange', syncHeight);
             window.visualViewport?.removeEventListener('resize', syncHeight);
+            window.visualViewport?.removeEventListener('scroll', syncHeight);
         };
     }, []);
 

@@ -396,7 +396,7 @@ function XFeedInner() {
                 {/* Top Navigation — scrolls with content */}
                 <TopNav />
 
-                <div className="flex flex-col pb-[var(--app-nav-bottom)]">
+                <div className="flex flex-col pb-[var(--app-scroll-bottom)]">
                         {/* Ambient sky hero — sits behind transparent TopNav */}
                         <div className="-mt-[60px] feed-hero-stack">
                           <FeedSkyHero />
