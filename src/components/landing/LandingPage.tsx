@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
 import { resolvePostAuthRoute, validateStoredSession } from '@/lib/authSession';
-import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
+import { LandingHeaderBrand } from '@/components/landing/LandingHeaderBrand';
+import { BRAND_NAME } from '@/lib/brand';
 
 const LANDING_VIDEO = '/video/background-video.mp4';
 /** Add `public/video/landing-poster.jpg` (first frame, ~120 KB) for instant paint. */
@@ -121,10 +122,9 @@ export function LandingPage() {
             </div>
 
             <div className="landing-page-shell relative z-10 mx-auto flex h-full min-h-0 w-full max-w-md flex-col">
-                <header className="landing-page-header relative flex min-h-0 flex-1 flex-col items-center justify-center px-6">
-                    <div className="landing-page-header-brand relative">
-                        <div className="landing-logo-halo pointer-events-none absolute inset-0 -z-10" aria-hidden />
-                        <NeyborHuudLogo layout="stacked" size="hero" tone="hero" priority />
+                <header className="landing-page-header">
+                    <div className="landing-page-header-brand-anchor">
+                        <LandingHeaderBrand />
                     </div>
                 </header>
 
@@ -145,9 +145,9 @@ export function LandingPage() {
                     <div className="landing-page-actions mt-auto">
                         <Link
                             href="/signup"
-                            className="landing-btn-primary landing-btn font-bold transition-transform"
+                            className="landing-btn-primary landing-btn landing-btn--brand font-bold transition-transform"
                         >
-                            Join neyborhuud
+                            Join {BRAND_NAME}
                         </Link>
                         <Link
                             href="/login"

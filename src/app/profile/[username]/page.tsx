@@ -551,7 +551,8 @@ export default function ProfilePage() {
           displayName={displayName}
           personalName={personalName}
           username={profile.username}
-          avatarUrl={profileAvatarSrc}
+          profilePicture={profile.profilePicture}
+          avatarUrl={profile.avatarUrl}
           isOwnProfile={isOwnProfile}
           uploading={isUploadingAvatar}
           hasMapLocation={hasMapLocation}
@@ -974,7 +975,7 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="auth-flow-hero-card__eyebrow mb-0">Badges</p>
-                  <h2 className="auth-flow-hero-card__title !text-lg">Neyborhuud credibility</h2>
+                  <h2 className="auth-flow-hero-card__title !text-lg">NeyborHuud credibility</h2>
                 </div>
                 <Link
                   href={isOwnProfile ? "/gamification?tab=badges" : `/gamification`}
@@ -1089,7 +1090,7 @@ export default function ProfilePage() {
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Jobs</p>
-                    <h2 className="mt-1 text-xl font-black text-slate-900">Posted by {isOwnProfile ? "you" : profile.firstName ?? profile.username}</h2>
+                    <h2 className="mt-1 text-xl font-black text-slate-900">Posted by {isOwnProfile ? "you" : displayName}</h2>
                   </div>
                   <Link href="/jobs" className="text-xs font-black text-emerald-600 hover:underline">See all →</Link>
                 </div>
@@ -1124,7 +1125,7 @@ export default function ProfilePage() {
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Events</p>
-                    <h2 className="mt-1 text-xl font-black text-slate-900">Organised by {isOwnProfile ? "you" : profile.firstName ?? profile.username}</h2>
+                    <h2 className="mt-1 text-xl font-black text-slate-900">Organised by {isOwnProfile ? "you" : displayName}</h2>
                   </div>
                   <Link href="/events" className="text-xs font-black text-emerald-600 hover:underline">See all →</Link>
                 </div>
@@ -1158,7 +1159,7 @@ export default function ProfilePage() {
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Services</p>
-                    <h2 className="mt-1 text-xl font-black text-slate-900">{isOwnProfile ? "Your" : `${profile.firstName ?? profile.username}'s`} service offerings</h2>
+                    <h2 className="mt-1 text-xl font-black text-slate-900">{isOwnProfile ? "Your" : `${displayName}'s`} service offerings</h2>
                   </div>
                   <Link href="/services" className="text-xs font-black text-emerald-600 hover:underline">See all →</Link>
                 </div>
@@ -1193,7 +1194,7 @@ export default function ProfilePage() {
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--neu-text-muted)]">Activity</p>
-                  <h2 className="mt-1 text-xl font-black text-slate-900">Recent neyborhuud posts</h2>
+                  <h2 className="mt-1 text-xl font-black text-slate-900">Recent Huud posts</h2>
                 </div>
                 <div className="grid grid-cols-3 rounded-2xl bg-slate-100 p-1 text-sm font-black text-[var(--neu-text-muted)]">
                   <button className="rounded-xl bg-white px-4 py-2 text-emerald-700 shadow-sm" type="button">All</button>

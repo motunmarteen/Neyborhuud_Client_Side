@@ -274,7 +274,7 @@ export default function MyListingsPage() {
               No listings yet
             </h3>
             <p className="text-[var(--neu-text-muted)] mb-6">
-              Start selling items in your neyborhuud
+              Start selling items in your Huud
             </p>
             <Link
               href="/marketplace/create"

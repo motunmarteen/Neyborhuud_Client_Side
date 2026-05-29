@@ -350,7 +350,7 @@ export default function CompleteProfilePage() {
                                     className={`flex-1 rounded-xl border py-3 text-[10px] font-bold uppercase tracking-wider transition-all ${
                                         formData.gender === g
                                             ? 'border-primary bg-primary/10 text-primary'
-                                            : 'border-charcoal/10 bg-white text-[var(--neu-text-muted)]'
+                                            : 'border-charcoal/10 bg-[var(--neu-bg)] text-[var(--neu-text-muted)]'
                                     }`}
                                 >
                                     {g}

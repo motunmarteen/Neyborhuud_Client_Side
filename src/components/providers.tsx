@@ -11,7 +11,8 @@ import { Toaster, toast } from 'sonner';
 import { queryClient } from '@/lib/query-client';
 import { useEffect, useRef } from 'react';
 import socketService from '@/lib/socket';
-import apiClient from '@/lib/api-client';
+import apiClient, { isLocalApiHost, shouldConnectSocket } from '@/lib/api-client';
+import { AxiosError } from 'axios';
 import { authService } from '@/services/auth.service';
 import { e2eeService } from '@/services/e2ee.service';
 import { I18nProvider } from '@/lib/i18n';
@@ -44,6 +45,14 @@ function SocketAuthenticator() {
     return () => socketService.off('connect', onConnect);
   }, [user?.id]);
   return null;
+}
+
+function isExpectedOfflineDevNoise(reason: unknown): boolean {
+  if (process.env.NODE_ENV !== 'development' || !isLocalApiHost()) return false;
+  if (reason instanceof AxiosError && !reason.response) return true;
+  const msg = reason instanceof Error ? reason.message : String(reason);
+  const lower = msg.toLowerCase();
+  return lower.includes('network error') || lower.includes('failed to fetch');
 }
 
 function isMetaMaskExtensionNoise(reason: unknown): boolean {
@@ -80,7 +89,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (process.env.NODE_ENV !== 'development') return;
 
     const onUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (isMetaMaskExtensionNoise(event.reason)) {
+      if (
+        isMetaMaskExtensionNoise(event.reason) ||
+        isExpectedOfflineDevNoise(event.reason)
+      ) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }
@@ -91,7 +103,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         event.filename?.includes(METAMASK_EXTENSION_SUBSTRING) ||
         event.message?.includes('MetaMask') ||
         isMetaMaskExtensionNoise(event.error ?? event.message);
-      if (fromMetaMask) {
+      const fromOfflineDev =
+        isExpectedOfflineDevNoise(event.error ?? event.message);
+      if (fromMetaMask || fromOfflineDev) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }
@@ -109,7 +123,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // Initialize socket connection if user is authenticated
     if (apiClient.isAuthenticated()) {
       void authService.touchSession();
-      socketService.connect();
+      if (shouldConnectSocket()) {
+        socketService.connect();
+      }
 
       // Setup real-time event listeners
       socketService.on('new-notification', (notification) => {

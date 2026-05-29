@@ -1,3 +1,5 @@
+import { humanizeErrorMessage } from '@/lib/error-handler';
+
 /** Extract HTTP status from axios or fetchAPI-style errors. */
 export function getApiErrorStatus(error: unknown): number | undefined {
   if (error && typeof error === 'object') {
@@ -10,11 +12,6 @@ export function getApiErrorStatus(error: unknown): number | undefined {
 }
 
 export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong.'): string {
-  if (error instanceof Error && error.message.trim()) return error.message.trim();
-  if (error && typeof error === 'object') {
-    const axiosMsg = (error as { response?: { data?: { message?: string } } }).response?.data
-      ?.message;
-    if (typeof axiosMsg === 'string' && axiosMsg.trim()) return axiosMsg.trim();
-  }
-  return fallback;
+  const message = humanizeErrorMessage(error);
+  return message || fallback;
 }

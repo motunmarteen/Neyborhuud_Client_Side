@@ -2,7 +2,11 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { resolvePostAuthRoute } from '@/lib/authSession';
+import {
+    isUserEmailVerified,
+    isValidEmailVerificationCode,
+    resolvePostAuthRoute,
+} from '@/lib/authSession';
 import { authService } from '@/services/auth.service';
 import { getApiErrorMessage } from '@/lib/apiErrors';
 import { OTPInput } from '@/components/ui/OTPInput';
@@ -84,9 +88,14 @@ function VerifyEmailContent() {
         }
     };
 
-    const verifyWithCode = async (code?: string) => {
-        const codeToVerify = code || verificationCode;
-        if (codeToVerify.length !== 6 || !email || isVerifying) return;
+    const verifyWithCode = async () => {
+        const codeToVerify = verificationCode.trim();
+        if (!email || isVerifying || !isValidEmailVerificationCode(codeToVerify)) {
+            if (codeToVerify.length > 0 && !isValidEmailVerificationCode(codeToVerify)) {
+                setErrorMessage('Enter all 6 digits, then tap Verify.');
+            }
+            return;
+        }
 
         setIsVerifying(true);
         setErrorMessage('');
@@ -96,7 +105,11 @@ function VerifyEmailContent() {
             if (!response.success) {
                 throw new Error(response.message || 'Verification failed. Please try again.');
             }
-            applyVerificationPayload(response.data?.user);
+            const verifiedUser = response.data?.user;
+            if (verifiedUser && !isUserEmailVerified(verifiedUser)) {
+                throw new Error('That code was not accepted. Check your email and try again.');
+            }
+            applyVerificationPayload(verifiedUser);
             setStep('success');
         } catch (error: unknown) {
             const message = getApiErrorMessage(error, 'Verification failed. Please try again.');
@@ -150,8 +163,8 @@ function VerifyEmailContent() {
                 </button>
                 <button
                     type="button"
-                    onClick={() => verifyWithCode()}
-                    disabled={verificationCode.length !== 6 || isVerifying || !email}
+                    onClick={() => void verifyWithCode()}
+                    disabled={!isValidEmailVerificationCode(verificationCode) || isVerifying || !email}
                     className="auth-btn auth-btn-primary"
                 >
                     {isVerifying ? (
@@ -263,7 +276,6 @@ function VerifyEmailContent() {
                         length={6}
                         value={verificationCode}
                         onChange={setVerificationCode}
-                        onComplete={verifyWithCode}
                         disabled={isVerifying || !email}
                         error={!!errorMessage}
                         autoFocus={!!email}
@@ -275,7 +287,7 @@ function VerifyEmailContent() {
                         </div>
                     ) : (
                         <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
-                            Enter the 6-digit code from your inbox
+                            Enter all 6 digits, then tap Verify
                         </p>
                     )}
                 </div>

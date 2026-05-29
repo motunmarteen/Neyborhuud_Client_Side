@@ -22,6 +22,8 @@ export interface SkyTheme {
   showStars: boolean;
   showClouds: boolean;
   showRain: boolean;
+  showSnow: boolean;
+  showFog: boolean;
   cloudColor: string;
   silhouetteColor: string;
 }
@@ -36,8 +38,11 @@ export function getTimePeriod(hour: number): TimePeriod {
 }
 
 export function getSkyTheme(time: TimePeriod, weather: WeatherCondition): SkyTheme {
-  const isRainy = weather === 'rain' || weather === 'storm';
-  const isCloudy = weather === 'cloudy' || isRainy || weather === 'fog';
+  const isSnowy = weather === 'snow';
+  const isRainy = (weather === 'rain' || weather === 'storm') && !isSnowy;
+  const isFoggy = weather === 'fog';
+  const isCloudy = weather === 'cloudy' || isRainy || isFoggy || isSnowy;
+  const isDarkTime = time === 'night' || time === 'evening';
 
   const base: Record<TimePeriod, SkyTheme> = {
     night: {
@@ -54,6 +59,8 @@ export function getSkyTheme(time: TimePeriod, weather: WeatherCondition): SkyThe
       showStars: true,
       showClouds: isCloudy,
       showRain: isRainy,
+      showSnow: isSnowy,
+      showFog: isFoggy,
       cloudColor: 'rgba(40,50,80,0.7)',
       silhouetteColor: '#0a0e1a',
     },
@@ -71,6 +78,8 @@ export function getSkyTheme(time: TimePeriod, weather: WeatherCondition): SkyThe
       showStars: false,
       showClouds: isCloudy,
       showRain: isRainy,
+      showSnow: isSnowy,
+      showFog: isFoggy,
       cloudColor: 'rgba(255,180,130,0.35)',
       silhouetteColor: '#1a0e20',
     },
@@ -88,6 +97,8 @@ export function getSkyTheme(time: TimePeriod, weather: WeatherCondition): SkyThe
       showStars: false,
       showClouds: isCloudy,
       showRain: isRainy,
+      showSnow: isSnowy,
+      showFog: isFoggy,
       cloudColor: 'rgba(255,255,255,0.6)',
       silhouetteColor: '#2a4a6a',
     },
@@ -105,6 +116,8 @@ export function getSkyTheme(time: TimePeriod, weather: WeatherCondition): SkyThe
       showStars: false,
       showClouds: isCloudy,
       showRain: isRainy,
+      showSnow: isSnowy,
+      showFog: isFoggy,
       cloudColor: 'rgba(255,255,255,0.55)',
       silhouetteColor: '#1a3a5a',
     },
@@ -122,6 +135,8 @@ export function getSkyTheme(time: TimePeriod, weather: WeatherCondition): SkyThe
       showStars: false,
       showClouds: isCloudy,
       showRain: isRainy,
+      showSnow: isSnowy,
+      showFog: isFoggy,
       cloudColor: 'rgba(255,150,100,0.4)',
       silhouetteColor: '#1a0e25',
     },
@@ -139,6 +154,8 @@ export function getSkyTheme(time: TimePeriod, weather: WeatherCondition): SkyThe
       showStars: true,
       showClouds: isCloudy,
       showRain: isRainy,
+      showSnow: isSnowy,
+      showFog: isFoggy,
       cloudColor: 'rgba(50,40,80,0.6)',
       silhouetteColor: '#0a0815',
     },
@@ -147,10 +164,42 @@ export function getSkyTheme(time: TimePeriod, weather: WeatherCondition): SkyThe
   const theme = { ...base[time] };
 
   if (isRainy) {
-    theme.skyGradient = time === 'night' || time === 'evening'
+    theme.skyGradient = isDarkTime
       ? 'linear-gradient(180deg, #0d1020 0%, #1a1e30 30%, #2a2e40 60%, #353840 100%)'
       : 'linear-gradient(180deg, #4a5060 0%, #5a6070 25%, #6a7080 50%, #808890 75%, #9aa0a8 100%)';
-    theme.silhouetteColor = time === 'night' || time === 'evening' ? '#080a12' : '#3a4050';
+    theme.silhouetteColor = isDarkTime ? '#080a12' : '#3a4050';
+  }
+
+  if (isSnowy) {
+    theme.showRain = false;
+    theme.showFog = false;
+    theme.showClouds = true;
+    theme.cloudColor = isDarkTime ? 'rgba(180,190,210,0.55)' : 'rgba(255,255,255,0.78)';
+    theme.skyGradient = isDarkTime
+      ? 'linear-gradient(180deg, #1a2030 0%, #2a3248 35%, #3a4460 65%, #454d68 100%)'
+      : 'linear-gradient(180deg, #9aaec8 0%, #b8c8dc 25%, #d0dce8 55%, #e8eef4 85%, #f4f7fa 100%)';
+    theme.horizonGlow = isDarkTime
+      ? 'radial-gradient(ellipse 100% 45% at 50% 100%, rgba(120,140,180,0.35) 0%, transparent 70%)'
+      : 'radial-gradient(ellipse 100% 50% at 50% 100%, rgba(255,255,255,0.45) 0%, transparent 70%)';
+    theme.silhouetteColor = isDarkTime ? '#0c1018' : '#4a5568';
+    if (!isDarkTime) {
+      theme.celestialColor = '#f0f4f8';
+      theme.celestialGlow = 'rgba(255,255,255,0.35)';
+    }
+  }
+
+  if (isFoggy) {
+    theme.showRain = false;
+    theme.showSnow = false;
+    theme.showClouds = true;
+    theme.cloudColor = isDarkTime ? 'rgba(150,160,180,0.5)' : 'rgba(255,255,255,0.58)';
+    theme.skyGradient = isDarkTime
+      ? 'linear-gradient(180deg, #1c2230 0%, #2a3040 40%, #383e4e 70%, #424852 100%)'
+      : 'linear-gradient(180deg, #8a9aaa 0%, #a0aeb8 30%, #b8c4cc 60%, #ccd4da 100%)';
+    theme.horizonGlow =
+      'radial-gradient(ellipse 120% 55% at 50% 85%, rgba(255,255,255,0.28) 0%, transparent 72%)';
+    theme.silhouetteColor = isDarkTime ? '#101218' : '#5a6470';
+    theme.mutedColor = isDarkTime ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.9)';
   }
 
   return theme;

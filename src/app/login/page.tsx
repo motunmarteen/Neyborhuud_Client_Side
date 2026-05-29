@@ -8,30 +8,11 @@ import Link from 'next/link';
 import { getCurrentLocation } from '@/lib/geolocation';
 import apiClient from '@/lib/api-client';
 import { resolvePostAuthRoute, validateStoredSession } from '@/lib/authSession';
+import { getAuthErrorMessage } from '@/lib/error-handler';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
-
-function friendlyLoginMessage(raw: string): string {
-    const m = raw.toLowerCase();
-    if (m.includes('load failed') || m.includes('failed to fetch') || m.includes('network')) {
-        return 'Could not reach the server. Check your connection and try again.';
-    }
-    if (
-        m.includes('invalid') &&
-        (m.includes('password') || m.includes('credential') || m.includes('email') || m.includes('login'))
-    ) {
-        return 'Invalid email or password. Check your details or use Forgot password.';
-    }
-    if (m.includes('not found') || m.includes('no user') || m.includes('does not exist')) {
-        return 'No account found with this email. You can create one from Join neyborhuud.';
-    }
-    if (m.includes('no session token')) {
-        return 'Sign-in succeeded but no session was returned. Please try again.';
-    }
-    return raw || 'Something went wrong. Please try again.';
-}
 
 function LoginPageContent() {
     const router = useRouter();
@@ -64,6 +45,7 @@ function LoginPageContent() {
             }
 
             if (validation === 'invalid') {
+                apiClient.clearToken();
                 if (!cancelled) setCheckingSession(false);
                 return;
             }
@@ -98,7 +80,7 @@ function LoginPageContent() {
             });
 
             if (!response.success || !apiClient.isAuthenticated()) {
-                const msg = friendlyLoginMessage(response.message || 'Login failed. Please try again.');
+                const msg = getAuthErrorMessage(response.message || 'Login failed');
                 setFormError(msg);
                 toast.error(msg, { duration: 5000 });
                 return;
@@ -106,8 +88,7 @@ function LoginPageContent() {
 
             router.push(resolvePostAuthRoute(nextParam));
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            const friendlyMsg = friendlyLoginMessage(message);
+            const friendlyMsg = getAuthErrorMessage(error);
             setFormError(friendlyMsg);
             toast.error(friendlyMsg, { duration: 5000 });
         }
@@ -151,7 +132,7 @@ function LoginPageContent() {
                         </button>
                         <Link href="/signup" className="auth-btn auth-btn-secondary no-underline">
                             <i className="bi bi-person-plus shrink-0" aria-hidden />
-                            <span>Join neyborhuud</span>
+                            <span>Join NeyborHuud</span>
                         </Link>
                     </div>
                 }

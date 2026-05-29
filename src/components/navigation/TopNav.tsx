@@ -32,10 +32,9 @@ export default function TopNav() {
       {/* Logo */}
       <Link href="/feed" className="flex shrink-0 items-center cursor-pointer">
         <NeyborHuudLogo
-          layout="inline"
+          layout="wordmark"
           size="sm"
           tone={isOnFeed ? 'light' : 'primary'}
-          priority
         />
       </Link>
 

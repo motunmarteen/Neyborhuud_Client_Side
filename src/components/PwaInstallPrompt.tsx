@@ -57,7 +57,7 @@ const IOS_STEPS = [
     {
         num: 3,
         title: 'Tap Add',
-        body: 'Open neyborhuud from your home screen',
+        body: 'Open NeyborHuud from your home screen',
         icon: 'home',
     },
 ] as const;
@@ -189,15 +189,15 @@ export default function PwaInstallPrompt() {
                 <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-4">
                     <div className="mb-5 flex flex-col items-center text-center">
                         <NeyborHuudLogo
-                            layout="mark"
+                            layout="wordmark"
                             size="md"
                             tone={lightSheet ? 'dark' : 'hero'}
                         />
                         <h2
                             id="pwa-install-title"
-                            className="pwa-install-title brand-wordmark mt-3 text-[1.35rem]"
+                            className="pwa-install-title mt-3 text-[1.35rem] font-extrabold"
                         >
-                            install neyborhuud
+                            Install NeyborHuud
                         </h2>
                         <p className="pwa-install-body mt-2 max-w-[19rem] text-sm leading-relaxed">
                             Get the full-screen Huud experience — safety alerts, faster access, and
@@ -208,7 +208,7 @@ export default function PwaInstallPrompt() {
                     {inAppBrowser ? (
                         <div className="pwa-install-callout-warn mb-5 rounded-2xl px-4 py-3 text-sm leading-relaxed">
                             Open this page in <strong>Safari</strong> (tap the browser menu → Open
-                            in Safari) to add neyborhuud to your home screen.
+                            in Safari) to add NeyborHuud to your home screen.
                         </div>
                     ) : null}
 

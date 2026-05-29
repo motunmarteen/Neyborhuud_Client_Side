@@ -43,7 +43,7 @@ export function NotFoundPage() {
                         <>
                             <Link href="/signup" className="auth-btn auth-btn-secondary no-underline">
                                 <i className="bi bi-person-plus shrink-0" aria-hidden />
-                                <span>Join neyborhuud</span>
+                                <span>Join NeyborHuud</span>
                             </Link>
                         </>
                     ) : (

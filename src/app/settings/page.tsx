@@ -13,6 +13,7 @@ import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { isAdminUser } from '@/lib/adminAccess';
+import { EmailVerificationCard } from '@/components/auth/EmailVerificationCard';
 
 function latestForType(
     rows: UserConsentRecord[],
@@ -62,8 +63,6 @@ export default function SettingsPage() {
     const [saving, setSaving] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [emailVerified, setEmailVerified] = useState(false);
-    const [resendingVerification, setResendingVerification] = useState(false);
-    const [resendCooldown, setResendCooldown] = useState(0);
     const [accountActionLoading, setAccountActionLoading] = useState<'export' | 'delete' | null>(null);
 
     const [consentRows, setConsentRows] = useState<UserConsentRecord[]>([]);
@@ -220,13 +219,25 @@ export default function SettingsPage() {
         }
     }, []);
 
-    // Resend cooldown timer
-    useEffect(() => {
-        if (resendCooldown > 0) {
-            const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
-            return () => clearTimeout(timer);
+    const handleEmailVerified = useCallback(() => {
+        if (typeof window !== 'undefined') {
+            const raw = localStorage.getItem('neyborhuud_user');
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    setUser(parsed);
+                    setEmailVerified(
+                        parsed.verificationStatus === 'verified' || !!parsed.emailVerified,
+                    );
+                } catch {
+                    setEmailVerified(true);
+                }
+            } else {
+                setEmailVerified(true);
+            }
         }
-    }, [resendCooldown]);
+        toast.success('Email verified! You now have full access.');
+    }, []);
 
     const loadConsents = useCallback(async () => {
         if (!authService.isAuthenticated()) return;
@@ -442,23 +453,6 @@ export default function SettingsPage() {
         }
     };
 
-    const handleResendVerification = async () => {
-        if (resendCooldown > 0 || resendingVerification) return;
-        
-        setResendingVerification(true);
-        try {
-            await fetchAPI('/auth/resend-verification', {
-                method: 'POST'
-            });
-            setResendCooldown(60);
-            toast.success('Verification email sent! Check your inbox.');
-        } catch (error: any) {
-            toast.error('Failed to send verification email.');
-        } finally {
-            setResendingVerification(false);
-        }
-    };
-
     const ToggleSwitch = ({
         enabled,
         onChange,
@@ -519,34 +513,25 @@ export default function SettingsPage() {
             </div>
 
             <div className="max-w-md mx-auto px-6 py-6">
-                {/* Email Verification Banner */}
-                {!emailVerified && (
-                    <div className="mb-6 p-4 rounded-2xl bg-primary/10 border border-yellow-500/20">
-                        <div className="flex items-start gap-3">
-                            <i className="bi bi-exclamation-triangle text-primary text-lg mt-0.5"></i>
-                            <div className="flex-1">
-                                <p className="text-sm font-bold text-charcoal mb-1">
-                                    Verify Your Email
-                                </p>
-                                <p className="text-xs text-charcoal/60 mb-3">
-                                    Please verify your email to access all features.
-                                </p>
-                                <button
-                                    onClick={handleResendVerification}
-                                    disabled={resendCooldown > 0 || resendingVerification}
-                                    className={`
-                                        text-xs font-bold transition-all
-                                        ${resendCooldown > 0 || resendingVerification 
-                                            ? 'text-charcoal/30 cursor-not-allowed' 
-                                            : 'text-brand-blue hover:underline'}
-                                    `}
-                                >
-                                    {resendingVerification ? 'Sending...' : 
-                                     resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 
-                                     'Resend Verification Email'}
-                                </button>
-                            </div>
-                        </div>
+                {!emailVerified && user?.email && (
+                    <EmailVerificationCard
+                        email={user.email}
+                        onVerified={handleEmailVerified}
+                        className="mb-6"
+                    />
+                )}
+                {!emailVerified && !user?.email && (
+                    <div className="mb-6 rounded-2xl border border-primary/25 bg-primary/10 p-4">
+                        <p className="text-sm font-bold text-charcoal mb-2">Verify your email</p>
+                        <p className="text-xs text-charcoal/60 mb-3">
+                            Enter the code from your inbox on the verification page.
+                        </p>
+                        <Link
+                            href="/verify-email"
+                            className="text-xs font-bold text-brand-blue hover:underline"
+                        >
+                            Open email verification →
+                        </Link>
                     </div>
                 )}
 
@@ -746,7 +731,7 @@ export default function SettingsPage() {
                                 enabled={privacy.showLocation}
                                 onChange={(val) => setPrivacy({ ...privacy, showLocation: val })}
                                 label="Show Location"
-                                description="Display your neyborhuud on profile"
+                                description="Display your Huud on profile"
                             />
                             <ToggleSwitch
                                 enabled={privacy.showPhone}
@@ -963,7 +948,8 @@ export default function SettingsPage() {
                             ) : null}
                             <input
                                 type="text"
-                                className="w-full rounded-xl neumorphic-inset px-4 py-3 text-sm text-charcoal mb-3"
+                                className="w-full rounded-xl neu-input px-4 py-3 text-sm mb-3"
+                                style={{ color: 'var(--neu-text)' }}
                                 placeholder="new_handle"
                                 autoComplete="username"
                                 value={newUsernameDraft}

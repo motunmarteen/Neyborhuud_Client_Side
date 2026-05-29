@@ -239,7 +239,7 @@ export function LocationSettingModal({ isOpen, onClose, currentLocation }: Locat
           {/* Neighborhood */}
           <div>
             <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
-              Neyborhuud
+              NeyborHuud
             </label>
             <input
               type="text"

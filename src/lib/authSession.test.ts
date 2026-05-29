@@ -1,6 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import {
   extractAccessToken,
+  isValidEmailVerificationCode,
+  isUserEmailVerified,
   parseSafeNextPath,
   resolvePostAuthRoute,
 } from './authSession';
@@ -71,6 +73,30 @@ describe('resolvePostAuthRoute', () => {
 
   it('falls back to setup-complete', () => {
     expect(resolvePostAuthRoute()).toBe('/setup-complete');
+  });
+});
+
+describe('isUserEmailVerified', () => {
+  it('detects verified users', () => {
+    expect(isUserEmailVerified({ emailVerified: true })).toBe(true);
+    expect(isUserEmailVerified({ verificationStatus: 'verified' })).toBe(true);
+  });
+
+  it('rejects unverified users', () => {
+    expect(isUserEmailVerified({ verificationStatus: 'pending' })).toBe(false);
+    expect(isUserEmailVerified(null)).toBe(false);
+  });
+});
+
+describe('isValidEmailVerificationCode', () => {
+  it('accepts exactly six digits', () => {
+    expect(isValidEmailVerificationCode('123456')).toBe(true);
+  });
+
+  it('rejects partial or non-numeric input', () => {
+    expect(isValidEmailVerificationCode('12345')).toBe(false);
+    expect(isValidEmailVerificationCode('12 3456')).toBe(false);
+    expect(isValidEmailVerificationCode('1234567')).toBe(false);
   });
 });
 

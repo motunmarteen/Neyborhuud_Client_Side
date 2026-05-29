@@ -1,16 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { MiniMap } from '@/components/ui/InteractiveMap';
 import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
-import { resolveUserAvatarUrl } from '@/lib/userAvatar';
+import { resolveProfileAvatarInitial, resolveUserAvatarUrl } from '@/lib/userAvatar';
 import { PROFILE_MAP_DEFAULT } from '@/lib/profileSnapHelpers';
 
 type ProfileSnapHeroProps = {
   displayName: string;
   personalName: string;
   username: string;
+  profilePicture?: string | null;
   avatarUrl?: string | null;
   isOwnProfile: boolean;
   uploading?: boolean;
@@ -95,35 +95,14 @@ function ProfileMapIdentity({
       : '');
 
   const hasFullName = resolvedName.length > 0;
-  const [emphasisHandle, setEmphasisHandle] = useState(false);
-
-  const primaryLabel = emphasisHandle || !hasFullName ? `@${handle}` : resolvedName;
-  const secondaryLabel = hasFullName ? (emphasisHandle ? resolvedName : `@${handle}`) : null;
-
-  const identityHeading = hasFullName ? (
-    <button
-      type="button"
-      onClick={() => setEmphasisHandle((value) => !value)}
-      className="profile-auth-map-foot__name-toggle"
-      aria-expanded={emphasisHandle}
-      aria-label={emphasisHandle ? 'Show full name' : 'Show username'}
-    >
-      <span className="profile-auth-map-foot__name landing-headline landing-headline--white !text-[1.35rem] !leading-tight">
-        {primaryLabel}
-      </span>
-      <span className="material-symbols-outlined text-[20px] opacity-70" aria-hidden>
-        {emphasisHandle ? 'expand_less' : 'expand_more'}
-      </span>
-    </button>
-  ) : (
-    <h1 className="profile-auth-map-foot__name landing-headline landing-headline--white !text-[1.35rem] !leading-tight">
-      @{handle}
-    </h1>
-  );
+  const primaryLabel = hasFullName ? resolvedName : `@${handle}`;
+  const secondaryLabel = hasFullName ? `@${handle}` : null;
 
   return (
     <div className="profile-auth-map-foot__identity">
-      {identityHeading}
+      <h1 className="profile-auth-map-foot__name landing-headline landing-headline--white !text-[1.35rem] !leading-tight">
+        {primaryLabel}
+      </h1>
       {secondaryLabel ? (
         <p className="profile-auth-map-foot__handle">{secondaryLabel}</p>
       ) : null}
@@ -214,6 +193,7 @@ export function ProfileSnapHero({
   displayName,
   personalName,
   username,
+  profilePicture,
   avatarUrl,
   isOwnProfile,
   uploading,
@@ -232,8 +212,8 @@ export function ProfileSnapHero({
   vouchCount = 0,
 }: ProfileSnapHeroProps) {
   const handle = username.trim().toLowerCase();
-  const initial = displayName[0]?.toUpperCase() || handle[0]?.toUpperCase() || 'N';
-  const resolved = resolveUserAvatarUrl({ profilePicture: avatarUrl, avatarUrl });
+  const initial = resolveProfileAvatarInitial({ displayName, username: handle }, handle);
+  const resolved = resolveUserAvatarUrl({ profilePicture, avatarUrl });
   const center = mapCenter ?? PROFILE_MAP_DEFAULT;
 
   return (

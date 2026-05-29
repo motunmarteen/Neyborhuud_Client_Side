@@ -95,7 +95,7 @@ export function BrandPinAvatar({
             src={resolvedSrc!}
             alt={alt}
             className="h-full w-full object-cover"
-            loading="lazy"
+            loading={priority ? 'eager' : 'lazy'}
             decoding="async"
             referrerPolicy="no-referrer"
             onError={() => setImgError(true)}

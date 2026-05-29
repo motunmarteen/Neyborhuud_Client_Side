@@ -8,6 +8,10 @@ import { AppViewport } from "@/components/AppViewport";
 import DailyCheckInModal from "@/components/gamification/DailyCheckInModalLoader";
 import TextSizeApplier from "@/components/TextSizeApplier";
 import { ThemeSync } from "@/components/theme/ThemeSync";
+import { SYSTEM_THEME_BOOT_SCRIPT } from "@/lib/systemTheme";
+import { BRAND_NAME } from "@/lib/brand";
+
+const BRAND_TITLE = `${BRAND_NAME} — Your Huud Operating System`;
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -17,8 +21,8 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "neyborhuud — Your Huud Operating System",
-    template: "%s | neyborhuud",
+    default: BRAND_TITLE,
+    template: `%s | ${BRAND_NAME}`,
   },
   description: "Digital infrastructure for the modern African Huud. Safety, trust, and local prosperity — hyperlocal feed, SOS alerts, marketplace, and more.",
   manifest: "/manifest.json",
@@ -34,20 +38,20 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "neyborhuud",
+    title: BRAND_NAME,
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "neyborhuud",
-    title: "neyborhuud — Your Huud Operating System",
+    siteName: BRAND_NAME,
+    title: BRAND_TITLE,
     description: "Digital infrastructure for the modern African Huud. Safety, trust, and local prosperity.",
   },
   twitter: {
     card: "summary",
-    title: "neyborhuud",
+    title: BRAND_NAME,
     description: "Digital infrastructure for the modern African Huud.",
   },
   robots: {
@@ -58,8 +62,8 @@ export const metadata: Metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#060908' },
-    { media: '(prefers-color-scheme: dark)', color: '#060908' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0d1a0f' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -82,7 +86,7 @@ export default function RootLayout({
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var m=window.matchMedia('(prefers-color-scheme: dark)');var d=document.documentElement;var a=function(x){d.classList.toggle('dark',x);d.style.colorScheme=x?'dark':'light';};a(m.matches);m.addEventListener('change',function(e){a(e.matches);});}catch(e){}}());`,
+            __html: SYSTEM_THEME_BOOT_SCRIPT,
           }}
         />
         <script
@@ -92,7 +96,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${jakarta.variable} app-body font-display text-brand-black transition-colors duration-200`}
+        className={`${jakarta.variable} app-body font-display text-foreground transition-colors duration-200`}
         suppressHydrationWarning
       >
         <AppViewport />

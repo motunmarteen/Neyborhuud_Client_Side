@@ -4,7 +4,7 @@
  */
 
 import { io, Socket } from "socket.io-client";
-import apiClient from "./api-client";
+import apiClient, { getSocketUrl, shouldConnectSocket } from "./api-client";
 
 class SocketService {
   private socket: Socket | null = null;
@@ -15,12 +15,15 @@ class SocketService {
    * Initialize socket connection
    */
   connect() {
+    if (!shouldConnectSocket()) {
+      return null;
+    }
+
     if (this.socket?.connected) {
       return this.socket;
     }
 
-    const socketUrl =
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5000";
+    const socketUrl = getSocketUrl();
     const token = apiClient.getToken();
 
     this.socket = io(socketUrl, {

@@ -1,25 +1,19 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { subscribeSystemTheme, type AppTheme } from '@/lib/systemTheme';
 
 /**
- * Syncs `html.dark` with the OS colour-scheme preference so CSS tokens
- * (`:root` / `.dark`) and Tailwind `dark:` utilities stay aligned.
+ * Keeps `html.dark`, CSS tokens, Tailwind `dark:` utilities, and theme-color
+ * meta in sync with the device light/dark setting (live updates included).
  */
 export function ThemeSync() {
+  const [, setTheme] = useState<AppTheme>('light');
+
   useEffect(() => {
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-
-    const apply = (matches: boolean) => {
-      document.documentElement.classList.toggle('dark', matches);
-      document.documentElement.style.colorScheme = matches ? 'dark' : 'light';
-    };
-
-    apply(media.matches);
-
-    const onChange = (event: MediaQueryListEvent) => apply(event.matches);
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
+    return subscribeSystemTheme((_isDark, theme) => {
+      setTheme(theme);
+    });
   }, []);
 
   return null;

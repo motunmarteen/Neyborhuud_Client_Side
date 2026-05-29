@@ -10,6 +10,7 @@ export const FEED_TAB_ORDER: FeedTab[] = ['your_huud', 'street_radar', 'followin
 interface FeedTabsProps {
     activeTab: FeedTab;
     onTabChange: (tab: FeedTab) => void;
+    className?: string;
 }
 
 const TAB_CONFIG: Array<{ key: FeedTab; label: string; accent: string }> = [
@@ -18,9 +19,9 @@ const TAB_CONFIG: Array<{ key: FeedTab; label: string; accent: string }> = [
     { key: 'following_places', label: 'Following Places', accent: 'bg-brand-green-dark' },
 ];
 
-export function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
+export function FeedTabs({ activeTab, onTabChange, className }: FeedTabsProps) {
     return (
-        <div className="bg-white border-b border-black/[0.06]">
+        <div className={`mod-card rounded-2xl overflow-hidden${className ? ` ${className}` : ''}`}>
             <div className="grid grid-cols-3 relative">
                 {TAB_CONFIG.map((tab) => {
                     const active = activeTab === tab.key;

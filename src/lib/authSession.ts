@@ -87,6 +87,22 @@ export function applyAuthVerificationPayload(
   return apiClient.isAuthenticated();
 }
 
+/** Whether the auth user record reflects a verified email. */
+export function isUserEmailVerified(user: unknown): boolean {
+  if (!user || typeof user !== 'object') return false;
+  const u = user as Record<string, unknown>;
+  return (
+    u.emailVerified === true ||
+    u.isVerified === true ||
+    u.verificationStatus === 'verified'
+  );
+}
+
+/** Strict 6-digit OTP — rejects partial input, spaces, or autofill junk. */
+export function isValidEmailVerificationCode(code: string): boolean {
+  return /^\d{6}$/.test(code.trim());
+}
+
 /**
  * Resolve post-verify navigation (signup inline verify uses gates before success screen).
  */

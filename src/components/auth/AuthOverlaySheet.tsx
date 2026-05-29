@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
+import { useSwipeBackDisabled } from '@/contexts/SwipeBackContext';
 
 type AuthOverlaySheetProps = {
     open: boolean;
@@ -30,6 +31,8 @@ export function AuthOverlaySheet({
     const [mounted, setMounted] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
 
+    useSwipeBackDisabled(open && !collapsed, 'auth-overlay-sheet');
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -42,13 +45,16 @@ export function AuthOverlaySheet({
 
         if (collapsed) {
             document.body.style.overflow = '';
+            document.documentElement.removeAttribute('data-scroll-locked');
             return;
         }
 
         const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
+        document.documentElement.setAttribute('data-scroll-locked', 'true');
         return () => {
             document.body.style.overflow = prevOverflow;
+            document.documentElement.removeAttribute('data-scroll-locked');
         };
     }, [open, collapsed]);
 

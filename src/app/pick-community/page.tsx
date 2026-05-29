@@ -210,7 +210,7 @@ function PickCommunityContent() {
 
   return (
     <AuthFlowPage
-      ariaLabel={isChangingCommunity ? 'Change neyborhuud' : 'Pick neyborhuud'}
+      ariaLabel={isChangingCommunity ? 'Change your Huud' : 'Pick your Huud'}
       stageKey={`pick-${isChangingCommunity ? 'change' : 'setup'}-${loading ? 'loading' : 'ready'}`}
       stepLabel={isChangingCommunity ? 'Change area' : setupProgress.stepLabel}
       progress={isChangingCommunity ? undefined : setupProgress}
@@ -293,7 +293,7 @@ function PickCommunityContent() {
       <AuthSheetStageHeader
         icon="bi-house-heart-fill"
         eyebrow={isChangingCommunity ? 'Select new area' : 'Confirm your area'}
-        title={selectedOption?.name || (isChangingCommunity ? 'Change neyborhuud' : 'Choose neyborhuud')}
+        title={selectedOption?.name || (isChangingCommunity ? 'Change your Huud' : 'Choose your Huud')}
         meta={locationMeta}
         signal={locationSignal}
         error={error && !loading && !selectedId ? error : undefined}

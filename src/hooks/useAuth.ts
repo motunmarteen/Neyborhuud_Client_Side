@@ -8,6 +8,7 @@ import { authService } from "@/services/auth.service";
 import { RegisterPayload, User } from "@/types/api";
 import { handleApiError } from "@/lib/error-handler";
 import apiClient from "@/lib/api-client";
+import { normalizeAuthUser } from "@/lib/userAvatar";
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -26,7 +27,7 @@ export function useAuth() {
       try {
         const res = await apiClient.get<{ user: import("@/types/api").User }>("/profile/me");
         if (res.success && res.data?.user) {
-          const freshUser = res.data.user;
+          const freshUser = normalizeAuthUser(res.data.user);
           // Persist fresh data (including role) back to localStorage
           if (typeof window !== "undefined") {
             const cached = localStorage.getItem("neyborhuud_user");
@@ -49,8 +50,10 @@ export function useAuth() {
     staleTime: 60_000,
     refetchOnMount: "always",
     /** Instant id for gated UI — admin routes must wait for isFetching (see admin/layout). */
-    placeholderData: () =>
-      apiClient.isAuthenticated() ? authService.getCachedUser() ?? undefined : undefined,
+    placeholderData: () => {
+      const cached = apiClient.isAuthenticated() ? authService.getCachedUser() : null;
+      return cached ? normalizeAuthUser(cached) : undefined;
+    },
   });
 
   // Login mutation
@@ -68,7 +71,6 @@ export function useAuth() {
       // Always refetch /profile/me so role/isAdmin from MongoDB is current (login payload may omit them).
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
-    onError: handleApiError,
   });
 
   // Register mutation
@@ -96,7 +98,7 @@ export function useAuth() {
     mutationFn: (data: Partial<User>) => authService.updateProfile(data),
     onSuccess: (data) => {
       if (data.data) {
-        queryClient.setQueryData(["currentUser"], data.data);
+        queryClient.setQueryData(["currentUser"], normalizeAuthUser(data.data));
       }
     },
     onError: handleApiError,
@@ -113,7 +115,7 @@ export function useAuth() {
     }) => authService.uploadProfilePicture(file, onProgress),
     onSuccess: (data) => {
       if (data.data) {
-        queryClient.setQueryData(["currentUser"], data.data);
+        queryClient.setQueryData(["currentUser"], normalizeAuthUser(data.data));
       }
     },
     onError: handleApiError,

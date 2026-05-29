@@ -25,7 +25,7 @@ export default function CreateProductPage() {
     <GlassFormPage
       wide
       title="Create listing"
-      subtitle="List your item for sale in your neyborhuud."
+      subtitle="List your item for sale in your Huud."
       onClose={handleCancel}
     >
       <ProductForm onSuccess={handleSuccess} onCancel={handleCancel} />

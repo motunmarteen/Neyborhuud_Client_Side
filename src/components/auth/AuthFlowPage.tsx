@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
 import { AuthFlowBackdrop } from '@/components/auth/AuthFlowBackdrop';
+import { AuthSignupMapBackdrop } from '@/components/auth/AuthSignupMapBackdrop';
+import type { SignupMapLocation } from '@/lib/signupMap';
 
 export type AuthFlowProgress = {
     active: number;
@@ -37,8 +39,10 @@ type AuthFlowPageProps = {
     /** Collapsed peek row (signup-aligned) */
     peek?: ReactNode;
     keyboardAware?: boolean;
-    /** Landing video backdrop (default true) */
+    /** Landing aerial video behind sheet (default true). Set false for signup map. */
     landingBackdrop?: boolean;
+    /** Map centre when `landingBackdrop` is false (e.g. street picked on signup). */
+    mapLocation?: SignupMapLocation | null;
 };
 
 /**
@@ -60,6 +64,7 @@ export function AuthFlowPage({
     peek,
     keyboardAware = false,
     landingBackdrop = true,
+    mapLocation = null,
 }: AuthFlowPageProps) {
     const chromeRef = useRef<HTMLDivElement>(null);
     const [sheetCollapsed, setSheetCollapsed] = useState(false);
@@ -105,18 +110,10 @@ export function AuthFlowPage({
                 {landingBackdrop ? (
                     <AuthFlowBackdrop sheetCollapsed={sheetCollapsed} />
                 ) : (
-                    <>
-                        <div className="auth-signup-backdrop" aria-hidden />
-                        <div
-                            className={[
-                                'auth-signup-map-scrim auth-signup-map-scrim--preview',
-                                sheetCollapsed ? 'auth-signup-map-scrim--sheet-collapsed' : '',
-                            ]
-                                .filter(Boolean)
-                                .join(' ')}
-                            aria-hidden
-                        />
-                    </>
+                    <AuthSignupMapBackdrop
+                        mapLocation={mapLocation}
+                        sheetCollapsed={sheetCollapsed}
+                    />
                 )}
             </div>
 

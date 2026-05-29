@@ -55,7 +55,7 @@ export default function VerifyLocationPage() {
         return;
       }
       if (!getCommunityIdForApi()) {
-        setError('No assigned neyborhuud found. Pick your area first.');
+        setError('No assigned Huud found. Pick your area first.');
         setLoading(false);
         return;
       }
@@ -74,7 +74,7 @@ export default function VerifyLocationPage() {
     try {
       const loc = await getCurrentLocation();
       if (!loc) {
-        setError('Location permission is required to verify you are in your neyborhuud.');
+        setError('Location permission is required to verify you are in your Huud.');
         return;
       }
       if (
@@ -125,7 +125,7 @@ export default function VerifyLocationPage() {
     );
   }
 
-  const communityName = comm?.name || 'Your neyborhuud';
+  const communityName = comm?.name || 'Your Huud';
 
   return (
     <AuthFlowPage
@@ -201,7 +201,7 @@ export default function VerifyLocationPage() {
 
         {!error ? (
           <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
-            A quick GPS check anchors your account to your neyborhuud
+            A quick GPS check anchors your account to your Huud
           </p>
         ) : null}
       </div>

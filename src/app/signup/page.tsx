@@ -8,7 +8,11 @@ import { OTPInput } from '@/components/ui/OTPInput';
 import { LocationPicker } from '@/components/ui/LocationPicker';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
-import { resolvePostVerifyRoute } from '@/lib/authSession';
+import {
+    isUserEmailVerified,
+    isValidEmailVerificationCode,
+    resolvePostVerifyRoute,
+} from '@/lib/authSession';
 import { getNeedsCommunitySelection } from '@/lib/communityContext';
 import { getPostSetupRoute } from '@/lib/onboarding';
 import { authService } from '@/services/auth.service';
@@ -24,7 +28,7 @@ import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { LEGAL_LINKS } from '@/components/legal/LegalDocumentPage';
 import { useMyGamificationStats } from '@/hooks/useGamification';
 
-const SIGNUP_MAP_DEFAULT = { lat: 6.6059, lng: 3.2771 };
+import { SIGNUP_MAP_DEFAULT } from '@/lib/signupMap';
 
 const SIGNUP_STAGE_LABELS = {
     location: 'Street',
@@ -66,6 +70,7 @@ function SignupPageContent() {
     const [isVerifying, setIsVerifying] = useState(false);
     const [verificationError, setVerificationError] = useState<string | null>(null);
     const [verificationNotice, setVerificationNotice] = useState<string | null>(null);
+    const verifyInFlightRef = useRef(false);
 
     // Email & Username validation hooks
     const emailValidation = useEmailValidation({ debounceMs: 600, checkAvailability: true });
@@ -88,14 +93,13 @@ function SignupPageContent() {
 
     // Resend cooldown timer
     useEffect(() => {
-        if (step !== 'form') return;
         document.documentElement.setAttribute('data-auth', 'signup-map');
         return () => {
             if (document.documentElement.getAttribute('data-auth') === 'signup-map') {
                 document.documentElement.removeAttribute('data-auth');
             }
         };
-    }, [step]);
+    }, []);
 
     useEffect(() => {
         if (resendCooldown > 0) {
@@ -103,6 +107,14 @@ function SignupPageContent() {
             return () => clearTimeout(timer);
         }
     }, [resendCooldown]);
+
+    useEffect(() => {
+        if (step !== 'verify-email') return;
+        setVerificationCode('');
+        setVerificationError(null);
+        setVerificationNotice(null);
+        verifyInFlightRef.current = false;
+    }, [step]);
 
     /** Matches server Joi / `src/utils/passwordPolicy` on NeyborHuud ServerSide (min 12, complexity, patterns, etc.). */
     const passwordPolicy = evaluatePasswordPolicy(formData.password, {
@@ -130,7 +142,7 @@ function SignupPageContent() {
     const huudStatus = location ? 'Your street is set' : 'Find your street';
     const huudSignal = location
         ? resolvedAddress?.source === 'backend'
-            ? 'Verified by neyborhuud'
+            ? 'Verified by NeyborHuud'
             : 'Location saved'
         : 'Tap below to use GPS or the map';
     const identityHandle = formData.username.trim() ? `@${formData.username.trim()}` : '@your_name';
@@ -203,17 +215,30 @@ function SignupPageContent() {
     };
 
     // Handle verification code submission
-    const handleVerifyCode = async (code?: string) => {
-        const codeToVerify = code || verificationCode;
-        
-        if (codeToVerify.length !== 6 || isVerifying) {
+    const advanceAfterVerified = () => {
+        const gateRoute = resolvePostVerifyRoute();
+        if (gateRoute) {
+            router.push(gateRoute);
             return;
         }
-        
+        setStep('success');
+    };
+
+    const handleVerifyCode = async () => {
+        const codeToVerify = verificationCode.trim();
+
+        if (!isValidEmailVerificationCode(codeToVerify) || isVerifying || verifyInFlightRef.current) {
+            if (codeToVerify.length > 0 && !isValidEmailVerificationCode(codeToVerify)) {
+                setVerificationError('Enter all 6 digits, then tap Verify.');
+            }
+            return;
+        }
+
+        verifyInFlightRef.current = true;
         setIsVerifying(true);
         setVerificationError(null);
         setVerificationNotice(null);
-        
+
         try {
             const response = await authService.verifyEmailWithCode(
                 formData.email,
@@ -224,20 +249,24 @@ function SignupPageContent() {
                 throw new Error(response.message || 'Verification failed. Please try again.');
             }
 
-            const gateRoute = resolvePostVerifyRoute();
-            if (gateRoute) {
-                router.push(gateRoute);
-                return;
+            const verifiedUser = response.data?.user;
+            if (verifiedUser && !isUserEmailVerified(verifiedUser)) {
+                throw new Error('That code was not accepted. Check your email and try again.');
             }
 
-            setStep('success');
+            advanceAfterVerified();
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Verification failed. Please try again.';
-            if (message.includes('expired')) {
+            const normalized = message.toLowerCase();
+            if (normalized.includes('already verified')) {
+                advanceAfterVerified();
+                return;
+            }
+            if (normalized.includes('expired')) {
                 setVerificationError('Code expired. Please request a new one.');
-            } else if (message.includes('invalid') || message.includes('incorrect')) {
+            } else if (normalized.includes('invalid') || normalized.includes('incorrect')) {
                 setVerificationError('Invalid code. Please check and try again.');
-            } else if (message.includes('attempts')) {
+            } else if (normalized.includes('attempts')) {
                 setVerificationError('Too many attempts. Please request a new code.');
             } else {
                 setVerificationError(message || 'Verification failed. Please try again.');
@@ -246,6 +275,7 @@ function SignupPageContent() {
             setVerificationCode('');
         } finally {
             setIsVerifying(false);
+            verifyInFlightRef.current = false;
         }
     };
 
@@ -440,6 +470,13 @@ function SignupPageContent() {
             if (response.success && response.data) {
                 const ext = response.data;
 
+                if (isUserEmailVerified(ext.user)) {
+                    setVerificationNotice('Your email is already verified.');
+                    setVerificationError(null);
+                    advanceAfterVerified();
+                    return;
+                }
+
                 if (ext.emailDelivery?.sent === false) {
                     setVerificationError(ext.emailDelivery.message || 'Account created, but the verification email could not be sent. Please request a new code.');
                     setVerificationNotice(null);
@@ -453,7 +490,7 @@ function SignupPageContent() {
                 throw new Error(response.message || 'Registration failed');
             }
 
-            // Show email verification screen
+            setVerificationCode('');
             setStep('verify-email');
         } catch (error: unknown) {
             const err = error as { message?: string; status?: number; response?: { status?: number; data?: { message?: string } } };
@@ -514,8 +551,8 @@ function SignupPageContent() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => handleVerifyCode()}
-                            disabled={verificationCode.length !== 6 || isVerifying}
+                            onClick={() => void handleVerifyCode()}
+                            disabled={!isValidEmailVerificationCode(verificationCode) || isVerifying}
                             className="auth-btn auth-btn-primary"
                         >
                             {isVerifying ? (
@@ -538,11 +575,13 @@ function SignupPageContent() {
                         length={6}
                         value={verificationCode}
                         onChange={setVerificationCode}
-                        onComplete={handleVerifyCode}
                         disabled={isVerifying}
                         error={!!verificationError}
                         autoFocus
                     />
+                    <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
+                        Enter all 6 digits, then tap Verify
+                    </p>
                     {verificationError ? (
                         <div className="auth-flow-notice auth-flow-notice--error" role="alert">
                             <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
@@ -553,11 +592,7 @@ function SignupPageContent() {
                             <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
                             <span>{verificationNotice}</span>
                         </div>
-                    ) : (
-                        <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
-                            Enter the 6-digit code from your inbox
-                        </p>
-                    )}
+                    ) : null}
                 </div>
             </AuthFlowPage>
         );
@@ -570,6 +605,8 @@ function SignupPageContent() {
                 ariaLabel="Welcome to the Huud"
                 stageKey="signup-success"
                 stepLabel="You're in"
+                landingBackdrop={false}
+                mapLocation={location}
                 hero={
                     <AuthFlowHero
                         icon="bi-person-check-fill"
@@ -945,7 +982,7 @@ function SignupPageContent() {
                                         </>
                                     ) : (
                                         <>
-                                            <span>Join neyborhuud</span>
+                                            <span>Join NeyborHuud</span>
                                             <i className="bi bi-arrow-right shrink-0" aria-hidden />
                                         </>
                                     )}

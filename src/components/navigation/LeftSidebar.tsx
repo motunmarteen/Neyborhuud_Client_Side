@@ -4,32 +4,25 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 
 import { SidebarProfileLockup } from './SidebarProfileLockup';
-import { resolveUserAvatarUrl } from '@/lib/userAvatar';
-
-import { SIDEBAR_ACCENTS } from '@/lib/brand-styles';
-
-const quickActions = [
-  { icon: 'shield', label: 'Sentinel', href: '/safety' },
-  { icon: 'route', label: 'Safe Trip', href: '/safety/trips' },
-  { icon: 'fence', label: 'Safety Zones', href: '/safety/geofences' },
-  { icon: 'phone_in_talk', label: 'Fake Call', href: '/safety/fake-call' },
-  { icon: 'pin', label: 'Panic PIN', href: '/safety/panic-pin' },
-  { icon: 'chat', label: 'Messages', href: '/messages' },
-];
+import { SidebarFxWidget } from './SidebarFxWidget';
+import { SidebarBuildingSilhouette } from './SidebarBuildingSilhouette';
+import { SidebarSkyHeaderPanel } from './SidebarSkyHeader';
+import { useSwipeBackDisabled } from '@/contexts/SwipeBackContext';
 
 const mainNav = [
   { icon: 'location_on', label: 'My Huud', href: '/neighborhood' },
   { icon: 'groups', label: 'Communities', href: '/communities' },
   { icon: 'bookmark', label: 'Saved', href: '/saved' },
   { icon: 'local_fire_department', label: 'Popular Nearby', href: '/popular' },
+  { icon: 'newspaper', label: 'Local News', href: '/local-news' },
   { icon: 'military_tech', label: 'My Huud Score', href: '/gamification' },
 ];
 
 const browseTypes = [
   { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi', href: '/fyi' },
-  { icon: 'newspaper', label: 'Local News', type: 'local-news', href: '/local-news' },
   { icon: 'help', label: 'Help Requests', type: 'help_request', href: '/help-request' },
   { icon: 'work', label: 'Jobs', type: 'job', href: '/jobs' },
   { icon: 'event', label: 'Events', type: 'event', href: '/events' },
@@ -39,15 +32,41 @@ const browseTypes = [
   { icon: 'add_alert', label: 'Community Alerts', type: 'emergency', href: '/community-emergency' },
 ];
 
+function SidebarLink({
+  href,
+  icon,
+  label,
+  active,
+  onNavigate,
+}: {
+  href: string;
+  icon: string;
+  label: string;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
+  return (
+    <li className="left-sidebar__nav-item">
+      <Link
+        href={href}
+        onClick={onNavigate}
+        className={`left-sidebar__link${active ? ' left-sidebar__link--active' : ''}`}
+      >
+        <span className="left-sidebar__link-icon">
+          <span className={`material-symbols-outlined${active ? ' fill-1' : ''}`}>{icon}</span>
+        </span>
+        <span className="left-sidebar__link-label">{label}</span>
+      </Link>
+    </li>
+  );
+}
 
-
-function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onClose?: () => void }) {
+function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => void; onClose?: () => void; isDrawer?: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const activeType = pathname === '/feed' ? searchParams.get('type') : null;
 
-  // Defer auth-dependent rendering until after mount to prevent SSR/client hydration mismatch
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
   const authUser = mounted ? user : null;
@@ -57,120 +76,89 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
     return pathname?.startsWith(href);
   };
 
-  const profileAvatarSrc = resolveUserAvatarUrl({
-    profilePicture: authUser?.profilePicture,
-    avatarUrl: authUser?.avatarUrl,
-  });
-
   return (
-    <div className="flex flex-col h-full">
-      <div className="pl-4 pr-6 pt-6 pb-2">
+    <div className="left-sidebar__body">
+      <SidebarSkyHeaderPanel isDrawer={isDrawer}>
+        <div className="left-sidebar__header-top">
+          <Link href="/feed" onClick={onNavigate} className="left-sidebar__header-logo">
+            <NeyborHuudLogo layout="wordmark" size={isDrawer ? 'sm' : 'md'} tone="primary" />
+          </Link>
+          {isDrawer && onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="left-sidebar__sky-close"
+              aria-label="Close menu"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          ) : null}
+        </div>
+
         <SidebarProfileLockup
-          avatarUrl={profileAvatarSrc}
-          username={authUser?.username || 'neybor'}
+          variant="sky"
+          user={authUser}
           profileHref={authUser ? `/profile/${authUser.username}` : '/settings'}
           onNavigate={onNavigate}
         />
-      </div>
 
-      <div className="pl-4 pr-6 pt-2 pb-6 flex flex-col gap-5 flex-1 min-h-0 overflow-y-auto">
+        <SidebarFxWidget variant="sky" />
+      </SidebarSkyHeaderPanel>
 
-        {/* Quick Actions */}
-        <div className="flex flex-col gap-3">
-          <h2 className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Quick Actions</h2>
-          <div className="grid grid-cols-3 gap-1.5">
-            {quickActions.map((item, idx) => {
-              const active = isActive(item.href);
-              const accent = SIDEBAR_ACCENTS[idx % SIDEBAR_ACCENTS.length];
+      <div className="left-sidebar__main">
+        <section className="left-sidebar__section">
+          <h2 className="left-sidebar__section-label">Navigation</h2>
+          <ul className="left-sidebar__nav">
+            {mainNav.map((item) => (
+              <SidebarLink
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                active={isActive(item.href)}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </ul>
+        </section>
+
+        <section className="left-sidebar__section">
+          <h2 className="left-sidebar__section-label">Explore</h2>
+          <div className="left-sidebar__explore-grid">
+            {browseTypes.map((item) => {
+              const active = item.href ? pathname?.startsWith(item.href) : activeType === item.type;
               return (
                 <Link
-                  key={item.href}
-                  href={item.href}
+                  key={item.type}
+                  href={item.href || `/feed?type=${item.type}`}
                   onClick={onNavigate}
-                  className={`flex items-center gap-1 px-2 py-2 rounded-full text-[11px] font-bold transition-all justify-center whitespace-nowrap ${
-                    active ? 'text-white shadow-md' : 'hover:opacity-80'
-                  }`}
-                  style={active
-                    ? { background: accent, color: '#fff', boxShadow: `0 4px 16px ${accent}55` }
-                    : { color: accent, background: `${accent}14` }
-                  }
+                  className={`left-sidebar__explore-link${active ? ' left-sidebar__explore-link--active' : ''}`}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{item.icon}</span>
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Main Navigation */}
-        <div className="flex flex-col gap-3">
-          <div className="neu-divider" />
-          <h2 className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Navigation</h2>
-          <div className="flex flex-col gap-2">
-            {mainNav.map((item) => {
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onNavigate}
-                  className={`neu-card-sm flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all hover:scale-[1.01] ${
-                    active ? 'text-primary' : ''
-                  }`}
-                  style={!active ? { color: 'var(--neu-text)' } : undefined}
-                >
-                  <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors`} style={{ fontSize: '20px' }}>
-                    {item.icon}
+                  <span className="left-sidebar__explore-icon">
+                    <span className={`material-symbols-outlined${active ? ' fill-1' : ''}`}>{item.icon}</span>
                   </span>
-                  <p className={`text-[13px] ${active ? 'font-bold' : 'font-medium'} leading-normal tracking-tight`}>
-                    {item.label}
-                  </p>
+                  <span className="left-sidebar__explore-label">{item.label}</span>
                 </Link>
               );
             })}
           </div>
-        </div>
-
-        {/* Feed Filters — 2-col grid */}
-        <div className="grid grid-cols-2 gap-1.5">
-          {browseTypes.map((item) => {
-            const active = item.href ? pathname?.startsWith(item.href) : activeType === item.type;
-            return (
-              <Link
-                key={item.type}
-                href={item.href || `/feed?type=${item.type}`}
-                onClick={onNavigate}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all ${
-                  active
-                    ? 'bg-primary/[0.08] text-primary'
-                    : 'hover:bg-black/[0.05] bg-black/[0.025]'
-                }`}
-                style={!active ? { color: 'var(--neu-text)' } : undefined}
-              >
-                <span className={`material-symbols-outlined ${active ? 'fill-1' : ''} transition-colors shrink-0`} style={{ fontSize: '16px' }}>
-                  {item.icon}
-                </span>
-                <p className={`text-[11px] ${active ? 'font-bold' : 'font-medium'} leading-snug`}>
-                  {item.label}
-                </p>
-              </Link>
-            );
-          })}
-        </div>
-
-      {/* Mobile-only: Settings at bottom */}
-      <div className="md:hidden mt-auto pt-4 border-t border-black/[0.06]">
-        <Link
-          href="/settings"
-          onClick={onNavigate}
-          className="flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-black/[0.04] cursor-pointer transition-all"
-          style={{ color: 'var(--neu-text)' }}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>settings</span>
-          <p className="text-[14.5px] font-medium leading-normal tracking-tight">Settings &amp; Privacy</p>
-        </Link>
+        </section>
       </div>
+
+      <div className="left-sidebar__footer">
+        <div className="left-sidebar__footer-settings">
+          <Link
+            href="/settings"
+            onClick={onNavigate}
+            className={`left-sidebar__link${isActive('/settings') ? ' left-sidebar__link--active' : ''}`}
+          >
+            <span className="left-sidebar__link-icon">
+              <span className={`material-symbols-outlined${isActive('/settings') ? ' fill-1' : ''}`}>settings</span>
+            </span>
+            <span className="left-sidebar__link-label">Settings &amp; Privacy</span>
+          </Link>
+        </div>
+        <SidebarBuildingSilhouette />
       </div>
     </div>
   );
@@ -179,14 +167,14 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
 export default function LeftSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Listen for toggle event from TopNav hamburger
+  useSwipeBackDisabled(mobileOpen, 'mobile-sidebar');
+
   useEffect(() => {
     const handleToggle = () => setMobileOpen(true);
     window.addEventListener('toggle-mobile-sidebar', handleToggle);
     return () => window.removeEventListener('toggle-mobile-sidebar', handleToggle);
   }, []);
 
-  // Prevent body scroll when mobile drawer is open
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = 'hidden';
@@ -198,29 +186,28 @@ export default function LeftSidebar() {
 
   return (
     <>
-      {/* Desktop sidebar – hidden on mobile */}
-      <aside className="hidden md:flex w-96 flex-col overflow-hidden shrink-0 neu-panel" style={{ backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg?v=2')", backgroundRepeat: 'repeat', backgroundSize: '360px 360px' }}>
-        <Suspense fallback={<div className="flex-1" />}>
+      <aside className="left-sidebar left-sidebar--desktop">
+        <div className="left-sidebar__scrim" aria-hidden />
+        <Suspense fallback={null}>
           <SidebarContent />
         </Suspense>
       </aside>
 
-      {/* Mobile drawer overlay */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-[100] md:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={() => setMobileOpen(false)}
-          />
-          {/* Drawer */}
-          <aside className="absolute top-0 left-0 bottom-0 w-72 overflow-y-auto animate-in slide-in-from-left duration-300 flex flex-col" style={{ boxShadow: '8px 0 24px rgba(0,0,0,0.08)', backgroundColor: '#FFFFFF', backgroundImage: "url('/doodle-pattern.svg?v=2')", backgroundRepeat: 'repeat', backgroundSize: '360px 360px' }}>
-            <Suspense fallback={<div className="flex-1" />}>
-              <SidebarContent onNavigate={() => setMobileOpen(false)} onClose={() => setMobileOpen(false)} />
+      {mobileOpen ? (
+        <div className="left-sidebar-overlay">
+          <div className="left-sidebar-backdrop" onClick={() => setMobileOpen(false)} aria-hidden />
+          <aside className="left-sidebar left-sidebar--drawer">
+            <div className="left-sidebar__scrim" aria-hidden />
+            <Suspense fallback={null}>
+              <SidebarContent
+                isDrawer
+                onNavigate={() => setMobileOpen(false)}
+                onClose={() => setMobileOpen(false)}
+              />
             </Suspense>
           </aside>
         </div>
-      )}
+      ) : null}
     </>
   );
 }

@@ -385,21 +385,26 @@ function XFeedInner() {
 
 
     return (
-        <div className="relative flex h-app w-full max-w-[100vw] overflow-hidden text-white neu-base">
+        <div className="relative flex h-app w-full max-w-[100vw] overflow-hidden neu-base">
             {/* Left Sidebar */}
             <Suspense fallback={<div className="w-64" />}>
                 <LeftSidebar />
             </Suspense>
 
             {/* Main scroll area: TopNav + Feed */}
-            <main ref={mainRef} className="flex flex-1 flex-col overflow-y-auto scroll-smooth md:snap-y md:snap-proximity" onTouchStart={feedSwipe.onTouchStart} onTouchEnd={feedSwipe.onTouchEnd}>
+            <main ref={mainRef} className="feed-scroll-main flex flex-1 flex-col overflow-y-auto scroll-smooth md:snap-y md:snap-proximity" onTouchStart={feedSwipe.onTouchStart} onTouchEnd={feedSwipe.onTouchEnd}>
                 {/* Top Navigation — scrolls with content */}
                 <TopNav />
 
                 <div className="flex flex-col pb-[var(--app-nav-bottom)]">
-                        {/* Full-width ambient sky hero — pulled up behind the transparent TopNav */}
-                        <div className="-mt-[60px]">
+                        {/* Ambient sky hero — sits behind transparent TopNav */}
+                        <div className="-mt-[60px] feed-hero-stack">
                           <FeedSkyHero />
+                          <FeedTabs
+                              activeTab={feedTab}
+                              onTabChange={(tab) => setFeedTab(tab)}
+                              className="feed-tabs-below-hero"
+                          />
                         </div>
                         <div className="px-4 flex flex-col gap-4 pt-3">
                             {/* Active content-type filter chip */}
@@ -417,12 +422,6 @@ function XFeedInner() {
                                     </span>
                                 </div>
                             )}
-
-                            {/* Feed Layer Selector */}
-                            <FeedTabs
-                                activeTab={feedTab}
-                                onTabChange={(tab) => setFeedTab(tab)}
-                            />
 
                             {feedTab === 'your_huud' && placeContext && (
                                 <FrequentPlaceContextBanner context={placeContext} />

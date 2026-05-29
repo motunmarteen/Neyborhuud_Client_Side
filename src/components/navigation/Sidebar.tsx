@@ -171,7 +171,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                     {/* Header with close button */}
                     <div className="flex items-center justify-between mb-6">
                         <Link href="/feed" className="flex items-center gap-3" onClick={handleNavClick}>
-                            <NeyborHuudLogo layout="inline" size="md" tone="primary" />
+                            <NeyborHuudLogo layout="wordmark" size="md" tone="primary" />
                         </Link>
                         <button
                             onClick={onMobileClose}
@@ -250,8 +250,12 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
         >
             {/* Logo & Toggle */}
             <div className="flex items-center justify-between h-14 px-3 mb-1">
-                <Link href="/feed" className="flex h-12 w-12 items-center justify-center rounded-full transition-colors hover:bg-brand-surface dark:hover:bg-brand-black/80">
-                    <NeyborHuudLogo layout="mark" size="sm" tone="primary" />
+                <Link href="/feed" className={`flex items-center rounded-full transition-colors hover:bg-brand-surface dark:hover:bg-brand-black/80 ${isCollapsed ? 'h-12 w-12 justify-center' : 'px-1'}`}>
+                    {isCollapsed ? (
+                        <span className="brand-wordmark text-[15px] font-extrabold text-[#00D431]">n</span>
+                    ) : (
+                        <NeyborHuudLogo layout="wordmark" size="md" tone="primary" />
+                    )}
                 </Link>
                 {!isCollapsed && (
                     <button

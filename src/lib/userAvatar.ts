@@ -1,4 +1,8 @@
-import { getApiUrl } from '@/lib/api';
+import { getApiBaseUrl } from '@/lib/api-client';
+import {
+  resolveProfileDisplayName,
+  type ProfileNameSource,
+} from '@/lib/profileSnapHelpers';
 import type { User } from '@/types/api';
 
 export type AvatarSource = {
@@ -6,6 +10,8 @@ export type AvatarSource = {
   avatarUrl?: string | null;
   avatar?: string | null;
 };
+
+export type ProfileAvatarSource = AvatarSource & ProfileNameSource;
 
 /** Turn API-relative media paths into absolute URLs the browser can load. */
 export function resolveMediaUrl(url: string): string {
@@ -16,7 +22,7 @@ export function resolveMediaUrl(url: string): string {
   }
 
   try {
-    const origin = new URL(getApiUrl()).origin;
+    const origin = new URL(getApiBaseUrl()).origin;
     const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
     return `${origin}${path}`;
   } catch {
@@ -39,6 +45,16 @@ export function resolveUserAvatarUrl(source?: AvatarSource | null): string | nul
 
   if (!raw) return null;
   return resolveMediaUrl(raw);
+}
+
+/** Same initial logic everywhere — display name first, then @username. */
+export function resolveProfileAvatarInitial(
+  source?: ProfileNameSource | null,
+  username?: string | null,
+): string {
+  const displayName = resolveProfileDisplayName(source, username);
+  const handle = (username ?? source?.username ?? '').trim().toLowerCase();
+  return displayName[0]?.toUpperCase() || handle.replace(/^@/, '')[0]?.toUpperCase() || 'N';
 }
 
 /** Keep both avatar fields aligned in auth cache after /profile/me or uploads. */

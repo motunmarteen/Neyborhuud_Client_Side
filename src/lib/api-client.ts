@@ -6,6 +6,22 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { ApiResponse } from "@/types/api";
 
+/** Auth routes that must not send a stored Bearer token (e.g. stale session on login). */
+const PUBLIC_AUTH_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/signup",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/auth/verify-email",
+  "/auth/resend-verification",
+];
+
+function isPublicAuthRequest(url: string | undefined): boolean {
+  if (!url) return false;
+  return PUBLIC_AUTH_PATHS.some((path) => url.includes(path));
+}
+
 class ApiClient {
   private client: AxiosInstance;
   private token: string | null = null;
@@ -22,12 +38,14 @@ class ApiClient {
     // Request interceptor - add auth token
     this.client.interceptors.request.use(
       (config) => {
-        // Always try to get token from localStorage if not in memory
+        if (isPublicAuthRequest(config.url)) {
+          delete config.headers.Authorization;
+          return config;
+        }
         const token = this.getToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-        // Don't warn if no token - some endpoints might be public
         return config;
       },
       (error) => Promise.reject(error),
@@ -324,8 +342,8 @@ class ApiClient {
   }
 }
 
-// Get API base URL from environment (must match @/lib/api — EC2 production API)
-const getApiBaseUrl = (): string => {
+/** API base URL — must match media URL resolution in @/lib/userAvatar. */
+export const getApiBaseUrl = (): string => {
   const envUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
   if (envUrl && envUrl !== "undefined") {
@@ -333,6 +351,25 @@ const getApiBaseUrl = (): string => {
   }
   return "https://api.neyborhuud.com/api/v1";
 };
+
+export function isLocalDevHost(url: string): boolean {
+  return /localhost|127\.0\.0\.1|\[::1\]/i.test(url);
+}
+
+export function isLocalApiHost(): boolean {
+  return isLocalDevHost(getApiBaseUrl());
+}
+
+export function getSocketUrl(): string {
+  return process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5000";
+}
+
+/** Skip Socket.IO when pointed at localhost unless explicitly enabled (frontend-only dev). */
+export function shouldConnectSocket(): boolean {
+  const socketUrl = getSocketUrl();
+  if (!isLocalDevHost(socketUrl)) return true;
+  return process.env.NEXT_PUBLIC_ENABLE_LOCAL_SOCKET === "true";
+}
 
 // Export singleton instance
 const apiClient = new ApiClient(getApiBaseUrl());

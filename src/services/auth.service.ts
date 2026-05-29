@@ -4,6 +4,7 @@
  */
 
 import apiClient from "@/lib/api-client";
+import { getAuthErrorMessage } from "@/lib/error-handler";
 import {
   extractAccessToken,
   extractRefreshToken,
@@ -275,26 +276,33 @@ export const authService = {
     password: string,
     options?: { deviceLocation?: { lat?: number; lng?: number } },
   ) {
-    const response = await apiClient.post<AuthSessionData>("/auth/login", {
-      identifier,
-      password,
-      ...(options?.deviceLocation && {
-        deviceLocation: options.deviceLocation,
-      }),
-    });
+    try {
+      const response = await apiClient.post<AuthSessionData>("/auth/login", {
+        identifier,
+        password,
+        ...(options?.deviceLocation && {
+          deviceLocation: options.deviceLocation,
+        }),
+      });
 
-    if (response.success && response.data) {
-      const stored = persistLoginSession(response.data);
-      if (!stored) {
-        return {
-          ...response,
-          success: false,
-          message: "Login succeeded but no session token was returned.",
-        };
+      if (response.success && response.data) {
+        const stored = persistLoginSession(response.data);
+        if (!stored) {
+          return {
+            ...response,
+            success: false,
+            message: "Login succeeded but no session token was returned.",
+          };
+        }
       }
-    }
 
-    return response;
+      return response;
+    } catch (error) {
+      return {
+        success: false,
+        message: getAuthErrorMessage(error),
+      };
+    }
   },
 
   /** Flow A: confirm ward/LGA-area after signup (Bearer token). */

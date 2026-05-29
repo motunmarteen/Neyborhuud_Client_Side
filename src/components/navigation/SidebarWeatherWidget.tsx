@@ -1,6 +1,5 @@
 /**
  * SidebarWeatherWidget — Compact ambient sky weather card for RightSidebar
- * Mirrors the FeedSkyHero data (weather, exchange rates, news) in sidebar form.
  */
 
 'use client';
@@ -10,75 +9,11 @@ import {
   getTimePeriod,
   getSkyTheme,
   type SkyTheme,
-  type WeatherCondition as AmbientWeather,
 } from '@/components/navigation/AmbientProfileCard';
-import { API_BASE_URL } from '@/lib/api';
-
-interface WeatherData {
-  temp: number;
-  condition: string;
-  city: string;
-  wmoCode: number;
-}
-
-interface ExchangeRate {
-  currency: string;
-  symbol: string;
-  rate: number;
-}
-
-interface NewsItem {
-  title: string;
-  source: string;
-}
-
-/* ── Weather code helpers ── */
-
-function interpretWeatherCode(code: number): string {
-  if (code === 0) return 'Clear Sky';
-  if (code <= 2) return 'Partly Cloudy';
-  if (code === 3) return 'Overcast';
-  if (code >= 45 && code <= 48) return 'Foggy';
-  if (code >= 51 && code <= 57) return 'Drizzle';
-  if (code >= 61 && code <= 67) return 'Rainy';
-  if (code >= 71 && code <= 77) return 'Snowy';
-  if (code >= 80 && code <= 82) return 'Showers';
-  if (code >= 85 && code <= 86) return 'Snow Showers';
-  if (code >= 95 && code <= 99) return 'Thunderstorm';
-  return 'Partly Cloudy';
-}
-
-function wmoToAmbient(code: number): AmbientWeather {
-  if (code === 0 || code === 1) return 'clear';
-  if (code === 2 || code === 3) return 'cloudy';
-  if (code >= 45 && code <= 48) return 'fog';
-  if (code >= 51 && code <= 67) return 'rain';
-  if (code >= 71 && code <= 77) return 'snow';
-  if (code >= 80 && code <= 82) return 'rain';
-  if (code >= 85 && code <= 86) return 'snow';
-  if (code >= 95 && code <= 99) return 'storm';
-  return 'clear';
-}
-
-function owmIdToWmo(id: number): number {
-  if (id >= 200 && id <= 232) return 95;
-  if (id >= 300 && id <= 321) return 51;
-  if (id >= 500 && id <= 504) return 61;
-  if (id === 511) return 66;
-  if (id >= 520 && id <= 531) return 80;
-  if (id >= 600 && id <= 622) return 71;
-  if (id >= 701 && id <= 781) return 45;
-  if (id === 800) return 0;
-  if (id === 801) return 1;
-  if (id === 802) return 2;
-  if (id >= 803) return 3;
-  return 2;
-}
-
-function owmIdToCondition(id: number, description: string): string {
-  if (description) return description.charAt(0).toUpperCase() + description.slice(1);
-  return interpretWeatherCode(owmIdToWmo(id));
-}
+import { wmoToAmbient } from '@/lib/weatherClient';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { SkyWeatherEffects } from '@/components/ambient/SkyWeatherEffects';
+import { useAmbientWeather } from '@/hooks/useAmbientWeather';
 
 /* ── Sky scene elements (compact for sidebar) ── */
 
@@ -198,40 +133,6 @@ function SidebarClouds({ color }: { color: string }) {
   );
 }
 
-function SidebarRainDrops({ isDark }: { isDark: boolean }) {
-  const drops = useMemo(() =>
-    Array.from({ length: 14 }).map((_, i) => ({
-      id: i,
-      left: (i * 13 + 5) % 100,
-      height: 8 + (i * 7 + 3) % 12,
-      dur: 0.35 + ((i * 11) % 4) / 15,
-      delay: ((i * 7) % 25) / 10,
-      angle: -10 + ((i * 3) % 8),
-    })), []);
-
-  return (
-    <>
-      {drops.map((d) => (
-        <div
-          key={d.id}
-          className="absolute"
-          style={{
-            left: `${d.left}%`, top: '-10px',
-            width: '1px', height: `${d.height}px`,
-            transform: `rotate(${d.angle}deg)`,
-            background: isDark
-              ? 'linear-gradient(180deg, transparent, rgba(150,180,255,0.5), transparent)'
-              : 'linear-gradient(180deg, transparent, rgba(255,255,255,0.5), transparent)',
-            borderRadius: '1px',
-            animation: `ambient-rain ${d.dur}s linear infinite`,
-            animationDelay: `${d.delay}s`,
-          }}
-        />
-      ))}
-    </>
-  );
-}
-
 function SidebarSilhouette({ color }: { color: string }) {
   return (
     <svg
@@ -268,53 +169,11 @@ function SidebarSilhouette({ color }: { color: string }) {
   );
 }
 
-/* ── News helpers ── */
-
-const CORS_PROXIES = [
-  (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-];
-
-const NEWS_FEEDS = [
-  { url: 'https://punchng.com/feed/', source: 'PUNCH' },
-  { url: 'https://www.vanguardngr.com/feed/', source: 'VANGUARD' },
-  { url: 'https://www.channelstv.com/feed/', source: 'CHANNELS' },
-];
-
-const FALLBACK_NEWS: NewsItem[] = [
-  { title: 'Stay updated with the latest from your neyborhuud', source: 'NeyborHuud' },
-];
-
-async function fetchFeedWithFallback(feedUrl: string, source: string): Promise<NewsItem[]> {
-  for (const proxy of CORS_PROXIES) {
-    try {
-      const res = await fetch(proxy(feedUrl), { signal: AbortSignal.timeout(6000) });
-      if (!res.ok) continue;
-      const text = await res.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/xml');
-      const items = doc.querySelectorAll('item');
-      const result: NewsItem[] = [];
-      items.forEach((item) => {
-        const title = item.querySelector('title')?.textContent?.trim();
-        if (title) result.push({ title, source });
-      });
-      if (result.length > 0) return result.slice(0, 5);
-    } catch { /* try next proxy */ }
-  }
-  return [];
-}
-
 /* ── Main Widget ── */
 
 export default function SidebarWeatherWidget() {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [rates, setRates] = useState<ExchangeRate[]>([]);
-  const [rateIndex, setRateIndex] = useState(0);
-  const [weatherLoading, setWeatherLoading] = useState(true);
-  const [ratesLoading, setRatesLoading] = useState(true);
-  const [newsItems, setNewsItems] = useState<NewsItem[]>(FALLBACK_NEWS);
-  const [newsIndex, setNewsIndex] = useState(0);
+  const { weather, loading: weatherLoading } = useAmbientWeather();
+  const { currentRate, loading: ratesLoading } = useExchangeRates();
 
   // SSR-safe hour
   const [currentHour, setCurrentHour] = useState(12);
@@ -329,230 +188,10 @@ export default function SidebarWeatherWidget() {
   const theme = useMemo(() => getSkyTheme(timePeriod, ambientWeather), [timePeriod, ambientWeather]);
   const isDark = timePeriod === 'night' || timePeriod === 'evening';
 
-  // Fetch weather
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setWeather({ temp: 32, condition: 'Sunny', city: 'Lagos', wmoCode: 0 });
-      setWeatherLoading(false);
-      return;
-    }
-
-    let lastLat = 0;
-    let lastLon = 0;
-
-    const updateWeather = async (latitude: number, longitude: number, force = false) => {
-      const moved = Math.abs(latitude - lastLat) > 0.005 || Math.abs(longitude - lastLon) > 0.005;
-      if (!force && lastLat !== 0 && !moved) return;
-      lastLat = latitude;
-      lastLon = longitude;
-
-      try {
-        let cityName = 'Your Area';
-        try {
-          const geoRes = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=12`,
-            { headers: { 'User-Agent': 'NeyborHuud/1.0' }, signal: AbortSignal.timeout(5000) },
-          );
-          if (geoRes.ok) {
-            const geoData = await geoRes.json();
-            const a = geoData?.address;
-            cityName = a?.city_district || a?.town || a?.city || a?.suburb
-              || a?.neighbourhood || a?.village || a?.county || a?.state || 'Your Area';
-          }
-        } catch { /* geocode failed */ }
-
-        // Strategy 1: Backend (OpenWeatherMap)
-        const apiBase = API_BASE_URL;
-        if (apiBase) {
-          try {
-            const backendRes = await fetch(
-              `${apiBase}/weather/current?lat=${latitude}&lon=${longitude}`,
-              { signal: AbortSignal.timeout(6000) },
-            );
-            if (backendRes.ok) {
-              const json = await backendRes.json();
-              const w = json?.data?.weather;
-              if (w) {
-                const owmCondition = w.conditions?.[0];
-                const owmId = owmCondition?.id ?? 800;
-                const desc = owmCondition?.description ?? '';
-                let wmoCode = owmIdToWmo(owmId);
-                let condition = owmIdToCondition(owmId, desc);
-
-                if (w.isRaining && wmoCode < 50) {
-                  wmoCode = w.isShowering ? 80 : 61;
-                  condition = w.isShowering ? 'Rain Showers' : 'Rain';
-                }
-
-                const city = cityName !== 'Your Area' ? cityName : (w.location?.name || cityName);
-                setWeather({ temp: w.temperature?.current ?? 28, condition, city, wmoCode });
-                return;
-              }
-            }
-          } catch { /* fall through */ }
-        }
-
-        // Strategy 2: Open-Meteo multi-model
-        const [defaultRes, ukmoRes] = await Promise.all([
-          fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,rain,showers,precipitation&timezone=auto`,
-            { signal: AbortSignal.timeout(6000) },
-          ).then(r => r.ok ? r.json() : null).catch(() => null),
-          fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,rain,showers,precipitation&models=ukmo_seamless&timezone=auto`,
-            { signal: AbortSignal.timeout(6000) },
-          ).then(r => r.ok ? r.json() : null).catch(() => null),
-        ]);
-
-        const defaultCur = defaultRes?.current;
-        const ukmoCur = ukmoRes?.current;
-        if (defaultCur) {
-          const temp = Math.round(defaultCur.temperature_2m || 31);
-          let code = defaultCur.weather_code || 0;
-          const rain = defaultCur.rain ?? 0;
-          const showers = defaultCur.showers ?? 0;
-          const ukmoCode = ukmoCur?.weather_code ?? 0;
-          const ukmoRain = (ukmoCur?.rain ?? 0) + (ukmoCur?.showers ?? 0) + (ukmoCur?.precipitation ?? 0);
-          if (ukmoCode >= 50 && code < 50) code = ukmoCode;
-          if ((rain > 0 || showers > 0 || ukmoRain > 0) && code < 50) {
-            code = showers > 0 ? 80 : 61;
-          }
-          setWeather({ temp, condition: interpretWeatherCode(code), city: cityName, wmoCode: code });
-        } else {
-          setWeather({ temp: 31, condition: 'Partly Cloudy', city: cityName, wmoCode: 2 });
-        }
-      } catch {
-        setWeather({ temp: 31, condition: 'Partly Cloudy', city: 'Your Area', wmoCode: 2 });
-      } finally {
-        setWeatherLoading(false);
-      }
-    };
-
-    const watchId = navigator.geolocation.watchPosition(
-      (pos) => updateWeather(pos.coords.latitude, pos.coords.longitude),
-      () => {
-        setWeather({ temp: 31, condition: 'Partly Cloudy', city: 'Lagos', wmoCode: 2 });
-        setWeatherLoading(false);
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
-    );
-
-    const refreshInterval = setInterval(() => {
-      if (lastLat !== 0) updateWeather(lastLat, lastLon, true);
-    }, 10 * 60_000);
-
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-      clearInterval(refreshInterval);
-    };
-  }, []);
-
-  // Fetch exchange rates
-  useEffect(() => {
-    const currencies = [
-      { currency: 'USD', symbol: '$' },
-      { currency: 'GBP', symbol: '£' },
-      { currency: 'EUR', symbol: '€' },
-      { currency: 'JPY', symbol: '¥' },
-      { currency: 'CNY', symbol: '¥' },
-    ];
-
-    const setFallback = () => {
-      setRates([
-        { currency: 'USD', symbol: '$', rate: 1352.24 },
-        { currency: 'GBP', symbol: '£', rate: 1834.16 },
-        { currency: 'EUR', symbol: '€', rate: 1594.37 },
-        { currency: 'JPY', symbol: '¥', rate: 8.47 },
-        { currency: 'CNY', symbol: '¥', rate: 197.53 },
-      ]);
-    };
-
-    const fetchRates = async () => {
-      const sources = [
-        `https://api.exchangerate-api.com/v4/latest/USD?t=${Date.now()}`,
-        `https://open.er-api.com/v6/latest/USD?t=${Date.now()}`,
-        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json`,
-      ];
-
-      for (const url of sources) {
-        try {
-          const res = await fetch(url, { cache: 'no-store' });
-          if (!res.ok) continue;
-          const data = await res.json();
-          const r: Record<string, number> = data.rates ?? data.usd ?? {};
-          const ngnPerUSD = r['NGN'] ?? r['ngn'] ?? 0;
-          if (!ngnPerUSD) continue;
-
-          const parsed = currencies.map((c) => {
-            const key = c.currency.toUpperCase();
-            const keyLower = c.currency.toLowerCase();
-            const foreignPerUSD = r[key] ?? r[keyLower] ?? 0;
-            const rate = foreignPerUSD ? Math.round((ngnPerUSD / foreignPerUSD) * 100) / 100 : 0;
-            return { ...c, rate };
-          });
-
-          if (parsed.some((p) => p.rate > 0)) {
-            setRates(parsed);
-            setRatesLoading(false);
-            return;
-          }
-        } catch { /* try next */ }
-      }
-      setFallback();
-      setRatesLoading(false);
-    };
-
-    fetchRates();
-    const interval = setInterval(fetchRates, 30 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Cycle exchange rates
-  useEffect(() => {
-    if (rates.length === 0) return;
-    const interval = setInterval(() => setRateIndex((prev) => (prev + 1) % rates.length), 3000);
-    return () => clearInterval(interval);
-  }, [rates]);
-
-  // Fetch news
-  useEffect(() => {
-    const fetchNews = async () => {
-      const results = await Promise.allSettled(
-        NEWS_FEEDS.map((feed) => fetchFeedWithFallback(feed.url, feed.source)),
-      );
-      const arrays = results.map((r) => (r.status === 'fulfilled' ? r.value : []));
-      const total = arrays.reduce((s, a) => s + a.length, 0);
-
-      if (total > 0) {
-        const max = Math.max(...arrays.map((a) => a.length));
-        const interleaved: NewsItem[] = [];
-        for (let i = 0; i < max; i++) {
-          arrays.forEach((a) => { if (a[i]) interleaved.push(a[i]); });
-        }
-        setNewsItems(interleaved.slice(0, 8));
-      } else {
-        setNewsItems(FALLBACK_NEWS);
-      }
-    };
-    fetchNews();
-    const interval = setInterval(fetchNews, 15 * 60_000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Cycle news
-  useEffect(() => {
-    if (newsItems.length <= 1) return;
-    const interval = setInterval(() => setNewsIndex((prev) => (prev + 1) % newsItems.length), 6000);
-    return () => clearInterval(interval);
-  }, [newsItems]);
-
-  const currentRate = rates[rateIndex];
-  const currentNews = newsItems[newsIndex];
-
   return (
     <div
       className="relative rounded-2xl overflow-hidden transition-all duration-[2000ms]"
-      style={{ background: theme.skyGradient, minHeight: 180 }}
+      style={{ background: theme.skyGradient, minHeight: 148 }}
     >
       {/* Horizon glow */}
       <div className="absolute inset-0 pointer-events-none transition-all duration-[2000ms]" style={{ background: theme.horizonGlow }} />
@@ -566,14 +205,14 @@ export default function SidebarWeatherWidget() {
       {/* Clouds */}
       {theme.showClouds && <SidebarClouds color={theme.cloudColor} />}
 
-      {/* Rain */}
-      {theme.showRain && <SidebarRainDrops isDark={isDark} />}
+      {/* Weather particles */}
+      <SkyWeatherEffects theme={theme} isDark={isDark} size="compact" />
 
       {/* City silhouette */}
       <SidebarSilhouette color={theme.silhouetteColor} />
 
       {/* Content overlay */}
-      <div className="relative z-10 p-4 flex flex-col justify-between" style={{ minHeight: 180 }}>
+      <div className="relative z-10 p-4 flex flex-col justify-between gap-3" style={{ minHeight: 148 }}>
         {weatherLoading ? (
           <div className="animate-pulse flex flex-col gap-2 flex-1 justify-center">
             <div className="h-3 rounded-full w-16 bg-white/15" />
@@ -582,46 +221,30 @@ export default function SidebarWeatherWidget() {
           </div>
         ) : weather ? (
           <>
+            <div className="flex items-baseline gap-2 min-w-0">
+              <p
+                className="text-2xl font-extrabold leading-none shrink-0"
+                style={{ color: theme.textColor, textShadow: '0 1px 4px rgba(0,0,0,0.35)' }}
+              >
+                {weather.temp}°
+              </p>
+              <p
+                className="text-[11px] font-medium leading-tight line-clamp-2"
+                style={{ color: theme.mutedColor, textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
+              >
+                {weather.condition}
+                {weather.city ? ` · ${weather.city}` : ''}
+              </p>
+            </div>
+
             {/* Exchange rate */}
             {!ratesLoading && currentRate && (
               <p
-                className="text-xs font-bold mt-3"
+                className="text-xs font-bold"
                 style={{ color: theme.textColor, textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
               >
                 1 {currentRate.currency} = ₦{currentRate.rate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-            )}
-
-            {/* News ticker */}
-            {currentNews && (
-              <div className="mt-2 flex items-start gap-1.5">
-                <span
-                  className="shrink-0 text-[8px] font-black px-1 py-0.5 rounded"
-                  style={{
-                    background: 'rgba(239,68,68,0.85)',
-                    color: '#fff',
-                    lineHeight: 1.2,
-                  }}
-                >
-                  LIVE
-                </span>
-                <span
-                  className="shrink-0 text-[8px] font-black px-1 py-0.5 rounded"
-                  style={{
-                    background: 'rgba(0,0,0,0.3)',
-                    color: '#fff',
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {currentNews.source}
-                </span>
-                <p
-                  className="text-[10px] leading-tight line-clamp-2"
-                  style={{ color: theme.mutedColor, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}
-                >
-                  {currentNews.title}
-                </p>
-              </div>
             )}
           </>
         ) : null}

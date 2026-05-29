@@ -13,6 +13,7 @@ import {
   type WeatherCondition as AmbientWeather,
 } from '@/components/navigation/AmbientProfileCard';
 import { API_BASE_URL } from '@/lib/api';
+import { SkyWeatherEffects } from '@/components/ambient/SkyWeatherEffects';
 
 interface WeatherData {
   temp: number;
@@ -161,40 +162,6 @@ function MiniCelestial({ theme }: { theme: SkyTheme }) {
         }}
       />
     </div>
-  );
-}
-
-function MiniRainDrops({ isDark }: { isDark: boolean }) {
-  const drops = useMemo(() =>
-    Array.from({ length: 10 }).map((_, i) => ({
-      id: i,
-      left: (i * 13 + 5) % 100,
-      height: 6 + (i * 7 + 3) % 10,
-      dur: 0.35 + ((i * 11) % 4) / 15,
-      delay: ((i * 7) % 25) / 10,
-      angle: -10 + ((i * 3) % 8),
-    })), []);
-
-  return (
-    <>
-      {drops.map((d) => (
-        <div
-          key={d.id}
-          className="absolute"
-          style={{
-            left: `${d.left}%`, top: '-8px',
-            width: '1px', height: `${d.height}px`,
-            transform: `rotate(${d.angle}deg)`,
-            background: isDark
-              ? 'linear-gradient(180deg, transparent, rgba(150,180,255,0.5), transparent)'
-              : 'linear-gradient(180deg, transparent, rgba(255,255,255,0.5), transparent)',
-            borderRadius: '1px',
-            animation: `ambient-rain ${d.dur}s linear infinite`,
-            animationDelay: `${d.delay}s`,
-          }}
-        />
-      ))}
-    </>
   );
 }
 
@@ -460,8 +427,8 @@ export function FeedInfoCards() {
         {/* Sun or Moon */}
         <MiniCelestial theme={theme} />
 
-        {/* Rain */}
-        {theme.showRain && <MiniRainDrops isDark={isDark} />}
+        {/* Weather particles */}
+        <SkyWeatherEffects theme={theme} isDark={isDark} size="mini" />
 
         {/* City silhouette */}
         <MiniSilhouette color={theme.silhouetteColor} />

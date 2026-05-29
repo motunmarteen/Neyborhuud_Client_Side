@@ -117,7 +117,7 @@ export function FeedWelcomeSheet() {
                 {FEED_TIPS.map((tip) => (
                     <li
                         key={tip.id}
-                        className="flex items-start gap-3 rounded-2xl border border-charcoal/8 bg-white px-3.5 py-3 shadow-[0_4px_16px_rgba(26,26,46,0.06)]"
+                        className="flex items-start gap-3 rounded-2xl border border-charcoal/8 bg-[var(--neu-bg)] px-3.5 py-3 shadow-[0_4px_16px_rgba(26,26,46,0.06)]"
                     >
                         <span
                             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tip.iconClass}`}
