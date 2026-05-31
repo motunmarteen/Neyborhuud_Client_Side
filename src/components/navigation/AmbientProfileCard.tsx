@@ -33,7 +33,7 @@ export function getTimePeriod(hour: number): TimePeriod {
   if (hour >= 7 && hour < 12) return 'morning';
   if (hour >= 12 && hour < 16) return 'afternoon';
   if (hour >= 16 && hour < 19) return 'sunset';
-  if (hour >= 19 && hour < 21) return 'evening';
+  if (hour >= 19 || hour < 5) return 'night';
   return 'night';
 }
 
@@ -216,15 +216,22 @@ function ensureLeafletCss() {
   document.head.appendChild(link);
 }
 
-function getGreeting(time: TimePeriod, firstName?: string): string {
-  const name = firstName ? `, ${firstName}` : '';
+export function getPersonalizedName(firstName?: string, username?: string): string {
+  const raw = firstName?.trim() || username?.trim() || '';
+  if (!raw) return '';
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
+export function getGreeting(time: TimePeriod, firstName?: string, username?: string): string {
+  const name = getPersonalizedName(firstName, username);
+  const suffix = name ? `, ${name}` : '';
   switch (time) {
-    case 'dawn': return `Good morning${name}`;
-    case 'morning': return `Good morning${name}`;
-    case 'afternoon': return `Good afternoon${name}`;
-    case 'sunset': return `Good evening${name}`;
-    case 'evening': return `Good evening${name}`;
-    case 'night': return `Good night${name}`;
+    case 'dawn': return `Good morning${suffix}`;
+    case 'morning': return `Good morning${suffix}`;
+    case 'afternoon': return `Good afternoon${suffix}`;
+    case 'sunset': return `Good evening${suffix}`;
+    case 'evening': return `Good evening${suffix}`;
+    case 'night': return `Good night${suffix}`;
   }
 }
 

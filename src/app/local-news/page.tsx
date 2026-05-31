@@ -8,10 +8,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { newsService } from '@/services/news.service';
 import type { NewsSource, RssArticle } from '@/types/incident';
 
@@ -142,44 +139,32 @@ function LocalNewsInner() {
   };
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
+    <AppBrowseLayout
+      subtitle={
+        <span className="inline-flex items-center gap-2">
+          <span className="material-symbols-outlined text-xl text-primary">newspaper</span>
+          Latest news from Nigeria and around the world
+        </span>
+      }
+      header={
+        <>
+          <div className="flex gap-1">
+            {(['nigeria', 'international'] as Tab[]).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => handleTabChange(tab)}
+                className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all ${
+                  activeTab === tab ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'
+                }`}
+                style={activeTab !== tab ? { color: 'var(--neu-text-muted)' } : undefined}
+              >
+                {tab === 'nigeria' ? '🇳🇬 Nigeria' : '🌍 International'}
+              </button>
+            ))}
+          </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        <Suspense fallback={<div className="w-64" />}><LeftSidebar /></Suspense>
-
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-[680px] mx-auto flex flex-col pb-20">
-
-            {/* Page Header */}
-            <div className="px-4 pt-6 pb-4">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="material-symbols-outlined text-xl text-primary">newspaper</span>
-                <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Local News</h1>
-              </div>
-              <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-                Latest news from Nigeria and around the world
-              </p>
-            </div>
-
-            {/* Nigeria / International tabs */}
-            <div className="flex gap-1 px-4 mb-3">
-              {(['nigeria', 'international'] as Tab[]).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => handleTabChange(tab)}
-                  className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all ${
-                    activeTab === tab ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'
-                  }`}
-                  style={activeTab !== tab ? { color: 'var(--neu-text-muted)' } : {}}
-                >
-                  {tab === 'nigeria' ? '🇳🇬 Nigeria' : '🌍 International'}
-                </button>
-              ))}
-            </div>
-
-            {/* Source filter chips */}
-            <div className="flex gap-2 px-4 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               <button
                 onClick={() => { setSelectedSourceIds([]); loadNews(activeTab, []); }}
                 className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
@@ -201,68 +186,61 @@ function LocalNewsInner() {
                   {src.name}
                 </button>
               ))}
-            </div>
-
-            {/* Refresh button */}
-            <div className="flex justify-end px-4 mt-1 mb-3">
-              <button
-                onClick={() => loadNews(activeTab, selectedSourceIds)}
-                disabled={loading}
-                className="flex items-center gap-1 text-xs font-semibold text-primary disabled:opacity-50"
-              >
-                <span className={`material-symbols-outlined text-sm ${loading ? 'animate-spin' : ''}`}>refresh</span>
-                {loading ? 'Loading...' : 'Refresh'}
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="px-4 flex flex-col gap-4">
-              {loading && (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-sm mt-4" style={{ color: 'var(--neu-text-muted)' }}>Fetching latest news...</p>
-                </div>
-              )}
-
-              {!loading && error && (
-                <div className="neu-card-sm rounded-2xl flex flex-col items-center justify-center py-12 px-5">
-                  <span className="material-symbols-outlined text-3xl text-brand-red mb-3">wifi_off</span>
-                  <p className="text-sm text-center mb-4" style={{ color: 'var(--neu-text)' }}>{error}</p>
-                  <button
-                    onClick={() => loadNews(activeTab, selectedSourceIds)}
-                    className="px-6 py-2.5 mod-chip rounded-2xl text-sm font-bold text-primary"
-                  >
-                    Retry
-                  </button>
-                </div>
-              )}
-
-              {!loading && !error && articles.length === 0 && (
-                <div className="neu-card-sm rounded-2xl flex flex-col items-center justify-center py-12 px-5">
-                  <span className="material-symbols-outlined text-3xl opacity-40 mb-3" style={{ color: 'var(--neu-text-muted)' }}>
-                    newspaper
-                  </span>
-                  <p className="text-sm text-center" style={{ color: 'var(--neu-text)' }}>No articles found</p>
-                  <p className="text-xs text-center mt-2" style={{ color: 'var(--neu-text-muted)' }}>
-                    Try selecting different sources or refresh.
-                  </p>
-                </div>
-              )}
-
-              {!loading && articles.map(article => (
-                <ArticleCard key={article.id} article={article} />
-              ))}
-            </div>
           </div>
-        </main>
 
-        <RightSidebar />
-      </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => loadNews(activeTab, selectedSourceIds)}
+              disabled={loading}
+              className="flex items-center gap-1 text-xs font-semibold text-primary disabled:opacity-50"
+            >
+              <span className={`material-symbols-outlined text-sm ${loading ? 'animate-spin' : ''}`}>refresh</span>
+              {loading ? 'Loading...' : 'Refresh'}
+            </button>
+          </div>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm mt-4" style={{ color: 'var(--neu-text-muted)' }}>Fetching latest news...</p>
+          </div>
+        )}
 
-      <div className="md:hidden">
-        <Suspense fallback={<div className="h-16" />}><BottomNav /></Suspense>
+        {!loading && error && (
+          <div className="neu-card-sm rounded-2xl flex flex-col items-center justify-center py-12 px-5">
+            <span className="material-symbols-outlined text-3xl text-brand-red mb-3">wifi_off</span>
+            <p className="text-sm text-center mb-4" style={{ color: 'var(--neu-text)' }}>{error}</p>
+            <button
+              type="button"
+              onClick={() => loadNews(activeTab, selectedSourceIds)}
+              className="px-6 py-2.5 mod-chip rounded-2xl text-sm font-bold text-primary"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && articles.length === 0 && (
+          <div className="neu-card-sm rounded-2xl flex flex-col items-center justify-center py-12 px-5">
+            <span className="material-symbols-outlined text-3xl opacity-40 mb-3" style={{ color: 'var(--neu-text-muted)' }}>
+              newspaper
+            </span>
+            <p className="text-sm text-center" style={{ color: 'var(--neu-text)' }}>No articles found</p>
+            <p className="text-xs text-center mt-2" style={{ color: 'var(--neu-text-muted)' }}>
+              Try selecting different sources or refresh.
+            </p>
+          </div>
+        )}
+
+        {!loading && articles.map((article) => (
+          <ArticleCard key={article.id} article={article} />
+        ))}
       </div>
-    </div>
+    </AppBrowseLayout>
   );
 }
 

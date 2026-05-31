@@ -4,29 +4,28 @@ export type AppTheme = 'light' | 'dark';
 
 const THEME_COLOR: Record<AppTheme, string> = {
   light: '#ffffff',
-  dark: '#0d1a0f',
+  dark: '#ffffff', // Forcing light background colour
 };
 
 export function getSystemPrefersDark(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return false; // Force light theme
 }
 
 export function resolveSystemTheme(isDark: boolean): AppTheme {
-  return isDark ? 'dark' : 'light';
+  return 'light'; // Always light theme
 }
 
 /** Apply theme to `<html>`, meta theme-color, and color-scheme. */
 export function applySystemTheme(isDark: boolean): AppTheme {
-  const theme = resolveSystemTheme(isDark);
+  const theme = 'light';
   const root = document.documentElement;
 
-  root.classList.toggle('dark', isDark);
+  root.classList.remove('dark'); // Remove dark mode class
   root.dataset.theme = theme;
   root.style.colorScheme = theme;
 
   updateThemeColorMeta(theme);
-  window.dispatchEvent(new CustomEvent('neyborhuud:theme', { detail: { theme, isDark } }));
+  window.dispatchEvent(new CustomEvent('neyborhuud:theme', { detail: { theme, isDark: false } }));
 
   return theme;
 }
@@ -55,15 +54,11 @@ function updateThemeColorMeta(theme: AppTheme): void {
 export function subscribeSystemTheme(onChange: (isDark: boolean, theme: AppTheme) => void): () => void {
   if (typeof window === 'undefined') return () => undefined;
 
-  const media = window.matchMedia('(prefers-color-scheme: dark)');
-  const notify = (matches: boolean) => onChange(matches, applySystemTheme(matches));
+  const notify = () => onChange(false, 'light');
+  notify();
 
-  notify(media.matches);
-
-  const handler = (event: MediaQueryListEvent) => notify(event.matches);
-  media.addEventListener('change', handler);
-  return () => media.removeEventListener('change', handler);
+  return () => undefined; // No-op since we don't need to listen to system shifts
 }
 
 /** Inline boot script (in layout `<head>`) — prevents flash before React hydrates. */
-export const SYSTEM_THEME_BOOT_SCRIPT = `(function(){try{var m=window.matchMedia('(prefers-color-scheme: dark)');var d=document.documentElement;var a=function(x){d.classList.toggle('dark',x);d.dataset.theme=x?'dark':'light';d.style.colorScheme=x?'dark':'light';var c=x?'#0d1a0f':'#ffffff';var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',c);};a(m.matches);m.addEventListener('change',function(e){a(e.matches);});}catch(e){}}());`;
+export const SYSTEM_THEME_BOOT_SCRIPT = `(function(){try{var d=document.documentElement;d.classList.remove('dark');d.dataset.theme='light';d.style.colorScheme='light';var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content','#ffffff');}catch(e){}}());`;

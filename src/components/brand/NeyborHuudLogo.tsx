@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { BRAND_LOGO_WORDMARK, BRAND_NAME } from '@/lib/brand';
 
 type LogoTone = 'light' | 'dark' | 'primary' | 'hero';
-type LogoSize = 'hero' | 'lg' | 'md' | 'sm';
+type LogoSize = 'hero' | 'lg' | 'md' | 'sm' | 'chrome';
 /** `lockup` = lowercase logotype (landing hero only); `name` = official product name everywhere else. */
 type LogoPresentation = 'lockup' | 'name';
 
@@ -35,11 +35,12 @@ const nameToneClass: Record<LogoTone, string> = {
     hero: 'brand-name-hero text-[#00D431]',
 };
 
-const TEXT_SIZE_PRESETS: Record<LogoSize, number> = {
+const TEXT_SIZE_PRESETS: Record<LogoSize, number | null> = {
     hero: 28,
     lg: 22,
     md: 17,
     sm: 15,
+    chrome: null,
 };
 
 /** Brand text — lockup (lowercase) on landing; official name (NeyborHuud) in app chrome. */
@@ -53,6 +54,7 @@ export function NeyborHuudLogo({
 }: NeyborHuudLogoProps) {
     const typeSize = textSizeProp ?? TEXT_SIZE_PRESETS[size];
     const isLockup = presentation === 'lockup';
+    const isChrome = size === 'chrome' && textSizeProp == null;
 
     const shellClass =
         shell === 'glass'
@@ -63,12 +65,19 @@ export function NeyborHuudLogo({
 
     const wordmark = (
         <span
-            className={`leading-[0.95] ${
+            className={`${isChrome ? 'app-topnav__headline' : 'leading-[0.95]'} ${
                 isLockup
                     ? `brand-wordmark ${toneClass[tone]}`
                     : `brand-name ${nameToneClass[tone]}`
-            }`}
-            style={{ fontSize: typeSize }}
+            }`.trim()}
+            style={
+                typeSize != null || isChrome
+                    ? {
+                          ...(typeSize != null ? { fontSize: typeSize } : {}),
+                          ...(isChrome ? { letterSpacing: 'var(--app-topnav-logo-tracking)' } : {}),
+                      }
+                    : undefined
+            }
             aria-label={BRAND_NAME}
         >
             {isLockup ? BRAND_LOGO_WORDMARK : BRAND_NAME}

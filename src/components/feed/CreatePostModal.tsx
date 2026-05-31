@@ -15,6 +15,8 @@ interface CreatePostModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void;
+    /** Open the device media picker when the modal appears */
+    focusMediaOnOpen?: boolean;
     /** Pre-select a content type when the modal opens */
     defaultContentType?: ContentType;
     /** When true, hides the content type selector (modal is locked to defaultContentType) */
@@ -35,7 +37,7 @@ const CONTENT_TYPES: { value: ContentType; labelKey: string; icon: string }[] = 
 
 const SUCCESS_DISPLAY_MS = 1400;
 
-export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType, lockContentType, defaultFyiSubtype }: CreatePostModalProps) {
+export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, defaultContentType, lockContentType, defaultFyiSubtype }: CreatePostModalProps) {
     const { t, language: appLanguage } = useTranslation();
     const awardCoins = useAwardCoins();
     const [content, setContent] = useState('');
@@ -105,6 +107,12 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
             if (defaultFyiSubtype) setFyiSubtype(defaultFyiSubtype);
         }
     }, [isOpen, defaultContentType, defaultFyiSubtype]);
+
+    useEffect(() => {
+        if (!isOpen || !focusMediaOnOpen) return;
+        const timer = setTimeout(() => fileInputRef.current?.click(), 120);
+        return () => clearTimeout(timer);
+    }, [isOpen, focusMediaOnOpen]);
 
     if (!isOpen) return null;
 
@@ -1040,7 +1048,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, defaultContentType
                         <input
                             ref={fileInputRef}
                             type="file"
-                            accept="image/*"
+                            accept="image/*,video/*"
                             multiple
                             onChange={handleFileSelect}
                             className="hidden"

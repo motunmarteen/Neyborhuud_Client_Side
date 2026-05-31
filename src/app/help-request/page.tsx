@@ -65,10 +65,7 @@ function HelpRequestPageInner() {
                     <div className="max-w-[680px] mx-auto flex flex-col pb-20">
                         {/* Page Header */}
                         <div className="flex items-center justify-between px-4 pt-6 pb-3">
-                            <div>
-                                <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Help Requests</h1>
-                                <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>Support your neighbours in need</p>
-                            </div>
+                            <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>Support your neighbours in need</p>
                             <button
                                 onClick={() => setIsCreateModalOpen(true)}
                                 className="neu-fab w-10 h-10 rounded-2xl flex items-center justify-center text-primary transition-all active:scale-95"

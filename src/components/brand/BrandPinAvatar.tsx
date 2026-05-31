@@ -19,7 +19,7 @@ const AVATAR = {
   size: 52,
 } as const;
 
-type BrandPinSize = 'hero' | 'lg' | 'md' | 'marker';
+type BrandPinSize = 'hero' | 'lg' | 'md' | 'marker' | 'sm' | 'xs';
 
 const SIZE_HEIGHT: Record<BrandPinSize, number> = {
   hero: 116,
@@ -27,6 +27,10 @@ const SIZE_HEIGHT: Record<BrandPinSize, number> = {
   md: 72,
   /** Map marker — matches prior MapPinAvatar `marker` tier */
   marker: 90,
+  /** Compact pin for tight rows (composer, chips) */
+  sm: 56,
+  /** Bottom nav profile tab */
+  xs: 36,
 };
 
 type BrandPinAvatarProps = {

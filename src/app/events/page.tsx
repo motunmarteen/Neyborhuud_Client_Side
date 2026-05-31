@@ -79,8 +79,7 @@ export default function EventsPage() {
 
           <div className="px-4 flex flex-col gap-4 pt-3">
             <div className="mod-card rounded-2xl p-4 border border-white/10 backdrop-blur-xl">
-              <div className="flex items-center justify-between mb-3 gap-3">
-                <h1 className="text-2xl font-black tracking-tight">Events</h1>
+              <div className="flex items-center justify-end mb-3 gap-3">
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
                   <Link
                     href="/events/nearby"

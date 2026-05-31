@@ -458,14 +458,9 @@ function IncidentReportsInner() {
 
             {/* Page Header */}
             <div className="flex items-center justify-between px-4 pt-6 pb-3">
-              <div>
-                <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>
-                  Incident Reports
-                </h1>
-                <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-                  Document neighborhood safety incidents
-                </p>
-              </div>
+              <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
+                Document neighborhood safety incidents
+              </p>
               {user && (
                 <button
                   onClick={() => setShowCreate(v => !v)}

@@ -1,63 +1,22 @@
 'use client';
 
-import React, { Suspense } from 'react';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState } from 'react';
+import { CommunitiesBrowser } from '@/components/communities/CommunitiesBrowser';
+import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
+import { BrowseSearchField } from '@/components/layout/BrowseSearchField';
 
-// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 export default function CommunitiesPage() {
-  const { user } = useAuth();
-  const assignedCommunity = (user as any)?.assignedCommunityId ?? (user as any)?.communityId;
+  const [search, setSearch] = useState('');
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <Suspense fallback={<div className="w-64" />}>
-          <LeftSidebar />
-        </Suspense>
-        <main className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="mx-auto flex w-full max-w-[920px] flex-col gap-6 pb-24">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-[32px] text-brand-blue">groups</span>
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>Communities</h1>
-            </div>
-
-            {assignedCommunity && (
-              <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: 'var(--neu-card)', border: '1px solid var(--neu-border)' }}>
-                <div className="w-12 h-12 rounded-full bg-brand-blue/10 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[24px] text-brand-blue">home</span>
-                </div>
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-brand-blue">Your Community</p>
-                  <p className="font-semibold mt-0.5" style={{ color: 'var(--neu-text)' }}>{assignedCommunity}</p>
-                </div>
-              </div>
-            )}
-
-            <div className="rounded-2xl p-10 flex flex-col items-center gap-4 text-center" style={{ background: 'var(--neu-card)', border: '1px solid var(--neu-border)' }}>
-              <span className="material-symbols-outlined text-[64px] text-purple-300">groups</span>
-              <h2 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Community Browser</h2>
-              <p className="text-sm max-w-sm leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
-                Discover and join communities near you. This feature is coming soon — you&apos;ll be able to browse,
-                join, and participate in NeyborHuud communities around your area.
-              </p>
-              <div className="mt-2 px-4 py-2 rounded-full text-sm font-medium text-brand-blue" style={{ background: 'var(--neu-card)', border: '1px solid var(--neu-border)' }}>
-                Coming Soon
-              </div>
-            </div>
-          </div>
-        </main>
-        <RightSidebar />
-      </div>
-      <Suspense fallback={<div className="h-16" />}>
-        <BottomNav />
-      </Suspense>
-    </div>
+    <AppBrowseLayout
+      maxWidth="920"
+      subtitle="Discover and join hyperlocal hubs in your Huud"
+      header={<BrowseSearchField value={search} onChange={setSearch} placeholder="Search communities…" />}
+    >
+      <CommunitiesBrowser search={search} />
+    </AppBrowseLayout>
   );
 }

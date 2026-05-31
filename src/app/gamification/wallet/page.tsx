@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import TopNav from "@/components/navigation/TopNav";
-import LeftSidebar from "@/components/navigation/LeftSidebar";
-import RightSidebar from "@/components/navigation/RightSidebar";
-import { BottomNav } from "@/components/feed/BottomNav";
+import { AppBrowseLayout } from "@/components/layout/AppBrowseLayout";
 import { useWallet, useTransactions } from "@/hooks/useGamification";
 import { usePaymentHistory } from "@/hooks/usePayments";
 import { Payment } from "@/types/api";
@@ -55,7 +52,7 @@ function formatDate(iso: string) {
 
 function EarnRow({ icon, label, amount }: { icon: string; label: string; amount: string }) {
   return (
-    <div className="flex items-center gap-2 bg-brand-black/50 rounded-lg px-3 py-2">
+    <div className="mod-inset flex items-center gap-2 rounded-lg px-3 py-2">
       <span
         className="material-symbols-outlined text-[16px] text-brand-blue shrink-0"
         style={{ fontVariationSettings: "'FILL' 1" }}
@@ -116,47 +113,51 @@ export default function WalletPage() {
       : allTxs;
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
-
-        <div className="flex-1 overflow-y-auto bg-brand-black text-white">
-          {/* Header */}
-          <div className="sticky top-0 z-10 bg-brand-black border-b border-black/[0.08] backdrop-blur-md bg-opacity-95">
-            <div className="max-w-3xl mx-auto px-4 py-4">
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/gamification"
-                  className="p-1.5 rounded-lg hover:bg-brand-black transition-colors"
-                  aria-label="Back to Gamification"
-                >
-                  <span className="material-symbols-outlined text-[20px] text-[var(--neu-text-muted)]">arrow_back</span>
-                </Link>
-                <div>
-                  <h1 className="text-xl font-bold flex items-center gap-2">
-                    <span>🪙</span> HuudCoins Wallet
-                  </h1>
-                  <p className="text-xs text-[var(--neu-text-muted)] mt-0.5">Your coin balance &amp; history</p>
-                </div>
-              </div>
-            </div>
+    <AppBrowseLayout
+      subtitle="Your coin balance & history"
+      header={
+        <div className="flex flex-col gap-3">
+          <Link
+            href="/gamification"
+            className="inline-flex w-fit items-center gap-1 text-xs font-semibold text-primary"
+            aria-label="Back to My Huud Score"
+          >
+            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+            My Huud Score
+          </Link>
+          <div className="flex gap-1 p-1 mod-inset rounded-2xl">
+            {(["activity", "spends"] as MainTab[]).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setMainTab(tab)}
+                className={`flex-1 rounded-xl py-2 text-sm font-bold transition-colors capitalize ${
+                  mainTab === tab ? "mod-chip mod-chip-active text-primary" : "mod-chip"
+                }`}
+                style={mainTab === tab ? undefined : { color: "var(--neu-text-muted)" }}
+              >
+                {tab === "activity" ? "🪙 Activity" : "💸 Coin Spends"}
+              </button>
+            ))}
           </div>
-
-          <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+        </div>
+      }
+    >
+      <div className="space-y-6">
             {/* Balance card */}
-            <div className="bg-gradient-to-br from-yellow-500/20 via-yellow-400/10 to-transparent border border-yellow-500/30 rounded-2xl p-6">              {wallet.isLoading ? (
-                <div className="h-16 animate-pulse bg-brand-black rounded-xl" />
+            <div className="mod-card rounded-2xl p-6 bg-gradient-to-br from-amber-50/80 via-[var(--neu-bg)] to-brand-surface">
+              {wallet.isLoading ? (
+                <div className="h-16 animate-pulse mod-inset rounded-xl" />
               ) : wallet.isError ? (
                 <p className="text-sm text-[var(--neu-text-muted)] text-center py-4">
                   Balance unavailable — backend coming soon
                 </p>
               ) : (
                 <>
-                  <p className="text-sm text-primary400/80 font-semibold uppercase tracking-widest mb-1">
+                  <p className="text-sm text-amber-800/80 font-semibold uppercase tracking-widest mb-1">
                     Current Balance
                   </p>
-                  <p className="text-5xl font-extrabold text-primary tabular-nums">
+                  <p className="text-5xl font-extrabold text-[#006F35] tabular-nums">
                     {balance.toLocaleString()}
                     <span className="text-2xl ml-2 text-primary/60">HC</span>
                   </p>
@@ -178,28 +179,11 @@ export default function WalletPage() {
               )}
             </div>
 
-            {/* Main Tab Navigation */}
-            <div className="flex gap-1 rounded-2xl bg-brand-black border border-black/[0.08] p-1">
-              {(["activity", "spends"] as MainTab[]).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setMainTab(tab)}
-                  className={`flex-1 rounded-xl py-2 text-sm font-bold transition-colors capitalize ${
-                    mainTab === tab
-                      ? "bg-primary text-white shadow"
-                      : "text-[var(--neu-text-muted)] hover:text-white"
-                  }`}
-                >
-                  {tab === "activity" ? "🪙 Activity" : "💸 Coin Spends"}
-                </button>
-              ))}
-            </div>
-
             {mainTab === "activity" && (
               <>
             {/* How to earn */}
-            <div className="bg-brand-black border border-black/[0.08] rounded-xl p-4">
-              <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+            <div className="mod-card rounded-xl p-4">
+              <h2 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px] text-brand-blue" style={{ fontVariationSettings: "'FILL' 1" }}>
                   tips_and_updates
                 </span>
@@ -275,8 +259,8 @@ export default function WalletPage() {
             </div>
 
             {/* Ways to Spend */}
-            <div className="bg-brand-black border border-amber-500/20 rounded-xl p-4">
-              <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+            <div className="bg-amber-50/50 border border-amber-200/60 rounded-xl p-4 shadow-sm">
+              <h2 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <span className="text-lg">🪙</span>
                 Ways to Spend HuudCoins
               </h2>
@@ -315,7 +299,7 @@ export default function WalletPage() {
             {/* Transaction history */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-white">Transaction History</h2>
+                <h2 className="text-sm font-semibold text-slate-900">Transaction History</h2>
                 <div className="flex gap-1">
                   {(["all", "earned", "spent"] as TxType[]).map((f) => (
                     <button
@@ -323,8 +307,8 @@ export default function WalletPage() {
                       onClick={() => { setFilter(f); setPage(1); }}
                       className={`text-xs px-3 py-1 rounded-full font-semibold transition-colors capitalize ${
                         filter === f
-                          ? "bg-purple-600 text-white"
-                          : "text-[var(--neu-text-muted)] hover:text-white hover:bg-brand-black"
+                          ? "bg-primary text-white"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
                       }`}
                     >
                       {f}
@@ -336,11 +320,11 @@ export default function WalletPage() {
               {txQuery.isLoading ? (
                 <div className="space-y-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-14 animate-pulse bg-brand-black rounded-xl" />
+                    <div key={i} className="h-14 animate-pulse mod-inset rounded-xl" />
                   ))}
                 </div>
               ) : txQuery.isError || displayedTxs.length === 0 ? (
-                <div className="bg-brand-black border border-black/[0.08] rounded-xl p-10 text-center">
+                <div className="mod-card rounded-xl p-10 text-center">
                   <span
                     className="material-symbols-outlined text-[40px] text-[var(--neu-text-muted)] mb-3 block"
                     style={{ fontVariationSettings: "'FILL' 1" }}
@@ -366,7 +350,7 @@ export default function WalletPage() {
                   {displayedTxs.map((tx: any, i: number) => (
                     <div
                       key={tx.id ?? tx._id ?? i}
-                      className="bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 flex items-center gap-3"
+                      className="mod-card rounded-xl px-4 py-3 flex items-center gap-3"
                     >
                       <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${txBg(tx.amount ?? 0)}`}>
                         <span
@@ -377,7 +361,7 @@ export default function WalletPage() {
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">
+                        <p className="text-sm font-medium text-slate-900 truncate">
                           {tx.description ?? tx.type ?? "Transaction"}
                         </p>
                         {tx.createdAt && (
@@ -399,7 +383,7 @@ export default function WalletPage() {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="px-3 py-1.5 text-xs rounded-lg bg-brand-black text-[var(--neu-text-muted)] disabled:opacity-40 hover:bg-brand-black transition-colors"
+                    className="px-3 py-1.5 text-xs rounded-lg mod-inset text-slate-600 disabled:opacity-40 hover:bg-slate-200 transition-colors"
                   >
                     Previous
                   </button>
@@ -409,7 +393,7 @@ export default function WalletPage() {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="px-3 py-1.5 text-xs rounded-lg bg-brand-black text-[var(--neu-text-muted)] disabled:opacity-40 hover:bg-brand-black transition-colors"
+                    className="px-3 py-1.5 text-xs rounded-lg mod-inset text-slate-600 disabled:opacity-40 hover:bg-slate-200 transition-colors"
                   >
                     Next
                   </button>
@@ -423,7 +407,7 @@ export default function WalletPage() {
             {mainTab === "spends" && (
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-semibold text-white">Boost &amp; Payment History</h2>
+                  <h2 className="text-sm font-semibold text-slate-900">Boost &amp; Payment History</h2>
                   <Link
                     href="/premium"
                     className="text-xs text-primary hover:text-amber-300 transition"
@@ -435,13 +419,13 @@ export default function WalletPage() {
                 {paymentsQuery.isLoading && (
                   <div className="space-y-2">
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="h-14 animate-pulse bg-brand-black rounded-xl" />
+                      <div key={i} className="h-14 animate-pulse mod-inset rounded-xl" />
                     ))}
                   </div>
                 )}
 
                 {!paymentsQuery.isLoading && allPayments.length === 0 && (
-                  <div className="bg-brand-black border border-black/[0.08] rounded-xl p-10 text-center">
+                  <div className="mod-card rounded-xl p-10 text-center">
                     <span className="text-4xl mb-3 block">🚀</span>
                     <p className="text-[var(--neu-text-muted)] text-sm">No boosts or payments yet.</p>
                     <p className="text-xs text-[var(--neu-text-secondary)] mt-2">
@@ -455,13 +439,13 @@ export default function WalletPage() {
                     {allPayments.map((p) => (
                       <div
                         key={p.id ?? p.reference}
-                        className="bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 flex items-center gap-3"
+                        className="mod-card rounded-xl px-4 py-3 flex items-center gap-3"
                       >
                         <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0 text-lg">
                           {PAYMENT_TYPE_ICONS[p.type] ?? "🪙"}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-white truncate">
+                          <p className="text-sm font-semibold text-slate-900 truncate">
                             {PAYMENT_TYPE_LABELS[p.type] ?? p.type}
                           </p>
                           {p.description && (
@@ -494,7 +478,7 @@ export default function WalletPage() {
                       <button
                         onClick={() => paymentsQuery.fetchNextPage()}
                         disabled={paymentsQuery.isFetchingNextPage}
-                        className="w-full py-2 text-xs text-[var(--neu-text-muted)] hover:text-white bg-brand-black hover:bg-brand-black rounded-xl transition"
+                        className="w-full py-2 text-xs text-slate-600 hover:text-slate-900 mod-inset hover:bg-slate-200 rounded-xl transition"
                       >
                         {paymentsQuery.isFetchingNextPage ? "Loading…" : "Load More"}
                       </button>
@@ -503,15 +487,7 @@ export default function WalletPage() {
                 )}
               </div>
             )}
-          </div>
-
-          {/* Bottom nav spacer */}
-          <div className="h-20 md:hidden" />
-        </div>
-
-        <RightSidebar />
       </div>
-      <BottomNav />
-    </div>
+    </AppBrowseLayout>
   );
 }

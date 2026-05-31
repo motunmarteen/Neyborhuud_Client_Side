@@ -15,53 +15,50 @@ export default function AchievementCard({ achievement }: Props) {
   const canClaim = achievement.completed && !(achievement as any).claimedAt;
 
   return (
-    <div className="bg-brand-black border border-black/[0.08] rounded-xl p-4">
+    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span
               className={`material-symbols-outlined text-[18px] ${
-                achievement.completed ? "text-primary400" : "text-[var(--neu-text-secondary)]"
+                achievement.completed ? "text-primary" : "text-[var(--neu-text-secondary)]"
               }`}
               style={{ fontVariationSettings: achievement.completed ? "'FILL' 1" : "'FILL' 0" }}
             >
               {achievement.completed ? "emoji_events" : "radio_button_unchecked"}
             </span>
-            <p className="text-sm font-semibold text-white truncate">{achievement.name}</p>
+            <p className="text-sm font-semibold text-slate-900 truncate">{achievement.name}</p>
           </div>
           <p className="text-xs text-[var(--neu-text-muted)] mt-1 ml-6">{achievement.description}</p>
         </div>
 
-        {/* Reward label */}
-        <span className="shrink-0 text-xs font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">
+        <span className="shrink-0 text-xs font-bold text-[#006F35] bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">
           +{achievement.reward?.points ?? 0} pts
         </span>
       </div>
 
-      {/* Progress bar */}
       <div className="mt-3">
         <div className="flex justify-between text-[10px] text-[var(--neu-text-muted)] mb-1">
           <span>{achievement.progress} / {achievement.goal}</span>
           <span>{pct}%</span>
         </div>
-        <div className="h-2 bg-brand-black rounded-full overflow-hidden">
+        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               achievement.completed
-                ? "bg-gradient-to-r from-yellow-500 to-green-400"
-                : "bg-blue-600"
+                ? "bg-gradient-to-r from-primary to-[#006F35]"
+                : "bg-brand-blue"
             }`}
             style={{ width: `${pct}%` }}
           />
         </div>
       </div>
 
-      {/* Claim button */}
       {canClaim && (
         <button
           onClick={() => claim.mutate(achievement.id)}
           disabled={claim.isPending}
-          className="mt-3 w-full py-2 rounded-lg bg-primary hover:bg-primary400 text-black text-sm font-bold transition-colors disabled:opacity-50"
+          className="mt-3 w-full py-2 rounded-lg bg-primary hover:brightness-105 text-white text-sm font-bold transition-colors disabled:opacity-50"
         >
           {claim.isPending ? "Claiming…" : "Claim Reward 🎉"}
         </button>

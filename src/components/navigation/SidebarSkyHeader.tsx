@@ -143,10 +143,7 @@ export function SidebarSkyHeaderPanel({
         style={{ background: theme.skyGradient }}
         aria-hidden
       >
-        <div
-          className="absolute inset-0 pointer-events-none transition-all duration-[2000ms]"
-          style={{ background: theme.horizonGlow }}
-        />
+
         {theme.showStars && <SkyStars />}
         <SkyCelestial theme={theme} />
         {theme.showClouds && (
@@ -156,7 +153,6 @@ export function SidebarSkyHeaderPanel({
           </>
         )}
         <SkyWeatherEffects theme={theme} isDark={sceneDark} size="compact" />
-        <div className="left-sidebar__sky-header-fade" />
       </div>
 
       <div className={`left-sidebar__header-content${isDrawer ? ' left-sidebar__header-content--drawer' : ''}`}>

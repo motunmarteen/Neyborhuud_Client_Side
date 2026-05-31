@@ -194,7 +194,7 @@ function Tile({ tile }: { tile: Tile }) {
       </span>
       <div className="text-sm font-semibold leading-tight">{tile.label}</div>
       {tile.description && (
-        <div className="text-[11px] text-white/60 leading-snug">{tile.description}</div>
+        <div className="text-[11px] text-[var(--neu-text-muted)] leading-snug">{tile.description}</div>
       )}
       {tile.badge && (
         <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-brand-red text-white text-[10px] font-bold">
@@ -225,10 +225,7 @@ export default function SentinelHubPage() {
           <header className="mb-6">
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-brand-blue text-4xl">shield</span>
-              <div>
-                <h1 className="text-2xl font-bold">Sentinel</h1>
-                <p className="text-sm text-white/60">Your safety control center</p>
-              </div>
+              <p className="text-sm text-[var(--neu-text-muted)]">Your safety control center</p>
             </div>
           </header>
 
@@ -240,7 +237,7 @@ export default function SentinelHubPage() {
               <section key={section.title}>
                 <div className="mb-3">
                   <h2 className="text-base font-semibold">{section.title}</h2>
-                  <p className="text-xs text-white/50">{section.subtitle}</p>
+                  <p className="text-xs text-[var(--neu-text-muted)]">{section.subtitle}</p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {section.tiles.map((tile) => (
@@ -254,7 +251,7 @@ export default function SentinelHubPage() {
           <div className="mt-10 text-center">
             <Link
               href="/safety/manage"
-              className="text-sm text-white/60 hover:text-white underline"
+              className="text-sm text-[var(--neu-text-muted)] hover:text-foreground underline"
             >
               Open advanced safety dashboard →
             </Link>

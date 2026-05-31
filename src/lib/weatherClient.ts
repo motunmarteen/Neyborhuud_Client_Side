@@ -7,6 +7,7 @@ const PRECIP_THRESHOLD_MM = 0.2;
 
 export interface CurrentWeather {
   temp: number;
+  tempMax?: number;
   condition: string;
   city: string;
   wmoCode: number;
@@ -202,6 +203,7 @@ export async function fetchCurrentWeather(
           const city = cityName !== 'Your Area' ? cityName : (location?.name || cityName);
           return {
             temp: temperature?.current ?? 28,
+            tempMax: (temperature?.current ?? 28) + 4, // Mock tempMax for backend if unavailable
             condition,
             city,
             wmoCode,
@@ -215,7 +217,7 @@ export async function fetchCurrentWeather(
 
   const [defaultRes, ukmoRes] = await Promise.all([
     fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,rain,showers,precipitation&timezone=auto`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,rain,showers,precipitation&daily=temperature_2m_max&forecast_days=1&timezone=auto`,
       { signal: AbortSignal.timeout(6000) },
     ).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     fetch(
@@ -252,13 +254,19 @@ export async function fetchCurrentWeather(
       ukmoCode,
       ukmoPrecipMm,
     );
+    const defaultDaily = defaultRes?.daily as {
+      temperature_2m_max?: number[];
+    } | undefined;
+    const tempMax = defaultDaily?.temperature_2m_max?.[0] ? Math.round(defaultDaily.temperature_2m_max[0]) : temp + 4;
+
     return {
       temp,
+      tempMax,
       condition: interpretWeatherCode(code),
       city: cityName,
       wmoCode: code,
     };
   }
 
-  return { temp: 31, condition: 'Partly Cloudy', city: cityName, wmoCode: 2 };
+  return { temp: 31, tempMax: 35, condition: 'Partly Cloudy', city: cityName, wmoCode: 2 };
 }

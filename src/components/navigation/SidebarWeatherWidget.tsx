@@ -11,7 +11,7 @@ import {
   type SkyTheme,
 } from '@/components/navigation/AmbientProfileCard';
 import { wmoToAmbient } from '@/lib/weatherClient';
-import { useExchangeRates } from '@/hooks/useExchangeRates';
+
 import { SkyWeatherEffects } from '@/components/ambient/SkyWeatherEffects';
 import { useAmbientWeather } from '@/hooks/useAmbientWeather';
 
@@ -173,7 +173,7 @@ function SidebarSilhouette({ color }: { color: string }) {
 
 export default function SidebarWeatherWidget() {
   const { weather, loading: weatherLoading } = useAmbientWeather();
-  const { currentRate, loading: ratesLoading } = useExchangeRates();
+
 
   // SSR-safe hour
   const [currentHour, setCurrentHour] = useState(12);
@@ -237,15 +237,7 @@ export default function SidebarWeatherWidget() {
               </p>
             </div>
 
-            {/* Exchange rate */}
-            {!ratesLoading && currentRate && (
-              <p
-                className="text-xs font-bold"
-                style={{ color: theme.textColor, textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
-              >
-                1 {currentRate.currency} = ₦{currentRate.rate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </p>
-            )}
+
           </>
         ) : null}
       </div>

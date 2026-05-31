@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
-/** Class-based dark mode — must match `html.dark` set by systemTheme boot script. */
+/** Dark variant exists, but the app is forced to light theme. */
 @custom-variant dark (&:where(.dark, .dark *));
+
+html { color-scheme: light; }
 
 /* ── Accessibility — font size tiers ── */
 .text-size-sm { font-size: 14px; }
@@ -126,7 +128,15 @@
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --viewport-bottom-inset: 0px;
-  --app-nav-bottom: calc(5.5rem + var(--safe-bottom));
+  --app-bottomnav-inner-height: 3.5rem;
+  --app-bottomnav-sos-size: 4.25rem;
+  --app-bottomnav-sos-icon-size: 2rem;
+  --app-topnav-height: 3.5rem;
+  --app-topnav-icon-size: 2rem;
+  --app-topnav-text-size: 1.125rem;
+  --app-topnav-logo-size: 1.4375rem;
+  --app-topnav-logo-tracking: 0.05em;
+  --app-nav-bottom: calc(var(--app-bottomnav-inner-height) + (var(--app-bottomnav-sos-size) / 2) + var(--safe-bottom));
   --app-scroll-bottom: calc(var(--app-nav-bottom) + var(--viewport-bottom-inset));
 }
 
@@ -147,6 +157,24 @@ body {
   min-height: -webkit-fill-available;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
+}
+
+/** Material Symbols — must override inherited display font on body */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
 
 /** Global native-app shell */
@@ -217,6 +245,501 @@ html[data-standalone] .app-body {
   padding-bottom: var(--app-scroll-bottom);
 }
 
+.bottom-nav__profile-pin {
+  display: block;
+  transition: transform 160ms ease, filter 160ms ease;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12));
+}
+
+.bottom-nav__profile-pin--active {
+  transform: scale(1.04);
+}
+
+/* ── App chrome nav — standard 56px bars, tight icon row ── */
+.app-topnav {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--app-topnav-height);
+  padding-inline: 0.5rem;
+  padding-bottom: 0;
+  padding-top: max(0px, var(--safe-top));
+  white-space: nowrap;
+}
+
+.app-topnav--solid {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px) saturate(1.35);
+  -webkit-backdrop-filter: blur(20px) saturate(1.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 4px 24px rgba(0, 0, 0, 0.04);
+}
+
+.app-topnav--sky {
+  background: transparent;
+}
+
+.app-topnav__title,
+.app-topnav__headline {
+  margin: 0;
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+}
+
+.app-topnav__title {
+  min-width: 0;
+  font-size: var(--app-topnav-text-size);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--brand-green-dark);
+}
+
+.app-topnav__headline {
+  font-size: var(--app-topnav-logo-size);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.app-topnav--sky .app-topnav__headline {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+.app-topnav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.app-topnav__action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0.25rem;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--brand-black);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 160ms ease, opacity 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-topnav__action .app-nav-icon-shell {
+  display: block;
+  width: var(--app-topnav-icon-size);
+  height: var(--app-topnav-icon-size);
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.app-nav-icon-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+  transform-origin: center;
+}
+
+.app-nav-icon-shell.is-tapping {
+  animation: app-nav-tap-spring 420ms cubic-bezier(0.34, 1.35, 0.64, 1) both;
+  will-change: transform;
+}
+
+.app-nav-icon-shell .app-nav-icon__glyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: fill 220ms ease, color 160ms ease;
+}
+
+.app-topnav__action:hover {
+  color: var(--brand-green-dark);
+}
+
+.app-topnav__action:active {
+  opacity: 0.92;
+}
+
+.app-topnav--sky .app-topnav__action {
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+}
+
+.app-topnav--sky .app-topnav__action:hover {
+  color: #fff;
+  opacity: 0.88;
+}
+
+.app-topnav__badge {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  min-width: 1rem;
+  height: 1rem;
+  padding-inline: 0.2rem;
+  border-radius: 999px;
+  background: var(--primary);
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 111, 53, 0.35);
+}
+
+.app-topnav--sky .app-topnav__badge {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.app-bottomnav {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.app-bottomnav__bar {
+  pointer-events: auto;
+  width: 100%;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 -8px 32px rgba(0, 0, 0, 0.06);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
+}
+
+.app-bottomnav__bar--hidden {
+  transform: translateY(100%);
+}
+
+.app-bottomnav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: var(--app-bottomnav-inner-height);
+  padding-inline: 0.5rem;
+  margin: 0;
+  gap: 0.125rem;
+}
+
+.app-bottomnav__center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.app-bottomnav__item {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0.25rem;
+  text-decoration: none;
+  color: rgba(26, 26, 26, 0.55);
+  touch-action: manipulation;
+  transition: color 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-bottomnav__item--edge {
+  flex-shrink: 0;
+}
+
+.app-bottomnav__item:hover {
+  color: rgba(26, 26, 26, 0.72);
+}
+
+.app-bottomnav__item--active {
+  color: var(--brand-green-dark);
+}
+
+.app-bottomnav__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+
+.app-bottomnav__item .app-nav-icon-shell {
+  width: 2rem;
+  height: 2rem;
+}
+
+.app-bottomnav__item--active .app-nav-icon-shell {
+  color: inherit;
+}
+
+.app-bottomnav__item:active .bottom-nav__profile-pin {
+  animation: app-nav-tap-spring 420ms cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+
+.app-bottomnav__label {
+  display: none;
+}
+
+.app-bottomnav__profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+
+.app-bottomnav__sos-slot {
+  flex: 0 0 auto;
+  width: var(--app-bottomnav-sos-size);
+  height: 100%;
+  pointer-events: none;
+}
+
+.app-bottomnav__sos {
+  position: absolute;
+  left: 50%;
+  /* Half the SOS disc sits above the bar top edge */
+  bottom: calc(
+    var(--app-bottomnav-inner-height) - (var(--app-bottomnav-sos-size) / 2) + env(safe-area-inset-bottom)
+  );
+  z-index: 51;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.app-bottomnav__sos-btn {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--app-bottomnav-sos-size);
+  height: var(--app-bottomnav-sos-size);
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #ff3333 0%, var(--brand-red) 48%, #cc0000 100%);
+  box-shadow:
+    0 6px 20px rgba(255, 0, 0, 0.38),
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  touch-action: manipulation;
+  user-select: none;
+  transition: box-shadow 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-bottomnav__sos-btn:hover {
+  box-shadow:
+    0 8px 24px rgba(255, 0, 0, 0.42),
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.app-bottomnav__sos-btn:active {
+  opacity: 1;
+}
+
+.app-bottomnav__sos-btn--active {
+  box-shadow:
+    0 8px 28px rgba(255, 0, 0, 0.45),
+    0 0 0 4px rgba(255, 0, 0, 0.14);
+}
+
+.app-bottomnav__sos-btn .app-nav-icon-shell {
+  width: var(--app-bottomnav-sos-icon-size);
+  height: var(--app-bottomnav-sos-icon-size);
+  color: #fff;
+}
+
+@keyframes app-nav-tap-spring {
+  0% { transform: scale(1); }
+  38% { transform: scale(0.86); }
+  68% { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
+
+@keyframes app-nav-tap-search {
+  0% { transform: scale(1) rotate(0deg); }
+  38% { transform: scale(0.88) rotate(-12deg); }
+  72% { transform: scale(1.05) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes app-nav-tap-create {
+  0% { transform: scale(1) rotate(0deg); }
+  42% { transform: scale(0.9) rotate(90deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes app-nav-tap-bell {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  18% { transform: rotate(13deg) scale(0.96); }
+  38% { transform: rotate(-11deg) scale(0.98); }
+  58% { transform: rotate(7deg) scale(1.02); }
+  78% { transform: rotate(-3deg) scale(1); }
+}
+
+@keyframes app-nav-tap-menu {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.86); }
+  72% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes app-nav-tap-home {
+  0% { transform: translateY(0) scale(1); }
+  38% { transform: translateY(2px) scale(0.9); }
+  68% { transform: translateY(-5px) scale(1.06); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes app-nav-tap-shield {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+@keyframes app-nav-tap-connect {
+  0% { transform: scale(1); }
+  42% { transform: scale(0.9); }
+  74% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes app-nav-tap-back {
+  0% { transform: translateX(0) scale(1); }
+  45% { transform: translateX(-6px) scale(0.92); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes app-nav-tap-sos {
+  0% { transform: scale(1); }
+  32% { transform: scale(0.86); }
+  62% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+@keyframes app-nav-tap-messages {
+  0% { transform: scale(1); }
+  38% { transform: scale(0.9); }
+  68% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.app-nav-icon-shell--messages.is-tapping {
+  animation-name: app-nav-tap-messages;
+}
+
+.app-nav-icon-shell--search.is-tapping {
+  animation-name: app-nav-tap-search;
+}
+
+.app-nav-icon-shell--create.is-tapping {
+  animation-name: app-nav-tap-create;
+}
+
+.app-nav-icon-shell--notifications.is-tapping {
+  animation-name: app-nav-tap-bell;
+}
+
+.app-nav-icon-shell--menu.is-tapping {
+  animation-name: app-nav-tap-menu;
+}
+
+.app-nav-icon-shell--home.is-tapping {
+  animation-name: app-nav-tap-home;
+}
+
+.app-nav-icon-shell--shield.is-tapping {
+  animation-name: app-nav-tap-shield;
+}
+
+.app-nav-icon-shell--connect.is-tapping {
+  animation-name: app-nav-tap-connect;
+}
+
+.app-nav-icon-shell--back.is-tapping {
+  animation-name: app-nav-tap-back;
+}
+
+.app-nav-icon-shell--sos.is-tapping {
+  animation-name: app-nav-tap-sos;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-nav-icon-shell.is-tapping,
+  .app-bottomnav__item:active .bottom-nav__profile-pin {
+    animation: none !important;
+  }
+}
+
+.app-bottomnav__sos-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.app-bottomnav__sos-ring--idle {
+  background: rgba(255, 0, 0, 0.08);
+  animation: app-bottomnav-sos-pulse 2.5s ease-in-out infinite;
+}
+
+.app-bottomnav__sos-ring--live {
+  background: rgba(255, 0, 0, 0.35);
+  animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes app-bottomnav-sos-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+.bottom-nav__profile-pin {
+  display: block;
+  transition: transform 160ms ease, filter 160ms ease;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12));
+}
+
 .app-shell .pb-24,
 .app-shell .pb-20,
 .app-shell .pb-28 {
@@ -265,6 +788,12 @@ html[data-standalone] .app-body {
   font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
   letter-spacing: -0.03em;
+}
+
+/** Top nav wordmark — overrides .brand-name tight tracking */
+.app-topnav .app-topnav__headline.brand-name,
+.app-topnav .app-topnav__headline.brand-wordmark {
+  letter-spacing: var(--app-topnav-logo-tracking);
 }
 
 /** Landing `/` — green wordmark aligned with hero headline */
@@ -2101,8 +2630,10 @@ html[data-scroll-locked] .feed-scroll-main {
 
 .feed-sky-scene {
   position: relative;
-  height: 12.5rem;
+  height: 17.875rem;
   isolation: isolate;
+  --feed-sky-city-height: 2.625rem;
+  --feed-sky-nav-clearance: calc(var(--app-topnav-height) + var(--safe-top));
 }
 
 .feed-sky-celestial {
@@ -2114,24 +2645,42 @@ html[data-scroll-locked] .feed-scroll-main {
   height: 2.75rem;
 }
 
-.feed-sky-scene__weather {
+.feed-sky-scene__content {
   position: absolute;
   z-index: 4;
-  inset-inline: 0;
-  top: 2.25rem;
-  bottom: 2.75rem;
+  inset-inline: 1rem;
+  top: var(--feed-sky-nav-clearance);
+  bottom: var(--feed-sky-city-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  pointer-events: none;
+}
+
+.feed-sky-scene__weather {
+  display: contents;
+}
+
+.feed-sky-scene__weather-skeleton {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding-inline: 1rem;
-  pointer-events: none;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.feed-sky-scene__label,
+.feed-sky-scene__temp,
+.feed-sky-scene__condition {
+  flex-shrink: 0;
 }
 
 .feed-sky-scene__label {
-  margin: 0 0 0.4rem;
-  width: 100%;
+  margin: 0 auto;
+  width: fit-content;
+  max-width: 100%;
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.35;
@@ -2139,21 +2688,10 @@ html[data-scroll-locked] .feed-scroll-main {
   text-align: center;
 }
 
-.feed-sky-scene__label-huud {
-  font-weight: 700;
-  letter-spacing: -0.015em;
-}
-
-.feed-sky-scene__label-now {
-  font-weight: 500;
-  opacity: 0.78;
-  letter-spacing: 0.04em;
-  text-transform: lowercase;
-}
-
 .feed-sky-scene__temp {
-  margin: 0;
-  width: 100%;
+  margin: 0 auto;
+  width: fit-content;
+  max-width: 100%;
   text-align: center;
   font-size: clamp(3.35rem, 14vw, 4.5rem);
   font-weight: 900;
@@ -2163,23 +2701,111 @@ html[data-scroll-locked] .feed-scroll-main {
 }
 
 .feed-sky-scene__condition {
-  margin: 0.45rem 0 0;
+  margin: 0 auto;
   width: 100%;
-  max-width: 18rem;
-  font-size: 0.9375rem;
+  max-width: 21rem;
+  font-size: 0.875rem;
   font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: 0.015em;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
   text-align: center;
-  opacity: 0.9;
+  opacity: 0.92;
 }
 
-.feed-sky-scene__weather-skeleton {
+.feed-sky-scene__composer {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.625rem;
+  align-self: stretch;
   width: 100%;
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.feed-sky-scene__composer-pin {
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.22));
+}
+
+.feed-sky-scene__composer-pill {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.35rem 0.4rem 0.35rem 0.875rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 4px 16px rgba(0, 0, 0, 0.12);
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.feed-sky-scene__composer-text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0.3rem 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  white-space: normal;
+  color: inherit;
+  cursor: pointer;
+}
+
+.feed-sky-scene__composer-media {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: inherit;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.feed-sky-scene__composer-media .material-symbols-outlined {
+  font-size: 1.25rem;
+  opacity: 0.92;
+}
+
+.feed-sky-scene__composer-pill:hover {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.feed-sky-scene__composer-media:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.feed-sky-scene__composer-media:active {
+  transform: scale(0.94);
+}
+
+.feed-sky-scene__composer-text:focus-visible,
+.feed-sky-scene__composer-media:focus-visible {
+  outline: none;
+}
+
+.feed-sky-scene__composer-text:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.feed-sky-scene__composer-media:focus-visible {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.45);
 }
 
 .feed-sky-scene__weather-skeleton-label {
@@ -2599,7 +3225,7 @@ html.dark body {
   display: flex;
   flex-direction: column;
   width: 20rem;
-  height: 100%;
+  height: 100dvh;
   min-height: 0;
   flex-shrink: 0;
   overflow: hidden;
@@ -2607,6 +3233,15 @@ html.dark body {
   background-color: #ffffff;
   background-image: none;
   color: var(--neu-text);
+}
+
+.left-sidebar__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .dark .left-sidebar {
@@ -2623,6 +3258,9 @@ html.dark body {
   flex-shrink: 0;
   overflow: hidden;
   padding-bottom: 0.375rem;
+  min-height: 11.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .left-sidebar__sky-header-scene {
@@ -2638,12 +3276,12 @@ html.dark body {
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: 55%;
+  height: 3.5rem;
   z-index: 3;
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.45) 42%,
+    rgba(255, 255, 255, 0.6) 60%,
     #ffffff 100%
   );
 }
@@ -2652,7 +3290,7 @@ html.dark body {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(19, 34, 24, 0.45) 42%,
+    rgba(19, 34, 24, 0.6) 60%,
     #132218 100%
   );
 }
@@ -2675,6 +3313,7 @@ html.dark body {
   padding: max(env(safe-area-inset-top, 0px), 1rem) 1rem 0.875rem;
   background: transparent;
   color: var(--sidebar-sky-text, #ffffff);
+  flex: 1;
 }
 
 .left-sidebar__header-content--drawer {
@@ -2719,15 +3358,55 @@ html.dark body {
   background: rgba(0, 0, 0, 0.32);
 }
 
+.left-sidebar__sentinel-btn {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--sidebar-sky-text, #ffffff);
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: all 0.15s ease;
+}
+
+.left-sidebar__sentinel-btn:hover {
+  background: rgba(0, 0, 0, 0.35);
+  transform: scale(1.05);
+}
+
+.left-sidebar__sentinel-btn:active {
+  transform: scale(0.95);
+}
+
+.left-sidebar__sentinel-btn--active {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
+
+.left-sidebar__sentinel-btn span {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
 .left-sidebar__header-panel .left-sidebar__sky-profile {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: nowrap;
   align-items: center;
+  justify-content: center;
   width: 100%;
-  gap: 0.625rem;
+  gap: 0.25rem;
   padding: 0;
-  margin: 0;
+  margin-top: auto;
+  margin-bottom: 0;
   border: none;
   background: transparent;
   text-decoration: none;
@@ -2753,7 +3432,10 @@ html.dark body {
 .left-sidebar__header-panel .left-sidebar__sky-profile__copy {
   flex: 1 1 auto;
   min-width: 0;
-  text-align: left;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .left-sidebar__header-panel .left-sidebar__sky-profile__huud {
@@ -2833,12 +3515,12 @@ html.dark body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.5rem;
+  justify-content: space-between;
   min-height: 0;
-  margin-top: -0.25rem;
-  padding: 0.125rem 1rem 0.75rem;
+  margin-top: 0;
+  padding: clamp(0.5rem, 1.5vh, 1rem) 1rem clamp(0.375rem, 1vh, 0.625rem);
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
   background-color: #ffffff;
 }
 
@@ -3010,7 +3692,7 @@ html.dark body {
   box-sizing: border-box;
   border-radius: 1rem;
   border: 1px solid transparent;
-  padding: 0.4375rem 0.625rem;
+  padding: clamp(0.25rem, 1vh, 0.4375rem) 0.625rem;
   text-decoration: none;
   color: var(--neu-text);
   transition:
@@ -3087,19 +3769,19 @@ html.dark body {
 .left-sidebar__explore-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .left-sidebar__explore-link {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.5rem;
   box-sizing: border-box;
   border-radius: 0.75rem;
   border: 1px solid rgba(0, 111, 53, 0.1);
   background: rgba(255, 255, 255, 0.72);
-  padding: 0.3125rem 0.5rem;
+  padding: 0.5rem;
   text-decoration: none;
   color: var(--neu-text);
   transition:
@@ -3174,17 +3856,6 @@ html.dark body {
   margin-top: auto;
   display: flex;
   flex-direction: column;
-}
-
-.left-sidebar__footer-settings {
-  padding: 0.375rem 1rem 0.5rem;
-  border-top: 1px solid rgba(0, 111, 53, 0.1);
-  background: var(--neu-surface, #fff);
-}
-
-.dark .left-sidebar__footer-settings {
-  border-top-color: rgba(0, 212, 49, 0.12);
-  background: var(--neu-surface, #0d1a0f);
 }
 
 .left-sidebar__buildings {
@@ -3270,6 +3941,76 @@ html.dark body {
 
 @media (min-width: 768px) {
   .left-sidebar-overlay {
+    display: none;
+  }
+}
+
+/* Height-based responsiveness for Left Sidebar to prevent in-app scrolling on any smartphone */
+@media (max-height: 900px) {
+  .left-sidebar__header-panel {
+    min-height: min(9.5rem, 15vh);
+  }
+  .left-sidebar__header-content {
+    padding: max(env(safe-area-inset-top, 0px), min(0.75rem, 1.5vh)) min(1rem, 2vw) min(0.5rem, 1vh);
+    gap: min(0.375rem, 0.8vh);
+  }
+  .left-sidebar__sky-profile__avatar {
+    transform: scale(min(0.85, calc(1vh * 0.12)));
+    margin-bottom: min(-0.5rem, -1vh);
+    transform-origin: center bottom;
+  }
+  .left-sidebar__header-panel .left-sidebar__sky-profile__huud {
+    font-size: min(0.7rem, 1.4vh);
+  }
+  .left-sidebar__header-panel .left-sidebar__sky-profile__handle {
+    font-size: min(0.875rem, 1.8vh);
+  }
+  .left-sidebar__main {
+    gap: min(0.375rem, 0.8vh);
+    padding: min(0.125rem, 0.5vh) min(0.75rem, 2vw) min(0.5rem, 1vh);
+  }
+  .left-sidebar__section {
+    gap: min(0.1875rem, 0.5vh);
+  }
+  .left-sidebar__link {
+    padding: min(0.3125rem, 0.8vh) min(0.5rem, 1vw);
+    border-radius: min(0.75rem, 1.5vh);
+    gap: min(0.5rem, 1.2vh);
+  }
+  .left-sidebar__link-icon {
+    height: min(1.5rem, 3.5vh);
+    width: min(1.5rem, 3.5vh);
+    border-radius: min(0.375rem, 0.8vh);
+  }
+  .left-sidebar__link-icon .material-symbols-outlined {
+    font-size: min(0.875rem, 2vh);
+  }
+  .left-sidebar__link-label {
+    font-size: min(0.7rem, 1.6vh);
+  }
+  .left-sidebar__explore-grid {
+    gap: min(0.375rem, 0.8vh);
+  }
+  .left-sidebar__explore-link {
+    padding: min(0.375rem, 0.8vh);
+    border-radius: min(0.5rem, 1vh);
+    gap: min(0.375rem, 0.8vh);
+  }
+  .left-sidebar__explore-icon {
+    height: min(1.125rem, 2.5vh);
+    width: min(1.125rem, 2.5vh);
+    border-radius: min(0.25rem, 0.6vh);
+  }
+  .left-sidebar__explore-icon .material-symbols-outlined {
+    font-size: min(0.75rem, 1.8vh);
+  }
+  .left-sidebar__explore-label {
+    font-size: min(0.5625rem, 1.4vh);
+  }
+}
+
+@media (max-height: 640px) {
+  .left-sidebar__buildings {
     display: none;
   }
 }

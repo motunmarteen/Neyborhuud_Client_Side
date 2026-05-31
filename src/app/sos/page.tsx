@@ -601,12 +601,9 @@ export default function SosPage() {
               <span className="material-symbols-outlined text-brand-red text-4xl">
                 sos
               </span>
-              <div>
-                <h1 className="text-2xl font-bold">SOS</h1>
-                <p className="text-sm text-white/60">
-                  Emergency command center · long-press the SOS tab anywhere for an instant silent alert
-                </p>
-              </div>
+              <p className="text-sm text-white/60">
+                Emergency command center · long-press the SOS tab anywhere for an instant silent alert
+              </p>
             </div>
           </header>
 

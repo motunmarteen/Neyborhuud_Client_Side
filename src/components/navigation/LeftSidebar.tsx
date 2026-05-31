@@ -7,7 +7,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 
 import { SidebarProfileLockup } from './SidebarProfileLockup';
-import { SidebarFxWidget } from './SidebarFxWidget';
 import { SidebarBuildingSilhouette } from './SidebarBuildingSilhouette';
 import { SidebarSkyHeaderPanel } from './SidebarSkyHeader';
 import { useSwipeBackDisabled } from '@/contexts/SwipeBackContext';
@@ -16,7 +15,7 @@ const mainNav = [
   { icon: 'location_on', label: 'My Huud', href: '/neighborhood' },
   { icon: 'groups', label: 'Communities', href: '/communities' },
   { icon: 'bookmark', label: 'Saved', href: '/saved' },
-  { icon: 'local_fire_department', label: 'Popular Nearby', href: '/popular' },
+  { icon: 'local_fire_department', label: 'Fans out', href: '/popular' },
   { icon: 'newspaper', label: 'Local News', href: '/local-news' },
   { icon: 'military_tech', label: 'My Huud Score', href: '/gamification' },
 ];
@@ -31,6 +30,9 @@ const browseTypes = [
   { icon: 'report', label: 'Incident Reports', type: 'incident', href: '/incident-reports' },
   { icon: 'add_alert', label: 'Community Alerts', type: 'emergency', href: '/community-emergency' },
 ];
+
+type LeftSidebarOrigin = 'page' | 'global';
+type LeftSidebarMode = 'desktop' | 'mobile' | 'both';
 
 function SidebarLink({
   href,
@@ -83,16 +85,14 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
           <Link href="/feed" onClick={onNavigate} className="left-sidebar__header-logo">
             <NeyborHuudLogo layout="wordmark" size={isDrawer ? 'sm' : 'md'} tone="primary" />
           </Link>
-          {isDrawer && onClose ? (
-            <button
-              type="button"
-              onClick={onClose}
-              className="left-sidebar__sky-close"
-              aria-label="Close menu"
-            >
-              <span className="material-symbols-outlined">close</span>
-            </button>
-          ) : null}
+          <Link
+            href="/safety"
+            onClick={onNavigate}
+            className={`left-sidebar__sentinel-btn${isActive('/safety') ? ' left-sidebar__sentinel-btn--active' : ''}`}
+            aria-label="Sentinel AI"
+          >
+            <span className={`material-symbols-outlined${isActive('/safety') ? ' fill-1' : ''}`}>shield</span>
+          </Link>
         </div>
 
         <SidebarProfileLockup
@@ -101,13 +101,10 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
           profileHref={authUser ? `/profile/${authUser.username}` : '/settings'}
           onNavigate={onNavigate}
         />
-
-        <SidebarFxWidget variant="sky" />
       </SidebarSkyHeaderPanel>
 
       <div className="left-sidebar__main">
         <section className="left-sidebar__section">
-          <h2 className="left-sidebar__section-label">Navigation</h2>
           <ul className="left-sidebar__nav">
             {mainNav.map((item) => (
               <SidebarLink
@@ -123,7 +120,6 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
         </section>
 
         <section className="left-sidebar__section">
-          <h2 className="left-sidebar__section-label">Explore</h2>
           <div className="left-sidebar__explore-grid">
             {browseTypes.map((item) => {
               const active = item.href ? pathname?.startsWith(item.href) : activeType === item.type;
@@ -143,67 +139,92 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
             })}
           </div>
         </section>
+
+        <section className="left-sidebar__section">
+          <ul className="left-sidebar__nav">
+            <SidebarLink
+              href="/settings"
+              icon="settings"
+              label="Settings &amp; Privacy"
+              active={isActive('/settings')}
+              onNavigate={onNavigate}
+            />
+            <SidebarLink
+              href="/help-center"
+              icon="support"
+              label="Help Center"
+              active={isActive('/help-center')}
+              onNavigate={onNavigate}
+            />
+          </ul>
+        </section>
       </div>
 
       <div className="left-sidebar__footer">
-        <div className="left-sidebar__footer-settings">
-          <Link
-            href="/settings"
-            onClick={onNavigate}
-            className={`left-sidebar__link${isActive('/settings') ? ' left-sidebar__link--active' : ''}`}
-          >
-            <span className="left-sidebar__link-icon">
-              <span className={`material-symbols-outlined${isActive('/settings') ? ' fill-1' : ''}`}>settings</span>
-            </span>
-            <span className="left-sidebar__link-label">Settings &amp; Privacy</span>
-          </Link>
-        </div>
         <SidebarBuildingSilhouette />
       </div>
     </div>
   );
 }
 
-export default function LeftSidebar() {
+export default function LeftSidebar({ origin = 'page', mode = 'desktop' }: { origin?: LeftSidebarOrigin; mode?: LeftSidebarMode }) {
+  return <LeftSidebarInner origin={origin} mode={mode} />;
+}
+
+function LeftSidebarInner({ origin = 'page', mode = 'desktop' }: { origin?: LeftSidebarOrigin; mode?: LeftSidebarMode }) {
+  const enableMobile = mode === 'mobile' || mode === 'both';
+  const enableDesktop = mode === 'desktop' || mode === 'both';
+
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useSwipeBackDisabled(mobileOpen, 'mobile-sidebar');
+  useSwipeBackDisabled(enableMobile && mobileOpen, 'mobile-sidebar');
 
   useEffect(() => {
+    if (!enableMobile) return;
     const handleToggle = () => setMobileOpen(true);
     window.addEventListener('toggle-mobile-sidebar', handleToggle);
     return () => window.removeEventListener('toggle-mobile-sidebar', handleToggle);
-  }, []);
+  }, [enableMobile]);
 
   useEffect(() => {
+    if (!enableMobile) return;
     if (mobileOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileOpen]);
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [enableMobile, mobileOpen]);
 
   return (
     <>
-      <aside className="left-sidebar left-sidebar--desktop">
-        <div className="left-sidebar__scrim" aria-hidden />
-        <Suspense fallback={null}>
-          <SidebarContent />
-        </Suspense>
-      </aside>
+      {/* Invisible marker so global auto-drawer can detect a page sidebar */}
+      <span
+        data-leftsidebar="1"
+        data-leftsidebar-origin={origin}
+        data-leftsidebar-mode={mode}
+        className="hidden"
+        aria-hidden
+      />
 
-      {mobileOpen ? (
+      {enableDesktop ? (
+        <aside className="left-sidebar left-sidebar--desktop">
+          <div className="left-sidebar__scrim" aria-hidden />
+          <Suspense fallback={null}>
+            <SidebarContent />
+          </Suspense>
+        </aside>
+      ) : null}
+
+      {enableMobile && mobileOpen ? (
         <div className="left-sidebar-overlay">
           <div className="left-sidebar-backdrop" onClick={() => setMobileOpen(false)} aria-hidden />
           <aside className="left-sidebar left-sidebar--drawer">
             <div className="left-sidebar__scrim" aria-hidden />
             <Suspense fallback={null}>
-              <SidebarContent
-                isDrawer
-                onNavigate={() => setMobileOpen(false)}
-                onClose={() => setMobileOpen(false)}
-              />
+              <SidebarContent isDrawer onNavigate={() => setMobileOpen(false)} onClose={() => setMobileOpen(false)} />
             </Suspense>
           </aside>
         </div>

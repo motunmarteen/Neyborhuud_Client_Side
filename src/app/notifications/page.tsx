@@ -96,8 +96,7 @@ export default function NotificationsPage() {
         <main className="flex-1 overflow-y-auto px-4 py-6">
           <div className="mx-auto flex w-full max-w-[920px] flex-col gap-6 pb-24">
             {/* Header */}
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>Notifications</h1>
+            <div className={`flex items-center ${unreadCount > 0 ? 'justify-end' : 'hidden'}`}>
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllRead.mutate()}

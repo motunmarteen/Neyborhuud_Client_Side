@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "node start-dev.js",
     "dev:clean": "node scripts/dev-clean.mjs",
     "dev:stable": "next dev",
     "dev:port": "node start-dev.js",

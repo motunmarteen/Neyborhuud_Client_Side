@@ -246,10 +246,7 @@ export default function MessagesPage() {
 
               {/* Header */}
               <div className="flex items-center justify-between rounded-2xl border border-[var(--neu-border)] bg-[var(--neu-card)] p-4">
-                <div>
-                  <h1 className="text-xl font-bold text-[var(--neu-text)]">Messages</h1>
-                  <p className="mt-0.5 text-sm text-[var(--neu-text-muted)]">Your conversations</p>
-                </div>
+                <p className="text-sm text-[var(--neu-text-muted)]">Your conversations</p>
                 <button
                   onClick={() => setShowNewChat(true)}
                   title="New message"

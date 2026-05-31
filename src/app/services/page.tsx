@@ -70,7 +70,6 @@ export default function ServicesPage() {
                   <span className="material-symbols-outlined text-xl text-primary">handyman</span>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold" style={{ color: "var(--neu-text)" }}>Services</h1>
                   <p className="text-xs" style={{ color: "var(--neu-text-muted)" }}>Find help near you</p>
                 </div>
               </div>

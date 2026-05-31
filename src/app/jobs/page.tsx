@@ -45,7 +45,7 @@ export default function JobsPage() {
     <div className="relative flex h-screen w-full overflow-hidden neu-base">
       <LeftSidebar />
 
-      <main className="flex flex-col flex-1 overflow-y-auto">
+      <main className="feed-scroll-main flex flex-col flex-1 overflow-y-auto scroll-smooth">
         <TopNav />
 
         <div className="flex flex-col pb-20">
@@ -57,7 +57,6 @@ export default function JobsPage() {
                   <span className="material-symbols-outlined text-xl text-primary">work</span>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold" style={{ color: "var(--neu-text)" }}>Jobs</h1>
                   <p className="text-xs" style={{ color: "var(--neu-text-muted)" }}>Find work near you</p>
                 </div>
               </div>

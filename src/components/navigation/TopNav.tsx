@@ -1,94 +1,136 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { GlobalSearch } from '@/components/GlobalSearch';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
+import { AppNavIcon } from '@/components/navigation/AppNavIcon';
+import { TopNavChatAction, CHAT_INBOX_HREF } from '@/components/navigation/TopNavChatAction';
 import { useUnreadCount } from '@/hooks/useNotifications';
 
-export default function TopNav() {
+type TopNavOrigin = 'page' | 'global';
+
+function titleCaseFromSegment(segment: string) {
+  const normalized = segment.replace(/[-_]+/g, ' ').trim();
+  if (!normalized) return '';
+  return normalized
+    .split(' ')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+function getRouteTitle(pathname: string) {
+  const parts = pathname.split('?')[0].split('#')[0].split('/').filter(Boolean);
+  const segment = (parts[0] ?? '').toLowerCase();
+
+  if (segment === 'gamification' && parts[1] === 'wallet') {
+    return 'HuudCoins Wallet';
+  }
+
+  const map: Record<string, string> = {
+    friendship: 'Friendship',
+    marketplace: 'Marketplace',
+    communities: 'Communities',
+    neighborhood: 'My Huud',
+    'help-request': 'Help Request',
+    events: 'Events',
+    'local-news': 'Local News',
+    jobs: 'Jobs',
+    notifications: 'Notifications',
+    settings: 'Settings',
+    safety: 'Sentinel AI',
+    sentinel: 'Sentinel AI',
+    map: 'Discovery',
+    explore: 'Explore',
+    popular: 'Fans out',
+    messages: 'Messages',
+    chat: 'Chat',
+    info: 'Info',
+    sos: 'SOS',
+    profile: 'Profile',
+    gamification: 'My Huud Score',
+  };
+
+  if (map[segment]) return map[segment];
+  return titleCaseFromSegment(segment) || 'NeyborHuud';
+}
+
+export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
   const isOnFeed = pathname === '/feed' || pathname === '/';
-  const isOnProfile = pathname?.startsWith('/profile/');
-  const isTransparent = isOnFeed || isOnProfile;
-  const navTone = isOnFeed ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]' : isOnProfile ? 'text-primary' : 'text-charcoal';
+  const title = useMemo(() => (pathname ? getRouteTitle(pathname) : 'NeyborHuud'), [pathname]);
   const { data: unreadCount = 0 } = useUnreadCount();
 
   return (
     <header
-      className={`relative z-20 flex items-center gap-3 whitespace-nowrap px-4 pb-2.5 pt-[max(0.625rem,var(--safe-top))] ${isTransparent ? 'bg-transparent' : 'bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]'}`}
+      data-topnav="1"
+      data-topnav-origin={origin}
+      className={`app-topnav ${isOnFeed ? 'app-topnav--sky' : 'app-topnav--solid'}`}
     >
-      {/* Mobile hamburger */}
       <button
+        type="button"
         onClick={() => window.dispatchEvent(new CustomEvent('toggle-mobile-sidebar'))}
-        className={`md:hidden flex items-center justify-center w-10 h-10 shrink-0 rounded-full transition-colors ${navTone}`}
+        className="app-topnav__action md:hidden"
         aria-label="Open menu"
       >
-        <span className="material-symbols-outlined text-[26px]">menu</span>
+        <AppNavIcon name="menu" />
       </button>
 
-      {/* Logo */}
-      <Link href="/feed" className="flex shrink-0 items-center cursor-pointer">
-        <NeyborHuudLogo
-          layout="wordmark"
-          size="sm"
-          tone={isOnFeed ? 'light' : 'primary'}
-        />
-      </Link>
+      {isOnFeed ? (
+        <Link href="/feed" className="flex shrink-0 items-center min-w-0 cursor-pointer">
+          <NeyborHuudLogo layout="wordmark" size="chrome" tone="light" />
+        </Link>
+      ) : (
+        <div className="flex shrink-0 items-center min-w-0">
+          <h1 className="app-topnav__title truncate">{title}</h1>
+        </div>
+      )}
 
-      {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Right side: Search + Create Post + Notifications */}
-      <div className="flex items-center gap-1 shrink-0">
-        {/* Search */}
+      <div className="app-topnav__actions">
         <button
+          type="button"
           onClick={() => setSearchOpen(true)}
-          className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${navTone}`}
+          className="app-topnav__action"
           aria-label="Search"
         >
-          <span className="material-symbols-outlined text-[26px]">search</span>
+          <AppNavIcon name="search" />
         </button>
-        {/* Create Post */}
-        <button
-          onClick={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
-          className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${navTone}`}
-          aria-label="Create post"
-        >
-          <span className="material-symbols-outlined text-[26px]">edit_square</span>
-        </button>
-        {/* Notifications */}
         <Link
           href="/notifications"
-          className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors relative ${navTone}`}
+          className="app-topnav__action"
           aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
         >
-          <span className="material-symbols-outlined text-[26px]">notifications</span>
+          <AppNavIcon name="notifications" />
           {unreadCount > 0 && (
-            <div
-              className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-primary rounded-full flex items-center justify-center"
-              aria-hidden="true"
-            >
-              <span className="text-[9px] font-black text-white leading-none px-0.5">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            </div>
+            <span className="app-topnav__badge" aria-hidden="true">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
           )}
         </Link>
+        <Suspense
+          fallback={
+            <Link href={CHAT_INBOX_HREF} className="app-topnav__action" aria-label="Chat">
+              <AppNavIcon name="messages" />
+            </Link>
+          }
+        >
+          <TopNavChatAction />
+        </Suspense>
       </div>
 
-      {/* Search Overlay */}
       {searchOpen && (
         <div className="fixed inset-0 z-[100] bg-white flex flex-col">
           <div className="flex items-center gap-3 px-4 py-3 border-b border-black/[0.06]">
             <button
               onClick={() => setSearchOpen(false)}
-              className="flex items-center justify-center w-10 h-10 shrink-0 rounded-xl text-charcoal"
+              className="app-topnav__action"
               aria-label="Close search"
             >
-              <span className="material-symbols-outlined text-2xl">arrow_back</span>
+              <AppNavIcon name="back" />
             </button>
             <div className="flex-1">
               <GlobalSearch />

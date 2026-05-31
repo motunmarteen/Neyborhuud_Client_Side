@@ -76,23 +76,20 @@ export function SidebarProfileLockup({
           {displayName}
         </p>
         {hasLegalName ? (
-          <p
-            className={
-              isSky
-                ? 'left-sidebar__sky-profile__handle !text-[11px] !font-semibold !opacity-75'
-                : 'text-[11px] font-semibold text-[var(--neu-text-muted)] truncate'
-            }
-          >
-            @{handle}
-          </p>
-        ) : null}
-        {isSky ? (
-          <p className="left-sidebar__sky-profile__meta-row">
-            <span>View profile</span>
-            <i className="bi bi-chevron-right" aria-hidden />
-          </p>
+          <div className="flex items-center gap-1 mt-0.5">
+            <p
+              className={
+                isSky
+                  ? 'left-sidebar__sky-profile__handle !text-[11px] !font-semibold !opacity-75'
+                  : 'text-[11px] font-semibold text-[var(--neu-text-muted)] truncate'
+              }
+            >
+              @{handle}
+            </p>
+            {isSky && <i className="bi bi-chevron-right text-[10px] opacity-70" aria-hidden />}
+          </div>
         ) : (
-          <p className="auth-signup-identity-card__meta truncate">View profile</p>
+          isSky && <i className="bi bi-chevron-right text-[10px] opacity-70 mt-0.5" aria-hidden />
         )}
       </div>
       {!isSky ? (

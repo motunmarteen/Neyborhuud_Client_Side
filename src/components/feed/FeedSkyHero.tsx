@@ -6,19 +6,29 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, type MouseEvent } from 'react';
 import {
   getTimePeriod,
   getSkyTheme,
+  getGreeting,
   type SkyTheme,
 } from '@/components/navigation/AmbientProfileCard';
 import { wmoToAmbient } from '@/lib/weatherClient';
 import { useAmbientWeather } from '@/hooks/useAmbientWeather';
 import { useAuth } from '@/hooks/useAuth';
 import { useHuudDisplayName } from '@/hooks/useHuudDisplayName';
+import {
+  getExpressiveWeatherLine,
+  getHuudComposerPrompt,
+} from '@/lib/feedSkyHeroCopy';
+import {
+  resolveProfileAvatarInitial,
+  resolveUserAvatarUrl,
+} from '@/lib/userAvatar';
 
 import { CitySilhouette } from '@/components/ambient/CitySilhouette';
 import { SkyWeatherEffects } from '@/components/ambient/SkyWeatherEffects';
+import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
 
 /* ── Sky scene elements ── */
 
@@ -146,10 +156,15 @@ function AnimatedClouds({ color }: { color: string }) {
 export function FeedSkyHero() {
   const { weather, loading: weatherLoading } = useAmbientWeather();
   const { user } = useAuth();
-  const huudName = useHuudDisplayName(user);
+  const [mounted, setMounted] = useState(false);
+  const authUser = mounted ? user : null;
+  const huudName = useHuudDisplayName(authUser);
 
   // SSR-safe hour
   const [currentHour, setCurrentHour] = useState(12);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   useEffect(() => {
     setCurrentHour(new Date().getHours());
     const interval = setInterval(() => setCurrentHour(new Date().getHours()), 60_000);
@@ -160,6 +175,28 @@ export function FeedSkyHero() {
   const ambientWeather = weather ? wmoToAmbient(weather.wmoCode) : 'clear';
   const theme = useMemo(() => getSkyTheme(timePeriod, ambientWeather), [timePeriod, ambientWeather]);
   const isDark = timePeriod === 'night' || timePeriod === 'evening';
+  const greeting = getGreeting(timePeriod, authUser?.firstName, authUser?.username);
+  const composerPrompt = getHuudComposerPrompt(timePeriod);
+  const avatarUrl = resolveUserAvatarUrl(authUser);
+  const avatarInitial = resolveProfileAvatarInitial(authUser, authUser?.username);
+
+  const openComposer = () => {
+    window.dispatchEvent(new CustomEvent('open-create-post'));
+  };
+
+  const openComposerWithMedia = (e: MouseEvent) => {
+    e.stopPropagation();
+    window.dispatchEvent(new CustomEvent('open-create-post', { detail: { focusMedia: true } }));
+  };
+
+  const expressiveWeather = weather
+    ? getExpressiveWeatherLine({
+        condition: weather.condition,
+        temp: weather.temp,
+        huudName,
+        ambientWeather,
+      })
+    : '';
 
   return (
     <section className="feed-sky-hero">
@@ -178,39 +215,72 @@ export function FeedSkyHero() {
         {theme.showClouds && <AnimatedClouds color={theme.cloudColor} />}
         <SkyWeatherEffects theme={theme} isDark={isDark} size="hero" />
 
-        <div className="feed-sky-scene__weather">
-          {weatherLoading ? (
-            <div className="feed-sky-scene__weather-skeleton animate-pulse" aria-hidden>
-              <div className="feed-sky-scene__weather-skeleton-label" />
-              <div className="feed-sky-scene__weather-skeleton-temp" />
-              <div className="feed-sky-scene__weather-skeleton-condition" />
+        <div className="feed-sky-scene__content">
+          <div className="feed-sky-scene__weather">
+            {weatherLoading ? (
+              <div className="feed-sky-scene__weather-skeleton animate-pulse" aria-hidden>
+                <div className="feed-sky-scene__weather-skeleton-label" />
+                <div className="feed-sky-scene__weather-skeleton-temp" />
+                <div className="feed-sky-scene__weather-skeleton-condition" />
+              </div>
+            ) : weather ? (
+              <>
+                <p
+                  className="feed-sky-scene__label"
+                  style={{ color: theme.textColor, textShadow: '0 1px 4px rgba(0,0,0,0.22)' }}
+                >
+                  {greeting}
+                </p>
+
+                <p
+                  className="feed-sky-scene__temp"
+                  style={{
+                    color: theme.textColor,
+                    textShadow: '0 4px 24px rgba(0,0,0,0.38), 0 1px 4px rgba(0,0,0,0.25)',
+                  }}
+                >
+                  {weather.temp}°
+                </p>
+
+                <p
+                  className="feed-sky-scene__condition"
+                  style={{ color: theme.textColor, textShadow: '0 1px 4px rgba(0,0,0,0.22)' }}
+                >
+                  {expressiveWeather}
+                </p>
+              </>
+            ) : null}
+          </div>
+
+          <div className="feed-sky-scene__composer">
+            <BrandPinAvatar
+              src={avatarUrl}
+              alt={authUser?.firstName || authUser?.username || 'You'}
+              fallbackInitial={avatarInitial}
+              size="md"
+              className="feed-sky-scene__composer-pin"
+            />
+            <div
+              className="feed-sky-scene__composer-pill"
+              style={{ color: theme.textColor }}
+            >
+              <button
+                type="button"
+                className="feed-sky-scene__composer-text"
+                onClick={openComposer}
+              >
+                {composerPrompt}
+              </button>
+              <button
+                type="button"
+                className="feed-sky-scene__composer-media"
+                onClick={openComposerWithMedia}
+                aria-label="Add photo or video"
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">perm_media</span>
+              </button>
             </div>
-          ) : weather ? (
-            <>
-              <p
-                className="feed-sky-scene__label"
-                style={{ color: theme.mutedColor, textShadow: '0 1px 4px rgba(0,0,0,0.22)' }}
-              >
-                <span className="feed-sky-scene__label-huud">{huudName}</span>
-                <span className="feed-sky-scene__label-now"> right now</span>
-              </p>
-              <p
-                className="feed-sky-scene__temp"
-                style={{
-                  color: theme.textColor,
-                  textShadow: '0 4px 24px rgba(0,0,0,0.38), 0 1px 4px rgba(0,0,0,0.25)',
-                }}
-              >
-                {weather.temp}°
-              </p>
-              <p
-                className="feed-sky-scene__condition"
-                style={{ color: theme.mutedColor, textShadow: '0 1px 4px rgba(0,0,0,0.22)' }}
-              >
-                {weather.condition}
-              </p>
-            </>
-          ) : null}
+          </div>
         </div>
 
         <CitySilhouette color={theme.silhouetteColor} />

@@ -3,41 +3,54 @@
 import React, { useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
+import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
 import { useAuth } from '@/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
-import { chatService } from '@/services/chat.service';
 import { useSos } from '@/hooks/useSos';
+import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
+import { AppNavIcon, type AppNavIconName } from '@/components/navigation/AppNavIcon';
+import {
+  resolveProfileAvatarInitial,
+  resolveUserAvatarUrl,
+} from '@/lib/userAvatar';
 
 interface BottomNavProps {
+  /**
+   * When set, parent controls visibility (e.g. feed page).
+   * When omitted, nav auto-hides on scroll down and shows on scroll up.
+   */
   hidden?: boolean;
 }
 
-export function BottomNav({ hidden }: BottomNavProps) {
+const TABS: { href: string; label: string; icon: AppNavIconName; match: (p: string) => boolean }[] = [
+  { href: '/feed', label: 'Home', icon: 'home', match: (p) => p === '/feed' || p === '/' },
+  { href: '/safety', label: 'Safety', icon: 'shield', match: (p) => p.startsWith('/safety') || p.startsWith('/sentinel') },
+  { href: '/friendship', label: 'Connect', icon: 'connect', match: (p) => p.startsWith('/friendship') },
+];
+
+export function BottomNav({ hidden: hiddenProp }: BottomNavProps) {
   const pathname = usePathname();
+  const scrollHidden = useScrollHideBottomNav(hiddenProp === undefined, pathname);
+  const hidden = hiddenProp ?? scrollHidden;
   const router = useRouter();
   const { user } = useAuth();
   const sos = useSos();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => { setMounted(true); }, []);
-  const isFeed = pathname === '/feed';
-  const isSentinel = pathname.startsWith('/safety');
-  const profileHref = mounted && user?.username ? `/profile/${user.username}` : '/settings';
+  const authUser = mounted ? user : null;
+  const profileHref = authUser?.username ? `/profile/${authUser.username}` : '/settings';
+  const isProfile = pathname.startsWith('/profile') || (profileHref === '/settings' && pathname.startsWith('/settings'));
+  const profileAvatar = resolveUserAvatarUrl(authUser);
+  const profileInitial = resolveProfileAvatarInitial(authUser, authUser?.username);
 
-  // Long-press → silent SOS. ≥600 ms hold fires silently in the background.
-  // Tap → /sos (the dedicated emergency command center, where the user can
-  // pick visibility mode, run a drill, see active SOS state, etc.). The
-  // /safety hub remains for browsing the broader safety toolkit.
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFired = useRef(false);
   const SOS_HREF = '/sos';
+  const sosActive = pathname.startsWith('/sos') || pathname.startsWith('/safety') || sos.phase !== 'idle';
 
   const startSosPress = () => {
     longPressFired.current = false;
     longPressTimer.current = setTimeout(() => {
       longPressFired.current = true;
-      // Silent SOS — no UI feedback, by design. If the backend rejects (e.g. missing
-      // profile fields), useSos surfaces the error; we do NOT pre-empt with a redirect
-      // because a safety control must not silently navigate users away from the action.
       void sos.triggerSos({ silent: true });
     }, 600);
   };
@@ -48,64 +61,73 @@ export function BottomNav({ hidden }: BottomNavProps) {
       longPressTimer.current = null;
     }
     if (longPressFired.current) {
-      // Suppress the navigation that would otherwise follow a click after long-press.
       e.preventDefault();
       e.stopPropagation();
       longPressFired.current = false;
       return;
     }
-    // Short tap → navigate to the dedicated SOS command center.
     if (e.type === 'pointerup' || e.type === 'touchend' || e.type === 'mouseup') {
       router.push(SOS_HREF);
     }
   };
 
-  const { data: convData } = useQuery({
-    queryKey: ['conversations'],
-    queryFn: () => chatService.getConversations(),
-    enabled: !!user,
-    refetchInterval: 30_000,
-    staleTime: 15_000,
-  });
-  const unreadMessages = ((convData?.data as any)?.conversations ?? (convData?.data as any)?.data ?? [])
-    .reduce((sum: number, c: any) => sum + (c.unreadCount ?? 0), 0);
+  const [homeTab, safetyTab, connectTab] = TABS;
+  const homeActive = homeTab.match(pathname);
+  const safetyActive = safetyTab.match(pathname);
+  const connectActive = connectTab.match(pathname);
 
-  const navItemClass = (active: boolean) =>
-    `relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-2xl transition-all duration-200 ease-out touch-manipulation ${
-      active
-        ? 'text-primary scale-105 bg-primary/12 shadow-[0_0_20px_rgba(0,212,49,0.18)] dark:text-primary dark:bg-primary/15 dark:shadow-[0_0_20px_rgba(0,212,49,0.12)]'
-        : 'text-brand-green-dark/70 hover:text-brand-black hover:bg-black/[0.04] dark:text-white/55 dark:hover:text-white/85 dark:hover:bg-white/[0.06]'
-    }`;
+  const renderTab = (
+    tab: (typeof TABS)[number],
+    active: boolean,
+    edge = false,
+  ) => (
+    <Link
+      key={tab.href}
+      href={tab.href}
+      className={`app-bottomnav__item${edge ? ' app-bottomnav__item--edge' : ''}${active ? ' app-bottomnav__item--active' : ''}`}
+      aria-current={active ? 'page' : undefined}
+      aria-label={tab.label}
+    >
+      <span className="app-bottomnav__icon-wrap">
+        <AppNavIcon name={tab.icon} active={active} />
+      </span>
+      <span className="app-bottomnav__label">{tab.label}</span>
+    </Link>
+  );
 
   return (
-    <nav
-      className={`fixed bottom-0 left-0 right-0 z-50 pointer-events-none safe-area-bottom transition-transform duration-300 ease-in-out ${hidden ? 'translate-y-full' : 'translate-y-0'}`}
-      role="navigation"
-      aria-label="Main navigation"
-    >
-      <div className="pointer-events-auto mx-3 mb-[max(0.75rem,var(--safe-bottom))] max-w-lg mx-auto rounded-[26px] border border-[var(--border-light)] bg-white/76 px-1.5 py-1 shadow-[0_12px_40px_rgba(0,111,53,0.12),0_0_0_1px_rgba(255,255,255,0.9)_inset] backdrop-blur-2xl dark:border-white/12 dark:bg-[rgba(12,18,24,0.55)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.05)_inset,0_0_48px_-8px_rgba(0,212,49,0.12)]">
-        <div className="flex h-[52px] items-center justify-around">
-        {/* Home */}
-        <Link
-          href="/feed"
-          className={navItemClass(isFeed)}
-          aria-current={isFeed ? 'page' : undefined}
-          aria-label="Home"
-        >
-          <span className={`material-symbols-outlined text-[30px] ${isFeed ? 'fill-1' : ''}`}>home</span>
-        </Link>
+    <nav className="app-bottomnav" role="navigation" aria-label="Main navigation">
+      <div className={`app-bottomnav__bar${hidden ? ' app-bottomnav__bar--hidden' : ''}`}>
+        <div className="app-bottomnav__inner">
+          {renderTab(homeTab, homeActive, true)}
 
-        {/* Sentinel */}
-        <Link
-          href="/safety"
-          className={navItemClass(isSentinel)}
-          aria-current={isSentinel ? 'page' : undefined}
-          aria-label="Sentinel"
-        >
-          <span className={`material-symbols-outlined text-[30px] ${isSentinel ? 'fill-1' : ''}`}>shield</span>
-        </Link>
+          <div className="app-bottomnav__center">
+            {renderTab(safetyTab, safetyActive)}
+            <div className="app-bottomnav__sos-slot" aria-hidden />
+            {renderTab(connectTab, connectActive)}
+          </div>
 
-        {/* SOS / Safety — tap navigates; long-press fires SILENT SOS */}
+          <Link
+            href={profileHref}
+            className={`app-bottomnav__item app-bottomnav__item--edge${isProfile ? ' app-bottomnav__item--active' : ''}`}
+            aria-current={isProfile ? 'page' : undefined}
+            aria-label="Profile"
+          >
+            <span className="app-bottomnav__profile">
+              <BrandPinAvatar
+                src={profileAvatar}
+                alt={authUser?.firstName || authUser?.username || 'Profile'}
+                fallbackInitial={profileInitial}
+                size="xs"
+                className="bottom-nav__profile-pin"
+              />
+            </span>
+            <span className="app-bottomnav__label">Profile</span>
+          </Link>
+        </div>
+      </div>
+
+      <div className="app-bottomnav__sos">
         <button
           type="button"
           onPointerDown={startSosPress}
@@ -114,48 +136,17 @@ export function BottomNav({ hidden }: BottomNavProps) {
             if (longPressTimer.current) clearTimeout(longPressTimer.current);
           }}
           onContextMenu={(e) => e.preventDefault()}
-          className="relative min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation select-none"
-          aria-current={pathname.startsWith('/sos') || pathname.startsWith('/safety') ? 'page' : undefined}
+          className={`app-bottomnav__sos-btn${sosActive ? ' app-bottomnav__sos-btn--active' : ''}`}
+          aria-current={sosActive ? 'page' : undefined}
           aria-label="SOS — tap to open command center, long-press for silent SOS"
         >
-          {/* Pulsing ring when active or pending */}
-          {(pathname.startsWith('/sos') || pathname.startsWith('/safety') || sos.phase !== 'idle') && (
-            <span className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-brand-red/20 animate-ping" />
-          )}
-          {/* Steady glow backdrop */}
-          <span className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-brand-red/10" />
-          <span className={`material-symbols-outlined text-[30px] text-brand-red relative z-10 ${pathname.startsWith('/sos') || pathname.startsWith('/safety') ? 'fill-1' : ''}`}>sos</span>
+          <span
+            className={`app-bottomnav__sos-ring ${sos.phase !== 'idle' ? 'app-bottomnav__sos-ring--live' : 'app-bottomnav__sos-ring--idle'}`}
+            aria-hidden
+          />
+          <AppNavIcon name="sos" />
         </button>
-
-        {/* Messages */}
-        <Link
-          href="/messages"
-          className={navItemClass(pathname === '/messages')}
-          aria-current={pathname === '/messages' ? 'page' : undefined}
-          aria-label="Messages"
-        >
-          <div className="relative">
-            <span className={`material-symbols-outlined text-[30px] ${pathname === '/messages' ? 'fill-1' : ''}`}>chat</span>
-            {unreadMessages > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-brand-red text-white text-[10px] font-bold flex items-center justify-center">
-                {unreadMessages > 99 ? '99+' : unreadMessages}
-              </span>
-            )}
-          </div>
-        </Link>
-
-        {/* Profile */}
-        <Link
-          href={profileHref}
-          className={navItemClass(pathname.startsWith('/profile'))}
-          aria-current={pathname.startsWith('/profile') ? 'page' : undefined}
-          aria-label="Profile"
-        >
-          <span className={`material-symbols-outlined text-[30px] ${pathname.startsWith('/profile') ? 'fill-1' : ''}`}>person</span>
-        </Link>
-        </div>
       </div>
     </nav>
   );
 }
-

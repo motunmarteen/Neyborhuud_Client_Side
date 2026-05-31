@@ -1,16 +1,14 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { contentService } from '@/services/content.service';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
 import { XPostCard } from '@/components/feed/XPostCard';
+import { FeedSkeleton } from '@/components/feed/PostSkeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
+import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 
-// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 export default function PopularPage() {
@@ -20,72 +18,47 @@ export default function PopularPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['popular-feed'],
     queryFn: () =>
-      contentService.getLocationFeed(
-        coords?.lat ?? 9.0765,
-        coords?.lng ?? 7.3986,
-        { feedTab: 'street_radar', ranked: true, limit: 30 },
-      ),
+      contentService.getLocationFeed(coords?.lat ?? 9.0765, coords?.lng ?? 7.3986, {
+        feedTab: 'street_radar',
+        ranked: true,
+        limit: 30,
+      }),
   });
 
   const posts = data?.content ?? [];
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <Suspense fallback={<div className="w-64" />}>
-          <LeftSidebar />
-        </Suspense>
-        <main className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="mx-auto flex w-full max-w-[920px] flex-col gap-6 pb-24">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-[32px] text-brand-red">local_fire_department</span>
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--neu-text)' }}>Trending Nearby</h1>
+    <AppBrowseLayout subtitle="What's buzzing in your area right now">
+      {isLoading ? (
+        <FeedSkeleton count={5} />
+      ) : posts.length === 0 ? (
+        <BrowseEmptyState
+          icon="local_fire_department"
+          title="Nothing trending yet"
+          description="Check back soon for what's hot in your Huud"
+          filledIcon
+        />
+      ) : (
+        <div className="flex flex-col gap-4">
+          {posts.map((post: { id?: string; _id?: string }, idx: number) => (
+            <div key={post.id ?? post._id} className="relative">
+              {idx < 3 && (
+                <div className="absolute -left-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-brand-red text-xs font-bold text-white shadow-md">
+                  {idx + 1}
+                </div>
+              )}
+              <XPostCard
+                post={post as Parameters<typeof XPostCard>[0]['post']}
+                currentUserId={user?.id ?? ''}
+                onLike={() => contentService.likePost(post.id ?? post._id ?? '')}
+                onComment={() => {}}
+                onShare={() => {}}
+                onSave={() => contentService.savePost(post.id ?? post._id ?? '')}
+              />
             </div>
-            <p className="text-sm -mt-4" style={{ color: 'var(--neu-text-muted)' }}>
-              What's buzzing in your area right now
-            </p>
-
-            {isLoading ? (
-              <div className="flex flex-col gap-4">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-48 rounded-2xl animate-pulse" style={{ background: 'var(--neu-card)' }} />
-                ))}
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="flex flex-col items-center gap-4 py-16">
-                <span className="material-symbols-outlined text-[64px] text-[var(--neu-text-muted)]">local_fire_department</span>
-                <p className="text-lg font-medium" style={{ color: 'var(--neu-text-muted)' }}>Nothing trending yet</p>
-                <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>Check back soon</p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {posts.map((post: any, idx: number) => (
-                  <div key={post.id ?? post._id} className="relative">
-                    {idx < 3 && (
-                      <div className="absolute -top-2 -left-2 z-10 w-7 h-7 rounded-full bg-brand-red flex items-center justify-center text-white text-xs font-bold shadow-md">
-                        {idx + 1}
-                      </div>
-                    )}
-                    <XPostCard
-                      post={post}
-                      currentUserId={user?.id ?? ''}
-                      onLike={() => contentService.likePost(post.id ?? post._id)}
-                      onComment={() => {}}
-                      onShare={() => {}}
-                      onSave={() => contentService.savePost(post.id ?? post._id)}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
-        <RightSidebar />
-      </div>
-      <Suspense fallback={<div className="h-16" />}>
-        <BottomNav />
-      </Suspense>
-    </div>
+          ))}
+        </div>
+      )}
+    </AppBrowseLayout>
   );
 }

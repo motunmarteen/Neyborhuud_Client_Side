@@ -149,4 +149,39 @@ export const geoService = {
       navigator.geolocation.clearWatch(watchId);
     }
   },
+
+  /**
+   * Get all auto-created Places (LGAs with registered users)
+   */
+  async getPlaces(state?: string, limit = 50) {
+    return await apiClient.get<{
+      places: Array<{
+        lga: string;
+        state: string;
+        userCount: number;
+        followerCount: number;
+        isFollowing: boolean;
+        sampleCoords: [number, number];
+      }>;
+      total: number;
+    }>('/geo/places', {
+      params: { ...(state ? { state } : {}), limit },
+    });
+  },
+
+  /**
+   * Get stats for a specific LGA Place
+   */
+  async getPlaceStats(lga: string, state?: string) {
+    return await apiClient.get<{
+      lga: string;
+      state: string;
+      followerCount: number;
+      userCount: number;
+      recentPostCount: number;
+      isFollowing: boolean;
+    }>(`/geo/places/${encodeURIComponent(lga)}/stats`, {
+      params: { ...(state ? { state } : {}) },
+    });
+  },
 };

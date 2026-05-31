@@ -52,6 +52,7 @@ function XFeedInner() {
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [locationError, setLocationError] = useState<string | null>(null);
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+    const [createPostFocusMedia, setCreatePostFocusMedia] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
     const [feedTab, setFeedTab] = useState<FeedTab>('your_huud');
@@ -78,9 +79,13 @@ function XFeedInner() {
         }
     }, [typeParam, router]);
 
-    // Listen for create-post event from TopNav
+    // Listen for create-post event from TopNav / sky hero
     useEffect(() => {
-        const handler = () => setIsCreatePostOpen(true);
+        const handler = (event: Event) => {
+            const detail = (event as CustomEvent<{ focusMedia?: boolean }>).detail;
+            setCreatePostFocusMedia(!!detail?.focusMedia);
+            setIsCreatePostOpen(true);
+        };
         window.addEventListener('open-create-post', handler);
         return () => window.removeEventListener('open-create-post', handler);
     }, []);
@@ -388,7 +393,7 @@ function XFeedInner() {
         <div className="relative flex h-app w-full max-w-[100vw] overflow-hidden neu-base">
             {/* Left Sidebar */}
             <Suspense fallback={<div className="w-64" />}>
-                <LeftSidebar />
+                <LeftSidebar mode="both" />
             </Suspense>
 
             {/* Main scroll area: TopNav + Feed */}
@@ -398,7 +403,7 @@ function XFeedInner() {
 
                 <div className="flex flex-col pb-[var(--app-scroll-bottom)]">
                         {/* Ambient sky hero — sits behind transparent TopNav */}
-                        <div className="-mt-[60px] feed-hero-stack">
+                        <div className="-mt-[var(--app-topnav-height)] feed-hero-stack">
                           <FeedSkyHero />
                           <FeedTabs
                               activeTab={feedTab}
@@ -637,7 +642,11 @@ function XFeedInner() {
             {/* Create Post Modal */}
             <CreatePostModal
                 isOpen={isCreatePostOpen}
-                onClose={() => setIsCreatePostOpen(false)}
+                onClose={() => {
+                    setIsCreatePostOpen(false);
+                    setCreatePostFocusMedia(false);
+                }}
+                focusMediaOnOpen={createPostFocusMedia}
                 onSuccess={() => {
                     queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
                     queryClient.invalidateQueries({ queryKey: ['gossip'] });

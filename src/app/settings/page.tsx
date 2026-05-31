@@ -498,21 +498,8 @@ export default function SettingsPage() {
             <TopNav />
             <div className="flex flex-1 overflow-hidden">
                 <LeftSidebar />
-                <div className="flex-1 overflow-y-auto bg-soft-bg pb-24">
-            {/* Header */}
-            <div className="bg-white/60 dark:bg-surface-dark/60 backdrop-blur-xl sticky top-0 z-50 border-b border-charcoal/5">
-                <div className="max-w-md mx-auto px-6 py-4 flex items-center gap-4">
-                    <button 
-                        onClick={() => router.back()}
-                        className="w-10 h-10 rounded-xl neumorphic flex items-center justify-center"
-                    >
-                        <i className="bi bi-arrow-left text-charcoal"></i>
-                    </button>
-                    <h1 className="text-xl font-bold text-charcoal">Settings</h1>
-                </div>
-            </div>
-
-            <div className="max-w-md mx-auto px-6 py-6">
+                <div className="flex-1 overflow-y-auto bg-soft-bg pb-24 pt-4">
+            <div className="max-w-md mx-auto px-6 py-2">
                 {!emailVerified && user?.email && (
                     <EmailVerificationCard
                         email={user.email}

@@ -10,6 +10,8 @@ import TextSizeApplier from "@/components/TextSizeApplier";
 import { ThemeSync } from "@/components/theme/ThemeSync";
 import { SYSTEM_THEME_BOOT_SCRIPT } from "@/lib/systemTheme";
 import { BRAND_NAME } from "@/lib/brand";
+import AutoTopNav from "@/components/navigation/AutoTopNav";
+import AutoLeftSidebar from "@/components/navigation/AutoLeftSidebar";
 
 const BRAND_TITLE = `${BRAND_NAME} — Your Huud Operating System`;
 
@@ -61,10 +63,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0d1a0f' },
-  ],
+  themeColor: '#ffffff',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
@@ -108,6 +107,8 @@ export default function RootLayout({
           <TextSizeApplier />
           <DailyCheckInModal />
           <div id="main-content" className="app-shell">
+            <AutoTopNav />
+            <AutoLeftSidebar />
             {children}
           </div>
         </Providers>

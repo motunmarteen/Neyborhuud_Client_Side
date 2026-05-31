@@ -18,11 +18,11 @@ function RankDisplay({ rank }: { rank: number }) {
 }
 
 const LEVEL_COLORS = [
-  "bg-brand-black text-[var(--neu-text-muted)]",     // 1–4
-  "bg-primary/20 text-primary", // 5–9
-  "bg-brand-blue/20 text-brand-blue",   // 10–19
-  "bg-brand-blue/20 text-brand-blue", // 20–29
-  "bg-primary/20 text-primary400", // 30+
+  "bg-slate-100 text-slate-600",
+  "bg-primary/15 text-[#006F35]",
+  "bg-brand-blue/10 text-brand-blue",
+  "bg-brand-blue/15 text-brand-blue",
+  "bg-amber-50 text-amber-800",
 ];
 function levelColor(level: number) {
   if (level >= 30) return LEVEL_COLORS[4];
@@ -42,17 +42,15 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
     <div
       className={`flex items-center gap-3 py-3 px-4 rounded-xl transition-colors ${
         isMe
-          ? "bg-brand-blue/10 border border-brand-blue/30"
-          : "hover:bg-brand-black/50"
+          ? "bg-brand-blue/5 border border-brand-blue/20"
+          : "hover:bg-slate-50"
       }`}
     >
-      {/* Rank */}
       <div className="w-8 flex justify-center shrink-0">
         <RankDisplay rank={entry.rank} />
       </div>
 
-      {/* Avatar */}
-      <div className="w-9 h-9 rounded-full bg-brand-black overflow-hidden shrink-0 flex items-center justify-center text-sm font-bold text-white">
+      <div className="w-9 h-9 rounded-full bg-brand-surface overflow-hidden shrink-0 flex items-center justify-center text-sm font-bold text-slate-700 border border-gray-100">
         {(entry.user?.avatarUrl ?? entry.user?.profilePicture) ? (
           <img src={entry.user.avatarUrl ?? entry.user.profilePicture} alt={displayName} className="w-full h-full object-cover" />
         ) : (
@@ -60,11 +58,10 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
         )}
       </div>
 
-      {/* Name + handle */}
       <div className="flex-1 min-w-0">
         <Link
           href={`/profile/${entry.user?.username ?? ""}`}
-          className="text-sm font-semibold text-white hover:text-brand-blue transition-colors truncate block"
+          className="text-sm font-semibold text-slate-900 hover:text-brand-blue transition-colors truncate block"
         >
           {displayName}
           {isMe && <span className="ml-1 text-xs text-brand-blue">(You)</span>}
@@ -72,12 +69,11 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
         <p className="text-xs text-[var(--neu-text-muted)] truncate">@{entry.user?.username ?? "—"}</p>
       </div>
 
-      {/* Points + level */}
       <div className="flex items-center gap-2 shrink-0">
         <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${levelColor(entry.level)}`}>
           Lv {entry.level}
         </span>
-        <span className="text-sm font-bold text-white tabular-nums">
+        <span className="text-sm font-bold text-slate-900 tabular-nums">
           {(entry.points ?? 0).toLocaleString()}
         </span>
         <span className="text-xs text-[var(--neu-text-muted)]">pts</span>
