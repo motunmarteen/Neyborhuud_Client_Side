@@ -18,6 +18,7 @@ import TopNav from '@/components/navigation/TopNav';
 import { searchService } from '@/services/search.service';
 import { newsService } from '@/services/news.service';
 import type { RssArticle } from '@/types/incident';
+import { LocalHuudMenu } from '@/components/navigation/LocalHuudMenu';
 
 // ── Explore Tabs ──────────────────────────────────────────────
 const EXPLORE_TABS = [
@@ -40,18 +41,6 @@ interface NewsArticle {
   source: string;
   publishedAt: string;
 }
-
-// ── Browse by Type grid ───────────────────────────────────────
-const BROWSE_TYPES = [
-  { icon: 'campaign', label: 'FYI Bulletins', href: '/fyi' },
-  { icon: 'help', label: 'Help Requests', href: '/help-request' },
-  { icon: 'work', label: 'Jobs', href: '/jobs' },
-  { icon: 'event', label: 'Events', href: '/events' },
-  { icon: 'shopping_bag', label: 'Marketplace', href: '/marketplace' },
-  { icon: 'handyman', label: 'Services', href: '/services' },
-  { icon: 'report', label: 'Incident Reports', href: '/incident-reports' },
-  { icon: 'add_alert', label: 'Community Alerts', href: '/community-emergency' },
-];
 
 // ── Search result tabs ────────────────────────────────────────
 const SEARCH_TABS = [
@@ -186,10 +175,6 @@ function ExplorePageInner() {
     const clean = topic.startsWith('#') ? topic.slice(1) : topic;
     setQuery(clean);
     saveSearchHistory(clean);
-  };
-
-  const handleBrowseType = (href: string) => {
-    router.push(href);
   };
 
   const handleBack = () => {
@@ -403,20 +388,9 @@ function ExplorePageInner() {
         ) : (
           /* ═══ Explore Content (no search query) ═══ */
           <div className="max-w-[680px] mx-auto">
-            {/* Browse by Type — always at top */}
+            {/* Local Huud — community utilities dropdown */}
             <div className="px-4 pt-4 pb-2">
-              <div className="grid grid-cols-2 gap-2.5">
-                {BROWSE_TYPES.map((item) => (
-                  <button
-                    key={item.href}
-                    onClick={() => handleBrowseType(item.href)}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-2xl mod-chip transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
-                  >
-                    <span className="material-symbols-outlined text-xl text-primary">{item.icon}</span>
-                    <span className="text-sm font-medium" style={{ color: 'var(--neu-text)' }}>{item.label}</span>
-                  </button>
-                ))}
-              </div>
+              <LocalHuudMenu variant="panel" defaultOpen />
             </div>
 
             {/* Divider */}

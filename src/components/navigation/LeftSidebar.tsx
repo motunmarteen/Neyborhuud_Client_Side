@@ -1,14 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
+import { AppNavIcon } from '@/components/navigation/AppNavIcon';
 
 import { SidebarProfileLockup } from './SidebarProfileLockup';
 import { SidebarBuildingSilhouette } from './SidebarBuildingSilhouette';
 import { SidebarSkyHeaderPanel } from './SidebarSkyHeader';
+import { LocalHuudMenu } from './LocalHuudMenu';
 import { useSwipeBackDisabled } from '@/contexts/SwipeBackContext';
 
 const mainNav = [
@@ -17,17 +19,6 @@ const mainNav = [
   { icon: 'bookmark', label: 'Saved', href: '/saved' },
   { icon: 'newspaper', label: 'Local News', href: '/local-news' },
   { icon: 'military_tech', label: 'My Huud Score', href: '/gamification' },
-];
-
-const browseTypes = [
-  { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi', href: '/fyi' },
-  { icon: 'help', label: 'Help Requests', type: 'help_request', href: '/help-request' },
-  { icon: 'work', label: 'Jobs', type: 'job', href: '/jobs' },
-  { icon: 'event', label: 'Events', type: 'event', href: '/events' },
-  { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace', href: '/marketplace' },
-  { icon: 'handyman', label: 'Services', type: 'services', href: '/services' },
-  { icon: 'report', label: 'Incident Reports', type: 'incident', href: '/incident-reports' },
-  { icon: 'add_alert', label: 'Community Alerts', type: 'emergency', href: '/community-emergency' },
 ];
 
 type LeftSidebarOrigin = 'page' | 'global';
@@ -64,9 +55,7 @@ function SidebarLink({
 
 function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => void; onClose?: () => void; isDrawer?: boolean }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { user } = useAuth();
-  const activeType = pathname === '/feed' ? searchParams.get('type') : null;
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
@@ -82,7 +71,7 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
       <SidebarSkyHeaderPanel isDrawer={isDrawer}>
         <div className="left-sidebar__header-top">
           <Link href="/feed" onClick={onNavigate} className="left-sidebar__header-logo">
-            <NeyborHuudLogo layout="wordmark" size={isDrawer ? 'sm' : 'md'} tone="primary" />
+            <NeyborHuudLogo layout="wordmark" size="chrome" tone="primary" />
           </Link>
           <Link
             href="/safety"
@@ -90,7 +79,7 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
             className={`left-sidebar__sentinel-btn${isActive('/safety') ? ' left-sidebar__sentinel-btn--active' : ''}`}
             aria-label="Sentinel AI"
           >
-            <span className={`material-symbols-outlined${isActive('/safety') ? ' fill-1' : ''}`}>shield</span>
+            <AppNavIcon name="shield" active={isActive('/safety')} />
           </Link>
         </div>
 
@@ -118,26 +107,7 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
           </ul>
         </section>
 
-        <section className="left-sidebar__section">
-          <div className="left-sidebar__explore-grid">
-            {browseTypes.map((item) => {
-              const active = item.href ? pathname?.startsWith(item.href) : activeType === item.type;
-              return (
-                <Link
-                  key={item.type}
-                  href={item.href || `/feed?type=${item.type}`}
-                  onClick={onNavigate}
-                  className={`left-sidebar__explore-link${active ? ' left-sidebar__explore-link--active' : ''}`}
-                >
-                  <span className="left-sidebar__explore-icon">
-                    <span className={`material-symbols-outlined${active ? ' fill-1' : ''}`}>{item.icon}</span>
-                  </span>
-                  <span className="left-sidebar__explore-label">{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
+        <LocalHuudMenu variant="sidebar" onNavigate={onNavigate} />
 
         <section className="left-sidebar__section">
           <ul className="left-sidebar__nav">

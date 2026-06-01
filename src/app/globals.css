@@ -3456,8 +3456,19 @@ html.dark body {
   display: inline-flex;
   width: fit-content;
   flex-shrink: 0;
+  min-width: 0;
   text-decoration: none;
   filter: drop-shadow(0 1px 5px rgba(0, 0, 0, 0.35));
+}
+
+.left-sidebar__header-logo .brand-name,
+.left-sidebar__header-logo .brand-wordmark,
+.left-sidebar__header-logo .app-topnav__headline {
+  font-size: var(--app-topnav-logo-size);
+  font-weight: 800;
+  letter-spacing: var(--app-topnav-logo-tracking);
+  line-height: 1.15;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
 }
 
 .left-sidebar__sky-close {
@@ -3482,42 +3493,58 @@ html.dark body {
   background: rgba(0, 0, 0, 0.32);
 }
 
+/* Sentinel — same footprint as top nav actions (no circular chrome) */
 .left-sidebar__sentinel-btn {
   display: flex;
-  height: 2.25rem;
-  width: 2.25rem;
-  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(0, 0, 0, 0.22);
-  color: var(--sidebar-sky-text, #ffffff);
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #ffffff;
   text-decoration: none;
   cursor: pointer;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  transition: all 0.15s ease;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: color 160ms ease, opacity 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.left-sidebar__sentinel-btn .app-nav-icon-shell {
+  display: block;
+  width: var(--app-topnav-icon-size);
+  height: var(--app-topnav-icon-size);
+  flex-shrink: 0;
 }
 
 .left-sidebar__sentinel-btn:hover {
-  background: rgba(0, 0, 0, 0.35);
-  transform: scale(1.05);
+  color: #ffffff;
+  opacity: 0.88;
+  transform: none;
+  background: none;
 }
 
 .left-sidebar__sentinel-btn:active {
-  transform: scale(0.95);
+  opacity: 0.92;
+  transform: none;
 }
 
 .left-sidebar__sentinel-btn--active {
-  border-color: rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  opacity: 1;
+  border: 0;
+  background: none;
+  box-shadow: none;
 }
 
-.left-sidebar__sentinel-btn span {
-  font-size: 1.125rem;
-  line-height: 1;
+.left-sidebar__sentinel-btn--active .app-nav-icon__glyph {
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.45));
 }
 
 .left-sidebar__header-panel .left-sidebar__sky-profile {
@@ -3973,6 +4000,52 @@ html.dark body {
 
 .left-sidebar__explore-link--active .left-sidebar__explore-label {
   font-weight: 800;
+}
+
+/* Local Huud — nested nav (same rows as main sidebar / Huud Score) */
+.left-sidebar__section--local-huud {
+  margin-top: 0.125rem;
+}
+
+.left-sidebar__link-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  min-width: 0;
+}
+
+button.left-sidebar__link {
+  width: 100%;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+button.left-sidebar__link:focus-visible {
+  outline: 2px solid rgba(0, 111, 53, 0.35);
+  outline-offset: 2px;
+}
+
+.left-sidebar__subnav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.125rem 0 0.25rem;
+  padding: 0.125rem 0 0.125rem 0.625rem;
+  border-left: 2px solid rgba(0, 111, 53, 0.18);
+  list-style: none;
+}
+
+.dark .left-sidebar__subnav {
+  border-left-color: rgba(0, 212, 49, 0.22);
+}
+
+.mod-inset .left-sidebar__subnav {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+  padding-left: 0.75rem;
 }
 
 .left-sidebar__footer {
