@@ -298,7 +298,7 @@ function ExplorePageInner() {
       {/* ── Content Area ── */}
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
-        <div className="flex-1 overflow-y-auto pb-20">
+        <div data-app-scroll-root className="flex-1 overflow-y-auto pb-20">
         {isSearching ? (
           /* ═══ Search Results ═══ */
           <div className="max-w-[680px] mx-auto">

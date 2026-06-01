@@ -5,9 +5,15 @@ import { usePathname } from 'next/navigation';
 
 const SKIP_PATHS = new Set(['/feed', '/']);
 
+function shouldSkipTransition(pathname: string) {
+  if (SKIP_PATHS.has(pathname)) return true;
+  if (pathname === '/chat' || pathname.startsWith('/chat/')) return true;
+  return false;
+}
+
 export function PageTransition({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const skip = SKIP_PATHS.has(pathname);
+    const skip = shouldSkipTransition(pathname);
 
     if (skip) {
         return <>{children}</>;

@@ -7,6 +7,8 @@
  */
 
 import { ChatMessage } from '@/types/api';
+import { ChatExpandableText } from '@/components/chat/ChatExpandableText';
+import { ChatMessageTicks } from '@/components/chat/ChatMessageTicks';
 import { MessageReactions } from '@/components/chat/MessageReactions';
 
 function timeStr(dateStr: string | undefined): string {
@@ -16,21 +18,11 @@ function timeStr(dateStr: string | undefined): string {
   return dt.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
 }
 
-// ─── Status ticks ─────────────────────────────────────────────────────────────
-function Ticks({ status }: { status: ChatMessage['status'] }) {
-  return (
-    <span className="ml-1">
-      {status === 'read' || status === 'delivered' ? '✓✓' : '✓'}
-    </span>
-  );
-}
-
-// ─── Timestamp + ticks row ────────────────────────────────────────────────────
 function Meta({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
-    <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${mine ? 'text-brand-blue' : 'text-[var(--neu-text-muted)]'}`}>
+    <div className="chat-bubble__meta">
       <span>{timeStr(msg.createdAt)}</span>
-      {mine && <Ticks status={msg.status} />}
+      {mine ? <ChatMessageTicks status={msg.status} /> : null}
     </div>
   );
 }
@@ -233,34 +225,33 @@ function TextBubble({
   currentUserId?: string;
   onReactionsUpdate?: (reactions: ChatMessage['reactions']) => void;
 }) {
+  const bubbleClass = isPriority
+    ? 'chat-bubble chat-bubble--priority'
+    : mine
+      ? 'chat-bubble chat-bubble--out'
+      : 'chat-bubble chat-bubble--in';
+
   return (
-    <div className={`max-w-[70%] ${mine ? 'ml-auto' : ''}`}>
-      <div
-        className={`rounded-2xl px-4 py-2.5 ${
-          isPriority
-            ? 'border-2 border-red-600 bg-red-900/40'
-            : mine
-              ? 'bg-blue-700 text-white'
-              : 'bg-brand-black text-[var(--neu-text-muted)]'
-        }`}
-      >
-        {isPriority && (
-          <p className="mb-1 text-[10px] font-bold uppercase text-brand-red">🚨 Priority</p>
-        )}
+    <div className={bubbleClass}>
+      <div className="chat-bubble__body">
+        {isPriority ? (
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide opacity-90">Priority</p>
+        ) : null}
         {msg.isDeleted ? (
-          <p className="text-sm italic text-[var(--neu-text-muted)]">[deleted]</p>
+          <p className="italic opacity-70">Message deleted</p>
         ) : (
-          <p className="text-sm leading-relaxed">{msg.content}</p>
+          <ChatExpandableText text={msg.content ?? ''} />
         )}
         <Meta msg={msg} mine={mine} />
       </div>
-      {!msg.isDeleted && (
+      {!msg.isDeleted ? (
         <MessageReactions
           msg={msg}
+          mine={mine}
           currentUserId={currentUserId}
           onUpdated={onReactionsUpdate}
         />
-      )}
+      ) : null}
     </div>
   );
 }

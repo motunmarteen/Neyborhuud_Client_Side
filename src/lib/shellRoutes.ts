@@ -22,6 +22,7 @@ export const PAGE_OWNED_TOP_NAV_PREFIXES = [
   '/premium',
   '/fyi',
   '/info',
+  '/chat',
 ] as const;
 
 function normalizePath(pathname: string): string {

@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { ChatMessage, ChatMessageMeta, ChatMessageType } from '@/types/api';
 import VoiceRecorder from './VoiceRecorder';
@@ -463,73 +464,80 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
       {activeModal === 'voice'            && <VoiceRecorder    onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
 
       <div className="relative" ref={menuRef}>
-        {/* "+" button */}
         <button
           type="button"
           onClick={() => setOpen((s) => !s)}
           disabled={disabled}
           aria-label="Add attachment or context action"
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl font-bold transition-all duration-200 disabled:opacity-40 ${
-            open
-              ? 'rotate-45 bg-blue-600 text-white shadow-lg shadow-blue-900/50'
-              : 'bg-brand-black text-[var(--neu-text-muted)] hover:bg-brand-surface'
-          }`}
+          aria-expanded={open}
+          className={`chat-attach-trigger${open ? ' chat-attach-trigger--open' : ''}`}
         >
-          +
+          <span className="material-symbols-outlined text-[24px]">{open ? 'close' : 'add'}</span>
         </button>
 
-        {/* Action sheet */}
-        {open && (
-          <div className="absolute bottom-14 left-0 z-50 w-72 overflow-hidden rounded-2xl border border-black/[0.08] bg-brand-black shadow-2xl">
-
-            {/* MEDIA section */}
-            <div className="px-4 pt-4 pb-2">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--neu-text-muted)]">Media</p>
-              <div className="grid grid-cols-4 gap-2">
-                {MEDIA_ACTIONS.map((a) => (
-                  <button
-                    key={a.key}
-                    type="button"
-                    onClick={() => openFilePicker(a.key as keyof typeof ALLOWED_MIME, a.accept)}
-                    className="flex flex-col items-center gap-1 rounded-xl bg-brand-black p-3 text-center transition-colors hover:bg-brand-black"
-                  >
-                    <span className="text-2xl">{a.icon}</span>
-                    <span className="text-[10px] text-[var(--neu-text-muted)]">{a.label}</span>
-                  </button>
-                ))}
-                {/* Voice note */}
+        {open && typeof document !== 'undefined'
+          ? createPortal(
+              <div className="chat-attach-root" role="presentation">
                 <button
                   type="button"
-                  onClick={() => { setOpen(false); setActiveModal('voice'); }}
-                  className="flex flex-col items-center gap-1 rounded-xl bg-brand-black p-3 text-center transition-colors hover:bg-brand-black"
-                >
-                  <span className="text-2xl">🎤</span>
-                  <span className="text-[10px] text-[var(--neu-text-muted)]">Voice</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="mx-4 my-1 h-px bg-brand-black" />
-
-            {/* CONTEXT ACTIONS section */}
-            <div className="px-4 pt-2 pb-4">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--neu-text-muted)]">Context Actions</p>
-              <div className="grid grid-cols-4 gap-2">
-                {CONTEXT_ACTIONS.map((a) => (
-                  <button
-                    key={a.key}
-                    type="button"
-                    onClick={() => { setOpen(false); setActiveModal(a.key as ActiveModal); }}
-                    className="flex flex-col items-center gap-1 rounded-xl bg-brand-black p-3 text-center transition-colors hover:bg-brand-black"
-                  >
-                    <span className="text-2xl">{a.icon}</span>
-                    <span className="text-[10px] text-[var(--neu-text-muted)] leading-tight">{a.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+                  className="chat-attach-backdrop"
+                  aria-label="Close attachments"
+                  onClick={() => setOpen(false)}
+                />
+                <div className="chat-attach-sheet" role="dialog" aria-label="Attach or share">
+                  <div className="chat-attach-sheet__handle" aria-hidden />
+                  <section className="chat-attach-section">
+                    <p className="chat-attach-section__title">Media</p>
+                    <div className="chat-attach-grid">
+                      {MEDIA_ACTIONS.map((a) => (
+                        <button
+                          key={a.key}
+                          type="button"
+                          onClick={() => openFilePicker(a.key as keyof typeof ALLOWED_MIME, a.accept)}
+                          className="chat-attach-tile mod-inset"
+                        >
+                          <span className="text-2xl" aria-hidden>{a.icon}</span>
+                          <span className="chat-attach-tile__label">{a.label}</span>
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpen(false);
+                          setActiveModal('voice');
+                        }}
+                        className="chat-attach-tile mod-inset"
+                      >
+                        <span className="text-2xl" aria-hidden>🎤</span>
+                        <span className="chat-attach-tile__label">Voice</span>
+                      </button>
+                    </div>
+                  </section>
+                  <div className="mod-divider mx-4" />
+                  <section className="chat-attach-section">
+                    <p className="chat-attach-section__title">Huud context</p>
+                    <div className="chat-attach-grid">
+                      {CONTEXT_ACTIONS.map((a) => (
+                        <button
+                          key={a.key}
+                          type="button"
+                          onClick={() => {
+                            setOpen(false);
+                            setActiveModal(a.key as ActiveModal);
+                          }}
+                          className="chat-attach-tile mod-inset"
+                        >
+                          <span className="text-2xl" aria-hidden>{a.icon}</span>
+                          <span className="chat-attach-tile__label">{a.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+              </div>,
+              document.body,
+            )
+          : null}
       </div>
     </>
   );

@@ -45,7 +45,10 @@ export default function JobsPage() {
     <div className="relative flex h-screen w-full overflow-hidden neu-base">
       <LeftSidebar />
 
-      <main className="feed-scroll-main flex flex-col flex-1 overflow-y-auto scroll-smooth">
+      <main
+        data-app-scroll-root
+        className="feed-scroll-main flex flex-col flex-1 overflow-y-auto scroll-smooth"
+      >
         <TopNav />
 
         <div className="flex flex-col pb-20">

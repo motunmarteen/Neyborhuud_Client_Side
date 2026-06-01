@@ -6,6 +6,7 @@ export const BROWSE_SHELL_ROUTE_PREFIXES = [
   '/neighborhood',
   '/saved',
   '/communities',
+  '/chat',
 ] as const;
 
 export function routeUsesBrowseShell(pathname: string): boolean {

@@ -391,6 +391,7 @@ export default function FriendshipPage() {
 
       {/* Content */}
       <main
+        data-app-scroll-root={mainTab !== 'map' ? true : undefined}
         className={`flex-1 bg-white ${
           mainTab === 'map'
             ? 'relative min-h-0 overflow-hidden'

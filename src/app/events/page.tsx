@@ -69,7 +69,11 @@ export default function EventsPage() {
         <LeftSidebar />
       </Suspense>
 
-      <main ref={mainRef} className="flex flex-1 flex-col overflow-y-auto scroll-smooth md:snap-y md:snap-proximity">
+      <main
+        ref={mainRef}
+        data-app-scroll-root
+        className="flex flex-1 flex-col overflow-y-auto scroll-smooth md:snap-y md:snap-proximity"
+      >
         <TopNav />
 
         <div className="flex flex-col pb-20">

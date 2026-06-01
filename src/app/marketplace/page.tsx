@@ -105,7 +105,10 @@ function MarketplacePageInner() {
       <TopNav />
       <div className="relative flex flex-1 overflow-hidden">
         <LeftSidebar />
-        <main className="feed-scroll-main relative flex-1 overflow-y-auto overscroll-contain scroll-smooth pb-28">
+        <main
+          data-app-scroll-root
+          className="feed-scroll-main relative flex-1 overflow-y-auto overscroll-contain scroll-smooth pb-28"
+        >
           <header className="sticky top-0 z-20 border-b border-[var(--border-light)] bg-white/78 shadow-[0_8px_28px_rgba(0,111,53,0.08)] backdrop-blur-xl dark:border-[var(--border-dark)] dark:bg-[rgba(8,12,18,0.72)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
             <div className="mx-auto max-w-5xl px-3 pt-4 sm:px-4">
               <div className="flex items-start justify-between gap-3 pb-3">

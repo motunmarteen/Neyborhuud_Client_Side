@@ -152,7 +152,11 @@ export function SidebarSkyHeaderPanel({
             <SkyCloud x={55} y={2} scale={0.6} color={theme.cloudColor} speed={18} />
           </>
         )}
-        <SkyWeatherEffects theme={theme} isDark={sceneDark} size="compact" />
+        <SkyWeatherEffects
+          theme={{ ...theme, showRain: false, showSnow: false }}
+          isDark={sceneDark}
+          size="compact"
+        />
       </div>
 
       <div className={`left-sidebar__header-content${isDrawer ? ' left-sidebar__header-content--drawer' : ''}`}>

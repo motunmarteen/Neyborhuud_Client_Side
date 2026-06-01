@@ -35,7 +35,10 @@ export function AppBrowseLayout({
         <LeftSidebar mode="both" />
       </Suspense>
 
-      <main className="feed-scroll-main flex flex-1 flex-col overflow-y-auto scroll-smooth">
+      <main
+        data-app-scroll-root
+        className="feed-scroll-main flex flex-1 flex-col overflow-y-auto scroll-smooth"
+      >
         <TopNav />
 
         <div

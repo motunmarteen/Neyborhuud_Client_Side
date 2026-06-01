@@ -9,6 +9,10 @@ import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 
 import { SidebarProfileLockup } from './SidebarProfileLockup';
 import { SidebarBuildingSilhouette } from './SidebarBuildingSilhouette';
+import {
+  SidebarAtmosphereColumn,
+  useSidebarAtmosphereActive,
+} from './SidebarAtmosphereColumn';
 import { SidebarSkyHeaderPanel } from './SidebarSkyHeader';
 import { LocalHuudMenu } from './LocalHuudMenu';
 import { useSwipeBackDisabled } from '@/contexts/SwipeBackContext';
@@ -66,8 +70,13 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
     return pathname?.startsWith(href);
   };
 
+  const { active: atmosphereActive } = useSidebarAtmosphereActive();
+
   return (
-    <div className="left-sidebar__body">
+    <div
+      className={`left-sidebar__body${atmosphereActive ? ' left-sidebar__body--atmospheric' : ''}`}
+    >
+      <SidebarAtmosphereColumn />
       <SidebarSkyHeaderPanel isDrawer={isDrawer}>
         <div className="left-sidebar__header-top">
           <Link href="/feed" onClick={onNavigate} className="left-sidebar__header-logo">

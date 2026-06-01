@@ -377,7 +377,13 @@ function XFeedInner() {
             </Suspense>
 
             {/* Main scroll area: TopNav + Feed */}
-            <main ref={mainRef} className="feed-scroll-main flex flex-1 flex-col overflow-y-auto scroll-smooth md:snap-y md:snap-proximity" onTouchStart={feedSwipe.onTouchStart} onTouchEnd={feedSwipe.onTouchEnd}>
+            <main
+              ref={mainRef}
+              data-app-scroll-root
+              className="feed-scroll-main flex flex-1 flex-col overflow-y-auto scroll-smooth md:snap-y md:snap-proximity"
+              onTouchStart={feedSwipe.onTouchStart}
+              onTouchEnd={feedSwipe.onTouchEnd}
+            >
                 {/* Top Navigation — scrolls with content */}
                 <TopNav />
 

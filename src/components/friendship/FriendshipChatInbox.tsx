@@ -78,15 +78,9 @@ function timeAgo(dateStr?: string): string {
 
 function ChatListSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="divide-y divide-gray-100 animate-pulse bg-white">
+    <div className="flex flex-col gap-2 px-4 py-2 animate-pulse">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 px-4 py-3.5">
-          <div className="h-12 w-12 flex-shrink-0 rounded-full bg-slate-100" />
-          <div className="flex-1 space-y-2">
-            <div className="h-3.5 w-1/3 rounded-full bg-slate-100" />
-            <div className="h-3 w-1/2 rounded-full bg-slate-100" />
-          </div>
-        </div>
+        <div key={i} className="mod-card flex h-[4.5rem] items-center gap-3 rounded-2xl px-3" />
       ))}
     </div>
   );
@@ -95,16 +89,16 @@ function ChatListSkeleton({ count = 4 }: { count?: number }) {
 function ChatEmptyState({ filter }: { filter: InboxFilter }) {
   const isCommunities = filter === 'communities';
   return (
-    <div className="flex flex-col items-center justify-center bg-white px-8 py-16 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-gray-100 bg-slate-50">
-        <span className="material-symbols-outlined fill-1 text-[32px] text-[#00D431]">
+    <div className="flex flex-col items-center justify-center px-8 py-16 text-center">
+      <div className="mod-inset mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+        <span className="material-symbols-outlined text-[32px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
           {isCommunities ? 'groups' : 'chat'}
         </span>
       </div>
-      <h3 className="mb-1 text-sm font-bold text-slate-800">
+      <h3 className="mb-1 text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
         {isCommunities ? 'No community chats yet' : 'No conversations yet'}
       </h3>
-      <p className="max-w-xs text-xs leading-relaxed text-slate-500">
+      <p className="max-w-xs text-xs leading-relaxed text-[var(--neu-text-muted)]">
         {isCommunities
           ? 'Create or join a community to start a group chat, or tap Browse to discover hubs near you.'
           : 'Message a friend from your followers list to start chatting.'}
@@ -176,11 +170,11 @@ export function FriendshipChatInbox({
   }, [conversations, search, inboxFilter]);
 
   return (
-    <div className="flex flex-col bg-white">
+    <div className="flex flex-col">
       {!hideSearchBar && (
-        <div className="border-b border-gray-100 px-4 pb-3 pt-2">
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">
+        <div className="px-4 pb-3">
+          <div className="mod-inset relative rounded-2xl">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[var(--neu-text-muted)]">
               search
             </span>
             <input
@@ -188,7 +182,7 @@ export function FriendshipChatInbox({
               value={internalSearch}
               onChange={(e) => setInternalSearch(e.target.value)}
               placeholder="Search conversations…"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-800 placeholder-slate-400 transition-all focus:border-[#00D431] focus:outline-none focus:ring-1 focus:ring-[#00D431]"
+              className="w-full rounded-2xl border-0 bg-transparent py-2.5 pl-10 pr-3 text-sm text-[var(--neu-text)] placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
         </div>
@@ -199,7 +193,7 @@ export function FriendshipChatInbox({
       ) : filtered.length === 0 ? (
         <ChatEmptyState filter={inboxFilter} />
       ) : (
-        <div className="divide-y divide-gray-100 bg-white">
+        <div className="flex flex-col gap-2 px-4 pb-4">
           {filtered.map((c, index) => {
             const cid = getCid(c);
             if (!cid) return null;
@@ -212,34 +206,40 @@ export function FriendshipChatInbox({
               <Link
                 key={cid || `conv-${index}`}
                 href={`/chat/${cid}`}
-                className="flex items-center gap-3 border-b border-gray-100 px-4 py-3.5 transition-colors duration-150 hover:bg-slate-50"
+                className="mod-card mod-card-hover flex items-center gap-3 rounded-2xl p-3 no-underline transition-opacity"
               >
                 {url ? (
                   <img
                     src={url}
                     alt={displayName}
-                    className="h-12 w-12 rounded-full border border-slate-100 object-cover"
+                    className="neu-avatar h-12 w-12 shrink-0 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#00D431]/10 text-sm font-bold text-[#00D431]">
+                  <div className="mod-inset flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                     {getInitials(c)}
                   </div>
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="truncate text-sm font-semibold text-slate-800">{displayName}</p>
-                    {lastTime && <span className="text-xs text-slate-400">{timeAgo(lastTime)}</span>}
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+                      {displayName}
+                    </p>
+                    {lastTime ? (
+                      <span className="shrink-0 text-[10px] font-semibold text-[var(--neu-text-muted)]">
+                        {timeAgo(lastTime)}
+                      </span>
+                    ) : null}
                   </div>
-                  <div className="mt-1 flex items-center justify-between">
-                    <p className="max-w-[200px] truncate text-xs text-slate-500">
+                  <div className="mt-0.5 flex items-center justify-between gap-2">
+                    <p className="max-w-[200px] truncate text-xs text-[var(--neu-text-muted)]">
                       {lastMsg ? (lastMsg.isDeleted ? 'Message deleted' : lastMsg.content) : 'No messages yet'}
                     </p>
-                    {c.unreadCount > 0 && (
-                      <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#00D431] px-1 text-[10px] font-bold text-white">
+                    {c.unreadCount > 0 ? (
+                      <span className="flex h-5 min-w-[1.25rem] shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-white">
                         {c.unreadCount}
                       </span>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </Link>

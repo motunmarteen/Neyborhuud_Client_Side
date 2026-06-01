@@ -1,20 +1,32 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { ChatRoomLayout } from '@/components/chat/ChatRoomLayout';
+import { ChatThreadPlaceholder } from '@/components/chat/ChatThreadPlaceholder';
+import { isMineMessage } from '@/lib/chatMessage';
+import {
+  applyPeerDeliveredReceipt,
+  applyPeerReadReceipt,
+  enrichMessageReceipt,
+  enrichMessagesReceipts,
+  getOutgoingReadLabel,
+  resolvePeerUserId,
+} from '@/lib/chatReceipts';
+import { normalizeChatId } from '@/lib/chatMessage';
 import { useAuth } from '@/hooks/useAuth';
 import { chatService } from '@/services/chat.service';
 import { e2eeService } from '@/services/e2ee.service';
 import { ChatMessage, ChatMessageType, Conversation, MarketplaceOffer } from '@/types/api';
 import socketService from '@/lib/socket';
 import { toast } from 'sonner';
-import ChatActionMenu, { ActionResult } from '@/components/chat/ChatActionMenu';
 import ChatMessageCard from '@/components/chat/ChatMessageCard';
+import { ChatRoomHeader } from '@/components/chat/ChatRoomHeader';
+import { ChatComposer } from '@/components/chat/ChatComposer';
+import { convAvatarMeta, convDisplayName, convSubtitle } from '@/lib/chatDisplay';
+import type { ActionResult } from '@/components/chat/ChatActionMenu';
 import { CommunityChatBanner } from '@/components/communities/CommunityChatBanner';
 import { isCommunityChat } from '@/lib/chatPaths';
 import { useProductOffers, useAcceptOffer, useRejectOffer, useRespondToOffer, useProduct } from '@/hooks/useMarketplace';
@@ -34,17 +46,36 @@ function msgId(m: ChatMessage): string {
   return (m as any)._id ?? m.id ?? m.clientMessageId ?? '';
 }
 
-function groupByDate(messages: ChatMessage[]): { date: string; msgs: ChatMessage[] }[] {
+function formatChatDateLabel(dt: Date, useLocale: boolean): string {
+  if (!useLocale) {
+    return dt.toISOString().slice(0, 10);
+  }
+  const today = new Date();
+  const sameDay =
+    dt.getFullYear() === today.getFullYear() &&
+    dt.getMonth() === today.getMonth() &&
+    dt.getDate() === today.getDate();
+  if (sameDay) return 'Today';
+  return dt.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function groupByDate(
+  messages: ChatMessage[],
+  useLocaleDates: boolean,
+): { date: string; msgs: ChatMessage[] }[] {
   const groups: { date: string; msgs: ChatMessage[] }[] = [];
-  let curDate = '';
+  let curKey = '';
   for (const m of messages) {
     const dt = m.createdAt ? new Date(m.createdAt) : null;
-    const d = dt && !isNaN(dt.getTime())
-      ? dt.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })
-      : 'Today';
-    if (d !== curDate) {
-      curDate = d;
-      groups.push({ date: d, msgs: [] });
+    const key =
+      dt && !isNaN(dt.getTime()) ? dt.toISOString().slice(0, 10) : 'unknown';
+    const label =
+      dt && !isNaN(dt.getTime())
+        ? formatChatDateLabel(dt, useLocaleDates)
+        : 'Today';
+    if (key !== curKey) {
+      curKey = key;
+      groups.push({ date: label, msgs: [] });
     }
     groups[groups.length - 1].msgs.push(m);
   }
@@ -56,44 +87,6 @@ function timeStr(dateStr: string | undefined): string {
   const dt = new Date(dateStr);
   if (isNaN(dt.getTime())) return '';
   return dt.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
-}
-
-function convDisplayName(c: Conversation | undefined, currentUserId?: string): string {
-  if (!c) return 'Chat';
-  if (c.type === 'incident') return '🚨 Emergency Chat';
-  if (isCommunityChat(c)) return c.name || c.groupName || '🏘️ Community';
-  // Marketplace chats: lead with the product so users can tell threads apart
-  if (c.contextType === 'marketplace') {
-    const title = c.context?.productTitle;
-    if (title) return title;
-    if (c.contextLabel) return c.contextLabel;
-  }
-  // Try otherParticipant first
-  if (c.otherParticipant?.name) return c.otherParticipant.name;
-  if (c.otherParticipant?.username) return c.otherParticipant.username;
-  // Fall back to participants array
-  const participants: any[] = (c as any).participants ?? [];
-  const other = participants.find(
-    (p: any) => p && (p.id ?? p._id?.toString() ?? p.userId?.toString()) !== currentUserId,
-  );
-  if (other?.name) return other.name;
-  if (other?.username) return other.username;
-  return 'Direct Message';
-}
-
-function convSubtitle(c: Conversation | undefined): string {
-  if (!c) return '';
-  if (isCommunityChat(c)) {
-    return c.contextLabel ?? 'Community chat';
-  }
-  if (c.contextType === 'marketplace') {
-    if (c.context?.productPrice != null) {
-      const cur = c.context.productCurrency ?? 'NGN';
-      return `Marketplace • ${cur} ${c.context.productPrice.toLocaleString()}`;
-    }
-    return c.contextLabel ?? 'Marketplace';
-  }
-  return `${c.type} conversation`;
 }
 
 // ─── E2EE Key Bundle Panel ────────────────────────────────────────────────────
@@ -138,29 +131,33 @@ function KeyBundlePanel({ conversationId, onClose }: KeyBundlePanelProps) {
   };
 
   return (
-    <div className="shrink-0 border-b border-black/[0.08] bg-brand-black p-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-[var(--neu-text-muted)]">🔐 Encryption Keys</p>
-        <button onClick={onClose} className="text-xs text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)]">
+    <div className="chat-room__keys-panel">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+          <span className="material-symbols-outlined mr-1 align-middle text-[18px] text-primary">encrypted</span>
+          Encryption keys
+        </p>
+        <button type="button" onClick={onClose} className="mod-chip rounded-full px-3 py-1 text-xs font-semibold">
           Close
         </button>
       </div>
 
       {loading ? (
-        <p className="mt-2 text-xs text-[var(--neu-text-muted)]">Loading key bundle…</p>
+        <p className="mt-3 text-xs text-[var(--neu-text-muted)]">Loading key bundle…</p>
       ) : !bundle ? (
-        <p className="mt-2 text-xs text-brand-red">Failed to load keys.</p>
+        <p className="mt-3 text-xs text-brand-red">Failed to load keys.</p>
       ) : (
-        <div className="mt-2 flex flex-col gap-3">
+        <div className="mt-3 flex flex-col gap-3">
           {bundle.missingKeys.length > 0 && (
-            <div className="rounded-lg bg-primary950/40 p-2 text-xs text-primary">
-              ⚠️ {bundle.missingKeys.length} participant(s) have not registered an encryption key.
-              Messages may not be end-to-end encrypted.
+            <div className="mod-card rounded-xl p-3 text-xs text-primary">
+              {bundle.missingKeys.length} participant(s) have not registered a key yet. Messages may not be fully encrypted.
             </div>
           )}
           {Object.entries(bundle.bundle).map(([uid, info]) => (
-            <div key={uid} className="rounded-lg border border-black/[0.08] bg-brand-black p-3">
-              <p className="text-xs text-[var(--neu-text-muted)]">User: <span className="font-mono text-[var(--neu-text-muted)]">{uid}</span></p>
+            <div key={uid} className="mod-card rounded-xl p-3">
+              <p className="text-xs text-[var(--neu-text-muted)]">
+                User <span className="font-mono">{uid.slice(0, 12)}…</span>
+              </p>
               <p className="mt-1 break-all font-mono text-[10px] text-primary">
                 {info.publicKey.slice(0, 40)}…
               </p>
@@ -168,16 +165,17 @@ function KeyBundlePanel({ conversationId, onClose }: KeyBundlePanelProps) {
                 <input
                   type="text"
                   placeholder="Paste fingerprint to verify…"
-                  className="flex-1 rounded bg-brand-black px-2 py-1 text-[10px] text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)]"
+                  className="mod-inset flex-1 rounded-lg px-2 py-1.5 text-[10px] text-[var(--neu-text)] placeholder:text-[var(--neu-text-muted)]"
                   value={fingerprints[uid] ?? ''}
                   onChange={(e) =>
                     setFingerprints((prev) => ({ ...prev, [uid]: e.target.value.trim() }))
                   }
                 />
                 <button
+                  type="button"
                   disabled={verifying === uid}
                   onClick={() => handleVerify(uid)}
-                  className="rounded bg-blue-600 px-2 py-1 text-[10px] font-medium text-white hover:bg-brand-blue disabled:opacity-50"
+                  className="mod-chip mod-chip-active shrink-0 rounded-lg px-3 py-1.5 text-[10px] font-bold disabled:opacity-50"
                 >
                   {verifying === uid ? '…' : 'Verify'}
                 </button>
@@ -424,6 +422,11 @@ export default function ConversationPage() {
   const [sending, setSending] = useState(false);
   const [showKeyPanel, setShowKeyPanel] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [clientReady, setClientReady] = useState(false);
+
+  useEffect(() => {
+    setClientReady(true);
+  }, []);
 
   const lastMsgRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -465,6 +468,16 @@ export default function ConversationPage() {
   })();
   const viewerRole: OfferRole | null = resolveOfferRole(user?.id, resolvedSellerId);
 
+  const peerUserId = useMemo(
+    () => resolvePeerUserId(conv, user?.id),
+    [conv, user?.id],
+  );
+
+  const enrichOutgoing = useCallback(
+    (msg: ChatMessage) => enrichMessageReceipt(msg, user?.id, peerUserId),
+    [user?.id, peerUserId],
+  );
+
   // ── Load messages ────────────────────────────────────────────────────────
   const loadMessages = useCallback(async () => {
     if (!conversationId || isPlaceholder) return;
@@ -472,13 +485,13 @@ export default function ConversationPage() {
       const res = await chatService.getMessages(conversationId);
       const raw = res.data?.messages ?? [];
       // Backend already reverses to oldest-first before responding
-      setMessages([...raw]);
+      setMessages(enrichMessagesReceipts([...raw], user?.id, peerUserId));
     } catch {
       setMessages([]);
     } finally {
       setLoading(false);
     }
-  }, [conversationId, isPlaceholder]);
+  }, [conversationId, isPlaceholder, user?.id, peerUserId]);
 
   useEffect(() => {
     if (isPlaceholder) {
@@ -491,6 +504,16 @@ export default function ConversationPage() {
     chatService.markAsDelivered(conversationId).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMessages, isPlaceholder]);
+
+  // Re-derive ticks when conversation detail loads peer id after messages
+  useEffect(() => {
+    if (!user?.id) return;
+    setMessages((prev) => {
+      const next = enrichMessagesReceipts(prev, user.id, peerUserId);
+      const changed = next.some((m, i) => m.status !== prev[i]?.status);
+      return changed ? next : prev;
+    });
+  }, [peerUserId, user?.id]);
 
   // ── Auto-scroll ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -507,6 +530,14 @@ export default function ConversationPage() {
     // Backend emits socket events as { message: { ...chatData } } — unwrap it
     const extractMsg = (data: any): ChatMessage => data?.message ?? data;
 
+    const mergeIncoming = (msg: ChatMessage, prev: ChatMessage[], tempIdx: number) => {
+      const merged =
+        tempIdx !== -1
+          ? { ...msg, senderId: prev[tempIdx].senderId }
+          : msg;
+      return enrichOutgoing(merged);
+    };
+
     const onNew = (data: any) => {
       const msg = extractMsg(data);
       if (msg.conversationId !== conversationId) return;
@@ -520,11 +551,10 @@ export default function ConversationPage() {
         );
         if (tempIdx !== -1) {
           const next = [...prev];
-          // Preserve senderId as user's local id so 'mine' stays correct
-          next[tempIdx] = { ...msg, senderId: prev[tempIdx].senderId };
+          next[tempIdx] = mergeIncoming(msg, prev, tempIdx);
           return next;
         }
-        return [...prev, msg];
+        return [...prev, enrichOutgoing(msg)];
       });
       chatService.markAsRead(conversationId).catch(() => {});
     };
@@ -540,29 +570,30 @@ export default function ConversationPage() {
         );
         if (tempIdx !== -1) {
           const next = [...prev];
-          next[tempIdx] = { ...msg, senderId: prev[tempIdx].senderId };
+          next[tempIdx] = mergeIncoming(msg, prev, tempIdx);
           return next;
         }
-        return [...prev, msg];
+        return [...prev, enrichOutgoing(msg)];
       });
       chatService.markAsRead(conversationId).catch(() => {});
     };
 
     const onDelivered = (data: any) => {
       if (data.conversationId !== conversationId) return;
+      if (!user?.id) return;
+      const messageIds: string[] = data.messageIds ?? (data.messageId ? [data.messageId] : []);
       setMessages((prev) =>
-        prev.map((m) =>
-          msgId(m) === data.messageId ? { ...m, status: 'delivered' as const } : m,
-        ),
+        applyPeerDeliveredReceipt(prev, user.id, { messageIds }),
       );
     };
 
     const onRead = (data: any) => {
       if (data.conversationId !== conversationId) return;
+      if (!user?.id) return;
+      const reader = normalizeChatId(data.readByUserId);
+      if (reader && reader === normalizeChatId(user.id)) return;
       setMessages((prev) =>
-        prev.map((m) =>
-          msgId(m) === data.messageId ? { ...m, status: 'read' as const } : m,
-        ),
+        applyPeerReadReceipt(prev, user.id, data.messageId as string | undefined),
       );
     };
 
@@ -626,7 +657,7 @@ export default function ConversationPage() {
       socketService.off('offer:updated', onOfferUpdated);
       socketService.off('offer:new', onOfferNew);
     };
-  }, [conversationId, viewerRole, queryClient, user?.id, loadMessages]);
+  }, [conversationId, viewerRole, queryClient, user?.id, loadMessages, enrichOutgoing]);
 
   // ── Send ──────────────────────────────────────────────────────────────────
   const handleSend = async () => {
@@ -661,7 +692,17 @@ export default function ConversationPage() {
       if (sent && !(sent as any).duplicate) {
         // Override senderId with user?.id so the 'mine' comparison always works,
         // regardless of ObjectId vs string ID format differences between server and client.
-        setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...sent, id: sent.id || (sent as any)._id || tempId, senderId: user?.id ?? sent.senderId } : m)));
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === tempId
+              ? enrichOutgoing({
+                  ...sent,
+                  id: sent.id || (sent as any)._id || tempId,
+                  senderId: user?.id ?? sent.senderId,
+                })
+              : m,
+          ),
+        );
       } else if ((payload as any)?.duplicate) {
         // Server already has this message — keep optimistic until socket/reload syncs it
       } else {
@@ -747,7 +788,12 @@ export default function ConversationPage() {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === tempId
-              ? { ...sent, id: sent.id || (sent as any)._id || tempId, senderId: user?.id ?? sent.senderId, meta: optimistic.meta }
+              ? enrichOutgoing({
+                  ...sent,
+                  id: sent.id || (sent as any)._id || tempId,
+                  senderId: user?.id ?? sent.senderId,
+                  meta: optimistic.meta,
+                })
               : m,
           ),
         );
@@ -765,168 +811,149 @@ export default function ConversationPage() {
   };
 
   // ── Groups ────────────────────────────────────────────────────────────────
-  const groups = groupByDate(messages);
+  const groups = groupByDate(messages, clientReady);
+
+  if (!clientReady) {
+    return <ChatThreadPlaceholder />;
+  }
 
   const isIncident = conv?.type === 'incident';
   const displayName = convDisplayName(conv, user?.id);
+  const avatar = convAvatarMeta(conv);
+  const baseSubtitle = conv ? convSubtitle(conv) : '';
+  const readLabel = getOutgoingReadLabel(messages, user?.id, peerUserId);
+  const headerSubtitle =
+    conv?.type === 'direct' && readLabel
+      ? `${baseSubtitle} · ${readLabel}`
+      : baseSubtitle;
+
+  const banners = (
+    <>
+      {conv?.type === 'community' ? (
+        <CommunityChatBanner conversationId={conversationId} />
+      ) : null}
+
+      {conv?.contextType === 'marketplace' && conv.context ? (
+        <div className="chat-room__banner chat-room__banner--market mod-card rounded-none border-x-0 border-t-0">
+          {conv.context.productThumbnail ? (
+            <img
+              src={conv.context.productThumbnail}
+              alt={conv.context.productTitle ?? 'Product'}
+              className="neu-avatar h-11 w-11 shrink-0 rounded-xl object-cover"
+            />
+          ) : (
+            <div className="mod-inset flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg">
+              🛍️
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">Marketplace</p>
+            <p className="truncate text-sm font-bold text-[var(--neu-text)]">
+              {conv.context.productTitle ?? 'Product'}
+            </p>
+          </div>
+          {conv.context.productPrice != null ? (
+            <span className="mod-chip shrink-0 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums text-primary">
+              {conv.context.productCurrency ?? 'NGN'} {conv.context.productPrice.toLocaleString()}
+            </span>
+          ) : null}
+          {conv.context.productId ? (
+            <Link
+              href={`/marketplace?product=${encodeURIComponent(String(conv.context.productId))}`}
+              className="mod-chip mod-chip-active shrink-0 rounded-full px-3 py-1.5 text-xs font-bold no-underline"
+            >
+              View
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
+
+      {showKeyPanel ? (
+        <KeyBundlePanel conversationId={conversationId} onClose={() => setShowKeyPanel(false)} />
+      ) : null}
+
+      {conv?.contextType === 'marketplace' && conv.context?.productId && viewerRole === 'seller' ? (
+        <InlineOfferBar
+          productId={conv.context.productId}
+          currentUserId={user?.id}
+          onActionComplete={loadMessages}
+        />
+      ) : null}
+    </>
+  );
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <div className="flex flex-1 overflow-hidden pb-14">
-        <Suspense fallback={<div className="w-64" />}>
-          <LeftSidebar />
-        </Suspense>
-
-        {/* Chat main — flex-col layout */}
-        <main className="flex flex-1 flex-col overflow-hidden">
-
-          {/* Header */}
-          <div
-            className={`flex shrink-0 items-center justify-between border-b px-4 py-3 ${
-              isIncident
-                ? 'border-red-800/60 bg-red-950/20'
-                : 'border-black/[0.08] bg-brand-black'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push('/chat')}
-                className="text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)]"
-                aria-label="Back"
-              >
-                ←
-              </button>
-              <div>
-                <p className={`font-semibold ${isIncident ? 'text-brand-red' : 'text-[var(--neu-text-muted)]'}`}>
-                  {displayName}
-                </p>
-                {conv && (
-                  <p className="text-xs capitalize text-[var(--neu-text-muted)]">{convSubtitle(conv)}</p>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowKeyPanel((s) => !s)}
-              className={`rounded-full p-1.5 text-lg transition-colors ${
-                showKeyPanel ? 'bg-blue-600 text-white' : 'text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)]'
-              }`}
-              title="Encryption keys"
-            >
-              🔐
-            </button>
+    <ChatRoomLayout
+      header={
+        <ChatRoomHeader
+          displayName={displayName}
+          subtitle={headerSubtitle || undefined}
+          avatarUrl={avatar.url}
+          avatarInitials={avatar.initials}
+          isIncident={isIncident}
+          encrypted={conv?.type === 'direct'}
+          showKeyPanel={showKeyPanel}
+          onToggleKeys={() => setShowKeyPanel((s) => !s)}
+        />
+      }
+      banners={banners}
+      composer={
+        <ChatComposer
+          inputText={inputText}
+          onInputChange={setInputText}
+          onKeyDown={handleKeyDown}
+          onSend={handleSend}
+          sending={sending}
+          uploadProgress={uploadProgress}
+          textareaRef={textareaRef}
+          onAction={handleActionResult}
+        />
+      }
+    >
+      <div className="chat-room__messages">
+        {loading ? (
+          <div className="flex flex-col gap-2">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className={`chat-skeleton w-2/3 ${i % 2 === 0 ? 'self-start' : 'self-end ml-auto'}`}
+              />
+            ))}
           </div>
-
-          {conv?.type === 'community' ? (
-            <CommunityChatBanner conversationId={conversationId} />
-          ) : null}
-
-          {/* Marketplace context banner — shows the product this chat is about */}
-          {conv?.contextType === 'marketplace' && conv.context && (
-            <div className="flex shrink-0 items-center gap-3 border-b border-blue-900/40 bg-blue-950/20 px-4 py-2.5">
-              {conv.context.productThumbnail ? (
-                <img
-                  src={conv.context.productThumbnail}
-                  alt={conv.context.productTitle ?? 'Product'}
-                  className="h-10 w-10 shrink-0 rounded-md object-cover"
-                />
-              ) : (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-900/50 text-lg">
-                  🛍️
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-brand-blue">
-                  🛍️ Marketplace
-                </p>
-                <p className="truncate text-sm font-medium text-[var(--neu-text-muted)]">
-                  {conv.context.productTitle ?? 'Product'}
-                </p>
-              </div>
-              {conv.context.productPrice != null && (
-                <span className="shrink-0 rounded-full bg-blue-900/40 px-2.5 py-1 text-xs font-semibold text-blue-100">
-                  {conv.context.productCurrency ?? 'NGN'} {conv.context.productPrice.toLocaleString()}
-                </span>
-              )}
-              {conv.context.productId && (
-                <Link
-                  href={`/marketplace?product=${encodeURIComponent(String(conv.context.productId))}`}
-                  className="shrink-0 rounded-full border border-brand-blue/60 px-3 py-1 text-xs font-medium text-brand-blue hover:bg-blue-900/40"
-                >
-                  View
-                </Link>
-              )}
+        ) : messages.length === 0 ? (
+          <div className="chat-room__empty">
+            <div className="chat-room__empty-icon">
+              <span className="material-symbols-outlined text-[28px]">waving_hand</span>
             </div>
-          )}
+            <p className="text-sm font-bold text-[var(--neu-text)]">Start the conversation</p>
+            <p className="max-w-xs text-xs text-[var(--neu-text-muted)]">
+              Say hello — your messages stay on NeyborHuud with trust and safety built in.
+            </p>
+          </div>
+        ) : (
+          <div className="chat-thread-list">
+            {groups.map(({ date, msgs }) => (
+              <div key={date}>
+                <div className="chat-room__date">
+                  <div className="chat-room__date-line" aria-hidden />
+                  <span className="chat-room__date-pill">{date}</span>
+                  <div className="chat-room__date-line" aria-hidden />
+                </div>
 
-          {/* E2EE Key Panel (collapsible) */}
-          {showKeyPanel && (
-            <KeyBundlePanel
-              conversationId={conversationId}
-              onClose={() => setShowKeyPanel(false)}
-            />
-          )}
-
-          {/* Inline offer action bar — shown only to the seller when there's a pending offer.
-              viewerRole must be 'seller' (resolved from product.sellerId) to prevent the
-              buyer from seeing Accept/Counter/Decline buttons and getting a 403. */}
-          {conv?.contextType === 'marketplace' && conv.context?.productId && viewerRole === 'seller' && (
-            <InlineOfferBar
-              productId={conv.context.productId}
-              currentUserId={user?.id}
-              onActionComplete={loadMessages}
-            />
-          )}
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            {loading ? (
-              <div className="flex flex-col gap-2">
-                {[...Array(8)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-10 w-2/3 animate-pulse rounded-2xl bg-brand-black ${
-                      i % 2 === 0 ? 'self-start' : 'self-end'
-                    }`}
-                  />
-                ))}
-              </div>
-            ) : messages.length === 0 ? (
-              <div className="flex h-full items-center justify-center">
-                <p className="text-sm text-[var(--neu-text-muted)]">No messages yet. Say hello 👋</p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-1">
-                {groups.map(({ date, msgs }) => (
-                  <div key={date}>
-                    {/* Date divider */}
-                    <div className="my-4 flex items-center gap-3">
-                      <div className="h-px flex-1 bg-brand-black" />
-                      <span className="rounded-full bg-brand-black px-3 py-0.5 text-[11px] text-[var(--neu-text-muted)]">
-                        {date}
-                      </span>
-                      <div className="h-px flex-1 bg-brand-black" />
-                    </div>
-
-                    {msgs.map((msg, msgIdx) => {
-                      const mine = msg.senderId === user?.id;
+                {msgs.map((msg, msgIdx) => {
+                  const mine = isMineMessage(msg, user?.id);
                       const id = msgId(msg);
                       const isLastOverall =
                         msgIdx === msgs.length - 1 &&
                         groups[groups.length - 1]?.date === date;
 
-                      // System messages (e.g. "🛒 Inquiry about: iPhone 13 — ₦250,000")
-                      // Detected by sentinel senderId or type === 'system'
                       const isSystem =
                         msg.type === 'system' ||
                         msg.senderId === '000000000000000000000000';
 
                       if (isSystem) {
-                        // Resolve an OfferEvent from the message.
-                        // Priority 1: structured meta added by postSystemMessage (new messages)
-                        // Priority 2: legacy emoji-prefix parsing (old persisted messages)
                         const c = msg.content ?? '';
-                        const msgMeta = (msg as any).meta;
+                        const msgMeta = (msg as { meta?: Record<string, unknown> }).meta;
                         const structuredEvent =
                           msgMeta?.offerAction && msgMeta?.actorRole
                             ? {
@@ -937,15 +964,13 @@ export default function ConversationPage() {
                             : null;
                         const parsed = structuredEvent ?? parseLegacyOfferMessage(c);
                         let display = c;
-                        let pillClass = 'bg-blue-900/40 text-brand-blue';
+                        let pillClass = 'chat-room__system-pill mod-chip text-primary';
 
                         if (parsed) {
-                          pillClass = getOfferPillClass(parsed.action);
+                          pillClass = `chat-room__system-pill mod-chip ${getOfferPillClass(parsed.action)}`;
                           if (viewerRole) {
                             display = getOfferSystemMessage(parsed, viewerRole);
                           } else {
-                            // viewerRole not yet resolved (product still loading) —
-                            // strip the leading emoji so legacy format doesn't show raw.
                             display = c.replace(/^\s*(💰|✅|❌|↩️|↩\uFE0F?)\s*/u, '').trim();
                           }
                         }
@@ -954,11 +979,9 @@ export default function ConversationPage() {
                           <div
                             key={id}
                             ref={isLastOverall ? lastMsgRef : undefined}
-                            className="my-3 flex justify-center"
+                            className="my-3 flex justify-center px-2"
                           >
-                            <span className={`rounded-full px-4 py-1.5 text-[11px] ${pillClass}`}>
-                              {display}
-                            </span>
+                            <span className={pillClass}>{display}</span>
                           </div>
                         );
                       }
@@ -967,7 +990,7 @@ export default function ConversationPage() {
                         <div
                           key={id}
                           ref={isLastOverall ? lastMsgRef : undefined}
-                          className={`mb-1 flex ${mine ? 'justify-end' : 'justify-start'}`}
+                          className={`chat-row ${mine ? 'chat-row--out' : 'chat-row--in'}`}
                         >
                           <ChatMessageCard
                             msg={msg}
@@ -984,74 +1007,11 @@ export default function ConversationPage() {
                         </div>
                       );
                     })}
-                  </div>
-                ))}
               </div>
-            )}
-
+            ))}
           </div>
-
-          {/* Input */}
-          <div className="shrink-0 border-t border-black/[0.08] bg-brand-black px-4 py-3">
-            {/* Upload progress bar */}
-            {uploadProgress !== null && (
-              <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-brand-black">
-                <div
-                  className="h-full rounded-full bg-brand-blue transition-all"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            )}
-            <div className="flex items-end gap-2">
-              {/* ⮕ Action menu (+ button) */}
-              <ChatActionMenu disabled={sending} onAction={handleActionResult} />
-
-              <div className="relative flex-1">
-                <textarea
-                  ref={textareaRef}
-                  rows={1}
-                  value={inputText}
-                  maxLength={10000}
-                  onChange={(e) => {
-                    setInputText(e.target.value);
-                    e.target.style.height = 'auto';
-                    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
-                  }}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
-                  className="max-h-[200px] w-full resize-none rounded-xl border border-black/[0.08] bg-brand-black px-4 py-2.5 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:border-brand-blue focus:outline-none"
-                />
-                {inputText.length > 8000 && (
-                  <span
-                    className={`absolute bottom-2 right-3 text-[10px] ${
-                      inputText.length >= 10000 ? 'text-brand-red' : 'text-brand-red'
-                    }`}
-                  >
-                    {10000 - inputText.length} left
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={handleSend}
-                disabled={!inputText.trim() || sending}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-brand-blue disabled:opacity-50"
-                aria-label="Send message"
-              >
-                {sending ? (
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <span>↑</span>
-                )}
-              </button>
-            </div>
-          </div>
-        </main>
-
-        <RightSidebar />
+        )}
       </div>
-      <Suspense fallback={<div className="h-16" />}>
-        <BottomNav />
-      </Suspense>
-    </div>
+    </ChatRoomLayout>
   );
 }
