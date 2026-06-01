@@ -1,5 +1,7 @@
 // src/lib/reverseGeocode.ts
 
+import { fetchNominatimReverse } from '@/lib/nominatimClient';
+
 export interface LocationAddress {
     neighborhood?: string;
     lga?: string;
@@ -17,40 +19,14 @@ export interface LocationAddress {
  * Uses fallback chain: Backend API -> OpenStreetMap -> Google Maps (if configured)
  */
 export async function reverseGeocode(lat: number, lng: number): Promise<LocationAddress | null> {
-    console.log('🗺️ Starting reverse geocoding for:', { lat, lng });
-
-    // Try backend API first
     try {
         const backendResult = await reverseGeocodeBackend(lat, lng);
-        if (backendResult) {
-            console.log('✅ Backend geocoding successful:', backendResult);
-            return backendResult;
-        }
-    } catch (error) {
-        console.warn('⚠️ Backend geocoding failed, trying fallback...', error);
+        if (backendResult) return backendResult;
+    } catch {
+        // Backend unavailable — try OSM proxy below
     }
 
-    // Fallback to OpenStreetMap
-    try {
-        const osmResult = await reverseGeocodeOSM(lat, lng);
-        if (osmResult) {
-            console.log('✅ OpenStreetMap geocoding successful:', osmResult);
-            return osmResult;
-        }
-    } catch (error) {
-        console.error('❌ OpenStreetMap geocoding failed:', error);
-    }
-
-    // Could add Google Maps fallback here if API key is available
-    // try {
-    //     const googleResult = await reverseGeocodeGoogle(lat, lng);
-    //     if (googleResult) return googleResult;
-    // } catch (error) {
-    //     console.error('Google Maps geocoding failed:', error);
-    // }
-
-    console.error('❌ All geocoding methods failed');
-    return null;
+    return reverseGeocodeOSM(lat, lng);
 }
 
 /**
@@ -162,44 +138,17 @@ async function reverseGeocodeBackend(lat: number, lng: number): Promise<Location
  * Rate limit: 1 request/second
  */
 async function reverseGeocodeOSM(lat: number, lng: number): Promise<LocationAddress | null> {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
-
-    const response = await fetch(url, {
-        headers: {
-            'User-Agent': 'NeyborHuud-PWA/1.0' // Required by Nominatim
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error(`OpenStreetMap API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.address) {
-        return null;
-    }
+    const data = await fetchNominatimReverse(lat, lng);
+    if (!data?.address) return null;
 
     const addr = data.address;
-
-    // Extract Nigerian location structure
-    const neighborhood = addr.suburb || addr.neighbourhood || addr.village || addr.hamlet || addr.residential;
+    const neighborhood =
+        addr.suburb || addr.neighbourhood || addr.village || addr.hamlet || addr.residential;
     const lga = addr.county || addr.municipality || addr.local_government || addr.state_district;
     const state = addr.state;
     const country = addr.country;
-
-    // Build formatted address
     const parts = [neighborhood, lga, state].filter(Boolean);
-    const formatted = parts.join(', ');
-
-    console.log('🗺️ OpenStreetMap address data:', {
-        neighborhood,
-        lga,
-        state,
-        country,
-        formatted,
-        raw: addr
-    });
+    const formatted = parts.length > 0 ? parts.join(', ') : data.display_name;
 
     return {
         neighborhood,
@@ -207,7 +156,7 @@ async function reverseGeocodeOSM(lat: number, lng: number): Promise<LocationAddr
         state,
         country,
         formatted,
-        source: 'osm'
+        source: 'osm',
     };
 }
 

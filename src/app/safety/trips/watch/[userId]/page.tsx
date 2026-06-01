@@ -1,11 +1,8 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
+import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
 import { tripService, type Trip } from '@/services/trip.service';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -256,42 +253,20 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
 
 function GuardianTripViewPageInner({ userId }: { userId: string }) {
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <Suspense fallback={<div className="w-64" />}>
-          <LeftSidebar />
-        </Suspense>
-        <main className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="mx-auto flex w-full max-w-[680px] flex-col gap-4 pb-24">
-            <div
-              className="neu-card-sm rounded-2xl p-4 flex items-center justify-between gap-3"
-              style={{ backgroundImage: "url('/doodle-pattern.svg?v=2')", backgroundRepeat: 'repeat', backgroundSize: '360px 360px' }}
-            >
-              <div>
-                <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>Guardian Trip View</h1>
-                <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
-                  Live monitoring of a protégé&apos;s active trip.
-                </p>
-              </div>
-              <Link
-                href="/safety"
-                className="px-3 py-2 rounded-xl mod-chip text-xs font-medium"
-                style={{ color: 'var(--neu-text-muted)' }}
-              >
-                ← Safety
-              </Link>
-            </div>
-
-            <GuardianTripViewInner userId={userId} />
-          </div>
-        </main>
-        <RightSidebar />
-      </div>
-      <Suspense fallback={<div className="h-16" />}>
-        <BottomNav />
-      </Suspense>
-    </div>
+    <SentinelSubpageLayout
+      pageTitle="Guardian trip view"
+      pageSubtitle="Live progress, check-ins, and escalation for someone you protect."
+      icon="directions_walk"
+      iconAccent="blue"
+      backFallback={{ href: '/safety/trips', label: 'Safe trips' }}
+    >
+      <SentinelHowItWorks>
+        When a protégé starts a safe trip, this view refreshes every minute with route progress,
+        missed check-ins, and auto-SOS status. Contact them immediately if escalation or SOS
+        appears.
+      </SentinelHowItWorks>
+      <GuardianTripViewInner userId={userId} />
+    </SentinelSubpageLayout>
   );
 }
 

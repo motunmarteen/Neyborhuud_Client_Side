@@ -42,7 +42,7 @@ export function AppBrowseLayout({
         <TopNav />
 
         <div
-          className={`mx-auto flex w-full ${widthClass} flex-col gap-4 px-4 pt-3 pb-[var(--app-scroll-bottom)] ${className}`.trim()}
+          className={`mx-auto flex w-full min-w-0 max-w-full ${widthClass} flex-col gap-4 overflow-x-clip px-4 pt-3 pb-[var(--app-scroll-bottom)] ${className}`.trim()}
         >
           {(subtitle || header) && (
             <div className="browse-toolbar">

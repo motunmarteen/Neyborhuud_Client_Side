@@ -14,6 +14,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { extractTrackingSession, extractTrackingSummary } from '@/lib/liveTrackingApi';
+import { extractApiError, resolveSafetyCoords } from '@/lib/safetyLocation';
 import {
   kidnappingTrackingService,
   type KidnappingTrackingSession,
@@ -153,9 +155,11 @@ export interface UseKidnappingTrackingReturn extends KidnappingTrackingState {
     sosEventId?: string;
     intervalSeconds?: number;
   }) => Promise<void>;
-  stopTracking: () => Promise<void>;
+  stopTracking: () => Promise<{ ok: boolean; error?: string }>;
   flushOfflineQueue: () => Promise<void>;
-  refreshSummary: () => Promise<void>;
+  refreshSummary: () => Promise<{ ok: boolean; error?: string }>;
+  stopping: boolean;
+  summaryLoading: boolean;
 }
 
 export function useKidnappingTracking(
@@ -174,6 +178,8 @@ export function useKidnappingTracking(
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionRef = useRef<KidnappingTrackingSession | null>(externalSession ?? null);
   const isMountedRef = useRef(true);
+  const [stopping, setStopping] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
 
   // Keep sessionRef in sync with state
   useEffect(() => {
@@ -283,11 +289,11 @@ export function useKidnappingTracking(
     let source: LocationSource = 'gps';
 
     try {
-      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
-          timeout: 8000,
-          maximumAge: 5000,
+          timeout: 15_000,
+          maximumAge: 30_000,
         });
       });
 
@@ -435,24 +441,13 @@ export function useKidnappingTracking(
         let session: KidnappingTrackingSession | null = null;
         try {
           const res = await kidnappingTrackingService.getActiveSession();
-          session = res.data?.session ?? null;
-        } catch {}
+          session = extractTrackingSession(res);
+        } catch {
+          /* no active session */
+        }
 
         if (!session) {
-          // Get current GPS position for start location
-          let startLat: number | undefined;
-          let startLng: number | undefined;
-          try {
-            const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 8000,
-              });
-            });
-            startLat = pos.coords.latitude;
-            startLng = pos.coords.longitude;
-          } catch {}
-
+          const coords = await resolveSafetyCoords(null);
           const battery = await getBatteryInfo();
           const networkType = getNetworkType();
 
@@ -460,16 +455,16 @@ export function useKidnappingTracking(
             emergencyType: opts.emergencyType || 'kidnapping',
             emergencyId: opts.emergencyId,
             sosEventId: opts.sosEventId,
-            latitude: startLat,
-            longitude: startLng,
+            latitude: coords?.latitude,
+            longitude: coords?.longitude,
             intervalSeconds: opts.intervalSeconds,
             deviceInfo: {
               batteryLevel: battery.level,
               networkType,
             },
           });
-          if (!startRes.data) throw new Error('Failed to start session');
-          session = startRes.data.session;
+          session = extractTrackingSession(startRes);
+          if (!session) throw new Error('Failed to start tracking session');
         }
 
         sessionRef.current = session;
@@ -482,13 +477,14 @@ export function useKidnappingTracking(
         }
 
         startInterval(session);
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (isMountedRef.current) {
           setState((prev) => ({
             ...prev,
-            error: err?.message || 'Failed to start tracking',
+            error: extractApiError(err, 'Failed to start tracking'),
           }));
         }
+        throw err;
       }
     },
     [startInterval],
@@ -496,35 +492,94 @@ export function useKidnappingTracking(
 
   // ─── Stop tracking ────────────────────────────────────────────────────────
 
-  const stopTracking = useCallback(async () => {
+  const stopTracking = useCallback(async (): Promise<{ ok: boolean; error?: string }> => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
 
     const session = sessionRef.current;
-    if (session) {
-      try {
-        await kidnappingTrackingService.stopSession(session._id);
-      } catch {}
+    if (!session) {
+      if (isMountedRef.current) {
+        setState((prev) => ({ ...prev, isTracking: false, session: null, error: null }));
+      }
+      sessionRef.current = null;
+      return { ok: true };
     }
 
-    if (isMountedRef.current) {
-      setState((prev) => ({ ...prev, isTracking: false, session: null }));
+    setStopping(true);
+    const resumeOnFailure = () => {
+      if (sessionRef.current?.status === 'active') {
+        startInterval(sessionRef.current);
+      }
+    };
+
+    try {
+      const res = await kidnappingTrackingService.stopSession(session._id);
+      if (!res.success) {
+        const message =
+          (typeof res.message === 'string' && res.message) || 'Server could not end the session';
+        if (isMountedRef.current) {
+          setState((prev) => ({ ...prev, error: message }));
+        }
+        resumeOnFailure();
+        return { ok: false, error: message };
+      }
+
+      const stopped = extractTrackingSession(res);
+      sessionRef.current = null;
+      if (isMountedRef.current) {
+        setState((prev) => ({
+          ...prev,
+          isTracking: false,
+          session: stopped?.status === 'active' ? null : stopped ?? null,
+          error: null,
+        }));
+      }
+      return { ok: true };
+    } catch (err: unknown) {
+      const message = extractApiError(err, 'Failed to stop tracking');
+      if (isMountedRef.current) {
+        setState((prev) => ({ ...prev, error: message }));
+      }
+      resumeOnFailure();
+      return { ok: false, error: message };
+    } finally {
+      if (isMountedRef.current) setStopping(false);
     }
-  }, []);
+  }, [startInterval]);
 
   // ─── Refresh summary ──────────────────────────────────────────────────────
 
-  const refreshSummary = useCallback(async () => {
+  const refreshSummary = useCallback(async (): Promise<{ ok: boolean; error?: string }> => {
     const session = sessionRef.current;
-    if (!session) return;
+    if (!session) return { ok: false, error: 'No active session' };
+
+    setSummaryLoading(true);
     try {
       const summaryRes = await kidnappingTrackingService.getTrackingSummary(session._id);
-      if (isMountedRef.current && summaryRes.data) {
-        setState((prev) => ({ ...prev, summary: summaryRes.data!.summary }));
+      const summary = extractTrackingSummary(summaryRes);
+      if (summary && isMountedRef.current) {
+        setState((prev) => ({ ...prev, summary, error: null }));
+        return { ok: true };
       }
-    } catch {}
+
+      const message =
+        (typeof summaryRes.message === 'string' && summaryRes.message) ||
+        'Summary not available from server yet';
+      if (isMountedRef.current) {
+        setState((prev) => ({ ...prev, error: message }));
+      }
+      return { ok: false, error: message };
+    } catch (err: unknown) {
+      const message = extractApiError(err, 'Failed to load session summary');
+      if (isMountedRef.current) {
+        setState((prev) => ({ ...prev, error: message }));
+      }
+      return { ok: false, error: message };
+    } finally {
+      if (isMountedRef.current) setSummaryLoading(false);
+    }
   }, []);
 
   // Auto-resume if externalSession is provided and active
@@ -543,5 +598,7 @@ export function useKidnappingTracking(
     stopTracking,
     flushOfflineQueue,
     refreshSummary,
+    stopping,
+    summaryLoading,
   };
 }

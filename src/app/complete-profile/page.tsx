@@ -14,6 +14,7 @@ import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthSheetStageHeader } from '@/components/auth/AuthSheetStageHeader';
 import { useMyGamificationStats } from '@/hooks/useGamification';
+import { resolveUserPhone } from '@/lib/userProfileFields';
 
 const TOKEN_KEY = 'neyborhuud_access_token';
 
@@ -46,7 +47,8 @@ export default function CompleteProfilePage() {
     });
 
     const isPhoneValid = /^(?:\+234|0)[789][01]\d{8}$/.test(formData.phone);
-    const isFormValid = formData.firstName && formData.lastName;
+    const isFormValid =
+        Boolean(formData.firstName.trim() && formData.lastName.trim() && isPhoneValid);
     const displayName =
         formData.firstName && formData.lastName
             ? `${formData.firstName} ${formData.lastName}`
@@ -79,9 +81,9 @@ export default function CompleteProfilePage() {
                 }
 
                 setFormData((prev) => ({
-                    firstName: user.firstName || prev.firstName,
-                    lastName: user.lastName || prev.lastName,
-                    phone: user.phoneNumber || user.phone || prev.phone,
+                    firstName: user.firstName || user.first_name || prev.firstName,
+                    lastName: user.lastName || user.last_name || prev.lastName,
+                    phone: resolveUserPhone(user) || prev.phone,
                     gender: user.gender || prev.gender,
                     dob: user.dateOfBirth?.slice(0, 10) || prev.dob,
                 }));
@@ -327,14 +329,20 @@ export default function CompleteProfilePage() {
                     </div>
 
                     <PremiumInput
-                        label="Phone (Nigerian)"
+                        label="Phone (Nigerian) — required for SOS & live tracking"
                         type="tel"
                         icon="bi-telephone"
                         placeholder="08012345678"
                         className="py-0.5"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        error={formData.phone && !isPhoneValid ? 'Invalid format' : undefined}
+                        error={
+                            formData.phone && !isPhoneValid
+                                ? 'Use 080… or +234… (required for live tracking)'
+                                : !formData.phone.trim()
+                                  ? 'Required for safety features'
+                                  : undefined
+                        }
                     />
 
                     <div className="flex flex-col gap-1.5">

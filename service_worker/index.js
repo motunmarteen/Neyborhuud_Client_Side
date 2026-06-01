@@ -24,8 +24,11 @@ function resolveUrl(data) {
   switch (data.type) {
     case "sos_triggered":
     case "sos_escalated":
+      return data.watchUrl || data.sosEventId
+        ? "/safety/incident/" + data.sosEventId
+        : "/sos";
     case "sos_resolved":
-      return data.watchUrl || "/safety";
+      return data.watchUrl || "/sos?tab=history";
     case "trip_alert":
     case "trip_started":
     case "trip_overdue":

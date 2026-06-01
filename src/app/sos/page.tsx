@@ -1,634 +1,127 @@
 'use client';
 
 /**
- * /sos — Dedicated SOS command center.
+ * /sos — SOS command center (Huud Score design template).
  *
- * This page is the action surface for emergency response. Distinct from
- * `/safety` (the discovery hub of safety features), this page is laser-
- * focused on what to do when something is wrong RIGHT NOW.
- *
- * Sections:
- *   1. Big armed SOS button — visibility mode, countdown, emergency services
- *   2. Active SOS panel — cancel / resolve / view incident
- *   3. Drill mode — practice without alerting anyone (frontend-only)
- *   4. Quick safety actions — Trusted Contacts, Panic PIN, Trips, Fake Call
- *   5. Recent SOS history (last 5)
- *   6. Guardians' status feed
- *
- * Interaction model wired by `BottomNav`:
- *   • Tap SOS in BottomNav    →  navigates here (/sos)
- *   • Long-press SOS in BottomNav  →  fires silent SOS instantly
+ * Tabs: Now · Prepare · History · Circle
+ * Long-press the bottom-nav SOS tab anywhere for silent alert.
  */
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { Suspense, useState } from 'react';
+import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
+import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
+import { SentinelBackLink } from '@/components/sentinel/SentinelBackLink';
 import SosCountdownOverlay from '@/components/safety/SosCountdownOverlay';
+import { SosGuardianIncomingAlerts } from '@/components/sentinel/sos/SosGuardianIncomingAlerts';
+import { SosGuardiansFeed } from '@/components/sentinel/sos/SosGuardiansFeed';
+import { SosGuardiansNotifiedCard } from '@/components/sentinel/sos/SosGuardiansNotifiedCard';
+import { SosHowItWorks } from '@/components/sentinel/sos/SosHowItWorks';
+import { SosLongPressTip } from '@/components/sentinel/sos/SosLongPressTip';
+import { SosPageHero } from '@/components/sentinel/sos/SosPageHero';
+import { SosPanicPinBanner } from '@/components/sentinel/sos/SosPanicPinBanner';
+import { SosQuickActions } from '@/components/sentinel/sos/SosQuickActions';
+import { SosRecentHistory } from '@/components/sentinel/sos/SosRecentHistory';
+import { SosTriggerCard } from '@/components/sentinel/sos/SosTriggerCard';
+import { SentinelSectionHeader } from '@/components/sentinel/SentinelSectionHeader';
 import { useSos } from '@/hooks/useSos';
-import { safetyService, type SosEvent, type UserStatus } from '@/services/safety.service';
 
 export const dynamic = 'force-dynamic';
 
-// ─── Drill mode (purely client-side — never hits the backend) ─────────────
-function useDrill() {
-  const [running, setRunning] = useState(false);
-  const [seconds, setSeconds] = useState(0);
+type SosTab = 'now' | 'prepare' | 'history' | 'circle';
 
-  useEffect(() => {
-    if (!running) return;
-    if (seconds <= 0) {
-      setRunning(false);
-      return;
-    }
-    const t = setTimeout(() => setSeconds((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [running, seconds]);
-
-  const start = (count = 5) => {
-    setSeconds(count);
-    setRunning(true);
-  };
-  const stop = () => {
-    setRunning(false);
-    setSeconds(0);
-  };
-  return { running, seconds, start, stop };
-}
-
-// ─── Active SOS control panel ─────────────────────────────────────────────
-function ActiveSosPanel() {
-  const sos = useSos();
-  if (sos.phase === 'idle') return null;
-
-  if (sos.phase === 'pending') {
-    return (
-      <div className="rounded-2xl border-2 border-yellow-500/50 bg-primary950/30 p-5 mb-6">
-        <div className="flex items-center gap-3 mb-3">
-          <span className="material-symbols-outlined text-primary400 text-3xl animate-pulse">
-            timer
-          </span>
-          <div className="flex-1">
-            <h2 className="text-lg font-bold text-primary100">SOS arming…</h2>
-            <p className="text-sm text-primary/80">
-              {sos.secondsRemaining}s before guardians are alerted
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => void sos.cancelSos('Cancelled from /sos page')}
-          className="w-full py-3 rounded-xl bg-primary hover:bg-primary400 text-black font-bold text-base transition-colors"
-        >
-          Cancel SOS
-        </button>
-      </div>
-    );
-  }
-
-  if (sos.phase === 'active') {
-    return (
-      <div className="rounded-2xl border-2 border-brand-red/60 bg-red-950/40 p-5 mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <span className="material-symbols-outlined text-brand-red text-3xl animate-pulse">
-            emergency_home
-          </span>
-          <div className="flex-1">
-            <h2 className="text-lg font-bold text-red-100">SOS ACTIVE</h2>
-            <p className="text-sm text-brand-red/80">
-              Guardians notified · Escalation level {sos.activeSos?.escalationLevel ?? 0}
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          {sos.activeSos?._id && (
-            <Link
-              href={`/safety/incident/${sos.activeSos._id}`}
-              className="py-3 rounded-xl bg-red-700 hover:bg-red-600 text-white font-semibold text-sm text-center transition-colors"
-            >
-              View incident
-            </Link>
-          )}
-          <button
-            type="button"
-            onClick={() => void sos.resolveSos()}
-            className="py-3 rounded-xl bg-brand-green-dark hover:bg-primary text-white font-semibold text-sm transition-colors"
-          >
-            I&apos;m safe now
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-}
-
-// ─── The big armed button (only when idle) ───────────────────────────────
-function ArmedSosButton() {
-  const sos = useSos();
-  const drill = useDrill();
-  const [silent, setSilent] = useState(false);
-  const [countdown, setCountdown] = useState(5);
-  const [emergencyServices, setEmergencyServices] = useState(false);
-
-  const disabled = sos.phase !== 'idle' || sos.loading || drill.running;
-
-  const handleTrigger = async () => {
-    if (disabled) return;
-    await sos.triggerSos({
-      silent,
-      countdownSeconds: silent ? 0 : countdown,
-      emergencyServicesEnabled: emergencyServices,
-    });
-  };
-
-  if (sos.phase !== 'idle') return null;
-
-  return (
-    <div className="rounded-2xl neu-card p-6 mb-6">
-      {/* Drill mode countdown overlay (purely visual, no API call) */}
-      {drill.running && (
-        <div className="mb-4 p-4 rounded-xl border border-brand-blue/40 bg-blue-950/30 text-center">
-          <div className="text-xs uppercase tracking-widest text-brand-blue mb-1">
-            DRILL MODE — no real alert
-          </div>
-          <div className="text-5xl font-black tabular-nums text-brand-blue my-2">
-            {drill.seconds}
-          </div>
-          <button
-            type="button"
-            onClick={drill.stop}
-            className="mt-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-brand-blue text-white text-sm font-medium"
-          >
-            Stop drill
-          </button>
-        </div>
-      )}
-
-      {/* The button */}
-      <button
-        type="button"
-        onClick={handleTrigger}
-        disabled={disabled}
-        className="relative w-full aspect-square max-w-[260px] mx-auto rounded-full bg-gradient-to-br from-brand-red to-brand-red shadow-xl shadow-red-900/40 flex flex-col items-center justify-center text-white font-black uppercase tracking-widest transition-transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-        aria-label="Trigger SOS"
-      >
-        <span className="absolute inset-0 rounded-full bg-brand-red/40 animate-ping pointer-events-none" />
-        <span className="material-symbols-outlined text-7xl mb-1 relative">
-          sos
-        </span>
-        <span className="text-xl relative">
-          {silent ? 'Silent SOS' : 'Trigger SOS'}
-        </span>
-        {!silent && (
-          <span className="text-[11px] mt-1 opacity-80 relative">
-            {countdown}s countdown
-          </span>
-        )}
-      </button>
-
-      {/* Options */}
-      <div className="mt-6 space-y-4">
-        {/* Silent mode toggle */}
-        <label className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer transition-colors">
-          <input
-            type="checkbox"
-            checked={silent}
-            onChange={(e) => setSilent(e.target.checked)}
-            className="mt-1 w-4 h-4 accent-brand-red"
-          />
-          <div className="flex-1">
-            <div className="text-sm font-semibold flex items-center gap-2">
-              <span className="material-symbols-outlined text-base">visibility_off</span>
-              Silent mode
-            </div>
-            <div className="text-xs text-white/60 mt-0.5">
-              No on-screen feedback. Fires immediately. Use under duress.
-            </div>
-          </div>
-        </label>
-
-        {/* Countdown slider — hidden when silent */}
-        {!silent && (
-          <div className="p-3 rounded-xl bg-white/5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold">Countdown</span>
-              <span className="text-sm tabular-nums text-white/80">{countdown}s</span>
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={30}
-              value={countdown}
-              onChange={(e) => setCountdown(Number(e.target.value))}
-              aria-label="Countdown seconds"
-              title="Countdown seconds"
-              className="w-full accent-brand-red"
-            />
-            <div className="text-xs text-white/50 mt-1">
-              Time to cancel before guardians are alerted (0 = instant).
-            </div>
-          </div>
-        )}
-
-        {/* Emergency services toggle */}
-        <label className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer transition-colors">
-          <input
-            type="checkbox"
-            checked={emergencyServices}
-            onChange={(e) => setEmergencyServices(e.target.checked)}
-            className="mt-1 w-4 h-4 accent-brand-red"
-          />
-          <div className="flex-1">
-            <div className="text-sm font-semibold flex items-center gap-2">
-              <span className="material-symbols-outlined text-base">local_police</span>
-              Notify emergency services
-            </div>
-            <div className="text-xs text-white/60 mt-0.5">
-              Auto-dispatch to police / medical when SOS activates.
-            </div>
-          </div>
-        </label>
-
-        {/* Drill mode */}
-        <button
-          type="button"
-          onClick={() => drill.start(5)}
-          disabled={drill.running}
-          className="w-full p-3 rounded-xl border border-brand-blue/30 bg-blue-950/10 hover:bg-blue-950/30 text-left transition-colors disabled:opacity-60"
-        >
-          <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined text-brand-blue">
-              fitness_center
-            </span>
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-brand-blue">
-                Run a drill
-              </div>
-              <div className="text-xs text-brand-blue/70 mt-0.5">
-                Practice the countdown without alerting anyone.
-              </div>
-            </div>
-          </div>
-        </button>
-
-        {/* Error */}
-        {sos.error && (
-          <div className="p-3 rounded-xl border border-brand-red/40 bg-red-950/30 text-sm text-brand-red flex items-start justify-between gap-2">
-            <span>{sos.error}</span>
-            <button
-              type="button"
-              onClick={sos.clearError}
-              className="text-brand-red hover:text-red-100 text-xs underline shrink-0"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── Quick action tiles ──────────────────────────────────────────────────
-const QUICK_ACTIONS: Array<{
-  icon: string;
-  label: string;
-  href: string;
-  iconClass: string;
-  description: string;
-}> = [
-  {
-    icon: 'shield_person',
-    label: 'Trusted contacts',
-    href: '/safety/manage#guardians',
-    iconClass: 'text-brand-blue',
-    description: 'Manage your guardians',
-  },
-  {
-    icon: 'pin',
-    label: 'Panic PIN',
-    href: '/safety/panic-pin',
-    iconClass: 'text-brand-red',
-    description: 'Duress code setup',
-  },
-  {
-    icon: 'route',
-    label: 'Trips & check-ins',
-    href: '/safety/trips',
-    iconClass: 'text-primary',
-    description: 'Plan & monitor journeys',
-  },
-  {
-    icon: 'phone_in_talk',
-    label: 'Fake call',
-    href: '/safety/fake-call',
-    iconClass: 'text-primary',
-    description: 'Stage an exit excuse',
-  },
+const TABS: { id: SosTab; label: string; icon: string }[] = [
+  { id: 'now', label: 'Now', icon: 'emergency' },
+  { id: 'prepare', label: 'Prepare', icon: 'shield' },
+  { id: 'history', label: 'History', icon: 'history' },
+  { id: 'circle', label: 'Circle', icon: 'groups' },
 ];
 
-function QuickActions() {
-  return (
-    <section className="mb-6">
-      <h3 className="text-base font-semibold mb-3">Quick actions</h3>
-      <div className="grid grid-cols-2 gap-3">
-        {QUICK_ACTIONS.map((a) => (
-          <Link
-            key={a.href}
-            href={a.href}
-            className="rounded-xl neu-card p-4 hover:bg-white/5 transition-colors flex flex-col gap-1.5"
-          >
-            <span className={`material-symbols-outlined text-2xl ${a.iconClass}`}>
-              {a.icon}
-            </span>
-            <div className="text-sm font-semibold leading-tight">{a.label}</div>
-            <div className="text-[11px] text-white/55 leading-snug">{a.description}</div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ─── Panic PIN status pill ───────────────────────────────────────────────
-function PanicPinStatus() {
-  const [pinSet, setPinSet] = useState<boolean | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    void safetyService
-      .getPanicPinStatus()
-      .then((res) => {
-        if (!cancelled) setPinSet(Boolean(res?.data?.panicPinSet));
-      })
-      .catch(() => {
-        if (!cancelled) setPinSet(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (pinSet === null) return null;
-  if (pinSet) {
-    return (
-      <Link
-        href="/safety/panic-pin"
-        className="block rounded-xl border border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-950/40 p-3 mb-4 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-primary text-2xl">
-            verified_user
-          </span>
-          <div className="flex-1">
-            <div className="text-sm font-semibold text-white/90">Panic PIN active</div>
-            <div className="text-xs text-primary/70">Tap to manage your duress code.</div>
-          </div>
-          <span className="material-symbols-outlined text-primary">chevron_right</span>
-        </div>
-      </Link>
-    );
-  }
-  return (
-    <Link
-      href="/safety/panic-pin"
-      className="block rounded-xl border border-brand-red/30 bg-red-950/20 hover:bg-red-950/40 p-3 mb-4 transition-colors"
-    >
-      <div className="flex items-center gap-3">
-        <span className="material-symbols-outlined text-brand-red text-2xl">pin</span>
-        <div className="flex-1">
-          <div className="text-sm font-semibold text-brand-red">Set up your Panic PIN</div>
-          <div className="text-xs text-brand-red/80">A duress code that silently triggers SOS.</div>
-        </div>
-        <span className="material-symbols-outlined text-brand-red">chevron_right</span>
-      </div>
-    </Link>
-  );
-}
-
-// ─── Recent SOS history ───────────────────────────────────────────────────
-function RecentHistory() {
-  const [events, setEvents] = useState<SosEvent[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    void safetyService
-      .getSosHistory(5, 1)
-      .then((res) => {
-        if (!cancelled) setEvents(res?.data?.events ?? []);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          const msg = err instanceof Error ? err.message : 'Failed to load history';
-          setError(msg);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <section className="mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-base font-semibold">Recent incidents</h3>
-        <Link
-          href="/safety/manage#history"
-          className="text-xs text-white/60 hover:text-white"
-        >
-          View all →
-        </Link>
-      </div>
-
-      {error && (
-        <div className="text-xs text-brand-red p-3 rounded-xl bg-red-950/20 border border-brand-red/30">
-          {error}
-        </div>
-      )}
-
-      {events && events.length === 0 && !error && (
-        <div className="rounded-xl neu-card p-4 text-sm text-white/60 text-center">
-          No SOS history yet — stay safe.
-        </div>
-      )}
-
-      {events && events.length > 0 && (
-        <ul className="space-y-2">
-          {events.map((e) => (
-            <li key={e._id}>
-              <Link
-                href={`/safety/incident/${e._id}`}
-                className="block rounded-xl neu-card p-3 hover:bg-white/5 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`material-symbols-outlined text-2xl ${
-                      e.status === 'resolved'
-                        ? 'text-primary'
-                        : e.status === 'cancelled'
-                        ? 'text-[var(--neu-text-muted)]'
-                        : 'text-brand-red'
-                    }`}
-                  >
-                    {e.status === 'resolved'
-                      ? 'task_alt'
-                      : e.status === 'cancelled'
-                      ? 'cancel'
-                      : 'emergency'}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium capitalize">
-                      {e.status} · {e.visibilityMode}
-                    </div>
-                    <div className="text-[11px] text-white/55">
-                      {new Date(e.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined text-white/40">
-                    chevron_right
-                  </span>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {!events && !error && (
-        <div className="rounded-xl neu-card p-4 text-sm text-white/40 text-center">
-          Loading…
-        </div>
-      )}
-    </section>
-  );
-}
-
-// ─── Guardians' status feed ──────────────────────────────────────────────
-function GuardiansFeed() {
-  const [feed, setFeed] = useState<UserStatus[] | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    void safetyService
-      .getGuardiansFeed()
-      .then((res) => {
-        if (!cancelled) setFeed(res?.data?.feed ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setFeed([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (!feed || feed.length === 0) return null;
-
-  return (
-    <section className="mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-base font-semibold">Your circle</h3>
-        <Link
-          href="/safety/manage#status"
-          className="text-xs text-white/60 hover:text-white"
-        >
-          Open feed →
-        </Link>
-      </div>
-      <ul className="space-y-2">
-        {feed.slice(0, 4).map((s, idx) => (
-          <li
-            key={`${s.userId ?? idx}-${s.lastUpdatedAt ?? idx}`}
-            className="rounded-xl neu-card p-3 flex items-center gap-3"
-          >
-            <span
-              className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                s.currentStatus === 'safe' || s.currentStatus === 'arrived'
-                  ? 'bg-primary'
-                  : s.currentStatus === 'unsafe' || s.currentStatus === 'need_attention'
-                  ? 'bg-brand-red'
-                  : 'bg-primary'
-              }`}
-            />
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium capitalize">
-                {String(s.currentStatus).replace(/_/g, ' ')}
-              </div>
-              {s.customMessage && (
-                <div className="text-[11px] text-white/55 truncate">{s.customMessage}</div>
-              )}
-            </div>
-            {s.lastUpdatedAt && (
-              <div className="text-[10px] text-white/40 tabular-nums shrink-0">
-                {new Date(s.lastUpdatedAt).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-// ─── Page ────────────────────────────────────────────────────────────────
 export default function SosPage() {
+  const [tab, setTab] = useState<SosTab>('now');
   const sos = useSos();
 
+  const incidentHref = sos.activeSos?._id ? `/safety/incident/${sos.activeSos._id}` : undefined;
+  const showTrigger = sos.phase === 'idle';
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <TopNav />
+    <>
       <SosCountdownOverlay
         phase={sos.phase}
         secondsRemaining={sos.secondsRemaining}
         visibilityMode={sos.activeSos?.visibilityMode ?? 'normal'}
         onCancel={() => void sos.cancelSos('User cancelled countdown')}
       />
-      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-[260px_1fr_300px] gap-6 pt-4 pb-24">
-        <aside className="hidden lg:block sticky top-20 self-start">
-          <LeftSidebar />
-        </aside>
-
-        <main className="min-w-0">
-          <header className="mb-5">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-brand-red text-4xl">
-                sos
-              </span>
-              <p className="text-sm text-white/60">
-                Emergency command center · long-press the SOS tab anywhere for an instant silent alert
-              </p>
-            </div>
-          </header>
-
-          <PanicPinStatus />
-          <ActiveSosPanel />
-          <ArmedSosButton />
-          <QuickActions />
-          <RecentHistory />
-          <GuardiansFeed />
-
-          <div className="mt-8 text-center">
-            <Link
-              href="/safety"
-              className="text-sm text-white/60 hover:text-white underline"
+      <AppBrowseLayout
+        maxWidth="680"
+        subtitle={
+          <span className="inline-flex min-w-0 items-center gap-2">
+            <span
+              className="material-symbols-outlined shrink-0 text-xl text-brand-red"
+              style={{ fontVariationSettings: "'FILL' 1" }}
             >
-              ← Back to Safety hub
-            </Link>
+              emergency
+            </span>
+            <span className="truncate">
+              {sos.phase === 'active'
+                ? 'SOS active — stay on this page'
+                : sos.phase === 'pending'
+                  ? `Arming ${sos.secondsRemaining}s`
+                  : 'Long-press bottom nav SOS for silent alert'}
+            </span>
+          </span>
+        }
+        header={
+          <div className="flex flex-col gap-3">
+            <Suspense fallback={null}>
+              <SentinelBackLink />
+            </Suspense>
+            <BrowseTabStrip tabs={TABS} activeId={tab} onChange={(id) => setTab(id as SosTab)} />
           </div>
-        </main>
+        }
+      >
+        <div className="space-y-5">
+          <SosPageHero
+            phase={sos.phase}
+            secondsRemaining={sos.secondsRemaining}
+            escalationLevel={sos.activeSos?.escalationLevel ?? 0}
+            incidentHref={incidentHref}
+            onCancel={() => void sos.cancelSos('Cancelled from /sos page')}
+            onResolve={() => void sos.resolveSos()}
+          />
 
-        <aside className="hidden lg:block sticky top-20 self-start">
-          <RightSidebar />
-        </aside>
-      </div>
-      <BottomNav />
-    </div>
+          {tab === 'now' && (
+            <>
+              <SosGuardiansNotifiedCard notifyMeta={sos.notifyMeta} phase={sos.phase} />
+              {showTrigger ? <SosTriggerCard sos={sos} /> : null}
+              <SosLongPressTip />
+              <SosHowItWorks />
+            </>
+          )}
+
+          {tab === 'prepare' && (
+            <>
+              <SosPanicPinBanner />
+              <section className="space-y-3">
+                <SentinelSectionHeader
+                  title="Before an emergency"
+                  subtitle="Set these up once so SOS and your circle work when it matters."
+                />
+                <SosQuickActions />
+              </section>
+              <SosLongPressTip />
+            </>
+          )}
+
+          {tab === 'history' && <SosRecentHistory />}
+
+          {tab === 'circle' && (
+            <>
+              <SosGuardianIncomingAlerts />
+              <SosGuardiansFeed />
+            </>
+          )}
+        </div>
+      </AppBrowseLayout>
+    </>
   );
 }

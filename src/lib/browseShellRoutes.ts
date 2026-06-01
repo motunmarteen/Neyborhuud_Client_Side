@@ -7,6 +7,8 @@ export const BROWSE_SHELL_ROUTE_PREFIXES = [
   '/saved',
   '/communities',
   '/chat',
+  '/safety',
+  '/sos',
 ] as const;
 
 export function routeUsesBrowseShell(pathname: string): boolean {

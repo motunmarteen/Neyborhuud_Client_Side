@@ -13,6 +13,10 @@ import {
   type WeatherCondition as AmbientWeather,
 } from '@/components/navigation/AmbientProfileCard';
 import { API_BASE_URL } from '@/lib/api';
+import {
+  cityLabelFromNominatimAddress,
+  fetchNominatimReverse,
+} from '@/lib/nominatimClient';
 import { SkyWeatherEffects } from '@/components/ambient/SkyWeatherEffects';
 
 interface WeatherData {
@@ -241,21 +245,8 @@ export function FeedInfoCards() {
 
       try {
         // Reverse-geocode for city name
-        let cityName = 'Your Area';
-        try {
-          const geoRes = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=12`,
-            { headers: { 'User-Agent': 'NeyborHuud/1.0' }, signal: AbortSignal.timeout(5000) },
-          );
-          if (geoRes.ok) {
-            const geoData = await geoRes.json();
-            const a = geoData?.address;
-            cityName = a?.city_district || a?.town || a?.city || a?.suburb
-              || a?.neighbourhood || a?.village || a?.county || a?.state || 'Your Area';
-          }
-        } catch {
-          // geocode failed — cityName stays as default
-        }
+        const geoData = await fetchNominatimReverse(latitude, longitude, { zoom: 12, timeoutMs: 5_000 });
+        const cityName = cityLabelFromNominatimAddress(geoData?.address) || 'Your Area';
 
         // Strategy 1: Backend (OpenWeatherMap)
         const apiBase = API_BASE_URL;

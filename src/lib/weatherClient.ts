@@ -1,5 +1,9 @@
 import type { WeatherCondition as AmbientWeather } from '@/components/navigation/AmbientProfileCard';
 import { getApiBaseUrl, isLocalDevHost } from '@/lib/api-client';
+import {
+  cityLabelFromNominatimAddress,
+  fetchNominatimReverse,
+} from '@/lib/nominatimClient';
 import { reverseGeocode, type LocationAddress } from '@/lib/reverseGeocode';
 
 /** Ignore trace model output — common cause of false drizzle/rain. */
@@ -151,22 +155,12 @@ async function reverseGeocodeCity(latitude: number, longitude: number): Promise<
     const label = loc ? areaLabelFromAddress(loc) : null;
     if (label) return label;
   } catch {
-    // fall through to direct Nominatim
+    // fall through to Nominatim proxy
   }
 
-  try {
-    const geoRes = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&zoom=12`,
-      { headers: { 'User-Agent': 'NeyborHuud/1.0' }, signal: AbortSignal.timeout(5000) },
-    );
-    if (!geoRes.ok) return 'Your Area';
-    const geoData = await geoRes.json();
-    const a = geoData?.address;
-    return a?.suburb || a?.neighbourhood || a?.city_district || a?.town || a?.city
-      || a?.village || a?.county || a?.state || 'Your Area';
-  } catch {
-    return 'Your Area';
-  }
+  const geoData = await fetchNominatimReverse(latitude, longitude, { zoom: 12, timeoutMs: 5_000 });
+  const fromOsm = cityLabelFromNominatimAddress(geoData?.address);
+  return fromOsm || 'Your Area';
 }
 
 export async function fetchCurrentWeather(

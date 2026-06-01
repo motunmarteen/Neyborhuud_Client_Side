@@ -13,7 +13,6 @@
  */
 
 import {
-  Suspense,
   useState,
   useEffect,
   useCallback,
@@ -21,11 +20,8 @@ import {
   type FormEvent,
 } from 'react';
 import dynamicImport from 'next/dynamic';
-import Link from 'next/link';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
+import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
 
 // Force dynamic rendering to avoid pre-rendering issues
 export const dynamic = 'force-dynamic';
@@ -235,51 +231,40 @@ export default function GeofencesPage() {
   // ─────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <TopNav />
-      <div className="flex pt-16 pb-16">
-        <Suspense fallback={<div className="w-64" />}>
-          <LeftSidebar />
-        </Suspense>
+    <SentinelSubpageLayout
+      pageTitle="Geofences"
+      pageSubtitle="Safe, alert, and restricted zones that react when you enter or leave."
+      icon="fence"
+      iconAccent="blue"
+      maxWidth="920"
+      header={
+        <button
+          type="button"
+          onClick={() => {
+            setShowForm((v) => !v);
+            setEditingId(null);
+            setForm(DEFAULT_FORM);
+          }}
+          className="w-full rounded-2xl bg-primary py-2.5 text-sm font-bold text-white"
+        >
+          + New zone
+        </button>
+      }
+    >
+      <SentinelHowItWorks>
+        Tap the map to place a pin, set radius and zone type, then save. Safe zones confirm arrivals;
+        alert zones warn on unfamiliar areas; restricted zones can notify guardians and trigger SOS.
+      </SentinelHowItWorks>
 
-        <main className="flex-1 max-w-2xl mx-auto px-3 py-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold">My Geofences</h1>
-              <p className="text-[var(--neu-text-muted)] text-sm mt-0.5">
-                Define safe and danger zones that react when you move.
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                setShowForm((v) => !v);
-                setEditingId(null);
-                setForm(DEFAULT_FORM);
-              }}
-              className="px-4 py-2 bg-brand-green-dark hover:bg-primary rounded-lg text-sm font-semibold transition"
-            >
-              + New Zone
-            </button>
-          </div>
+      {error && (
+        <div className="mod-card rounded-2xl border border-brand-red/30 bg-brand-red/10 px-4 py-2 text-sm text-brand-red">
+          {error}
+        </div>
+      )}
 
-          {/* Back to safety */}
-          <Link href="/safety" className="inline-flex items-center gap-1 text-sm text-[var(--neu-text-muted)] hover:text-white">
-            ← Safety Dashboard
-          </Link>
-
-          {error && (
-            <div className="bg-red-900/30 border border-red-700 text-brand-red text-sm rounded-lg px-4 py-2">
-              {error}
-            </div>
-          )}
-
-          {/* Live Alerts */}
-          {alerts.length > 0 && (
-            <div className="space-y-2">
-              <h2 className="text-sm font-semibold text-[var(--neu-text-muted)] uppercase tracking-wider">
-                Live Alerts
-              </h2>
+      {alerts.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Live alerts</p>
               {alerts.slice(0, 5).map((a, i) => (
                 <div
                   key={i}
@@ -308,11 +293,10 @@ export default function GeofencesPage() {
                   </button>
                 </div>
               ))}
-            </div>
-          )}
+        </div>
+      )}
 
-          {/* Map */}
-          <div className="rounded-xl overflow-hidden border border-black/[0.08]">
+      <div className="mod-card overflow-hidden rounded-2xl p-0">
             <GeofenceMap
               geofences={geofences}
               onMapClick={handleMapClick}
@@ -320,17 +304,13 @@ export default function GeofencesPage() {
               pendingRadius={form.radiusMeters ?? 200}
               pendingType={form.type ?? 'safe_zone'}
             />
-          </div>
+      </div>
 
-          {/* Create / Edit form */}
-          {showForm && (
-            <form
-              onSubmit={handleSubmit}
-              className="bg-brand-black border border-black/[0.08] rounded-xl p-5 space-y-4"
-            >
-              <h2 className="font-semibold text-lg">
-                {editingId ? 'Edit Geofence' : 'New Geofence'}
-              </h2>
+      {showForm && (
+        <form onSubmit={handleSubmit} className="mod-card space-y-4 rounded-2xl p-5">
+          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">
+            {editingId ? 'Edit geofence' : 'New geofence'}
+          </p>
 
               {/* Label */}
               <div>
@@ -342,7 +322,8 @@ export default function GeofencesPage() {
                   placeholder="e.g. Home, Office, School"
                   maxLength={100}
                   required
-                  className="w-full bg-brand-black border border-black/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="mod-inset w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  style={{ color: 'var(--neu-text)' }}
                 />
               </div>
 
@@ -357,7 +338,8 @@ export default function GeofencesPage() {
                     placeholder="6.5244"
                     value={form.latitude}
                     onChange={(e) => setForm((p) => ({ ...p, latitude: parseFloat(e.target.value) }))}
-                    className="w-full bg-brand-black border border-black/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="mod-inset w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  style={{ color: 'var(--neu-text)' }}
                   />
                 </div>
                 <div>
@@ -369,7 +351,8 @@ export default function GeofencesPage() {
                     placeholder="3.3792"
                     value={form.longitude}
                     onChange={(e) => setForm((p) => ({ ...p, longitude: parseFloat(e.target.value) }))}
-                    className="w-full bg-brand-black border border-black/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="mod-inset w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  style={{ color: 'var(--neu-text)' }}
                   />
                 </div>
               </div>
@@ -487,43 +470,37 @@ export default function GeofencesPage() {
                 </button>
               </div>
             </form>
-          )}
+      )}
 
-          {/* Geofence list */}
-          {loading ? (
+      {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-20 rounded-xl bg-brand-black animate-pulse" />
               ))}
             </div>
-          ) : geofences.length === 0 ? (
-            <div className="text-center text-[var(--neu-text-muted)] py-12">
-              <p className="text-4xl mb-2">🗺️</p>
-              <p className="font-semibold">No geofences yet</p>
-              <p className="text-sm mt-1">
-                Click &quot;+ New Zone&quot; or tap on the map to create your first safety boundary.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {geofences.map((fence) => (
-                <GeofenceCard
-                  key={fence._id}
-                  fence={fence}
-                  onEdit={() => handleEdit(fence)}
-                  onDelete={() => handleDelete(fence._id)}
-                />
-              ))}
-            </div>
-          )}
-        </main>
-
-        <RightSidebar />
-      </div>
-      <Suspense fallback={<div className="h-16" />}>
-        <BottomNav />
-      </Suspense>
-    </div>
+      ) : geofences.length === 0 ? (
+        <div className="mod-card rounded-2xl py-12 text-center">
+          <p className="text-4xl mb-2">🗺️</p>
+          <p className="font-semibold" style={{ color: 'var(--neu-text)' }}>
+            No geofences yet
+          </p>
+          <p className="mt-1 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
+            Tap &quot;+ New zone&quot; or click the map to draw your first boundary.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {geofences.map((fence) => (
+            <GeofenceCard
+              key={fence._id}
+              fence={fence}
+              onEdit={() => handleEdit(fence)}
+              onDelete={() => handleDelete(fence._id)}
+            />
+          ))}
+        </div>
+      )}
+    </SentinelSubpageLayout>
   );
 }
 
@@ -547,7 +524,7 @@ function GeofenceCard({
   const statusLabel = fence.lastStatus === 'inside' ? 'Inside' : fence.lastStatus === 'outside' ? 'Outside' : 'Unknown';
 
   return (
-    <div className="bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 flex items-center gap-3">
+    <div className="mod-card flex items-center gap-3 rounded-2xl px-4 py-3">
       {/* Colour dot — Tailwind classes per type to avoid inline styles */}
       <div
         className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-lg font-bold ${TYPE_DOT_CLASS[fence.type]}`}
@@ -573,15 +550,13 @@ function GeofenceCard({
       </div>
 
       <div className="flex gap-2 flex-shrink-0">
-        <button
-          onClick={onEdit}
-          className="px-3 py-1.5 bg-brand-black hover:bg-brand-surface rounded-lg text-xs transition"
-        >
+        <button type="button" onClick={onEdit} className="mod-chip px-3 py-1.5 text-xs font-semibold">
           Edit
         </button>
         <button
+          type="button"
           onClick={onDelete}
-          className="px-3 py-1.5 bg-red-900/40 hover:bg-red-900/70 text-brand-red rounded-lg text-xs transition"
+          className="mod-chip px-3 py-1.5 text-xs font-semibold text-brand-red"
         >
           Delete
         </button>

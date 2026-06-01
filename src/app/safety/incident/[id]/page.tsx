@@ -10,10 +10,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
 import { safetyService } from '@/services/safety.service';
 import type { IncidentSummary } from '@/types/api';
 
@@ -104,26 +101,17 @@ export default function IncidentRecapPage() {
   }, [id]);
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-background text-foreground">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 pt-4 pb-20">
-        <button
-          type="button"
-          onClick={() => router.push('/safety')}
-          className="text-sm text-white/60 hover:text-white mb-4 flex items-center gap-1"
-        >
-          <span className="material-symbols-outlined text-base">arrow_back</span> Sentinel
-        </button>
-
-        <header className="mb-6">
-          <h1 className="text-2xl font-bold">Incident recap</h1>
-          <p className="text-sm text-white/60">A timeline of what happened, who responded, and how it ended.</p>
-        </header>
-
-        {loading && <div className="text-center text-white/60 py-12">Loading incident…</div>}
+    <SentinelSubpageLayout
+      pageTitle="Incident recap"
+      pageSubtitle="Timeline of what happened, who responded, and how it ended."
+      icon="history"
+      iconAccent="red"
+    >
+        {loading && (
+          <div className="mod-card py-12 text-center text-sm" style={{ color: 'var(--neu-text-muted)' }}>
+            Loading incident…
+          </div>
+        )}
         {error && (
           <div className="rounded-lg bg-red-950/40 border border-red-700/50 px-3 py-2 text-sm text-brand-red">
             {error}
@@ -256,12 +244,7 @@ export default function IncidentRecapPage() {
             </div>
           </>
         )}
-          </div>
-        </main>
-        <RightSidebar />
-      </div>
-      <BottomNav />
-    </div>
+    </SentinelSubpageLayout>
   );
 }
 

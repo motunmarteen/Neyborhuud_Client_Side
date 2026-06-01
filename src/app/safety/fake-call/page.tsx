@@ -13,11 +13,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
+import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,7 +84,6 @@ function startRingtone(): () => void {
 }
 
 export default function FakeCallPage() {
-  const router = useRouter();
   const [phase, setPhase] = useState<Phase>('setup');
   const [callerName, setCallerName] = useState('Mum');
   const [callerSubtitle, setCallerSubtitle] = useState('Mobile');
@@ -223,114 +219,98 @@ export default function FakeCallPage() {
 
   // ── Setup screen ──────────────────────────────────────────────────────────
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-background text-foreground">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 pt-4 pb-20">
-        <button
-          type="button"
-          onClick={() => router.push('/safety')}
-          className="text-sm text-white/60 hover:text-white mb-4 flex items-center gap-1"
-        >
-          <span className="material-symbols-outlined text-base">arrow_back</span> Sentinel
-        </button>
+    <SentinelSubpageLayout
+      pageTitle="Fake Call"
+      pageSubtitle="Stage an incoming call to exit an uncomfortable situation discreetly."
+      icon="phone_in_talk"
+      iconAccent="primary"
+    >
+      <SentinelHowItWorks>
+        Pick who is calling and when the phone should ring. After the delay, a full-screen incoming
+        call appears — accept to keep the conversation going, or decline to return here. Nothing
+        leaves your device.
+      </SentinelHowItWorks>
 
-        <header className="mb-6">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-primary text-4xl">phone_in_talk</span>
-            <div>
-              <h1 className="text-2xl font-bold">Fake Call</h1>
-              <p className="text-sm text-white/60">Stage an incoming call to leave a situation.</p>
-            </div>
+      {phase === 'waiting' && (
+        <div className="mod-card flex items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+          <div>
+            <p className="text-sm font-semibold text-primary">Call in {secondsLeft}s…</p>
+            <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+              From {callerName}
+            </p>
           </div>
-        </header>
+          <button type="button" onClick={cancelWait} className="mod-chip px-3 py-1.5 text-sm font-semibold text-primary">
+            Cancel
+          </button>
+        </div>
+      )}
 
-        {phase === 'waiting' && (
-          <div className="rounded-xl border border-yellow-500/40 bg-primary950/40 p-4 mb-4 flex items-center justify-between">
-            <div>
-              <div className="text-sm font-semibold text-primary200">Call coming in {secondsLeft}s…</div>
-              <div className="text-xs text-primary/80">From {callerName}</div>
-            </div>
+      <section className="mod-card rounded-2xl p-4">
+        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Caller</p>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {PRESET_CALLERS.map((c) => (
             <button
+              key={c.name}
               type="button"
-              onClick={cancelWait}
-              className="px-3 py-1.5 rounded-lg bg-primary700 hover:bg-brand-green-dark text-white text-sm"
+              onClick={() => {
+                setCallerName(c.name);
+                setCallerSubtitle(c.subtitle);
+                setCustomName('');
+              }}
+              className={`mod-inset rounded-xl p-3 text-left transition ${
+                callerName === c.name && !customName ? 'ring-2 ring-primary' : ''
+              }`}
             >
-              Cancel
+              <div className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
+                {c.name}
+              </div>
+              <div className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+                {c.subtitle}
+              </div>
             </button>
-          </div>
-        )}
+          ))}
+        </div>
+        <input
+          type="text"
+          value={customName}
+          onChange={(e) => setCustomName(e.target.value)}
+          placeholder="Or type a custom name…"
+          className="mod-inset mt-3 w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          style={{ color: 'var(--neu-text)' }}
+        />
+      </section>
 
-        <section className="mb-6">
-          <h2 className="text-sm font-semibold mb-2">Caller</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {PRESET_CALLERS.map((c) => (
-              <button
-                key={c.name}
-                type="button"
-                onClick={() => {
-                  setCallerName(c.name);
-                  setCallerSubtitle(c.subtitle);
-                  setCustomName('');
-                }}
-                className={`rounded-xl neu-card p-3 text-left ${
-                  callerName === c.name && !customName ? 'ring-2 ring-primary' : ''
-                }`}
-              >
-                <div className="text-sm font-medium">{c.name}</div>
-                <div className="text-xs text-white/50">{c.subtitle}</div>
-              </button>
-            ))}
-          </div>
-          <input
-            type="text"
-            value={customName}
-            onChange={(e) => setCustomName(e.target.value)}
-            placeholder="Or type a custom name…"
-            className="mt-3 w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-primary"
-          />
-        </section>
+      <section className="mod-card rounded-2xl p-4">
+        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">When to ring</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {DELAY_OPTIONS.map((d) => (
+            <button
+              key={d.ms}
+              type="button"
+              onClick={() => setDelayMs(d.ms)}
+              className={`mod-chip px-4 py-2 text-sm font-semibold ${
+                delayMs === d.ms ? 'bg-primary text-white' : ''
+              }`}
+              style={delayMs === d.ms ? undefined : { color: 'var(--neu-text-muted)' }}
+            >
+              {d.label}
+            </button>
+          ))}
+        </div>
+      </section>
 
-        <section className="mb-6">
-          <h2 className="text-sm font-semibold mb-2">When to ring</h2>
-          <div className="flex gap-2 flex-wrap">
-            {DELAY_OPTIONS.map((d) => (
-              <button
-                key={d.ms}
-                type="button"
-                onClick={() => setDelayMs(d.ms)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  delayMs === d.ms
-                    ? 'bg-brand-green-dark text-white'
-                    : 'bg-white/5 text-white/70 hover:bg-white/10'
-                }`}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
-        </section>
+      <button
+        type="button"
+        onClick={startScheduled}
+        disabled={phase === 'waiting'}
+        className="w-full rounded-2xl bg-primary py-3.5 text-base font-bold text-white disabled:opacity-50"
+      >
+        {delayMs === 0 ? 'Ring now' : 'Schedule call'}
+      </button>
 
-        <button
-          type="button"
-          onClick={startScheduled}
-          disabled={phase === 'waiting'}
-          className="w-full rounded-xl bg-brand-green-dark hover:bg-primary disabled:opacity-50 text-white font-semibold py-3 text-base"
-        >
-          {delayMs === 0 ? 'Ring now' : `Schedule call`}
-        </button>
-
-        <p className="mt-6 text-xs text-white/40 leading-relaxed">
-          The fake call runs only on this device. No data is sent. If your phone is on silent,
-          the visual call screen still appears.
-        </p>
-          </div>
-        </main>
-        <RightSidebar />
-      </div>
-      <BottomNav />
-    </div>
+      <p className="text-center text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
+        Runs only on this device. On silent mode you still get the full-screen call UI.
+      </p>
+    </SentinelSubpageLayout>
   );
 }

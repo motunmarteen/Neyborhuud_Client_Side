@@ -25,18 +25,8 @@ export function useAuth() {
     queryFn: async () => {
       if (!apiClient.isAuthenticated()) return null;
       try {
-        const res = await apiClient.get<{ user: import("@/types/api").User }>("/profile/me");
-        if (res.success && res.data?.user) {
-          const freshUser = normalizeAuthUser(res.data.user);
-          // Persist fresh data (including role) back to localStorage
-          if (typeof window !== "undefined") {
-            const cached = localStorage.getItem("neyborhuud_user");
-            const existing = cached ? JSON.parse(cached) : {};
-            localStorage.setItem(
-              "neyborhuud_user",
-              JSON.stringify({ ...existing, ...freshUser }),
-            );
-          }
+        const freshUser = await authService.fetchMergedCurrentUser();
+        if (freshUser) {
           return freshUser;
         }
       } catch {

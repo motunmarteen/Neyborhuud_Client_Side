@@ -93,8 +93,10 @@ export function isUserEmailVerified(user: unknown): boolean {
   const u = user as Record<string, unknown>;
   return (
     u.emailVerified === true ||
+    u.email_verified === true ||
     u.isVerified === true ||
-    u.verificationStatus === 'verified'
+    u.verificationStatus === 'verified' ||
+    u.identityVerified === true
   );
 }
 

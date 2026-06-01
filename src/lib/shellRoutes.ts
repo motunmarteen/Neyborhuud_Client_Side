@@ -7,13 +7,11 @@ import { routeUsesBrowseShell } from '@/lib/browseShellRoutes';
 export const PAGE_OWNED_TOP_NAV_PREFIXES = [
   '/feed',
   '/friendship',
-  '/safety',
   '/explore',
   '/marketplace',
   '/jobs',
   '/events',
   '/services',
-  '/sos',
   '/settings',
   '/notifications',
   '/incident-reports',
@@ -60,7 +58,7 @@ export function shouldRenderGlobalTopNav(pathname: string): boolean {
 export function routeHasPageOwnedSidebar(pathname: string): boolean {
   const path = normalizePath(pathname);
   if (path === '/' || path === '/feed' || routeUsesBrowseShell(path)) return true;
-  if (path.startsWith('/safety')) return true;
+  if (path.startsWith('/safety') || path.startsWith('/sos')) return true;
   if (path === '/events/create' || path === '/marketplace/create') return true;
   if (/^\/marketplace\/[^/]+\/edit$/.test(path)) return true;
   if (path.startsWith('/chat/')) return true;

@@ -5449,6 +5449,14 @@ html:not(.dark) .mod-inset {
   background: rgba(0, 0, 0, 0.03);
   border-color: rgba(0, 0, 0, 0.05);
 }
+
+/* Native selects can paint OS menus wider than the viewport on mobile — constrain width when used */
+.mod-card select,
+.feed-scroll-main select {
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 100%;
+}
 html:not(.dark) .mod-btn {
   background: rgba(255, 255, 255, 0.6);
   border-color: rgba(0, 0, 0, 0.07);

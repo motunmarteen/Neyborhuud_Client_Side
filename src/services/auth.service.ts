@@ -25,7 +25,65 @@ import {
   ApiResponse,
 } from "@/types/api";
 import { normalizeAuthUser } from "@/lib/userAvatar";
+import {
+  extractUserFromIdentityPayload,
+  extractUserFromProfileMeResponse,
+  mergeAuthUserRecords,
+} from "@/lib/profileMe";
+import {
+  hasSafetyProfileFields,
+  resolveUserFirstName,
+  resolveUserLastName,
+  resolveUserPhone,
+} from "@/lib/userProfileFields";
 import { getApiErrorMessage, getApiErrorStatus } from "@/lib/apiErrors";
+
+function buildProfilePatchForServer(data: {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}): Record<string, string> {
+  const patch: Record<string, string> = {
+    firstName: data.firstName.trim(),
+    lastName: data.lastName.trim(),
+    first_name: data.firstName.trim(),
+    last_name: data.lastName.trim(),
+  };
+  const phone = data.phone?.trim();
+  if (phone) {
+    patch.phoneNumber = phone;
+    patch.phone = phone;
+    patch.phone_number = phone;
+  }
+  return patch;
+}
+
+async function fetchIdentityProfilePatch(): Promise<Partial<User> | null> {
+  try {
+    const res = await apiClient.get<unknown>("/identity/profile");
+    if (res.success) {
+      return extractUserFromIdentityPayload(res.data);
+    }
+  } catch {
+    /* optional service */
+  }
+  return null;
+}
+
+async function fetchMergedUserFromServer(): Promise<User | null> {
+  try {
+    const res = await apiClient.get<unknown>("/profile/me");
+    const fromMe = extractUserFromProfileMeResponse(res);
+    const fromIdentity = await fetchIdentityProfilePatch();
+    const merged = mergeAuthUserRecords(fromMe, fromIdentity);
+    if (merged) {
+      return persistProfileUploadUser(merged);
+    }
+  } catch {
+    /* offline */
+  }
+  return null;
+}
 
 /** Throttle session keepalive pings (rolling expiry on server). */
 let lastSessionTouchAt = 0;
@@ -161,15 +219,7 @@ function buildIdentityProfilePayload(data: CompleteProfileInput) {
 }
 
 async function syncCachedUserFromProfileMe(): Promise<User | null> {
-  try {
-    const res = await apiClient.get<{ user: User }>("/profile/me");
-    if (res.success && res.data?.user) {
-      return persistProfileUploadUser(res.data.user);
-    }
-  } catch {
-    /* offline */
-  }
-  return null;
+  return fetchMergedUserFromServer();
 }
 
 async function completeProfileViaIdentity(data: CompleteProfileInput): Promise<ApiResponse<User>> {
@@ -358,6 +408,13 @@ export const authService = {
   },
 
   /**
+   * Merged user from /profile/me + /identity/profile (fills phone/name gaps).
+   */
+  async fetchMergedCurrentUser(): Promise<User | null> {
+    return fetchMergedUserFromServer();
+  },
+
+  /**
    * Light ping so Better Auth can roll session expiry while the app is open (social-style persistence).
    * Uses GET /profile/me — safe to call on an interval / visibility resume.
    */
@@ -445,10 +502,11 @@ export const authService = {
     const response = await tryProfileUpdate(data);
 
     if (response.success && response.data) {
-      // Update stored user data
+      const merged = normalizeAuthUser(response.data as User);
       if (typeof window !== "undefined") {
-        localStorage.setItem("neyborhuud_user", JSON.stringify(response.data));
+        localStorage.setItem("neyborhuud_user", JSON.stringify(merged));
       }
+      return { ...response, data: merged };
     }
 
     return response;
@@ -608,42 +666,89 @@ export const authService = {
    * for first-time HuudCoin reward (skipped when name is already saved).
    */
   async completeProfile(data: CompleteProfileInput): Promise<ApiResponse<User>> {
+    const phone = data.phone?.trim();
     const persistLocal = () => {
       persistProfileUploadUser({
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
-        phoneNumber: data.phone?.trim() || undefined,
+        phoneNumber: phone || undefined,
         gender: (data.gender as User["gender"]) || undefined,
         dateOfBirth: data.dob || undefined,
       });
     };
 
+    const syncMainProfile = async (): Promise<User | null> => {
+      try {
+        await tryProfileUpdate(
+          buildProfilePatchForServer({
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone,
+          }),
+        );
+      } catch {
+        /* identity/reward path may still have saved fields */
+      }
+      return syncCachedUserFromProfileMe();
+    };
+
     const cached = this.getCachedUser();
-    const hasExistingName = !!(
-      cached?.firstName?.trim() &&
-      cached?.lastName?.trim()
-    );
+    const hasExistingName = !!(resolveUserFirstName(cached) && resolveUserLastName(cached));
+    const needsPhoneOnMainProfile = !!phone && !resolveUserPhone(cached);
 
     if (!hasExistingName) {
       const rewardResult = await tryCompleteProfileReward(data);
-      if (rewardResult === "success") {
+      if (rewardResult === "success" || rewardResult === "already_completed") {
         persistLocal();
-        const synced = await syncCachedUserFromProfileMe();
+        const synced = await syncMainProfile();
         return {
           success: true,
-          message: "Profile completed successfully! 100 HuudCoins awarded.",
+          message:
+            rewardResult === "success"
+              ? "Profile completed successfully! 100 HuudCoins awarded."
+              : "Profile saved.",
           data: synced ?? undefined,
         };
       }
     }
 
+    if (needsPhoneOnMainProfile) {
+      const synced = await syncMainProfile();
+      if (synced && hasSafetyProfileFields(synced)) {
+        return { success: true, message: "Phone number saved to your profile.", data: synced };
+      }
+    }
+
     const fallback = await completeProfileViaIdentity(data);
     if (fallback.success) {
-      return fallback;
+      const synced = await syncMainProfile();
+      return {
+        ...fallback,
+        data: synced ?? fallback.data,
+      };
+    }
+
+    if (phone) {
+      const synced = await syncMainProfile();
+      if (synced && hasSafetyProfileFields(synced)) {
+        return {
+          success: true,
+          message: "Profile saved for live tracking.",
+          data: synced,
+        };
+      }
     }
 
     const synced = await syncCachedUserFromProfileMe();
-    if (synced?.firstName?.trim() && synced?.lastName?.trim()) {
+    if (synced && hasSafetyProfileFields(synced)) {
+      return {
+        success: true,
+        message: "Profile saved.",
+        data: synced,
+      };
+    }
+
+    if (synced && resolveUserFirstName(synced) && resolveUserLastName(synced)) {
       return {
         success: true,
         message: "Profile saved.",
@@ -749,7 +854,12 @@ export const authService = {
   getCachedUser(): User | null {
     if (typeof window === "undefined") return null;
     const userData = localStorage.getItem("neyborhuud_user");
-    return userData ? JSON.parse(userData) : null;
+    if (!userData) return null;
+    try {
+      return normalizeAuthUser(JSON.parse(userData) as User);
+    } catch {
+      return null;
+    }
   },
 
   /**

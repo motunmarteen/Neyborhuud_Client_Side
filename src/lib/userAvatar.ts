@@ -3,6 +3,7 @@ import {
   resolveProfileDisplayName,
   type ProfileNameSource,
 } from '@/lib/profileSnapHelpers';
+import { normalizeAuthProfileFields } from '@/lib/userProfileFields';
 import type { User } from '@/types/api';
 
 export type AvatarSource = {
@@ -70,5 +71,5 @@ export function normalizeUserAvatarFields<T extends AvatarSource>(user: T): T {
 }
 
 export function normalizeAuthUser(user: User): User {
-  return normalizeUserAvatarFields(user);
+  return normalizeUserAvatarFields(normalizeAuthProfileFields(user));
 }

@@ -320,6 +320,11 @@ export const safetyService = {
     return apiClient.post<{ status: UserStatus }>("/safety/status/update", payload);
   },
 
+  /** Current user's latest guardian status (if exposed by API). */
+  async getMyStatus() {
+    return apiClient.get<{ status: UserStatus | null }>("/safety/status/me");
+  },
+
   async getStatus(userId: string) {
     return apiClient.get<{ status: UserStatus | null }>(`/safety/status/${userId}`);
   },

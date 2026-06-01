@@ -2,10 +2,8 @@
 
 import { useCallback, useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
+import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
 import {
   safetyService,
   type Emergency,
@@ -205,26 +203,17 @@ export default function EmergencyPage() {
   };
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <Suspense fallback={<div className="w-64" />}>
-          <LeftSidebar />
-        </Suspense>
-
-        <main className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="mx-auto flex w-full max-w-[920px] flex-col gap-6 pb-24">
-
-            {/* Header */}
-            <div className="neu-card-sm rounded-2xl p-4">
-              <div className="flex items-center gap-2">
-                <Link href="/safety" className="text-sm text-brand-blue hover:underline">← Safety</Link>
-              </div>
-              <h1 className="mt-2 text-xl font-bold text-[var(--neu-text)]">🚨 Report Emergency</h1>
-              <p className="mt-1 text-sm text-[var(--neu-text-muted)]">
-                Report an emergency and the correct Nigerian agency (NPF / NEMA / DSS / Fire Service) will be automatically notified for high-severity incidents.
-              </p>
-            </div>
+    <SentinelSubpageLayout
+      maxWidth="920"
+      pageTitle="Emergency report"
+      pageSubtitle="Report to NPF, NEMA, DSS, or Fire Service with live dispatch tracking."
+      icon="local_police"
+      iconAccent="red"
+    >
+      <SentinelHowItWorks>
+        Choose the emergency type and severity. High-severity reports can auto-dispatch the
+        assigned agency. You can replay location history and escalate from this dashboard.
+      </SentinelHowItWorks>
 
             {/* Active Emergencies panel */}
             {(activeLoading || active.length > 0) && (
@@ -571,14 +560,6 @@ export default function EmergencyPage() {
               )}
             </div>
 
-          </div>
-        </main>
-
-        <RightSidebar />
-      </div>
-      <Suspense fallback={<div className="h-16" />}>
-        <BottomNav />
-      </Suspense>
-    </div>
+    </SentinelSubpageLayout>
   );
 }
