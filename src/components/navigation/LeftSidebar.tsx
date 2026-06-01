@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { Shield } from 'lucide-react';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
-import { AppNavIcon } from '@/components/navigation/AppNavIcon';
 
 import { SidebarProfileLockup } from './SidebarProfileLockup';
 import { SidebarBuildingSilhouette } from './SidebarBuildingSilhouette';
@@ -76,10 +76,10 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
           <Link
             href="/safety"
             onClick={onNavigate}
-            className={`left-sidebar__sentinel-btn${isActive('/safety') ? ' left-sidebar__sentinel-btn--active' : ''}`}
+            className={`left-sidebar__sentinel-link${isActive('/safety') ? ' is-active' : ''}`}
             aria-label="Sentinel AI"
           >
-            <AppNavIcon name="shield" active={isActive('/safety')} />
+            <Shield className="left-sidebar__sentinel-glyph" strokeWidth={2} fill="none" aria-hidden />
           </Link>
         </div>
 
