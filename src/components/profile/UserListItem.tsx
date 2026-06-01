@@ -96,16 +96,16 @@ export function UserListItem({ user }: UserListItemProps) {
                 <span className="inline-flex items-center gap-1.5">
                   <i className="bi bi-hourglass-split animate-spin text-xs" />
                   <span className="hidden sm:inline">
-                    {isFollowing ? 'Unlinking...' : 'Linking...'}
+                    {isFollowing ? 'Unfollowing…' : 'Following…'}
                   </span>
                 </span>
               ) : (
                 <>
                   <span className="hidden group-hover:inline">
-                    {isFollowing ? 'Unlink' : 'HuudLink'}
+                    {isFollowing ? 'Unfollow' : 'Follow'}
                   </span>
                   <span className="group-hover:hidden">
-                    {isFollowing ? 'HuudLinked' : 'HuudLink'}
+                    {isFollowing ? 'Following' : 'Follow'}
                   </span>
                 </>
               )}

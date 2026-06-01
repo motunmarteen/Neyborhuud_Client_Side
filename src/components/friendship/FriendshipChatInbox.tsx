@@ -6,10 +6,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { chatService } from '@/services/chat.service';
 import socketService from '@/lib/socket';
 import type { Conversation } from '@/types/api';
+import { isCommunityChat } from '@/lib/chatPaths';
 
 function getDisplayName(c: Conversation): string {
   if (c.type === 'incident') return '🚨 Emergency Chat';
-  if (c.type === 'community') return '🏘️ Community Chat';
+  if (isCommunityChat(c)) return c.name || c.groupName || '🏘️ Community';
   if (c.contextType === 'marketplace') {
     return (
       c.context?.productTitle ||
@@ -28,7 +29,6 @@ function getDisplayName(c: Conversation): string {
       'Job Chat'
     );
   }
-  if (c.type === 'group') return c.name || c.groupName || 'Group Chat';
   if (c.otherParticipant) {
     return c.otherParticipant.name || c.otherParticipant.username || 'Direct Message';
   }
@@ -39,6 +39,7 @@ function getAvatarUrl(c: Conversation): string | null {
   if (c.contextType === 'marketplace' && c.context?.productThumbnail) {
     return c.context.productThumbnail;
   }
+  if (isCommunityChat(c) && c.imageUrl) return c.imageUrl;
   if (c.type === 'direct' && c.otherParticipant?.avatarUrl) return c.otherParticipant.avatarUrl;
   return null;
 }
@@ -52,10 +53,9 @@ function getCid(c: Conversation): string {
 
 function getInitials(c: Conversation): string {
   if (c.type === 'incident') return '🚨';
-  if (c.type === 'community') return '🏘️';
+  if (isCommunityChat(c)) return '🏘️';
   if (c.contextType === 'marketplace') return '🛍️';
   if (c.contextType === 'jobs') return '💼';
-  if (c.type === 'group') return '👥';
   if (c.otherParticipant) {
     const n = c.otherParticipant.name || c.otherParticipant.username || '?';
     return n.slice(0, 2).toUpperCase();
@@ -92,29 +92,55 @@ function ChatListSkeleton({ count = 4 }: { count?: number }) {
   );
 }
 
-function ChatEmptyState() {
+function ChatEmptyState({ filter }: { filter: InboxFilter }) {
+  const isCommunities = filter === 'communities';
   return (
     <div className="flex flex-col items-center justify-center bg-white px-8 py-16 text-center">
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-gray-100 bg-slate-50">
-        <span className="material-symbols-outlined fill-1 text-[32px] text-[#00D431]">chat</span>
+        <span className="material-symbols-outlined fill-1 text-[32px] text-[#00D431]">
+          {isCommunities ? 'groups' : 'chat'}
+        </span>
       </div>
-      <h3 className="mb-1 text-sm font-bold text-slate-800">No conversations yet</h3>
+      <h3 className="mb-1 text-sm font-bold text-slate-800">
+        {isCommunities ? 'No community chats yet' : 'No conversations yet'}
+      </h3>
       <p className="max-w-xs text-xs leading-relaxed text-slate-500">
-        Message a friend from your followers list to start chatting.
+        {isCommunities
+          ? 'Create or join a community to start a group chat, or tap Browse to discover hubs near you.'
+          : 'Message a friend from your followers list to start chatting.'}
       </p>
+      {isCommunities ? (
+        <Link
+          href="/communities"
+          className="mod-chip mod-chip-active mt-4 rounded-full px-4 py-2 text-xs font-bold text-primary no-underline"
+        >
+          Browse communities
+        </Link>
+      ) : null}
     </div>
   );
+}
+
+type InboxFilter = 'all' | 'direct' | 'communities';
+
+function matchesFilter(c: Conversation, filter: InboxFilter): boolean {
+  if (filter === 'all') return true;
+  if (filter === 'direct') return c.type === 'direct';
+  if (filter === 'communities') return isCommunityChat(c);
+  return true;
 }
 
 type FriendshipChatInboxProps = {
   searchQuery?: string;
   hideSearchBar?: boolean;
+  inboxFilter?: InboxFilter;
 };
 
 /** Chats tab UI from Friendship — conversation search + list only. */
 export function FriendshipChatInbox({
   searchQuery: searchQueryProp,
   hideSearchBar = false,
+  inboxFilter = 'all',
 }: FriendshipChatInboxProps = {}) {
   const queryClient = useQueryClient();
   const [internalSearch, setInternalSearch] = useState('');
@@ -139,14 +165,15 @@ export function FriendshipChatInbox({
   const conversations: Conversation[] = (conversationsData as { data?: { conversations?: Conversation[] } })?.data?.conversations ?? [];
 
   const filtered = useMemo(() => {
-    if (!search) return conversations;
+    let list = conversations.filter((c) => matchesFilter(c, inboxFilter));
+    if (!search) return list;
     const q = search.toLowerCase();
-    return conversations.filter(
+    return list.filter(
       (c) =>
         getDisplayName(c).toLowerCase().includes(q) ||
         (c.otherParticipant?.username || '').toLowerCase().includes(q),
     );
-  }, [conversations, search]);
+  }, [conversations, search, inboxFilter]);
 
   return (
     <div className="flex flex-col bg-white">
@@ -170,7 +197,7 @@ export function FriendshipChatInbox({
       {isLoading ? (
         <ChatListSkeleton count={4} />
       ) : filtered.length === 0 ? (
-        <ChatEmptyState />
+        <ChatEmptyState filter={inboxFilter} />
       ) : (
         <div className="divide-y divide-gray-100 bg-white">
           {filtered.map((c, index) => {
@@ -184,7 +211,7 @@ export function FriendshipChatInbox({
             return (
               <Link
                 key={cid || `conv-${index}`}
-                href={`/messages/${cid}`}
+                href={`/chat/${cid}`}
                 className="flex items-center gap-3 border-b border-gray-100 px-4 py-3.5 transition-colors duration-150 hover:bg-slate-50"
               >
                 {url ? (

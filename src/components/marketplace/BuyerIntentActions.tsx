@@ -176,7 +176,7 @@ export function BuyerIntentActions({
         toast.error("Could not start conversation with seller");
         return false;
       }
-      router.push(`/messages/${convId}`);
+      router.push(`/chat/${convId}`);
       return true;
     };
 
@@ -279,7 +279,7 @@ export function BuyerIntentActions({
         
         if (order?.conversationId) {
           // Redirect to chat
-          router.push(`/messages/${order.conversationId}`);
+          router.push(`/chat/${order.conversationId}`);
         }
       } catch (error) {
         // Error toast shown by hook
@@ -314,7 +314,7 @@ export function BuyerIntentActions({
         toast.success(
           `${getOfferToast({ action: 'new', amount, actorRole: 'buyer' }, 'buyer')} You are awaiting the seller's response.`,
         );
-        router.push(`/messages/${conversationId}`);
+        router.push(`/chat/${conversationId}`);
       } else {
         toast.success(
           `You placed an offer of ${formatNGN(amount)} and are awaiting the seller's response.`,

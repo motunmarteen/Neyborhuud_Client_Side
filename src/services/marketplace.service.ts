@@ -258,6 +258,7 @@ export const marketplaceService = {
       maxPrice?: number;
       condition?: string;
       delivery?: boolean;
+      sellerId?: string;
     },
   ) {
     return await apiClient.get<PaginatedResponse<Product>>(

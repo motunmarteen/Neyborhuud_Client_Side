@@ -1,6 +1,6 @@
 /**
  * FYI Bulletin Page
- * Community bulletins with unified feed tab layout — mirrors Gossip page architecture.
+ * Community bulletins with unified feed tab layout.
  */
 
 'use client';

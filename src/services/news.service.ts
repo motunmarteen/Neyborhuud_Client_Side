@@ -1,57 +1,62 @@
 /**
  * News Service
- * Fetches RSS feeds via the backend proxy (/api/v1/news)
- * and parses the XML client-side.
+ * Consumes /api/v1/news — categories, sources, articles (server-parsed RSS), and raw feed proxy.
  */
 
-import apiClient from "@/lib/api-client";
-import type { NewsCategory, RssArticle } from "@/types/incident";
+import apiClient from '@/lib/api-client';
+import type {
+  NewsArticlesResponse,
+  NewsCategoriesResponse,
+  NewsCategory,
+  NewsSource,
+  NewsTopic,
+  RssArticle,
+} from '@/types/incident';
 
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data?: T;
+function normalizeArticleLink(link: string): string {
+  if (!link) return '';
+  try {
+    const url = new URL(link);
+    url.hash = '';
+    return url.href;
+  } catch {
+    return link.split('#')[0];
+  }
 }
-
-// ── Simple RSS XML → article parser ──────────────────────────────────────────
 
 function parseRssXml(xml: string, sourceId: string, sourceName: string): RssArticle[] {
   try {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(xml, "application/xml");
+    const doc = parser.parseFromString(xml, 'application/xml');
+    const items = Array.from(doc.querySelectorAll('item'));
 
-    const items = Array.from(doc.querySelectorAll("item"));
     return items.slice(0, 20).map((item, index): RssArticle => {
-      const getText = (tag: string) =>
-        item.querySelector(tag)?.textContent?.trim() ?? "";
-
-      const guid = getText("guid") || getText("link") || `${sourceId}-${index}`;
-      const title = getText("title");
-      const description = getText("description")
-        // Strip HTML tags from description
-        .replace(/<[^>]*>/g, "")
-        .replace(/&[a-z]+;/gi, " ")
+      const getText = (tag: string) => item.querySelector(tag)?.textContent?.trim() ?? '';
+      const guid = getText('guid') || getText('link') || `${sourceId}-${index}`;
+      const title = getText('title');
+      const description = getText('description')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&[a-z]+;/gi, ' ')
         .trim();
-      const link = getText("link");
-      const pubDate = getText("pubDate");
+      const link = getText('link');
+      const pubDate = getText('pubDate');
 
-      // Try to extract image from media:content, enclosure, or description
       let imageUrl: string | undefined;
-      const mediaContent = item.querySelector("content");
-      const enclosure = item.querySelector("enclosure");
-      if (mediaContent?.getAttribute("url")) {
-        imageUrl = mediaContent.getAttribute("url") ?? undefined;
-      } else if (enclosure?.getAttribute("url")) {
-        imageUrl = enclosure.getAttribute("url") ?? undefined;
+      const mediaContent = item.querySelector('content');
+      const enclosure = item.querySelector('enclosure');
+      if (mediaContent?.getAttribute('url')) {
+        imageUrl = mediaContent.getAttribute('url') ?? undefined;
+      } else if (enclosure?.getAttribute('url')) {
+        imageUrl = enclosure.getAttribute('url') ?? undefined;
       } else {
-        const imgMatch = item.querySelector("description")?.textContent?.match(
+        const imgMatch = item.querySelector('description')?.textContent?.match(
           /<img[^>]+src=["']([^"']+)["']/i,
         );
         if (imgMatch) imageUrl = imgMatch[1];
       }
 
       return {
-        id: guid,
+        id: `${sourceId}::${guid}`,
         title,
         description: description.substring(0, 300),
         link,
@@ -66,39 +71,52 @@ function parseRssXml(xml: string, sourceId: string, sourceName: string): RssArti
   }
 }
 
-// ── Service ───────────────────────────────────────────────────────────────────
-
 export const newsService = {
   async getCategories() {
-    return apiClient.get<ApiResponse<{ categories: NewsCategory[] }>>(
-      "/news/categories",
-    );
+    return apiClient.get<NewsCategoriesResponse>('/news/categories');
   },
 
-  async getSources() {
-    return apiClient.get<ApiResponse<{ sources: Array<{ id: string; name: string }> }>>(
-      "/news/sources",
-    );
+  async getTopics() {
+    return apiClient.get<{ topics: NewsTopic[] }>('/news/topics');
+  },
+
+  async getSources(region?: 'nigeria' | 'international') {
+    return apiClient.get<{ sources: NewsSource[] }>('/news/sources', {
+      params: region ? { region } : undefined,
+    });
   },
 
   /**
-   * Fetch a single RSS feed by source id.
-   * The backend returns raw XML; we parse it here.
+   * Primary RSS path — server fetch, parse, topic filter, and merge.
    */
+  async getArticles(params: {
+    region: 'nigeria' | 'international';
+    topic?: string;
+    sources?: string[];
+    limit?: number;
+  }): Promise<RssArticle[]> {
+    const response = await apiClient.get<NewsArticlesResponse>('/news/articles', {
+      params: {
+        region: params.region,
+        topic: params.topic ?? 'all',
+        sources: params.sources?.length ? params.sources.join(',') : undefined,
+        limit: params.limit ?? 12,
+      },
+    });
+    return response.data?.articles ?? [];
+  },
+
+  /** Raw XML feed proxy (fallback / legacy). */
   async getFeed(sourceId: string, sourceName: string): Promise<RssArticle[]> {
-    // apiClient.get() already returns response.data, so the result IS the raw XML string.
     const xml = await apiClient.get<string>(`/news/feed`, {
       params: { source: sourceId },
-      responseType: "text",
-      // Prevent axios from JSON-parsing the RSS XML response
+      responseType: 'text',
       transformResponse: [(data) => data],
     });
-    return parseRssXml(typeof xml === "string" ? xml : "", sourceId, sourceName);
+    return parseRssXml(typeof xml === 'string' ? xml : '', sourceId, sourceName);
   },
 
-  /**
-   * Fetch multiple sources in parallel and merge/sort by date.
-   */
+  /** Client-side merge fallback when /articles is unavailable. */
   async getMultipleFeeds(
     sources: Array<{ id: string; name: string }>,
     maxPerSource = 10,
@@ -109,18 +127,25 @@ export const newsService = {
 
     const articles: RssArticle[] = [];
     results.forEach((result) => {
-      if (result.status === "fulfilled") {
+      if (result.status === 'fulfilled') {
         articles.push(...result.value.slice(0, maxPerSource));
       }
     });
 
-    // Sort by pubDate descending
     articles.sort((a, b) => {
       const ta = a.pubDate ? new Date(a.pubDate).getTime() : 0;
       const tb = b.pubDate ? new Date(b.pubDate).getTime() : 0;
       return tb - ta;
     });
 
-    return articles;
+    const seen = new Set<string>();
+    return articles.filter((article) => {
+      const dedupeKey = normalizeArticleLink(article.link) || `${article.source}::${article.id}`;
+      if (seen.has(dedupeKey)) return false;
+      seen.add(dedupeKey);
+      return true;
+    });
   },
 };
+
+export type { NewsCategory, NewsTopic };

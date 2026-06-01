@@ -5,86 +5,82 @@ import { formatProfileBirthday, getZodiacFromBirthday } from '@/lib/profileSnapH
 
 type ProfileSnapStatsRowProps = {
   username: string;
+  isOwnProfile?: boolean;
   dateOfBirth?: string | null;
   huudCoins: number;
   followerCount: number;
   followingCount: number;
 };
 
-type StatChip = {
-  key: string;
+function StatCard({
+  icon,
+  label,
+  value,
+  href,
+}: {
   icon: string;
   label: string;
   value: string;
   href?: string;
-};
-
-function StatChipCard({ chip }: { chip: StatChip }) {
+}) {
   const inner = (
-    <>
-      <span className="auth-signup-location-peek__icon" aria-hidden>
-        {chip.icon.startsWith('bi-') ? <i className={`bi ${chip.icon}`} /> : chip.icon}
-      </span>
-      <div className="min-w-0">
-        <p className="auth-signup-location-peek__label">{chip.label}</p>
-        <p className="auth-signup-location-peek__name truncate">{chip.value}</p>
+    <div className="mod-card flex items-center gap-3 rounded-xl p-3">
+      <div className="mod-inset flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+        <span className="text-lg leading-none">{icon}</span>
       </div>
-      {chip.href ? <span className="auth-signup-location-peek__chevron" aria-hidden>›</span> : null}
-    </>
+      <div className="min-w-0">
+        <p className="truncate text-lg font-extrabold tabular-nums" style={{ color: 'var(--neu-text)' }}>
+          {value}
+        </p>
+        <p className="text-xs text-[var(--neu-text-muted)]">{label}</p>
+      </div>
+    </div>
   );
 
-  if (chip.href) {
+  if (href) {
     return (
-      <Link href={chip.href} className="auth-signup-location-peek profile-auth-stat-chip no-underline">
+      <Link href={href} className="block no-underline transition-opacity hover:opacity-90">
         {inner}
       </Link>
     );
   }
 
-  return <div className="auth-signup-location-peek profile-auth-stat-chip">{inner}</div>;
+  return inner;
 }
 
 export function ProfileSnapStatsRow({
   username,
+  isOwnProfile = false,
   dateOfBirth,
   huudCoins,
   followerCount,
   followingCount,
 }: ProfileSnapStatsRowProps) {
-  const birthday = formatProfileBirthday(dateOfBirth);
-  const zodiac = getZodiacFromBirthday(dateOfBirth);
-
-  const chips: StatChip[] = [
-    ...(birthday ? [{ key: 'birthday', icon: '🎈', label: 'Birthday', value: birthday }] : []),
-    {
-      key: 'coins',
-      icon: '🪙',
-      label: 'HuudCoins',
-      value: huudCoins.toLocaleString(),
-      href: '/gamification/wallet',
-    },
-    ...(zodiac ? [{ key: 'zodiac', icon: zodiac.emoji, label: 'Sign', value: zodiac.sign }] : []),
-    {
-      key: 'linkers',
-      icon: '👥',
-      label: 'Linkers',
-      value: followerCount.toLocaleString(),
-      href: `/profile/${username}/followers`,
-    },
-    {
-      key: 'linking',
-      icon: 'bi-share',
-      label: 'Linking',
-      value: followingCount.toLocaleString(),
-      href: `/profile/${username}/following`,
-    },
-  ];
+  const birthday = isOwnProfile ? formatProfileBirthday(dateOfBirth) : null;
+  const zodiac = isOwnProfile ? getZodiacFromBirthday(dateOfBirth) : null;
 
   return (
-    <div className="profile-auth-stat-row">
-      {chips.map((chip) => (
-        <StatChipCard key={chip.key} chip={chip} />
-      ))}
+    <div className="grid grid-cols-2 gap-3">
+      {birthday ? <StatCard icon="🎈" label="Birthday" value={birthday} /> : null}
+      <StatCard
+        icon="🪙"
+        label="HuudCoins"
+        value={huudCoins.toLocaleString()}
+        href={isOwnProfile ? '/gamification/wallet' : undefined}
+      />
+      {zodiac ? <StatCard icon={zodiac.emoji} label="Sign" value={zodiac.sign} /> : null}
+      <StatCard
+        icon="👥"
+        label="Followers"
+        value={followerCount.toLocaleString()}
+        href={`/profile/${username}/followers`}
+      />
+      <StatCard
+        icon="↔"
+        label="Following"
+        value={followingCount.toLocaleString()}
+        href={`/profile/${username}/following`}
+      />
     </div>
   );
 }

@@ -18,17 +18,18 @@ function RankDisplay({ rank }: { rank: number }) {
 }
 
 const LEVEL_COLORS = [
-  "bg-slate-100 text-slate-600",
-  "bg-primary/15 text-[#006F35]",
-  "bg-brand-blue/10 text-brand-blue",
-  "bg-brand-blue/15 text-brand-blue",
-  "bg-amber-50 text-amber-800",
+  "mod-chip text-[var(--neu-text-muted)]",
+  "mod-chip mod-chip-active text-primary",
+  "mod-chip text-brand-blue",
+  "mod-chip text-brand-blue",
+  "mod-chip text-amber-800",
 ];
+
 function levelColor(level: number) {
   if (level >= 30) return LEVEL_COLORS[4];
   if (level >= 20) return LEVEL_COLORS[3];
   if (level >= 10) return LEVEL_COLORS[2];
-  if (level >= 5)  return LEVEL_COLORS[1];
+  if (level >= 5) return LEVEL_COLORS[1];
   return LEVEL_COLORS[0];
 }
 
@@ -40,40 +41,42 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
 
   return (
     <div
-      className={`flex items-center gap-3 py-3 px-4 rounded-xl transition-colors ${
-        isMe
-          ? "bg-brand-blue/5 border border-brand-blue/20"
-          : "hover:bg-slate-50"
+      className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${
+        isMe ? "mod-inset ring-1 ring-primary/25 bg-primary/5" : "hover:bg-black/[0.02]"
       }`}
     >
-      <div className="w-8 flex justify-center shrink-0">
+      <div className="flex w-8 shrink-0 justify-center">
         <RankDisplay rank={entry.rank} />
       </div>
 
-      <div className="w-9 h-9 rounded-full bg-brand-surface overflow-hidden shrink-0 flex items-center justify-center text-sm font-bold text-slate-700 border border-gray-100">
+      <div className="mod-inset flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-[var(--neu-text)]">
         {(entry.user?.avatarUrl ?? entry.user?.profilePicture) ? (
-          <img src={entry.user.avatarUrl ?? entry.user.profilePicture} alt={displayName} className="w-full h-full object-cover" />
+          <img
+            src={entry.user.avatarUrl ?? entry.user.profilePicture}
+            alt={displayName}
+            className="h-full w-full object-cover"
+          />
         ) : (
           displayName[0]?.toUpperCase() || "?"
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <Link
           href={`/profile/${entry.user?.username ?? ""}`}
-          className="text-sm font-semibold text-slate-900 hover:text-brand-blue transition-colors truncate block"
+          className="block truncate text-sm font-semibold text-[var(--neu-text)] transition-colors hover:text-primary"
         >
           {displayName}
-          {isMe && <span className="ml-1 text-xs text-brand-blue">(You)</span>}
+          {isMe && <span className="ml-1 text-xs text-primary">(You)</span>}
         </Link>
-        <p className="text-xs text-[var(--neu-text-muted)] truncate">@{entry.user?.username ?? "—"}</p>
+        <p className="truncate text-xs text-[var(--neu-text-muted)]">@{entry.user?.username ?? "—"}</p>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
-        <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${levelColor(entry.level)}`}>
+      <div className="flex shrink-0 items-center gap-2">
+        <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${levelColor(entry.level)}`}>
           Lv {entry.level}
         </span>
-        <span className="text-sm font-bold text-slate-900 tabular-nums">
+        <span className="text-sm font-bold tabular-nums" style={{ color: "var(--neu-text)" }}>
           {(entry.points ?? 0).toLocaleString()}
         </span>
         <span className="text-xs text-[var(--neu-text-muted)]">pts</span>

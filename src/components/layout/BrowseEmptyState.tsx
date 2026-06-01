@@ -1,13 +1,16 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 type BrowseEmptyStateProps = {
   icon: string;
   title: string;
   description?: string;
   filledIcon?: boolean;
+  action?: ReactNode;
 };
 
-export function BrowseEmptyState({ icon, title, description, filledIcon }: BrowseEmptyStateProps) {
+export function BrowseEmptyState({ icon, title, description, filledIcon, action }: BrowseEmptyStateProps) {
   return (
     <div className="mod-card flex flex-col items-center gap-3 rounded-2xl px-6 py-14 text-center">
       <div className="mod-inset flex h-16 w-16 items-center justify-center rounded-full">
@@ -25,6 +28,7 @@ export function BrowseEmptyState({ icon, title, description, filledIcon }: Brows
           {description}
         </p>
       ) : null}
+      {action ? <div className="mt-1">{action}</div> : null}
     </div>
   );
 }

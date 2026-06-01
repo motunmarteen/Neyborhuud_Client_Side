@@ -38,14 +38,14 @@ export default function StreakCard({
     milestone.target > 0 ? Math.min(100, Math.round((streak / milestone.target) * 100)) : 0;
 
   return (
-    <div className="rounded-2xl border border-brand-red/30 bg-gradient-to-br from-brand-red/10 via-brand-surface to-white p-5">
+    <div className="mod-card rounded-2xl bg-gradient-to-br from-brand-red/10 via-[var(--neu-bg)] to-primary/5 p-5">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-red/15 text-2xl">
+          <div className="mod-inset flex h-12 w-12 items-center justify-center rounded-full text-2xl">
             🔥
           </div>
           <div>
-            <p className="text-2xl font-extrabold tabular-nums text-brand-black">
+            <p className="text-2xl font-extrabold tabular-nums" style={{ color: "var(--neu-text)" }}>
               {streak}
               <span className="ml-1 text-base font-semibold text-brand-red">
                 day{streak !== 1 ? "s" : ""}
@@ -71,7 +71,7 @@ export default function StreakCard({
           <span>Day {streak}</span>
           <span>Day {milestone.target}</span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-brand-surface">
+        <div className="mod-inset h-2 overflow-hidden rounded-full">
           <div
             className="h-full rounded-full bg-gradient-to-r from-brand-red to-primary transition-all duration-500"
             style={{ width: `${progressPct}%` }}
@@ -92,11 +92,12 @@ export default function StreakCard({
       )}
 
       <button
+        type="button"
         onClick={onCheckIn}
         disabled={checkInPending || checkedInToday}
         className={`w-full rounded-xl py-2.5 text-sm font-bold transition-colors ${
           checkedInToday
-            ? "cursor-default border border-primary/30 bg-primary/15 text-primary"
+            ? "mod-chip mod-chip-active cursor-default text-primary"
             : "bg-brand-red text-white hover:bg-brand-red disabled:opacity-50"
         }`}
       >

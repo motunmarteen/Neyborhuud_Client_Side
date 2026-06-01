@@ -6,7 +6,6 @@ import { getCurrentLocation } from '@/lib/geolocation';
 import { isUserInNigeria } from '@/lib/nigeriaCheck';
 import { useTranslation } from '@/lib/i18n';
 import { CreatePostPayload, ContentType, AppLanguage } from '@/types/api';
-import { gossipService } from '@/services/gossip.service';
 import { fyiService } from '@/services/fyi.service';
 import apiClient from '@/lib/api-client';
 import { useAwardCoins } from '@/hooks/useGamification';
@@ -28,7 +27,6 @@ interface CreatePostModalProps {
 const CONTENT_TYPES: { value: ContentType; labelKey: string; icon: string }[] = [
     { value: 'post', labelKey: 'contentType.post', icon: '💬' },
     { value: 'fyi', labelKey: 'contentType.fyi', icon: '📢' },
-    { value: 'gossip', labelKey: 'contentType.gossip', icon: '🗣️' },
     { value: 'help_request', labelKey: 'contentType.help_request', icon: '🆘' },
     { value: 'job', labelKey: 'contentType.job', icon: '💼' },
     { value: 'event', labelKey: 'contentType.event', icon: '📅' },
@@ -172,36 +170,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
         }
 
         try {
-            // ── Local News path: route to the dedicated gossip endpoint ──
-            if (contentType === 'gossip') {
-                // Always include #localnews tag
-                if (!extractedTags.includes('localnews')) extractedTags.push('localnews');
-
-                let mediaUrls: string[] = [];
-                if (selectedFiles.length > 0) {
-                    setUploadProgress(10);
-                    const uploadRes = await apiClient.uploadFiles<{ files: { url: string }[] }>(
-                        '/media/upload',
-                        selectedFiles,
-                        undefined,
-                        (p) => setUploadProgress(10 + Math.round(p * 0.8)),
-                    );
-                    mediaUrls = (uploadRes.data?.files || []).map((f) => f.url);
-                    setUploadProgress(90);
-                }
-
-                await gossipService.createGossip({
-                    title: content.trim().substring(0, 100),
-                    body: content.trim(),
-                    anonymous: false,
-                    discussion_type: 'general',
-                    tags: extractedTags,
-                    mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
-                });
-                awardCoins('gossip_created');
-
-                setUploadProgress(100);
-            } else if (contentType === 'fyi' && lockContentType) {
+            if (contentType === 'fyi' && lockContentType) {
                 // ── FYI page path: route to dedicated FYI endpoint ──
                 // Always include #fyi tag
                 if (!extractedTags.includes('fyi')) extractedTags.push('fyi');
@@ -416,7 +385,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
-                                placeholder={contentType === 'gossip' ? 'Share the details…' : t('feed.composerPlaceholder')}
+                                placeholder={t('feed.composerPlaceholder')}
                                 className="w-full p-3 rounded-xl resize-none focus:outline-none text-sm min-h-[120px] neu-input"
                                 rows={5}
                                 disabled={isSubmitting}
@@ -912,8 +881,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                             </div>
                         )}
 
-                        {/* Language Selection — hidden for fyi, gossip, and help_request */}
-                        {contentType !== 'fyi' && contentType !== 'gossip' && contentType !== 'help_request' && (
+                        {/* Language Selection — hidden for fyi and help_request */}
+                        {contentType !== 'fyi' && contentType !== 'help_request' && (
                         <div>
                             <label className="block text-xs font-bold uppercase mb-2" style={{ color: 'var(--neu-text-muted)' }}>
                                 {t('createPost.language')}
@@ -933,8 +902,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                         </div>
                         )}
 
-                        {/* Category, Visibility, Priority — hidden for fyi, locked mode, gossip, and help_request */}
-                        {!lockContentType && contentType !== 'gossip' && contentType !== 'fyi' && contentType !== 'help_request' && (<>
+                        {/* Category, Visibility, Priority — hidden for fyi, locked mode, and help_request */}
+                        {!lockContentType && contentType !== 'fyi' && contentType !== 'help_request' && (<>
                         {/* Category Selection */}
                         <div>
                             <label className="block text-xs font-bold uppercase mb-2" style={{ color: 'var(--neu-text-muted)' }}>

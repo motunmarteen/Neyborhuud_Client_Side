@@ -188,4 +188,31 @@ export const chatService = {
       missingKeys: string[];
     }>(`/chat/conversations/${conversationId}/key-bundle`);
   },
+
+  async setReaction(messageId: string, emoji: string) {
+    return await apiClient.post<{ reactions: Record<string, { count: number; userIds: string[] }> }>(
+      `/chat/messages/${messageId}/reactions`,
+      { emoji },
+    );
+  },
+
+  async removeReaction(messageId: string) {
+    return await apiClient.delete<{ reactions: Record<string, { count: number; userIds: string[] }> }>(
+      `/chat/messages/${messageId}/reactions`,
+    );
+  },
+
+  async startCall(conversationId: string, callType: 'voice' | 'video' = 'voice') {
+    return await apiClient.post(`/chat/conversations/${conversationId}/calls`, { callType });
+  },
+
+  async endCall(conversationId: string, sessionId: string) {
+    return await apiClient.post(`/chat/conversations/${conversationId}/calls/${sessionId}/end`);
+  },
+
+  async getActiveCall(conversationId: string) {
+    return await apiClient.get<{ session: { id: string; callType: string; status: string } | null }>(
+      `/chat/conversations/${conversationId}/calls/active`,
+    );
+  },
 };

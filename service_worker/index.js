@@ -39,8 +39,8 @@ function resolveUrl(data) {
     case "message":
     case "message_new":
       return data.conversationId
-        ? "/messages/" + data.conversationId
-        : "/messages";
+        ? "/chat/" + data.conversationId
+        : "/chat";
     case "community_post":
     case "post_reaction":
     case "comment":

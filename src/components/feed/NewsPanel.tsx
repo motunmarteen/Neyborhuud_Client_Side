@@ -1,160 +1,162 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { newsService } from '@/services/news.service';
+import type { RssArticle } from '@/types/incident';
 
 interface TrendingTopic {
-    id: string;
-    title: string;
-    category: string;
-    postCount: number;
-    trending: boolean;
+  id: string;
+  title: string;
+  category: string;
+  postCount: number;
+  trending: boolean;
 }
 
-interface NewsItem {
-    id: string;
-    title: string;
-    source: string;
-    timeAgo: string;
-    imageUrl?: string;
-    postCount?: number;
-    category: string;
-    avatars?: string[];
-}
+function useNewsFeed() {
+  const [items, setItems] = useState<RssArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-// In a real app these would come from an API. For now we use the data structure
-// so the UI is ready. The backend endpoint can be wired later.
-function useNewsAndTrending(tab: 'news' | 'trending') {
-    const [items, setItems] = useState<NewsItem[]>([]);
-    const [topics, setTopics] = useState<TrendingTopic[]>([]);
-    const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const articles = await newsService.getArticles({
+          region: 'nigeria',
+          limit: 8,
+        });
+        if (!cancelled) setItems(articles);
+      } catch {
+        try {
+          const fallback = await newsService.getMultipleFeeds(
+            [
+              { id: 'punch', name: 'Punch' },
+              { id: 'vanguard', name: 'Vanguard' },
+              { id: 'channels', name: 'Channels TV' },
+            ],
+            8,
+          );
+          if (!cancelled) setItems(fallback);
+        } catch {
+          if (!cancelled) {
+            setItems([]);
+            setError('Could not load headlines');
+          }
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-    useEffect(() => {
-        setLoading(true);
-        // Simulated delay — replace with actual API call
-        const timer = setTimeout(() => {
-            if (tab === 'news') {
-                setItems([]);
-            } else {
-                setTopics([]);
-            }
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [tab]);
-
-    return { items, topics, loading };
+  return { items, loading, error };
 }
 
 export function TrendingPanel() {
-    const { topics, loading } = useNewsAndTrending('trending');
+  const [topics] = useState<TrendingTopic[]>([]);
+  const loading = false;
 
-    if (loading) {
-        return (
-            <div className="flex flex-col gap-4">
-                {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="animate-pulse flex flex-col gap-2 px-4 py-3">
-                        <div className="h-3 w-24 rounded bg-white/5" />
-                        <div className="h-5 w-48 rounded bg-white/10" />
-                        <div className="h-3 w-32 rounded bg-white/5" />
-                    </div>
-                ))}
-            </div>
-        );
-    }
-
-    if (topics.length === 0) {
-        return (
-            <div className="flex flex-col items-center py-16 px-6">
-                <span className="material-symbols-outlined text-4xl mb-3" style={{ color: 'var(--neu-text-muted)' }}>trending_up</span>
-                <p className="text-sm font-medium mb-1" style={{ color: 'var(--neu-text)' }}>Nothing trending yet</p>
-                <p className="text-xs text-center" style={{ color: 'var(--neu-text-muted)' }}>
-                    Trending topics from your Huud and Nigeria will appear here as community activity grows.
-                </p>
-            </div>
-        );
-    }
-
+  if (loading) {
     return (
-        <div className="flex flex-col divide-y" style={{ borderColor: 'var(--neu-shadow-dark, rgba(255,255,255,0.05))' }}>
-            {topics.map((topic) => (
-                <div key={topic.id} className="px-4 py-3 hover:bg-white/[0.02] transition-colors cursor-pointer">
-                    <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
-                        {topic.category} · Trending
-                    </p>
-                    <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--neu-text)' }}>
-                        {topic.title}
-                    </p>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--neu-text-muted)' }}>
-                        {topic.postCount.toLocaleString()} posts
-                    </p>
-                </div>
-            ))}
-        </div>
+      <div className="flex flex-col gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="animate-pulse flex flex-col gap-2 px-4 py-3">
+            <div className="h-3 w-24 rounded bg-white/5" />
+            <div className="h-5 w-48 rounded bg-white/10" />
+            <div className="h-3 w-32 rounded bg-white/5" />
+          </div>
+        ))}
+      </div>
     );
+  }
+
+  if (topics.length === 0) {
+    return (
+      <div className="flex flex-col items-center py-16 px-6">
+        <span className="material-symbols-outlined mb-3 text-4xl text-[var(--neu-text-muted)]">trending_up</span>
+        <p className="mb-1 text-sm font-medium" style={{ color: 'var(--neu-text)' }}>Nothing trending yet</p>
+        <p className="text-center text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+          Trending topics from your Huud and Nigeria will appear here as community activity grows.
+        </p>
+      </div>
+    );
+  }
+
+  return null;
 }
 
 export function NewsPanel() {
-    const { items, loading } = useNewsAndTrending('news');
+  const { items, loading, error } = useNewsFeed();
 
-    if (loading) {
-        return (
-            <div className="flex flex-col gap-4">
-                <div className="px-4 pt-3">
-                    <div className="h-5 w-32 rounded bg-white/10 animate-pulse" />
-                </div>
-                {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="animate-pulse px-4 py-3">
-                        <div className="h-5 w-full rounded bg-white/10 mb-2" />
-                        <div className="h-4 w-3/4 rounded bg-white/5 mb-2" />
-                        <div className="flex gap-2 items-center">
-                            <div className="h-3 w-20 rounded bg-white/5" />
-                            <div className="h-3 w-16 rounded bg-white/5" />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
-    }
-
-    if (items.length === 0) {
-        return (
-            <div className="flex flex-col items-center py-16 px-6">
-                <span className="material-symbols-outlined text-4xl mb-3" style={{ color: 'var(--neu-text-muted)' }}>newspaper</span>
-                <p className="text-sm font-medium mb-1" style={{ color: 'var(--neu-text)' }}>No news yet</p>
-                <p className="text-xs text-center" style={{ color: 'var(--neu-text-muted)' }}>
-                    Breaking news and stories from Nigeria and around the world will appear here. Stay tuned.
-                </p>
-            </div>
-        );
-    }
-
+  if (loading) {
     return (
-        <div className="flex flex-col">
-            <h3 className="px-4 pt-3 pb-2 text-lg font-extrabold" style={{ color: 'var(--neu-text)' }}>
-                Today&rsquo;s News
-            </h3>
-            <div className="flex flex-col divide-y" style={{ borderColor: 'var(--neu-shadow-dark, rgba(255,255,255,0.05))' }}>
-                {items.map((item) => (
-                    <article key={item.id} className="px-4 py-3 hover:bg-white/[0.02] transition-colors cursor-pointer">
-                        <h4 className="text-[15px] font-bold leading-snug mb-1.5" style={{ color: 'var(--neu-text)' }}>
-                            {item.title}
-                        </h4>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            {item.avatars && item.avatars.length > 0 && (
-                                <div className="flex -space-x-2">
-                                    {item.avatars.slice(0, 3).map((av, i) => (
-                                        <img key={i} src={av} alt="" className="w-5 h-5 rounded-full border border-black" />
-                                    ))}
-                                </div>
-                            )}
-                            <span className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
-                                {item.timeAgo} · {item.category}
-                                {item.postCount ? ` · ${item.postCount >= 1000 ? `${(item.postCount / 1000).toFixed(1)}K` : item.postCount} posts` : ''}
-                            </span>
-                        </div>
-                    </article>
-                ))}
-            </div>
+      <div className="flex flex-col gap-4">
+        <div className="px-4 pt-3">
+          <div className="h-5 w-32 animate-pulse rounded bg-white/10" />
         </div>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="animate-pulse px-4 py-3">
+            <div className="mb-2 h-5 w-full rounded bg-white/10" />
+            <div className="mb-2 h-4 w-3/4 rounded bg-white/5" />
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-20 rounded bg-white/5" />
+              <div className="h-3 w-16 rounded bg-white/5" />
+            </div>
+          </div>
+        ))}
+      </div>
     );
+  }
+
+  if (error || items.length === 0) {
+    return (
+      <div className="flex flex-col items-center py-16 px-6">
+        <span className="material-symbols-outlined mb-3 text-4xl text-[var(--neu-text-muted)]">newspaper</span>
+        <p className="mb-1 text-sm font-medium" style={{ color: 'var(--neu-text)' }}>No headlines right now</p>
+        <p className="mb-4 text-center text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+          {error ?? 'Check Local News for the latest Nigeria and international stories.'}
+        </p>
+        <Link href="/local-news?tab=nigeria" className="mod-chip mod-chip-active rounded-full px-3 py-1.5 text-xs font-bold text-primary no-underline">
+          Open Local News
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between px-4 pt-3 pb-2">
+        <h3 className="text-lg font-extrabold" style={{ color: 'var(--neu-text)' }}>
+          Today&rsquo;s News
+        </h3>
+        <Link href="/local-news?tab=nigeria" className="text-xs font-bold text-primary no-underline">
+          See all
+        </Link>
+      </div>
+      <div className="flex flex-col divide-y" style={{ borderColor: 'var(--neu-shadow-dark, rgba(255,255,255,0.05))' }}>
+        {items.map((item) => (
+          <a
+            key={item.id}
+            href={item.link || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-3 transition-colors hover:bg-white/[0.02]"
+          >
+            <h4 className="mb-1.5 text-[15px] font-bold leading-snug" style={{ color: 'var(--neu-text)' }}>
+              {item.title}
+            </h4>
+            <span className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+              {item.sourceName ?? item.source ?? 'News'} · {item.pubDate ? new Date(item.pubDate).toLocaleDateString() : 'Recent'}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
 }

@@ -169,7 +169,7 @@ export default function MyOrdersPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        router.push(`/messages/${order.conversationId}`);
+                        router.push(`/chat/${order.conversationId}`);
                       }}
                       className="px-4 py-2 bg-brand-blue hover:bg-blue-600 rounded-full text-sm font-semibold transition-all self-center flex items-center gap-2"
                     >

@@ -26,7 +26,7 @@ interface Recipient {
 
 interface Props {
   recipient: Recipient;
-  onConfirm: (amount: TipAmount) => void;
+  onConfirm: (amount: TipAmount) => void | Promise<void>;
   isPending: boolean;
   onClose: () => void;
 }
@@ -68,8 +68,12 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
   const avatarSrc = recipient.profilePicture || recipient.avatarUrl;
 
   async function handleConfirm() {
-    onConfirm(selected);
-    setDone(true);
+    try {
+      await onConfirm(selected);
+      setDone(true);
+    } catch {
+      // Parent handles error toast; keep modal open for retry
+    }
   }
 
   return (

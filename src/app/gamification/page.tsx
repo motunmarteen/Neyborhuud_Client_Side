@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { AppBrowseLayout } from "@/components/layout/AppBrowseLayout";
+import { BrowseEmptyState } from "@/components/layout/BrowseEmptyState";
+import { BrowseTabStrip } from "@/components/layout/BrowseTabStrip";
 import BadgeCard from "@/components/gamification/BadgeCard";
 import AchievementCard from "@/components/gamification/AchievementCard";
 import LeaderboardRow from "@/components/gamification/LeaderboardRow";
@@ -59,7 +61,7 @@ function StatCard({
 }) {
   return (
     <div className="mod-card rounded-xl p-4 flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${color}`}>
+      <div className={`mod-inset flex h-10 w-10 items-center justify-center rounded-full ${color}`}>
         <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
           {icon}
         </span>
@@ -69,6 +71,37 @@ function StatCard({
         <p className="text-xs text-[var(--neu-text-muted)]">{label}</p>
       </div>
     </div>
+  );
+}
+
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>
+      {children}
+    </h2>
+  );
+}
+
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+        active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
+      }`}
+      style={active ? undefined : { color: "var(--neu-text-muted)" }}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -161,39 +194,37 @@ export default function GamificationPage() {
     <AppBrowseLayout
       maxWidth="680"
       subtitle={
-        statsData
-          ? `Level ${statsData.level ?? 1} · ${(statsData.points ?? 0).toLocaleString()} pts`
-          : "Track badges, trust, and HuudCoins"
+        <span className="flex items-center justify-between gap-3">
+          <span className="inline-flex min-w-0 items-center gap-2">
+            <span className="material-symbols-outlined shrink-0 text-xl text-primary">military_tech</span>
+            <span className="truncate">
+              {statsData
+                ? `Level ${statsData.level ?? 1} · ${(statsData.points ?? 0).toLocaleString()} pts`
+                : "Track badges, trust, and HuudCoins"}
+            </span>
+          </span>
+        </span>
       }
       header={
-        <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
-          {TABS.map((t) => {
-            const active = tab === t.id;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTab(t.id)}
-                className={`shrink-0 flex items-center gap-1.5 text-sm px-4 py-2 rounded-full font-semibold transition-colors ${
-                  active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
-                }`}
-                style={active ? undefined : { color: "var(--neu-text-muted)" }}
-              >
-                <span className="material-symbols-outlined text-[16px]">{t.icon}</span>
-                {t.label}
-              </button>
-            );
-          })}
-          <Link
-            href="/gamification/wallet"
-            className="ml-auto shrink-0 flex items-center gap-1.5 text-xs px-3 py-2 mod-chip mod-chip-active text-primary font-semibold"
-          >
-            <span>🪙</span>
-            {statsData?.huudCoins != null
-              ? `${(statsData.huudCoins as number).toLocaleString()}`
-              : "Wallet"}
-          </Link>
-        </div>
+        <BrowseTabStrip
+          tabs={TABS}
+          activeId={tab}
+          onChange={(id) => setTab(id as Tab)}
+          trailing={
+            <Link
+              href="/gamification/wallet"
+              className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary"
+              aria-label="HuudCoins wallet"
+            >
+              <span aria-hidden>🪙</span>
+              <span className="tabular-nums">
+                {statsData?.huudCoins != null
+                  ? (statsData.huudCoins as number).toLocaleString()
+                  : "Wallet"}
+              </span>
+            </Link>
+          }
+        />
       }
     >
       <div className="space-y-5">
@@ -251,37 +282,42 @@ export default function GamificationPage() {
                   </div>
                 ) : null}
 
-                <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-brand-surface via-white to-emerald-50/80 p-4 shadow-sm">
+                <div className="mod-card rounded-2xl bg-gradient-to-br from-primary/8 via-[var(--neu-bg)] to-brand-surface p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">TrustOS Signal</p>
-                      <p className="mt-1 text-2xl font-black text-slate-900 tabular-nums">{trustEconomy.score1000.toLocaleString()}</p>
-                      <p className="text-xs text-slate-600">
+                      <p className="mt-1 text-2xl font-black tabular-nums" style={{ color: "var(--neu-text)" }}>
+                        {trustEconomy.score1000.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-[var(--neu-text-muted)]">
                         {trustEconomy.trustTier.icon} {trustEconomy.trustTier.label} tier · {trustEconomy.communityTrustPercent}% community trust
                       </p>
                     </div>
                     {trustEconomy.nextTier ? (
-                      <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-right shadow-sm">
+                      <div className="mod-inset rounded-xl px-3 py-2 text-right">
                         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">Next Tier</p>
-                        <p className="text-sm font-bold text-slate-900">{trustEconomy.nextTier.icon} {trustEconomy.nextTier.label}</p>
+                        <p className="text-sm font-bold" style={{ color: "var(--neu-text)" }}>
+                          {trustEconomy.nextTier.icon} {trustEconomy.nextTier.label}
+                        </p>
                         <p className="text-xs text-[var(--neu-text-muted)]">{trustEconomy.nextTierDelta} pts to unlock</p>
                       </div>
                     ) : (
-                      <div className="rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-right">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#006F35]">Top Tier</p>
-                        <p className="text-sm font-bold text-[#006F35]">Baobab unlocked</p>
+                      <div className="mod-chip mod-chip-active rounded-xl px-3 py-2 text-right">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">Top Tier</p>
+                        <p className="text-sm font-bold text-primary">Baobab unlocked</p>
                       </div>
                     )}
                   </div>
-                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+                  <div className="mod-inset mt-4 h-2 overflow-hidden rounded-full">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 transition-all duration-500"
                       style={{ width: `${trustEconomy.communityTrustPercent}%` }}
                     />
                   </div>
                   <button
+                    type="button"
                     onClick={() => setTab("trustos")}
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-primary/30 px-3 py-1.5 text-xs font-semibold text-[#006F35] hover:bg-primary/10"
+                    className="mod-chip mod-chip-active mt-4 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-primary"
                   >
                     Open TrustOS Details
                     <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -290,29 +326,34 @@ export default function GamificationPage() {
 
                 {/* Recent badges */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-base font-bold text-slate-900">Recent Badges</h2>
+                  <div className="mb-3 flex items-center justify-between">
+                    <SectionTitle>Recent Badges</SectionTitle>
                     <button
+                      type="button"
                       onClick={() => setTab("badges")}
-                      className="text-xs text-brand-blue hover:underline"
+                      className="text-xs font-semibold text-primary hover:underline"
                     >
                       View all →
                     </button>
                   </div>
                   {myBadges.isLoading ? (
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse mod-card rounded-xl h-32" />
+                        <div key={i} className="mod-inset h-16 animate-pulse rounded-xl" />
                       ))}
                     </div>
                   ) : myBadgeList.length === 0 ? (
-                    <div className="text-center py-8 mod-card rounded-xl">
-                      <span className="text-3xl">🏅</span>
-                      <p className="text-sm text-[var(--neu-text-muted)] mt-2">No badges earned yet</p>
-                      <p className="text-xs text-[var(--neu-text-secondary)] mt-1">Complete achievements to earn badges</p>
-                    </div>
+                    <BrowseEmptyState
+                      icon="military_tech"
+                      title="No badges earned yet"
+                      description="Complete achievements to earn badges"
+                      filledIcon
+                    />
                   ) : (
-                    <div className="grid grid-cols-3 gap-3">
+                    <div
+                      className="mod-card divide-y overflow-hidden rounded-2xl"
+                      style={{ borderColor: "var(--neu-shadow-dark)" }}
+                    >
                       {myBadgeList.slice(0, 3).map((badge: Badge) => (
                         <BadgeCard key={badge.id} badge={badge} earned />
                       ))}
@@ -323,7 +364,7 @@ export default function GamificationPage() {
                 {/* Leaderboard teaser */}
                 <div className="mod-card rounded-xl p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-base font-bold text-slate-900">Leaderboard</h2>
+                    <SectionTitle>Leaderboard</SectionTitle>
                     <button
                       onClick={() => setTab("leaderboard")}
                       className="text-xs text-brand-blue hover:underline"
@@ -334,7 +375,7 @@ export default function GamificationPage() {
                   {leaderboard.isLoading ? (
                     <div className="space-y-2">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse h-12 bg-slate-100 rounded-lg" />
+                        <div key={i} className="mod-inset h-12 animate-pulse rounded-lg" />
                       ))}
                     </div>
                   ) : (
@@ -356,32 +397,36 @@ export default function GamificationPage() {
             {tab === "trustos" && (
               <>
                 {/* ── Core metrics ── */}
-                <section className="rounded-2xl border border-primary/20 bg-brand-surface p-5 shadow-sm">
+                <section className="mod-card rounded-2xl p-5">
                   <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">TrustOS Core</p>
                   <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                    <div className="mod-card p-4 shadow-sm">
+                    <div className="mod-inset rounded-xl p-4">
                       <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">Trust Score</p>
-                      <p className="mt-2 text-3xl font-black text-slate-900 tabular-nums">{trustEconomy.score1000.toLocaleString()}</p>
+                      <p className="mt-2 text-3xl font-black tabular-nums" style={{ color: "var(--neu-text)" }}>
+                        {trustEconomy.score1000.toLocaleString()}
+                      </p>
                       <p className="text-xs text-[var(--neu-text-muted)]">Scale: 0 to 1,000</p>
                     </div>
-                    <div className="mod-card p-4 shadow-sm">
+                    <div className="mod-inset rounded-xl p-4">
                       <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">Community Trust</p>
                       <p className="mt-2 text-3xl font-black text-primary tabular-nums">{trustEconomy.communityTrustPercent}%</p>
                       <p className="text-xs text-[var(--neu-text-muted)]">Public trust perception index</p>
                     </div>
-                    <div className="mod-card p-4 shadow-sm">
+                    <div className="mod-inset rounded-xl p-4">
                       <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">Current Tier</p>
-                      <p className="mt-2 text-2xl font-black text-slate-900">{trustEconomy.trustTier.icon} {trustEconomy.trustTier.label}</p>
+                      <p className="mt-2 text-2xl font-black" style={{ color: "var(--neu-text)" }}>
+                        {trustEconomy.trustTier.icon} {trustEconomy.trustTier.label}
+                      </p>
                       <p className="text-xs text-[var(--neu-text-muted)]">{trustEconomy.trustTier.description}</p>
                     </div>
                   </div>
                   {trustEconomy.nextTier && (
                     <div className="mt-4">
-                      <div className="flex items-center justify-between text-[11px] font-bold text-primary mb-1.5">
+                      <div className="mb-1.5 flex items-center justify-between text-[11px] font-bold text-primary">
                         <span>Progress to {trustEconomy.nextTier.icon} {trustEconomy.nextTier.label}</span>
                         <span>{trustEconomy.score1000} / {trustEconomy.nextTier.minScore}</span>
                       </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                      <div className="mod-inset h-2 w-full overflow-hidden rounded-full">
                         <div
                           className="h-full rounded-full bg-primary transition-all duration-700"
                           style={{ width: `${Math.min(100, Math.round((trustEconomy.score1000 / trustEconomy.nextTier.minScore) * 100))}%` }}
@@ -396,10 +441,10 @@ export default function GamificationPage() {
                 </section>
 
                 {/* ── Tier Privileges ── */}
-                <section className="rounded-2xl border border-indigo-500/20 bg-white p-5 shadow-sm">
+                <section className="mod-card rounded-2xl p-5">
                   <div className="mb-1 flex items-center justify-between">
-                    <h2 className="text-base font-bold text-slate-900">Tier Privileges</h2>
-                    <span className="rounded-full border border-indigo-500/30 bg-brand-blue500/10 px-2 py-0.5 text-[11px] font-bold text-brand-blue300">
+                    <SectionTitle>Tier Privileges</SectionTitle>
+                    <span className="mod-chip mod-chip-active rounded-full px-2 py-0.5 text-[11px] font-bold text-primary">
                       {trustEconomy.trustTier.icon} {trustEconomy.trustTier.label}
                     </span>
                   </div>
@@ -408,20 +453,25 @@ export default function GamificationPage() {
                     {privileges.privilegeList.map((p) => (
                       <div
                         key={p.label}
-                        className={`flex items-start gap-3 rounded-xl border px-3 py-2.5 ${
-                          p.unlocked
-                            ? "border-emerald-500/20 bg-primary/5"
-                            : "border-gray-100 bg-slate-50 opacity-50"
+                        className={`flex items-start gap-3 rounded-xl px-3 py-2.5 ${
+                          p.unlocked ? "mod-inset bg-primary/5 ring-1 ring-primary/15" : "mod-inset opacity-50"
                         }`}
                       >
-                        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${p.unlocked ? "bg-primary/20" : "bg-slate-100"}`}>
-                          <span className={`material-symbols-outlined text-[15px] ${p.unlocked ? "text-primary" : "text-[var(--neu-text-muted)]"}`}
-                            style={{ fontVariationSettings: "'FILL' 1" }}>
+                        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${p.unlocked ? "bg-primary/20" : "mod-inset"}`}>
+                          <span
+                            className={`material-symbols-outlined text-[15px] ${p.unlocked ? "text-primary" : "text-[var(--neu-text-muted)]"}`}
+                            style={{ fontVariationSettings: "'FILL' 1" }}
+                          >
                             {p.unlocked ? p.icon : "lock"}
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className={`text-sm font-semibold ${p.unlocked ? "text-slate-900" : "text-[var(--neu-text-muted)]"}`}>{p.label}</p>
+                          <p
+                            className="text-sm font-semibold"
+                            style={{ color: p.unlocked ? "var(--neu-text)" : "var(--neu-text-muted)" }}
+                          >
+                            {p.label}
+                          </p>
                           <p className="text-xs text-[var(--neu-text-muted)]">{p.description}</p>
                         </div>
                         {p.unlocked && (
@@ -453,10 +503,10 @@ export default function GamificationPage() {
                 </section>
 
                 {/* ── Follower Milestones ── */}
-                <section className="rounded-2xl border border-pink-500/20 bg-white p-5 shadow-sm">
+                <section className="mod-card rounded-2xl p-5">
                   <div className="mb-1 flex items-center justify-between">
-                    <h2 className="text-base font-bold text-slate-900">Follower Milestones</h2>
-                    <span className="rounded-full border border-pink-500/30 bg-brand-blue/10 px-2 py-0.5 text-[11px] font-bold text-brand-blue">
+                    <SectionTitle>Follower Milestones</SectionTitle>
+                    <span className="mod-chip rounded-full px-2 py-0.5 text-[11px] font-bold text-brand-blue">
                       {milestoneStatus.data?.followerCount?.toLocaleString() ?? 0} followers
                     </span>
                   </div>
@@ -471,7 +521,7 @@ export default function GamificationPage() {
                         <span>Next: {milestoneStatus.data.nextMilestone.emoji} {milestoneStatus.data.nextMilestone.label}</span>
                         <span>{milestoneStatus.data.followerCount?.toLocaleString()} / {milestoneStatus.data.nextMilestone.count.toLocaleString()}</span>
                       </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                      <div className="mod-inset h-2 w-full overflow-hidden rounded-full">
                         <div
                           className="h-full rounded-full bg-pink-400 transition-all duration-700"
                           style={{ width: `${milestoneStatus.data.nextMilestone.progressPercent}%` }}
@@ -488,16 +538,18 @@ export default function GamificationPage() {
                     {(milestoneStatus.data?.milestones ?? []).map((m: MilestoneInfo) => (
                       <div
                         key={m.count}
-                        className={`rounded-xl border p-3 transition-all ${
+                        className={`rounded-xl p-3 transition-all ${
                           m.rewarded
-                            ? "border-yellow-500/40 bg-primary/10"
+                            ? "mod-inset bg-primary/10 ring-1 ring-primary/25"
                             : m.achieved
-                            ? "border-pink-500/40 bg-brand-blue/10"
-                            : "border-gray-100 bg-slate-50 opacity-50"
+                            ? "mod-inset bg-brand-blue/10 ring-1 ring-brand-blue/20"
+                            : "mod-inset opacity-50"
                         }`}
                       >
                         <div className="text-xl mb-1">{m.emoji}</div>
-                        <p className="text-[11px] font-bold text-slate-900">{m.label}</p>
+                        <p className="text-[11px] font-bold" style={{ color: "var(--neu-text)" }}>
+                          {m.label}
+                        </p>
                         <p className="text-[10px] text-primary font-semibold">+{m.hcReward.toLocaleString()} HC</p>
                         {m.rewarded && (
                           <span className="mt-1 inline-block rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold text-primary">CLAIMED</span>
@@ -515,10 +567,10 @@ export default function GamificationPage() {
                 </section>
 
                 {/* ── Community Vouches ── */}
-                <section className="rounded-2xl border border-violet-500/20 bg-white p-5 shadow-sm">
+                <section className="mod-card rounded-2xl p-5">
                   <div className="mb-1 flex items-center justify-between">
-                    <h2 className="text-base font-bold text-slate-900">Community Vouches</h2>
-                    <span className="rounded-full border border-violet-500/30 bg-brand-blue500/10 px-2 py-0.5 text-[11px] font-bold text-brand-blue300">
+                    <SectionTitle>Community Vouches</SectionTitle>
+                    <span className="mod-chip rounded-full px-2 py-0.5 text-[11px] font-bold text-brand-blue">
                       {myVouches.data?.length ?? 0} received
                     </span>
                   </div>
@@ -527,9 +579,9 @@ export default function GamificationPage() {
                   </p>
 
                   {myVouches.isLoading ? (
-                    <div className="flex gap-2">
+                    <div className="browse-chip-row">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse w-10 h-10 rounded-full bg-slate-100" />
+                        <div key={i} className="mod-inset h-10 w-10 animate-pulse rounded-full" />
                       ))}
                     </div>
                   ) : (myVouches.data?.length ?? 0) > 0 ? (
@@ -538,7 +590,7 @@ export default function GamificationPage() {
                         <a
                           key={v.id}
                           href={`/profile/${v.voucherUsername}`}
-                          className="group flex items-center gap-2 rounded-xl border border-violet-500/20 bg-brand-blue500/5 px-2 py-1.5 hover:bg-brand-blue500/10 transition-colors"
+                          className="group mod-inset flex items-center gap-2 rounded-xl px-2 py-1.5 transition-colors hover:bg-primary/5"
                         >
                           {v.voucherAvatar ? (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -553,15 +605,16 @@ export default function GamificationPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-gray-200 bg-slate-50 py-8 text-center">
-                      <span className="material-symbols-outlined text-3xl text-[var(--neu-text-secondary)]" style={{ fontVariationSettings: "'FILL' 1" }}>handshake</span>
-                      <p className="mt-2 text-sm font-semibold text-[var(--neu-text-muted)]">No vouches yet</p>
-                      <p className="mt-1 text-xs text-[var(--neu-text-secondary)]">Build connections and earn trust — neighbours at Tree tier can vouch for you.</p>
-                    </div>
+                    <BrowseEmptyState
+                      icon="handshake"
+                      title="No vouches yet"
+                      description="Build connections and earn trust — neighbours at Tree tier can vouch for you."
+                      filledIcon
+                    />
                   )}
 
                   {/* Vouch eligibility notice */}
-                  <div className={`mt-4 rounded-xl border px-3 py-2.5 ${privileges.canVouch ? "border-emerald-500/20 bg-primary/5" : "border-gray-100 bg-slate-50"}`}>
+                  <div className={`mt-4 rounded-xl px-3 py-2.5 ${privileges.canVouch ? "mod-inset bg-primary/5 ring-1 ring-primary/15" : "mod-inset"}`}>
                     <div className="flex items-center gap-2">
                       <span className={`material-symbols-outlined text-[16px] ${privileges.canVouch ? "text-primary" : "text-[var(--neu-text-muted)]"}`} style={{ fontVariationSettings: "'FILL' 1" }}>
                         {privileges.canVouch ? "check_circle" : "lock"}
@@ -581,14 +634,14 @@ export default function GamificationPage() {
                 {/* ── Trust Activity Feed ── */}
                 <section className="mod-card p-5 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-base font-bold text-slate-900">Trust Activity Log</h2>
+                    <SectionTitle>Trust Activity Log</SectionTitle>
                     <span className="text-xs text-[var(--neu-text-muted)]">Why your score changed</span>
                   </div>
 
                   {trustProfile.isLoading ? (
                     <div className="space-y-2">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse h-14 rounded-xl bg-slate-100" />
+                        <div key={i} className="mod-inset h-14 animate-pulse rounded-xl" />
                       ))}
                     </div>
                   ) : trustEvents.length > 0 ? (
@@ -609,7 +662,9 @@ export default function GamificationPage() {
                               </span>
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm font-semibold text-slate-900">{meta.label}</p>
+                              <p className="text-sm font-semibold" style={{ color: "var(--neu-text)" }}>
+                                {meta.label}
+                              </p>
                               {event.reason && <p className="text-xs text-[var(--neu-text-muted)]">{event.reason}</p>}
                               <p className="text-[11px] text-[var(--neu-text-secondary)]">{formatTimeAgo(event.createdAt)}</p>
                             </div>
@@ -621,20 +676,19 @@ export default function GamificationPage() {
                       })}
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-gray-200 bg-slate-50 py-10 text-center">
-                      <span className="material-symbols-outlined text-4xl text-[var(--neu-text-secondary)]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        history
-                      </span>
-                      <p className="mt-2 text-sm font-semibold text-[var(--neu-text-muted)]">No activity recorded yet</p>
-                      <p className="mt-1 text-xs text-[var(--neu-text-secondary)]">Completing jobs, selling products, getting vouched, and verifying your identity will all appear here.</p>
-                    </div>
+                    <BrowseEmptyState
+                      icon="history"
+                      title="No activity recorded yet"
+                      description="Completing jobs, selling products, getting vouched, and verifying your identity will all appear here."
+                      filledIcon
+                    />
                   )}
                 </section>
 
                 {/* ── Trust Breakdown ── */}
                 <section className="mod-card p-5 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-base font-bold text-slate-900">Trust Breakdown</h2>
+                    <SectionTitle>Trust Breakdown</SectionTitle>
                     <span className="text-xs text-[var(--neu-text-muted)]">Pillars that drive TrustOS</span>
                   </div>
                   <div className="space-y-3">
@@ -643,10 +697,12 @@ export default function GamificationPage() {
                       return (
                         <div key={item.id} className="rounded-xl mod-inset p-3">
                           <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-semibold text-slate-900">{item.label}</p>
+                            <p className="text-sm font-semibold" style={{ color: "var(--neu-text)" }}>
+                              {item.label}
+                            </p>
                             <p className="text-xs font-bold text-[var(--neu-text-muted)] tabular-nums">{item.current} / {item.max}</p>
                           </div>
-                          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+                          <div className="mod-inset mt-2 h-2 overflow-hidden rounded-full">
                             <div className={`h-full rounded-full ${item.colorClass}`} style={{ width: `${Math.min(100, pct)}%` }} />
                           </div>
                           <p className="mt-2 text-xs text-[var(--neu-text-muted)]">{item.reason}</p>
@@ -658,13 +714,15 @@ export default function GamificationPage() {
 
                 {/* ── How Trust Is Earned ── */}
                 <section className="mod-card p-5 shadow-sm">
-                  <h2 className="text-base font-bold text-slate-900">How Trust Is Earned</h2>
+                  <SectionTitle>How Trust Is Earned</SectionTitle>
                   <p className="mt-1 text-xs text-[var(--neu-text-muted)]">Actions are rewarded with caps to protect the economy from farming.</p>
                   <div className="mt-4 space-y-2">
                     {trustEconomy.topActions.map((rule) => (
                       <div key={rule.id} className="flex items-center justify-between rounded-xl mod-inset px-3 py-2">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">{rule.title}</p>
+                          <p className="text-sm font-semibold" style={{ color: "var(--neu-text)" }}>
+                            {rule.title}
+                          </p>
                           <p className="text-xs text-[var(--neu-text-muted)]">{rule.description}</p>
                         </div>
                         <div className="text-right">
@@ -677,11 +735,11 @@ export default function GamificationPage() {
                 </section>
 
                 {/* ── Guardrails ── */}
-                <section className="rounded-2xl border border-rose-500/20 bg-brand-red500/5 p-5">
-                  <h2 className="text-base font-bold text-slate-900">Trust Economy Guardrails</h2>
+                <section className="mod-card rounded-2xl border border-brand-red/15 bg-brand-red/5 p-5">
+                  <SectionTitle>Trust Economy Guardrails</SectionTitle>
                   <div className="mt-3 space-y-2">
                     {trustEconomy.riskControls.map((control) => (
-                      <div key={control} className="rounded-xl border border-rose-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                      <div key={control} className="mod-inset rounded-xl px-3 py-2 text-sm text-brand-red">
                         {control}
                       </div>
                     ))}
@@ -696,7 +754,9 @@ export default function GamificationPage() {
                 {/* Summary row */}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[var(--neu-text-muted)]">
-                    <span className="font-bold text-slate-900">{earnedBadgeIds.size}</span>
+                    <span className="font-bold" style={{ color: "var(--neu-text)" }}>
+                      {earnedBadgeIds.size}
+                    </span>
                     {" / "}{allBadgeList.length} earned
                   </span>
                   <span className="text-xs text-[var(--neu-text-secondary)]">
@@ -705,35 +765,31 @@ export default function GamificationPage() {
                 </div>
 
                 {/* Filter */}
-                <div className="flex gap-2">
+                <div className="browse-chip-row">
                   {(["all", "earned", "not-earned"] as BadgeFilter[]).map((f) => (
-                    <button
-                      key={f}
-                      onClick={() => setBadgeFilter(f)}
-                      className={`text-sm px-4 py-1.5 rounded-full font-semibold transition-colors ${
-                        badgeFilter === f
-                          ? "bg-primary text-white"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
-                    >
+                    <FilterChip key={f} active={badgeFilter === f} onClick={() => setBadgeFilter(f)}>
                       {f === "all" ? "All" : f === "earned" ? "Earned" : "Not Earned"}
-                    </button>
+                    </FilterChip>
                   ))}
                 </div>
 
                 {allBadges.isLoading ? (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-2">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="animate-pulse mod-card rounded-xl h-44" />
+                      <div key={i} className="mod-inset h-16 animate-pulse rounded-xl" />
                     ))}
                   </div>
                 ) : filteredBadges.length === 0 ? (
-                  <div className="text-center py-12">
-                    <span className="text-4xl">🏅</span>
-                    <p className="text-[var(--neu-text-muted)] mt-3">No badges match this filter</p>
-                  </div>
+                  <BrowseEmptyState
+                    icon="military_tech"
+                    title="No badges match this filter"
+                    filledIcon
+                  />
                 ) : (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div
+                    className="mod-card divide-y overflow-hidden rounded-2xl"
+                    style={{ borderColor: "var(--neu-shadow-dark)" }}
+                  >
                     {filteredBadges.map((badge: Badge) => (
                       <BadgeCard
                         key={badge.id}
@@ -753,7 +809,7 @@ export default function GamificationPage() {
                 {!achievements.isLoading && achievementList.length > 0 && (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-[var(--neu-text-muted)]">
-                      <span className="font-bold text-slate-900">
+                      <span className="font-bold" style={{ color: "var(--neu-text)" }}>
                         {achievementList.filter((a: any) => a.completed).length}
                       </span>
                       {" / "}{achievementList.length} completed
@@ -790,19 +846,11 @@ export default function GamificationPage() {
             {tab === "leaderboard" && (
               <>
                 {/* Timeframe toggle */}
-                <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
+                <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
                   {TIMEFRAMES.map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => setTimeframe(t.id)}
-                      className={`shrink-0 text-sm px-4 py-1.5 rounded-full font-semibold transition-colors ${
-                        timeframe === t.id
-                          ? "bg-primary text-white"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
-                    >
+                    <FilterChip key={t.id} active={timeframe === t.id} onClick={() => setTimeframe(t.id)}>
                       {t.label}
-                    </button>
+                    </FilterChip>
                   ))}
                 </div>
 

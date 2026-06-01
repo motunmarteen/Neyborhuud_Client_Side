@@ -1,245 +1,448 @@
-/**
- * Local News Page
- * Displays real RSS news from Nigeria and international sources
- * fetched via the backend proxy at /api/v1/news
- */
-
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
-
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useInView } from 'react-intersection-observer';
+import type { AxiosError } from 'axios';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
+import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
+import { BrowseFilterChip } from '@/components/layout/BrowseFilterChip';
+import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
+import { CreateHuudGistModal } from '@/components/huud-gist/CreateHuudGistModal';
+import { HuudGistRow } from '@/components/huud-gist/HuudGistRow';
+import { NewsArticleRow } from '@/components/news/NewsArticleRow';
+import { useHuudGistList } from '@/hooks/useHuudGist';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  LOCAL_NEWS_TABS,
+  NEWS_TOPICS,
+  NIGERIA_SOURCES,
+  INTERNATIONAL_SOURCES,
+  parseGistSection,
+  parseLocalNewsTab,
+  parseNewsTopic,
+  filterArticlesByTopic,
+  type LocalNewsTab,
+  type NewsTopicId,
+} from '@/lib/localNewsConfig';
+import { buildGistSectionList } from '@/lib/huudGistConfig';
+import { huudGistService } from '@/services/huudGist.service';
 import { newsService } from '@/services/news.service';
+import type { GistSection, GistSectionId } from '@/types/huudGist';
 import type { NewsSource, RssArticle } from '@/types/incident';
+import { gistPostId, type HuudGistPost } from '@/types/huudGist';
 
-// ── Source groupings from backend ─────────────────────────────────────────────
-
-const NIGERIA_SOURCES: NewsSource[] = [
-  { id: 'punch',        name: 'Punch' },
-  { id: 'vanguard',     name: 'Vanguard' },
-  { id: 'channels',     name: 'Channels TV' },
-  { id: 'thisday',      name: 'ThisDay' },
-  { id: 'guardian_ng',  name: 'Guardian NG' },
-  { id: 'premiumtimes', name: 'Premium Times' },
-  { id: 'dailytrust',   name: 'Daily Trust' },
-  { id: 'tribune',      name: 'Tribune' },
-  { id: 'sun',          name: 'The Sun' },
-];
-
-const INTERNATIONAL_SOURCES: NewsSource[] = [
-  { id: 'bbc_world',  name: 'BBC World' },
-  { id: 'bbc_africa', name: 'BBC Africa' },
-  { id: 'aljazeera',  name: 'Al Jazeera' },
-  { id: 'skynews',    name: 'Sky News' },
-  { id: 'nytimes',    name: 'NY Times World' },
-  { id: 'cnn',        name: 'CNN' },
-];
-
-// ── Article Card ──────────────────────────────────────────────────────────────
-
-function ArticleCard({ article }: { article: RssArticle }) {
-  const date = article.pubDate
-    ? new Date(article.pubDate).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
-    : '';
-
-  return (
-    <a
-      href={article.link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="neu-card rounded-2xl overflow-hidden flex gap-0 transition-all active:scale-[0.99] hover:shadow-md block"
-    >
-      {/* Image */}
-      {article.imageUrl && (
-        <div className="relative flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32">
-          <img
-            src={article.imageUrl}
-            alt=""
-            className="w-full h-full object-cover"
-            loading="lazy"
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="flex-1 p-4 min-w-0 flex flex-col gap-1.5">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full neu-socket" style={{ color: 'var(--neu-text-muted)' }}>
-            {article.sourceName}
-          </span>
-          {date && (
-            <span className="text-[10px]" style={{ color: 'var(--neu-text-muted)' }}>{date}</span>
-          )}
-        </div>
-        <h3 className="font-semibold text-sm leading-snug line-clamp-3" style={{ color: 'var(--neu-text)' }}>
-          {article.title}
-        </h3>
-        {article.description && (
-          <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--neu-text-muted)' }}>
-            {article.description}
-          </p>
-        )}
-        <div className="flex items-center gap-1 mt-auto pt-1">
-          <span className="text-[10px] font-semibold text-primary">Read more</span>
-          <span className="material-symbols-outlined text-xs text-primary">open_in_new</span>
-        </div>
-      </div>
-    </a>
-  );
+function sourcesForRegion(
+  tab: LocalNewsTab,
+  nigeria: NewsSource[],
+  international: NewsSource[],
+): NewsSource[] {
+  if (tab === 'nigeria') return nigeria;
+  if (tab === 'international') return international;
+  return [];
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
-
-type Tab = 'nigeria' | 'international';
-
 function LocalNewsInner() {
-  const [activeTab, setActiveTab] = useState<Tab>('nigeria');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<LocalNewsTab>(() =>
+    parseLocalNewsTab(searchParams.get('tab')),
+  );
+  const [gistSection, setGistSection] = useState<GistSectionId>(() =>
+    parseGistSection(searchParams.get('section')),
+  );
+  const [newsTopic, setNewsTopic] = useState<NewsTopicId>(() =>
+    parseNewsTopic(searchParams.get('topic')),
+  );
+  const [gistSections, setGistSections] = useState<GistSection[]>(() =>
+    buildGistSectionList([]),
+  );
+  const [newsTopics, setNewsTopics] = useState<Array<{ id: NewsTopicId; label: string }>>([
+    ...NEWS_TOPICS.map(({ id, label }) => ({ id, label })),
+  ]);
+  const [nigeriaSources, setNigeriaSources] = useState<NewsSource[]>(NIGERIA_SOURCES);
+  const [internationalSources, setInternationalSources] =
+    useState<NewsSource[]>(INTERNATIONAL_SOURCES);
   const [selectedSourceIds, setSelectedSourceIds] = useState<string[]>([]);
   const [articles, setArticles] = useState<RssArticle[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [rssLoading, setRssLoading] = useState(false);
+  const [rssError, setRssError] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
-  const sources = activeTab === 'nigeria' ? NIGERIA_SOURCES : INTERNATIONAL_SOURCES;
-
-  const loadNews = useCallback(async (tab: Tab, sourceIds: string[]) => {
-    setLoading(true);
-    setError(null);
-    const sourcesToFetch: NewsSource[] = (tab === 'nigeria' ? NIGERIA_SOURCES : INTERNATIONAL_SOURCES)
-      .filter(s => sourceIds.length === 0 || sourceIds.includes(s.id));
-
-    try {
-      const results = await newsService.getMultipleFeeds(sourcesToFetch, 10);
-      setArticles(results);
-    } catch {
-      setError('Failed to load news. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Initial load
   useEffect(() => {
-    loadNews(activeTab, selectedSourceIds);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    void (async () => {
+      try {
+        const [categoriesRes, sections] = await Promise.all([
+          newsService.getCategories(),
+          huudGistService.getSections(),
+        ]);
+
+        setGistSections(sections);
+
+        const categories = categoriesRes.data?.categories;
+        if (categories?.length) {
+          const ng = categories.find((c) => c.key === 'nigeria')?.sources;
+          const intl = categories.find((c) => c.key === 'international')?.sources;
+          if (ng?.length) setNigeriaSources(ng);
+          if (intl?.length) setInternationalSources(intl);
+        }
+
+        const topics = categoriesRes.data?.topics;
+        if (topics?.length) {
+          setNewsTopics(topics.map((t) => ({ id: t.id as NewsTopicId, label: t.label })));
+        }
+      } catch {
+        // Keep local fallbacks when API is unreachable
+      }
+    })();
   }, []);
 
-  const handleTabChange = (tab: Tab) => {
+  const gistFilters = useMemo(
+    () => ({ section: gistSection === 'all' ? undefined : gistSection }),
+    [gistSection],
+  );
+  const {
+    data: gistPages,
+    isLoading: gistLoading,
+    isError: gistIsError,
+    error: gistError,
+    refetch: refetchGist,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useHuudGistList(gistFilters);
+  const gistThreads = useMemo(
+    () => gistPages?.pages.flatMap((p) => p?.gossip ?? []) ?? [],
+    [gistPages],
+  );
+  const gistAuthRequired =
+    gistIsError && (gistError as AxiosError)?.response?.status === 401;
+
+  const { ref: gistLoadMoreRef, inView: gistLoadMoreInView } = useInView({
+    threshold: 0,
+    rootMargin: '400px',
+  });
+
+  useEffect(() => {
+    if (gistLoadMoreInView && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [gistLoadMoreInView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const syncUrl = useCallback(
+    (tab: LocalNewsTab, section: GistSectionId, topic: NewsTopicId) => {
+      const params = new URLSearchParams();
+      params.set('tab', tab);
+      if (tab === 'huud-gist' && section !== 'all') params.set('section', section);
+      if (tab !== 'huud-gist' && topic !== 'all') params.set('topic', topic);
+      router.replace(`/local-news?${params.toString()}`, { scroll: false });
+    },
+    [router],
+  );
+
+  const loadRss = useCallback(
+    async (tab: LocalNewsTab, topic: NewsTopicId, sourceIds: string[]) => {
+      if (tab !== 'nigeria' && tab !== 'international') return;
+
+      setRssLoading(true);
+      setRssError(null);
+
+      try {
+        const results = await newsService.getArticles({
+          region: tab,
+          topic,
+          sources: sourceIds.length > 0 ? sourceIds : undefined,
+          limit: 12,
+        });
+        setArticles(results);
+      } catch {
+        const pool = sourcesForRegion(tab, nigeriaSources, internationalSources).filter(
+          (s) => sourceIds.length === 0 || sourceIds.includes(s.id),
+        );
+        try {
+          const fallback = await newsService.getMultipleFeeds(pool, 12);
+          setArticles(filterArticlesByTopic(fallback, topic));
+        } catch {
+          setRssError('Failed to load news. Please try again.');
+        }
+      } finally {
+        setRssLoading(false);
+      }
+    },
+    [nigeriaSources, internationalSources],
+  );
+
+  useEffect(() => {
+    setActiveTab(parseLocalNewsTab(searchParams.get('tab')));
+    setGistSection(parseGistSection(searchParams.get('section')));
+    setNewsTopic(parseNewsTopic(searchParams.get('topic')));
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (activeTab === 'nigeria' || activeTab === 'international') {
+      loadRss(activeTab, newsTopic, selectedSourceIds);
+    }
+  }, [activeTab, newsTopic, selectedSourceIds, loadRss]);
+
+  const sources = sourcesForRegion(activeTab, nigeriaSources, internationalSources);
+  const isRssTab = activeTab === 'nigeria' || activeTab === 'international';
+
+  const setTab = (tab: LocalNewsTab) => {
     setActiveTab(tab);
     setSelectedSourceIds([]);
-    loadNews(tab, []);
+    syncUrl(tab, gistSection, newsTopic);
+    if (tab === 'nigeria' || tab === 'international') loadRss(tab, newsTopic, []);
   };
 
-  const toggleSource = (sourceId: string) => {
-    const next = selectedSourceIds.includes(sourceId)
-      ? selectedSourceIds.filter(id => id !== sourceId)
-      : [...selectedSourceIds, sourceId];
-    setSelectedSourceIds(next);
-    loadNews(activeTab, next);
-  };
+  const topicLabel = newsTopics.find((t) => t.id === newsTopic)?.label;
+
+  const subtitle =
+    activeTab === 'huud-gist'
+      ? `Huud Gist · ${gistThreads.length} thread${gistThreads.length === 1 ? '' : 's'}`
+      : activeTab === 'nigeria'
+        ? `Nigeria · ${articles.length} stories${newsTopic !== 'all' ? ` · ${topicLabel}` : ''}`
+        : `International · ${articles.length} stories${newsTopic !== 'all' ? ` · ${topicLabel}` : ''}`;
 
   return (
     <AppBrowseLayout
+      maxWidth="680"
       subtitle={
-        <span className="inline-flex items-center gap-2">
-          <span className="material-symbols-outlined text-xl text-primary">newspaper</span>
-          Latest news from Nigeria and around the world
+        <span className="inline-flex min-w-0 items-center gap-2">
+          <span className="material-symbols-outlined shrink-0 text-xl text-primary">newspaper</span>
+          <span className="truncate">{subtitle}</span>
         </span>
       }
       header={
         <>
-          <div className="flex gap-1">
-            {(['nigeria', 'international'] as Tab[]).map((tab) => (
+          <BrowseTabStrip
+            tabs={[...LOCAL_NEWS_TABS]}
+            activeId={activeTab}
+            onChange={(id) => setTab(id as LocalNewsTab)}
+            trailing={
               <button
-                key={tab}
                 type="button"
-                onClick={() => handleTabChange(tab)}
-                className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all ${
-                  activeTab === tab ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'
-                }`}
-                style={activeTab !== tab ? { color: 'var(--neu-text-muted)' } : undefined}
+                onClick={() => {
+                  if (activeTab === 'huud-gist') void refetchGist();
+                  else loadRss(activeTab, newsTopic, selectedSourceIds);
+                }}
+                disabled={activeTab === 'huud-gist' ? gistLoading : rssLoading}
+                className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary disabled:opacity-50"
+                aria-label="Refresh"
               >
-                {tab === 'nigeria' ? '🇳🇬 Nigeria' : '🌍 International'}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-              <button
-                onClick={() => { setSelectedSourceIds([]); loadNews(activeTab, []); }}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  selectedSourceIds.length === 0 ? 'mod-chip mod-chip-active text-primary' : 'neu-socket'
-                }`}
-                style={selectedSourceIds.length !== 0 ? { color: 'var(--neu-text-muted)' } : {}}
-              >
-                All Sources
-              </button>
-              {sources.map(src => (
-                <button
-                  key={src.id}
-                  onClick={() => toggleSource(src.id)}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                    selectedSourceIds.includes(src.id) ? 'mod-chip mod-chip-active text-primary' : 'neu-socket'
-                  }`}
-                  style={!selectedSourceIds.includes(src.id) ? { color: 'var(--neu-text-muted)' } : {}}
+                <span
+                  className={`material-symbols-outlined text-[18px] ${gistLoading || rssLoading ? 'animate-spin' : ''}`}
                 >
-                  {src.name}
-                </button>
-              ))}
-          </div>
+                  refresh
+                </span>
+                <span className="hidden min-[420px]:inline">Refresh</span>
+              </button>
+            }
+          />
 
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => loadNews(activeTab, selectedSourceIds)}
-              disabled={loading}
-              className="flex items-center gap-1 text-xs font-semibold text-primary disabled:opacity-50"
-            >
-              <span className={`material-symbols-outlined text-sm ${loading ? 'animate-spin' : ''}`}>refresh</span>
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
-          </div>
+          {activeTab === 'huud-gist' ? (
+            <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
+              {gistSections.map((section) => (
+                <BrowseFilterChip
+                  key={section.id}
+                  active={gistSection === section.id}
+                  onClick={() => {
+                    setGistSection(section.id);
+                    syncUrl(activeTab, section.id, newsTopic);
+                  }}
+                >
+                  {section.label}
+                </BrowseFilterChip>
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
+                {newsTopics.map((topic) => (
+                  <BrowseFilterChip
+                    key={topic.id}
+                    active={newsTopic === topic.id}
+                    onClick={() => {
+                      setNewsTopic(topic.id);
+                      syncUrl(activeTab, gistSection, topic.id);
+                      loadRss(activeTab, topic.id, selectedSourceIds);
+                    }}
+                  >
+                    {topic.label}
+                  </BrowseFilterChip>
+                ))}
+              </div>
+              <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
+                <BrowseFilterChip
+                  active={selectedSourceIds.length === 0}
+                  onClick={() => {
+                    setSelectedSourceIds([]);
+                    loadRss(activeTab, newsTopic, []);
+                  }}
+                >
+                  All sources
+                </BrowseFilterChip>
+                {sources.map((src) => (
+                  <BrowseFilterChip
+                    key={src.id}
+                    active={selectedSourceIds.includes(src.id)}
+                    onClick={() => {
+                      const next = selectedSourceIds.includes(src.id)
+                        ? selectedSourceIds.filter((id) => id !== src.id)
+                        : [...selectedSourceIds, src.id];
+                      setSelectedSourceIds(next);
+                      loadRss(activeTab, newsTopic, next);
+                    }}
+                  >
+                    {src.name}
+                  </BrowseFilterChip>
+                ))}
+              </div>
+            </>
+          )}
         </>
       }
     >
-      <div className="flex flex-col gap-4">
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm mt-4" style={{ color: 'var(--neu-text-muted)' }}>Fetching latest news...</p>
+      <div className="space-y-5">
+        {activeTab === 'huud-gist' ? (
+          <>
+            {user ? (
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="mod-chip mod-chip-active inline-flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-primary"
+              >
+                <span className="material-symbols-outlined text-[18px]">edit_square</span>
+                Start a Huud Gist thread
+              </button>
+            ) : (
+              <Link
+                href="/login?redirect=/local-news?tab=huud-gist"
+                className="mod-card flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold no-underline"
+              >
+                <span className="material-symbols-outlined text-[18px] text-primary">login</span>
+                Sign in to start a Huud Gist thread
+              </Link>
+            )}
+
+            {gistLoading ? (
+              <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="mod-inset h-[4.5rem] animate-pulse rounded-xl" />
+                ))}
+              </div>
+            ) : gistIsError && !gistAuthRequired ? (
+              <BrowseEmptyState
+                icon="wifi_off"
+                title="Could not load Huud Gist"
+                description="Something went wrong. Tap refresh to try again."
+                filledIcon
+                action={
+                  <button
+                    type="button"
+                    onClick={() => void refetchGist()}
+                    className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary"
+                  >
+                    Retry
+                  </button>
+                }
+              />
+            ) : gistAuthRequired ? (
+              <BrowseEmptyState
+                icon="login"
+                title="Sign in to view Huud Gist"
+                description="Your session may have expired. Sign in again to browse and join threads."
+                action={
+                  <Link
+                    href="/login?redirect=/local-news?tab=huud-gist"
+                    className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary no-underline"
+                  >
+                    Sign in
+                  </Link>
+                }
+              />
+            ) : gistThreads.length === 0 ? (
+              <BrowseEmptyState
+                icon="forum"
+                title="No Huud Gist threads yet"
+                description="Start the conversation — local gist, questions, business talk, and more."
+                filledIcon
+                action={
+                  user ? (
+                    <button
+                      type="button"
+                      onClick={() => setCreateOpen(true)}
+                      className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary"
+                    >
+                      Start a thread
+                    </button>
+                  ) : undefined
+                }
+              />
+            ) : (
+              <>
+                <div
+                  className="mod-card divide-y overflow-hidden rounded-2xl"
+                  style={{ borderColor: 'var(--neu-shadow-dark)' }}
+                >
+                  {gistThreads.map((post: HuudGistPost, index) => (
+                    <HuudGistRow key={gistPostId(post) || `gist-${index}`} post={post} />
+                  ))}
+                </div>
+                {hasNextPage ? (
+                  <div ref={gistLoadMoreRef} className="flex justify-center py-4">
+                    {isFetchingNextPage ? (
+                      <span className="text-sm font-semibold text-[var(--neu-text-muted)]">
+                        Loading more…
+                      </span>
+                    ) : (
+                      <div className="h-6" />
+                    )}
+                  </div>
+                ) : null}
+              </>
+            )}
+          </>
+        ) : rssLoading ? (
+          <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="mod-inset h-[4.5rem] animate-pulse rounded-xl" />
+            ))}
+          </div>
+        ) : rssError ? (
+          <BrowseEmptyState icon="wifi_off" title="Could not load news" description={rssError} filledIcon />
+        ) : articles.length === 0 ? (
+          <BrowseEmptyState
+            icon="newspaper"
+            title="No articles in this section"
+            description="Try another topic or source, or tap Refresh."
+            filledIcon
+          />
+        ) : (
+          <div
+            className="mod-card divide-y overflow-hidden rounded-2xl"
+            style={{ borderColor: 'var(--neu-shadow-dark)' }}
+          >
+            {articles.map((article) => (
+              <NewsArticleRow key={article.id} article={article} />
+            ))}
           </div>
         )}
 
-        {!loading && error && (
-          <div className="neu-card-sm rounded-2xl flex flex-col items-center justify-center py-12 px-5">
-            <span className="material-symbols-outlined text-3xl text-brand-red mb-3">wifi_off</span>
-            <p className="text-sm text-center mb-4" style={{ color: 'var(--neu-text)' }}>{error}</p>
-            <button
-              type="button"
-              onClick={() => loadNews(activeTab, selectedSourceIds)}
-              className="px-6 py-2.5 mod-chip rounded-2xl text-sm font-bold text-primary"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {!loading && !error && articles.length === 0 && (
-          <div className="neu-card-sm rounded-2xl flex flex-col items-center justify-center py-12 px-5">
-            <span className="material-symbols-outlined text-3xl opacity-40 mb-3" style={{ color: 'var(--neu-text-muted)' }}>
-              newspaper
-            </span>
-            <p className="text-sm text-center" style={{ color: 'var(--neu-text)' }}>No articles found</p>
-            <p className="text-xs text-center mt-2" style={{ color: 'var(--neu-text-muted)' }}>
-              Try selecting different sources or refresh.
-            </p>
-          </div>
-        )}
-
-        {!loading && articles.map((article) => (
-          <ArticleCard key={article.id} article={article} />
-        ))}
+        {isRssTab && !rssLoading && !rssError && articles.length > 0 ? (
+          <p className="text-center text-[11px] text-[var(--neu-text-muted)]">
+            Headlines open on the publisher site
+          </p>
+        ) : null}
       </div>
+
+      <CreateHuudGistModal
+        isOpen={createOpen}
+        onClose={() => setCreateOpen(false)}
+        sections={gistSections}
+        defaultSection={gistSection}
+      />
     </AppBrowseLayout>
   );
 }
@@ -248,8 +451,8 @@ export default function LocalNewsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen neu-base flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="flex min-h-app items-center justify-center neu-base">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       }
     >

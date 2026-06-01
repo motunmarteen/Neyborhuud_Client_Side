@@ -183,7 +183,7 @@ function OfferRow({
       {/* Chat link */}
       {offer.conversationId && (
         <button
-          onClick={() => router.push(`/messages/${offer.conversationId}`)}
+          onClick={() => router.push(`/chat/${offer.conversationId}`)}
           className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-blue-600/40 py-2 text-sm font-medium text-brand-blue hover:bg-blue-900/30 transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

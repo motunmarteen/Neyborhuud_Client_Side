@@ -183,7 +183,7 @@ export default function WalletPage() {
               <>
             {/* How to earn */}
             <div className="mod-card rounded-xl p-4">
-              <h2 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-[var(--neu-text)] mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px] text-brand-blue" style={{ fontVariationSettings: "'FILL' 1" }}>
                   tips_and_updates
                 </span>
@@ -199,7 +199,7 @@ export default function WalletPage() {
                   { icon: "campaign", label: "Post an FYI", amount: "+8 HC" },
                   { icon: "forum", label: "Start a discussion", amount: "+3 HC" },
                   { icon: "comment", label: "Comment on post", amount: "+2 HC" },
-                  { icon: "record_voice_over", label: "Comment on gossip", amount: "+2 HC" },
+                  { icon: "record_voice_over", label: "Comment on posts", amount: "+2 HC" },
                   { icon: "share", label: "Share a post", amount: "+3 HC" },
                   { icon: "group_add", label: "Follow a neighbor", amount: "+2 HC" },
                 ].map((item) => (
@@ -260,7 +260,7 @@ export default function WalletPage() {
 
             {/* Ways to Spend */}
             <div className="bg-amber-50/50 border border-amber-200/60 rounded-xl p-4 shadow-sm">
-              <h2 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-[var(--neu-text)] mb-4 flex items-center gap-2">
                 <span className="text-lg">🪙</span>
                 Ways to Spend HuudCoins
               </h2>
@@ -299,16 +299,16 @@ export default function WalletPage() {
             {/* Transaction history */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-slate-900">Transaction History</h2>
+                <h2 className="text-sm font-semibold text-[var(--neu-text)]">Transaction History</h2>
                 <div className="flex gap-1">
                   {(["all", "earned", "spent"] as TxType[]).map((f) => (
                     <button
                       key={f}
                       onClick={() => { setFilter(f); setPage(1); }}
-                      className={`text-xs px-3 py-1 rounded-full font-semibold transition-colors capitalize ${
+                      className={`rounded-full px-3 py-1 text-xs font-semibold capitalize transition-colors ${
                         filter === f
-                          ? "bg-primary text-white"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                          ? "mod-chip mod-chip-active text-primary"
+                          : "mod-chip text-[var(--neu-text-muted)]"
                       }`}
                     >
                       {f}
@@ -361,7 +361,7 @@ export default function WalletPage() {
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900 truncate">
+                        <p className="text-sm font-medium text-[var(--neu-text)] truncate">
                           {tx.description ?? tx.type ?? "Transaction"}
                         </p>
                         {tx.createdAt && (
@@ -383,7 +383,7 @@ export default function WalletPage() {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="px-3 py-1.5 text-xs rounded-lg mod-inset text-slate-600 disabled:opacity-40 hover:bg-slate-200 transition-colors"
+                    className="px-3 py-1.5 text-xs rounded-lg mod-inset text-[var(--neu-text-muted)] disabled:opacity-40 transition-colors"
                   >
                     Previous
                   </button>
@@ -393,7 +393,7 @@ export default function WalletPage() {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="px-3 py-1.5 text-xs rounded-lg mod-inset text-slate-600 disabled:opacity-40 hover:bg-slate-200 transition-colors"
+                    className="px-3 py-1.5 text-xs rounded-lg mod-inset text-[var(--neu-text-muted)] disabled:opacity-40 transition-colors"
                   >
                     Next
                   </button>
@@ -407,7 +407,7 @@ export default function WalletPage() {
             {mainTab === "spends" && (
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-semibold text-slate-900">Boost &amp; Payment History</h2>
+                  <h2 className="text-sm font-semibold text-[var(--neu-text)]">Boost &amp; Payment History</h2>
                   <Link
                     href="/premium"
                     className="text-xs text-primary hover:text-amber-300 transition"
@@ -445,7 +445,7 @@ export default function WalletPage() {
                           {PAYMENT_TYPE_ICONS[p.type] ?? "🪙"}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-slate-900 truncate">
+                          <p className="text-sm font-semibold text-[var(--neu-text)] truncate">
                             {PAYMENT_TYPE_LABELS[p.type] ?? p.type}
                           </p>
                           {p.description && (
@@ -478,7 +478,7 @@ export default function WalletPage() {
                       <button
                         onClick={() => paymentsQuery.fetchNextPage()}
                         disabled={paymentsQuery.isFetchingNextPage}
-                        className="w-full py-2 text-xs text-slate-600 hover:text-slate-900 mod-inset hover:bg-slate-200 rounded-xl transition"
+                        className="mod-inset w-full rounded-xl py-2 text-xs text-[var(--neu-text-muted)] transition hover:text-[var(--neu-text)]"
                       >
                         {paymentsQuery.isFetchingNextPage ? "Loading…" : "Load More"}
                       </button>

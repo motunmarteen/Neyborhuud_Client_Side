@@ -5,12 +5,9 @@
 
 import type { Post } from "@/types/api";
 import type { Event, Job } from "@/types/api";
-import type { GossipPost } from "@/types/gossip";
 import type { Product } from "@/services/marketplace.service";
 
-export type BaseFeedItem =
-  | { _type: "post"; data: Post }
-  | { _type: "gossip"; data: GossipPost };
+export type BaseFeedItem = { _type: "post"; data: Post };
 
 export type DiscoveryFeedItem =
   | BaseFeedItem
@@ -41,9 +38,7 @@ function h2u32(h: number): number {
 function feedSalt(base: BaseFeedItem[]): string {
   if (!base.length) return "empty";
   const first = base[0];
-  if (first._type === "post") return first.data.id || String(first.data.createdAt || "");
-  const g = first.data;
-  return String(g.id || g._id || g.createdAt || "");
+  return first.data.id || String(first.data.createdAt || "");
 }
 
 /**

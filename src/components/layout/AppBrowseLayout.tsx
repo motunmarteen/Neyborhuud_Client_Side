@@ -42,11 +42,11 @@ export function AppBrowseLayout({
           className={`mx-auto flex w-full ${widthClass} flex-col gap-4 px-4 pt-3 pb-[var(--app-scroll-bottom)] ${className}`.trim()}
         >
           {(subtitle || header) && (
-            <div className="flex flex-col gap-3">
+            <div className="browse-toolbar">
               {subtitle ? (
-                <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
+                <div className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
                   {subtitle}
-                </p>
+                </div>
               ) : null}
               {header}
             </div>

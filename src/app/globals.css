@@ -2147,6 +2147,130 @@ html[data-scroll-locked] .feed-scroll-main {
 .feed-scroll-main {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  background: var(--neu-bg);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.feed-scroll-main::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* ── Browse page tab strip (My Huud Score, etc.) ── */
+.browse-toolbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--neu-bg);
+}
+
+.browse-tab-strip {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.browse-tab-strip__track {
+  flex: 1 1 0%;
+  min-width: 0;
+  border-radius: 1rem;
+  padding: 0.25rem;
+}
+
+.browse-tab-strip__scroll {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  padding: 0.125rem;
+}
+
+.browse-tab-strip__tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  scroll-snap-align: start;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.5rem 0.875rem;
+  min-height: 2.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--neu-text-muted);
+  background: transparent;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.browse-tab-strip__tab:hover {
+  color: var(--neu-text);
+}
+
+.browse-tab-strip__tab--active {
+  background: #ffffff;
+  color: var(--brand-green-dark, #006f35);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  font-weight: 700;
+}
+
+.dark .browse-tab-strip__tab--active {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--primary);
+}
+
+.browse-tab-strip__icon {
+  font-size: 1rem !important;
+  line-height: 1;
+}
+
+.browse-tab-strip__label {
+  line-height: 1.2;
+}
+
+.browse-tab-strip__trailing {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.browse-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.browse-chip-row--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.125rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.browse-chip-row--scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .auth-signup-bottom-sheet--with-footer .auth-signup-bottom-sheet__body {
@@ -4111,31 +4235,70 @@ html.dark body {
   padding-top: env(safe-area-inset-top, 0);
 }
 
-/* Hide scrollbar but keep scroll */
-.no-scrollbar {
-  -ms-overflow-style: none;
+/* ── Modern PWA scrolling: no visible scrollbars, scroll still works (touch/wheel/trackpad) ── */
+*,
+*::before,
+*::after {
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.no-scrollbar::-webkit-scrollbar {
+
+*::-webkit-scrollbar {
   display: none;
-}
-
-/* Custom Scrollbar - Dark theme */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
+  width: 0;
+  height: 0;
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #D4C4BC;
-  border-radius: 10px;
+html,
+body,
+.app-body,
+.app-shell {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #2A2A3D;
+/* Hide scrollbar but keep scroll (utility — redundant with global rule, kept for explicit markup) */
+.no-scrollbar,
+.scrollbar-none,
+.scrollbar-hide,
+.custom-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Opt-in visible scrollbar (e.g. admin data tables on desktop) */
+.show-scrollbar {
+  scrollbar-width: thin !important;
+  -ms-overflow-style: auto !important;
+}
+
+.show-scrollbar::-webkit-scrollbar {
+  display: block !important;
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.show-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.show-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+}
+
+.dark .show-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 /* Material Symbols Fill Utility */
@@ -4339,9 +4502,9 @@ html.dark body {
   --neu-text-muted: #4A6B4A;
 }
 
-/* ── Base Surface ── */
+/* ── Base Surface — solid app shell (no body doodle bleed-through) ── */
 .neu-base {
-  background: transparent;
+  background: var(--neu-bg);
 }
 
 /* ── Raised Card ── */

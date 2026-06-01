@@ -27,6 +27,9 @@ function getRouteTitle(pathname: string) {
   if (segment === 'gamification' && parts[1] === 'wallet') {
     return 'HuudCoins Wallet';
   }
+  if (segment === 'local-news' && parts[1] === 'gist') {
+    return 'Huud Gist';
+  }
 
   const map: Record<string, string> = {
     friendship: 'Friendship',
@@ -43,7 +46,8 @@ function getRouteTitle(pathname: string) {
     sentinel: 'Sentinel AI',
     map: 'Discovery',
     explore: 'Explore',
-    popular: 'Fans out',
+    popular: 'My Huud',
+    gossip: 'Huud Gist',
     messages: 'Messages',
     chat: 'Chat',
     info: 'Info',

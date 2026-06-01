@@ -686,7 +686,7 @@ function SafetyPageInner() {
                   className="shrink-0 px-3 py-1.5 rounded-xl mod-chip text-xs font-medium"
                   style={{ color: 'var(--primary)', opacity: linkersLoading ? 0.6 : 1 }}
                 >
-                  {linkersLoading ? 'Loading…' : linkers.length > 0 ? '↻ Refresh' : 'Load Linkers'}
+                  {linkersLoading ? 'Loading…' : linkers.length > 0 ? '↻ Refresh' : 'Load followers'}
                 </button>
               </div>
 
@@ -695,14 +695,14 @@ function SafetyPageInner() {
                 <div className="md:col-span-2 flex flex-col gap-1">
                   {linkers.length === 0 ? (
                     <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
-                      {linkersLoading ? 'Loading your mutual linkers…' : 'Click "Load Linkers" to see who you can add as a guardian.'}
+                      {linkersLoading ? 'Loading mutual followers…' : 'Click "Load followers" to see who you can add as a guardian.'}
                     </p>
                   ) : (
                     <>
                       <input
                         value={linkerSearch}
                         onChange={(e) => setLinkerSearch(e.target.value)}
-                        placeholder="Search linkers…"
+                        placeholder="Search followers…"
                         className="neu-input rounded-xl px-3 py-2 text-sm"
                       />
                       <div className="flex flex-col gap-1 max-h-48 overflow-y-auto neu-socket rounded-xl p-2">

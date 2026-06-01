@@ -16,12 +16,13 @@ import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
 import TopNav from '@/components/navigation/TopNav';
 import { searchService } from '@/services/search.service';
+import { newsService } from '@/services/news.service';
+import type { RssArticle } from '@/types/incident';
 
 // ── Explore Tabs ──────────────────────────────────────────────
 const EXPLORE_TABS = [
   { id: 'trending', label: 'Trending' },
   { id: 'fyi', label: 'FYI Bulletins' },
-  { id: 'gossip', label: 'Gossip' },
   { id: 'help_request', label: 'Help Requests' },
   { id: 'jobs', label: 'Jobs' },
   { id: 'events', label: 'Events' },
@@ -42,12 +43,14 @@ interface NewsArticle {
 
 // ── Browse by Type grid ───────────────────────────────────────
 const BROWSE_TYPES = [
-  { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi' },
-  { icon: 'forum', label: 'Gossip', type: 'gossip' },
-  { icon: 'help', label: 'Help Requests', type: 'help_request' },
-  { icon: 'work', label: 'Jobs', type: 'job' },
-  { icon: 'event', label: 'Events', type: 'event' },
-  { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace' },
+  { icon: 'campaign', label: 'FYI Bulletins', href: '/fyi' },
+  { icon: 'help', label: 'Help Requests', href: '/help-request' },
+  { icon: 'work', label: 'Jobs', href: '/jobs' },
+  { icon: 'event', label: 'Events', href: '/events' },
+  { icon: 'shopping_bag', label: 'Marketplace', href: '/marketplace' },
+  { icon: 'handyman', label: 'Services', href: '/services' },
+  { icon: 'report', label: 'Incident Reports', href: '/incident-reports' },
+  { icon: 'add_alert', label: 'Community Alerts', href: '/community-emergency' },
 ];
 
 // ── Search result tabs ────────────────────────────────────────
@@ -119,44 +122,25 @@ function ExplorePageInner() {
     loadTrending();
   }, []);
 
-  // Load Nigeria news from free RSS-to-JSON APIs
+  // Load Nigeria news via unified news API
   useEffect(() => {
     const loadNews = async () => {
       setNewsLoading(true);
       try {
-        // Use rss2json to fetch Nigeria news from Google News RSS
-        const rssUrl = encodeURIComponent('https://news.google.com/rss/search?q=Nigeria&hl=en-NG&gl=NG&ceid=NG:en');
-        const res = await fetch(
-          `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=10`,
+        const articles = await newsService.getArticles({
+          region: 'nigeria',
+          limit: 10,
+        });
+        setNewsArticles(
+          articles.map((a: RssArticle) => ({
+            title: a.title || '',
+            description: a.description?.replace(/<[^>]*>/g, '').slice(0, 150) || '',
+            url: a.link || '#',
+            image: a.imageUrl || null,
+            source: a.sourceName || a.source || 'News',
+            publishedAt: a.pubDate || new Date().toISOString(),
+          })),
         );
-        if (res.ok) {
-          const data = await res.json();
-          if (data.status === 'ok' && data.items?.length) {
-            setNewsArticles(
-              data.items.map((a: any) => {
-                // Extract image from enclosure or thumbnail
-                const image = a.enclosure?.link || a.thumbnail || null;
-                return {
-                  title: a.title || '',
-                  description: a.description?.replace(/<[^>]*>/g, '').slice(0, 150) || '',
-                  url: a.link || '',
-                  image,
-                  source: a.author || 'Google News',
-                  publishedAt: a.pubDate || '',
-                };
-              }),
-            );
-            return;
-          }
-        }
-        // Fallback curated news
-        setNewsArticles([
-          { title: 'Nigeria Economy Shows Growth Signs in Q2', description: 'GDP growth accelerates as reforms take effect across key sectors.', url: '#', image: null, source: 'Business Day', publishedAt: new Date().toISOString() },
-          { title: 'Lagos to Expand BRT Network by 2027', description: 'New routes will connect Alimosho, Ikorodu, and Epe to the central grid.', url: '#', image: null, source: 'The Guardian', publishedAt: new Date().toISOString() },
-          { title: 'Super Eagles Qualify for AFCON Quarter-Finals', description: 'Nigeria advances after a dominant group stage performance.', url: '#', image: null, source: 'ESPN Africa', publishedAt: new Date().toISOString() },
-          { title: 'CBN Holds Interest Rate Steady at 27.5%', description: 'Central bank maintains rate to curb inflation while supporting growth.', url: '#', image: null, source: 'Punch', publishedAt: new Date().toISOString() },
-          { title: 'New Tech Hub Opens in Yaba', description: 'The innovation center aims to support 500 startups in its first year.', url: '#', image: null, source: 'TechCabal', publishedAt: new Date().toISOString() },
-        ]);
       } catch {
         setNewsArticles([]);
       } finally {
@@ -204,8 +188,8 @@ function ExplorePageInner() {
     saveSearchHistory(clean);
   };
 
-  const handleBrowseType = (contentType: string) => {
-    router.push(`/feed?type=${contentType}`);
+  const handleBrowseType = (href: string) => {
+    router.push(href);
   };
 
   const handleBack = () => {
@@ -424,8 +408,8 @@ function ExplorePageInner() {
               <div className="grid grid-cols-2 gap-2.5">
                 {BROWSE_TYPES.map((item) => (
                   <button
-                    key={item.type}
-                    onClick={() => handleBrowseType(item.type)}
+                    key={item.href}
+                    onClick={() => handleBrowseType(item.href)}
                     className="flex items-center gap-3 px-4 py-3.5 rounded-2xl mod-chip transition-all active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
                   >
                     <span className="material-symbols-outlined text-xl text-primary">{item.icon}</span>
@@ -632,7 +616,6 @@ function ExplorePageInner() {
               <div className="px-4 pt-3 pb-6">
                 <h2 className="text-lg font-bold mb-3" style={{ color: 'var(--neu-text)' }}>
                   {activeTab === 'fyi' ? 'FYI Bulletins' :
-                   activeTab === 'gossip' ? 'Latest Gossip' :
                    activeTab === 'help_request' ? 'Help Requests' :
                    activeTab === 'jobs' ? 'Job Listings' :
                    activeTab === 'events' ? 'Upcoming Events' :
@@ -641,7 +624,6 @@ function ExplorePageInner() {
                 <div className="flex flex-col items-center py-10 gap-3">
                   <span className="material-symbols-outlined text-4xl" style={{ color: 'var(--neu-text-muted)' }}>
                     {activeTab === 'fyi' ? 'campaign' :
-                     activeTab === 'gossip' ? 'forum' :
                      activeTab === 'help_request' ? 'help' :
                      activeTab === 'jobs' ? 'work' :
                      activeTab === 'events' ? 'event' :
@@ -651,7 +633,15 @@ function ExplorePageInner() {
                     Browse {activeTab === 'fyi' ? 'bulletins' : activeTab === 'help_request' ? 'requests' : activeTab.replace('_', ' ')} in the feed
                   </p>
                   <button
-                    onClick={() => handleBrowseType(activeTab === 'jobs' ? 'job' : activeTab)}
+                    onClick={() => {
+                      const href =
+                        activeTab === 'fyi' ? '/fyi' :
+                        activeTab === 'help_request' ? '/help-request' :
+                        activeTab === 'jobs' ? '/jobs' :
+                        activeTab === 'events' ? '/events' :
+                        '/marketplace';
+                      router.push(href);
+                    }}
                     className="px-4 py-2 rounded-full text-sm font-semibold bg-primary text-white hover:bg-primary/90 transition-colors"
                   >
                     View All

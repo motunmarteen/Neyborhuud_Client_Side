@@ -18,9 +18,6 @@ import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
 import { useLocationFeed, usePostMutations } from '@/hooks/usePosts';
-import { useGossipList } from '@/hooks/useGossip';
-import { GossipCard } from '@/components/gossip/GossipCard';
-import { GossipPost } from '@/types/gossip';
 import { FYICard } from '@/components/fyi/FYICard';
 import { HelpRequestCard } from '@/components/help-request/HelpRequestCard';
 import { useDepartments } from '@/hooks/useDepartments';
@@ -40,7 +37,7 @@ import { BoostModal } from '@/components/gamification/BoostModal';
 import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
 import { FeedDiscoveryBlock } from '@/components/feed/FeedDiscoveryBlock';
 import { FrequentPlaceContextBanner } from '@/components/feed/FrequentPlaceContextBanner';
-import { mergeDiscoveryIntoFeed, type DiscoveryFeedItem } from '@/lib/feedDiscoveryMerge';
+import { mergeDiscoveryIntoFeed, type BaseFeedItem, type DiscoveryFeedItem } from '@/lib/feedDiscoveryMerge';
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
 import { useFeedTabSwipe } from '@/hooks/useFeedTabSwipe';
 import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
@@ -72,10 +69,10 @@ function XFeedInner() {
     const typeParam = searchParams.get('type') || '';
     const contentTypeFilter: ContentType | undefined = CONTENT_TYPE_TABS.includes(typeParam) ? (typeParam as ContentType) : undefined;
 
-    // Gossip has its own dedicated page — redirect when ?type=gossip is set
+    // Legacy gossip filter → Huud Gist in Local News
     useEffect(() => {
         if (typeParam === 'gossip') {
-            router.replace('/gossip');
+            router.replace('/local-news?tab=huud-gist');
         }
     }, [typeParam, router]);
 
@@ -178,11 +175,11 @@ function XFeedInner() {
     const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
     const [reportingPostId, setReportingPostId] = useState<string | null>(null);
     const [pinningPostId, setPinningPostId] = useState<string | null>(null);
-    const [commentsTarget, setCommentsTarget] = useState<{ kind: 'post' | 'gossip'; id: string } | null>(null);
+    const [commentsTarget, setCommentsTarget] = useState<{ kind: 'post'; id: string } | null>(null);
     const [commentsAnchor, setCommentsAnchor] = useState<{ left: number; width: number } | null>(null);
     const pinPost = usePinPost();
 
-    const openCommentsFromElement = (target: { kind: 'post' | 'gossip'; id: string }, element: HTMLElement | null) => {
+    const openCommentsFromElement = (target: { kind: 'post'; id: string }, element: HTMLElement | null) => {
         if (element) {
             const rect = element.getBoundingClientRect();
             setCommentsAnchor({ left: rect.left, width: rect.width });
@@ -199,26 +196,9 @@ function XFeedInner() {
         [feedData?.pages],
     );
 
-    // Fetch gossip posts for the same feed tab and merge into timeline
-    const { data: gossipData } = useGossipList({ feedTab });
-    const gossipPosts: GossipPost[] = useMemo(
-        () => gossipData?.pages?.flatMap((page) => page?.gossip || []) ?? [],
-        [gossipData?.pages],
-    );
-
-    // Merge and sort by createdAt descending
-    type FeedItem = { _type: 'post'; data: Post } | { _type: 'gossip'; data: GossipPost };
-    const mergedFeed: FeedItem[] = useMemo(
-        () =>
-            [
-                ...posts.map((p): FeedItem => ({ _type: 'post', data: p })),
-                ...gossipPosts.map((g): FeedItem => ({ _type: 'gossip', data: g })),
-            ].sort((a, b) => {
-                const dateA = new Date(a.data.createdAt || 0).getTime();
-                const dateB = new Date(b.data.createdAt || 0).getTime();
-                return dateB - dateA;
-            }),
-        [posts, gossipPosts],
+    const mergedFeed: BaseFeedItem[] = useMemo(
+        () => posts.map((p) => ({ _type: 'post' as const, data: p })),
+        [posts],
     );
     const missedAlerts = feedData?.pages?.[0]?.meta?.missedAlerts ?? null;
     const placeContext = feedData?.pages?.[0]?.meta?.placeContext ?? null;
@@ -547,24 +527,6 @@ function XFeedInner() {
                                         </div>
                                     );
                                 }
-                                if (item._type === 'gossip') {
-                                    const gossipId = item.data.id || item.data._id;
-                                    return (
-                                    <div
-                                        key={`gossip-${gossipId}`}
-                                        className="w-full md:max-w-[480px] md:snap-center"
-                                        data-comment-anchor={`gossip-${gossipId}`}
-                                    >
-                                        <GossipCard
-                                            post={item.data}
-                                            onComment={(id) => {
-                                                const el = document.querySelector(`[data-comment-anchor="gossip-${id}"]`) as HTMLElement | null;
-                                                openCommentsFromElement({ kind: 'gossip', id }, el);
-                                            }}
-                                        />
-                                    </div>
-                                    );
-                                }
                                 const post = item.data;
                                 if (post.contentType === 'fyi') {
                                     return (
@@ -649,7 +611,6 @@ function XFeedInner() {
                 focusMediaOnOpen={createPostFocusMedia}
                 onSuccess={() => {
                     queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
-                    queryClient.invalidateQueries({ queryKey: ['gossip'] });
                     queryClient.invalidateQueries({ queryKey: ['fyi'] });
                     queryClient.invalidateQueries({ queryKey: ['helpRequest'] });
                 }}

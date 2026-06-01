@@ -153,7 +153,7 @@ export function XPostCard({
             const res = await chatService.getOrCreateDirectConversation(authorId);
             const conv = (res.data as any)?.conversation ?? (res.data as any);
             const convId = conv?._id ?? conv?.conversationId ?? conv?.id;
-            if (convId) router.push(`/messages/${convId}`);
+            if (convId) router.push(`/chat/${convId}`);
         } catch { /* silent */ }
     }, [author?.id, isAnonymousAuthor, router]);
 

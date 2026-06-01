@@ -723,7 +723,7 @@ function OfferCard({
       <div className="mt-3 flex flex-col sm:flex-row gap-2">
         {offer.conversationId && (
           <button
-            onClick={() => router.push(`/messages/${offer.conversationId}`)}
+            onClick={() => router.push(`/chat/${offer.conversationId}`)}
             className="flex flex-1 items-center justify-center gap-2 rounded-full border border-blue-600/50 py-2 text-sm font-medium text-brand-blue hover:bg-blue-900/30 transition-colors"
           >
             <span className="material-symbols-outlined text-[16px]">chat</span>

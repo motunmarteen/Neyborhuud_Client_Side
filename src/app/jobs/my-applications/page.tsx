@@ -120,7 +120,7 @@ export default function MyApplicationsPage() {
                     <div className="flex items-center gap-4">
                       {app.conversationId && (
                         <Link
-                          href={`/messages/${app.conversationId}`}
+                          href={`/chat/${app.conversationId}`}
                           className="text-xs font-semibold transition-all flex items-center gap-1"
                           style={{ color: "var(--primary)" }}
                         >

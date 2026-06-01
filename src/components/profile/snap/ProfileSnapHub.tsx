@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ProfileAuthSectionTitle } from '@/components/profile/ProfileAuthShell';
+import { ProfileBrowseEyebrow } from '@/components/profile/browse/ProfileBrowseSectionTitle';
 
 type HubItem = {
   id: string;
@@ -19,30 +19,36 @@ type ProfileSnapHubProps = {
   showPinPrompt?: boolean;
 };
 
-function HubCard({ item }: { item: HubItem }) {
+function HubRow({ item }: { item: HubItem }) {
   const content = (
     <>
-      <span className="auth-flow-hero-card__icon" aria-hidden>
-        <span className="material-symbols-outlined text-[1.25rem]">{item.icon}</span>
-      </span>
-      <div className="min-w-0 flex-1 text-left">
-        <p className="auth-flow-hero-card__title !text-[0.9375rem]">{item.title}</p>
-        <p className="auth-flow-hero-card__meta">{item.subtitle}</p>
+      <div className="mod-inset flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary">
+        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
       </div>
-      <span className="material-symbols-outlined text-[var(--neu-text-muted)]">chevron_right</span>
+      <div className="min-w-0 flex-1 text-left">
+        <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
+          {item.title}
+        </p>
+        <p className="text-xs text-[var(--neu-text-muted)]">{item.subtitle}</p>
+      </div>
+      <span className="material-symbols-outlined shrink-0 text-[var(--neu-text-muted)]">chevron_right</span>
     </>
   );
 
   if (item.onClick) {
     return (
-      <button type="button" onClick={item.onClick} className="auth-flow-hero-card w-full text-left">
+      <button
+        type="button"
+        onClick={item.onClick}
+        className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-black/[0.02]"
+      >
         {content}
       </button>
     );
   }
 
   return (
-    <Link href={item.href!} className="auth-flow-hero-card no-underline">
+    <Link href={item.href!} className="flex items-center gap-3 px-3 py-2.5 no-underline transition-colors hover:bg-black/[0.02]">
       {content}
     </Link>
   );
@@ -54,6 +60,8 @@ export function ProfileSnapHub({
   onSetLocation,
   showPinPrompt = false,
 }: ProfileSnapHubProps) {
+  if (!isOwnProfile) return null;
+
   const postItems: HubItem[] = [
     {
       id: 'feed',
@@ -67,7 +75,7 @@ export function ProfileSnapHub({
       title: 'Street radar',
       subtitle: 'Discover trending posts & local news',
       icon: 'explore',
-      href: '/explore',
+      href: '/neighborhood?tab=street-radar',
     },
     {
       id: 'fyi',
@@ -94,43 +102,47 @@ export function ProfileSnapHub({
   ];
 
   return (
-    <div className="flex flex-col gap-3">
-      <ProfileAuthSectionTitle>Post to…</ProfileAuthSectionTitle>
-
-      {showPinPrompt && isOwnProfile && onSetLocation ? (
-        <button type="button" onClick={onSetLocation} className="auth-flow-hero-card w-full border-dashed text-left">
-          <span className="auth-flow-hero-card__icon" aria-hidden>
-            <span className="material-symbols-outlined text-[1.25rem]">add_location_alt</span>
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="auth-flow-hero-card__title !text-[0.9375rem]">Pin your Huud on the map</p>
-            <p className="auth-flow-hero-card__meta">
-              Set location so neighbours can find you — your map becomes your profile header
-            </p>
-          </div>
-        </button>
-      ) : null}
-
-      <div className="flex flex-col gap-2">
-        {postItems.map((item) => (
-          <HubCard key={item.id} item={item} />
-        ))}
+    <div className="space-y-4">
+      <div className="mod-card overflow-hidden rounded-2xl">
+        <div className="border-b px-4 py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+          <ProfileBrowseEyebrow>Post to…</ProfileBrowseEyebrow>
+        </div>
+        {showPinPrompt && onSetLocation ? (
+          <button
+            type="button"
+            onClick={onSetLocation}
+            className="flex w-full items-center gap-3 border-b px-3 py-3 text-left"
+            style={{ borderColor: 'var(--neu-shadow-dark)' }}
+          >
+            <div className="mod-inset flex h-10 w-10 items-center justify-center rounded-xl text-primary">
+              <span className="material-symbols-outlined text-[20px]">add_location_alt</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
+                Pin your Huud on the map
+              </p>
+              <p className="text-xs text-[var(--neu-text-muted)]">
+                Set location so neighbours can find you
+              </p>
+            </div>
+          </button>
+        ) : null}
+        <div className="divide-y" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+          {postItems.map((item) => (
+            <HubRow key={item.id} item={item} />
+          ))}
+        </div>
       </div>
 
-      <ProfileAuthSectionTitle>Your Huud</ProfileAuthSectionTitle>
-      <div className="flex flex-col gap-2">
-        {platformItems.map((item) => (
-          <Link key={item.id} href={item.href!} className="auth-signup-location-peek no-underline">
-            <span className="auth-signup-location-peek__icon" aria-hidden>
-              <span className="material-symbols-outlined text-[1rem]">{item.icon}</span>
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="auth-signup-location-peek__label">{item.title}</p>
-              <p className="auth-signup-location-peek__name truncate">{item.subtitle}</p>
-            </div>
-            <span className="auth-signup-location-peek__chevron" aria-hidden>›</span>
-          </Link>
-        ))}
+      <div className="mod-card overflow-hidden rounded-2xl">
+        <div className="border-b px-4 py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+          <ProfileBrowseEyebrow>Your Huud</ProfileBrowseEyebrow>
+        </div>
+        <div className="divide-y" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+          {platformItems.map((item) => (
+            <HubRow key={item.id} item={item} />
+          ))}
+        </div>
       </div>
     </div>
   );

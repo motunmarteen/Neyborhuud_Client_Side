@@ -15,7 +15,6 @@ const mainNav = [
   { icon: 'location_on', label: 'My Huud', href: '/neighborhood' },
   { icon: 'groups', label: 'Communities', href: '/communities' },
   { icon: 'bookmark', label: 'Saved', href: '/saved' },
-  { icon: 'local_fire_department', label: 'Fans out', href: '/popular' },
   { icon: 'newspaper', label: 'Local News', href: '/local-news' },
   { icon: 'military_tech', label: 'My Huud Score', href: '/gamification' },
 ];

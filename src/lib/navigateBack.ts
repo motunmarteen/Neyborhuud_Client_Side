@@ -11,7 +11,8 @@ const PREFIX_FALLBACKS: Array<[prefix: string, href: string]> = [
   ['/events', '/events'],
   ['/jobs', '/jobs'],
   ['/services', '/services'],
-  ['/messages', '/messages'],
+  ['/messages', '/chat'],
+  ['/chat', '/chat'],
   ['/safety', '/feed'],
   ['/sos', '/feed'],
   ['/help-request', '/help-request'],
@@ -23,6 +24,8 @@ const PREFIX_FALLBACKS: Array<[prefix: string, href: string]> = [
   ['/notifications', '/feed'],
   ['/communities', '/feed'],
   ['/neighborhood', '/feed'],
+  ['/popular', '/neighborhood'],
+  ['/gossip', '/local-news?tab=huud-gist'],
 ];
 
 export function resolveBackFallback(pathname: string): string {

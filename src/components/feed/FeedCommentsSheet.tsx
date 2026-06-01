@@ -5,17 +5,8 @@ import { usePost } from '@/hooks/usePosts';
 import { useCommentMutations } from '@/hooks/useComments';
 import { CommentForm } from '@/components/feed/CommentForm';
 import { CommentItem } from '@/components/feed/CommentItem';
-import {
-    useCommentMutations as useGossipCommentMutations,
-    useGossipDetail,
-    useGossipMutations,
-} from '@/hooks/useGossip';
-import { GossipCommentInput } from '@/components/gossip/GossipCommentInput';
-import { CommentThread } from '@/components/gossip/CommentThread';
 
-type CommentTarget =
-    | { kind: 'post'; id: string }
-    | { kind: 'gossip'; id: string };
+type CommentTarget = { kind: 'post'; id: string };
 
 interface FeedCommentsSheetProps {
     isOpen: boolean;
@@ -33,27 +24,15 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
     const [dragStartTs, setDragStartTs] = useState<number | null>(null);
 
     const activeTarget = isOpen ? target : null;
-    const activePostId = activeTarget?.kind === 'post' ? activeTarget.id : null;
-    const activeGossipId = activeTarget?.kind === 'gossip' ? activeTarget.id : null;
+    const activePostId = activeTarget?.id ?? null;
 
     const { data: postDetails, isLoading: isPostLoading, isError: isPostError } = usePost(activePostId);
-    const {
-        data: gossipDetails,
-        isLoading: isGossipLoading,
-        isError: isGossipError,
-    } = useGossipDetail(activeGossipId);
-
     const { isCreating: isPostingComment } = useCommentMutations(activePostId || '');
-    const gossipMutations = useGossipMutations(activeGossipId || '');
-    const gossipCommentMutations = useGossipCommentMutations(activeGossipId || '');
 
     const commentsCount = useMemo(() => {
         if (!activeTarget) return 0;
-        if (activeTarget.kind === 'post') {
-            return postDetails?.content?.comments || postDetails?.comments?.length || 0;
-        }
-        return gossipDetails?.gossip?.commentCount || gossipDetails?.comments?.length || 0;
-    }, [activeTarget, postDetails, gossipDetails]);
+        return postDetails?.content?.comments || postDetails?.comments?.length || 0;
+    }, [activeTarget, postDetails]);
 
     useEffect(() => {
         if (isOpen) {
@@ -105,7 +84,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
         if (!isDragging) return;
 
         const elapsedMs = dragStartTs ? Math.max(1, performance.now() - dragStartTs) : 1;
-        const velocity = dragY / elapsedMs; // px/ms
+        const velocity = dragY / elapsedMs;
         const shouldDismiss = dragY > 120 || velocity > 1.1;
 
         setIsDragging(false);
@@ -187,57 +166,24 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-4 py-3">
-                    {activeTarget.kind === 'post' ? (
-                        isPostLoading ? (
-                            <div className="flex items-center justify-center py-12">
-                                <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
-                            </div>
-                        ) : isPostError ? (
-                            <div className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-8 text-center text-sm text-red-700 dark:text-red-100">
-                                Unable to load comments for this post.
-                            </div>
-                        ) : postDetails?.comments?.length ? (
-                            <div className="space-y-0.5">
-                                {postDetails.comments.map((comment) => (
-                                    <CommentItem key={comment.id} comment={comment} postId={activeTarget.id} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="py-14 text-center text-[var(--neu-text-muted)]">
-                                <span className="material-symbols-outlined text-3xl opacity-40">chat_bubble_outline</span>
-                                <p className="mt-2 text-sm">Start the conversation.</p>
-                            </div>
-                        )
-                    ) : isGossipLoading ? (
+                    {isPostLoading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
                         </div>
-                    ) : isGossipError ? (
+                    ) : isPostError ? (
                         <div className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-8 text-center text-sm text-red-700 dark:text-red-100">
-                            Unable to load comments for this discussion.
+                            Unable to load comments for this post.
                         </div>
-                    ) : gossipDetails?.comments?.length ? (
-                        <div className="divide-y divide-[var(--neu-shadow-dark)]">
-                            {gossipDetails.comments.map((comment) => (
-                                <CommentThread
-                                    key={comment.id || comment._id}
-                                    comment={comment}
-                                    replies={(comment as any).replies || []}
-                                    onReply={async (body, anonymous, parentId) => {
-                                        await gossipMutations.addComment({ body, anonymous, parentId });
-                                    }}
-                                    isSubmitting={gossipMutations.isCommenting}
-                                    onLikeComment={gossipCommentMutations.likeComment}
-                                    onDeleteComment={gossipCommentMutations.deleteComment}
-                                    isLikingCommentId={gossipCommentMutations.likingCommentId}
-                                    isDeletingCommentId={gossipCommentMutations.deletingCommentId}
-                                />
+                    ) : postDetails?.comments?.length ? (
+                        <div className="space-y-0.5">
+                            {postDetails.comments.map((comment) => (
+                                <CommentItem key={comment.id} comment={comment} postId={activeTarget.id} />
                             ))}
                         </div>
                     ) : (
                         <div className="py-14 text-center text-[var(--neu-text-muted)]">
                             <span className="material-symbols-outlined text-3xl opacity-40">chat_bubble_outline</span>
-                            <p className="mt-2 text-sm">No comments yet. Be the first.</p>
+                            <p className="mt-2 text-sm">Start the conversation.</p>
                         </div>
                     )}
                 </div>
@@ -246,20 +192,10 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                     className="relative z-[1] border-t border-[var(--neu-shadow-dark)] bg-[var(--neu-bg)]/88 px-4 py-3 backdrop-blur-xl"
                     style={{ boxShadow: '0 -1px 0 var(--neu-shadow-light)' }}
                 >
-                    {activeTarget.kind === 'post' ? (
-                        <CommentForm
-                            postId={activeTarget.id}
-                            placeholder={isPostingComment ? 'Posting...' : 'Add a comment...'}
-                        />
-                    ) : (
-                        <GossipCommentInput
-                            onSubmit={async (body, anonymous) => {
-                                await gossipMutations.addComment({ body, anonymous });
-                            }}
-                            isSubmitting={gossipMutations.isCommenting}
-                            placeholder="Add a comment..."
-                        />
-                    )}
+                    <CommentForm
+                        postId={activeTarget.id}
+                        placeholder={isPostingComment ? 'Posting...' : 'Add a comment...'}
+                    />
                 </div>
                 </div>
             </section>

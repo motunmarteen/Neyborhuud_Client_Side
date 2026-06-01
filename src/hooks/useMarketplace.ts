@@ -962,3 +962,24 @@ export function useBoostProduct() {
     },
   });
 }
+
+/** Fetch up to `limit` marketplace listings by seller (profile pages). */
+export function useUserMarketplace(userId: string | null, limit = 3) {
+  return useQuery({
+    queryKey: ["marketplace", "by-user", userId, limit],
+    queryFn: async () => {
+      const res = await marketplaceService.getItems(1, limit, { sellerId: userId! });
+      const payload = (res as any)?.data ?? res;
+      const items =
+        payload?.products ??
+        payload?.items ??
+        payload?.data ??
+        payload ??
+        [];
+      return Array.isArray(items) ? items : [];
+    },
+    enabled: !!userId,
+    staleTime: 60_000,
+    retry: false,
+  });
+}

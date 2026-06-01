@@ -56,14 +56,7 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
   } = useQuery({
     queryKey: ["follow-status", userId],
     queryFn: async () => {
-      const result = await followService.getFollowStatus(userId!);
-      // Debug: Log the raw response (apiClient.get already unwraps response.data)
-      console.log('🔍 Follow Status Response:', {
-        userId,
-        rawResponse: result,
-        followData: result?.data,
-      });
-      return result;
+      return followService.getFollowStatus(userId!);
     },
     enabled: options?.enabled !== false && !!userId,
     retry: false,
@@ -77,19 +70,10 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
     staleTime: 10000,
   });
 
-  // Log any errors
-  if (statusError && userId) {
-    console.error('❌ Follow Status Error:', statusError);
-  }
-
   // Follow mutation
   const followMutation = useMutation({
-    mutationFn: () => {
-      console.log('➕ Following user:', userId);
-      return followService.followUser(userId!);
-    },
+    mutationFn: () => followService.followUser(userId!),
     onSuccess: (response: unknown) => {
-      console.log('✅ Follow successful:', response);
       // Update follow status cache
       queryClient.setQueryData(["follow-status", userId], {
         data: {
@@ -113,10 +97,7 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
       if (m) setPendingMilestone(m);
     },
     onError: (error: { response?: { status?: number } }) => {
-      console.error('❌ Follow error:', error);
-      // Handle 409 (already following) gracefully
       if (error.response?.status === 409) {
-        console.log('ℹ️ User is already following - updating state');
         // Update state to reflect that user is following
         queryClient.setQueryData(["follow-status", userId], {
           data: {
@@ -137,12 +118,8 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
 
   // Unfollow mutation
   const unfollowMutation = useMutation({
-    mutationFn: () => {
-      console.log('🚫 Unfollowing user:', userId);
-      return followService.unfollowUser(userId!);
-    },
-    onSuccess: (response) => {
-      console.log('✅ Unfollow successful:', response);
+    mutationFn: () => followService.unfollowUser(userId!),
+    onSuccess: () => {
       // Update follow status cache
       queryClient.setQueryData(["follow-status", userId], {
         data: {
@@ -159,10 +136,7 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
       queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
     },
     onError: (error: { response?: { status?: number } }) => {
-      console.error('❌ Unfollow error:', error);
-      // Handle 404 (not following) gracefully
       if (error.response?.status === 404) {
-        console.log('ℹ️ User is not following - updating state');
         // Update state to reflect that user is not following
         queryClient.setQueryData(["follow-status", userId], {
           data: {
@@ -185,12 +159,6 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
     if (!userId) return;
 
     const isCurrentlyFollowing = followStatusData?.data?.isFollowing;
-    
-    console.log('🔄 Toggle Follow:', {
-      userId,
-      isCurrentlyFollowing,
-      action: isCurrentlyFollowing ? 'UNFOLLOW' : 'FOLLOW',
-    });
 
     if (isCurrentlyFollowing) {
       unfollowMutation.mutate();

@@ -204,6 +204,12 @@ export const INCIDENT_STATUS_META: Record<
 export interface NewsSource {
   id: string;
   name: string;
+  region?: 'nigeria' | 'international';
+}
+
+export interface NewsTopic {
+  id: string;
+  label: string;
 }
 
 export interface NewsCategory {
@@ -214,6 +220,15 @@ export interface NewsCategory {
 
 export interface NewsCategoriesResponse {
   categories: NewsCategory[];
+  topics: NewsTopic[];
+}
+
+export interface NewsArticlesResponse {
+  articles: RssArticle[];
+  region: string;
+  topic: string;
+  sourcesUsed: string[];
+  count: number;
 }
 
 // Parsed RSS article (client-side parsed from XML)

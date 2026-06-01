@@ -277,7 +277,7 @@ export default function FriendshipPage() {
       const res = await chatService.getOrCreateDirectConversation(userId);
       const conv = (res.data as { conversation?: { _id?: string; conversationId?: string; id?: string } })?.conversation ?? (res.data as { _id?: string; conversationId?: string; id?: string });
       const convId = conv?._id ?? conv?.conversationId ?? conv?.id;
-      if (convId) router.push(`/messages/${convId}`);
+      if (convId) router.push(`/chat/${convId}`);
     } catch {
       // silent — user can retry
     } finally {

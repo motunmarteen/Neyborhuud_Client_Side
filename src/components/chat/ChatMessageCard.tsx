@@ -7,6 +7,7 @@
  */
 
 import { ChatMessage } from '@/types/api';
+import { MessageReactions } from '@/components/chat/MessageReactions';
 
 function timeStr(dateStr: string | undefined): string {
   if (!dateStr) return '';
@@ -219,38 +220,76 @@ function FileBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 }
 
 // ─── Plain text bubble ────────────────────────────────────────────────────────
-function TextBubble({ msg, mine, isPriority }: { msg: ChatMessage; mine: boolean; isPriority: boolean }) {
+function TextBubble({
+  msg,
+  mine,
+  isPriority,
+  currentUserId,
+  onReactionsUpdate,
+}: {
+  msg: ChatMessage;
+  mine: boolean;
+  isPriority: boolean;
+  currentUserId?: string;
+  onReactionsUpdate?: (reactions: ChatMessage['reactions']) => void;
+}) {
   return (
-    <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
-      isPriority
-        ? 'border-2 border-red-600 bg-red-900/40'
-        : mine
-        ? 'bg-blue-700 text-white'
-        : 'bg-brand-black text-[var(--neu-text-muted)]'
-    }`}>
-      {isPriority && <p className="mb-1 text-[10px] font-bold uppercase text-brand-red">🚨 Priority</p>}
-      {msg.isDeleted
-        ? <p className="italic text-[var(--neu-text-muted)] text-sm">[deleted]</p>
-        : <p className="text-sm leading-relaxed">{msg.content}</p>
-      }
-      <Meta msg={msg} mine={mine} />
+    <div className={`max-w-[70%] ${mine ? 'ml-auto' : ''}`}>
+      <div
+        className={`rounded-2xl px-4 py-2.5 ${
+          isPriority
+            ? 'border-2 border-red-600 bg-red-900/40'
+            : mine
+              ? 'bg-blue-700 text-white'
+              : 'bg-brand-black text-[var(--neu-text-muted)]'
+        }`}
+      >
+        {isPriority && (
+          <p className="mb-1 text-[10px] font-bold uppercase text-brand-red">🚨 Priority</p>
+        )}
+        {msg.isDeleted ? (
+          <p className="text-sm italic text-[var(--neu-text-muted)]">[deleted]</p>
+        ) : (
+          <p className="text-sm leading-relaxed">{msg.content}</p>
+        )}
+        <Meta msg={msg} mine={mine} />
+      </div>
+      {!msg.isDeleted && (
+        <MessageReactions
+          msg={msg}
+          currentUserId={currentUserId}
+          onUpdated={onReactionsUpdate}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
-export default function ChatMessageCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
+export default function ChatMessageCard({
+  msg,
+  mine,
+  currentUserId,
+  onReactionsUpdate,
+}: {
+  msg: ChatMessage;
+  mine: boolean;
+  currentUserId?: string;
+  onReactionsUpdate?: (reactions: ChatMessage['reactions']) => void;
+}) {
   const isPriority = msg.priority === 'emergency';
+  const textProps = { currentUserId, onReactionsUpdate };
 
   if (msg.isDeleted) {
-    return <TextBubble msg={msg} mine={mine} isPriority={false} />;
+    return <TextBubble msg={msg} mine={mine} isPriority={false} {...textProps} />;
   }
 
   switch (msg.type) {
-    case 'image': return msg.mediaUrl ? <ImageBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />;
-    case 'video': return msg.mediaUrl ? <VideoBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />;
-    case 'audio': return msg.mediaUrl ? <AudioBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />;
-    case 'file':  return msg.mediaUrl ? <FileBubble  msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />;
+    case 'image': return msg.mediaUrl ? <ImageBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
+    case 'video': return msg.mediaUrl ? <VideoBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
+    case 'audio': return msg.mediaUrl ? <AudioBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
+    case 'file':  return msg.mediaUrl ? <FileBubble  msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
+    case 'system':         return <TextBubble msg={msg} mine={mine} isPriority={false} {...textProps} />;
     case 'location':       return <LocationCard    msg={msg} mine={mine} />;
     case 'event':          return <EventCard       msg={msg} mine={mine} />;
     case 'marketplace':    return <MarketplaceCard msg={msg} mine={mine} />;
@@ -259,6 +298,6 @@ export default function ChatMessageCard({ msg, mine }: { msg: ChatMessage; mine:
     case 'tracking':       return <TrackingCard    msg={msg} mine={mine} />;
     case 'kidnapping_info':return <KidnappingCard  msg={msg} mine={mine} />;
     case 'sos':            return <SOSCard         msg={msg} mine={mine} />;
-    default:               return <TextBubble     msg={msg} mine={mine} isPriority={isPriority} />;
+    default:               return <TextBubble     msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
   }
 }
