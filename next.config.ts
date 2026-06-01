@@ -16,6 +16,20 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   /* config options here */
+  async redirects() {
+    return [
+      {
+        source: "/messages",
+        destination: "/chat",
+        permanent: false,
+      },
+      {
+        source: "/messages/:conversationId",
+        destination: "/chat/:conversationId",
+        permanent: false,
+      },
+    ];
+  },
   reactCompiler: true,
   // Allow running multiple dev servers by isolating cache/output directories.
   distDir: process.env.NEXT_DIST_DIR || ".next",

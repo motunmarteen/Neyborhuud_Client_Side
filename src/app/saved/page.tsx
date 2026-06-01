@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { contentService } from '@/services/content.service';
-import { useAuth } from '@/hooks/useAuth';
+import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 import { BrowseFilterChip } from '@/components/layout/BrowseFilterChip';
@@ -94,8 +94,22 @@ function postSearchText(post: Post) {
     .toLowerCase();
 }
 
+function SavedToolbarSkeleton() {
+  return (
+    <div className="space-y-3" aria-hidden>
+      <div className="mod-card h-[2.75rem] animate-pulse rounded-2xl" />
+      <div className="flex gap-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="mod-inset h-9 w-20 animate-pulse rounded-full" />
+        ))}
+      </div>
+      <div className="mod-inset h-10 animate-pulse rounded-xl" />
+    </div>
+  );
+}
+
 export default function SavedPage() {
-  const { user } = useAuth();
+  const { user, mounted } = useClientAuthUser();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<ContentFilter>('all');
   const [search, setSearch] = useState('');
@@ -191,14 +205,16 @@ export default function SavedPage() {
           </span>
           <span className="truncate">
             {filterLabel}
-            {!isLoading && user
+            {mounted && user && !isLoading
               ? ` · ${filteredPosts.length} of ${allPosts.length} saved`
               : " · Posts you've bookmarked"}
           </span>
         </span>
       }
       header={
-        user ? (
+        !mounted ? (
+          <SavedToolbarSkeleton />
+        ) : user ? (
           <>
             <BrowseTabStrip
               tabs={[...VIEW_TABS]}
@@ -249,7 +265,13 @@ export default function SavedPage() {
         ) : undefined
       }
     >
-      {!user ? (
+      {!mounted ? (
+        <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="mod-inset h-[5.5rem] animate-pulse rounded-xl" />
+          ))}
+        </div>
+      ) : !user ? (
         <BrowseEmptyState
           icon="login"
           title="Sign in to view saved posts"
