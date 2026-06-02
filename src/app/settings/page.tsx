@@ -1,19 +1,54 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { fetchAPI } from '@/lib/api';
 import { authService } from '@/services/auth.service';
-import { toast } from 'sonner';
 import type { ConsentType, UserConsentRecord, AppLanguage } from '@/types/api';
 import { useTranslation } from '@/lib/i18n';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
+import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { isAdminUser } from '@/lib/adminAccess';
 import { EmailVerificationCard } from '@/components/auth/EmailVerificationCard';
+import { formatProfileBirthday, getZodiacFromBirthday } from '@/lib/profileSnapHelpers';
+
+type SettingsTab = 'notifications' | 'privacy' | 'account' | 'language';
+
+function isEmailVerifiedStrict(user: unknown): boolean {
+  if (!user || typeof user !== 'object') return false;
+  const u = user as Record<string, unknown>;
+  return (
+    u.emailVerified === true ||
+    u.email_verified === true ||
+    u.verificationStatus === 'verified'
+  );
+}
+
+function Section({
+  title,
+  children,
+  description,
+}: {
+  title: string;
+  description?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="mod-card rounded-2xl p-4">
+      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">
+        {title}
+      </p>
+      {description ? (
+        <p className="mt-1 text-sm leading-relaxed text-[var(--neu-text-muted)]">
+          {description}
+        </p>
+      ) : null}
+      <div className={description ? 'mt-4' : 'mt-3'}>{children}</div>
+    </div>
+  );
+}
 
 function latestForType(
     rows: UserConsentRecord[],
@@ -58,7 +93,7 @@ interface UserSettings {
 export default function SettingsPage() {
     const router = useRouter();
     const { t, language: currentLanguage, setLanguage, languageNames, availableLanguages } = useTranslation();
-    const [activeTab, setActiveTab] = useState<'notifications' | 'privacy' | 'account' | 'language'>('notifications');
+    const [activeTab, setActiveTab] = useState<SettingsTab>('notifications');
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [user, setUser] = useState<any>(null);
@@ -184,59 +219,94 @@ export default function SettingsPage() {
         if (notifSaveTimer.current) clearTimeout(notifSaveTimer.current);
     }, []);
 
-    // Load user data from localStorage
+    // Load settings from server (source of truth) + fallback to localStorage.
     useEffect(() => {
-        const userData = localStorage.getItem('neyborhuud_user');
-        if (userData) {
+      let cancelled = false;
+
+      const load = async () => {
+        // Fallback (fast paint) from localStorage
+        try {
+          const userData = localStorage.getItem('neyborhuud_user');
+          if (userData && !cancelled) {
             const parsed = JSON.parse(userData);
             setUser(parsed);
-            setEmailVerified(parsed.verificationStatus === 'verified' || parsed.emailVerified);
-            
-            // Load settings if available
+            setEmailVerified(isEmailVerifiedStrict(parsed));
             if (parsed.settings?.notifications) {
-                setNotifications(prev => ({ ...prev, ...parsed.settings.notifications }));
+              setNotifications((prev) => ({ ...prev, ...parsed.settings.notifications }));
             }
             if (parsed.settings?.privacy) {
-                setPrivacy(prev => ({ ...prev, ...parsed.settings.privacy }));
+              setPrivacy((prev) => ({ ...prev, ...parsed.settings.privacy }));
             }
             if (parsed.settings?.accessibility?.textSize) {
-                setTextSize(parsed.settings.accessibility.textSize);
+              setTextSize(parsed.settings.accessibility.textSize);
             }
             if (parsed.settings?.accessibility?.liteMode !== undefined) {
-                setLiteMode(!!parsed.settings.accessibility.liteMode);
+              setLiteMode(!!parsed.settings.accessibility.liteMode);
             }
+          }
+        } catch {
+          // ignore corrupt
         }
 
-        // Load per-user safety settings from backend
+        // Source of truth from backend
         if (authService.isAuthenticated()) {
-            fetchAPI('/safety/settings')
-                .then((res: any) => {
-                    if (res?.data?.safetySettings?.emergencyServicesEnabled !== undefined) {
-                        setEmergencyServicesEnabled(!!res.data.safetySettings.emergencyServicesEnabled);
-                    }
-                })
-                .catch(() => {}); // non-fatal
+          try {
+            const res = await authService.getMyProfileFull();
+            const u = res.success ? res.data?.user : null;
+            if (u && !cancelled) {
+              setUser(u);
+              setEmailVerified(isEmailVerifiedStrict(u));
+              localStorage.setItem('neyborhuud_user', JSON.stringify(u));
+
+              if ((u as any).settings?.notifications) {
+                setNotifications((prev) => ({ ...prev, ...(u as any).settings.notifications }));
+              }
+              if ((u as any).settings?.privacy) {
+                setPrivacy((prev) => ({ ...prev, ...(u as any).settings.privacy }));
+              }
+              if ((u as any).settings?.accessibility?.textSize) {
+                setTextSize((u as any).settings.accessibility.textSize);
+              }
+              if ((u as any).settings?.accessibility?.liteMode !== undefined) {
+                setLiteMode(!!(u as any).settings.accessibility.liteMode);
+              }
+            }
+          } catch {
+            // non-fatal
+          }
+
+          // Per-user safety settings
+          fetchAPI('/safety/settings')
+            .then((res: any) => {
+              if (cancelled) return;
+              if (res?.data?.safetySettings?.emergencyServicesEnabled !== undefined) {
+                setEmergencyServicesEnabled(!!res.data.safetySettings.emergencyServicesEnabled);
+              }
+            })
+            .catch(() => {});
         }
+      };
+
+      void load();
+      return () => {
+        cancelled = true;
+      };
     }, []);
 
-    const handleEmailVerified = useCallback(() => {
-        if (typeof window !== 'undefined') {
-            const raw = localStorage.getItem('neyborhuud_user');
-            if (raw) {
-                try {
-                    const parsed = JSON.parse(raw);
-                    setUser(parsed);
-                    setEmailVerified(
-                        parsed.verificationStatus === 'verified' || !!parsed.emailVerified,
-                    );
-                } catch {
-                    setEmailVerified(true);
-                }
-            } else {
-                setEmailVerified(true);
-            }
+    const handleEmailVerified = useCallback(async () => {
+      setEmailVerified(true);
+      try {
+        const res = await authService.getMyProfileFull();
+        const u = res.success ? res.data?.user : null;
+        if (u) {
+          setUser(u);
+          setEmailVerified(isEmailVerifiedStrict(u));
+          localStorage.setItem('neyborhuud_user', JSON.stringify(u));
         }
-        toast.success('Email verified! You now have full access.');
+      } catch {
+        // ignore
+      }
+      toast.success('Email verified!');
     }, []);
 
     const loadConsents = useCallback(async () => {
@@ -454,222 +524,235 @@ export default function SettingsPage() {
     };
 
     const ToggleSwitch = ({
-        enabled,
-        onChange,
-        label,
-        description,
-        disabled,
+      enabled,
+      onChange,
+      label,
+      description,
+      disabled,
     }: {
-        enabled: boolean;
-        onChange: (val: boolean) => void;
-        label: string;
-        description?: string;
-        disabled?: boolean;
+      enabled: boolean;
+      onChange: (val: boolean) => void;
+      label: string;
+      description?: string;
+      disabled?: boolean;
     }) => (
-        <div className="flex items-center justify-between py-4 border-b border-charcoal/5 last:border-0">
-            <div className="flex-1 pr-4">
-                <p className="text-sm font-bold text-charcoal">{label}</p>
-                {description && (
-                    <p className="text-xs text-charcoal/40 mt-0.5">{description}</p>
-                )}
-            </div>
-            <button
-                type="button"
-                disabled={disabled}
-                onClick={() => !disabled && onChange(!enabled)}
-                className={`
-                    relative w-12 h-7 rounded-full transition-all duration-300
-                    ${disabled ? 'opacity-40 cursor-not-allowed' : ''}
-                    ${enabled ? 'bg-primary' : 'bg-charcoal/20'}
-                `}
-            >
-                <div
-                    className={`
-                    absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300
-                    ${enabled ? 'left-6' : 'left-1'}
-                `}
-                ></div>
-            </button>
+      <div
+        className="flex items-center justify-between gap-4 border-b py-3 last:border-0"
+        style={{ borderColor: 'var(--neu-shadow-dark)' }}
+      >
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
+            {label}
+          </p>
+          {description ? (
+            <p className="mt-0.5 text-xs text-[var(--neu-text-muted)]">{description}</p>
+          ) : null}
         </div>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => !disabled && onChange(!enabled)}
+          className={`relative h-7 w-12 rounded-full transition-colors ${
+            disabled ? 'opacity-50' : ''
+          } ${enabled ? 'bg-primary' : 'bg-black/15'}`}
+          aria-label={`${label}: ${enabled ? 'On' : 'Off'}`}
+        >
+          <span
+            className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+              enabled ? 'translate-x-6' : 'translate-x-1'
+            }`}
+            aria-hidden
+          />
+        </button>
+      </div>
     );
 
+    const birthday = formatProfileBirthday(user?.dateOfBirth);
+    const zodiac = getZodiacFromBirthday(user?.dateOfBirth);
+
     return (
-        <div className="relative flex h-screen w-full flex-col overflow-hidden">
-            <TopNav />
-            <div className="flex flex-1 overflow-hidden">
-                <LeftSidebar />
-                <div className="flex-1 overflow-y-auto bg-soft-bg pb-24 pt-4">
-            <div className="max-w-md mx-auto px-6 py-2">
-                {!emailVerified && user?.email && (
-                    <EmailVerificationCard
-                        email={user.email}
-                        onVerified={handleEmailVerified}
-                        className="mb-6"
-                    />
-                )}
-                {!emailVerified && !user?.email && (
-                    <div className="mb-6 rounded-2xl border border-primary/25 bg-primary/10 p-4">
-                        <p className="text-sm font-bold text-charcoal mb-2">Verify your email</p>
-                        <p className="text-xs text-charcoal/60 mb-3">
-                            Enter the code from your inbox on the verification page.
-                        </p>
-                        <Link
-                            href="/verify-email"
-                            className="text-xs font-bold text-brand-blue hover:underline"
-                        >
-                            Open email verification →
-                        </Link>
-                    </div>
-                )}
+      <AppBrowseLayout
+        maxWidth="680"
+        header={
+          <div className="space-y-3">
+            <div className="mod-card rounded-2xl p-4">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">
+                Settings
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--neu-text-muted)]">
+                Control notifications, privacy, language, and account security.
+              </p>
+            </div>
+            <BrowseTabStrip
+              tabs={[
+                { id: 'notifications', label: 'Notifications', icon: 'notifications' },
+                { id: 'privacy', label: 'Privacy', icon: 'shield' },
+                { id: 'account', label: 'Account', icon: 'manage_accounts' },
+                { id: 'language', label: t('settings.language'), icon: 'translate' },
+              ]}
+              activeId={activeTab}
+              onChange={(id) => setActiveTab(id as SettingsTab)}
+            />
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {!emailVerified && user?.email ? (
+            <EmailVerificationCard
+              email={user.email}
+              onVerified={() => void handleEmailVerified()}
+            />
+          ) : null}
 
-                {/* Tab Navigation */}
-                <div className="flex gap-2 mb-6 p-1 neumorphic-inset rounded-2xl">
-                    {[
-                        { id: 'notifications', label: 'Notifications', icon: 'bi-bell' },
-                        { id: 'privacy', label: 'Privacy', icon: 'bi-shield' },
-                        { id: 'account', label: 'Account', icon: 'bi-person' },
-                        { id: 'language', label: t('settings.language'), icon: 'bi-translate' },
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`
-                                flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all
-                                ${activeTab === tab.id 
-                                    ? 'neumorphic text-charcoal' 
-                                    : 'text-charcoal/40 hover:text-charcoal/60'}
-                            `}
-                        >
-                            <i className={`bi ${tab.icon} mr-1`}></i>
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
+          {!emailVerified && !user?.email ? (
+            <Section
+              title="Email verification"
+              description="Add an email to your profile, then verify it to unlock all features."
+            >
+              <Link
+                href="/complete-profile"
+                className="mod-chip mod-chip-active inline-flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-primary no-underline"
+              >
+                Add email in profile
+              </Link>
+            </Section>
+          ) : null}
 
-                {/* Notifications Tab */}
-                {activeTab === 'notifications' && (
-                    <div className="animate-in fade-in duration-300">
-                        <div className="neumorphic rounded-2xl p-6 mb-6">
-                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
-                                Delivery Channels
-                            </h2>
-                            
-                            <ToggleSwitch
-                                enabled={notifications.email}
-                                onChange={(val) => setNotifications({ ...notifications, email: val })}
-                                label="Email Notifications"
-                                description="Receive updates via email"
-                            />
-                            <ToggleSwitch
-                                enabled={notifications.push}
-                                onChange={(val) => setNotifications({ ...notifications, push: val })}
-                                label="Push Notifications"
-                                description="Browser and mobile push alerts"
-                            />
-                            <ToggleSwitch
-                                enabled={notifications.sms}
-                                onChange={(val) => setNotifications({ ...notifications, sms: val })}
-                                label="SMS Notifications"
-                                description="Text messages for urgent alerts"
-                            />
-                        </div>
+          {activeTab === 'notifications' ? (
+            <div className="space-y-4">
+              <Section title="Delivery channels">
+                <ToggleSwitch
+                  enabled={notifications.email}
+                  onChange={(val) => setNotifications({ ...notifications, email: val })}
+                  label="Email notifications"
+                  description="Receive updates via email"
+                />
+                <ToggleSwitch
+                  enabled={notifications.push}
+                  onChange={(val) => setNotifications({ ...notifications, push: val })}
+                  label="Push notifications"
+                  description="Browser and mobile push alerts"
+                />
+                <ToggleSwitch
+                  enabled={notifications.sms}
+                  onChange={(val) => setNotifications({ ...notifications, sms: val })}
+                  label="SMS notifications"
+                  description="Text messages for urgent alerts"
+                />
+              </Section>
 
-                        <div className="neumorphic rounded-2xl p-6 mb-6">
-                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
-                                Activity Alerts
-                            </h2>
-                            
-                            <ToggleSwitch
-                                enabled={notifications.chat}
-                                onChange={(val) => { const u = { ...notifications, chat: val }; setNotifications(u); debouncedSaveNotifications(u); }}
-                                label="Chat Messages"
-                                description="New messages from NeyburHs"
-                            />
-                            <ToggleSwitch
-                                enabled={notifications.mentions}
-                                onChange={(val) => { const u = { ...notifications, mentions: val }; setNotifications(u); debouncedSaveNotifications(u); }}
-                                label="Mentions"
-                                description="When someone tags you"
-                            />
-                            <ToggleSwitch
-                                enabled={notifications.likes}
-                                onChange={(val) => { const u = { ...notifications, likes: val }; setNotifications(u); debouncedSaveNotifications(u); }}
-                                label="Likes"
-                                description="When someone likes your post"
-                            />
-                            <ToggleSwitch
-                                enabled={notifications.comments}
-                                onChange={(val) => { const u = { ...notifications, comments: val }; setNotifications(u); debouncedSaveNotifications(u); }}
-                                label="Comments"
-                                description="Replies to your posts"
-                            />
-                        </div>
+              <Section title="Activity alerts">
+                <ToggleSwitch
+                  enabled={notifications.chat}
+                  onChange={(val) => {
+                    const u = { ...notifications, chat: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Chat messages"
+                  description="New messages from neighbours"
+                />
+                <ToggleSwitch
+                  enabled={notifications.mentions}
+                  onChange={(val) => {
+                    const u = { ...notifications, mentions: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Mentions"
+                  description="When someone tags you"
+                />
+                <ToggleSwitch
+                  enabled={notifications.likes}
+                  onChange={(val) => {
+                    const u = { ...notifications, likes: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Likes"
+                  description="When someone likes your post"
+                />
+                <ToggleSwitch
+                  enabled={notifications.comments}
+                  onChange={(val) => {
+                    const u = { ...notifications, comments: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Comments"
+                  description="Replies to your posts"
+                />
+              </Section>
 
-                        <div className="neumorphic rounded-2xl p-6 mb-6">
-                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-4">
-                                What You&apos;re Notified About
-                            </h2>
-                            <ToggleSwitch
-                                enabled={notifications.follows}
-                                onChange={(val) => { const u = { ...notifications, follows: val }; setNotifications(u); debouncedSaveNotifications(u); }}
-                                label="New Followers"
-                                description="When someone follows you"
-                            />
-                            <ToggleSwitch
-                                enabled={notifications.events}
-                                onChange={(val) => { const u = { ...notifications, events: val }; setNotifications(u); debouncedSaveNotifications(u); }}
-                                label="Events in Your Area"
-                                description="New events near your location"
-                            />
-                            <ToggleSwitch
-                                enabled={notifications.jobs}
-                                onChange={(val) => { const u = { ...notifications, jobs: val }; setNotifications(u); debouncedSaveNotifications(u); }}
-                                label="Job Postings"
-                                description="New jobs matching your area"
-                            />
-                            <ToggleSwitch
-                                enabled={notifications.safety}
-                                onChange={(val) => { const u = { ...notifications, safety: val }; setNotifications(u); debouncedSaveNotifications(u); }}
-                                label="Safety Alerts"
-                                description="Urgent safety notices from your neighbourhood"
-                            />
-                            <ToggleSwitch
-                                enabled={notifications.gamification}
-                                onChange={(val) => { const u = { ...notifications, gamification: val }; setNotifications(u); debouncedSaveNotifications(u); }}
-                                label="Gamification Rewards"
-                                description="Badges, achievements, and HuudCoin updates"
-                            />
-                        </div>
+              <Section title="Topics">
+                <ToggleSwitch
+                  enabled={notifications.follows}
+                  onChange={(val) => {
+                    const u = { ...notifications, follows: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="New followers"
+                />
+                <ToggleSwitch
+                  enabled={notifications.events}
+                  onChange={(val) => {
+                    const u = { ...notifications, events: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Events in your area"
+                />
+                <ToggleSwitch
+                  enabled={notifications.jobs}
+                  onChange={(val) => {
+                    const u = { ...notifications, jobs: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Job postings"
+                />
+                <ToggleSwitch
+                  enabled={notifications.safety}
+                  onChange={(val) => {
+                    const u = { ...notifications, safety: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Safety alerts"
+                />
+                <ToggleSwitch
+                  enabled={notifications.gamification}
+                  onChange={(val) => {
+                    const u = { ...notifications, gamification: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Gamification rewards"
+                />
+              </Section>
 
-                        <button
-                            onClick={handleSaveNotifications}
-                            disabled={saving}
-                            className="neumorphic-btn w-full py-4 rounded-2xl"
-                        >
-                            <span className="text-charcoal font-black uppercase tracking-widest text-xs">
-                                {saving ? 'Saving...' : 'Save Notification Settings'}
-                            </span>
-                        </button>
+              <button
+                onClick={handleSaveNotifications}
+                disabled={saving}
+                className="mod-chip mod-chip-active w-full rounded-xl py-3 text-sm font-bold text-primary disabled:opacity-50"
+              >
+                {saving ? 'Saving…' : 'Save notification settings'}
+              </button>
 
-                        {/* Emergency Services Consent */}
-                        <div className="neumorphic rounded-2xl p-6 mt-4">
-                            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40 mb-1">
-                                Emergency Services
-                            </h2>
-                            <p className="text-xs text-charcoal/50 mb-4">
-                                Allow NeyborHuud to contact emergency services (Police, DSS, NEMA) on your behalf
-                                when an SOS is auto-escalated and you do not respond.
-                                This requires your explicit consent and can be withdrawn at any time.
-                            </p>
-                            <ToggleSwitch
-                                enabled={emergencyServicesEnabled}
-                                onChange={(val) => void handleSaveEmergencyConsent(val)}
-                                label={savingSafety ? 'Saving…' : 'Contact Emergency Services for Me'}
-                                description="Auto-dispatches authorities during an unresponsive SOS escalation"
-                            />
-                        </div>
-                    </div>
-                )}
+              <Section
+                title="Emergency services"
+                description="Allow NeyborHuud to contact emergency services on your behalf when SOS escalates and you do not respond."
+              >
+                <ToggleSwitch
+                  enabled={emergencyServicesEnabled}
+                  onChange={(val) => void handleSaveEmergencyConsent(val)}
+                  label={savingSafety ? 'Saving…' : 'Contact emergency services for me'}
+                  description="Auto-dispatches authorities during an unresponsive SOS escalation"
+                />
+              </Section>
+            </div>
+          ) : null}
 
                 {/* Privacy Tab */}
                 {activeTab === 'privacy' && (
@@ -1329,11 +1412,166 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 )}
-            </div>
+          {activeTab === 'account' ? (
+            <div className="space-y-4">
+              <Section title="Profile">
+                <div className="grid grid-cols-2 gap-2">
+                  {birthday ? (
+                    <div className="mod-inset rounded-xl p-3">
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
+                        Birthday
+                      </p>
+                      <p className="mt-1 text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+                        {birthday}
+                      </p>
+                    </div>
+                  ) : null}
+                  {zodiac ? (
+                    <div className="mod-inset rounded-xl p-3">
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
+                        Sign
+                      </p>
+                      <p className="mt-1 text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+                        {zodiac.emoji} {zodiac.sign}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
-                <RightSidebar />
+
+                <Link
+                  href="/complete-profile"
+                  className="mod-chip mod-chip-active mt-3 inline-flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-primary no-underline"
+                >
+                  Edit profile
+                </Link>
+              </Section>
+
+              <Section title="Security">
+                {isAdminUser(user) ? (
+                  <Link
+                    href="/admin"
+                    className="mod-inset flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold no-underline"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px] text-primary">shield</span>
+                      Admin panel
+                    </span>
+                    <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)]">
+                      chevron_right
+                    </span>
+                  </Link>
+                ) : null}
+
+                <Link
+                  href="/settings/password"
+                  className="mod-inset mt-2 flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold no-underline"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-primary">key</span>
+                    Change password
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)]">
+                    chevron_right
+                  </span>
+                </Link>
+              </Section>
+
+              <Section title="Session">
+                <button
+                  type="button"
+                  onClick={() => void handleLogout()}
+                  className="mod-chip w-full rounded-xl py-3 text-sm font-bold text-brand-red"
+                >
+                  Sign out
+                </button>
+              </Section>
             </div>
-            <BottomNav />
+          ) : null}
+
+          {activeTab === 'privacy' ? (
+            <div className="space-y-4">
+              <Section title="Visibility">
+                <div className="flex gap-1 rounded-2xl p-1 mod-inset">
+                  {[
+                    { value: 'public', label: 'Public' },
+                    { value: 'friends', label: 'Friends' },
+                    { value: 'private', label: 'Private' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setPrivacy({ ...privacy, profileVisibility: opt.value as any })}
+                      className={`flex-1 rounded-xl py-2 text-sm font-bold transition-colors ${
+                        privacy.profileVisibility === opt.value
+                          ? 'mod-chip mod-chip-active text-primary'
+                          : 'mod-chip text-[var(--neu-text-muted)]'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </Section>
+
+              <Section title="Information sharing">
+                <ToggleSwitch
+                  enabled={privacy.showLocation}
+                  onChange={(val) => setPrivacy({ ...privacy, showLocation: val })}
+                  label="Show location"
+                  description="Display your Huud on profile"
+                />
+                <ToggleSwitch
+                  enabled={privacy.showPhone}
+                  onChange={(val) => setPrivacy({ ...privacy, showPhone: val })}
+                  label="Show phone number"
+                />
+                <ToggleSwitch
+                  enabled={privacy.showEmail}
+                  onChange={(val) => setPrivacy({ ...privacy, showEmail: val })}
+                  label="Show email address"
+                />
+              </Section>
+
+              <button
+                onClick={handleSavePrivacy}
+                disabled={saving}
+                className="mod-chip mod-chip-active w-full rounded-xl py-3 text-sm font-bold text-primary disabled:opacity-50"
+              >
+                {saving ? 'Saving…' : 'Save privacy settings'}
+              </button>
+            </div>
+          ) : null}
+
+          {activeTab === 'language' ? (
+            <div className="space-y-4">
+              <Section title={t('settings.language')} description={t('settings.languageDesc')}>
+                <div className="space-y-2">
+                  {availableLanguages.map((lang) => (
+                    <button
+                      key={lang}
+                      type="button"
+                      onClick={() => {
+                        setLanguage(lang);
+                        toast.success(t('settings.languageSaved'));
+                      }}
+                      className="mod-inset flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold"
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <span>{lang === 'en' ? '🇬🇧' : '🇳🇬'}</span>
+                        <span style={{ color: 'var(--neu-text)' }}>{languageNames[lang]}</span>
+                      </span>
+                      {currentLanguage === lang ? (
+                        <span className="material-symbols-outlined text-[18px] text-primary">check</span>
+                      ) : (
+                        <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)]">chevron_right</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </Section>
+            </div>
+          ) : null}
         </div>
+      </AppBrowseLayout>
     );
 }
