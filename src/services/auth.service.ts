@@ -684,6 +684,8 @@ export const authService = {
             firstName: data.firstName,
             lastName: data.lastName,
             phone,
+            gender: data.gender,
+            dob: data.dob,
           }),
         );
       } catch {
