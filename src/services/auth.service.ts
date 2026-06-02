@@ -42,6 +42,8 @@ function buildProfilePatchForServer(data: {
   firstName: string;
   lastName: string;
   phone?: string;
+  gender?: string;
+  dob?: string;
 }): Record<string, string> {
   const patch: Record<string, string> = {
     firstName: data.firstName.trim(),
@@ -54,6 +56,11 @@ function buildProfilePatchForServer(data: {
     patch.phoneNumber = phone;
     patch.phone = phone;
     patch.phone_number = phone;
+  }
+  if (data.gender) patch.gender = String(data.gender);
+  if (data.dob) {
+    patch.dateOfBirth = data.dob;
+    patch.date_of_birth = data.dob;
   }
   return patch;
 }
