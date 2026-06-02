@@ -125,6 +125,7 @@ export const chatService = {
     content: string;
     type?: string;
     mediaUrl?: string;
+    thumbnailUrl?: string;
     replyTo?: string;
     locationSnapshot?: { latitude: number; longitude: number; address?: string };
     emergencyRef?: string;

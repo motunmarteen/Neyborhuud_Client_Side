@@ -196,24 +196,9 @@ function LocalNewsInner() {
     if (tab === 'nigeria' || tab === 'international') loadRss(tab, newsTopic, []);
   };
 
-  const topicLabel = newsTopics.find((t) => t.id === newsTopic)?.label;
-
-  const subtitle =
-    activeTab === 'huud-gist'
-      ? `Huud Gist · ${gistThreads.length} thread${gistThreads.length === 1 ? '' : 's'}`
-      : activeTab === 'nigeria'
-        ? `Nigeria · ${articles.length} stories${newsTopic !== 'all' ? ` · ${topicLabel}` : ''}`
-        : `International · ${articles.length} stories${newsTopic !== 'all' ? ` · ${topicLabel}` : ''}`;
-
   return (
     <AppBrowseLayout
       maxWidth="680"
-      subtitle={
-        <span className="inline-flex min-w-0 items-center gap-2">
-          <span className="material-symbols-outlined shrink-0 text-xl text-primary">newspaper</span>
-          <span className="truncate">{subtitle}</span>
-        </span>
-      }
       header={
         <>
           <BrowseTabStrip
@@ -236,7 +221,7 @@ function LocalNewsInner() {
                 >
                   refresh
                 </span>
-                <span className="hidden min-[420px]:inline">Refresh</span>
+                <span>Refresh</span>
               </button>
             }
           />

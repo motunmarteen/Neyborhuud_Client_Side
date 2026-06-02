@@ -23,10 +23,15 @@ import { ChatMessage, ChatMessageType, Conversation, MarketplaceOffer } from '@/
 import socketService from '@/lib/socket';
 import { toast } from 'sonner';
 import ChatMessageCard from '@/components/chat/ChatMessageCard';
+import {
+  resolveChatSenderLabel,
+  shouldShowSenderLabel,
+} from '@/lib/chatSender';
 import { ChatRoomHeader } from '@/components/chat/ChatRoomHeader';
 import { ChatComposer } from '@/components/chat/ChatComposer';
 import { convAvatarMeta, convDisplayName, convSubtitle } from '@/lib/chatDisplay';
 import type { ActionResult } from '@/components/chat/ChatActionMenu';
+import { unwrapApiData } from '@/lib/apiPayload';
 import { CommunityChatBanner } from '@/components/communities/CommunityChatBanner';
 import { isCommunityChat } from '@/lib/chatPaths';
 import { useProductOffers, useAcceptOffer, useRejectOffer, useRespondToOffer, useProduct } from '@/hooks/useMarketplace';
@@ -669,6 +674,15 @@ export default function ConversationPage() {
       id: tempId,
       conversationId,
       senderId: user?.id ?? '',
+      sender: user
+        ? {
+            id: user.id,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            avatarUrl: user.avatarUrl ?? user.profilePicture ?? null,
+          }
+        : undefined,
       content,
       type: 'text',
       createdAt: new Date().toISOString(),
@@ -742,6 +756,15 @@ export default function ConversationPage() {
       id: tempId,
       conversationId,
       senderId: user?.id ?? '',
+      sender: user
+        ? {
+            id: user.id,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            avatarUrl: user.avatarUrl ?? user.profilePicture ?? null,
+          }
+        : undefined,
       content: result.content,
       type: result.type,
       mediaUrl: result.mediaUrl,
@@ -760,30 +783,38 @@ export default function ConversationPage() {
 
     try {
       let mediaUrl = result.mediaUrl;
+      let thumbnailUrl: string | undefined;
 
       // Upload file if we have a raw file
       if (result.mediaFile) {
         setUploadProgress(0);
         const uploadRes = await chatService.uploadChatMedia(result.mediaFile, (pct) => setUploadProgress(pct));
-        // Backend wraps response: { data: { success, data: { url, ... } } }
-        const payload = (uploadRes as any)?.data?.data ?? (uploadRes as any)?.data ?? {};
-        mediaUrl = payload?.mediaUrl ?? payload?.url ?? payload?.secure_url;
+        const uploaded = unwrapApiData<{
+          url?: string;
+          mediaUrl?: string;
+          thumbnailUrl?: string;
+        }>(uploadRes);
+        mediaUrl = uploaded?.url ?? uploaded?.mediaUrl;
+        thumbnailUrl = uploaded?.thumbnailUrl;
         if (!mediaUrl) throw new Error('Upload failed — no URL returned');
-        // Update optimistic with real URL
-        setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, mediaUrl } : m));
+        setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, mediaUrl, thumbnailUrl } : m));
       }
 
       const res = await chatService.sendMessage({
         conversationId,
         content: result.content,
-        type: result.type as any,
+        type: result.type,
         mediaUrl,
+        thumbnailUrl,
         locationSnapshot: result.locationSnapshot,
         emergencyRef: result.emergencyRef,
         trackingSessionRef: result.trackingSessionRef,
+        meta: result.meta,
       });
-      const payload = res.data as any;
-      const sent: ChatMessage | undefined = payload?.message ?? (payload?.duplicate ? undefined : payload);
+      const payload =
+        unwrapApiData<{ message?: ChatMessage; duplicate?: boolean }>(res as unknown) ??
+        undefined;
+      const sent: ChatMessage | undefined = payload?.message;
       if (sent && !(sent as any).duplicate) {
         setMessages((prev) =>
           prev.map((m) =>
@@ -941,8 +972,11 @@ export default function ConversationPage() {
                 </div>
 
                 {msgs.map((msg, msgIdx) => {
-                  const mine = isMineMessage(msg, user?.id);
+                      const mine = isMineMessage(msg, user?.id);
                       const id = msgId(msg);
+                      const senderLabel = shouldShowSenderLabel(conv, mine)
+                        ? resolveChatSenderLabel(msg, conv?.participants)
+                        : null;
                       const isLastOverall =
                         msgIdx === msgs.length - 1 &&
                         groups[groups.length - 1]?.date === date;
@@ -995,6 +1029,7 @@ export default function ConversationPage() {
                           <ChatMessageCard
                             msg={msg}
                             mine={mine}
+                            senderLabel={senderLabel}
                             currentUserId={user?.id}
                             onReactionsUpdate={(reactions) => {
                               setMessages((prev) =>

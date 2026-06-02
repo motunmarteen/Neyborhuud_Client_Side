@@ -52,20 +52,6 @@ export function SentinelSubpageLayout({
       />
       <AppBrowseLayout
         maxWidth={maxWidth}
-        subtitle={
-          <span className="flex items-center gap-2">
-            <span
-              className={`mod-inset flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${ICON_ACCENTS[iconAccent]}`}
-            >
-              <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                {icon}
-              </span>
-            </span>
-            <span className="min-w-0 truncate text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-              {pageSubtitle}
-            </span>
-          </span>
-        }
         header={
           <div className="flex flex-col gap-3">
             <Suspense fallback={null}>

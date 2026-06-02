@@ -85,15 +85,6 @@ function SafetyDashboardInner() {
       />
       <AppBrowseLayout
         maxWidth="920"
-        subtitle={
-          <span className="inline-flex min-w-0 items-center gap-2">
-            <span className="material-symbols-outlined shrink-0 text-xl text-brand-blue">dashboard</span>
-            <span className="truncate">
-              {dash.acceptedGuardianCount} guardian{dash.acceptedGuardianCount === 1 ? '' : 's'}
-              {alerts.length > 0 ? ` · ${alerts.length} alert${alerts.length === 1 ? '' : 's'}` : ''}
-            </span>
-          </span>
-        }
         header={
           <div className="flex flex-col gap-3">
             <Suspense fallback={null}>

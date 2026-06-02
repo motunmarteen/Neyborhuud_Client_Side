@@ -4,14 +4,17 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import type L from 'leaflet';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 
 import { useAuth } from '@/hooks/useAuth';
 import { geoService } from '@/services/geo.service';
 import { followService } from '@/services/follow.service';
 import apiClient from '@/lib/api-client';
 import { BottomNav } from '@/components/feed/BottomNav';
+import {
+  extractUserMapCoords,
+  unwrapNearbyUsersPayload,
+} from '@/lib/mapUserLocation';
+import { MapSelectionSheet } from '@/components/map/MapSelectionSheet';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -77,6 +80,12 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersGroupRef = useRef<L.LayerGroup | null>(null);
+  const lastMapPublishRef = useRef(0);
+  const [nearbyCount, setNearbyCount] = useState(0);
+
+  const MAP_PUBLISH_MIN_MS = 90_000;
+  const publishLat = userCoords?.lat ?? null;
+  const publishLng = userCoords?.lng ?? null;
 
   // Load Leaflet library dynamically
   useEffect(() => {
@@ -108,6 +117,31 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
   useEffect(() => {
     requestLocation();
   }, [requestLocation]);
+
+  // Publish GPS so neighbours can see you on the map (throttled)
+  useEffect(() => {
+    if (publishLat == null || publishLng == null || !authUser?.id || locationStatus !== 'success') {
+      return;
+    }
+
+    const lat = publishLat;
+    const lng = publishLng;
+
+    const publish = async () => {
+      const now = Date.now();
+      const isFirst = lastMapPublishRef.current === 0;
+      if (!isFirst && now - lastMapPublishRef.current < MAP_PUBLISH_MIN_MS) return;
+      lastMapPublishRef.current = now;
+      try {
+        await geoService.updateCurrentLocation(lat, lng);
+        await queryClient.invalidateQueries({ queryKey: ['nearby-users'] });
+      } catch (err) {
+        console.warn('[Map] Failed to publish location', err);
+      }
+    };
+
+    void publish();
+  }, [publishLat, publishLng, authUser?.id, locationStatus, queryClient]);
 
   // ─── React Query Data Fetching ────────────────────────────────────────────────
 
@@ -241,11 +275,18 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
 
     // 2. Render layer elements
     if (layer === 'people') {
-      const users: FollowUser[] = (nearbyUsersData?.data as any)?.users ?? [];
+      const users: FollowUser[] = unwrapNearbyUsersPayload(nearbyUsersData) as FollowUser[];
+      const selfId = authUser?.id ? String(authUser.id) : '';
+      let placed = 0;
+
       users.forEach((u) => {
-        if (!u.geoLocation?.coordinates) return;
-        const [lng, lat] = u.geoLocation.coordinates;
-        if (lat === 0 && lng === 0) return;
+        const userId = String(u._id || (u as { id?: string }).id || '');
+        if (selfId && userId === selfId) return;
+
+        const coords = extractUserMapCoords(u);
+        if (!coords) return;
+        const { lat, lng } = coords;
+        placed += 1;
 
         const initials = `${(u.firstName || '')[0] || ''}${(u.lastName || '')[0] || ''}`.toUpperCase() || (u.username || '?')[0].toUpperCase();
         const avatarSrc = u.avatarUrl || u.profilePicture;
@@ -287,7 +328,10 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         });
         marker.addTo(markersGroup);
       });
+
+      setNearbyCount(placed);
     } else {
+      setNearbyCount(0);
       const places: Place[] = (placesData?.data as any)?.places ?? [];
       places.forEach((p) => {
         if (!p.sampleCoords) return;
@@ -316,7 +360,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         marker.addTo(markersGroup);
       });
     }
-  }, [userCoords, layer, nearbyUsersData, placesData]);
+  }, [userCoords, layer, nearbyUsersData, placesData, authUser?.id]);
 
   // Sync markers when Leaflet is ready or dataset updates
   useEffect(() => {
@@ -453,6 +497,19 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         </div>
       )}
 
+      {/* ─── Nearby count hint ─── */}
+      {layer === 'people' && locationStatus === 'success' && !selectedItem && (
+        <div className="absolute top-[4.5rem] left-4 right-4 z-10 pointer-events-none flex justify-center">
+          <p className="rounded-full bg-white/90 border border-black/[0.08] px-3 py-1.5 text-[11px] font-semibold text-[var(--neu-text-muted)] shadow-md backdrop-blur-md">
+            {nearbyUsersData === undefined
+              ? 'Finding neighbours…'
+              : nearbyCount > 0
+                ? `${nearbyCount} neighbour${nearbyCount === 1 ? '' : 's'} on map`
+                : 'No neighbours sharing location in this radius yet'}
+          </p>
+        </div>
+      )}
+
       {/* ─── Radius Control Overlay ─── */}
       {layer === 'people' && !selectedItem && (
         <div className={`absolute left-4 right-4 z-10 bg-white/90 border border-black/[0.08] rounded-2xl p-4 shadow-xl backdrop-blur-md ${embedded ? 'bottom-[calc(var(--app-scroll-bottom)+0.5rem)]' : 'bottom-24'}`}>
@@ -474,164 +531,17 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         </div>
       )}
 
-      {/* ─── Bottom Sheet Details Overlay ─── */}
-      <AnimatePresence>
-        {selectedItem && (
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-            className="absolute bottom-0 left-0 right-0 z-20 rounded-t-3xl bg-white border-t border-black/[0.08] shadow-2xl p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
-          >
-            {/* Sheet Handle */}
-            <div className="w-12 h-1 rounded-full bg-black/[0.10] mx-auto mb-4" />
-
-            {selectedItem.type === 'user' && (
-              <div className="flex items-center gap-4">
-                {/* User Avatar */}
-                <div className="relative shrink-0">
-                  {selectedItem.data.avatarUrl || selectedItem.data.profilePicture ? (
-                    <Image
-                      src={selectedItem.data.avatarUrl || selectedItem.data.profilePicture!}
-                      alt={selectedItem.data.username}
-                      width={56}
-                      height={56}
-                      className="rounded-full object-cover border-2 border-black/[0.08]"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-primary to-brand-green-dark border-2 border-black/[0.08] text-lg">
-                      {`${(selectedItem.data.firstName || '')[0] || ''}${(selectedItem.data.lastName || '')[0] || ''}`.toUpperCase() || '?'}
-                    </div>
-                  )}
-                  {selectedItem.data.isVerified && (
-                    <span className="material-symbols-outlined text-[15px] text-primary fill-1 absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5">
-                      verified
-                    </span>
-                  )}
-                </div>
-
-                {/* Identity */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-extrabold text-brand-black text-base truncate">
-                    {selectedItem.data.firstName} {selectedItem.data.lastName}
-                  </h3>
-                  <p className="text-[var(--neu-text-muted)] text-xs">@{selectedItem.data.username}</p>
-                  {(selectedItem.data.lga || selectedItem.data.state) && (
-                    <p className="text-[var(--neu-text-muted)] text-xs flex items-center gap-1 mt-1">
-                      <span className="material-symbols-outlined text-[13px] text-primary">location_on</span>
-                      <span className="truncate">{[selectedItem.data.lga, selectedItem.data.state].filter(Boolean).join(', ')}</span>
-                      {selectedItem.data.distanceMetres != null && (
-                        <span className="text-primary font-semibold">· {fmtDist(selectedItem.data.distanceMetres)}</span>
-                      )}
-                    </p>
-                  )}
-                  {selectedItem.data.bio && (
-                    <p className="text-[var(--neu-text-muted)] text-xs mt-1.5 line-clamp-1 italic opacity-80">{selectedItem.data.bio}</p>
-                  )}
-                </div>
-
-                {/* Follow Button */}
-                <button
-                  onClick={() =>
-                    handleUserFollowToggle(
-                      selectedItem.data._id,
-                      selectedItem.data.isFollowing ?? false
-                    )
-                  }
-                  disabled={isActionPending}
-                  className={`shrink-0 px-4 py-2.5 rounded-full text-xs font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-95 disabled:opacity-50 ${
-                    selectedItem.data.isFollowing
-                      ? 'bg-brand-surface text-[var(--neu-text-muted)] border border-black/[0.08] hover:border-brand-red hover:text-brand-red'
-                      : 'bg-primary text-brand-black hover:bg-brand-green-dark hover:text-white'
-                  }`}
-                >
-                  {isActionPending ? '…' : selectedItem.data.isFollowing ? 'Following' : 'Follow'}
-                </button>
-              </div>
-            )}
-
-            {selectedItem.type === 'place' && (
-              <div>
-                <div className="flex items-center gap-4">
-                  {/* Place Icon Flag */}
-                  <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border border-black/[0.08]"
-                    style={{
-                      background: `linear-gradient(135deg, hsl(${
-                        Array.from(selectedItem.data.lga).reduce((s, c) => s + c.charCodeAt(0), 0) % 360
-                      },60%,28%), hsl(${
-                        (Array.from(selectedItem.data.lga).reduce((s, c) => s + c.charCodeAt(0), 0) + 30) % 360
-                      },70%,18%))`
-                    }}
-                  >
-                    <span className="material-symbols-outlined text-[28px] text-white fill-1">location_city</span>
-                  </div>
-
-                  {/* Title & Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-extrabold text-brand-black text-base truncate">{selectedItem.data.lga}</h3>
-                    <p className="text-[var(--neu-text-muted)] text-xs mb-1">{selectedItem.data.state}</p>
-                    
-                    <div className="flex items-center gap-3">
-                      <span className="text-[var(--neu-text-muted)] text-[11px] flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px]">person</span>
-                        {selectedItem.data.userCount.toLocaleString()} residents
-                      </span>
-                      <span className="text-[var(--neu-text-muted)] text-[11px] flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px]">favorite</span>
-                        {(placeStatsData?.data?.followerCount ?? selectedItem.data.followerCount).toLocaleString()} followers
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Follow Button */}
-                  <button
-                    onClick={() =>
-                      handlePlaceFollowToggle(
-                        selectedItem.data.lga,
-                        selectedItem.data.state,
-                        selectedItem.data.isFollowing
-                      )
-                    }
-                    disabled={isActionPending}
-                    className={`shrink-0 px-4 py-2.5 rounded-full text-xs font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-95 disabled:opacity-50 ${
-                      selectedItem.data.isFollowing
-                        ? 'bg-brand-surface text-[var(--neu-text-muted)] border border-black/[0.08] hover:border-brand-red hover:text-brand-red'
-                        : 'bg-primary text-brand-black hover:bg-brand-green-dark hover:text-white'
-                    }`}
-                  >
-                    {isActionPending ? '…' : selectedItem.data.isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                </div>
-
-                {/* Additional Place Stats block */}
-                <div className="mt-4 pt-4 border-t border-black/[0.08] grid grid-cols-3 gap-2">
-                  <div className="bg-brand-surface/60 p-2.5 rounded-xl text-center border border-black/[0.06]">
-                    <p className="text-[10px] text-[var(--neu-text-muted)] font-bold uppercase tracking-wider">Residents</p>
-                    <p className="text-base font-black text-brand-black mt-0.5">
-                      {loadingPlaceStats ? '...' : (placeStatsData?.data?.userCount ?? selectedItem.data.userCount)}
-                    </p>
-                  </div>
-                  <div className="bg-brand-surface/60 p-2.5 rounded-xl text-center border border-black/[0.06]">
-                    <p className="text-[10px] text-[var(--neu-text-muted)] font-bold uppercase tracking-wider">Followers</p>
-                    <p className="text-base font-black text-primary mt-0.5">
-                      {loadingPlaceStats ? '...' : (placeStatsData?.data?.followerCount ?? selectedItem.data.followerCount)}
-                    </p>
-                  </div>
-                  <div className="bg-brand-surface/60 p-2.5 rounded-xl text-center border border-black/[0.06]">
-                    <p className="text-[10px] text-[var(--neu-text-muted)] font-bold uppercase tracking-wider">Posts (7d)</p>
-                    <p className="text-base font-black text-brand-black mt-0.5">
-                      {loadingPlaceStats ? '...' : (placeStatsData?.data?.recentPostCount ?? 0)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MapSelectionSheet
+        selection={selectedItem}
+        embedded={embedded}
+        isActionPending={isActionPending}
+        loadingPlaceStats={loadingPlaceStats}
+        placeStats={placeStatsData?.data}
+        onClose={() => setSelectedItem(null)}
+        onUserFollowToggle={handleUserFollowToggle}
+        onPlaceFollowToggle={handlePlaceFollowToggle}
+        fmtDist={fmtDist}
+      />
 
       {!embedded && <BottomNav hidden={true} />}
     </div>

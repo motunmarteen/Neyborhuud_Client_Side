@@ -62,6 +62,19 @@ export const geoService = {
   },
 
   /**
+   * Publish live GPS to the server so you appear on neighbour maps.
+   */
+  async updateCurrentLocation(latitude: number, longitude: number) {
+    return await apiClient.put<{ currentLocation: unknown }>(
+      "/auth/location/update",
+      {
+        type: "current",
+        location: { latitude, longitude },
+      },
+    );
+  },
+
+  /**
    * Get nearby users
    */
   async getNearbyUsers(

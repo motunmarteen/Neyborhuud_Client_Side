@@ -53,23 +53,6 @@ export default function SosPage() {
       />
       <AppBrowseLayout
         maxWidth="680"
-        subtitle={
-          <span className="inline-flex min-w-0 items-center gap-2">
-            <span
-              className="material-symbols-outlined shrink-0 text-xl text-brand-red"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              emergency
-            </span>
-            <span className="truncate">
-              {sos.phase === 'active'
-                ? 'SOS active — stay on this page'
-                : sos.phase === 'pending'
-                  ? `Arming ${sos.secondsRemaining}s`
-                  : 'Long-press bottom nav SOS for silent alert'}
-            </span>
-          </span>
-        }
         header={
           <div className="flex flex-col gap-3">
             <Suspense fallback={null}>

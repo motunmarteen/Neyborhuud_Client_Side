@@ -6,6 +6,7 @@
  * All cards are self-contained and fail safely (fallback to text bubble).
  */
 
+import type { ReactNode } from 'react';
 import { ChatMessage } from '@/types/api';
 import { ChatExpandableText } from '@/components/chat/ChatExpandableText';
 import { ChatMessageTicks } from '@/components/chat/ChatMessageTicks';
@@ -257,38 +258,65 @@ function TextBubble({
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
+function MessageStack({
+  mine,
+  senderLabel,
+  children,
+}: {
+  mine: boolean;
+  senderLabel?: string | null;
+  children: ReactNode;
+}) {
+  return (
+    <div className={`chat-message-stack ${mine ? 'chat-message-stack--out' : 'chat-message-stack--in'}`}>
+      {!mine && senderLabel ? (
+        <span className="chat-message-stack__sender">{senderLabel}</span>
+      ) : null}
+      {children}
+    </div>
+  );
+}
+
 export default function ChatMessageCard({
   msg,
   mine,
   currentUserId,
   onReactionsUpdate,
+  senderLabel,
 }: {
   msg: ChatMessage;
   mine: boolean;
   currentUserId?: string;
   onReactionsUpdate?: (reactions: ChatMessage['reactions']) => void;
+  senderLabel?: string | null;
 }) {
   const isPriority = msg.priority === 'emergency';
   const textProps = { currentUserId, onReactionsUpdate };
 
+  const wrap = (node: ReactNode) => (
+    <MessageStack mine={mine} senderLabel={senderLabel}>
+      {node}
+    </MessageStack>
+  );
+
   if (msg.isDeleted) {
-    return <TextBubble msg={msg} mine={mine} isPriority={false} {...textProps} />;
+    return wrap(<TextBubble msg={msg} mine={mine} isPriority={false} {...textProps} />);
   }
 
   switch (msg.type) {
-    case 'image': return msg.mediaUrl ? <ImageBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
-    case 'video': return msg.mediaUrl ? <VideoBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
-    case 'audio': return msg.mediaUrl ? <AudioBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
-    case 'file':  return msg.mediaUrl ? <FileBubble  msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
-    case 'system':         return <TextBubble msg={msg} mine={mine} isPriority={false} {...textProps} />;
-    case 'location':       return <LocationCard    msg={msg} mine={mine} />;
-    case 'event':          return <EventCard       msg={msg} mine={mine} />;
-    case 'marketplace':    return <MarketplaceCard msg={msg} mine={mine} />;
-    case 'contact':        return <ContactCard     msg={msg} mine={mine} />;
-    case 'poll':           return <PollCard        msg={msg} mine={mine} />;
-    case 'tracking':       return <TrackingCard    msg={msg} mine={mine} />;
-    case 'kidnapping_info':return <KidnappingCard  msg={msg} mine={mine} />;
-    case 'sos':            return <SOSCard         msg={msg} mine={mine} />;
-    default:               return <TextBubble     msg={msg} mine={mine} isPriority={isPriority} {...textProps} />;
+    case 'image': return wrap(msg.mediaUrl ? <ImageBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />);
+    case 'video': return wrap(msg.mediaUrl ? <VideoBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />);
+    case 'audio': return wrap(msg.mediaUrl ? <AudioBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />);
+    case 'file':  return wrap(msg.mediaUrl ? <FileBubble  msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} {...textProps} />);
+    case 'system':         return wrap(<TextBubble msg={msg} mine={mine} isPriority={false} {...textProps} />);
+    case 'location':       return wrap(<LocationCard    msg={msg} mine={mine} />);
+    case 'event':          return wrap(<EventCard       msg={msg} mine={mine} />);
+    case 'marketplace':    return wrap(<MarketplaceCard msg={msg} mine={mine} />);
+    case 'contact':        return wrap(<ContactCard     msg={msg} mine={mine} />);
+    case 'poll':           return wrap(<PollCard        msg={msg} mine={mine} />);
+    case 'tracking':       return wrap(<TrackingCard    msg={msg} mine={mine} />);
+    case 'kidnapping_info':return wrap(<KidnappingCard  msg={msg} mine={mine} />);
+    case 'sos':            return wrap(<SOSCard         msg={msg} mine={mine} />);
+    default:               return wrap(<TextBubble     msg={msg} mine={mine} isPriority={isPriority} {...textProps} />);
   }
 }

@@ -46,7 +46,7 @@ export default function JoinByInvitePage() {
 
   if (isLoading) {
     return (
-      <AppBrowseLayout maxWidth="680" subtitle="Loading invite…">
+      <AppBrowseLayout maxWidth="680">
         <div className="mod-card h-32 animate-pulse rounded-2xl" />
       </AppBrowseLayout>
     );
@@ -54,7 +54,7 @@ export default function JoinByInvitePage() {
 
   if (isError || !preview) {
     return (
-      <AppBrowseLayout maxWidth="680" subtitle="Invite">
+      <AppBrowseLayout maxWidth="680">
         <BrowseEmptyState
           icon="link_off"
           title="Invalid invite"
@@ -70,7 +70,7 @@ export default function JoinByInvitePage() {
   }
 
   return (
-    <AppBrowseLayout maxWidth="680" subtitle="Join community">
+    <AppBrowseLayout maxWidth="680">
       <div className="mod-card space-y-4 rounded-2xl p-5">
         <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>
           {preview.name}

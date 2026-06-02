@@ -140,19 +140,9 @@ function LiveTrackingInner() {
     }
   };
 
-  const subtitle = live
-    ? `Active · ${session?.emergencyType.replace(/_/g, ' ') ?? 'tracking'}`
-    : 'Continuous location sharing for high-risk moments';
-
   return (
     <AppBrowseLayout
       maxWidth="920"
-      subtitle={
-        <span className="inline-flex min-w-0 items-center gap-2">
-          <span className="material-symbols-outlined shrink-0 text-xl text-brand-red">my_location</span>
-          <span className="truncate">{subtitle}</span>
-        </span>
-      }
       header={
         <div className="flex flex-col gap-3">
           <Suspense fallback={null}>

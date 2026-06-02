@@ -36,7 +36,7 @@ function HuudGistDetailInner() {
 
   if (isLoading) {
     return (
-      <AppBrowseLayout maxWidth="680" subtitle="Huud Gist">
+      <AppBrowseLayout maxWidth="680">
         <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="mod-inset h-24 animate-pulse rounded-xl" />
@@ -51,7 +51,7 @@ function HuudGistDetailInner() {
     const needsSignIn = status === 401;
 
     return (
-      <AppBrowseLayout maxWidth="680" subtitle="Huud Gist">
+      <AppBrowseLayout maxWidth="680">
         <BrowseEmptyState
           icon={needsSignIn ? 'login' : 'forum'}
           title={needsSignIn ? 'Sign in to view this thread' : 'Thread not found'}
@@ -83,22 +83,8 @@ function HuudGistDetailInner() {
     );
   }
 
-  const authorLabel = thread.anonymous
-    ? 'Anonymous NeyburH'
-    : thread.author?.name || thread.author?.username || 'Neighbour';
-
   return (
-    <AppBrowseLayout
-      maxWidth="680"
-      subtitle={
-        <span className="inline-flex min-w-0 items-center gap-2">
-          <span className="material-symbols-outlined shrink-0 text-xl text-primary">forum</span>
-          <span className="truncate">
-            {gistSectionLabel(thread.discussionType)} · {authorLabel}
-          </span>
-        </span>
-      }
-    >
+    <AppBrowseLayout maxWidth="680">
       <div className="space-y-4">
         <Link
           href="/local-news?tab=huud-gist"

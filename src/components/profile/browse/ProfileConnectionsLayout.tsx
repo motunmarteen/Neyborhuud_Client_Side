@@ -27,7 +27,6 @@ type ProfileConnectionsLayoutProps = {
 
 export function ProfileConnectionsLayout({
   username,
-  displayName,
   activeTab,
   isLoading,
   error,
@@ -41,14 +40,6 @@ export function ProfileConnectionsLayout({
   return (
     <AppBrowseLayout
       maxWidth="680"
-      subtitle={
-        <span className="inline-flex min-w-0 items-center gap-2">
-          <span className="material-symbols-outlined shrink-0 text-xl text-primary">group</span>
-          <span className="truncate">
-            @{username} · {displayName}
-          </span>
-        </span>
-      }
       header={
         <BrowseTabStrip
           tabs={TABS}

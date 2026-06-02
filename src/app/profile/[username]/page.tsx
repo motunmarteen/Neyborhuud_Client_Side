@@ -422,10 +422,7 @@ export default function ProfilePage() {
   // Loading state
   if (isLoading) {
     return (
-      <AppBrowseLayout
-        maxWidth="680"
-        subtitle="Loading profile…"
-      >
+      <AppBrowseLayout maxWidth="680">
         <div className="space-y-4">
           <div className="animate-pulse mod-card h-52 rounded-2xl" />
           <div className="grid grid-cols-2 gap-3">
@@ -571,16 +568,6 @@ export default function ProfilePage() {
 
       <AppBrowseLayout
         maxWidth="680"
-        subtitle={
-          <span className="inline-flex min-w-0 items-center gap-2">
-            <span className="material-symbols-outlined shrink-0 text-xl text-primary">person</span>
-            <span className="truncate">
-              {isOwnProfile
-                ? `Your public profile · Level ${level}`
-                : `@${profile.username} · ${profileTrustTier.label}`}
-            </span>
-          </span>
-        }
         header={
           <BrowseTabStrip
             tabs={PROFILE_TABS}

@@ -99,17 +99,6 @@ export default function SentinelHubPage() {
       />
       <AppBrowseLayout
         maxWidth="680"
-        subtitle={
-          <span className="inline-flex min-w-0 items-center gap-2">
-            <span
-              className="material-symbols-outlined shrink-0 text-xl text-brand-blue"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              shield
-            </span>
-            <span className="truncate">Protection for you and your Huud</span>
-          </span>
-        }
         header={
           <BrowseTabStrip
             tabs={SENTINEL_HUB_TABS}

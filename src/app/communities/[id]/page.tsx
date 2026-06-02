@@ -48,7 +48,7 @@ export default function CommunityDetailPage() {
 
   if (isLoading) {
     return (
-      <AppBrowseLayout maxWidth="680" subtitle="Loading community…">
+      <AppBrowseLayout maxWidth="680">
         <div className="mod-card h-48 animate-pulse rounded-2xl" />
       </AppBrowseLayout>
     );
@@ -56,7 +56,7 @@ export default function CommunityDetailPage() {
 
   if (isError || !hub) {
     return (
-      <AppBrowseLayout maxWidth="680" subtitle="Community">
+      <AppBrowseLayout maxWidth="680">
         <BrowseEmptyState
           icon="groups"
           title="Community not found"
@@ -72,17 +72,7 @@ export default function CommunityDetailPage() {
   }
 
   return (
-    <AppBrowseLayout
-      maxWidth="680"
-      subtitle={
-        <span className="inline-flex min-w-0 items-center gap-2">
-          <Link href="/communities" className="text-[var(--neu-text-muted)] no-underline">
-            <span className="material-symbols-outlined text-lg">arrow_back</span>
-          </Link>
-          <span className="truncate">{hub.name}</span>
-        </span>
-      }
-    >
+    <AppBrowseLayout maxWidth="680">
       <div className="space-y-4">
         <div className="mod-card rounded-2xl p-5">
           <div className="mb-4 flex items-start gap-4">

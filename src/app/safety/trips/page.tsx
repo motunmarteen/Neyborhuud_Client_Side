@@ -81,20 +81,10 @@ function SafeTripsInner() {
     window.history.replaceState(null, '', `/safety/trips${hash}`);
   };
 
-  const subtitle = hasActiveTrip
-    ? `${state.trip?.originText ?? 'Trip'} → ${state.trip?.destinationText ?? ''}`
-    : 'Plan a journey and share live progress with guardians';
-
   return (
     <>
       <AppBrowseLayout
         maxWidth="680"
-        subtitle={
-          <span className="inline-flex min-w-0 items-center gap-2">
-            <span className="material-symbols-outlined shrink-0 text-xl text-primary">route</span>
-            <span className="truncate">{subtitle}</span>
-          </span>
-        }
         header={
           <div className="flex flex-col gap-3">
             <Suspense fallback={null}>

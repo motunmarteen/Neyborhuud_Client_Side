@@ -13,6 +13,7 @@ import { CommunityRow } from '@/components/communities/CommunityRow';
 import { CreateCommunityModal } from '@/components/communities/CreateCommunityModal';
 import { useHubCommunitiesList, useJoinHubCommunity } from '@/hooks/useHubCommunities';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
+import { unwrapApiData } from '@/lib/apiPayload';
 import type { HubCategory } from '@/types/hubCommunity';
 
 export const dynamic = 'force-dynamic';
@@ -99,16 +100,12 @@ export default function CommunitiesPage() {
   const joinMutation = useJoinHubCommunity();
 
   const hubs = data?.data?.hubs ?? [];
-  const pagination = data?.data?.pagination;
 
   const joinedCount = useMemo(() => hubs.filter((h) => h.joined).length, [hubs]);
   const highActivityCount = useMemo(
     () => hubs.filter((h) => h.activityLevel === 'High').length,
     [hubs],
   );
-
-  const tabLabel =
-    viewTab === 'joined' ? 'Your communities' : viewTab === 'discover' ? 'Discover hubs' : 'All hubs';
 
   const handleJoin = async (id: string) => {
     if (!user) {
@@ -121,12 +118,16 @@ export default function CommunitiesPage() {
     setPendingJoinId(id);
     try {
       const res = await joinMutation.mutateAsync(id);
-      if (res.data?.pending) {
+      const payload = unwrapApiData<{
+        pending?: boolean;
+        conversationId?: string;
+        hub?: { conversationId?: string };
+      }>(res as unknown);
+      if (payload?.pending) {
         toast.success('Join request submitted — an admin will review it');
         return;
       }
-      const conversationId =
-        res.data?.conversationId ?? res.data?.hub?.conversationId;
+      const conversationId = payload?.conversationId ?? payload?.hub?.conversationId;
       if (conversationId) {
         router.push(`/chat/${conversationId}`);
       }
@@ -139,27 +140,24 @@ export default function CommunitiesPage() {
     <>
       <AppBrowseLayout
         maxWidth="680"
-        subtitle={
-          <span className="inline-flex min-w-0 items-center gap-2">
-            <span
-              className="material-symbols-outlined shrink-0 text-xl text-primary"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              groups
-            </span>
-            <span className="truncate">
-              {tabLabel}
-              {` · ${hubs.length} hub${hubs.length === 1 ? '' : 's'}`}
-              {pagination?.total != null ? ` (${pagination.total} total)` : ''}
-            </span>
-          </span>
-        }
         header={
           <>
             <BrowseTabStrip
               tabs={[...VIEW_TABS]}
               activeId={viewTab}
               onChange={(id) => setViewTab(id as ViewTab)}
+              trailing={
+                mounted && user ? (
+                  <button
+                    type="button"
+                    onClick={() => setCreateOpen(true)}
+                    className="mod-fab flex h-9 w-9 items-center justify-center rounded-full border-0"
+                    aria-label="Create community"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-white">add</span>
+                  </button>
+                ) : null
+              }
             />
 
             <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">

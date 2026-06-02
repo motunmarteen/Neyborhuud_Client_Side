@@ -193,18 +193,6 @@ export default function GamificationPage() {
   return (
     <AppBrowseLayout
       maxWidth="680"
-      subtitle={
-        <span className="flex items-center justify-between gap-3">
-          <span className="inline-flex min-w-0 items-center gap-2">
-            <span className="material-symbols-outlined shrink-0 text-xl text-primary">military_tech</span>
-            <span className="truncate">
-              {statsData
-                ? `Level ${statsData.level ?? 1} · ${(statsData.points ?? 0).toLocaleString()} pts`
-                : "Track badges, trust, and HuudCoins"}
-            </span>
-          </span>
-        </span>
-      }
       header={
         <BrowseTabStrip
           tabs={TABS}

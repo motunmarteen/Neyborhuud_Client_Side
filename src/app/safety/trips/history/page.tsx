@@ -11,12 +11,6 @@ function TripHistoryInner() {
   return (
     <AppBrowseLayout
       maxWidth="680"
-      subtitle={
-        <span className="inline-flex min-w-0 items-center gap-2">
-          <span className="material-symbols-outlined shrink-0 text-xl text-primary">history</span>
-          <span className="truncate">Completed and cancelled safe trips</span>
-        </span>
-      }
       header={
         <div className="flex flex-col gap-3">
           <Link

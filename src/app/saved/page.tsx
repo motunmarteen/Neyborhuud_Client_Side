@@ -185,32 +185,10 @@ export default function SavedPage() {
     },
   });
 
-  const filterLabel =
-    filter === 'all'
-      ? 'All saved'
-      : (EXTRA_FILTERS.find((f) => f.id === filter)?.label ??
-          VIEW_TABS.find((t) => t.id === filter)?.label ??
-          filter);
 
   return (
     <AppBrowseLayout
       maxWidth="680"
-      subtitle={
-        <span className="inline-flex min-w-0 items-center gap-2">
-          <span
-            className="material-symbols-outlined shrink-0 text-xl text-primary"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            bookmark
-          </span>
-          <span className="truncate">
-            {filterLabel}
-            {mounted && user && !isLoading
-              ? ` · ${filteredPosts.length} of ${allPosts.length} saved`
-              : " · Posts you've bookmarked"}
-          </span>
-        </span>
-      }
       header={
         !mounted ? (
           <SavedToolbarSkeleton />
@@ -234,9 +212,7 @@ export default function SavedPage() {
                   >
                     refresh
                   </span>
-                  <span className="hidden min-[420px]:inline">
-                    {isFetching ? 'Loading' : 'Refresh'}
-                  </span>
+                  <span>{isFetching ? 'Loading' : 'Refresh'}</span>
                 </button>
               }
             />

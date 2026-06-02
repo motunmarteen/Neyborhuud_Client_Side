@@ -9,6 +9,7 @@ import { FriendshipChatInbox } from '@/components/friendship/FriendshipChatInbox
 import { CreateCommunityModal } from '@/components/communities/CreateCommunityModal';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import { CHAT_TAB_COMMUNITIES } from '@/lib/chatPaths';
+import { unwrapApiData } from '@/lib/apiPayload';
 
 type ChatTab = 'all' | 'direct' | 'communities';
 
@@ -54,16 +55,6 @@ function ChatPageContent() {
       <AppBrowseLayout
         maxWidth="680"
         className="chat-inbox-layout !gap-3 !pb-2 !pt-0"
-        subtitle={
-          <span className="flex items-center justify-between gap-3 px-4 pt-1">
-            <span className="inline-flex min-w-0 items-center gap-2">
-              <span className="material-symbols-outlined shrink-0 text-xl text-primary">forum</span>
-              <span className="truncate text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-                Messages across your Huud — DMs & communities
-              </span>
-            </span>
-          </span>
-        }
         header={
           <div className="px-4">
             <BrowseTabStrip

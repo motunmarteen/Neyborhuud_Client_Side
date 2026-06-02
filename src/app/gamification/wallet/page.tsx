@@ -114,7 +114,6 @@ export default function WalletPage() {
 
   return (
     <AppBrowseLayout
-      subtitle="Your coin balance & history"
       header={
         <div className="flex flex-col gap-3">
           <Link

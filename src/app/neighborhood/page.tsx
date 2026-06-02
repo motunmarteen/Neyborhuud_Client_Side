@@ -206,30 +206,9 @@ function HuudBrowseInner() {
     router.replace(`/neighborhood?${params.toString()}`, { scroll: false });
   };
 
-  const subtitleSuffix =
-    !isLoading && posts.length > 0
-      ? view === 'street-radar'
-        ? ` · ${stats.count} trending · ${stats.totalLikes.toLocaleString()} reactions`
-        : ` · ${stats.count} post${stats.count === 1 ? '' : 's'}`
-      : ` · ${meta.emptySuffix}`;
-
   return (
     <AppBrowseLayout
       maxWidth="680"
-      subtitle={
-        <span className="inline-flex min-w-0 items-center gap-2">
-          <span
-            className="material-symbols-outlined shrink-0 text-xl text-primary"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            {meta.icon}
-          </span>
-          <span className="truncate">
-            {meta.label}
-            {subtitleSuffix}
-          </span>
-        </span>
-      }
       header={
         <>
           <BrowseTabStrip
@@ -250,9 +229,7 @@ function HuudBrowseInner() {
                 >
                   refresh
                 </span>
-                <span className="hidden min-[420px]:inline">
-                  {isFetching ? 'Loading' : 'Refresh'}
-                </span>
+                <span>{isFetching ? 'Loading' : 'Refresh'}</span>
               </button>
             }
           />
@@ -349,7 +326,7 @@ export default function NeighborhoodPage() {
   return (
     <Suspense
       fallback={
-        <AppBrowseLayout maxWidth="680" subtitle="My Huud">
+        <AppBrowseLayout maxWidth="680">
           <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="mod-inset h-[5.5rem] animate-pulse rounded-xl" />

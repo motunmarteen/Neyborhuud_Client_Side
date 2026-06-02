@@ -8,8 +8,6 @@ import { BottomNav } from '@/components/feed/BottomNav';
 
 type AppBrowseLayoutProps = {
   children: ReactNode;
-  /** Short description under the top nav (page title lives in TopNav). */
-  subtitle?: ReactNode;
   /** Toolbar row: search, filters, actions. */
   header?: ReactNode;
   maxWidth?: '680' | '920';
@@ -22,7 +20,6 @@ type AppBrowseLayoutProps = {
  */
 export function AppBrowseLayout({
   children,
-  subtitle,
   header,
   maxWidth = '680',
   className = '',
@@ -44,16 +41,7 @@ export function AppBrowseLayout({
         <div
           className={`mx-auto flex w-full min-w-0 max-w-full ${widthClass} flex-col gap-4 overflow-x-clip px-4 pt-3 pb-[var(--app-scroll-bottom)] ${className}`.trim()}
         >
-          {(subtitle || header) && (
-            <div className="browse-toolbar">
-              {subtitle ? (
-                <div className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-                  {subtitle}
-                </div>
-              ) : null}
-              {header}
-            </div>
-          )}
+          {header ? <div className="browse-toolbar">{header}</div> : null}
           {children}
         </div>
       </main>

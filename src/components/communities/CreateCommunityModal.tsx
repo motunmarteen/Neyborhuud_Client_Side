@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { useCreateHubCommunity } from '@/hooks/useHubCommunities';
 import { getErrorMessage } from '@/lib/error-handler';
-import type { HubCategory } from '@/types/hubCommunity';
+import { unwrapApiData } from '@/lib/apiPayload';
+import type { HubCategory, HubCommunity } from '@/types/hubCommunity';
 
 const CATEGORIES: { id: HubCategory; label: string; icon: string }[] = [
   { id: 'security', label: 'Security & Safety', icon: 'shield' },
@@ -22,6 +25,7 @@ type CreateCommunityModalProps = {
 
 export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const createHub = useCreateHubCommunity();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -49,13 +53,27 @@ export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalPr
           onlyAdminsCanPost,
         },
       });
-      const hub = res.data?.hub;
+      const payload = unwrapApiData<{ hub: HubCommunity }>(res);
+      const hub = payload?.hub;
+      if (!hub?.conversationId && !hub?.id) {
+        throw new Error('Community created but chat link was missing.');
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ['hub-communities'] });
+      await queryClient.invalidateQueries({ queryKey: ['conversations'] });
+
+      toast.success('Community created — opening chat…');
       onClose();
       setName('');
       setDescription('');
-      if (hub?.conversationId) {
+      setCategory('general');
+      setVisibility('public');
+      setJoinApprovalRequired(false);
+      setOnlyAdminsCanPost(false);
+
+      if (hub.conversationId) {
         router.push(`/chat/${hub.conversationId}`);
-      } else if (hub?.id) {
+      } else if (hub.id) {
         router.push(`/communities/${hub.id}`);
       }
     } catch (err: unknown) {

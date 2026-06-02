@@ -6368,6 +6368,28 @@ html.dark .chat-attach-sheet {
   justify-content: flex-start;
 }
 
+.chat-message-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: min(88%, 22rem);
+  gap: 0.2rem;
+}
+
+.chat-message-stack--out {
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.chat-message-stack__sender {
+  padding-inline: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--brand-green-dark, #006f35);
+  letter-spacing: 0.01em;
+}
+
 .chat-thread-list {
   display: flex;
   flex-direction: column;
