@@ -432,7 +432,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
     m < 1000 ? `${Math.round(m)}m away` : `${(m / 1000).toFixed(1)}km away`;
 
   return (
-    <div className={`relative w-full overflow-hidden bg-background ${embedded ? 'absolute inset-0 h-full' : 'h-[100dvh]'}`}>
+    <div className={`relative w-full overflow-hidden bg-background ${embedded ? 'absolute inset-0 h-full' : 'h-app min-h-0 flex-1'}`}>
       
       {/* ─── Leaflet Map Container ─── */}
       <div ref={mapContainerRef} className="absolute inset-0 z-0" />

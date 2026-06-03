@@ -48,8 +48,12 @@ export function SidebarProfileLockup({
       }
       aria-label={
         hasLegalName
-          ? `View ${displayName} (@${handle}) profile in ${huudName}`
-          : `View @${handle} profile in ${huudName}`
+          ? isSky
+            ? `View ${displayName} (@${handle}) profile`
+            : `View ${displayName} (@${handle}) profile in ${huudName}`
+          : isSky
+            ? `View @${handle} profile`
+            : `View @${handle} profile in ${huudName}`
       }
     >
       <div className={isSky ? 'left-sidebar__sky-profile__avatar' : undefined}>
@@ -57,15 +61,15 @@ export function SidebarProfileLockup({
           src={resolvedAvatar}
           alt={displayName}
           fallbackInitial={initial}
-          size="md"
+          size={isSky ? 'lg' : 'md'}
           priority
           className={isSky ? undefined : 'shrink-0 transition-transform group-hover:scale-[1.02] group-active:scale-[0.98]'}
         />
       </div>
       <div className={isSky ? 'left-sidebar__sky-profile__copy' : 'min-w-0 flex-1 text-left'}>
-        <p className={isSky ? 'left-sidebar__sky-profile__huud' : 'auth-signup-identity-card__eyebrow'}>
-          {huudName}
-        </p>
+        {!isSky ? (
+          <p className="auth-signup-identity-card__eyebrow">{huudName}</p>
+        ) : null}
         <p
           className={
             isSky
@@ -76,7 +80,7 @@ export function SidebarProfileLockup({
           {displayName}
         </p>
         {hasLegalName ? (
-          <div className="flex items-center gap-1 mt-0.5">
+          <div className="flex items-center justify-center gap-1 mt-0.5">
             <p
               className={
                 isSky

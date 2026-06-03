@@ -26,7 +26,8 @@ type ProfileBrowseHeroProps = {
   settingLocation?: boolean;
   savingMapLocation?: boolean;
   identityVerified?: boolean;
-  vouchCount?: number;
+  vouchReceived?: number;
+  vouchGiven?: number;
 };
 
 export function ProfileBrowseHero({
@@ -48,7 +49,8 @@ export function ProfileBrowseHero({
   settingLocation,
   savingMapLocation,
   identityVerified,
-  vouchCount = 0,
+  vouchReceived = 0,
+  vouchGiven = 0,
 }: ProfileBrowseHeroProps) {
   const handle = username.trim().toLowerCase();
   const initial = resolveProfileAvatarInitial({ displayName, username: handle }, handle);
@@ -150,9 +152,22 @@ export function ProfileBrowseHero({
               Verified
             </span>
           ) : null}
-          {vouchCount > 0 ? (
-            <span className="mod-chip inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold">
-              🤜 {vouchCount} vouches
+          <span
+            className={`mod-chip inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              vouchReceived > 0 ? '' : 'opacity-60'
+            }`}
+            aria-label={`Vouches received: ${vouchReceived}`}
+          >
+            🤜 {vouchReceived} received
+          </span>
+          {isOwnProfile ? (
+            <span
+              className={`mod-chip inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                vouchGiven > 0 ? '' : 'opacity-60'
+              }`}
+              aria-label={`Vouches given: ${vouchGiven}`}
+            >
+              🤝 {vouchGiven} given
             </span>
           ) : null}
         </div>

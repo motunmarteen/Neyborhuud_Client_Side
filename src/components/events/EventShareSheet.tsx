@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { BottomSheetOverlay } from "@/components/ui/BottomSheetOverlay";
 import { useEventSharePayload, useRecordEventShare } from "@/hooks/useEvents";
 import { getErrorMessage } from "@/lib/error-handler";
 import type { EventShareFallbackInput, EventSharePayload, EventSharePlatforms } from "@/services/events.service";
@@ -169,19 +170,17 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
   const hasNative = typeof navigator !== "undefined" && "share" in navigator;
 
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-end justify-center p-4 sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Share event"
-      onClick={onClose}
+    <BottomSheetOverlay
+      open={open}
+      onClose={onClose}
+      ariaLabel="Share event"
+      zIndexClass="z-[60]"
+      alignClass="items-end justify-center p-4 sm:items-center"
+      backdropClassName="bg-black/60 backdrop-blur-sm"
+      panelClassName="neu-modal relative mx-auto mb-0 max-h-[85vh] w-full max-w-md overflow-hidden rounded-t-2xl sm:rounded-2xl"
+      handleClassName="pt-3 pb-0"
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-hidden />
-      <div
-        className="neu-modal relative mx-auto mb-0 max-h-[85vh] w-full max-w-md overflow-hidden rounded-t-2xl sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-3 border-b border-black/[0.08] px-4 pb-3 pt-4 dark:border-white/10">
+        <div className="flex items-start justify-between gap-3 border-b border-black/[0.08] px-4 pb-3 pt-2 dark:border-white/10">
           <div className="min-w-0 pr-2">
             <h3 className="text-lg font-bold" style={{ color: "var(--neu-text)" }}>
               Share event
@@ -287,7 +286,6 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
           </>
         ) : null}
         </div>
-      </div>
-    </div>
+    </BottomSheetOverlay>
   );
 }

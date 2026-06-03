@@ -10,6 +10,8 @@ type ProfileSnapStatsRowProps = {
   huudCoins: number;
   followerCount: number;
   followingCount: number;
+  vouchReceived?: number;
+  vouchGiven?: number;
 };
 
 function StatCard({
@@ -55,6 +57,8 @@ export function ProfileSnapStatsRow({
   huudCoins,
   followerCount,
   followingCount,
+  vouchReceived = 0,
+  vouchGiven = 0,
 }: ProfileSnapStatsRowProps) {
   const birthday = isOwnProfile ? formatProfileBirthday(dateOfBirth) : null;
   const zodiac = isOwnProfile ? getZodiacFromBirthday(dateOfBirth) : null;
@@ -66,8 +70,22 @@ export function ProfileSnapStatsRow({
         icon="🪙"
         label="HuudCoins"
         value={huudCoins.toLocaleString()}
-        href={isOwnProfile ? '/gamification/wallet' : undefined}
+        href={isOwnProfile ? '/huud-economy/wallet' : undefined}
       />
+      <StatCard
+        icon="🤜"
+        label="Vouches received"
+        value={vouchReceived.toLocaleString()}
+        href={`/profile/${username}?tab=trust`}
+      />
+      {isOwnProfile ? (
+        <StatCard
+          icon="🤝"
+          label="Vouches given"
+          value={vouchGiven.toLocaleString()}
+          href={`/profile/${username}?tab=trust`}
+        />
+      ) : null}
       {zodiac ? <StatCard icon={zodiac.emoji} label="Sign" value={zodiac.sign} /> : null}
       <StatCard
         icon="👥"

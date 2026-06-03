@@ -10,6 +10,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import type { ActionResult } from './ChatActionMenu';
 
 type RecorderState = 'idle' | 'recording' | 'preview';
@@ -146,11 +147,17 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-end justify-center sm:items-center">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60" onClick={state === 'recording' ? undefined : onClose} />
-
-      <div className="relative z-10 w-full max-w-sm rounded-t-2xl bg-brand-black p-6 shadow-2xl sm:rounded-2xl">
+    <BottomSheetOverlay
+      open
+      onClose={onClose}
+      ariaLabel="Record voice note"
+      zIndexClass="z-[200]"
+      alignClass="items-end justify-center sm:items-center"
+      backdropClassName="bg-black/60"
+      panelClassName="w-full max-w-sm rounded-t-2xl bg-brand-black p-6 shadow-2xl sm:rounded-2xl"
+      closeOnBackdrop={state !== 'recording'}
+      handleClassName="pt-2 pb-0"
+    >
         {/* Header */}
         <div className="mb-5 flex items-center justify-between">
           <p className="font-semibold text-[var(--neu-text-muted)]">
@@ -225,7 +232,6 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </BottomSheetOverlay>
   );
 }

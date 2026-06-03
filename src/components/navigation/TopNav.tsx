@@ -8,6 +8,7 @@ import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { AppNavIcon } from '@/components/navigation/AppNavIcon';
 import { TopNavChatAction, CHAT_INBOX_HREF } from '@/components/navigation/TopNavChatAction';
 import { useUnreadCount } from '@/hooks/useNotifications';
+import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
 
 type TopNavOrigin = 'page' | 'global';
 
@@ -24,8 +25,17 @@ function getRouteTitle(pathname: string) {
   const parts = pathname.split('?')[0].split('#')[0].split('/').filter(Boolean);
   const segment = (parts[0] ?? '').toLowerCase();
 
-  if (segment === 'gamification' && parts[1] === 'wallet') {
-    return 'HuudCoins Wallet';
+  if (
+    (segment === 'gamification' || segment === 'huud-economy') &&
+    parts[1] === 'wallet'
+  ) {
+    return 'Huud Wallet';
+  }
+  if (segment === 'huud-economy' && parts[1] === 'score') {
+    return 'Huud Score';
+  }
+  if (segment === 'huud-economy') {
+    return 'Huud Economy';
   }
   if (segment === 'local-news' && parts[1] === 'gist') {
     return 'Huud Gist';
@@ -53,7 +63,8 @@ function getRouteTitle(pathname: string) {
     info: 'Info',
     sos: 'SOS',
     profile: 'Profile',
-    gamification: 'My Huud Score',
+    gamification: 'Huud Economy',
+    'huud-economy': 'Huud Economy',
   };
 
   if (map[segment]) return map[segment];
@@ -66,8 +77,16 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
   const isOnFeed = pathname === '/feed' || pathname === '/';
   const title = useMemo(() => (pathname ? getRouteTitle(pathname) : 'NeyborHuud'), [pathname]);
   const { data: unreadCount = 0 } = useUnreadCount();
+  const scrollHidden = useScrollHideBottomNav(!searchOpen, pathname);
+
+  const skyOverlay = isOnFeed;
 
   return (
+    <>
+    <div
+      className={`app-topnav-host${skyOverlay ? ' app-topnav-host--sky-overlay' : ''}${scrollHidden ? ' app-topnav-host--hidden' : ''}`}
+      data-topnav-host="1"
+    >
     <header
       data-topnav="1"
       data-topnav-origin={origin}
@@ -143,5 +162,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
         </div>
       )}
     </header>
+    </div>
+    </>
   );
 }

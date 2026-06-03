@@ -1,6 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
+import { BottomSheetDragHandle } from '@/components/ui/BottomSheetDragHandle';
+import { useBottomSheetDrag } from '@/hooks/useBottomSheetDrag';
+import { useBottomSheetMount } from '@/hooks/useBottomSheetMount';
 import { usePost } from '@/hooks/usePosts';
 import { useCommentMutations } from '@/hooks/useComments';
 import { CommentForm } from '@/components/feed/CommentForm';
@@ -16,12 +19,8 @@ interface FeedCommentsSheetProps {
 }
 
 export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = null }: FeedCommentsSheetProps) {
-    const [isMounted, setIsMounted] = useState(isOpen);
-    const [isVisible, setIsVisible] = useState(false);
-    const [dragY, setDragY] = useState(0);
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStartY, setDragStartY] = useState<number | null>(null);
-    const [dragStartTs, setDragStartTs] = useState<number | null>(null);
+    const { mounted: isMounted, visible: isVisible } = useBottomSheetMount({ open: isOpen, onClose });
+    const { handleProps, getPanelStyle, reset } = useBottomSheetDrag({ onDismiss: onClose });
 
     const activeTarget = isOpen ? target : null;
     const activePostId = activeTarget?.id ?? null;
@@ -35,70 +34,11 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
     }, [activeTarget, postDetails]);
 
     useEffect(() => {
-        if (isOpen) {
-            setIsMounted(true);
-            setDragY(0);
-            setIsDragging(false);
-            const raf = window.requestAnimationFrame(() => setIsVisible(true));
-            return () => window.cancelAnimationFrame(raf);
-        }
-
-        setIsVisible(false);
-        const timer = window.setTimeout(() => setIsMounted(false), 240);
-        return () => window.clearTimeout(timer);
-    }, [isOpen]);
-
-    useEffect(() => {
-        if (!isOpen) return;
-
-        const handleEsc = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') onClose();
-        };
-
-        window.addEventListener('keydown', handleEsc);
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-
-        return () => {
-            window.removeEventListener('keydown', handleEsc);
-            document.body.style.overflow = previousOverflow;
-        };
-    }, [isOpen, onClose]);
+        if (isOpen) reset();
+    }, [isOpen, reset]);
 
     if (!isMounted || !activeTarget) return null;
     const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
-
-    const handlePointerDown = (event: React.PointerEvent<HTMLElement>) => {
-        setIsDragging(true);
-        setDragStartY(event.clientY);
-        setDragStartTs(performance.now());
-    };
-
-    const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
-        if (!isDragging || dragStartY === null) return;
-        const nextY = Math.max(0, event.clientY - dragStartY);
-        setDragY(nextY);
-    };
-
-    const handlePointerEnd = () => {
-        if (!isDragging) return;
-
-        const elapsedMs = dragStartTs ? Math.max(1, performance.now() - dragStartTs) : 1;
-        const velocity = dragY / elapsedMs;
-        const shouldDismiss = dragY > 120 || velocity > 1.1;
-
-        setIsDragging(false);
-        setDragStartY(null);
-        setDragStartTs(null);
-
-        if (shouldDismiss) {
-            onClose();
-            setDragY(0);
-            return;
-        }
-
-        setDragY(0);
-    };
 
     return (
         <div className="fixed inset-0 z-[70] flex items-end justify-center">
@@ -114,11 +54,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
             <section
                 className={`feed-comments-panel relative flex w-full max-h-[86vh] flex-col overflow-hidden rounded-t-[32px] border border-[var(--neu-shadow-dark)] shadow-[0_-12px_40px_var(--neu-shadow-dark)] md:max-w-[560px] md:shadow-[0_20px_50px_var(--neu-shadow-dark)]`}
                 style={{
-                    transform: `translate3d(0, ${(isVisible ? 0 : 520) + dragY}px, 0)`,
-                    opacity: isVisible ? 1 : 0,
-                    transitionProperty: isDragging ? 'none' : 'transform, opacity',
-                    transitionDuration: isDragging ? '0ms' : '300ms',
-                    transitionTimingFunction: isDragging ? 'linear' : 'cubic-bezier(0.22, 1, 0.36, 1)',
+                    ...getPanelStyle(isVisible, 520),
                     position: isDesktop && desktopAnchor ? 'fixed' : 'relative',
                     left: isDesktop && desktopAnchor ? `${desktopAnchor.left}px` : undefined,
                     bottom: isDesktop && desktopAnchor ? 0 : undefined,
@@ -135,15 +71,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                 </div>
 
                 <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
-                <div
-                    className="flex cursor-grab touch-none justify-center pt-2.5 pb-1 active:cursor-grabbing"
-                    onPointerDown={handlePointerDown}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerEnd}
-                    onPointerCancel={handlePointerEnd}
-                >
-                    <div className="h-1 w-12 rounded-full bg-[var(--neu-text-muted)]/40" />
-                </div>
+                <BottomSheetDragHandle handleProps={handleProps} className="pt-2.5 pb-1" />
 
                 <div
                     className="flex items-center justify-between border-b border-[var(--neu-shadow-dark)] px-4 py-2.5"

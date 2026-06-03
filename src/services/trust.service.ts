@@ -24,6 +24,11 @@ export interface VouchRecord {
   createdAt: string;
 }
 
+export interface VouchMetrics {
+  received: number;
+  given: number;
+}
+
 /**
  * A single trust activity event – mirrors TrustEvent enum on the backend
  * plus the wallet/gamification events we surface synthetically.
@@ -85,6 +90,14 @@ export const trustService = {
    */
   async getVouchStatus(userId: string) {
     return await apiClient.get<VouchStatus>(`/trust/vouch-status/${userId}`);
+  },
+
+  /**
+   * Lightweight metrics for profile surfaces.
+   * GET /trust/vouch-metrics/:userId
+   */
+  async getVouchMetrics(userId: string) {
+    return await apiClient.get<VouchMetrics>(`/trust/vouch-metrics/${userId}`);
   },
 
   /**

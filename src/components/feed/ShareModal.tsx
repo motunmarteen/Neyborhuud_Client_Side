@@ -12,6 +12,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import apiClient from '@/lib/api-client';
 
 // ─── Platform definitions ──────────────────────────────────────────────────
@@ -227,16 +228,16 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Share post">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-
-      <div className="relative z-10 w-full max-w-sm rounded-t-3xl bg-white dark:bg-brand-black pb-safe shadow-2xl sm:rounded-3xl">
-        {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-brand-surface dark:bg-brand-black" />
-        </div>
-
+    <BottomSheetOverlay
+      open
+      onClose={onClose}
+      ariaLabel="Share post"
+      zIndexClass="z-[300]"
+      alignClass="items-end justify-center sm:items-center"
+      backdropClassName="bg-black/60 backdrop-blur-sm"
+      panelClassName="w-full max-w-sm rounded-t-3xl bg-white pb-safe shadow-2xl dark:bg-brand-black sm:rounded-3xl"
+      handleClassName="pt-2 pb-0"
+    >
         <div className="px-5 pb-6 pt-2">
           {/* Header */}
           <div className="mb-5 flex items-center justify-between">
@@ -319,7 +320,6 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
             New sign-ups via your link count toward your growth streak.
           </p>
         </div>
-      </div>
-    </div>
+    </BottomSheetOverlay>
   );
 }

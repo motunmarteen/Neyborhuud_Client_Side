@@ -2,6 +2,7 @@
 export const BROWSE_SHELL_ROUTE_PREFIXES = [
   '/profile',
   '/gamification',
+  '/huud-economy',
   '/local-news',
   '/neighborhood',
   '/saved',
@@ -9,6 +10,14 @@ export const BROWSE_SHELL_ROUTE_PREFIXES = [
   '/chat',
   '/safety',
   '/sos',
+  '/marketplace',
+  '/jobs',
+  '/services',
+  '/events',
+  '/fyi',
+  '/help-request',
+  '/incident-reports',
+  '/community-emergency',
 ] as const;
 
 export function routeUsesBrowseShell(pathname: string): boolean {

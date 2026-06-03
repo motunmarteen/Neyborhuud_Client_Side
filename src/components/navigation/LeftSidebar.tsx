@@ -14,15 +14,19 @@ import {
   useSidebarAtmosphereActive,
 } from './SidebarAtmosphereColumn';
 import { SidebarSkyHeaderPanel } from './SidebarSkyHeader';
+import { SidebarFxWidget } from './SidebarFxWidget';
+import { SidebarLocalNewsWidget } from './SidebarLocalNewsWidget';
 import { LocalHuudMenu } from './LocalHuudMenu';
 import { useSwipeBackDisabled } from '@/contexts/SwipeBackContext';
 
-const mainNav = [
+const mainNavTop = [
   { icon: 'location_on', label: 'My Huud', href: '/neighborhood' },
   { icon: 'groups', label: 'Communities', href: '/communities' },
   { icon: 'bookmark', label: 'Saved', href: '/saved' },
-  { icon: 'newspaper', label: 'Local News', href: '/local-news' },
-  { icon: 'military_tech', label: 'My Huud Score', href: '/gamification' },
+];
+
+const mainNavBottom = [
+  { icon: 'account_balance', label: 'Huud Economy', href: '/huud-economy' },
 ];
 
 type LeftSidebarOrigin = 'page' | 'global';
@@ -48,7 +52,7 @@ function SidebarLink({
         onClick={onNavigate}
         className={`left-sidebar__link${active ? ' left-sidebar__link--active' : ''}`}
       >
-        <span className="left-sidebar__link-icon">
+        <span className="left-sidebar__link-icon" aria-hidden>
           <span className={`material-symbols-outlined${active ? ' fill-1' : ''}`}>{icon}</span>
         </span>
         <span className="left-sidebar__link-label">{label}</span>
@@ -103,7 +107,8 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
       <div className="left-sidebar__main">
         <section className="left-sidebar__section">
           <ul className="left-sidebar__nav">
-            {mainNav.map((item) => (
+            <LocalHuudMenu variant="sidebar" onNavigate={onNavigate} />
+            {mainNavTop.map((item) => (
               <SidebarLink
                 key={item.href}
                 href={item.href}
@@ -113,12 +118,22 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
                 onNavigate={onNavigate}
               />
             ))}
+            <SidebarLocalNewsWidget onNavigate={onNavigate} />
+            {mainNavBottom.map((item) => (
+              <SidebarLink
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                active={isActive(item.href)}
+                onNavigate={onNavigate}
+              />
+            ))}
+            <SidebarFxWidget />
           </ul>
         </section>
 
-        <LocalHuudMenu variant="sidebar" onNavigate={onNavigate} />
-
-        <section className="left-sidebar__section">
+        <section className="left-sidebar__section left-sidebar__section--footer">
           <ul className="left-sidebar__nav">
             <SidebarLink
               href="/settings"

@@ -157,6 +157,11 @@ export function SidebarSkyHeaderPanel({
           isDark={sceneDark}
           size="compact"
         />
+        <div
+          className="left-sidebar__sky-header-horizon"
+          style={{ background: theme.horizonGlow }}
+        />
+        <div className="left-sidebar__sky-header-fade" aria-hidden />
       </div>
 
       <div className={`left-sidebar__header-content${isDrawer ? ' left-sidebar__header-content--drawer' : ''}`}>

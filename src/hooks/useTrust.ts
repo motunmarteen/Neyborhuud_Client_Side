@@ -19,6 +19,7 @@ import {
   TrustProfileResponse,
   TRUST_EVENT_META,
 } from "@/services/trust.service";
+import type { VouchMetrics } from "@/services/trust.service";
 import {
   TRUST_TIERS as BASE_TRUST_TIERS,
   getTrustTier as getBaseTrustTier,
@@ -158,6 +159,34 @@ export function useVouches(
     throwOnError: false,
     staleTime: 60_000,
     placeholderData: [],
+  });
+}
+
+// ─── Vouch Metrics (counts) ───────────────────────────────────────────────────
+
+/**
+ * Fetch lightweight vouch counts for profile surfaces.
+ * Returns `{ received, given }` for the requested user.
+ */
+export function useVouchMetrics(
+  userId: string | null | undefined,
+  options?: { enabled?: boolean }
+) {
+  return useQuery<VouchMetrics>({
+    queryKey: ["vouch-metrics", userId],
+    queryFn: async () => {
+      const res = await trustService.getVouchMetrics(userId!);
+      const raw = unwrap<VouchMetrics>(res);
+      return {
+        received: raw?.received ?? 0,
+        given: raw?.given ?? 0,
+      };
+    },
+    enabled: options?.enabled !== false && !!userId,
+    retry: false,
+    throwOnError: false,
+    staleTime: 60_000,
+    placeholderData: { received: 0, given: 0 },
   });
 }
 

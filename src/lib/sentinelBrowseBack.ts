@@ -22,7 +22,8 @@ export function labelForSentinelPath(pathname: string): string {
     '/sos': 'SOS',
     '/': 'Home',
     '/feed': 'Feed',
-    '/gamification': 'Huud Score',
+    '/gamification': 'Huud Economy',
+    '/huud-economy': 'Huud Economy',
   };
   return labels[base] ?? 'Back';
 }

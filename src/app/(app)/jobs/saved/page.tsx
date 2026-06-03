@@ -1,0 +1,85 @@
+"use client";
+
+import { useEffect } from "react";
+import Link from "next/link";
+import { useInView } from "react-intersection-observer";
+import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
+import JobCard from "@/components/jobs/JobCard";
+import { useSavedJobs, useSaveJob } from "@/hooks/useJobs";
+
+export default function SavedJobsPage() {
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useSavedJobs();
+  const saveJob = useSaveJob();
+
+  const savedItems = data?.pages.flatMap(
+    (page) => (page as any)?.data?.savedJobs ?? (page as any)?.savedJobs ?? []
+  ) ?? [];
+
+  const { ref, inView } = useInView({ threshold: 0, rootMargin: "300px" });
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  return (
+    <LocalHuudSubpageShell hubId="jobs">
+      {isLoading && (
+        <div className="space-y-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="animate-pulse mod-card rounded-2xl p-4">
+              <div className="h-5 rounded-lg w-2/3 mb-3" style={{ background: "var(--neu-shadow-dark)" }} />
+              <div className="flex gap-2 mb-3">
+                <div className="h-5 rounded-full w-24" style={{ background: "var(--neu-shadow-dark)" }} />
+                <div className="h-5 rounded-full w-16" style={{ background: "var(--neu-shadow-dark)" }} />
+              </div>
+              <div className="h-3 rounded-lg w-1/2" style={{ background: "var(--neu-shadow-dark)" }} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isLoading && savedItems.length > 0 && (
+        <div className="space-y-3">
+          {savedItems.map((item: any, idx: number) => {
+            const job = item.jobId ?? item;
+            const jobId = job._id ?? job.id;
+            return (
+              <JobCard
+                key={jobId ?? `saved-${idx}`}
+                job={{ ...job, isSaved: true }}
+                onSave={(id) => saveJob.mutate({ jobId: id, saved: true })}
+              />
+            );
+          })}
+          <div ref={ref} className="py-2 flex justify-center">
+            {isFetchingNextPage && (
+              <div className="flex items-center gap-2 text-sm" style={{ color: "var(--neu-text-muted)" }}>
+                <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                Loading more…
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!isLoading && savedItems.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 mod-card rounded-2xl">
+          <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
+            <span className="material-symbols-outlined text-4xl" style={{ color: "var(--neu-text-muted)" }}>
+              bookmark_border
+            </span>
+          </div>
+          <p className="text-base font-bold mb-2" style={{ color: "var(--neu-text)" }}>No saved jobs yet</p>
+          <p className="text-sm mb-6" style={{ color: "var(--neu-text-muted)" }}>
+            Bookmark jobs to revisit them later
+          </p>
+          <Link
+            href="/jobs"
+            className="px-6 py-2.5 rounded-xl font-bold text-sm mod-chip mod-chip-active text-primary transition-all"
+          >
+            Browse Jobs
+          </Link>
+        </div>
+      )}
+    </LocalHuudSubpageShell>
+  );
+}

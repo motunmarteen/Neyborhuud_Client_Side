@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BottomSheetOverlay } from "@/components/ui/BottomSheetOverlay";
 import { useWallet } from "@/hooks/useGamification";
 import Image from "next/image";
 
@@ -77,11 +78,16 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <BottomSheetOverlay
+      open
+      onClose={onClose}
+      ariaLabel="Send tip"
+      zIndexClass="z-50"
+      alignClass="items-end justify-center sm:items-center"
+      backdropClassName="bg-black/60 backdrop-blur-sm"
+      panelClassName="w-full max-w-sm overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl"
+      handleClassName="pt-2 pb-0"
     >
-      <div className="w-full max-w-sm rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl overflow-hidden">
 
         {/* Gradient header bar */}
         <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400" />
@@ -237,7 +243,6 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
             </>
           )}
         </div>
-      </div>
-    </div>
+    </BottomSheetOverlay>
   );
 }

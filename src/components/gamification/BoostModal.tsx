@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BottomSheetOverlay } from "@/components/ui/BottomSheetOverlay";
 import { useWallet } from "@/hooks/useGamification";
 
 type BoostType = "job" | "service" | "event" | "listing" | "post";
@@ -73,11 +74,16 @@ export function BoostModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <BottomSheetOverlay
+      open
+      onClose={onClose}
+      ariaLabel={`Boost ${type}`}
+      zIndexClass="z-50"
+      alignClass="items-end justify-center sm:items-center"
+      backdropClassName="bg-black/70 backdrop-blur-sm"
+      panelClassName="w-full max-w-md overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl"
+      handleClassName="pt-2 pb-0"
     >
-      <div className="w-full max-w-md rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl overflow-hidden">
 
         {/* Gradient header */}
         <div className={`bg-gradient-to-r ${meta.gradient} px-6 py-5 text-white`}>
@@ -222,7 +228,6 @@ export function BoostModal({
             </>
           )}
         </div>
-      </div>
-    </div>
+    </BottomSheetOverlay>
   );
 }

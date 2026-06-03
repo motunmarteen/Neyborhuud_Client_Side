@@ -1,4 +1,4 @@
-import { resolveProfilePersonalName, type ProfileNameSource } from '@/lib/profileSnapHelpers';
+import { resolveProfilePersonalName, capitalizeName, type ProfileNameSource } from '@/lib/profileSnapHelpers';
 import type { User } from '@/types/api';
 
 export type ProfileFieldSource = ProfileNameSource &
@@ -30,24 +30,24 @@ export function resolveUserFirstName(source?: ProfileFieldSource | User | null):
   if (!source || typeof source !== 'object') return '';
   const u = source as ProfileFieldSource;
   const direct = readString(u.firstName ?? u.first_name);
-  if (direct) return direct;
+  if (direct) return capitalizeName(direct);
 
   const personal = resolveProfilePersonalName(u, u.username);
   if (!personal) return '';
-  return personal.split(/\s+/)[0] ?? '';
+  return capitalizeName(personal.split(/\s+/)[0] ?? '');
 }
 
 export function resolveUserLastName(source?: ProfileFieldSource | User | null): string {
   if (!source || typeof source !== 'object') return '';
   const u = source as ProfileFieldSource;
   const direct = readString(u.lastName ?? u.last_name);
-  if (direct) return direct;
+  if (direct) return capitalizeName(direct);
 
   const personal = resolveProfilePersonalName(u, u.username);
   if (!personal) return '';
   const parts = personal.split(/\s+/).filter(Boolean);
   if (parts.length < 2) return '';
-  return parts.slice(1).join(' ');
+  return capitalizeName(parts.slice(1).join(' '));
 }
 
 export type SafetyProfileGap = 'firstName' | 'lastName' | 'phone';

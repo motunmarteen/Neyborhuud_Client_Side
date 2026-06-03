@@ -200,20 +200,23 @@ export function FeedSkyHero() {
 
   return (
     <section className="feed-sky-hero">
-      <div
-        className="feed-sky-scene relative overflow-hidden transition-all duration-[2000ms]"
-        style={{ background: theme.skyGradient }}
-      >
-        <div
-          className="absolute inset-0 pointer-events-none transition-all duration-[2000ms]"
-          style={{ background: theme.horizonGlow }}
-        />
-        <div className="feed-sky-brand-glow pointer-events-none" aria-hidden />
+      <div className="feed-sky-scene relative transition-all duration-[2000ms]">
+        <div className="feed-sky-scene__atmosphere" aria-hidden>
+          <div
+            className="feed-sky-scene__layer feed-sky-scene__layer--gradient"
+            style={{ background: theme.skyGradient }}
+          />
+          <div
+            className="feed-sky-scene__layer feed-sky-scene__layer--horizon"
+            style={{ background: theme.horizonGlow }}
+          />
+          <div className="feed-sky-brand-glow pointer-events-none" />
 
-        {theme.showStars && <Stars />}
-        <CelestialBody theme={theme} />
-        {theme.showClouds && <AnimatedClouds color={theme.cloudColor} />}
-        <SkyWeatherEffects theme={theme} isDark={isDark} size="hero" />
+          {theme.showStars && <Stars />}
+          <CelestialBody theme={theme} />
+          {theme.showClouds && <AnimatedClouds color={theme.cloudColor} />}
+          <SkyWeatherEffects theme={theme} isDark={isDark} size="hero" />
+        </div>
 
         <div className="feed-sky-scene__content">
           <div className="feed-sky-scene__weather">

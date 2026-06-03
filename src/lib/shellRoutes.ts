@@ -31,7 +31,7 @@ export function routeHasPageOwnedTopNav(pathname: string): boolean {
   const path = normalizePath(pathname);
 
   if (routeUsesBrowseShell(path)) return true;
-  if (path === '/') return false;
+  if (path === '/') return true;
 
   if (
     PAGE_OWNED_TOP_NAV_PREFIXES.some(

@@ -42,7 +42,10 @@ export function GlassFormPage({ title, subtitle, titleId = "glass-form-title", o
       <TopNav />
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         <LeftSidebar />
-        <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-3 py-4 pb-28 sm:px-4 sm:py-6">
+        <main
+          data-app-scroll-root
+          className="feed-scroll-main relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-3 py-4 pb-28 sm:px-4 sm:py-6"
+        >
           <div
             role="dialog"
             aria-modal="true"

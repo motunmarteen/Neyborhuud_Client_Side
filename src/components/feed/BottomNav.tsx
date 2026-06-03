@@ -1,17 +1,13 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
-import { useAuth } from '@/hooks/useAuth';
 import { useSos } from '@/hooks/useSos';
-import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
 import { AppNavIcon, type AppNavIconName } from '@/components/navigation/AppNavIcon';
-import {
-  resolveProfileAvatarInitial,
-  resolveUserAvatarUrl,
-} from '@/lib/userAvatar';
+import { LocalHuudBottomSheet } from '@/components/navigation/LocalHuudBottomSheet';
+import { isLocalHuudPath } from '@/lib/localHuudLinks';
 
 interface BottomNavProps {
   /**
@@ -32,15 +28,14 @@ export function BottomNav({ hidden: hiddenProp }: BottomNavProps) {
   const scrollHidden = useScrollHideBottomNav(hiddenProp === undefined, pathname);
   const hidden = hiddenProp ?? scrollHidden;
   const router = useRouter();
-  const { user } = useAuth();
   const sos = useSos();
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => { setMounted(true); }, []);
-  const authUser = mounted ? user : null;
-  const profileHref = authUser?.username ? `/profile/${authUser.username}` : '/settings';
-  const isProfile = pathname.startsWith('/profile') || (profileHref === '/settings' && pathname.startsWith('/settings'));
-  const profileAvatar = resolveUserAvatarUrl(authUser);
-  const profileInitial = resolveProfileAvatarInitial(authUser, authUser?.username);
+  const [localHuudOpen, setLocalHuudOpen] = useState(false);
+
+  useEffect(() => {
+    setLocalHuudOpen(false);
+  }, [pathname]);
+
+  const isLocalHuud = isLocalHuudPath(pathname) || localHuudOpen;
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFired = useRef(false);
@@ -107,25 +102,23 @@ export function BottomNav({ hidden: hiddenProp }: BottomNavProps) {
             {renderTab(connectTab, connectActive)}
           </div>
 
-          <Link
-            href={profileHref}
-            className={`app-bottomnav__item app-bottomnav__item--edge${isProfile ? ' app-bottomnav__item--active' : ''}`}
-            aria-current={isProfile ? 'page' : undefined}
-            aria-label="Profile"
+          <button
+            type="button"
+            onClick={() => setLocalHuudOpen(true)}
+            className={`app-bottomnav__item app-bottomnav__item--edge${isLocalHuud ? ' app-bottomnav__item--active' : ''}`}
+            aria-expanded={localHuudOpen}
+            aria-haspopup="dialog"
+            aria-label="Local Huud — community services"
           >
-            <span className="app-bottomnav__profile">
-              <BrandPinAvatar
-                src={profileAvatar}
-                alt={authUser?.firstName || authUser?.username || 'Profile'}
-                fallbackInitial={profileInitial}
-                size="xs"
-                className="bottom-nav__profile-pin"
-              />
+            <span className="app-bottomnav__icon-wrap">
+              <AppNavIcon name="localHuud" active={isLocalHuud} />
             </span>
-            <span className="app-bottomnav__label">Profile</span>
-          </Link>
+            <span className="app-bottomnav__label">Huud</span>
+          </button>
         </div>
       </div>
+
+      <LocalHuudBottomSheet open={localHuudOpen} onClose={() => setLocalHuudOpen(false)} />
 
       <div className="app-bottomnav__sos">
         <button

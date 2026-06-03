@@ -1,21 +1,71 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useId, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   LOCAL_HUUD_LINKS,
   LOCAL_HUUD_MENU,
   getLocalHuudLinkForPath,
   isLocalHuudPath,
+  type LocalHuudLink,
 } from '@/lib/localHuudLinks';
 
 type LocalHuudMenuProps = {
   variant?: 'sidebar' | 'panel';
   onNavigate?: () => void;
-  defaultOpen?: boolean;
   className?: string;
 };
+
+function getLocalHuudRotationItems(): LocalHuudLink[] {
+  const priority = ['marketplace', 'services', 'job', 'event'];
+  const byType = new Map(LOCAL_HUUD_LINKS.map((item) => [item.type, item]));
+  const ordered = priority
+    .map((type) => byType.get(type))
+    .filter((item): item is LocalHuudLink => Boolean(item));
+  const rest = LOCAL_HUUD_LINKS.filter((item) => !priority.includes(item.type));
+  return [...ordered, ...rest];
+}
+
+function LocalHuudRotatingSubtitle({ label, visible }: { label: string; visible: boolean }) {
+  return (
+    <span
+      className="left-sidebar__link-sub left-sidebar__link-sub--rotate block truncate"
+      aria-live="polite"
+    >
+      <span className={`left-sidebar__link-sub-rotate__text${visible ? ' is-visible' : ''}`}>
+        {label}
+      </span>
+    </span>
+  );
+}
+
+function useLocalHuudRotation(active = true) {
+  const items = useMemo(() => getLocalHuudRotationItems(), []);
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (!active || items.length <= 1) return;
+
+    let swapTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    const interval = setInterval(() => {
+      setVisible(false);
+      swapTimeout = setTimeout(() => {
+        setIndex((current) => (current + 1) % items.length);
+        setVisible(true);
+      }, 220);
+    }, 2800);
+
+    return () => {
+      clearInterval(interval);
+      if (swapTimeout) clearTimeout(swapTimeout);
+    };
+  }, [active, items.length]);
+
+  return { items, index, visible };
+}
 
 function NavRow({
   href,
@@ -23,65 +73,37 @@ function NavRow({
   label,
   active,
   onNavigate,
-  asButton,
-  expanded,
-  onToggle,
   subtitle,
+  flat = false,
 }: {
-  href?: string;
+  href: string;
   icon: string;
   label: string;
   active: boolean;
   onNavigate?: () => void;
-  asButton?: boolean;
-  expanded?: boolean;
-  onToggle?: () => void;
-  subtitle?: string;
+  subtitle?: ReactNode;
+  /** Sidebar Local Huud row — no pill/chip container on hover or active */
+  flat?: boolean;
 }) {
-  const className = `left-sidebar__link${active ? ' left-sidebar__link--active' : ''}`;
-
-  const inner = (
-    <>
-      <span className="left-sidebar__link-icon">
+  return (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className={`left-sidebar__link${flat ? ' left-sidebar__link--flat' : ''}${active ? ' left-sidebar__link--active' : ''}`}
+    >
+      <span className="left-sidebar__link-icon" aria-hidden>
         <span className={`material-symbols-outlined${active ? ' fill-1' : ''}`}>{icon}</span>
       </span>
       <span className="left-sidebar__link-text min-w-0 flex-1">
         <span className="left-sidebar__link-label block">{label}</span>
         {subtitle ? (
-          <span className="left-sidebar__link-sub block truncate text-[10px] font-medium normal-case tracking-normal text-[var(--neu-text-muted)]">
-            {subtitle}
-          </span>
+          typeof subtitle === 'string' ? (
+            <span className="left-sidebar__link-sub block truncate">{subtitle}</span>
+          ) : (
+            subtitle
+          )
         ) : null}
       </span>
-      {asButton ? (
-        <span
-          className={`material-symbols-outlined shrink-0 text-[20px] text-[var(--neu-text-muted)] transition-transform duration-200 ${
-            expanded ? 'rotate-180' : ''
-          }`}
-          aria-hidden
-        >
-          expand_more
-        </span>
-      ) : null}
-    </>
-  );
-
-  if (asButton) {
-    return (
-      <button
-        type="button"
-        className={className}
-        aria-expanded={expanded ? true : false}
-        onClick={onToggle}
-      >
-        {inner}
-      </button>
-    );
-  }
-
-  return (
-    <Link href={href!} onClick={onNavigate} className={className}>
-      {inner}
     </Link>
   );
 }
@@ -89,91 +111,54 @@ function NavRow({
 export function LocalHuudMenu({
   variant = 'sidebar',
   onNavigate,
-  defaultOpen = false,
   className = '',
 }: LocalHuudMenuProps) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const panelId = useId();
   const childActive = isLocalHuudPath(pathname);
   const activeLink = getLocalHuudLinkForPath(pathname);
+  const { items, index, visible } = useLocalHuudRotation(!childActive);
 
-  const [open, setOpen] = useState(defaultOpen || childActive);
+  const currentItem = childActive && activeLink ? activeLink : items[index];
 
-  useEffect(() => {
-    if (childActive) setOpen(true);
-  }, [childActive, pathname]);
-
-  const isItemActive = useCallback(
-    (href: string, type: string) => {
-      if (href && pathname?.startsWith(href)) return true;
-      if (pathname === '/feed' && searchParams.get('type') === type) return true;
-      return false;
-    },
-    [pathname, searchParams],
-  );
-
-  const triggerSubtitle =
-    childActive && activeLink
-      ? activeLink.label
-      : `${LOCAL_HUUD_LINKS.length} services in your Huud`;
-
-  const subnav = (
-    <ul
-      id={panelId}
-      className="left-sidebar__subnav"
-      role="group"
-      aria-label={`${LOCAL_HUUD_MENU.label} links`}
-    >
+  if (variant === 'panel') {
+    return (
+      <section className={className.trim()} aria-label={`${LOCAL_HUUD_MENU.label} links`}>
+        <ul className="left-sidebar__nav space-y-0.5">
       {LOCAL_HUUD_LINKS.map((item) => (
         <li key={item.type} className="left-sidebar__nav-item">
           <NavRow
             href={item.href}
             icon={item.icon}
             label={item.label}
-            active={isItemActive(item.href, item.type)}
+                active={
+                  pathname === item.href || Boolean(pathname?.startsWith(`${item.href}/`))
+                }
             onNavigate={onNavigate}
           />
         </li>
       ))}
     </ul>
-  );
-
-  if (variant === 'panel') {
-    return (
-      <div className={`mod-card overflow-hidden rounded-2xl p-1 ${className}`.trim()}>
-        <div className="mod-inset rounded-xl p-1">
-          <NavRow
-            asButton
-            icon={LOCAL_HUUD_MENU.icon}
-            label={LOCAL_HUUD_MENU.label}
-            active={childActive}
-            expanded={open}
-            onToggle={() => setOpen((v) => !v)}
-            subtitle={triggerSubtitle}
-          />
-          {open ? subnav : null}
-        </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <section className={`left-sidebar__section left-sidebar__section--local-huud ${className}`.trim()}>
-      <ul className="left-sidebar__nav">
-        <li className="left-sidebar__nav-item">
+    <li className={`left-sidebar__nav-item ${className}`.trim()}>
           <NavRow
-            asButton
+        href={currentItem.href}
             icon={LOCAL_HUUD_MENU.icon}
             label={LOCAL_HUUD_MENU.label}
             active={childActive}
-            expanded={open}
-            onToggle={() => setOpen((v) => !v)}
-            subtitle={triggerSubtitle}
+            flat
+        onNavigate={onNavigate}
+        subtitle={
+          childActive && activeLink ? (
+            activeLink.label
+          ) : (
+            <LocalHuudRotatingSubtitle label={items[index]?.label ?? ''} visible={visible} />
+          )
+        }
           />
         </li>
-      </ul>
-      {open ? subnav : null}
-    </section>
   );
 }

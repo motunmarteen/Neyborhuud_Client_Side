@@ -1,39 +1,54 @@
 'use client';
 
-import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { useState, useEffect } from 'react';
+import { useExchangeRates, ExchangeRate } from '@/hooks/useExchangeRates';
 
-type SidebarFxWidgetProps = {
-  variant?: 'default' | 'sky';
-};
+export function SidebarFxWidget() {
+  const { currentRate, loading } = useExchangeRates(3000);
+  const [displayRate, setDisplayRate] = useState<ExchangeRate | null>(null);
+  const [visible, setVisible] = useState(true);
 
-export function SidebarFxWidget({ variant = 'default' }: SidebarFxWidgetProps) {
-  const { currentRate, loading } = useExchangeRates();
-  const isSky = variant === 'sky';
+  useEffect(() => {
+    if (!currentRate) return;
+    if (!displayRate) {
+      setDisplayRate(currentRate);
+      return;
+    }
+
+    // When currentRate changes, trigger fade out/in
+    setVisible(false);
+    const timeout = setTimeout(() => {
+      setDisplayRate(currentRate);
+      setVisible(true);
+    }, 220);
+
+    return () => clearTimeout(timeout);
+  }, [currentRate, displayRate]);
 
   return (
-    <section
-      className={isSky ? 'left-sidebar__sky-fx' : 'left-sidebar__fx'}
-      aria-label="Exchange rates"
-    >
-      <div className="left-sidebar__fx-lockup">
-        <span className="material-symbols-outlined left-sidebar__fx-icon" aria-hidden>
-          currency_exchange
+    <li className="left-sidebar__nav-item">
+      <div className="left-sidebar__link cursor-default">
+        <span className="left-sidebar__link-icon" aria-hidden>
+          <span className="material-symbols-outlined">currency_exchange</span>
         </span>
-        <span className="left-sidebar__fx-label">Exchange rates</span>
-        {loading ? (
-          <div className="left-sidebar__fx-skeleton animate-pulse" aria-hidden />
-        ) : currentRate ? (
-          <p className="left-sidebar__fx-rate">
-            1 {currentRate.currency} = ₦
-            {currentRate.rate.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </p>
-        ) : (
-          <p className="left-sidebar__fx-rate left-sidebar__fx-rate--empty" aria-hidden />
-        )}
+        <span className="left-sidebar__link-text min-w-0 flex-1">
+          <span className="left-sidebar__link-label block">Exchange Rates</span>
+          {loading ? (
+            <span className="left-sidebar__link-sub block animate-pulse">Loading rates...</span>
+          ) : displayRate ? (
+            <span className="left-sidebar__link-sub left-sidebar__link-sub--rotate block truncate" aria-live="polite">
+              <span className={`left-sidebar__link-sub-rotate__text${visible ? ' is-visible' : ''}`}>
+                1 {displayRate.currency} = ₦{displayRate.rate.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </span>
+          ) : (
+            <span className="left-sidebar__link-sub block truncate" />
+          )}
+        </span>
       </div>
-    </section>
+    </li>
   );
 }

@@ -27,6 +27,22 @@ export type ProfileNameSource = {
   full_name?: string | null;
 };
 
+export function capitalizeName(str: string): string {
+  if (!str) return '';
+  return str
+    .split(/\s+/)
+    .map((word) => {
+      if (!word) return '';
+      const parts = word.split('-');
+      const capitalizedParts = parts.map((part) => {
+        if (!part) return '';
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+      });
+      return capitalizedParts.join('-');
+    })
+    .join(' ');
+}
+
 function isHandleLikeName(name: string, username?: string | null): boolean {
   const normalized = name.trim().toLowerCase();
   const handle = (username ?? '').trim().toLowerCase();
@@ -46,7 +62,7 @@ export function resolveProfilePersonalName(
   const middleName = String(source.middleName ?? '').trim();
   const fromParts = [firstName, middleName, lastName].filter(Boolean).join(' ').trim();
   if (fromParts && !isHandleLikeName(fromParts, username ?? source.username)) {
-    return fromParts;
+    return capitalizeName(fromParts);
   }
 
   for (const candidate of [
@@ -57,16 +73,16 @@ export function resolveProfilePersonalName(
   ]) {
     const value = String(candidate ?? '').trim();
     if (value && !isHandleLikeName(value, username ?? source.username)) {
-      return value;
+      return capitalizeName(value);
     }
   }
 
   if (firstName && !isHandleLikeName(firstName, username ?? source.username)) {
-    return firstName;
+    return capitalizeName(firstName);
   }
 
   if (lastName && !isHandleLikeName(lastName, username ?? source.username)) {
-    return lastName;
+    return capitalizeName(lastName);
   }
 
   return '';

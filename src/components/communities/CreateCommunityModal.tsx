@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -34,8 +35,6 @@ export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalPr
   const [joinApprovalRequired, setJoinApprovalRequired] = useState(false);
   const [onlyAdminsCanPost, setOnlyAdminsCanPost] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,11 +81,17 @@ export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center overflow-hidden bg-black/50 p-3 sm:items-center sm:p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="mod-card box-border max-h-[min(92vh,720px)] w-full max-w-lg min-w-0 overflow-y-auto rounded-2xl p-4 sm:p-5"
-      >
+    <BottomSheetOverlay
+      open={isOpen}
+      onClose={onClose}
+      ariaLabel="Create community"
+      zIndexClass="z-[80]"
+      alignClass="items-end justify-center overflow-hidden p-3 sm:items-center sm:p-4"
+      backdropClassName="bg-black/50"
+      panelClassName="mod-card box-border max-h-[min(92vh,720px)] w-full max-w-lg min-w-0 overflow-y-auto rounded-2xl p-4 sm:p-5"
+      handleClassName="pt-2 pb-0"
+    >
+      <form onSubmit={handleSubmit}>
         <div className="mb-4 flex items-center justify-between gap-2">
           <h2 className="text-lg font-bold" style={{ color: 'var(--neu-text)' }}>
             Create community
@@ -167,6 +172,6 @@ export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalPr
           {createHub.isPending ? 'Creating…' : 'Create & open chat'}
         </button>
       </form>
-    </div>
+    </BottomSheetOverlay>
   );
 }

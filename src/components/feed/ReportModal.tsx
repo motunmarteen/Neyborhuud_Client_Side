@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 
 const REPORT_REASONS = [
   { value: 'spam', label: 'Spam', icon: 'block' },
@@ -38,12 +39,16 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        className="relative w-full max-w-md mx-auto rounded-t-2xl sm:rounded-2xl neu-modal overflow-hidden animate-slide-up"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <BottomSheetOverlay
+      open
+      onClose={onClose}
+      ariaLabel="Report post"
+      zIndexClass="z-50"
+      alignClass="items-end justify-center sm:items-center"
+      backdropClassName="bg-black/60 backdrop-blur-sm"
+      panelClassName="relative mx-auto w-full max-w-md overflow-hidden rounded-t-2xl neu-modal sm:rounded-2xl"
+      handleClassName="pt-2 pb-0"
+    >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <h3 className="text-base font-semibold" style={{ color: 'var(--neu-text)' }}>
@@ -119,7 +124,6 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
             </div>
           </>
         )}
-      </div>
-    </div>
+    </BottomSheetOverlay>
   );
 }

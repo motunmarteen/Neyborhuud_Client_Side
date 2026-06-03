@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   CirclePlus,
   Home,
+  LayoutGrid,
   MessageCircle,
   Search,
   Shield,
@@ -24,6 +25,7 @@ export type AppNavIconName =
   | 'home'
   | 'shield'
   | 'connect'
+  | 'localHuud'
   | 'sos';
 
 type AppNavIconProps = {
@@ -42,6 +44,7 @@ const lucideIcons: Record<Exclude<AppNavIconName, 'menu'>, LucideIcon> = {
   home: Home,
   shield: Shield,
   connect: Users,
+  localHuud: LayoutGrid,
   sos: Siren,
 };
 
@@ -79,7 +82,7 @@ function NavIconShell({
     if (!el) return;
 
     const trigger = el.closest(
-      '.app-topnav__action, .app-bottomnav__item, .app-bottomnav__sos-btn',
+      '.app-topnav__action, .app-bottomnav__item, .app-bottomnav__sos-btn, button.app-bottomnav__item',
     ) as HTMLElement | null;
     if (!trigger) return;
 

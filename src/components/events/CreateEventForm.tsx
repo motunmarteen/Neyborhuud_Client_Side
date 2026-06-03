@@ -218,7 +218,7 @@ export default function CreateEventForm() {
             className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${isFree ? "bg-gradient-to-r from-primary to-[#006F35]" : "bg-[#3D5A3E]/25 dark:bg-white/15"}`}
           >
             <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${isFree ? "left-6" : "left-0.5"}`}
+              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${isFree ? "translate-x-[1.375rem]" : "translate-x-0"}`}
             />
           </button>
         </div>

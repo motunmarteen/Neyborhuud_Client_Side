@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BottomSheetOverlay } from "@/components/ui/BottomSheetOverlay";
 import { getCurrentLocation } from "@/lib/geolocation";
 import {
   FREQUENT_PLACE_KINDS,
@@ -52,11 +53,17 @@ export function AddFrequentPlaceSheet({ onClose, onSaved, initialCoords, initial
   }
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-end justify-center bg-black/45 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-      <div
-        className="mod-modal w-full max-w-md rounded-t-2xl p-6 sm:rounded-2xl"
-        style={{ background: "var(--neu-bg, #fff)", color: "var(--neu-text)" }}
-      >
+    <BottomSheetOverlay
+      open
+      onClose={onClose}
+      ariaLabel="Save frequent place"
+      zIndexClass="z-[300]"
+      alignClass="items-end justify-center p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      backdropClassName="bg-black/45"
+      panelClassName="mod-modal w-full max-w-md rounded-t-2xl p-6 sm:rounded-2xl"
+      panelStyle={{ background: "var(--neu-bg, #fff)", color: "var(--neu-text)" }}
+      handleClassName="pt-2 pb-0"
+    >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold">Save frequent place</h2>
           <button type="button" onClick={onClose} className="rounded-full p-1 hover:bg-brand-surface">
@@ -120,7 +127,6 @@ export function AddFrequentPlaceSheet({ onClose, onSaved, initialCoords, initial
         >
           {add.isPending ? "Saving…" : "Save place"}
         </button>
-      </div>
-    </div>
+    </BottomSheetOverlay>
   );
 }

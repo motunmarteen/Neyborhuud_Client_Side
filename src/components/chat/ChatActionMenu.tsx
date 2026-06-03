@@ -15,6 +15,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { BottomSheetDragHandle } from '@/components/ui/BottomSheetDragHandle';
+import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
+import { useBottomSheetDrag } from '@/hooks/useBottomSheetDrag';
 import { toast } from 'sonner';
 import { ChatMessage, ChatMessageMeta, ChatMessageType } from '@/types/api';
 import VoiceRecorder from './VoiceRecorder';
@@ -60,16 +63,22 @@ interface Props {
 // ─── Small modal wrapper ──────────────────────────────────────────────────────
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-[200] flex items-end justify-center sm:items-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-sm rounded-t-2xl bg-brand-black p-5 shadow-2xl sm:rounded-2xl">
-        <div className="mb-4 flex items-center justify-between">
-          <p className="font-semibold text-[var(--neu-text-muted)]">{title}</p>
-          <button onClick={onClose} className="text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)] text-xl leading-none">×</button>
-        </div>
-        {children}
+    <BottomSheetOverlay
+      open
+      onClose={onClose}
+      ariaLabel={title}
+      zIndexClass="z-[200]"
+      alignClass="items-end justify-center sm:items-center"
+      backdropClassName="bg-black/60"
+      panelClassName="w-full max-w-sm rounded-t-2xl bg-brand-black p-5 shadow-2xl sm:rounded-2xl"
+      handleClassName="pt-2 pb-0"
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <p className="font-semibold text-[var(--neu-text-muted)]">{title}</p>
+        <button type="button" onClick={onClose} className="text-[var(--neu-text-muted)] hover:text-[var(--neu-text-muted)] text-xl leading-none">×</button>
       </div>
-    </div>
+      {children}
+    </BottomSheetOverlay>
   );
 }
 
@@ -383,11 +392,18 @@ const CONTEXT_ACTIONS: { key: ActiveModal & string; label: string; icon: string;
 
 export default function ChatActionMenu({ disabled, onAction }: Props) {
   const [open, setOpen] = useState(false);
+  const { handleProps, getPanelStyle, reset: resetSheetDrag } = useBottomSheetDrag({
+    onDismiss: () => setOpen(false),
+  });
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [pendingAccept, setPendingAccept] = useState('image/jpeg,image/png,image/webp,image/gif');
   const [pendingMediaKey, setPendingMediaKey] = useState<keyof typeof ALLOWED_MIME>('image');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) resetSheetDrag();
+  }, [open, resetSheetDrag]);
 
   // Close on outside click
   useEffect(() => {
@@ -484,8 +500,13 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
                   aria-label="Close attachments"
                   onClick={() => setOpen(false)}
                 />
-                <div className="chat-attach-sheet" role="dialog" aria-label="Attach or share">
-                  <div className="chat-attach-sheet__handle" aria-hidden />
+                <div
+                  className="chat-attach-sheet"
+                  role="dialog"
+                  aria-label="Attach or share"
+                  style={getPanelStyle(true, 360)}
+                >
+                  <BottomSheetDragHandle handleProps={handleProps} className="pb-0 pt-1" />
                   <section className="chat-attach-section">
                     <p className="chat-attach-section__title">Media</p>
                     <div className="chat-attach-grid">

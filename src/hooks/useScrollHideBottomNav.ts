@@ -57,6 +57,11 @@ export function useScrollHideBottomNav(enabled = true, resetKey?: string) {
     let windowAttached = false;
 
     const applyScrollDelta = (y: number, key: EventTarget) => {
+      if (y <= 16) {
+        setHidden(false);
+        lastScrollY.current.set(key, y);
+        return;
+      }
       const last = lastScrollY.current.get(key) ?? y;
       if (y - last > SCROLL_THRESHOLD) {
         setHidden(true);
@@ -73,6 +78,11 @@ export function useScrollHideBottomNav(enabled = true, resetKey?: string) {
 
     const onWindowScroll = () => {
       const y = window.scrollY;
+      if (y <= 16) {
+        setHidden(false);
+        windowLastY.current = y;
+        return;
+      }
       const last = windowLastY.current;
       if (y - last > SCROLL_THRESHOLD) {
         setHidden(true);

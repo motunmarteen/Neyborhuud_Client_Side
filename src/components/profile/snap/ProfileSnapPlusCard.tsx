@@ -17,7 +17,7 @@ export function ProfileSnapPlusCard({
   trustLabel,
   level,
 }: ProfileSnapPlusCardProps) {
-  const href = isOwnProfile ? '/gamification' : `/profile/${username}?tab=trust`;
+  const href = isOwnProfile ? '/huud-economy' : `/profile/${username}?tab=trust`;
   const eyebrow = isOwnProfile ? 'My Huud Score' : 'Huud Score';
   const title = isOwnProfile ? 'Trust, badges & HuudCoins' : `${trustLabel} · NeyborHuud credibility`;
 
