@@ -46,3 +46,8 @@ nul
 # Cache files
 cdn_rates.json
 rates.json
+
+# Dev/debug logs (never commit)
+*.log
+dev-server.log
+backend.log

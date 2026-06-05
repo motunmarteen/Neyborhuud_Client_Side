@@ -128,7 +128,7 @@ function UserCard({ user, currentUserId, onFollowToggle, onMessage, pendingIds, 
           <button
             onClick={() => userId && onMessage(userId)}
             disabled={!userId || messaging}
-            className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 bg-slate-100 text-slate-600 border border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+            className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 bg-white/8 text-white/60 border border-white/10 hover:bg-status-danger/10 hover:text-status-danger hover:border-status-danger/30"
           >
             {messaging ? '…' : 'Message'}
           </button>
@@ -307,9 +307,9 @@ export default function FriendshipPage() {
     const q = search.toLowerCase();
     return list.filter(
       u =>
-        (u.firstName + ' ' + u.lastName).toLowerCase().includes(q) ||
-        u.username.toLowerCase().includes(q) ||
-        (u.lga || '').toLowerCase().includes(q),
+        `${u.firstName ?? ''} ${u.lastName ?? ''}`.toLowerCase().includes(q) ||
+        (u.username ?? '').toLowerCase().includes(q) ||
+        (u.lga ?? '').toLowerCase().includes(q),
     );
   };
 

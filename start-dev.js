@@ -51,15 +51,28 @@ async function pickPort({ requestedPort, startPort = 3000, maxPort = 3010 }) {
   console.log(`🚀 Starting Next.js dev server on port ${port}`);
   console.log(`📁 Using build directory: ${distDir}`);
 
+  // Turbopack on Windows compiling several heavy routes (maps, chat, feed) can
+  // hit Node's default ~2GB heap ceiling and thrash into a runaway compile that
+  // never finishes ("stuck compiling"). Give it headroom. Honor any existing
+  // NODE_OPTIONS the user set.
+  const HEAP_FLAG = "--max-old-space-size=4096";
+  const existingNodeOptions = process.env.NODE_OPTIONS ?? "";
+  const nodeOptions = existingNodeOptions.includes("max-old-space-size")
+    ? existingNodeOptions
+    : `${existingNodeOptions} ${HEAP_FLAG}`.trim();
+
   const env = {
     ...process.env,
     NEXT_DIST_DIR: distDir,
     PORT: String(port),
+    NODE_OPTIONS: nodeOptions,
   };
 
   const child = spawn(
     "pnpm",
-    ["exec", "next", "dev", "--turbopack", "--port", String(port)],
+    // --hostname 0.0.0.0 so other devices on the LAN (e.g. a phone on the same
+    // WiFi) can reach the dev server, not just localhost.
+    ["exec", "next", "dev", "--turbopack", "--hostname", "0.0.0.0", "--port", String(port)],
     {
       env,
       stdio: "inherit",
