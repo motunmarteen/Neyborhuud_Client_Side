@@ -303,10 +303,12 @@ export const contentService = {
   },
 
   /**
-   * Unlike a post
+   * Unlike a post.
+   * Backend exposes a single toggle endpoint (POST /posts/:id/like) that
+   * likes when not liked and unlikes when already liked — there is no DELETE route.
    */
   async unlikePost(postId: string) {
-    return await apiClient.delete(`/content/posts/${postId}/like`);
+    return await apiClient.post(`/content/posts/${postId}/like`);
   },
 
   /**

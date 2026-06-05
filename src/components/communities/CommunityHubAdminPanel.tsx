@@ -112,7 +112,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
       ) : null}
 
       {hub.largeGroupMode ? (
-        <p className="text-xs text-amber-600">
+        <p className="text-xs text-status-warning">
           Large community mode: live notifications go to admins and moderators. All members can
           still read and post via chat.
         </p>

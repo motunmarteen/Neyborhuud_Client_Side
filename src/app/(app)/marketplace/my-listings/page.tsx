@@ -32,7 +32,7 @@ function PendingOffersBadge({ product }: { product: Product }) {
         e.stopPropagation();
         router.push(`/marketplace/${productId}/offers`);
       }}
-      className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-amber-300 hover:bg-primary/30 transition-colors"
+      className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-status-warning hover:bg-primary/30 transition-colors"
     >
       <span>💰</span>
       {count} pending {count === 1 ? "offer" : "offers"}
@@ -87,7 +87,7 @@ function ListingWithOffers({
           onClick={() => onBoost(productId, productTitle, isBoosted, boostedUntil)}
           className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
             boostActive
-              ? "bg-primary/30 text-amber-300 hover:bg-primary/40"
+              ? "bg-status-warning/15 text-status-warning hover:bg-status-warning/20"
               : "bg-primary/15 text-primary hover:bg-primary/25"
           }`}
         >

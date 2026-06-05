@@ -84,7 +84,7 @@ export function BrandPinAvatar({
         className="block h-full w-full object-contain drop-shadow-[0_4px_16px_rgba(0,111,53,0.28)]"
       />
       <div
-        className="absolute z-10 overflow-hidden rounded-full bg-[#0000FF] ring-[3px] ring-white"
+        className="absolute z-10 overflow-hidden rounded-full bg-brand-blue ring-[3px] ring-white"
         style={{
           left: `${AVATAR.centerX}%`,
           top: `${AVATAR.centerY}%`,

@@ -13,6 +13,7 @@ import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { isAdminUser } from '@/lib/adminAccess';
 import { EmailVerificationCard } from '@/components/auth/EmailVerificationCard';
 import { formatProfileBirthday, getZodiacFromBirthday } from '@/lib/profileSnapHelpers';
+import { getStoredTheme, setStoredTheme, applySystemTheme, getSystemPrefersDark } from '@/lib/systemTheme';
 
 type SettingsTab = 'notifications' | 'privacy' | 'account' | 'language';
 
@@ -102,6 +103,11 @@ export default function SettingsPage() {
 
     const [consentRows, setConsentRows] = useState<UserConsentRecord[]>([]);
     const [consentsLoading, setConsentsLoading] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+        if (typeof window === 'undefined') return false;
+        const stored = getStoredTheme();
+        return stored !== null ? stored === 'dark' : getSystemPrefersDark();
+    });
     const [consentBusy, setConsentBusy] = useState<ConsentType | null>(null);
     const [accessLogOpen, setAccessLogOpen] = useState(false);
     const [accessLogLoading, setAccessLogLoading] = useState(false);
@@ -1014,7 +1020,7 @@ export default function SettingsPage() {
                                 as referral codes — see Invite NeyburHs below.
                             </p>
                             {usernameChangePolicy?.canChangeUsername === false && usernameChangePolicy?.nextUsernameChangeAt ? (
-                                <p className="text-xs text-amber-700 dark:text-primary mb-3">
+                                <p className="text-xs text-status-warning dark:text-primary mb-3">
                                     Next change allowed:{' '}
                                     {new Date(usernameChangePolicy?.nextUsernameChangeAt ?? Date.now()).toLocaleString()}
                                 </p>
@@ -1074,9 +1080,9 @@ export default function SettingsPage() {
                                                 <span className="font-mono font-bold text-charcoal">@{row.username}</span>
                                                 <span className="text-charcoal/40">
                                                     {' '}
-                                                    — from {new Date(row.effectiveFrom).toLocaleDateString()}
+                                                    — from {new Date(row.effectiveFrom).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                     {row.effectiveTo
-                                                        ? ` to ${new Date(row.effectiveTo).toLocaleDateString()}`
+                                                        ? ` to ${new Date(row.effectiveTo).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}`
                                                         : ' (current)'}
                                                 </span>
                                             </li>
@@ -1200,7 +1206,7 @@ export default function SettingsPage() {
                                     <div className="flex justify-between items-center py-2">
                                         <span className="text-xs text-charcoal/50 uppercase tracking-wider">Member Since</span>
                                         <span className="text-sm font-bold text-charcoal">
-                                            {new Date(user.createdAt).toLocaleDateString()}
+                                            {new Date(user.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
                                         </span>
                                     </div>
                                 </div>
@@ -1279,7 +1285,7 @@ export default function SettingsPage() {
                                     className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <i className="bi bi-shield-check text-emerald-600 group-hover:text-brand-blue transition-colors"></i>
+                                        <i className="bi bi-shield-check text-status-success group-hover:text-brand-blue transition-colors"></i>
                                         <span className="text-sm font-bold text-charcoal">Admin Panel</span>
                                     </div>
                                     <i className="bi bi-chevron-right text-charcoal/20"></i>
@@ -1340,8 +1346,8 @@ export default function SettingsPage() {
                             <p className="text-[10px] text-charcoal/40 mb-4 leading-relaxed">
                                 Download your data (NDPR portability) or permanently delete this account
                                 (matches{' '}
-                                <code className="text-[9px]">GET /auth/export-data</code> and{' '}
-                                <code className="text-[9px]">DELETE /auth/delete-account</code> on the API).
+                                <code className="text-[10px]">GET /auth/export-data</code> and{' '}
+                                <code className="text-[10px]">DELETE /auth/delete-account</code> on the API).
                             </p>
                             <button
                                 type="button"
@@ -1486,6 +1492,44 @@ export default function SettingsPage() {
                     chevron_right
                   </span>
                 </Link>
+              </Section>
+
+              <Section title="Appearance">
+                <div className="mod-inset flex items-center justify-between rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`material-symbols-outlined text-[20px] text-primary ${isDarkMode ? 'icon-filled' : 'icon-outlined'}`}
+                      aria-hidden
+                    >
+                      {isDarkMode ? 'dark_mode' : 'light_mode'}
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold neu-text">
+                        {isDarkMode ? 'Dark mode' : 'Light mode'}
+                      </p>
+                      <p className="text-xs neu-text-muted">
+                        {isDarkMode ? 'Easy on the eyes at night' : 'Clean and bright'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isDarkMode ? 'true' : 'false'}
+                    aria-label="Toggle dark mode"
+                    onClick={() => {
+                      const next = !isDarkMode;
+                      setIsDarkMode(next);
+                      setStoredTheme(next ? 'dark' : 'light');
+                      applySystemTheme(next);
+                    }}
+                    className={`theme-toggle-btn relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${isDarkMode ? 'bg-primary' : 'bg-[var(--neu-shadow-dark)]'}`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow-lg transition-transform duration-200 ${isDarkMode ? 'translate-x-5' : 'translate-x-0'}`}
+                    />
+                  </button>
+                </div>
               </Section>
 
               <Section title="Session">

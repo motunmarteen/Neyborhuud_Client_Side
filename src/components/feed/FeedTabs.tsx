@@ -13,38 +13,35 @@ interface FeedTabsProps {
     className?: string;
 }
 
-const TAB_CONFIG: Array<{ key: FeedTab; label: string; accent: string }> = [
-    { key: 'your_huud', label: 'Your Huud', accent: 'bg-primary' },
-    { key: 'street_radar', label: 'Street Radar', accent: 'bg-brand-blue' },
-    { key: 'following_places', label: 'Following Places', accent: 'bg-brand-green-dark' },
+const TAB_CONFIG: Array<{ key: FeedTab; label: string }> = [
+    { key: 'your_huud', label: 'Your Huud' },
+    { key: 'street_radar', label: 'Street Radar' },
+    { key: 'following_places', label: 'Following Places' },
 ];
 
 export function FeedTabs({ activeTab, onTabChange, className }: FeedTabsProps) {
     return (
         <div className={`mod-card rounded-2xl overflow-hidden${className ? ` ${className}` : ''}`}>
-            <div className="grid grid-cols-3 relative">
+            {/* eslint-disable-next-line jsx-a11y/role-has-required-aria-props -- tab children are rendered via motion.button in the map below */}
+            <div
+                role="tablist"
+                aria-label="Feed layers"
+                className="grid grid-cols-3 relative gap-0.5 p-1"
+            >
                 {TAB_CONFIG.map((tab) => {
                     const active = activeTab === tab.key;
                     return (
-                        <button
+                        <motion.button
                             key={tab.key}
                             type="button"
+                            role="tab"
+                            aria-selected={active}
                             onClick={() => onTabChange(tab.key)}
-                            className={`relative py-2 px-2 text-xs md:text-sm font-medium transition-colors touch-manipulation min-h-[44px] ${
-                                active
-                                    ? 'font-bold text-[var(--neu-text)]'
-                                    : 'text-[var(--neu-text-muted)] hover:text-[var(--neu-text-secondary)]'
-                            }`}
+                            whileTap={{ scale: 0.96 }}
+                            className={`segmented-tab ${active ? 'segmented-tab--active' : 'segmented-tab--inactive'} py-2 px-2 text-xs font-semibold touch-manipulation min-h-[40px] rounded-full`}
                         >
                             {tab.label}
-                            {active && (
-                                <motion.span
-                                    layoutId="feed-tab-accent"
-                                    className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full ${tab.accent}`}
-                                    transition={{ type: 'spring', damping: 28, stiffness: 360 }}
-                                />
-                            )}
-                        </button>
+                        </motion.button>
                     );
                 })}
             </div>

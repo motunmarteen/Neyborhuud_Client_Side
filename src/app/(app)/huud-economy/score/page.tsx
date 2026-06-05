@@ -576,10 +576,10 @@ export default function HuudScorePage() {
                         </p>
                         <p className="text-[10px] text-primary font-semibold">+{m.hcReward.toLocaleString()} HC</p>
                         {m.rewarded && (
-                          <span className="mt-1 inline-block rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold text-primary">CLAIMED</span>
+                          <span className="mt-1 inline-block rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-bold text-primary">CLAIMED</span>
                         )}
                         {m.achieved && !m.rewarded && (
-                          <span className="mt-1 inline-block rounded-full bg-brand-blue/20 px-1.5 py-0.5 text-[9px] font-bold text-brand-blue">ACHIEVED</span>
+                          <span className="mt-1 inline-block rounded-full bg-brand-blue/20 px-1.5 py-0.5 text-[10px] font-bold text-brand-blue">ACHIEVED</span>
                         )}
                       </div>
                     ))}

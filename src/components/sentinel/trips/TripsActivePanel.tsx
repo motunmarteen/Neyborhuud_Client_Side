@@ -110,7 +110,7 @@ export function TripsActivePanel({
         </div>
 
         {isPaused ? (
-          <p className="mt-2 text-xs font-medium text-amber-600">Tracking paused since {fmtTripDate(trip.pausedAt)}</p>
+          <p className="mt-2 text-xs font-medium text-status-warning">Tracking paused since {fmtTripDate(trip.pausedAt)}</p>
         ) : null}
 
         {currentLocation ? (

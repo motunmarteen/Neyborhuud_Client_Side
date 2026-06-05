@@ -1,0 +1,12 @@
+[
+  {
+    "new_string": "        ) : null}\n\n        {(showHandleHistory || (!isOwnProfile && (followsYou || isMutual))) && (",
+    "old_string": "        ) : null}\n\n        </ProfileAuthSheet>\n\n        {isOwnProfile && (\n          <input\n            ref={fileInputRef}\n            type=\"file\"\n            accept=\"image/*\"\n            className=\"hidden\"\n            onChange={handleFileChange}\n            disabled={isUploadingAvatar}\n            aria-label=\"Upload profile photo\"\n          />\n        )}\n\n\n        <ProfileAuthSheet continueSheet>\n        {(showHandleHistory || (!isOwnProfile && (followsYou || isMutual))) && (",
+    "path": "c:\\Users\\Hp\\Desktop\\neyborhuud\\NeyborHuud-PWA\\src\\app\\profile\\[username]\\page.tsx"
+  },
+  {
+    "new_string": "        </ProfileAuthSheet>\n\n        {isOwnProfile && (\n          <input\n            ref={fileInputRef}\n            type=\"file\"\n            accept=\"image/*\"\n            className=\"hidden\"\n            onChange={handleFileChange}\n            disabled={isUploadingAvatar}\n            aria-label=\"Upload profile photo\"\n          />\n        )}\n      </ProfileAuthShell>",
+    "old_string": "        </ProfileAuthSheet>\n      </ProfileAuthShell>",
+    "path": "c:\\Users\\Hp\\Desktop\\neyborhuud\\NeyborHuud-PWA\\src\\app\\profile\\[username]\\page.tsx"
+  }
+]

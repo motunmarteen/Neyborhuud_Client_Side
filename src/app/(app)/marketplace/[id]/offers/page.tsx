@@ -21,17 +21,18 @@ import { formatNGN } from "@/lib/marketplaceMessages";
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
-  const cfg: Record<string, { bg: string; label: string }> = {
-    pending:   { bg: "bg-primary/20 text-amber-300",   label: "Pending" },
-    countered: { bg: "bg-brand-blue/20 text-purple-300", label: "Countered" },
-    accepted:  { bg: "bg-primary/20 text-primary",   label: "Accepted" },
-    rejected:  { bg: "bg-brand-red/20 text-brand-red",       label: "Declined" },
-    expired:   { bg: "bg-brand-surface/30 text-[var(--neu-text-muted)]",     label: "Expired" },
-    cancelled: { bg: "bg-brand-surface/30 text-[var(--neu-text-muted)]",     label: "Cancelled" },
+  const cfg: Record<string, { bg: string; label: string; icon: string }> = {
+    pending:   { bg: "bg-status-warning/15 text-status-warning border border-status-warning/30",   label: "Pending",   icon: "schedule"    },
+    countered: { bg: "bg-status-info/15 text-status-info border border-status-info/30",             label: "Countered", icon: "swap_horiz"  },
+    accepted:  { bg: "bg-status-success/15 text-status-success border border-status-success/30",   label: "Accepted",  icon: "check_circle" },
+    rejected:  { bg: "bg-status-danger/15 text-status-danger border border-status-danger/30",      label: "Declined",  icon: "cancel"       },
+    expired:   { bg: "bg-status-neutral/10 text-status-neutral border border-status-neutral/20",   label: "Expired",   icon: "timer_off"    },
+    cancelled: { bg: "bg-status-neutral/10 text-status-neutral border border-status-neutral/20",   label: "Cancelled", icon: "block"        },
   };
-  const { bg, label } = cfg[status] ?? { bg: "bg-brand-surface/30 text-[var(--neu-text-muted)]", label: status };
+  const { bg, label, icon } = cfg[status] ?? { bg: "bg-status-neutral/10 text-status-neutral border border-status-neutral/20", label: status, icon: "help" };
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${bg}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${bg}`}>
+      <span className="material-symbols-outlined text-[11px] [font-variation-settings:'FILL'_1]" aria-hidden>{icon}</span>
       {label}
     </span>
   );
@@ -92,7 +93,7 @@ function OfferRow({
         {buyerAvatar ? (
           <img src={buyerAvatar} alt={buyerName} className="h-10 w-10 rounded-full object-cover" />
         ) : (
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-800 text-sm font-bold text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/30 text-sm font-bold text-white">
             {buyerName.slice(0, 2).toUpperCase()}
           </div>
         )}
@@ -110,11 +111,11 @@ function OfferRow({
             Listed: <span className="font-medium text-[var(--neu-text-muted)]">{formatNGN(productPrice)}</span>
           </span>
         )}
-        <span className="text-amber-300 font-semibold">
+        <span className="text-status-warning font-semibold">
           Buyer&apos;s offer: {formatNGN(offer.offerAmount)}
         </span>
         {offer.counterOfferAmount != null && (
-          <span className="text-purple-300 font-semibold">
+          <span className="text-brand-blue font-semibold">
             Your counter: {formatNGN(offer.counterOfferAmount)}
           </span>
         )}
@@ -124,6 +125,7 @@ function OfferRow({
       {canAct && !showCounter && (
         <div className="mt-4 flex gap-2">
           <button
+            type="button"
             onClick={() => accept.mutate(offerId)}
             disabled={accept.isPending || reject.isPending}
             className="flex-1 rounded-full bg-brand-green-dark py-2 text-sm font-semibold text-white hover:bg-primary disabled:opacity-50 transition-colors"
@@ -131,15 +133,17 @@ function OfferRow({
             {accept.isPending ? "…" : "Accept"}
           </button>
           <button
+            type="button"
             onClick={() => setShowCounter(true)}
-            className="flex-1 rounded-full bg-purple-700 py-2 text-sm font-semibold text-white hover:bg-purple-600 transition-colors"
+            className="flex-1 rounded-full bg-brand-blue py-2 text-sm font-semibold text-white hover:bg-brand-blue/90 transition-colors"
           >
             Counter
           </button>
           <button
+            type="button"
             onClick={() => reject.mutate(offerId)}
             disabled={reject.isPending || accept.isPending}
-            className="flex-1 rounded-full bg-red-700 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+            className="flex-1 rounded-full bg-brand-red py-2 text-sm font-semibold text-white hover:bg-brand-red/85 disabled:opacity-50 transition-colors"
           >
             {reject.isPending ? "…" : "Decline"}
           </button>
@@ -164,15 +168,17 @@ function OfferRow({
           </div>
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={() => { setShowCounter(false); setCounterAmount(""); }}
               className="flex-1 rounded-full bg-brand-black py-2 text-sm font-semibold hover:bg-brand-surface transition-colors"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleCounter}
               disabled={respond.isPending || !counterAmount}
-              className="flex-1 rounded-full bg-purple-700 py-2 text-sm font-semibold text-white hover:bg-purple-600 disabled:opacity-50 transition-colors"
+              className="flex-1 rounded-full bg-brand-blue py-2 text-sm font-semibold text-white hover:bg-brand-blue/90 disabled:opacity-50 transition-colors"
             >
               {respond.isPending ? "Sending…" : "Send Counter"}
             </button>
@@ -183,8 +189,9 @@ function OfferRow({
       {/* Chat link */}
       {offer.conversationId && (
         <button
+          type="button"
           onClick={() => router.push(`/chat/${offer.conversationId}`)}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-blue-600/40 py-2 text-sm font-medium text-brand-blue hover:bg-blue-900/30 transition-colors"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-brand-blue/40 py-2 text-sm font-medium text-brand-blue hover:bg-brand-blue/10 transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -225,6 +232,7 @@ export default function ProductOffersPage() {
       <div className="sticky top-0 z-10 border-b border-black/[0.08] bg-brand-black">
         <div className="mx-auto max-w-2xl px-4 py-4">
           <button
+            type="button"
             onClick={() => router.back()}
             className="mb-2 flex items-center gap-2 text-sm text-[var(--neu-text-muted)] hover:text-white transition-colors"
           >
@@ -241,8 +249,8 @@ export default function ProductOffersPage() {
                 className="h-10 w-10 rounded-lg object-cover"
               />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-black text-lg">
-                🛍️
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-blue/20 text-brand-blue">
+                <span className="material-symbols-outlined text-[20px]" aria-hidden>shopping_bag</span>
               </div>
             )}
             <div>
@@ -264,6 +272,7 @@ export default function ProductOffersPage() {
         <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
           {FILTER_TABS.map(({ label, value }) => (
             <button
+              type="button"
               key={label}
               onClick={() => setStatusFilter(value)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${

@@ -4,8 +4,8 @@ import Link from 'next/link';
 import type { HubCommunity } from '@/types/hubCommunity';
 
 const ACTIVITY_TONE: Record<HubCommunity['activityLevel'], string> = {
-  High: 'text-green-600',
-  Moderate: 'text-amber-600',
+  High: 'text-status-success',
+  Moderate: 'text-status-warning',
   Low: 'text-[var(--neu-text-muted)]',
 };
 

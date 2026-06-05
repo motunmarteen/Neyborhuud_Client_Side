@@ -45,10 +45,8 @@ export function BrowseTabStrip({
                 aria-label={tab.label}
                 title={tab.label}
                 onClick={() => onChange(tab.id)}
-                className={`inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-semibold transition-colors touch-manipulation ${
-                  active
-                    ? 'bg-white font-bold text-[#006F35] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:bg-white/15 dark:text-primary'
-                    : 'text-[var(--neu-text-muted)] hover:text-[var(--neu-text)]'
+                className={`segmented-tab inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-[13px] font-semibold transition-all duration-200 touch-manipulation active:scale-[0.97] ${
+                  active ? 'segmented-tab--active' : 'segmented-tab--inactive'
                 }`}
               >
                 {tab.icon ? (

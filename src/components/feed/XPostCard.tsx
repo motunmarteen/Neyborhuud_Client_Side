@@ -5,7 +5,7 @@
  */
 
 import { MediaItem, Post, PostAuthor } from '@/types/api';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatTimeAgo } from '@/utils/timeAgo';
@@ -17,6 +17,7 @@ import { useLongPress } from '@/hooks/useLongPress';
 import { LongPressMenu, type LongPressMenuItem } from '@/components/ui/LongPressMenu';
 
 const CARD_HEIGHT = '90vh';
+const TEXT_CARD_HEIGHT = 'min(58vh, 440px)';
 
 const isVideoUrl = (url: string) => /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url);
 
@@ -39,20 +40,39 @@ interface GlassBtnProps {
 }
 
 function GlassBtn({ icon, count, active, activeIconClass, onClick, label, filled }: GlassBtnProps) {
+    const [burst, setBurst] = useState(false);
+    const handleClick = (e: React.MouseEvent) => {
+        if (filled && !active) {
+            setBurst(true);
+            window.setTimeout(() => setBurst(false), 420);
+        }
+        onClick(e);
+    };
     return (
         <button
-            onClick={onClick}
-            className="group flex flex-col items-center gap-1 rounded-full p-1 transition-transform duration-200 ease-out hover:scale-110 active:scale-90"
+            onClick={handleClick}
+            className="group flex flex-col items-center gap-1 transition-transform duration-200 ease-out active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/60"
             aria-label={label}
         >
             <span
-                className={`material-symbols-outlined text-[22px] transition-transform duration-200 ${active ? (activeIconClass || 'text-white') : 'text-white'}`}
+                className="flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 group-hover:scale-105"
                 style={{
-                    ...(filled && active ? { fontVariationSettings: '"FILL" 1' } : {}),
-                    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.85))',
+                    background: active ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.10)',
+                    backdropFilter: 'blur(16px) saturate(170%)',
+                    WebkitBackdropFilter: 'blur(16px) saturate(170%)',
+                    border: '1px solid rgba(255,255,255,0.16)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.18)',
                 }}
             >
-                {icon}
+                <span
+                    className={`material-symbols-outlined text-[21px] transition-transform duration-200 ${burst ? 'animate-like-burst' : ''} ${active ? (activeIconClass || 'text-white') : 'text-white'}`}
+                    style={{
+                        ...(filled && active ? { fontVariationSettings: '"FILL" 1' } : {}),
+                        filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.55))',
+                    }}
+                >
+                    {icon}
+                </span>
             </span>
             {(count !== undefined && count > 0) && (
                 <span className="text-[10px] font-black tracking-tight text-white" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
@@ -60,7 +80,7 @@ function GlassBtn({ icon, count, active, activeIconClass, onClick, label, filled
                 </span>
             )}
             {label && !(count !== undefined && count > 0) && (
-                <span className="text-[9px] font-semibold text-white/70">{label}</span>
+                <span className="text-[9px] font-semibold text-white/80" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}>{label}</span>
             )}
         </button>
     );
@@ -129,9 +149,10 @@ export function XPostCard({
     onHelpful,
 }: XPostCardProps) {
     const [imageError, setImageError] = useState(false);
-    const [showMenu, setShowMenu] = useState(false);
     const [showShare, setShowShare] = useState(false);
     const [longPressOpen, setLongPressOpen] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const router = useRouter();
 
     const longPress = useLongPress(() => setLongPressOpen(true));
@@ -139,14 +160,13 @@ export function XPostCard({
     const author = post.author as PostAuthor;
     const authorName = author?.name || 'Anonymous';
     const authorUsername = author?.username || 'user';
-    const authorAvatar = author?.avatarUrl || (author as any)?.profilePicture || null;
+    const authorAvatar = author?.avatarUrl || author?.profilePicture || null;
 
     const isAnonymousAuthor = !author?.id || author.id === 'anonymous';
-    const isOwnerPost = currentUserId && (author?.id === currentUserId || (post as any).authorId === currentUserId);
+    const isOwnerPost = currentUserId && (author?.id === currentUserId || post.authorId === currentUserId);
 
-    const handleMessageAuthor = useCallback(async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setShowMenu(false);
+    const handleMessageAuthor = useCallback(async (e?: React.MouseEvent) => {
+        e?.stopPropagation();
         const authorId = author?.id;
         if (!authorId || isAnonymousAuthor) return;
         try {
@@ -185,7 +205,6 @@ export function XPostCard({
         'Your Huud';
 
     const severityLabel = post.severity ? post.severity.toUpperCase() : null;
-    const isOwner = isOwnerPost;
 
     const hasMedia = mediaUrls.length > 0;
     const textContent = post.content || post.body || '';
@@ -214,24 +233,27 @@ export function XPostCard({
     const longPressItems: LongPressMenuItem[] = useMemo(() => {
         const postId = post.id ?? (post as { _id?: string })._id ?? '';
         const items: LongPressMenuItem[] = [
-            { id: 'save', label: 'Save post', icon: 'bookmark', onSelect: onSave },
-            { id: 'share', label: 'Share', icon: 'share', onSelect: () => setShowShare(true) },
-            { id: 'comment', label: 'Comment', icon: 'chat_bubble', onSelect: onComment },
+            { id: 'save',    label: 'Save post', icon: 'bookmark',    onSelect: onSave },
+            { id: 'share',   label: 'Share',     icon: 'share',       onSelect: () => setShowShare(true) },
+            { id: 'comment', label: 'Comment',   icon: 'chat_bubble', onSelect: onComment },
         ];
-        if (onReport && postId) {
-            items.push({ id: 'report', label: 'Report', icon: 'flag', danger: true, onSelect: () => onReport(postId) });
+        if (!isOwnerPost && !isAnonymousAuthor) {
+            items.push({ id: 'message', label: 'Message', icon: 'chat', onSelect: () => handleMessageAuthor() });
         }
         if (isOwnerPost && onEdit) {
             items.push({ id: 'edit', label: 'Edit', icon: 'edit', onSelect: () => onEdit(post) });
         }
+        if (isOwnerPost && onPin && postId) {
+            items.push({ id: 'pin', label: post.isPinned ? 'Extend Pin' : 'Pin to Feed', icon: 'push_pin', onSelect: () => onPin(postId) });
+        }
         if (isOwnerPost && onDelete && postId) {
             items.push({ id: 'delete', label: 'Delete', icon: 'delete', danger: true, onSelect: () => onDelete(postId) });
         }
-        if (onPin && postId) {
-            items.push({ id: 'pin', label: 'Pin post', icon: 'push_pin', onSelect: () => onPin(postId) });
+        if (onReport && postId && !isOwnerPost) {
+            items.push({ id: 'report', label: 'Report', icon: 'flag', danger: true, onSelect: () => onReport(postId) });
         }
         return items;
-    }, [post, onSave, onComment, onReport, onEdit, onDelete, onPin, isOwnerPost]);
+    }, [post, onSave, onComment, onReport, onEdit, onDelete, onPin, isOwnerPost, isAnonymousAuthor, handleMessageAuthor]);
 
     const articleGestureProps = {
         onPointerDown: longPress.onPointerDown,
@@ -259,72 +281,39 @@ export function XPostCard({
                 <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     {typeBadge && (
                         <span
-                            className={`text-[9px] px-2 py-[3px] rounded-full font-bold tracking-wider uppercase border ${typeBadge.cls}`}
-                            style={{ backdropFilter: 'blur(12px)' }}
+                            className={`text-[9px] px-2.5 py-[4px] rounded-full font-black tracking-[0.08em] uppercase border ${typeBadge.cls}`}
+                            style={{ backdropFilter: 'blur(14px) saturate(160%)', WebkitBackdropFilter: 'blur(14px) saturate(160%)' }}
                         >
                             {typeBadge.label}
                         </span>
                     )}
                     <span
-                        className="text-[9px] px-2 py-[3px] rounded-full font-bold tracking-wider uppercase text-white/70"
+                        className="inline-flex items-center gap-1 text-[9px] px-2.5 py-[4px] rounded-full font-bold tracking-[0.06em] uppercase text-white/75"
                         style={{
-                            background: 'rgba(255,255,255,0.11)',
-                            backdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(255,255,255,0.14)',
+                            background: 'rgba(255,255,255,0.12)',
+                            backdropFilter: 'blur(14px) saturate(160%)',
+                            WebkitBackdropFilter: 'blur(14px) saturate(160%)',
+                            border: '1px solid rgba(255,255,255,0.16)',
                         }}
                     >
+                        <span className="material-symbols-outlined text-[11px]" style={{ fontVariationSettings: '"FILL" 1' }}>location_on</span>
                         {feedLayerLabel}
                     </span>
                 </div>
                 <div className="relative shrink-0">
                     <button
-                        onClick={(e) => { e.stopPropagation(); setShowMenu(v => !v); }}
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-white/75 transition-all hover:scale-105 hover:text-white active:scale-95"
+                        onClick={(e) => { e.stopPropagation(); setLongPressOpen(true); }}
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-white/75 transition-all hover:scale-105 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:ring-offset-black/50"
                         style={{
                             background: 'rgba(255,255,255,0.11)',
                             backdropFilter: 'blur(16px) saturate(170%)',
                             border: '1px solid rgba(255,255,255,0.16)',
                         }}
+                        aria-label="Post options"
+                        aria-haspopup="dialog"
                     >
                         <span className="material-symbols-outlined text-[19px]">more_horiz</span>
                     </button>
-                    {showMenu && (
-                        <div
-                            className="absolute right-0 top-11 z-40 w-44 overflow-hidden rounded-2xl shadow-2xl"
-                            style={{
-                                background: 'rgba(4,12,16,0.88)',
-                                backdropFilter: 'blur(28px) saturate(180%)',
-                                border: '1px solid rgba(255,255,255,0.12)',
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {isOwner && onEdit && (
-                                <button onClick={() => { setShowMenu(false); onEdit(post); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-white transition-colors hover:bg-white/8">
-                                    <span className="material-symbols-outlined text-[17px]">edit</span> Edit
-                                </button>
-                            )}
-                            {isOwner && onDelete && (
-                                <button onClick={() => { setShowMenu(false); onDelete(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-brand-red transition-colors hover:bg-white/8">
-                                    <span className="material-symbols-outlined text-[17px]">delete</span> Delete
-                                </button>
-                            )}
-                            {isOwner && onPin && (
-                                <button onClick={() => { setShowMenu(false); onPin(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-primary transition-colors hover:bg-white/8">
-                                    <span className="material-symbols-outlined text-[17px]">push_pin</span> {post.isPinned ? 'Extend Pin' : 'Pin to Feed'}
-                                </button>
-                            )}
-                            {!isOwner && !isAnonymousAuthor && (
-                                <button onClick={handleMessageAuthor} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-white transition-colors hover:bg-white/8">
-                                    <span className="material-symbols-outlined text-[17px]">chat</span> Message
-                                </button>
-                            )}
-                            {!isOwner && (
-                                <button onClick={() => { setShowMenu(false); onReport?.(post.id); }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[13px] text-white/55 transition-colors hover:bg-white/8">
-                                    <span className="material-symbols-outlined text-[17px]">flag</span> Report
-                                </button>
-                            )}
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
@@ -332,23 +321,26 @@ export function XPostCard({
 
     // ── Shared: Action rail ───────────────────────────────────────────────────
     const actionRail = (
-        <div className="absolute right-3 bottom-5 z-30 flex flex-col items-center gap-3 sm:right-4 sm:bottom-6">
+        <div className="feed-post-card__action-rail absolute right-3 z-30 flex flex-col items-center gap-2.5 sm:right-4">
             <GlassBtn
                 icon="favorite"
                 count={post.likes || undefined}
                 active={post.isLiked === true}
-                activeIconClass="text-brand-blue"
+                activeIconClass="text-brand-red"
                 filled
                 onClick={(e) => { e.stopPropagation(); onLike(); }}
+                label={post.isLiked ? 'Unlike' : 'Like'}
             />
             <GlassBtn
                 icon="chat_bubble"
                 count={post.comments || undefined}
                 onClick={(e) => { e.stopPropagation(); onComment(); }}
+                label="Comment"
             />
             <GlassBtn
                 icon="send"
                 onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
+                label="Share"
             />
             <GlassBtn
                 icon="bookmark"
@@ -366,6 +358,7 @@ export function XPostCard({
                     activeIconClass="text-primary"
                     filled
                     onClick={(e) => { e.stopPropagation(); onHelpful(); }}
+                label="Helpful"
                 />
             )}
             {(post.views || 0) > 0 && (
@@ -378,7 +371,7 @@ export function XPostCard({
     );
 
     const renderBottomAuthorPanel = (includeText = mode !== 'text') => (
-        <div className="absolute bottom-5 left-4 right-[76px] z-20 sm:bottom-6 sm:left-5 sm:right-24">
+        <div className="feed-post-card__author-panel absolute left-4 right-[76px] z-20 sm:left-5 sm:right-24">
             <div className="flex max-w-[560px] flex-col gap-3">
                 <div className="flex items-center gap-2.5">
                     <div className="relative shrink-0">
@@ -403,14 +396,33 @@ export function XPostCard({
                         )}
                     </div>
                     <div className="min-w-0">
-                        <Link
-                            href={`/profile/${authorUsername}`}
-                            onClick={handleProfileClick}
-                            className="block max-w-[150px] whitespace-normal text-[12px] font-black leading-[1.05] text-white hover:underline"
-                            style={{ textShadow: '0 1px 10px rgba(0,0,0,0.8)' }}
-                        >
-                            {isAnonymousAuthor ? 'Anonymous Neyborh' : authorName}
-                        </Link>
+                        <div className="flex items-center gap-1">
+                            <Link
+                                href={`/profile/${authorUsername}`}
+                                onClick={handleProfileClick}
+                                className="block max-w-[140px] overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-black leading-[1.05] text-white hover:underline"
+                                style={{ textShadow: '0 1px 10px rgba(0,0,0,0.8)' }}
+                            >
+                                {isAnonymousAuthor ? 'Anonymous Neyborh' : authorName}
+                            </Link>
+                            {author?.isVerified && (
+                                <span
+                                    className={`material-symbols-outlined icon-filled text-[13px] shrink-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)] ${
+                                        author.verificationBadge === 'emergency_responder' ? 'text-brand-red' :
+                                        author.verificationBadge === 'community_leader'   ? 'text-status-warning' :
+                                        'text-brand-blue'
+                                    }`}
+                                    aria-label={
+                                        author.verificationBadge === 'emergency_responder' ? 'Emergency responder' :
+                                        author.verificationBadge === 'community_leader'   ? 'Community leader' :
+                                        'Verified Neyborh'
+                                    }
+                                    role="img"
+                                >
+                                    {author.verificationBadge === 'emergency_responder' ? 'shield' : 'verified'}
+                                </span>
+                            )}
+                        </div>
                         <div className="mt-1 text-[10px] font-bold leading-none text-white/58">
                             {formatTimeAgo(post.createdAt)}
                         </div>
@@ -436,32 +448,47 @@ export function XPostCard({
                 <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); onComment(); }}
-                    className="flex h-8 w-full max-w-[210px] items-center rounded-full border border-white/12 bg-white/8 px-3 text-left text-[11px] font-semibold text-white/55 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/12 hover:text-white/75 active:scale-[0.98]"
+                    className="flex h-9 w-full max-w-[230px] items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 text-left text-[12px] font-medium text-white/65 backdrop-blur-md transition-all hover:border-white/25 hover:bg-white/15 hover:text-white/85 active:scale-[0.98]"
                     aria-label="Add comment"
+                    style={{ WebkitBackdropFilter: 'blur(12px)' }}
                 >
-                    Add comment...
+                    <span className="material-symbols-outlined text-[16px] text-white/55">chat_bubble</span>
+                    Say something…
                 </button>
             </div>
         </div>
     );
 
     // ── Shared: structured content blocks ────────────────────────────────────
-    const eventBlock = post.contentType === 'event' && (post as any).eventDate ? (
+    const eventBlock = post.contentType === 'event' && post.eventDate ? (
         <div
             className="flex flex-wrap items-center gap-2 p-3 rounded-2xl"
             style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
         >
-            <span className="text-[12px] font-bold text-purple-300">📅 {new Date((post as any).eventDate).toLocaleDateString()}</span>
-            {(post as any).eventTime && <span className="text-[11px] text-white/65">⏰ {(post as any).eventTime}</span>}
-            {(post as any).venue?.name && <span className="text-[11px] text-white/65">📍 {(post as any).venue.name}</span>}
-            {(post as any).ticketInfo === 'paid' && (post as any).ticketPrice && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-blue/30 text-white/90 font-bold">₦{Number((post as any).ticketPrice).toLocaleString()}</span>
+            <span className="inline-flex items-center gap-1 text-[12px] font-bold text-brand-blue">
+                <span className="material-symbols-outlined text-[13px]" aria-hidden>calendar_today</span>
+                {new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(post.eventDate))}
+            </span>
+            {post.eventTime && (
+                <span className="inline-flex items-center gap-1 text-[11px] text-white/65">
+                    <span className="material-symbols-outlined text-[13px]" aria-hidden>schedule</span>
+                    {post.eventTime}
+                </span>
             )}
-            {(post as any).ticketInfo === 'free' && (
+            {post.venue?.name && (
+                <span className="inline-flex items-center gap-1 text-[11px] text-white/65">
+                    <span className="material-symbols-outlined text-[13px]" aria-hidden>location_on</span>
+                    {post.venue.name}
+                </span>
+            )}
+            {post.ticketInfo === 'paid' && post.ticketPrice && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-blue/30 text-white/90 font-bold">₦{Number(post.ticketPrice).toLocaleString()}</span>
+            )}
+            {post.ticketInfo === 'free' && (
                 <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/30 text-primary font-bold">FREE</span>
             )}
-            {(post as any).eventCategory && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{(post as any).eventCategory}</span>
+            {post.eventCategory && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{post.eventCategory}</span>
             )}
         </div>
     ) : null;
@@ -471,18 +498,18 @@ export function XPostCard({
             className="flex flex-wrap items-center gap-2 p-3 rounded-2xl"
             style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
         >
-            {(post as any).price != null && <span className="text-base font-bold text-primary">₦{Number((post as any).price).toLocaleString()}</span>}
-            {(post as any).isNegotiable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/20 text-white/90 font-medium">Negotiable</span>}
-            {(post as any).itemCondition && (
+            {post.price != null && <span className="text-base font-bold text-primary">₦{Number(post.price).toLocaleString()}</span>}
+            {post.isNegotiable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/20 text-white/90 font-medium">Negotiable</span>}
+            {post.itemCondition && (
                 <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/20 text-white/90 font-medium capitalize">
-                    {(post as any).itemCondition === 'used' ? 'Tokunbo' : (post as any).itemCondition}
+                    {post.itemCondition === 'used' ? 'Tokunbo' : post.itemCondition}
                 </span>
             )}
-            {(post as any).itemCategory && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium">{(post as any).itemCategory}</span>}
-            {(post as any).deliveryOption && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{(post as any).deliveryOption}</span>}
-            {(post as any).availability && (post as any).availability !== 'available' && (
-                <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${(post as any).availability === 'sold' ? 'bg-brand-red/30 text-brand-red' : 'bg-primary/30 text-primary'}`}>
-                    {(post as any).availability === 'sold' ? 'SOLD' : 'RESERVED'}
+            {post.itemCategory && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium">{post.itemCategory}</span>}
+            {post.deliveryOption && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{post.deliveryOption}</span>}
+            {post.availability && post.availability !== 'available' && (
+                <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${post.availability === 'sold' ? 'bg-brand-red/30 text-brand-red' : 'bg-primary/30 text-primary'}`}>
+                    {post.availability === 'sold' ? 'SOLD' : 'RESERVED'}
                 </span>
             )}
         </div>
@@ -533,21 +560,35 @@ export function XPostCard({
     const mediaBackground = primaryMedia ? (
         <div className="absolute inset-0">
             {isPrimaryVideo ? (
+                <>
                 <video
+                    ref={videoRef}
                     src={primaryMedia.url}
                     poster={primaryMedia.thumbnailUrl}
                     className="h-full w-full object-cover"
-                    muted
+                    muted={isMuted}
                     loop
                     playsInline
                     autoPlay
                     preload="metadata"
+                    aria-label={textContent ? textContent.slice(0, 120) : `Video post by ${authorName}`}
                 />
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setIsMuted(v => !v); }}
+                    className="feed-post-card__mute-btn absolute top-14 right-3 z-30 flex h-8 w-8 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:ring-offset-black/50"
+                    aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                >
+                    <span className="material-symbols-outlined text-[16px] text-white">
+                        {isMuted ? 'volume_off' : 'volume_up'}
+                    </span>
+                </button>
+                </>
             ) : (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                     src={primaryMedia.url}
-                    alt="Post media"
+                    alt={textContent ? textContent.slice(0, 120) : `Post by ${authorName}`}
                     className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
                     onError={(e) => { e.currentTarget.src = 'https://i.pravatar.cc/600?u=fallback'; }}
                 />
@@ -575,7 +616,7 @@ export function XPostCard({
             <>
             <article
                 className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-brand-red/50' : ''}`}
-                style={{ background: 'var(--brand-black)', height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
+                style={{ background: 'var(--brand-black)', height: TEXT_CARD_HEIGHT, minHeight: '320px' }}
                 {...articleGestureProps}
             >
                 {/* Ambient sphere background */}
@@ -651,7 +692,7 @@ export function XPostCard({
 
                     {post.expiresAt && (
                         <span className="self-start text-[10px] px-2.5 py-1 rounded-full bg-primary/20 text-primary200 font-medium border border-yellow-400/20 backdrop-blur-sm">
-                            Expires {new Date(post.expiresAt).toLocaleDateString()}
+                            Expires {new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(post.expiresAt))}
                         </span>
                     )}
 
@@ -670,7 +711,7 @@ export function XPostCard({
                 )}
             </article>
             {showShare && (
-                <ShareModal postId={post.id ?? (post as any)._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
+                <ShareModal postId={post.id ?? post._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
             )}
             {longPressMenu}
             </>
@@ -704,7 +745,7 @@ export function XPostCard({
                 )}
             </article>
             {showShare && (
-                <ShareModal postId={post.id ?? (post as any)._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
+                <ShareModal postId={post.id ?? post._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
             )}
             {longPressMenu}
             </>
@@ -737,7 +778,7 @@ export function XPostCard({
             )}
         </article>
         {showShare && (
-            <ShareModal postId={post.id ?? (post as any)._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
+            <ShareModal postId={post.id ?? post._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
         )}
         {longPressMenu}
         </>

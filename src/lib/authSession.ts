@@ -6,10 +6,11 @@ import apiClient from '@/lib/api-client';
 import {
   getNeedsCommunitySelection,
   getNeedsGpsLocationVerification,
+  getStoredCommunity,
   persistAuthSessionPayload,
   type PickerContext,
 } from '@/lib/communityContext';
-import { getPostSetupRoute } from '@/lib/onboarding';
+import { getPostSetupRoute, hasCompletedProductTour, markProductTourComplete } from '@/lib/onboarding';
 
 type SessionLike = {
   token?: string;
@@ -135,6 +136,14 @@ export function resolvePostAuthRoute(next?: string | null): string {
   if (getNeedsGpsLocationVerification()) return '/verify-location';
   const safeNext = parseSafeNextPath(next);
   if (safeNext) return safeNext;
+  // Returning users (product tour already done) go straight to feed.
+  if (hasCompletedProductTour()) return '/feed';
+  // Legacy users: already have a community (registered before the tour key was introduced).
+  // Mark tour complete so next launch skips setup-complete entirely.
+  if (getStoredCommunity()) {
+    markProductTourComplete();
+    return '/feed';
+  }
   return getPostSetupRoute();
 }
 

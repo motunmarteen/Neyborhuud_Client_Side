@@ -140,7 +140,7 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
               className={
                 embedded
                   ? "rounded-full bg-gradient-to-r from-primary to-[#006F35] px-6 py-2 text-sm font-bold text-white shadow-md transition-opacity disabled:cursor-not-allowed disabled:opacity-45 dark:from-emerald-500 dark:to-teal-600"
-                  : "rounded-lg bg-brand-blue px-6 py-2 font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-brand-black disabled:text-[var(--neu-text-muted)]"
+                  : "rounded-lg bg-brand-blue px-6 py-2 font-semibold text-white transition-colors hover:bg-brand-blue disabled:cursor-not-allowed disabled:bg-brand-black disabled:text-[var(--neu-text-muted)]"
               }
             >
               {addComment.isPending ? "Posting..." : "Post Comment"}

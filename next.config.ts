@@ -30,7 +30,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  reactCompiler: true,
+  // React Compiler disabled: on this codebase (Next 16 + Turbopack on Windows)
+  // it caused pathologically slow / hanging dev compilation. It's an optimization
+  // only — the app behaves identically without it. Re-enable for prod builds later
+  // if desired, but keep it off for the dev server's stability.
+  reactCompiler: false,
   // Allow running multiple dev servers by isolating cache/output directories.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   turbopack: {

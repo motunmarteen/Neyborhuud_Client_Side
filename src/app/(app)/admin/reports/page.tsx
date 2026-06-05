@@ -8,7 +8,7 @@ import { Report } from '@/types/api';
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const STATUS_CHIP: Record<string, string> = {
-  pending:      'bg-primary/20 text-amber-300',
+  pending:      'bg-status-warning/15 text-status-warning',
   under_review: 'bg-sky-500/20   text-sky-300',
   resolved:     'bg-primary/20 text-primary',
   dismissed:    'bg-slate-500/20  text-[var(--neu-text-muted)]',
@@ -19,7 +19,7 @@ const TARGET_CHIP: Record<string, string> = {
   post:        'bg-brand-blue/20   text-brand-blue',
   comment:     'bg-brand-blue500/20 text-brand-blue300',
   message:     'bg-sky-500/20    text-sky-300',
-  marketplace: 'bg-primary/20  text-amber-300',
+  marketplace: 'bg-status-warning/15 text-status-warning',
   service:     'bg-brand-green-dark/20   text-brand-green-dark',
   event:       'bg-brand-red500/20   text-brand-red300',
 };

@@ -508,7 +508,7 @@ export default function WalletPage() {
                           <p className="truncate text-xs text-[var(--neu-text-muted)]">{p.description}</p>
                         ) : null}
                         <p className="text-xs text-[var(--neu-text-muted)]">
-                          {new Date(p.createdAt).toLocaleDateString()}
+                          {new Date(p.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
                       </div>
                       <div className="flex shrink-0 flex-col items-end">

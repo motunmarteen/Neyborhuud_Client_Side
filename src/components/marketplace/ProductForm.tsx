@@ -202,7 +202,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           maxLength={100}
           className={`${glassField} ${errors.title ? glassFieldError : ""}`}
         />
-        {errors.title && <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.title}</p>}
+        {errors.title && <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.title}</p>}
         <p className="mt-1 text-xs text-brand-green-dark/70/70 dark:text-white/40">{title.length}/100</p>
       </div>
 
@@ -219,7 +219,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           className={`${glassField} resize-none ${errors.description ? glassFieldError : ""}`}
         />
         {errors.description && (
-          <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.description}</p>
+          <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.description}</p>
         )}
       </div>
 
@@ -238,7 +238,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             step="0.01"
             className={`${glassField} ${errors.price ? glassFieldError : ""}`}
           />
-          {errors.price && <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.price}</p>}
+          {errors.price && <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.price}</p>}
         </div>
 
         <div>
@@ -258,7 +258,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             ))}
           </select>
           {errors.category && (
-            <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.category}</p>
+            <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.category}</p>
           )}
         </div>
       </div>
@@ -306,7 +306,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           </span>
           Click to upload images (max 5)
         </label>
-        {errors.images && <p className="mt-1 text-sm font-medium text-red-600 dark:text-brand-red">{errors.images}</p>}
+        {errors.images && <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.images}</p>}
 
         {(images.length > 0 || imageUrls.length > 0) && (
           <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
@@ -316,7 +316,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(idx, true)}
-                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-brand-red text-white shadow-md transition-colors hover:bg-red-600"
+                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-brand-red text-white shadow-md transition-colors hover:bg-brand-red/85"
                   aria-label="Remove image"
                 >
                   <span className="material-symbols-outlined text-[16px]">close</span>
@@ -329,7 +329,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(idx, false)}
-                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-brand-red text-white shadow-md transition-colors hover:bg-red-600"
+                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-brand-red text-white shadow-md transition-colors hover:bg-brand-red/85"
                   aria-label="Remove image"
                 >
                   <span className="material-symbols-outlined text-[16px]">close</span>
@@ -370,19 +370,19 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           {!locationLoading &&
             (!userLocation || (userLocation.latitude === 0 && userLocation.longitude === 0)) && (
               <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-red/40 bg-brand-red/[0.08] p-4 dark:bg-brand-red/10">
-                <p className="text-sm font-medium text-red-700 dark:text-brand-red">
+                <p className="text-sm font-medium text-status-danger dark:text-brand-red">
                   {locationError || "Location is required to create a listing."}
                 </p>
                 <button
                   type="button"
                   onClick={getCurrentLocation}
-                  className="shrink-0 rounded-full bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-red-700"
+                  className="shrink-0 rounded-full bg-brand-red px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-brand-red/85"
                 >
                   Enable
                 </button>
               </div>
             )}
-          {errors.location && <p className="mt-2 text-sm font-medium text-red-600 dark:text-brand-red">{errors.location}</p>}
+          {errors.location && <p className="mt-2 text-sm font-medium text-status-danger dark:text-brand-red">{errors.location}</p>}
         </div>
       )}
 

@@ -247,7 +247,7 @@ export default function ServiceDetailPage() {
                     </button>
                     {service.isBoosted && service.boostedUntil && (
                       <span className="flex items-center text-xs font-semibold" style={{ color: "#d97706" }}>
-                        Active until {new Date(service.boostedUntil).toLocaleDateString()}
+                        Active until {new Date(service.boostedUntil).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     )}
                   </div>

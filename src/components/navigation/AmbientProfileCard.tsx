@@ -525,7 +525,7 @@ export default function AmbientProfileCard({
                   {heroStats.totalHuudCoins.toLocaleString()}
                 </p>
               </div>
-              <p className="text-[9px] font-bold uppercase mt-1.5 text-amber-300/60 text-center" style={{ letterSpacing: '0.08em' }}>
+              <p className="text-[10px] font-bold uppercase mt-1.5 text-status-warning/60 text-center" style={{ letterSpacing: '0.08em' }}>
                 HuudCoins
               </p>
             </div>

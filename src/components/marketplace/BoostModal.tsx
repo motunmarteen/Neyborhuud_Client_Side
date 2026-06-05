@@ -108,7 +108,7 @@ export function BoostModal({
 
           {/* Current boost notice */}
           {alreadyBoosted && boostedUntil && (
-            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 border border-amber-500/30 text-sm text-amber-300">
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 border border-status-warning/30 text-sm text-status-warning">
               <span>🔥</span>
               <span>
                 Currently boosted until{" "}

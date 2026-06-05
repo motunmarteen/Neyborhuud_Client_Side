@@ -207,7 +207,7 @@ export function FYICard({ post, onComment }: FYICardProps) {
                     className="mt-3 text-[14px] font-semibold leading-snug text-white whitespace-pre-wrap break-words"
                     style={{ textShadow: '0 1px 8px rgba(0,0,0,0.65)' }}
                 >
-                    <span className="text-amber-300 font-black mr-1.5">#fyi</span>
+                    <span className="text-status-warning font-black mr-1.5">#fyi</span>
                     {textContent}
                 </p>
             )}
@@ -256,7 +256,7 @@ export function FYICard({ post, onComment }: FYICardProps) {
                         className={`font-bold whitespace-pre-wrap break-words text-white ${textSizeClass}`}
                         style={{ textShadow: '0 2px 24px rgba(0,0,0,0.4)' }}
                     >
-                        <span className="text-amber-300 mr-1.5 font-black">
+                        <span className="text-status-warning mr-1.5 font-black">
                             #fyi{post.tags?.filter(t => t !== 'fyi').slice(0, 2).map(t => ` #${t}`).join('')}
                         </span>
                         {textContent}
@@ -267,7 +267,7 @@ export function FYICard({ post, onComment }: FYICardProps) {
                             className="flex items-center gap-2 px-3 py-2.5 rounded-2xl"
                             style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.09)', backdropFilter: 'blur(12px)' }}
                         >
-                            <span className="material-symbols-outlined text-[16px] text-amber-300/70">contact_phone</span>
+                            <span className="material-symbols-outlined text-[16px] text-status-warning/70">contact_phone</span>
                             <span className="text-[12px] text-white/65">{contactInfo}</span>
                         </div>
                     )}
@@ -337,7 +337,7 @@ export function FYICard({ post, onComment }: FYICardProps) {
                         className="flex items-center gap-2 px-3 py-2 rounded-xl mb-3"
                         style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.09)', backdropFilter: 'blur(12px)' }}
                     >
-                        <span className="material-symbols-outlined text-[15px] text-amber-300/70">contact_phone</span>
+                        <span className="material-symbols-outlined text-[15px] text-status-warning/70">contact_phone</span>
                         <span className="text-[12px] text-white/65">{contactInfo}</span>
                     </div>
                 )}

@@ -19,7 +19,7 @@ const TYPE_COLORS: Record<string, string> = {
   social: "bg-brand-blue/20 text-pink-400",
   sports: "bg-brand-red/20 text-brand-red",
   cultural: "bg-brand-blue/20 text-brand-blue",
-  educational: "bg-brand-green-dark/20 text-teal-400",
+  educational: "bg-brand-green-dark/20 text-brand-green-dark",
   business: "bg-primary/20 text-primary",
   other: "bg-brand-surface/20 text-[var(--neu-text-muted)]",
 };
@@ -104,7 +104,7 @@ function CancelModal({
           onChange={(e) => setReason(e.target.value)}
           rows={3}
           placeholder="Reason for cancellation (min 5 characters)…"
-          className="w-full resize-none rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:border-amber-300/50 focus:outline-none"
+          className="w-full resize-none rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:border-status-warning/50 focus:outline-none"
         />
         <div className="flex gap-3">
           <button
@@ -116,7 +116,7 @@ function CancelModal({
           <button
             onClick={() => reason.trim().length >= 5 && onConfirm(reason.trim())}
             disabled={isPending || reason.trim().length < 5}
-            className="flex-1 rounded-xl border border-amber-300/25 bg-primary/20 py-2.5 text-sm font-semibold text-amber-100 transition-colors hover:bg-primary/30 disabled:opacity-50"
+            className="flex-1 rounded-xl border border-status-warning/25 bg-primary/20 py-2.5 text-sm font-semibold text-status-warning/90 transition-colors hover:bg-primary/30 disabled:opacity-50"
           >
             {isPending ? "Cancelling…" : "Confirm Cancel"}
           </button>
@@ -473,7 +473,7 @@ export default function EventDetailPage() {
                       </div>
                       {event.endDate && (
                         <div className="flex items-start gap-2">
-                          <span className="material-symbols-outlined mt-0.5 text-[19px] text-purple-300">event_available</span>
+                          <span className="material-symbols-outlined mt-0.5 text-[19px] text-brand-blue">event_available</span>
                           <div>
                             <p className="text-[11px] font-semibold text-white/45">End</p>
                             <p className="text-sm font-semibold text-white">{formatDateTime(event.endDate)}</p>
@@ -545,7 +545,7 @@ export default function EventDetailPage() {
                         {!isCancelled && !isCompleted && (
                           <button
                             onClick={() => setShowCancelModal(true)}
-                            className="rounded-2xl border border-amber-300/25 bg-primary/15 py-3 text-sm font-bold text-amber-100 backdrop-blur-md transition-all hover:bg-primary/25"
+                            className="rounded-2xl border border-status-warning/25 bg-primary/15 py-3 text-sm font-bold text-status-warning/90 backdrop-blur-md transition-all hover:bg-primary/25"
                           >
                             Cancel Event
                           </button>

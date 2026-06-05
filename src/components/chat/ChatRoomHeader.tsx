@@ -48,7 +48,7 @@ export function ChatRoomHeader({
           ) : (
             <div
               className={`chat-room__avatar neu-avatar flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                isIncident ? 'bg-red-500/20 text-red-400' : 'bg-primary/15 text-primary'
+                isIncident ? 'bg-red-500/20 text-brand-red/70' : 'bg-primary/15 text-primary'
               }`}
               aria-hidden
             >

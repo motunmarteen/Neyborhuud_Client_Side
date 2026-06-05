@@ -46,7 +46,7 @@ export default function EditProductPage({
 
       {error && !isLoading && (
         <div className="rounded-2xl border border-brand-red/35 bg-brand-red/[0.08] p-6 text-center dark:bg-brand-red/10">
-          <p className="mb-4 font-medium text-red-700 dark:text-brand-red">Failed to load listing details.</p>
+          <p className="mb-4 font-medium text-status-danger dark:text-brand-red">Failed to load listing details.</p>
           <button
             type="button"
             onClick={handleCancel}

@@ -127,7 +127,7 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
           locationSnapshot: { latitude: loc.lat, longitude: loc.lng, address: loc.address },
           meta: { latitude: loc.lat, longitude: loc.lng, address: loc.address },
         })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
+        className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
       >
         Send Location
       </button>
@@ -183,7 +183,7 @@ function PollModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onC
       <button
         disabled={!question.trim() || options.filter(Boolean).length < 2}
         onClick={submit}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
+        className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
       >
         Create Poll
       </button>
@@ -203,7 +203,7 @@ function ContactModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; 
       <button
         disabled={!name.trim() || !phone.trim()}
         onClick={() => onDone({ type: 'contact', content: `👤 ${name} · ${phone}`, meta: { name: name.trim(), phone: phone.trim() } })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
+        className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
       >
         Share Contact
       </button>
@@ -243,7 +243,7 @@ function SOSModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onCl
           emergencyRef: ref.trim() || undefined,
           meta: { severity },
         })}
-        className="w-full rounded-xl bg-red-600 py-2.5 text-sm font-medium text-white hover:bg-brand-red"
+        className="w-full rounded-xl bg-brand-red py-2.5 text-sm font-medium text-white hover:bg-brand-red/85"
       >
         Send SOS
       </button>
@@ -277,7 +277,7 @@ function TrackingModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
           trackingSessionRef: sessionRef.trim(),
           meta: { live },
         })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
+        className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
       >
         Share Session
       </button>
@@ -317,7 +317,7 @@ function KidnappingModal({ onDone, onClose }: { onDone: (r: ActionResult) => voi
           trackingSessionRef: sessionRef.trim(),
           meta: { status },
         })}
-        className="w-full rounded-xl bg-red-700 py-2.5 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-40"
+        className="w-full rounded-xl bg-brand-red py-2.5 text-sm font-medium text-white hover:bg-brand-red/85 disabled:opacity-40"
       >
         Send Alert
       </button>
@@ -339,7 +339,7 @@ function EventModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; on
       <button
         disabled={!title.trim()}
         onClick={() => onDone({ type: 'event', content: `📅 ${title}`, meta: { eventId: eventId.trim() || undefined, title: title.trim(), time: time || undefined } })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
+        className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
       >
         Share Event
       </button>
@@ -361,7 +361,7 @@ function MarketplaceModal({ onDone, onClose }: { onDone: (r: ActionResult) => vo
       <button
         disabled={!title.trim()}
         onClick={() => onDone({ type: 'marketplace', content: `🛒 ${title}${price ? ` — ₦${price}` : ''}`, meta: { itemId: itemId.trim() || undefined, title: title.trim(), price: price ? Number(price) : undefined } })}
-        className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-brand-blue disabled:opacity-40"
+        className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
       >
         Share Item
       </button>
@@ -380,14 +380,14 @@ const MEDIA_ACTIONS = [
 ] as const;
 
 const CONTEXT_ACTIONS: { key: ActiveModal & string; label: string; icon: string; color: string }[] = [
-  { key: 'location',       label: 'Location',     icon: '📍', color: 'bg-green-700' },
-  { key: 'event',          label: 'Event',        icon: '📅', color: 'bg-purple-700' },
-  { key: 'marketplace',    label: 'Marketplace',  icon: '🛒', color: 'bg-primary700' },
-  { key: 'contact',        label: 'Contact',      icon: '👤', color: 'bg-blue-700' },
-  { key: 'poll',           label: 'Poll',         icon: '📊', color: 'bg-brand-blue700' },
-  { key: 'tracking',       label: 'Tracking',     icon: '📡', color: 'bg-brand-blue700' },
-  { key: 'kidnapping_info',label: 'Kidnapping',   icon: '🚨', color: 'bg-red-800' },
-  { key: 'sos',            label: 'SOS',          icon: '🆘', color: 'bg-red-700' },
+  { key: 'location',       label: 'Location',     icon: '📍', color: 'bg-brand-green-dark' },
+  { key: 'event',          label: 'Event',        icon: '📅', color: 'bg-brand-blue' },
+  { key: 'marketplace',    label: 'Marketplace',  icon: '🛒', color: 'bg-primary' },
+  { key: 'contact',        label: 'Contact',      icon: '👤', color: 'bg-brand-blue' },
+  { key: 'poll',           label: 'Poll',         icon: '📊', color: 'bg-brand-blue' },
+  { key: 'tracking',       label: 'Tracking',     icon: '📡', color: 'bg-brand-blue' },
+  { key: 'kidnapping_info',label: 'Kidnapping',   icon: '🚨', color: 'bg-brand-red' },
+  { key: 'sos',            label: 'SOS',          icon: '🆘', color: 'bg-brand-red' },
 ];
 
 export default function ChatActionMenu({ disabled, onAction }: Props) {

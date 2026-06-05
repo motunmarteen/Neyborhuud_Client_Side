@@ -93,7 +93,7 @@ export default function DailyCheckInModal() {
         }}
       >
         <div
-          className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-primary via-brand-amber to-brand-blue"
+          className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-primary via-status-warning to-brand-blue"
           aria-hidden
         />
 
@@ -113,7 +113,7 @@ export default function DailyCheckInModal() {
             <h2 className="mb-1 text-xl font-extrabold" style={{ color: "var(--neu-text)" }}>
               Day {currentStreak} Check-In!
             </h2>
-            <p className="mb-1 text-2xl font-bold text-brand-amber">+{coins} HuudCoins</p>
+            <p className="mb-1 text-2xl font-bold text-status-warning">+{coins} HuudCoins</p>
             {rewardData?.totalHuudCoins != null && (
               <p className="mb-2 text-xs" style={{ color: "var(--neu-text-muted)" }}>
                 Wallet balance: {rewardData.totalHuudCoins.toLocaleString()} coins

@@ -241,33 +241,28 @@ function ExplorePageInner() {
 
         {/* ── Tab Bar ── */}
         {!isSearching ? (
-          <div className="relative">
-            <div className="flex overflow-x-auto no-scrollbar border-b cursor-grab active:cursor-grabbing" style={{ borderColor: 'var(--neu-shadow-dark)', WebkitOverflowScrolling: 'touch' }}>
+          <div className="relative px-4 py-2">
+            <div role="tablist" aria-label="Explore" className="flex items-center gap-0.5 overflow-x-auto no-scrollbar rounded-full border border-black/[0.05] bg-brand-surface/60 p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               {EXPLORE_TABS.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive ? 'true' : 'false'}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`relative flex-shrink-0 px-3 py-3 text-[13px] font-medium transition-colors whitespace-nowrap select-none ${
-                      isActive ? 'font-bold' : 'hover:opacity-80'
-                    }`}
-                    style={{ color: isActive ? 'var(--neu-text)' : 'var(--neu-text-muted)' }}
+                    className={`segmented-tab ${isActive ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex-shrink-0 px-4 py-2 text-[13px] font-semibold rounded-full whitespace-nowrap select-none active:scale-[0.97]`}
                   >
                     {tab.label}
-                    {isActive && (
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-primary rounded-full" />
-                    )}
                   </button>
                 );
               })}
             </div>
-            {/* Fade hint — signals more tabs offscreen */}
-            <div className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none" style={{ background: 'linear-gradient(to right, transparent, var(--neu-bg))' }} />
           </div>
         ) : (
-          <div className="relative">
-            <div className="flex overflow-x-auto no-scrollbar border-b cursor-grab active:cursor-grabbing" style={{ borderColor: 'var(--neu-shadow-dark)', WebkitOverflowScrolling: 'touch' }}>
+          <div className="relative px-4 py-2">
+            <div role="tablist" aria-label="Search results" className="flex items-center gap-0.5 overflow-x-auto no-scrollbar rounded-full border border-black/[0.05] bg-brand-surface/60 p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               {SEARCH_TABS.map((tab) => {
                 const count =
                   tab.id === 'all'
@@ -277,21 +272,17 @@ function ExplorePageInner() {
                 return (
                   <button
                     key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive ? 'true' : 'false'}
                     onClick={() => setType(tab.id as any)}
-                    className={`relative flex-shrink-0 px-3 py-3 text-[13px] font-medium transition-colors whitespace-nowrap select-none ${
-                      isActive ? 'font-bold' : 'hover:opacity-80'
-                    }`}
-                    style={{ color: isActive ? 'var(--neu-text)' : 'var(--neu-text-muted)' }}
+                    className={`segmented-tab ${isActive ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex-shrink-0 px-4 py-2 text-[13px] font-semibold rounded-full whitespace-nowrap select-none active:scale-[0.97]`}
                   >
                     {tab.label}{count > 0 ? ` (${count})` : ''}
-                    {isActive && (
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-primary rounded-full" />
-                    )}
                   </button>
                 );
               })}
             </div>
-            <div className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none" style={{ background: 'linear-gradient(to right, transparent, var(--neu-bg))' }} />
           </div>
         )}
       </div>

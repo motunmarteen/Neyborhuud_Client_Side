@@ -8,11 +8,11 @@ import { tripService, type Trip, type TripListResult } from '@/services/trip.ser
 
 function statusChip(status: Trip['status']) {
   const styles: Record<Trip['status'], string> = {
-    planned: 'text-amber-700 bg-amber-100',
+    planned: 'text-amber-700 bg-status-warning/15',
     active: 'text-primary bg-primary/15',
     completed: 'text-brand-blue bg-brand-blue/15',
     cancelled: 'text-[var(--neu-text-muted)] bg-brand-surface',
-    escalated: 'text-amber-700 bg-amber-100',
+    escalated: 'text-amber-700 bg-status-warning/15',
     panic: 'text-brand-red bg-brand-red/15',
   };
   const labels: Record<Trip['status'], string> = {

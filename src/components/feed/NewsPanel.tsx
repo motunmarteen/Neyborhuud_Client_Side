@@ -152,7 +152,7 @@ export function NewsPanel() {
               {item.title}
             </h4>
             <span className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
-              {item.sourceName ?? item.source ?? 'News'} · {item.pubDate ? new Date(item.pubDate).toLocaleDateString() : 'Recent'}
+              {item.sourceName ?? item.source ?? 'News'} · {item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent'}
             </span>
           </a>
         ))}

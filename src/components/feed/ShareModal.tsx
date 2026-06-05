@@ -243,7 +243,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
           <div className="mb-5 flex items-center justify-between">
             <div>
               <p className="text-lg font-black text-[var(--neu-text-muted)] dark:text-white">Share Post</p>
-              <p className="text-xs text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">Earn <span className="font-black text-amber-600">+5 HuudCoins</span> per share</p>
+              <p className="text-xs text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">Earn <span className="font-black text-status-warning">+5 HuudCoins</span> per share</p>
             </div>
             <button
               onClick={onClose}
@@ -295,7 +295,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
               disabled={!!loading}
               className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-black transition-colors ${
                 copied
-                  ? 'bg-emerald-100 text-emerald-700'
+                  ? 'bg-status-success/15 text-status-success'
                   : 'bg-brand-black dark:bg-white text-white dark:text-[var(--neu-text-muted)] hover:bg-brand-black'
               }`}
             >
@@ -308,7 +308,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
             <button
               onClick={handleNativeShare}
               disabled={!!loading}
-              className="mt-3 w-full rounded-2xl bg-emerald-600 py-3 text-sm font-black text-white hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50"
+              className="mt-3 w-full rounded-2xl bg-status-success py-3 text-sm font-black text-white hover:bg-status-success/85 active:scale-[0.98] transition-all disabled:opacity-50"
             >
               {loading === 'native' ? 'Opening…' : '↗ More options'}
             </button>

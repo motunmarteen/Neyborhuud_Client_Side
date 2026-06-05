@@ -55,18 +55,18 @@ interface EmergencyPost {
 // ── Meta helpers ──────────────────────────────────────────────────────────────
 
 const EMERGENCY_TYPE_META: Record<EmergencyType, { label: string; icon: string; color: string }> = {
-  crime:               { label: 'Crime',              icon: 'local_police',      color: 'text-red-600' },
+  crime:               { label: 'Crime',              icon: 'local_police',      color: 'text-status-danger' },
   danger:              { label: 'Danger',             icon: 'dangerous',         color: 'text-brand-red600' },
-  missing_person:      { label: 'Missing Person',     icon: 'person_search',     color: 'text-purple-600' },
+  missing_person:      { label: 'Missing Person',     icon: 'person_search',     color: 'text-brand-blue' },
   fire:                { label: 'Fire',               icon: 'local_fire_department', color: 'text-brand-red' },
-  accident:            { label: 'Accident',           icon: 'car_crash',         color: 'text-amber-600' },
+  accident:            { label: 'Accident',           icon: 'car_crash',         color: 'text-status-warning' },
   suspicious_activity: { label: 'Suspicious Activity', icon: 'report',          color: 'text-primary600' },
 };
 
 const SEVERITY_META: Record<Severity, { label: string; bg: string; text: string; border: string }> = {
   low:      { label: 'Low',      bg: 'bg-primary50',  text: 'text-primary700', border: 'border-yellow-200' },
   medium:   { label: 'Medium',   bg: 'bg-brand-red50',  text: 'text-brand-red700', border: 'border-orange-200' },
-  critical: { label: 'CRITICAL', bg: 'bg-red-50',     text: 'text-red-700',    border: 'border-red-200' },
+  critical: { label: 'CRITICAL', bg: 'bg-status-danger/8',     text: 'text-status-danger',    border: 'border-status-danger/30' },
 };
 
 function getExpiryCountdown(expiresAt?: string): string {
@@ -121,7 +121,7 @@ function CreateEmergencyForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {/* Warning header */}
-      <div className="flex items-start gap-2 p-3 rounded-2xl bg-red-50 border border-red-100">
+      <div className="flex items-start gap-2 p-3 rounded-2xl bg-status-danger/8 border border-status-danger/20">
         <span className="material-symbols-outlined text-brand-red text-xl flex-shrink-0 mt-0.5">warning</span>
         <p className="text-xs" style={{ color: 'var(--neu-text)' }}>
           This will immediately alert your community. Only post real emergencies — up to 3 per hour.
@@ -259,7 +259,7 @@ function EmergencyCard({ post, onReact }: {
       {/* Header */}
       <div className="flex items-start gap-3">
         <div className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-          post.severity === 'critical' ? 'bg-red-100' : 'neu-socket'
+          post.severity === 'critical' ? 'bg-status-danger/15' : 'neu-socket'
         }`}>
           <span className={`material-symbols-outlined text-xl ${typeMeta?.color ?? 'text-brand-red'}`}>
             {typeMeta?.icon ?? 'emergency'}

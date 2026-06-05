@@ -44,7 +44,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: string; color: stri
 
 const STATUS_CONFIG: Record<string, { label: string; textCls: string }> = {
     open:        { label: 'Open',        textCls: 'text-primary' },
-    in_progress: { label: 'In Progress', textCls: 'text-amber-300' },
+    in_progress: { label: 'In Progress', textCls: 'text-status-warning' },
     fulfilled:   { label: 'Fulfilled',   textCls: 'text-brand-blue' },
     closed:      { label: 'Closed',      textCls: 'text-white/35' },
 };
@@ -73,7 +73,7 @@ function GlassBtn({
                 </span>
             )}
             {label && !(count !== undefined && count > 0) && (
-                <span className="text-[9px] font-semibold text-white/55">{label}</span>
+                <span className="text-[10px] font-semibold text-white/55">{label}</span>
             )}
         </button>
     );

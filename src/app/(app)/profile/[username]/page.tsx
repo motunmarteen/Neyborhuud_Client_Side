@@ -708,12 +708,12 @@ export default function ProfilePage() {
                         Location needed
                       </span>
                     ) : vouchStatus?.withinRange === true ? (
-                      <span className="inline-flex items-center gap-0.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                      <span className="inline-flex items-center gap-0.5 rounded-full border border-status-success/30 bg-status-success/10 px-2 py-0.5 text-[10px] font-bold text-status-success">
                         <span className="material-symbols-outlined text-[12px]">my_location</span>
                         {vouchStatus.distanceMeters}m away ✓
                       </span>
                     ) : vouchStatus?.withinRange === false ? (
-                      <span className="inline-flex items-center gap-0.5 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">
+                      <span className="inline-flex items-center gap-0.5 rounded-full border border-status-danger/30 bg-status-danger/8 px-2 py-0.5 text-[10px] font-bold text-status-danger">
                         <span className="material-symbols-outlined text-[12px]">location_off</span>
                         {vouchStatus.distanceMeters != null ? `${vouchStatus.distanceMeters}m away` : 'Too far'} — 500m limit
                       </span>
@@ -853,9 +853,9 @@ export default function ProfilePage() {
                       <li key={`${row.username}-${idx}`}>
                         <span className="font-mono font-semibold">@{row.username}</span>
                         <span className="block text-[10px] opacity-70">
-                          {new Date(row.effectiveFrom).toLocaleDateString()}
+                          {new Date(row.effectiveFrom).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
                           {row.effectiveTo
-                            ? ` – ${new Date(row.effectiveTo).toLocaleDateString()}`
+                            ? ` – ${new Date(row.effectiveTo).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}`
                             : ' – current'}
                         </span>
                       </li>
@@ -928,14 +928,14 @@ export default function ProfilePage() {
                         <button
                           key={v.id}
                           onClick={() => router.push(`/profile/${v.voucherUsername}`)}
-                          className="flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                          className="flex items-center gap-1.5 rounded-full border border-status-success/20 bg-status-success/10 px-2 py-1 text-xs font-semibold text-status-success transition hover:bg-status-success/15"
                           type="button"
                           title={`View @${v.voucherUsername}`}
                         >
                           {v.voucherAvatar ? (
                             <img src={v.voucherAvatar} alt="" className="h-4 w-4 rounded-full object-cover" />
                           ) : (
-                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-200 text-[9px] font-black text-emerald-700">
+                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-status-success/25 text-[10px] font-black text-status-success">
                               {v.voucherUsername[0]?.toUpperCase()}
                             </span>
                           )}
@@ -985,7 +985,7 @@ export default function ProfilePage() {
                             <span className={`material-symbols-outlined text-[13px] ${isPos ? 'text-primary' : 'text-brand-red500'}`}
                               style={{ fontVariationSettings: "'FILL' 1" }}>{meta.icon}</span>
                             <span className="min-w-0 flex-1 truncate text-xs text-slate-600">{meta.label}</span>
-                            <span className={`shrink-0 text-[11px] font-black tabular-nums ${isPos ? 'text-emerald-600' : 'text-brand-red500'}`}>
+                            <span className={`shrink-0 text-[11px] font-black tabular-nums ${isPos ? 'text-status-success' : 'text-brand-red500'}`}>
                               {isPos ? '+' : ''}{event.pointsChange}
                             </span>
                           </div>
@@ -1076,7 +1076,7 @@ export default function ProfilePage() {
                 })();
                 const rarityTone: Record<string, string> = {
                   common:    'bg-slate-50    text-slate-600  ring-slate-100',
-                  uncommon:  'bg-emerald-50  text-emerald-700 ring-emerald-100',
+                  uncommon:  'bg-status-success/10  text-status-success ring-status-success/20',
                   rare:      'bg-sky-50      text-sky-700    ring-sky-100',
                   epic:      'bg-brand-blue50   text-brand-blue700 ring-violet-100',
                   legendary: 'bg-amber-50    text-amber-700  ring-amber-100',

@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
         <StatCard label="Total Posts"      value={stats.totalPosts ?? 0}            icon="article"       color="text-brand-blue" />
         <StatCard label="Events"           value={stats.totalEvents ?? 0}           icon="event"         color="text-primary" />
         <StatCard label="Jobs"             value={stats.totalJobs ?? 0}             icon="work"          color="text-brand-red400" />
-        <StatCard label="Listings"         value={stats.totalMarketplaceItems ?? 0} icon="storefront"    color="text-teal-400" />
+        <StatCard label="Listings"         value={stats.totalMarketplaceItems ?? 0} icon="storefront"    color="text-brand-green-dark" />
       </div>
 
       {/* Engagement row */}

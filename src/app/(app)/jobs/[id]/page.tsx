@@ -197,7 +197,7 @@ export default function JobDetailPage() {
                   className={`w-full py-3 rounded-xl font-bold text-base transition-colors ${
                     job.hasApplied
                       ? "bg-brand-black text-[var(--neu-text-muted)] cursor-default"
-                      : "bg-blue-600 hover:bg-brand-blue text-white"
+                      : "bg-brand-blue hover:bg-brand-blue text-white"
                   }`}
                 >
                   {job.hasApplied ? "✓ Applied" : "Apply Now"}
@@ -218,7 +218,7 @@ export default function JobDetailPage() {
                   )}
                   <button
                     onClick={() => setShowBoost(true)}
-                    className="flex items-center gap-2 px-4 py-3 bg-primary/20 hover:bg-primary/30 border border-amber-500/40 text-primary rounded-xl font-semibold transition-colors"
+                    className="flex items-center gap-2 px-4 py-3 bg-primary/20 hover:bg-primary/30 border border-status-warning/40 text-primary rounded-xl font-semibold transition-colors"
                   >
                     🚀 {job.isBoosted ? "Extend Boost" : "Boost"}
                   </button>

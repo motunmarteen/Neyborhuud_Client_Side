@@ -31,7 +31,7 @@ export function TripsEscalationBanner({ alert, onDismiss, onCheckIn }: TripsEsca
       <button
         type="button"
         onClick={onCheckIn}
-        className="mt-3 rounded-full bg-amber-600 px-4 py-2.5 text-sm font-bold text-white"
+        className="mt-3 rounded-full bg-status-warning px-4 py-2.5 text-sm font-bold text-white"
       >
         I&apos;m safe — check in now
       </button>

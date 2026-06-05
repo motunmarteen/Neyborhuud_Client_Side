@@ -42,19 +42,19 @@ export function LiveTrackingRequirementsCard({ issues }: LiveTrackingRequirement
   if (issues.length === 0) return null;
 
   return (
-    <div className="mod-card space-y-3 rounded-2xl border border-amber-400/40 bg-amber-50/90 p-4 dark:bg-amber-950/25">
-      <p className="text-sm font-bold text-amber-900 dark:text-amber-100">Before you can start live tracking</p>
-      <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-200">
+    <div className="mod-card space-y-3 rounded-2xl border border-status-warning/40 bg-status-warning/10 p-4 dark:bg-status-warning/10">
+      <p className="text-sm font-bold text-status-warning dark:text-status-warning/90">Before you can start live tracking</p>
+      <p className="text-xs leading-relaxed text-status-warning/90 dark:text-status-warning/80">
         The server requires a verified account and complete profile for this high-risk feature (same rule as posting
         FYI). SOS does not require verification, but live tracking does.
       </p>
       {profileIssue && profileGaps.length > 0 ? (
-        <p className="text-[11px] font-semibold text-amber-900/90 dark:text-amber-100/90">
+        <p className="text-[11px] font-semibold text-status-warning/90 dark:text-status-warning/90/90">
           Still needed: {profileGaps.map((g) => GAP_LABELS[g] ?? g).join(' · ')}
         </p>
       ) : null}
       {profileIssue ? (
-        <p className="text-[10px] leading-relaxed text-amber-800/90 dark:text-amber-200/90">
+        <p className="text-[10px] leading-relaxed text-status-warning/90/90 dark:text-status-warning/80/90">
           On file: {resolveUserFirstName(user) || '—'} {resolveUserLastName(user) || '—'}
           {resolveUserPhone(user) ? ` · ${resolveUserPhone(user)}` : ' · no phone on account'}
           {isFetching || refreshing ? ' · checking server…' : ''}
@@ -73,7 +73,7 @@ export function LiveTrackingRequirementsCard({ issues }: LiveTrackingRequirement
       <ul className="space-y-2">
         {issues.map((issue) => (
           <li key={issue.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
-            <span className="text-amber-900 dark:text-amber-100">{issue.message}</span>
+            <span className="text-status-warning dark:text-status-warning/90">{issue.message}</span>
             <Link
               href={issue.href}
               className="shrink-0 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-white no-underline"

@@ -24,9 +24,8 @@ export function LocalHuudBottomSheet({ open, onClose }: LocalHuudBottomSheetProp
       ariaLabel={`${LOCAL_HUUD_MENU.label} services`}
       panelClassName="max-w-md"
       panelStyle={{
-        maxHeight: 'min(78vh, 32rem)',
-        marginBottom: 'max(env(safe-area-inset-bottom), 0px)',
-        paddingBottom: 'calc(var(--app-nav-bottom, 4.25rem) + 0.25rem)',
+        maxHeight: 'min(82vh, 34rem)',
+        paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)',
       }}
     >
       <header className="shrink-0 px-4 pb-3 text-center">
@@ -53,7 +52,7 @@ export function LocalHuudBottomSheet({ open, onClose }: LocalHuudBottomSheetProp
                 <span className="material-symbols-outlined text-2xl text-primary" aria-hidden>
                   {item.icon}
                 </span>
-                <span className="text-[11px] font-bold leading-tight tracking-tight text-[var(--neu-text)]">
+                <span className="text-[11px] font-bold leading-tight tracking-tight text-[#1A1A1A] dark:text-[var(--neu-text)]">
                   {item.label}
                 </span>
               </Link>

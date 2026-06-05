@@ -232,7 +232,7 @@ export default function CompleteProfilePage() {
                             <span className="text-3xl font-black leading-none">
                                 {profileCoinBalance ?? '—'}
                             </span>
-                            <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
+                            <i className="bi bi-coin text-xl text-status-warning" aria-hidden />
                         </div>
                     </div>
                     {profileCoinBalance === null ? (

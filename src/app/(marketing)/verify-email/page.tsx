@@ -315,7 +315,7 @@ function VerifyEmailContent() {
                             <span className="text-3xl font-black leading-none">
                                 {verifyCoinBalance ?? '—'}
                             </span>
-                            <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
+                            <i className="bi bi-coin text-xl text-status-warning" aria-hidden />
                         </div>
                     </div>
                     {verifyCoinBalance === null ? (

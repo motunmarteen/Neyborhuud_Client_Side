@@ -9,7 +9,7 @@ import { mapsUrl } from '@/lib/guardian-alerts';
 const SEVERITY_RING: Record<string, string> = {
   critical: 'border-brand-red/40 bg-brand-red/8',
   high: 'border-orange-500/35 bg-orange-500/8',
-  medium: 'border-amber-500/30 bg-amber-500/8',
+  medium: 'border-status-warning/30 bg-status-warning/8',
   low: 'border-primary/25 bg-primary/5',
 };
 

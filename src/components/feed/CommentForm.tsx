@@ -65,12 +65,15 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                     size="xs"
                 />
                 <div className="flex-1 min-w-0">
+                    <label htmlFor="comment-input" className="sr-only">Write a comment</label>
                     <textarea
+                        id="comment-input"
                         ref={textareaRef}
                         autoFocus={autoFocus}
                         value={body}
                         onChange={(e) => setBody(e.target.value)}
                         placeholder={placeholder}
+                        aria-label="Write a comment"
                         className="h-auto min-h-[40px] w-full resize-none border-none bg-transparent py-1.5 text-[16px] text-[var(--neu-text)] placeholder:text-[var(--neu-text-muted)] focus:ring-0"
                         rows={1}
                         onInput={(e) => {

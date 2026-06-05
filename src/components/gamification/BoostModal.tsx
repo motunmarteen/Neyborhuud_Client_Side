@@ -114,11 +114,11 @@ export function BoostModal({
 
         <div className="p-5">
           {alreadyActive && activeUntil && !done && (
-            <div className="mb-4 flex items-center gap-2 rounded-2xl bg-blue-50 border border-blue-100 px-4 py-3 text-sm text-blue-700">
+            <div className="mb-4 flex items-center gap-2 rounded-2xl bg-status-info/8 border border-status-info/20 px-4 py-3 text-sm text-status-info">
               <span>⚡</span>
               <span>
                 Currently active until{" "}
-                <strong>{new Date(activeUntil).toLocaleDateString()}</strong>.
+                <strong>{new Date(activeUntil).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</strong>.
                 Selecting a new duration <em>extends</em> from that date.
               </span>
             </div>
@@ -204,7 +204,7 @@ export function BoostModal({
 
               {/* Insufficient balance */}
               {!hasEnough && (
-                <div className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-2 text-xs text-red-600 font-medium">
+                <div className="mb-4 rounded-xl bg-status-danger/8 border border-status-danger/20 px-4 py-2 text-xs text-status-danger font-medium">
                   You need {(selectedOpt.coins - walletCoins).toLocaleString()} more HuudCoins for this option.
                   Earn more by posting, commenting, and engaging in your community!
                 </div>

@@ -101,6 +101,9 @@ export interface PostAuthor {
   name: string;
   username: string;
   avatarUrl: string | null;
+  profilePicture?: string | null;
+  isVerified?: boolean;
+  verificationBadge?: 'neighbor' | 'business' | 'emergency_responder' | 'community_leader';
 }
 
 // ==================== User & Authentication Types ====================
@@ -213,7 +216,9 @@ export interface MediaItem {
 /** Post shape from backend: id, author (id/name/username/avatarUrl), content, media (URLs or items), createdAt, etc. */
 export interface Post {
   id: string;
+  _id?: string;
   userId?: string;
+  authorId?: string;
   /** Backend returns author with id, name, username, avatarUrl (same shape for feed and create-post) */
   author: (User & { name?: string; avatarUrl?: string | null }) | PostAuthor;
   type?: "text" | "image" | "video" | "poll" | "event" | "article";
@@ -309,6 +314,7 @@ export interface Post {
   eventTime?: string;
   venue?: { name: string; address?: string; lat?: number; lng?: number };
   ticketInfo?: "free" | "paid";
+  ticketPrice?: number;
   capacity?: number;
   rsvpEnabled?: boolean;
   organizer?: string;

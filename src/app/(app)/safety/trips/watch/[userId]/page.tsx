@@ -118,8 +118,8 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
           style={{ background: '#fef2f2', borderColor: '#dc2626' }}
         >
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-red-600" style={{ fontSize: '20px' }}>emergency</span>
-            <p className="font-bold text-sm text-red-600">🆘 SOS Activated — Requires Immediate Response</p>
+            <span className="material-symbols-outlined text-status-danger" style={{ fontSize: '20px' }}>emergency</span>
+            <p className="font-bold text-sm text-status-danger">🆘 SOS Activated — Requires Immediate Response</p>
           </div>
           <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
             <strong>Triggered automatically due to missed trip check-ins.</strong>{' '}
@@ -218,7 +218,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
         {isPaused && (
           <div className="neu-socket rounded-xl p-2">
             <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Paused since</p>
-            <p className="text-xs font-semibold mt-0.5 text-amber-600">{minsAgo(trip.pausedAt)}</p>
+            <p className="text-xs font-semibold mt-0.5 text-status-warning">{minsAgo(trip.pausedAt)}</p>
           </div>
         )}
       </div>

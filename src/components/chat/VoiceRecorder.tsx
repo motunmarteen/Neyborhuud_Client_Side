@@ -174,7 +174,7 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
             <p className="text-sm text-[var(--neu-text-muted)] text-center">Tap the mic to start recording. Max 60 seconds.</p>
             <button
               onClick={startRecording}
-              className="flex h-20 w-20 items-center justify-center rounded-full bg-red-600 text-4xl shadow-lg hover:bg-brand-red active:scale-95 transition-all"
+              className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-red text-4xl shadow-lg hover:bg-brand-red active:scale-95 transition-all"
             >
               🎤
             </button>
@@ -203,7 +203,7 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
 
             <button
               onClick={stopRecording}
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-red-700 shadow-lg hover:bg-red-600 active:scale-95 transition-all"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-red shadow-lg hover:bg-brand-red active:scale-95 transition-all"
             >
               <span className="block h-6 w-6 rounded bg-white" />
             </button>
@@ -225,7 +225,7 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
               </button>
               <button
                 onClick={handleSend}
-                className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-brand-blue transition-colors"
+                className="flex-1 rounded-xl bg-brand-blue py-3 text-sm font-medium text-white hover:bg-brand-blue/85 transition-colors"
               >
                 Send
               </button>

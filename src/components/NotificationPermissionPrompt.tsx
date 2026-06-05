@@ -151,7 +151,7 @@ export default function NotificationPermissionPrompt() {
           <div className="w-10 h-1 rounded-full bg-brand-surface mx-auto mb-5 cursor-grab" />
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-full bg-status-danger/15 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-brand-red text-[26px]">notifications_off</span>
             </div>
             <div>
@@ -189,8 +189,8 @@ export default function NotificationPermissionPrompt() {
 
         {/* Icon */}
         <div className="flex justify-center mb-5">
-          <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
-            <span className="material-symbols-outlined text-blue-600 text-[44px]">emergency</span>
+          <div className="w-20 h-20 rounded-full bg-status-info/8 flex items-center justify-center">
+            <span className="material-symbols-outlined text-status-info text-[44px]">emergency</span>
           </div>
         </div>
 
@@ -222,7 +222,7 @@ export default function NotificationPermissionPrompt() {
         <button
           onClick={handleEnable}
           disabled={isRegistering}
-          className="w-full rounded-2xl bg-blue-600 py-4 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors mb-3"
+          className="w-full rounded-2xl bg-brand-blue py-4 text-base font-bold text-white hover:bg-brand-blue disabled:opacity-60 transition-colors mb-3"
         >
           {isRegistering ? 'Enabling…' : '🔔 Enable Notifications'}
         </button>

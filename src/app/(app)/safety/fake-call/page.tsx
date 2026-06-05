@@ -186,7 +186,7 @@ export default function FakeCallPage() {
               <button
                 type="button"
                 onClick={endCall}
-                className="w-16 h-16 rounded-full bg-red-600 hover:bg-brand-red flex items-center justify-center shadow-2xl"
+                className="w-16 h-16 rounded-full bg-brand-red hover:bg-brand-red flex items-center justify-center shadow-2xl"
                 aria-label="Decline"
               >
                 <span className="material-symbols-outlined text-white text-3xl">call_end</span>
@@ -205,7 +205,7 @@ export default function FakeCallPage() {
               <button
                 type="button"
                 onClick={endCall}
-                className="w-16 h-16 rounded-full bg-red-600 hover:bg-brand-red flex items-center justify-center shadow-2xl"
+                className="w-16 h-16 rounded-full bg-brand-red hover:bg-brand-red flex items-center justify-center shadow-2xl"
                 aria-label="End call"
               >
                 <span className="material-symbols-outlined text-white text-3xl">call_end</span>
@@ -232,7 +232,7 @@ export default function FakeCallPage() {
       </SentinelHowItWorks>
 
       {phase === 'waiting' && (
-        <div className="mod-card flex items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+        <div className="mod-card flex items-center justify-between gap-3 rounded-2xl border border-status-warning/30 bg-status-warning/10 p-4">
           <div>
             <p className="text-sm font-semibold text-primary">Call in {secondsLeft}s…</p>
             <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>

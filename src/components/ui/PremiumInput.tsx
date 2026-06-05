@@ -41,8 +41,10 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
     inputRef,
     className = '',
     type,
+    id,
     ...props
 }) => {
+    const inputId = id ?? (label ? `input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
     const [showPassword, setShowPassword] = useState(false);
     const isPasswordField = type === 'password';
     const inputType = isPasswordField && showPassword ? 'text' : type;
@@ -116,7 +118,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
     return (
         <div className="flex flex-col gap-2 w-full group">
             {label && (
-                <label className="text-xs font-bold uppercase tracking-widest ml-4" style={{ color: 'var(--neu-text-muted)' }}>
+                <label htmlFor={inputId} className="text-xs font-bold uppercase tracking-widest ml-4" style={{ color: 'var(--neu-text-muted)' }}>
                     {label}
                 </label>
             )}
@@ -140,6 +142,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
                 ) : null}
                 <input
                     ref={inputRef}
+                    id={inputId}
                     type={inputType}
                     className="bg-transparent w-full py-3 placeholder:opacity-40 focus:outline-none font-light"
                     style={{ color: 'var(--neu-text)' }}

@@ -9,7 +9,7 @@ import { safetyService, type UserStatus } from '@/services/safety.service';
 function statusDot(status: string) {
   if (status === 'safe' || status === 'arrived') return 'bg-primary';
   if (status === 'unsafe' || status === 'need_attention') return 'bg-brand-red';
-  return 'bg-amber-500';
+  return 'bg-status-warning';
 }
 
 export function SosGuardiansFeed() {

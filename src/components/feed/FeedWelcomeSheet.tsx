@@ -25,7 +25,7 @@ const FEED_TIPS = [
         icon: 'bi-coin',
         label: 'HuudCoins',
         description: 'Check in daily and participate to earn — already started from signup.',
-        iconClass: 'bg-brand-amber text-[#0a1a0f]',
+        iconClass: 'bg-status-warning text-[#0a1a0f]',
     },
 ] as const;
 

@@ -8,7 +8,7 @@ import { useMyApplications, useWithdrawApplication } from "@/hooks/useJobs";
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
   pending:    { bg: "var(--neu-shadow-dark)", color: "var(--neu-text-muted)",   label: "Pending"   },
-  reviewing:  { bg: "#0000FF20",             color: "var(--brand-blue)",        label: "Reviewing" },
+  reviewing:  { bg: "#1A56FF20",             color: "var(--brand-blue)",        label: "Reviewing" },
   accepted:   { bg: "#006F3520",             color: "var(--primary)",           label: "Accepted"  },
   rejected:   { bg: "#FF000020",             color: "var(--brand-red)",         label: "Rejected"  },
   withdrawn:  { bg: "#f9731620",             color: "#f97316",                  label: "Withdrawn" },

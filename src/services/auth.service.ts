@@ -65,14 +65,26 @@ function buildProfilePatchForServer(data: {
   return patch;
 }
 
+/**
+ * The identity profile patch is an optional enrichment service that may not be
+ * deployed on every backend. Once we see a 404 we stop calling it for the rest
+ * of the session to avoid spamming the network tab on every auth refresh.
+ */
+let identityServiceUnavailable = false;
+
 async function fetchIdentityProfilePatch(): Promise<Partial<User> | null> {
+  if (identityServiceUnavailable) return null;
   try {
     const res = await apiClient.get<unknown>("/identity/profile");
     if (res.success) {
       return extractUserFromIdentityPayload(res.data);
     }
-  } catch {
-    /* optional service */
+  } catch (err: unknown) {
+    const status = (err as { response?: { status?: number } } | undefined)?.response?.status;
+    if (status === 404) {
+      identityServiceUnavailable = true;
+    }
+    /* optional service — fall through to /profile/me data */
   }
   return null;
 }

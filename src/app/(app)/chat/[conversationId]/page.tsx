@@ -301,12 +301,12 @@ function OfferActionBar({
       : buyer?.username ?? 'Buyer';
 
   return (
-    <div className="shrink-0 border-b border-amber-900/40 bg-amber-950/20 px-4 py-3">
+    <div className="shrink-0 border-b border-status-warning/20 bg-status-warning/10 px-4 py-3">
       <div className="flex items-center justify-between gap-3 mb-2">
         <p className="text-xs font-semibold text-white/90">
           You received an offer of {formatNGN(offer.offerAmount)} from {buyerName}.
           {offer.counterOfferAmount != null && (
-            <span className="ml-2 text-purple-300">
+            <span className="ml-2 text-status-info">
               You countered with {formatNGN(offer.counterOfferAmount)}.
             </span>
           )}
@@ -314,7 +314,7 @@ function OfferActionBar({
         {pendingCount > 1 && (
           <button
             onClick={() => router.push(`/marketplace/${productId}/offers`)}
-            className="shrink-0 rounded-full bg-amber-800/40 px-2 py-0.5 text-[10px] font-semibold text-white/90 hover:bg-amber-800/60 transition-colors"
+            className="shrink-0 rounded-full bg-status-warning/30 px-2 py-0.5 text-[10px] font-semibold text-white/90 hover:bg-status-warning/45 transition-colors"
           >
             +{pendingCount - 1} more
           </button>
@@ -326,20 +326,20 @@ function OfferActionBar({
           <button
             onClick={handleAccept}
             disabled={accept.isPending || reject.isPending}
-            className="flex-1 rounded-full bg-green-700 py-1.5 text-xs font-semibold text-white hover:bg-brand-green-dark disabled:opacity-50 transition-colors"
+            className="flex-1 rounded-full bg-brand-green-dark py-1.5 text-xs font-semibold text-white hover:bg-brand-green-dark disabled:opacity-50 transition-colors"
           >
             {accept.isPending ? '…' : 'Accept'}
           </button>
           <button
             onClick={() => setShowCounter(true)}
-            className="flex-1 rounded-full bg-purple-800 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 transition-colors"
+            className="flex-1 rounded-full bg-brand-blue py-1.5 text-xs font-semibold text-white hover:bg-brand-blue transition-colors"
           >
             Counter
           </button>
           <button
             onClick={handleReject}
             disabled={reject.isPending || accept.isPending}
-            className="flex-1 rounded-full bg-red-800 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+            className="flex-1 rounded-full bg-brand-red py-1.5 text-xs font-semibold text-white hover:bg-brand-red/85 disabled:opacity-50 transition-colors"
           >
             {reject.isPending ? '…' : 'Decline'}
           </button>
@@ -367,7 +367,7 @@ function OfferActionBar({
           <button
             onClick={handleCounter}
             disabled={respond.isPending || !counterAmount}
-            className="rounded-full bg-purple-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-600 disabled:opacity-50 transition-colors"
+            className="rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/85 disabled:opacity-50 transition-colors"
           >
             {respond.isPending ? '…' : 'Send'}
           </button>

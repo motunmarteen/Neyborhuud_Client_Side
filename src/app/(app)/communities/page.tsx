@@ -52,7 +52,7 @@ function StatCard({
     tone === 'blue'
       ? 'text-brand-blue bg-brand-blue/10'
       : tone === 'green'
-        ? 'text-green-600 bg-green-600/10'
+        ? 'text-brand-green-dark bg-brand-green-dark/10'
         : 'text-primary bg-primary/15';
 
   return (

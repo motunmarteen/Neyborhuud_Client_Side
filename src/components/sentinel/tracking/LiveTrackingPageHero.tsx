@@ -57,7 +57,7 @@ export function LiveTrackingPageHero({ session, wsConnected, queuedCount, isOnli
           </span>
         ) : null}
         {!isOnline && live ? (
-          <span className="mod-chip rounded-full px-3 py-1 text-[10px] font-bold text-amber-700">
+          <span className="mod-chip rounded-full px-3 py-1 text-[10px] font-bold text-status-warning">
             Offline · {queuedCount} queued
           </span>
         ) : null}

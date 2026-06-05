@@ -211,7 +211,7 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
                 </span>
               )}
               {isActiveBoosted && (
-                <span className="flex items-center gap-0.5 rounded-full border border-amber-300/30 bg-primary/90 px-2 py-0.5 text-[9px] font-black text-slate-900 shadow-md">
+                <span className="flex items-center gap-0.5 rounded-full border border-status-warning/30 bg-primary/90 px-2 py-0.5 text-[9px] font-black text-slate-900 shadow-md">
                   <span>🚀</span>
                   BOOST
                 </span>
@@ -219,7 +219,7 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
             </div>
 
             {isSold && (
-              <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-red/35 bg-red-600/90 px-4 py-1.5 text-[11px] font-black uppercase tracking-widest text-white shadow-xl backdrop-blur-md">
+              <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-red/35 bg-brand-red/90 px-4 py-1.5 text-[11px] font-black uppercase tracking-widest text-white shadow-xl backdrop-blur-md">
                 Sold
               </div>
             )}

@@ -41,11 +41,11 @@ const SEVERITY_LEVELS = [
   { value: 'low',      label: 'Low',      color: 'text-primary',  bg: 'bg-green-900/30 border-green-700' },
   { value: 'medium',   label: 'Medium',   color: 'text-primary400', bg: 'bg-primary900/30 border-yellow-700' },
   { value: 'high',     label: 'High',     color: 'text-brand-red', bg: 'bg-brand-red900/30 border-orange-700' },
-  { value: 'critical', label: 'Critical', color: 'text-brand-red',    bg: 'bg-red-900/30 border-red-700' },
+  { value: 'critical', label: 'Critical', color: 'text-brand-red',    bg: 'bg-brand-red/80/30 border-red-700' },
 ] as const;
 
 const STATUS_BADGE: Record<Emergency['status'], string> = {
-  active:      'bg-red-900/50 text-brand-red border border-red-700',
+  active:      'bg-brand-red/80/50 text-brand-red border border-red-700',
   responding:  'bg-brand-red900/50 text-brand-red300 border border-orange-700',
   resolved:    'bg-green-900/50 text-primary border border-green-700',
   false_alarm: 'bg-brand-black text-[var(--neu-text-muted)] border border-black/[0.08]',
@@ -61,7 +61,7 @@ const SOURCE_LABEL: Record<EmergencySource, { icon: string; label: string }> = {
 const DISPATCH_BADGE: Record<DispatchStatus, string> = {
   pending:      'bg-primary900/40 text-primary border border-yellow-700',
   sent:         'bg-green-900/40 text-primary border border-green-700',
-  failed:       'bg-red-900/40 text-brand-red border border-red-700',
+  failed:       'bg-brand-red/80/40 text-brand-red border border-red-700',
   not_required: 'bg-brand-black text-[var(--neu-text-muted)] border border-black/[0.08]',
 };
 
@@ -227,7 +227,7 @@ export default function EmergencyPage() {
                       const typeInfo = EMERGENCY_TYPES.find((t) => t.value === em.type);
                       const src = em.source ? SOURCE_LABEL[em.source] : null;
                       return (
-                        <div key={em._id} className="flex items-center gap-3 rounded-xl border border-red-800/40 bg-red-950/20 px-4 py-3">
+                        <div key={em._id} className="flex items-center gap-3 rounded-xl border border-red-800/40 bg-brand-red/90/20 px-4 py-3">
                           <span className="text-lg">{typeInfo?.icon ?? '⚠️'}</span>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-[var(--neu-text-muted)] text-sm">{typeInfo?.label ?? em.type}</p>
@@ -293,7 +293,7 @@ export default function EmergencyPage() {
                         onClick={() => setType(t.value)}
                         className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition-colors ${
                           type === t.value
-                            ? 'border-brand-blue bg-blue-900/40 text-brand-blue'
+                            ? 'border-brand-blue bg-brand-blue/15 text-brand-blue'
                             : 'border-black/[0.08] bg-brand-black/40 text-[var(--neu-text-muted)] hover:border-black/[0.08]'
                         }`}
                       >
@@ -363,13 +363,13 @@ export default function EmergencyPage() {
                 </div>
 
                 {submitError && (
-                  <p className="rounded-xl bg-red-900/30 px-3 py-2 text-sm text-brand-red">{submitError}</p>
+                  <p className="rounded-xl bg-brand-red/80/30 px-3 py-2 text-sm text-brand-red">{submitError}</p>
                 )}
 
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full rounded-xl bg-red-600 py-3 font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                  className="w-full rounded-xl bg-brand-red py-3 font-semibold text-white transition-colors hover:bg-brand-red disabled:opacity-50"
                 >
                   {submitting ? '📡 Getting location & reporting…' : '🚨 Report Emergency'}
                 </button>

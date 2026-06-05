@@ -53,8 +53,8 @@ function StatusPill({ status, cancelledDuringPending }: { status: IncidentSummar
   const map: Record<IncidentSummary['status'], { label: string; cls: string }> = {
     pending:   { label: 'Pending',   cls: 'bg-primary700/40 text-primary200 border-yellow-600/50' },
     triggered: { label: 'Triggered', cls: 'bg-brand-red700/40 text-brand-red border-orange-600/50' },
-    active:    { label: 'Active',    cls: 'bg-red-700/40 text-brand-red border-red-600/50' },
-    resolved:  { label: 'Resolved',  cls: 'bg-green-700/40 text-primary border-green-600/50' },
+    active:    { label: 'Active',    cls: 'bg-brand-red/40 text-brand-red border-brand-red/50' },
+    resolved:  { label: 'Resolved',  cls: 'bg-brand-green-dark/40 text-primary border-green-600/50' },
     cancelled: {
       label: cancelledDuringPending ? 'Cancelled (no alert sent)' : 'Cancelled (false alarm)',
       cls: 'bg-slate-700/40 text-slate-200 border-slate-600/50',
@@ -113,7 +113,7 @@ export default function IncidentRecapPage() {
           </div>
         )}
         {error && (
-          <div className="rounded-lg bg-red-950/40 border border-red-700/50 px-3 py-2 text-sm text-brand-red">
+          <div className="rounded-lg bg-brand-red/90/40 border border-red-700/50 px-3 py-2 text-sm text-brand-red">
             {error}
           </div>
         )}

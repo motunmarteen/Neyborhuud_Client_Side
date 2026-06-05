@@ -50,22 +50,31 @@ export default function MyOrdersPage() {
     <LocalHuudSubpageShell hubId="marketplace">
       <div className="mod-card rounded-2xl p-4 space-y-6">
         {/* Tabs */}
-        <div className="flex gap-3 mb-6 flex-wrap">
+        <div role="tablist" aria-label="My marketplace" className="flex gap-1 mb-6 flex-wrap rounded-full border border-black/[0.05] bg-brand-surface/60 p-1">
           <button
+            type="button"
+            role="tab"
+            aria-selected="true"
             onClick={() => router.push("/marketplace/my-orders")}
-            className="px-5 py-2.5 bg-primary text-white rounded-full font-semibold"
+            className="segmented-tab segmented-tab--active px-5 py-2.5 rounded-full text-sm font-semibold active:scale-[0.97]"
           >
             My Orders
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected="false"
             onClick={() => router.push("/marketplace/my-sales")}
-            className="px-5 py-2.5 bg-brand-black/50 hover:bg-brand-black/50 rounded-full transition-all border border-black/[0.08]"
+            className="segmented-tab segmented-tab--inactive px-5 py-2.5 rounded-full text-sm font-semibold active:scale-[0.97]"
           >
             My Sales
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected="false"
             onClick={() => router.push("/marketplace/my-offers")}
-            className="px-5 py-2.5 bg-brand-black/50 hover:bg-brand-black/50 rounded-full transition-all border border-black/[0.08]"
+            className="segmented-tab segmented-tab--inactive px-5 py-2.5 rounded-full text-sm font-semibold active:scale-[0.97]"
           >
             My Offers
           </button>
@@ -129,7 +138,7 @@ export default function MyOrdersPage() {
                     </div>
                     <p className="text-xs text-white/50 mt-2 flex items-center gap-1">
                       <span className="material-symbols-outlined text-[12px]">schedule</span>
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Date(order.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                   </div>
 
@@ -140,7 +149,7 @@ export default function MyOrdersPage() {
                         e.stopPropagation();
                         router.push(`/chat/${order.conversationId}`);
                       }}
-                      className="px-4 py-2 bg-brand-blue hover:bg-blue-600 rounded-full text-sm font-semibold transition-all self-center flex items-center gap-2"
+                      className="px-4 py-2 bg-brand-blue hover:bg-brand-blue rounded-full text-sm font-semibold transition-all self-center flex items-center gap-2"
                     >
                       <span className="material-symbols-outlined text-[16px]">chat</span>
                       Chat

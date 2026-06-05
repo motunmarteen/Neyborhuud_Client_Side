@@ -17,14 +17,14 @@ export function SosGuardiansNotifiedCard({ notifyMeta, phase }: SosGuardiansNoti
   return (
     <div
       className={`mod-card rounded-2xl border p-4 ${
-        noneQueued ? 'border-amber-500/35 bg-amber-500/8' : 'border-primary/25 bg-primary/5'
+        noneQueued ? 'border-status-warning/35 bg-status-warning/8' : 'border-primary/25 bg-primary/5'
       }`}
     >
       <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">
         Guardian sharing
       </p>
       {noneQueued ? (
-        <p className="mt-2 text-sm leading-relaxed text-amber-800 dark:text-amber-200">
+        <p className="mt-2 text-sm leading-relaxed text-status-warning/90 dark:text-status-warning/80">
           No accepted guardians were queued. Add trusted contacts under Prepare so people get your
           location when SOS fires.
         </p>

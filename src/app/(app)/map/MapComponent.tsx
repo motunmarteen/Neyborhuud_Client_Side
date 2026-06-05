@@ -263,7 +263,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
                 animation: bluePulse 2.5s infinite;
               }
             </style>
-            <div class="self-map-marker w-4.5 h-4.5 rounded-full bg-blue-600 border-2 border-white shadow-md"></div>
+            <div class="self-map-marker w-4.5 h-4.5 rounded-full bg-brand-blue border-2 border-white shadow-md"></div>
           </div>
         `,
         className: '',
@@ -450,25 +450,27 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         )}
 
         {/* Floating Layer Switcher */}
-        <div className={`pointer-events-auto bg-white/90 border border-black/[0.08] rounded-full p-1 shadow-lg backdrop-blur-md flex ${embedded ? 'mx-auto' : ''}`}>
+        <div
+          role="tablist"
+          aria-label="Map layer"
+          className={`pointer-events-auto bg-white/90 border border-black/[0.08] rounded-full p-1 shadow-lg backdrop-blur-md flex gap-0.5 ${embedded ? 'mx-auto' : ''}`}
+        >
           <button
+            type="button"
+            role="tab"
+            aria-selected={layer === 'people' ? 'true' : 'false'}
             onClick={() => { setLayer('people'); setSelectedItem(null); }}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
-              layer === 'people'
-                ? 'bg-primary text-brand-black shadow-md'
-                : 'text-[var(--neu-text-muted)] hover:text-brand-black'
-            }`}
+            className={`segmented-tab ${layer === 'people' ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold active:scale-[0.97]`}
           >
             <span className="material-symbols-outlined text-[16px] fill-1">group</span>
             People
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={layer === 'places' ? 'true' : 'false'}
             onClick={() => { setLayer('places'); setSelectedItem(null); }}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
-              layer === 'places'
-                ? 'bg-primary text-brand-black shadow-md'
-                : 'text-[var(--neu-text-muted)] hover:text-brand-black'
-            }`}
+            className={`segmented-tab ${layer === 'places' ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold active:scale-[0.97]`}
           >
             <span className="material-symbols-outlined text-[16px] fill-1">location_city</span>
             Places

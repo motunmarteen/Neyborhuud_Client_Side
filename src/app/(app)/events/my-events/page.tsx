@@ -72,12 +72,12 @@ export default function MyEventsPage() {
               >
                 {t}
                 {t === "attending" && attendingList.length > 0 && (
-                  <span className="ml-1.5 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-1.5 bg-brand-blue text-white text-xs px-1.5 py-0.5 rounded-full">
                     {attendingList.length}
                   </span>
                 )}
                 {t === "organizing" && organizingList.length > 0 && (
-                  <span className="ml-1.5 bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-1.5 bg-brand-blue text-white text-xs px-1.5 py-0.5 rounded-full">
                     {organizingList.length}
                   </span>
                 )}
@@ -111,7 +111,7 @@ export default function MyEventsPage() {
                 {tab === "organizing" && (
                   <button
                     onClick={() => setBoostingEventId(event._id ?? event.id)}
-                    className="absolute bottom-4 left-4 z-10 flex items-center gap-1.5 rounded-full border border-amber-300/30 bg-primary/25 px-3 py-1.5 text-xs font-bold text-amber-100 shadow-lg backdrop-blur-md transition-all hover:bg-primary/35"
+                    className="absolute bottom-4 left-4 z-10 flex items-center gap-1.5 rounded-full border border-status-warning/30 bg-primary/25 px-3 py-1.5 text-xs font-bold text-status-warning/90 shadow-lg backdrop-blur-md transition-all hover:bg-primary/35"
                   >
                     Boost
                     {event.isBoosted && event.boostedUntil && (

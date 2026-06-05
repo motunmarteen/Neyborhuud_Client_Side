@@ -24,38 +24,38 @@ const STATUS_META: Record<
 > = {
   pending: {
     label: "Pending",
-    color: "bg-primary/15 text-amber-300 border-amber-500/30",
-    ring: "ring-amber-500/30",
+    color: "bg-status-warning/15 text-status-warning border-status-warning/30",
+    ring: "ring-status-warning/30",
     icon: "schedule",
   },
   accepted: {
     label: "Accepted",
-    color: "bg-primary/15 text-primary border-primary/30",
-    ring: "ring-primary/30",
+    color: "bg-status-success/15 text-status-success border-status-success/30",
+    ring: "ring-status-success/30",
     icon: "check_circle",
   },
   rejected: {
     label: "Declined",
-    color: "bg-brand-red/15 text-brand-red border-brand-red/30",
-    ring: "ring-brand-red/30",
+    color: "bg-status-danger/15 text-status-danger border-status-danger/30",
+    ring: "ring-status-danger/30",
     icon: "cancel",
   },
   countered: {
     label: "Countered",
-    color: "bg-brand-blue/15 text-purple-300 border-purple-500/30",
-    ring: "ring-purple-500/30",
+    color: "bg-status-info/15 text-status-info border-status-info/30",
+    ring: "ring-status-info/30",
     icon: "swap_horiz",
   },
   expired: {
     label: "Expired",
-    color: "bg-brand-surface/15 text-[var(--neu-text-muted)] border-black/[0.08]/30",
-    ring: "ring-gray-500/30",
+    color: "bg-status-neutral/10 text-status-neutral border-status-neutral/20",
+    ring: "ring-status-neutral/20",
     icon: "timer_off",
   },
   cancelled: {
     label: "Cancelled",
-    color: "bg-brand-surface/15 text-[var(--neu-text-muted)] border-black/[0.08]/30",
-    ring: "ring-gray-600/30",
+    color: "bg-status-neutral/10 text-status-neutral border-status-neutral/20",
+    ring: "ring-status-neutral/20",
     icon: "block",
   },
 };
@@ -71,7 +71,7 @@ function formatRelative(dateStr?: string) {
   if (hrs < 24) return `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
   if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString();
+  return date.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export default function MyOffersPage() {
@@ -177,59 +177,66 @@ export default function MyOffersPage() {
     <LocalHuudSubpageShell hubId="marketplace">
       <div className="mod-card rounded-2xl p-4 space-y-6">
         {/* Top Navigation Tabs */}
-        <div className="flex gap-3 mb-6 flex-wrap">
+        <div role="tablist" aria-label="My marketplace" className="flex gap-1 mb-6 flex-wrap rounded-full border border-black/[0.05] bg-brand-surface/60 p-1">
           <button
+            type="button"
+            role="tab"
+            aria-selected="false"
             onClick={() => router.push("/marketplace/my-orders")}
-            className="px-5 py-2.5 bg-brand-black/50 hover:bg-brand-black/50 rounded-full transition-all border border-black/[0.08]"
+            className="segmented-tab segmented-tab--inactive px-5 py-2.5 rounded-full text-sm font-semibold active:scale-[0.97]"
           >
             My Orders
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected="false"
             onClick={() => router.push("/marketplace/my-sales")}
-            className="px-5 py-2.5 bg-brand-black/50 hover:bg-brand-black/50 rounded-full transition-all border border-black/[0.08]"
+            className="segmented-tab segmented-tab--inactive px-5 py-2.5 rounded-full text-sm font-semibold active:scale-[0.97]"
           >
             My Sales
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected="true"
             onClick={() => router.push("/marketplace/my-offers")}
-            className="px-5 py-2.5 bg-primary text-white rounded-full font-semibold"
+            className="segmented-tab segmented-tab--active px-5 py-2.5 rounded-full text-sm font-semibold active:scale-[0.97]"
           >
             My Offers
           </button>
         </div>
 
         {/* All / Sent / Received Tabs */}
-        <div className="flex gap-2 mb-4 bg-brand-black/50 p-1.5 rounded-2xl border border-black/[0.08]">
+        <div role="tablist" aria-label="Offer direction" className="flex gap-1 mb-4 bg-brand-surface/60 p-1 rounded-full border border-black/[0.05]">
           {(
             [
               { id: "all" as const, label: "All", count: sentOffers.length + receivedOffers.length },
               { id: "sent" as const, label: "Sent", count: sentOffers.length },
               { id: "received" as const, label: "Received", count: receivedOffers.length },
             ]
-          ).map((t) => (
+          ).map((t) => {
+            const active = tab === t.id;
+            return (
             <button
               key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={active ? 'true' : 'false'}
               onClick={() => {
                 setTab(t.id);
                 setStatusFilter("all");
                 setSelectedOffer(null);
               }}
-              className={`flex-1 py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                tab === t.id
-                  ? "bg-primary text-white"
-                  : "text-[var(--neu-text-muted)] hover:text-white"
-              }`}
+              className={`segmented-tab ${active ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex-1 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.97]`}
             >
               <span>{t.label}</span>
-              <span
-                className={`text-[11px] px-1.5 rounded-full ${
-                  tab === t.id ? "bg-white/20" : "bg-brand-black"
-                }`}
-              >
+              <span className="segmented-tab__count text-[11px] px-1.5 rounded-full font-bold">
                 {t.count}
               </span>
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {/* Status Filter Chips */}
@@ -521,7 +528,7 @@ function OfferCard({
               <PriceCell
                 label={tab === "sent" ? "Seller counter" : "Your counter"}
                 value={counterAmt}
-                accent="text-purple-300"
+                accent="text-brand-blue"
               />
             )}
           </div>
@@ -598,14 +605,14 @@ function OfferCard({
           </button>
           <button
             onClick={() => setSelectedOffer(offer.id)}
-            className="flex-1 py-2.5 bg-brand-blue hover:bg-purple-600 rounded-full font-semibold transition-all text-sm sm:text-base"
+            className="flex-1 py-2.5 bg-brand-blue hover:bg-brand-blue/90 rounded-full font-semibold transition-all text-sm sm:text-base"
           >
             Counter
           </button>
           <button
             onClick={() => handleResponse("reject")}
             disabled={respondToOffer.isPending}
-            className="flex-1 py-2.5 bg-brand-red hover:bg-red-600 disabled:bg-brand-surface rounded-full font-semibold transition-all text-sm sm:text-base"
+            className="flex-1 py-2.5 bg-brand-red hover:bg-brand-red/85 disabled:bg-brand-surface rounded-full font-semibold transition-all text-sm sm:text-base"
           >
             Decline
           </button>
@@ -649,7 +656,7 @@ function OfferCard({
             <button
               onClick={() => handleResponse("counter")}
               disabled={respondToOffer.isPending || !counterAmount}
-              className="flex-1 py-2.5 bg-brand-blue hover:bg-purple-600 disabled:bg-brand-surface rounded-full font-semibold transition-all"
+              className="flex-1 py-2.5 bg-brand-blue hover:bg-brand-blue/90 disabled:bg-brand-surface rounded-full font-semibold transition-all"
             >
               {respondToOffer.isPending ? "Sending..." : "Send Counter"}
             </button>
@@ -683,7 +690,7 @@ function OfferCard({
         {offer.conversationId && (
           <button
             onClick={() => router.push(`/chat/${offer.conversationId}`)}
-            className="flex flex-1 items-center justify-center gap-2 rounded-full border border-blue-600/50 py-2 text-sm font-medium text-brand-blue hover:bg-blue-900/30 transition-colors"
+            className="flex flex-1 items-center justify-center gap-2 rounded-full border border-brand-blue/50 py-2 text-sm font-medium text-brand-blue hover:bg-brand-blue/10 transition-colors"
           >
             <span className="material-symbols-outlined text-[16px]">chat</span>
             {tab === "sent"

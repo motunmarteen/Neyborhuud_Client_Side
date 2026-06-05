@@ -191,7 +191,7 @@ export default function VerifyLocationPage() {
         </div>
 
         <div className="auth-flow-notice auth-flow-notice--info">
-          <i className="bi bi-lightbulb-fill shrink-0 text-brand-amber" aria-hidden />
+          <i className="bi bi-lightbulb-fill shrink-0 text-status-warning" aria-hidden />
           <span>
             Seeing &ldquo;too far&rdquo;? Try moving near a window or stepping outside. Admins can adjust area
             boundaries after running{' '}

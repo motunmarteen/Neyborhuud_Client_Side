@@ -72,19 +72,19 @@ export const TRUST_TIERS: TrustTierInfo[] = BASE_TRUST_TIERS.map((tier) => ({
   ...tier,
   color:
     tier.tier === "seedling"
-      ? "text-emerald-700"
+      ? "text-status-success"
       : tier.tier === "sapling"
       ? "text-teal-700"
       : tier.tier === "tree"
-      ? "text-green-700"
+      ? "text-status-success"
       : "text-primary700",
   bg:
     tier.tier === "seedling"
-      ? "bg-emerald-50 border-emerald-200"
+      ? "bg-status-success/10 border-status-success/30"
       : tier.tier === "sapling"
       ? "bg-teal-50 border-teal-200"
       : tier.tier === "tree"
-      ? "bg-green-50 border-green-200"
+      ? "bg-status-success/10 border-status-success/30"
       : "bg-primary50 border-lime-200",
 }));
 

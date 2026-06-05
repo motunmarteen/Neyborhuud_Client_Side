@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
 import { useSos } from '@/hooks/useSos';
+import { useNeighborhoodEmergency } from '@/hooks/useNeighborhoodEmergency';
 import { AppNavIcon, type AppNavIconName } from '@/components/navigation/AppNavIcon';
 import { LocalHuudBottomSheet } from '@/components/navigation/LocalHuudBottomSheet';
 import { isLocalHuudPath } from '@/lib/localHuudLinks';
@@ -29,6 +30,7 @@ export function BottomNav({ hidden: hiddenProp }: BottomNavProps) {
   const hidden = hiddenProp ?? scrollHidden;
   const router = useRouter();
   const sos = useSos();
+  const hasNeighborhoodEmergency = useNeighborhoodEmergency();
   const [localHuudOpen, setLocalHuudOpen] = useState(false);
 
   useEffect(() => {
@@ -134,7 +136,7 @@ export function BottomNav({ hidden: hiddenProp }: BottomNavProps) {
           aria-label="SOS — tap to open command center, long-press for silent SOS"
         >
           <span
-            className={`app-bottomnav__sos-ring ${sos.phase !== 'idle' ? 'app-bottomnav__sos-ring--live' : 'app-bottomnav__sos-ring--idle'}`}
+            className={`app-bottomnav__sos-ring ${(sos.phase !== 'idle' || hasNeighborhoodEmergency) ? 'app-bottomnav__sos-ring--live' : 'app-bottomnav__sos-ring--idle'}`}
             aria-hidden
           />
           <AppNavIcon name="sos" />

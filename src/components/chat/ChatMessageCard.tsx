@@ -75,7 +75,7 @@ function EventCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
     <CardShell icon="📅" label="Event" color="bg-purple-900" mine={mine} msg={msg}>
       <p className="font-semibold text-sm text-[var(--neu-text-muted)]">{title ?? msg.content}</p>
-      {time && <p className="text-xs text-purple-300">{new Date(time).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })}</p>}
+      {time && <p className="text-xs text-status-info">{new Date(time).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })}</p>}
       {eventId && <p className="text-[10px] text-[var(--neu-text-muted)] mt-0.5">ID: {eventId}</p>}
     </CardShell>
   );
@@ -95,7 +95,7 @@ function MarketplaceCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 function ContactCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const { name, phone } = msg.meta ?? {};
   return (
-    <CardShell icon="👤" label="Contact" color="bg-blue-900" mine={mine} msg={msg}>
+    <CardShell icon="👤" label="Contact" color="bg-brand-blue/30" mine={mine} msg={msg}>
       <p className="font-semibold text-sm text-[var(--neu-text-muted)]">{name ?? msg.content}</p>
       {phone && (
         <a href={`tel:${phone}`} className="text-xs text-brand-blue hover:underline">{phone}</a>

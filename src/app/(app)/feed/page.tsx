@@ -431,16 +431,26 @@ function XFeedInner() {
                             )}
 
                         {missedAlerts && missedAlerts.count > 0 && (
-                            <div className="mod-card rounded-2xl px-4 py-3 border border-brand-red/15">
+                            <div
+                                className="rounded-2xl px-4 py-3.5 animate-fade-in"
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(255,0,0,0.06), rgba(255,255,255,0.9))',
+                                    border: '1px solid rgba(255,0,0,0.16)',
+                                    boxShadow: '0 4px 16px rgba(255,0,0,0.06)',
+                                }}
+                            >
                                 <div className="flex items-start gap-3">
-                                    <div className="mod-inset rounded-xl size-10 shrink-0 flex items-center justify-center text-brand-red">
-                                        <span className="material-symbols-outlined text-xl">warning</span>
+                                    <div
+                                        className="rounded-xl size-10 shrink-0 flex items-center justify-center text-brand-red"
+                                        style={{ background: 'rgba(255,0,0,0.1)' }}
+                                    >
+                                        <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: '"FILL" 1' }}>shield</span>
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
                                             {missedAlerts.count === 1
-                                                ? 'You missed 1 nearby alert'
-                                                : `You missed ${missedAlerts.count} nearby alerts`}
+                                                ? '1 nearby alert while you were away'
+                                                : `${missedAlerts.count} nearby alerts while you were away`}
                                         </p>
                                         <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
                                             Highest severity: {missedAlerts.highestSeverity}. Areas: {missedAlerts.lgas.join(', ')}.
@@ -498,16 +508,29 @@ function XFeedInner() {
                         )}
 
                         {!isLoading && !isError && location && mergedFeed.length === 0 && timeline.length === 0 && (
-                            <div className="flex flex-col items-center justify-center py-12 px-5 mod-card rounded-2xl">
-                                <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
-                                    <span className="material-symbols-outlined text-3xl" style={{ color: 'var(--neu-text-muted)' }}>inbox</span>
+                            <div className="flex flex-col items-center justify-center py-14 px-6 mod-card rounded-3xl text-center">
+                                <div
+                                    className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5 animate-scale-in"
+                                    style={{
+                                        background: 'linear-gradient(140deg, rgba(0,212,49,0.14), rgba(0,111,53,0.08))',
+                                        border: '1px solid rgba(0,111,53,0.12)',
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined text-4xl text-brand-green-dark" style={{ fontVariationSettings: '"FILL" 1' }}>waving_hand</span>
                                 </div>
-                                <p className="text-sm text-center" style={{ color: 'var(--neu-text-secondary)' }}>
+                                <p className="text-base font-bold" style={{ color: 'var(--neu-text)' }}>
                                     {t('feed.noPostsTitle')}
                                 </p>
-                                <p className="text-xs text-center mt-2" style={{ color: 'var(--neu-text-muted)' }}>
+                                <p className="text-sm mt-2 max-w-xs" style={{ color: 'var(--neu-text-muted)' }}>
                                     {t('feed.noPostsSubtitle')}
                                 </p>
+                                <button
+                                    type="button"
+                                    onClick={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
+                                    className="btn-glass-primary mt-6 px-6 py-3 text-xs"
+                                >
+                                    Start a conversation
+                                </button>
                             </div>
                         )}
                             </div>
@@ -592,11 +615,15 @@ function XFeedInner() {
                             </div>
                             )}
 
-                        {/* Load More Trigger */}
+                        {/* Load More Trigger — branded pulsing dots, no generic spinner */}
                         {hasNextPage && (
-                            <div ref={loadMoreRef} className="flex justify-center py-4">
+                            <div ref={loadMoreRef} className="flex justify-center py-5">
                                 {isFetchingNextPage && (
-                                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="flex items-center gap-1.5" aria-label="Loading more">
+                                        <span className="h-2 w-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: '0ms' }} />
+                                        <span className="h-2 w-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: '180ms' }} />
+                                        <span className="h-2 w-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: '360ms' }} />
+                                    </div>
                                 )}
                             </div>
                         )}

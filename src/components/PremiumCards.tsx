@@ -11,8 +11,8 @@ const TIERS = [
     id: "bronze" as const,
     name: "Bronze",
     coinsRequired: 0,
-    borderColor: "border-amber-700",
-    badgeClass: "bg-amber-900/40 text-primary",
+    borderColor: "border-status-warning/70",
+    badgeClass: "bg-status-warning/15 text-primary",
     progressColor: "bg-primary",
     icon: "🥉",
     features: [
@@ -111,10 +111,10 @@ export function PremiumCards({ currentTier }: Props) {
     <div className="space-y-8">
 
       {/* ── Earn-based explanation banner ─────────────────────────────── */}
-      <div className="rounded-2xl border border-amber-500/30 bg-primary/5 px-6 py-5 flex items-start gap-4">
+      <div className="rounded-2xl border border-status-warning/30 bg-primary/5 px-6 py-5 flex items-start gap-4">
         <span className="text-3xl mt-0.5">🪙</span>
         <div>
-          <h3 className="font-bold text-amber-300 text-base">Tiers are earned, not bought</h3>
+          <h3 className="font-bold text-status-warning text-base">Tiers are earned, not bought</h3>
           <p className="text-[var(--neu-text-muted)] text-sm mt-1 leading-relaxed">
             NeyborHuud is free for everyone. Your tier badge is automatically upgraded as you
             accumulate HuudCoins through platform activity — no payment, no subscription.

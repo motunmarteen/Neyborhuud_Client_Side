@@ -627,7 +627,7 @@ function SignupPageContent() {
                         }}
                         className="auth-btn auth-btn-primary"
                     >
-                        <span>{getNeedsCommunitySelection() ? 'Pick your Huud' : 'Continue'}</span>
+                        <span>{getNeedsCommunitySelection() ? 'Pick your Huud' : 'Enter my Huud'}</span>
                         <i className="bi bi-arrow-right shrink-0" aria-hidden />
                     </button>
                 }
@@ -641,7 +641,7 @@ function SignupPageContent() {
                         <span className="text-3xl font-black leading-none">
                             {signupCoinBalance ?? '—'}
                         </span>
-                        <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
+                        <i className="bi bi-coin text-xl text-status-warning" aria-hidden />
                     </div>
                 </div>
                 {signupCoinBalance === null ? (
@@ -776,7 +776,7 @@ function SignupPageContent() {
                                     disabled={!canContinueLocation}
                                     className="auth-btn auth-btn-primary disabled:opacity-40"
                                 >
-                                    <span>Continue</span>
+                                    <span>Confirm my street</span>
                                     <i className="bi bi-arrow-right shrink-0" aria-hidden />
                                 </button>
                             </div>
@@ -856,7 +856,7 @@ function SignupPageContent() {
                                     disabled={!canContinueIdentity}
                                     className="auth-btn auth-btn-primary"
                                 >
-                                    <span>Continue</span>
+                                    <span>Set up my profile</span>
                                     <i className="bi bi-arrow-right shrink-0" aria-hidden />
                                 </button>
                             </div>

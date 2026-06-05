@@ -4,6 +4,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 html { color-scheme: light; }
+html.dark { color-scheme: dark; }
 
 /* ── Accessibility — font size tiers ── */
 .text-size-sm { font-size: 14px; }
@@ -34,7 +35,7 @@ html { color-scheme: light; }
      Never use a colour outside this set.
      ═══════════════════════════════════════════════════
      #00D431  Primary Green   — main brand, CTAs, highlights
-     #0000FF  Brand Blue      — links, info, secondary actions
+     #1A56FF  Brand Blue      — links, info, secondary actions (refined cobalt)
      #E9F6E6  Surface Green   — light backgrounds, cards, surfaces
      #FF0000  Brand Red       — danger, SOS, errors, destructive
      #006F35  Dark Green      — deep accents, FABs, hover states
@@ -42,16 +43,16 @@ html { color-scheme: light; }
      ═══════════════════════════════════════════════════ */
   --primary:          #00D431;
   --neon-green:       #00D431;
-  --brand-blue:       #0000FF;
+  --brand-blue:       #1A56FF;
   --brand-surface:    #E9F6E6;
   --brand-red:        #FF0000;
   --brand-green-dark: #006F35;
   --brand-black:      #1A1A1A;
 
-  /* Light mode */
-  --background-light:     #FFFFFF;
-  --surface-light:        #E9F6E6;
-  --border-light:         #C8E8C8;
+  /* Light mode — soft warm off-white foundation (avoids harsh pure white) */
+  --background-light:     #F6FAF6;
+  --surface-light:        #EDF5EA;
+  --border-light:         #D4E8D0;
   --text-primary-light:   #1A1A1A;
   --text-secondary-light: #3D5A3E;
 
@@ -63,10 +64,18 @@ html { color-scheme: light; }
   --text-primary-dark:    #E9F6E6;
   --text-secondary-dark:  #8FBC8F;
 
+  /* Semantic state tokens */
+  --status-success:  #00D431;
+  --status-warning:  #F59E0B;
+  --status-danger:   #E8271A;
+  --status-info:     #1A56FF;
+  --status-pending:  #F59E0B;
+  --status-neutral:  #6B7280;
+
   /* Legacy compat */
   --charcoal: #1A1A1A;
   --deep-text: #1A1A1A;
-  --soft-bg: #FFFFFF;
+  --soft-bg: #F6FAF6;
 
   /* Theme Mapping */
   --background: var(--background-light);
@@ -87,17 +96,27 @@ html { color-scheme: light; }
   /* Official brand palette — Tailwind utility classes */
   --color-primary:          #00D431;
   --color-neon-green:       #00D431;
-  --color-brand-blue:       #0000FF;
+  --color-brand-blue:       #1A56FF;
   --color-brand-surface:    #E9F6E6;
   --color-brand-red:        #FF0000;
   --color-brand-green-dark: #006F35;
   --color-brand-black:      #1A1A1A;
 
-  /* Compatibility aliases — map old tokens to brand colours so
-     existing tsx using brand-amber / brand-purple doesn't break.
-     Migrate usages to the official tokens over time (see DESIGN.md). */
-  --color-brand-amber:  #00D431;
-  --color-brand-purple: #0000FF;
+
+  /* ── Elevation shadow scale — xs→xl for cards, sheets, modals, nav ── */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 6px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,0.13), 0 4px 16px rgba(0,0,0,0.07);
+
+  /* ── Semantic state tokens — use these for status badges, alerts, indicators ── */
+  --color-status-success:  #00D431;
+  --color-status-warning:  #F59E0B;
+  --color-status-danger:   #E8271A;
+  --color-status-info:     #1A56FF;
+  --color-status-pending:  #F59E0B;
+  --color-status-neutral:  #6B7280;
 
   --color-charcoal:  var(--charcoal);
   --color-deep-text: var(--deep-text);
@@ -109,13 +128,13 @@ html { color-scheme: light; }
   --color-accent:     var(--brand-red);
 
   /* Surface & border tokens */
-  --color-background-light:    #FFFFFF;
+  --color-background-light:    #F6FAF6;
   --color-background-dark:     #0D1A0F;
   --color-surface-dark:        #132218;
-  --color-surface-light:       #E9F6E6;
+  --color-surface-light:       #EDF5EA;
   --color-surface-base-dark:   #0A1209;
   --color-border-dark:         #1E3A22;
-  --color-border-light:        #C8E8C8;
+  --color-border-light:        #D4E8D0;
   --color-text-secondary-dark: #8FBC8F;
   --color-text-secondary-light:#3D5A3E;
 
@@ -128,7 +147,7 @@ html { color-scheme: light; }
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --viewport-bottom-inset: 0px;
-  --app-bottomnav-inner-height: 3.5rem;
+  --app-bottomnav-inner-height: 3.75rem;
   --app-bottomnav-sos-size: 4.25rem;
   --app-bottomnav-sos-icon-size: 2rem;
   --app-topnav-height: 4.25rem;
@@ -139,25 +158,57 @@ html { color-scheme: light; }
   --app-nav-bottom: calc(var(--app-bottomnav-inner-height) + (var(--app-bottomnav-sos-size) / 2) + var(--safe-bottom));
   --app-scroll-bottom: calc(var(--app-nav-bottom) + var(--viewport-bottom-inset));
   --app-topnav-offset: calc(var(--app-topnav-height) + var(--safe-top));
+
+  /* ── Typography scale ────────────────────────────────────────────────────── */
+  /* 6 named type roles — use these instead of arbitrary px/rem sizes.          */
+  --text-caption:    0.625rem;   /* 10px  — badges, chip labels, eyebrows      */
+  --text-label:      0.6875rem;  /* 11px  — secondary meta, timestamps         */
+  --text-body-sm:    0.8125rem;  /* 13px  — compact body, list items           */
+  --text-body:       0.875rem;   /* 14px  — default body copy                  */
+  --text-subheading: 1rem;       /* 16px  — section subheadings                */
+  --text-heading:    1.125rem;   /* 18px  — page/card headings                 */
 }
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   color: var(--foreground);
   background-color: var(--background);
-  background-image: url('/doodle-pattern.svg?v=2');
-  background-repeat: repeat;
-  background-size: 360px 360px;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
   font-style: normal;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.3s ease, color 0.2s ease;
   min-height: var(--app-height);
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
+  /* Crisp text rendering on all devices */
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Type-scale utility classes ──────────────────────────────────────────────
+   Maps the 6 named type tokens to usable classes. Use these instead of
+   arbitrary text-[Xpx] values so spacing and size stay globally adjustable.  */
+.type-caption    { font-size: var(--text-caption);    line-height: 1.2; }
+.type-label      { font-size: var(--text-label);      line-height: 1.3; }
+.type-body-sm    { font-size: var(--text-body-sm);    line-height: 1.45; }
+.type-body       { font-size: var(--text-body);       line-height: 1.55; }
+.type-subheading { font-size: var(--text-subheading); line-height: 1.4; }
+.type-heading    { font-size: var(--text-heading);    line-height: 1.3; }
+
+/* Doodle pattern at 4% opacity — adds neighbourhood texture without competing with content */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url('/doodle-pattern.svg?v=2');
+  background-repeat: repeat;
+  background-size: 360px 360px;
+  opacity: 0.04;
+  pointer-events: none;
 }
 
 /** Material Symbols — must override inherited display font on body */
@@ -326,11 +377,14 @@ main.feed-scroll-main,
 }
 
 .app-topnav--solid {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(20px) saturate(1.35);
-  -webkit-backdrop-filter: blur(20px) saturate(1.35);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 4px 24px rgba(0, 0, 0, 0.04);
+  background: rgba(246, 250, 246, 0.92);
+  backdrop-filter: blur(28px) saturate(1.55);
+  -webkit-backdrop-filter: blur(28px) saturate(1.55);
+  border-bottom: 1px solid rgba(0, 111, 53, 0.07);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.92) inset,
+    0 4px 32px rgba(0, 0, 0, 0.05),
+    0 1px 0 rgba(0, 111, 53, 0.04);
 }
 
 .app-topnav--sky {
@@ -453,22 +507,24 @@ main.feed-scroll-main,
 
 .app-topnav__badge {
   position: absolute;
-  top: 0.35rem;
-  right: 0.35rem;
-  min-width: 1rem;
-  height: 1rem;
+  top: 0.25rem;
+  right: 0.25rem;
+  min-width: 1.0625rem;
+  height: 1.0625rem;
   padding-inline: 0.2rem;
   border-radius: 999px;
   background: var(--primary);
-  border: 2px solid #fff;
+  border: 2px solid #F6FAF6;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.5625rem;
-  font-weight: 800;
+  font-size: 0.625rem;
+  font-weight: 900;
   line-height: 1;
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 111, 53, 0.35);
+  color: #0a1a0f;
+  box-shadow:
+    0 2px 8px rgba(0, 212, 49, 0.42),
+    0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .app-topnav--sky .app-topnav__badge {
@@ -487,14 +543,15 @@ main.feed-scroll-main,
   pointer-events: auto;
   width: 100%;
   padding-bottom: env(safe-area-inset-bottom);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(246, 250, 246, 0.94);
+  backdrop-filter: blur(32px) saturate(1.6);
+  -webkit-backdrop-filter: blur(32px) saturate(1.6);
+  border-top: 1px solid rgba(0, 111, 53, 0.08);
   box-shadow:
-    0 -1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 -8px 32px rgba(0, 0, 0, 0.06);
-  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    0 -1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -8px 40px rgba(0, 0, 0, 0.06),
+    0 -1px 0 rgba(0, 111, 53, 0.04);
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
   overflow: visible;
 }
 
@@ -508,9 +565,9 @@ main.feed-scroll-main,
   justify-content: space-between;
   width: 100%;
   height: var(--app-bottomnav-inner-height);
-  padding-inline: 0.5rem;
+  padding-inline: 0.25rem;
   margin: 0;
-  gap: 0.125rem;
+  gap: 0;
 }
 
 .app-bottomnav__center {
@@ -526,20 +583,20 @@ main.feed-scroll-main,
 
 .app-bottomnav__item {
   position: relative;
-  flex: 0 0 auto;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  gap: 0.15rem;
   min-width: 0;
   height: 100%;
   margin: 0;
-  padding: 0.25rem;
+  padding: 0.25rem 0.125rem;
   text-decoration: none;
-  color: rgba(26, 26, 26, 0.55);
+  color: rgba(26, 26, 26, 0.48);
   touch-action: manipulation;
-  transition: color 160ms ease;
+  transition: color 160ms ease, opacity 160ms ease;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -562,6 +619,26 @@ button.app-bottomnav__item {
   color: var(--brand-green-dark);
 }
 
+/* Active indicator pill above icon */
+.app-bottomnav__item--active::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.75rem;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 212, 49, 0.4);
+  animation: app-nav-indicator-in 200ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes app-nav-indicator-in {
+  from { opacity: 0; transform: translateX(-50%) scaleX(0.4); }
+  to   { opacity: 1; transform: translateX(-50%) scaleX(1); }
+}
+
 .app-bottomnav__icon-wrap {
   display: flex;
   align-items: center;
@@ -573,8 +650,8 @@ button.app-bottomnav__item {
 }
 
 .app-bottomnav__item .app-nav-icon-shell {
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
 }
 
 .app-bottomnav__item--active .app-nav-icon-shell {
@@ -586,7 +663,14 @@ button.app-bottomnav__item {
 }
 
 .app-bottomnav__label {
-  display: none;
+  display: block;
+  font-size: 0.625rem; /* 10px — up from 9px for WCAG SC 1.4.4 legibility */
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: inherit;
+  white-space: nowrap;
+  transition: opacity 160ms ease;
 }
 
 .app-bottomnav__profile {
@@ -626,16 +710,17 @@ button.app-bottomnav__item {
   justify-content: center;
   width: var(--app-bottomnav-sos-size);
   height: var(--app-bottomnav-sos-size);
-  border: 2px solid #fff;
+  border: 2.5px solid rgba(255, 255, 255, 0.95);
   border-radius: 999px;
-  background: linear-gradient(145deg, #ff3333 0%, var(--brand-red) 48%, #cc0000 100%);
+  background: radial-gradient(circle at 38% 30%, #ff4444 0%, #ff0000 50%, #cc0000 100%);
   box-shadow:
-    0 6px 20px rgba(255, 0, 0, 0.38),
-    0 2px 6px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    0 8px 24px rgba(255, 0, 0, 0.42),
+    0 3px 8px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
   touch-action: manipulation;
   user-select: none;
-  transition: box-shadow 200ms ease;
+  transition: box-shadow 200ms ease, transform 150ms ease;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -647,7 +732,11 @@ button.app-bottomnav__item {
 }
 
 .app-bottomnav__sos-btn:active {
-  opacity: 1;
+  transform: scale(0.93);
+  box-shadow:
+    0 4px 12px rgba(255, 0, 0, 0.38),
+    0 1px 4px rgba(0, 0, 0, 0.12),
+    inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .app-bottomnav__sos-btn--active {
@@ -792,8 +881,9 @@ button.app-bottomnav__item {
 }
 
 .app-bottomnav__sos-ring--idle {
-  background: rgba(255, 0, 0, 0.08);
-  animation: app-bottomnav-sos-pulse 2.5s ease-in-out infinite;
+  background: rgba(255, 0, 0, 0.06);
+  /* Static — pulse reserved for active emergencies only, preventing alert fatigue */
+  animation: none;
 }
 
 .app-bottomnav__sos-ring--live {
@@ -826,13 +916,15 @@ button.app-bottomnav__item {
   z-index: 1;
   width: 100%;
   max-width: 32rem;
-  max-height: min(78vh, 36rem);
-  margin-bottom: calc(var(--app-nav-bottom, 4.25rem) - 0.5rem);
-  padding: 0.75rem 1rem 1.25rem;
-  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
-  border-radius: 1.25rem 1.25rem 0 0;
-  background: var(--neu-bg, #ffffff);
-  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.14);
+  max-height: min(82vh, 38rem);
+  /* Sheet is a full-screen overlay above the bottom nav — sit flush to the
+     screen edge (only clear the home indicator), not above the nav. */
+  margin-bottom: 0;
+  padding: 0.75rem 1rem 1rem;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: #F6FAF6;
+  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.12), 0 -1px 0 rgba(0, 111, 53, 0.06);
   overflow-y: auto;
   animation: local-huud-sheet-up 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -942,6 +1034,10 @@ button.app-bottomnav__item {
   line-height: 1.2;
   text-align: center;
   letter-spacing: -0.02em;
+  color: #1A1A1A; /* Explicit near-black for WCAG AA on green-tinted surface */
+}
+.dark .local-huud-sheet__tile-label {
+  color: var(--text-primary-dark);
 }
 
 @keyframes local-huud-sheet-up {
@@ -1080,8 +1176,8 @@ html[data-landing='true'] .app-shell {
   --landing-green-deep: #006f35;
   --landing-green-soft: rgba(0, 212, 49, 0.28);
   --landing-green-deep-soft: rgba(0, 111, 53, 0.42);
-  --landing-blue: #0000ff;
-  --landing-blue-whisper: rgba(0, 0, 255, 0.08);
+  --landing-blue: #1a56ff;
+  --landing-blue-whisper: rgba(26, 86, 255, 0.08);
   --landing-text-on-green: #0a1a0f;
   /* Headlines live in the bottom 50% */
   --landing-headline-size: clamp(3.5rem, min(28vw, 7.25svh), 9rem);
@@ -1403,7 +1499,7 @@ html[data-landing='true'] .app-shell {
 /** Auth flows (signup / login) — landing-aligned CTAs on light surfaces */
 html[data-auth='true'],
 html[data-auth='true'] body {
-  background-color: #f3faf1 !important;
+  background-color: #F6FAF6 !important;
   background-image: none !important;
 }
 
@@ -1468,9 +1564,11 @@ html[data-auth='true'] .neu-base {
 }
 
 .auth-step--active {
-  background-color: var(--landing-green, #00d431);
-  color: var(--landing-text-on-green, #0a1a0f);
-  box-shadow: 0 12px 24px rgba(0, 111, 53, 0.22);
+  background: linear-gradient(140deg, #00d431 0%, #00b82a 55%, #009922 100%);
+  color: #ffffff;
+  box-shadow:
+    0 4px 14px rgba(0, 212, 49, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .auth-step--done:not(.auth-step--active) {
@@ -1577,12 +1675,12 @@ html[data-auth='signup-map'] .neu-base {
 .auth-signup-bottom-sheet__footer,
 .auth-overlay-sheet-host .auth-signup-bottom-sheet {
   --auth-sheet-bg: #ffffff;
-  --auth-sheet-border: rgba(26, 26, 26, 0.06);
-  --neu-bg: #f8fcf8;
+  --auth-sheet-border: rgba(0, 111, 53, 0.07);
+  --neu-bg: #F6FAF6;
   --neu-text: #1a1a1a;
   --neu-text-secondary: #2e502e;
   --neu-text-muted: #5a825a;
-  --neu-shadow-dark: #c2dec2;
+  --neu-shadow-dark: #c8dfca;
   --neu-shadow-light: #ffffff;
   color: #1a1a1a;
 }
@@ -1620,7 +1718,7 @@ html[data-auth='profile-map'] .profile-auth-page-root {
 }
 
 html[data-auth='profile-map'] .profile-auth-page-root .profile-auth-scroll {
-  background: #ffffff;
+  background: #F6FAF6;
   padding-bottom: var(--app-scroll-bottom);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
@@ -1638,7 +1736,7 @@ html[data-auth='profile-map'] .neu-base {
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  background: #ffffff;
+  background: #F6FAF6;
 }
 
 .auth-signup-actions--row {
@@ -1740,7 +1838,7 @@ html[data-auth='profile-map'] .neu-base {
   z-index: 2;
   height: 2.5rem;
   pointer-events: none;
-  background: linear-gradient(to bottom, transparent, #ffffff);
+  background: linear-gradient(to bottom, transparent, #F6FAF6);
 }
 
 .profile-auth-map-stage--empty {
@@ -2008,7 +2106,7 @@ html[data-auth='profile-map'] .neu-base {
   height: 1rem;
   border-radius: 9999px;
   background: var(--landing-green, #00d431);
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   color: #0a1a0f;
   display: flex;
@@ -2090,7 +2188,7 @@ html[data-auth='profile-map'] .neu-base {
   right: 0.5rem;
   bottom: calc(max(env(safe-area-inset-bottom, 0px), 0px) + 5.5rem);
   max-width: min(11rem, 42vw);
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   opacity: 0.72;
 }
 
@@ -2315,7 +2413,7 @@ html[data-auth='profile-map'] .neu-base {
 
 .auth-signup-location-peek__label {
   margin: 0;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -2376,6 +2474,22 @@ html[data-scroll-locked] .feed-scroll-main {
   touch-action: none;
 }
 
+/* ── Post card — mute toggle button (glass surface, no inline style) ── */
+.feed-post-card__mute-btn {
+  background: rgba(0, 0, 0, 0.38);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* ── Post card safe-area-aware absolute positions ── */
+.feed-post-card__action-rail {
+  bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+}
+.feed-post-card__author-panel {
+  bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+}
+
 .feed-scroll-main {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
@@ -2409,9 +2523,24 @@ html[data-scroll-locked] .feed-scroll-main {
 
 .feed-posts-stream {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015)),
-    radial-gradient(circle at 50% 0%, rgba(0, 111, 53, 0.12), transparent 34%),
+    radial-gradient(circle at 50% 0%, rgba(0, 111, 53, 0.08), transparent 30%),
     var(--neu-bg);
+}
+
+/* Feed cards — gentle staggered entrance for a premium, alive feel */
+.feed-posts-stream > * {
+  animation: card-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.feed-posts-stream > *:nth-child(1)  { animation-delay: 0ms; }
+.feed-posts-stream > *:nth-child(2)  { animation-delay: 40ms; }
+.feed-posts-stream > *:nth-child(3)  { animation-delay: 80ms; }
+.feed-posts-stream > *:nth-child(4)  { animation-delay: 120ms; }
+.feed-posts-stream > *:nth-child(n+5) { animation-delay: 150ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-posts-stream > * {
+    animation: none;
+  }
 }
 
 .feed-scroll-main::-webkit-scrollbar {
@@ -2815,7 +2944,7 @@ html[data-scroll-locked] .feed-scroll-main {
 
 .auth-signup-identity-card__eyebrow {
   margin: 0;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -2844,7 +2973,7 @@ html[data-scroll-locked] .feed-scroll-main {
   border: 1px solid rgba(0, 111, 53, 0.22);
   background: rgba(0, 212, 49, 0.12);
   padding: 0.25rem 0.5rem;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2877,7 +3006,7 @@ html[data-scroll-locked] .feed-scroll-main {
 
 .auth-signup-identity-peek__label {
   margin: 0;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -3005,7 +3134,7 @@ html[data-scroll-locked] .feed-scroll-main {
 
 .auth-flow-hero-card__eyebrow {
   margin: 0;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -3136,10 +3265,10 @@ html[data-scroll-locked] .feed-scroll-main {
   width: fit-content;
   max-width: 100%;
   text-align: center;
-  font-size: clamp(3.35rem, 14vw, 4.5rem);
+  font-size: clamp(3.5rem, 14.5vw, 4.75rem);
   font-weight: 900;
-  line-height: 0.92;
-  letter-spacing: -0.045em;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3176,14 +3305,21 @@ html[data-scroll-locked] .feed-scroll-main {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.35rem 0.4rem 0.35rem 0.875rem;
+  padding: 0.4rem 0.45rem 0.4rem 1rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 4px 16px rgba(0, 0, 0, 0.12);
-  transition: background 160ms ease, border-color 160ms ease;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 6px 24px rgba(0, 0, 0, 0.16),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.feed-sky-scene__composer-pill:active {
+  transform: scale(0.985);
 }
 
 .feed-sky-scene__composer-text {
@@ -3208,29 +3344,31 @@ html[data-scroll-locked] .feed-scroll-main {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.125rem;
+  height: 2.125rem;
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  color: inherit;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--brand-green-dark);
   cursor: pointer;
-  transition: background 160ms ease, transform 160ms ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 
 .feed-sky-scene__composer-media .material-symbols-outlined {
   font-size: 1.25rem;
-  opacity: 0.92;
+  opacity: 1;
 }
 
 .feed-sky-scene__composer-pill:hover {
-  background: rgba(255, 255, 255, 0.28);
-  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.42);
 }
 
 .feed-sky-scene__composer-media:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
 }
 
 .feed-sky-scene__composer-media:active {
@@ -3276,12 +3414,13 @@ html[data-scroll-locked] .feed-scroll-main {
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: 4rem;
+  height: 5rem;
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 111, 53, 0.1) 55%,
-    rgba(0, 111, 53, 0.18) 100%
+    rgba(0, 111, 53, 0.08) 45%,
+    rgba(0, 111, 53, 0.14) 78%,
+    rgba(246, 250, 246, 0.55) 100%
   );
   z-index: 1;
 }
@@ -3311,7 +3450,7 @@ html[data-scroll-locked] .feed-scroll-main {
   align-items: center;
   border-radius: 999px;
   padding: 0.2rem 0.55rem;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -3598,10 +3737,11 @@ html.dark body {
    Page wrappers set a solid background-color that covers the body doodle.
    We re-inject the doodle as background-image here (CSS renders image over color). */
 
-/* Light page wrappers */
+/* Light page wrappers — use soft-white base */
 .min-h-screen.bg-background,
 .min-h-screen.bg-white,
 .min-h-screen.bg-soft-bg {
+  background-color: #F6FAF6;
   background-image: url('/doodle-pattern.svg?v=2');
   background-repeat: repeat;
   background-size: 360px 360px;
@@ -3623,7 +3763,7 @@ html.dark body {
 }
 
 .doodle-surface {
-  background-color: #FFFFFF;
+  background-color: #F6FAF6;
   background-image: url('/doodle-pattern.svg?v=2');
   background-repeat: repeat;
   background-size: 360px 360px;
@@ -3631,7 +3771,7 @@ html.dark body {
 }
 
 .doodle-surface-muted {
-  background-color: #F8FAFC;
+  background-color: #F2F7F2;
   background-image: url('/doodle-pattern.svg?v=2');
   background-repeat: repeat;
   background-size: 360px 360px;
@@ -3653,7 +3793,7 @@ html.dark body {
 
 /** Navigation chrome — clean surface, no doodles (keeps nav scannable). */
 .sidebar-surface {
-  background-color: #ffffff;
+  background-color: #F6FAF6;
   color: var(--foreground);
 }
 
@@ -3674,7 +3814,7 @@ html.dark body {
   overflow: hidden;
   border-right: none;
   border-radius: 0;
-  background-color: #ffffff;
+  background-color: #F6FAF6;
   background-image: none;
   color: var(--neu-text);
 }
@@ -3708,8 +3848,8 @@ html.dark body {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.35) 45%,
-    #ffffff 100%
+    rgba(246, 250, 246, 0.4) 45%,
+    #F6FAF6 100%
   );
 }
 
@@ -3792,12 +3932,12 @@ html.dark body {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.04) 16%,
-    rgba(255, 255, 255, 0.18) 38%,
-    rgba(255, 255, 255, 0.42) 58%,
-    rgba(255, 255, 255, 0.72) 78%,
-    rgba(255, 255, 255, 0.92) 92%,
-    #ffffff 100%
+    rgba(246, 250, 246, 0.06) 16%,
+    rgba(246, 250, 246, 0.22) 38%,
+    rgba(246, 250, 246, 0.46) 58%,
+    rgba(246, 250, 246, 0.74) 78%,
+    rgba(246, 250, 246, 0.94) 92%,
+    #F6FAF6 100%
   );
 }
 
@@ -4136,7 +4276,7 @@ html.dark body {
   grid-row: 1;
   align-self: end;
   margin: 0;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -4205,7 +4345,7 @@ html.dark body {
 .left-sidebar__section-label {
   margin: 0;
   padding: 0 0.125rem;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -4895,23 +5035,141 @@ body,
   font-variation-settings: 'FILL' 1;
 }
 
-/* Animations */
+/* ── Motion Design System ───────────────────────────────
+   All animations use GPU-composited properties only
+   (transform + opacity). Never animate layout properties.
+   ─────────────────────────────────────────────────────── */
+
+/* Ambient float — onboarding icon cards */
 @keyframes soft-float {
   0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-12px) scale(1.02); }
+  50% { transform: translateY(-10px) scale(1.018); }
 }
-
 .animate-soft-float {
-  animation: soft-float 6s ease-in-out infinite;
+  animation: soft-float 6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
+/* Post send — flies off screen */
 @keyframes fly-out {
-  0% { transform: translateX(0) rotate(0); opacity: 1; }
-  100% { transform: translateX(120%) rotate(20deg); opacity: 0; }
+  0%   { transform: translateX(0) rotate(0); opacity: 1; }
+  100% { transform: translateX(120%) rotate(18deg); opacity: 0; }
+}
+.animate-fly-out {
+  animation: fly-out 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
-.animate-fly-out {
-  animation: fly-out 0.35s ease-in forwards;
+/* Feed card entrance — staggered slide-up fade */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-card-enter {
+  animation: card-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Like burst — quick scale pop for reaction confirmation */
+@keyframes like-burst {
+  0%   { transform: scale(1); }
+  38%  { transform: scale(1.42); }
+  72%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+.animate-like-burst {
+  animation: like-burst 380ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Sheet slide-up — modal / bottom sheet entrance */
+@keyframes sheet-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-sheet-up {
+  animation: sheet-up 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Success checkmark scale */
+@keyframes success-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  65%  { transform: scale(1.18); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-success-pop {
+  animation: success-pop 360ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Gentle shake — form error feedback */
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+.animate-error-shake {
+  animation: error-shake 400ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Skeleton shimmer — replaces animate-pulse for loading states */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 111, 53, 0.06) 0%,
+    rgba(0, 212, 49, 0.1) 40%,
+    rgba(0, 111, 53, 0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* Fade-in — generic opacity entrance */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 220ms ease both;
+}
+
+/* Scale-in — icon / avatar pop */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.82); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in {
+  animation: scale-in 240ms cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+
+/* Notification badge pop */
+@keyframes badge-pop {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-badge-pop {
+  animation: badge-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Reduced motion — disable all custom animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-enter,
+  .animate-like-burst,
+  .animate-sheet-up,
+  .animate-success-pop,
+  .animate-error-shake,
+  .animate-shimmer,
+  .animate-fade-in,
+  .animate-scale-in,
+  .animate-badge-pop,
+  .animate-soft-float,
+  .animate-fly-out {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* Ambient profile card animations */
@@ -5108,8 +5366,9 @@ body,
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  --neu-bg: #F0FAF0;
-  --neu-shadow-dark: #C2DEC2;
+  /* Neumorphic surface — matches soft-white foundation */
+  --neu-bg: #F2F8F2;
+  --neu-shadow-dark: #C8DFCA;
   --neu-shadow-light: #FFFFFF;
   --neu-text: #1A1A1A;
   --neu-text-secondary: #2E502E;
@@ -5408,7 +5667,7 @@ textarea.neu-input:focus-within::after {
 .app-sidebar__section-label {
   margin: 0;
   padding: 0 0.25rem;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -5791,7 +6050,13 @@ textarea.neu-input:focus-within::after {
   border: 1px solid rgba(255, 255, 255, 0.07);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+/* Cards respond to touch — tactile press state */
+a.mod-card:active,
+button.mod-card:active {
+  transform: scale(0.985);
 }
 
 .mod-card-hover:hover {
@@ -5842,6 +6107,14 @@ textarea.neu-input:focus-within::after {
   color: #006F35;
 }
 
+/* ── Semantic text colour utilities (avoid inline style={{ color: 'var(--neu-text)' }}) ── */
+.neu-text       { color: var(--neu-text,        var(--foreground)); }
+.neu-text-muted { color: var(--neu-text-muted,  var(--text-secondary-light)); }
+
+/* ── Material Symbols fill helpers ── */
+.icon-filled   { font-variation-settings: 'FILL' 1; }
+.icon-outlined { font-variation-settings: 'FILL' 0; }
+
 /* ── Chip / Tag ── */
 .mod-chip {
   background: rgba(255, 255, 255, 0.06);
@@ -5852,6 +6125,49 @@ textarea.neu-input:focus-within::after {
   border: 1px solid rgba(0, 212, 49, 0.35);
   color: var(--primary);
   font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SEGMENTED TABS — the canonical app-wide tab/toggle style.
+   Active = solid brand-green pill + white label/icon.
+   Inactive = transparent, muted text.
+   Used by BrowseTabStrip, FeedTabs, friendship tabs, auth
+   steppers — every segmented control in the product.
+   ═══════════════════════════════════════════════════════ */
+.segmented-tab {
+  color: var(--neu-text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+}
+.segmented-tab--inactive:hover {
+  color: var(--neu-text);
+  background: rgba(0, 111, 53, 0.06);
+}
+.segmented-tab--active,
+.segmented-tab[aria-selected="true"],
+.segmented-tab[data-active="true"] {
+  color: #ffffff;
+  background: linear-gradient(140deg, #00D431 0%, #00B82A 55%, #009922 100%);
+  border-color: rgba(0, 111, 53, 0.28);
+  box-shadow:
+    0 4px 14px rgba(0, 212, 49, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.segmented-tab--active .material-symbols-outlined {
+  color: #ffffff;
+}
+/* Count/badge chips inside an active segmented tab flip to a translucent white */
+.segmented-tab--active .segmented-tab__count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+.segmented-tab__count {
+  background: rgba(0, 111, 53, 0.12);
+  color: var(--brand-green-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segmented-tab { transition: none; }
 }
 
 /* ── Modern FAB ── */
@@ -5888,33 +6204,39 @@ textarea.neu-input:focus-within::after {
 
 /* ── Content Type Accent Colors ── */
 .accent-line-post        { background: linear-gradient(90deg, transparent, #00D431, transparent); }
-.accent-line-fyi         { background: linear-gradient(90deg, transparent, #0000FF, transparent); }
-.accent-line-gossip      { background: linear-gradient(90deg, transparent, #0000FF, transparent); }
-.accent-line-help_request{ background: linear-gradient(90deg, transparent, #0000FF, transparent); }
+.accent-line-fyi         { background: linear-gradient(90deg, transparent, #1A56FF, transparent); }
+.accent-line-gossip      { background: linear-gradient(90deg, transparent, #1A56FF, transparent); }
+.accent-line-help_request{ background: linear-gradient(90deg, transparent, #1A56FF, transparent); }
 .accent-line-job         { background: linear-gradient(90deg, transparent, #006F35, transparent); }
 .accent-line-emergency   { background: linear-gradient(90deg, transparent, #FF0000, transparent); }
 .accent-line-event       { background: linear-gradient(90deg, transparent, #00D431, transparent); }
 .accent-line-marketplace { background: linear-gradient(90deg, transparent, #006F35, transparent); }
 
-/* ── Light mode overrides (active — coral white theme) ── */
+/* ── Light mode overrides — premium off-white surfaces ── */
 html:not(.dark) .mod-card {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(0, 111, 53, 0.07);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    var(--shadow-sm);
 }
 html:not(.dark) .mod-card-hover:hover {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(0, 0, 0, 0.09);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(0, 111, 53, 0.12);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    var(--shadow-md);
 }
 html:not(.dark) .mod-card-elevated {
   background: #FFFFFF;
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 111, 53, 0.1);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    var(--shadow-lg);
 }
 html:not(.dark) .mod-inset {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 111, 53, 0.035);
+  border-color: rgba(0, 111, 53, 0.06);
 }
 
 /* Native selects can paint OS menus wider than the viewport on mobile — constrain width when used */
@@ -5938,10 +6260,16 @@ html:not(.dark) .mod-btn-active {
   background: rgba(0, 212, 49, 0.08);
   border-color: rgba(0, 212, 49, 0.2);
 }
+html:not(.dark) .mod-chip {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 111, 53, 0.1);
+  color: var(--brand-black);
+}
 html:not(.dark) .mod-chip-active {
-  background: rgba(0, 212, 49, 0.1);
-  border-color: rgba(0, 111, 53, 0.25);
+  background: rgba(0, 212, 49, 0.12);
+  border-color: rgba(0, 111, 53, 0.28);
   color: var(--brand-green-dark);
+  box-shadow: 0 2px 8px rgba(0, 212, 49, 0.18);
 }
 html:not(.dark) .mod-divider {
   background: rgba(0, 0, 0, 0.07);
@@ -6004,18 +6332,28 @@ html:not(.dark) .mod-fab:hover {
 
 /* Primary — brand green */
 .btn-glass-primary {
-  background: radial-gradient(circle at 38% 32%, #33E85A 0%, #00D431 45%, #009922 100%);
-  box-shadow: 0 10px 32px rgba(0,212,49,0.45), 0 3px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+  background: radial-gradient(circle at 38% 32%, #3DEA60 0%, #00D431 45%, #009922 100%);
+  box-shadow:
+    0 8px 28px rgba(0, 212, 49, 0.42),
+    0 3px 10px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 }
 
 .btn-glass-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 40px rgba(0,212,49,0.55), 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow:
+    0 12px 36px rgba(0, 212, 49, 0.52),
+    0 4px 12px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
 .btn-glass-primary:active {
-  transform: scale(0.97) translateY(0);
-  box-shadow: 0 5px 18px rgba(0,212,49,0.35), 0 2px 6px rgba(0,0,0,0.12);
+  transform: scale(0.96) translateY(1px);
+  box-shadow:
+    0 4px 16px rgba(0, 212, 49, 0.32),
+    0 2px 6px rgba(0, 0, 0, 0.1),
+    inset 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .btn-glass-primary:disabled {
@@ -6056,38 +6394,43 @@ html:not(.dark) .mod-fab:hover {
   box-shadow: none;
 }
 
-/* Secondary button — neumorphic raised, muted */
+/* Secondary button — premium raised surface */
 .btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  border: 1px solid rgba(0, 111, 53, 0.12);
   border-radius: 1rem;
   padding: 0.875rem 1.5rem;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.875rem;
   font-weight: 700;
   color: var(--neu-text-secondary);
-  background: var(--neu-bg);
+  background: rgba(255, 255, 255, 0.88);
   cursor: pointer;
   box-shadow:
-    6px 6px 14px var(--neu-shadow-dark),
-    -6px -6px 14px var(--neu-shadow-light);
-  transition: all 0.2s ease;
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transition: all 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(0, 111, 53, 0.18);
   box-shadow:
-    4px 4px 10px var(--neu-shadow-dark),
-    -4px -4px 10px var(--neu-shadow-light);
+    0 4px 14px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
   color: var(--neu-text);
 }
 
 .btn-secondary:active {
+  transform: scale(0.97) translateY(1px);
   box-shadow:
-    inset 4px 4px 10px var(--neu-shadow-dark),
-    inset -4px -4px 10px var(--neu-shadow-light);
+    0 1px 4px rgba(0, 0, 0, 0.06),
+    inset 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .btn-secondary:disabled {

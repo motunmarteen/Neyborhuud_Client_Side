@@ -73,7 +73,7 @@ export function CommunityChatBanner({ conversationId }: CommunityChatBannerProps
             </span>
           </p>
           {hub.largeGroupMode ? (
-            <p className="text-[11px] text-amber-600">Large group — notifications for admins first</p>
+            <p className="text-[11px] text-status-warning">Large group — notifications for admins first</p>
           ) : null}
           {!hub.joined && mounted ? (
             <p className="text-[11px] text-slate-500">Join to participate in this community chat.</p>

@@ -110,13 +110,13 @@ export function ProductDetails({
             <div className="flex gap-2">
               <button
                 onClick={() => onEdit?.(productId)}
-                className="px-4 py-2 bg-brand-blue hover:bg-blue-600 rounded-lg transition-colors"
+                className="px-4 py-2 bg-brand-blue hover:bg-brand-blue rounded-lg transition-colors"
               >
                 Edit
               </button>
               <button
                 onClick={() => onDelete?.(productId)}
-                className="px-4 py-2 bg-brand-red hover:bg-red-600 rounded-lg transition-colors"
+                className="px-4 py-2 bg-brand-red hover:bg-brand-red/85 rounded-lg transition-colors"
               >
                 Delete
               </button>

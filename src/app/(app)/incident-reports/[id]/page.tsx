@@ -281,7 +281,7 @@ function IncidentDetailInner() {
             </span>
           )}
           {incident.verificationStatus === 'community_confirmed' && (
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-green-100 text-green-700">
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-status-success/15 text-status-success">
               Community Confirmed ✓
             </span>
           )}
@@ -438,8 +438,8 @@ function IncidentDetailInner() {
 
       {/* Resolution */}
       {incident.resolution && (
-        <div className="neu-card rounded-2xl p-5 border border-green-200/60">
-          <h2 className="text-sm font-bold mb-2 text-green-700">RESOLUTION</h2>
+        <div className="neu-card rounded-2xl p-5 border border-status-success/30/60">
+          <h2 className="text-sm font-bold mb-2 text-status-success">RESOLUTION</h2>
           <p className="text-sm" style={{ color: 'var(--neu-text)' }}>{incident.resolution}</p>
         </div>
       )}

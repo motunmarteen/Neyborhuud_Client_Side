@@ -97,7 +97,7 @@ function StatPill({
     accent === 'red'
       ? 'border-brand-red/30 bg-brand-red/8 text-brand-red'
       : accent === 'amber'
-        ? 'border-amber-500/30 bg-amber-500/8 text-amber-700 dark:text-amber-300'
+        ? 'border-status-warning/30 bg-status-warning/8 text-status-warning dark:text-status-warning'
         : accent === 'primary'
           ? 'border-primary/25 bg-primary/8 text-primary'
           : 'border-[var(--neu-shadow-dark)]/20';

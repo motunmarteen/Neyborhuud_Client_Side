@@ -11,7 +11,7 @@ const TYPE_COLORS: Record<Event["type"], string> = {
   social: "bg-brand-blue/20 text-pink-400",
   sports: "bg-brand-red/20 text-brand-red",
   cultural: "bg-brand-blue/20 text-brand-blue",
-  educational: "bg-brand-green-dark/20 text-teal-400",
+  educational: "bg-brand-green-dark/20 text-brand-green-dark",
   business: "bg-primary/20 text-primary",
   other: "bg-brand-surface/20 text-[var(--neu-text-muted)]",
 };

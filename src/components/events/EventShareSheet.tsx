@@ -211,7 +211,7 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
           </div>
         ) : isError ? (
           <div className="space-y-4 py-4 text-center">
-            <p className="text-sm font-medium text-red-600 dark:text-brand-red">
+            <p className="text-sm font-medium text-status-danger dark:text-brand-red">
               Something went wrong while loading share data.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -235,7 +235,7 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
         ) : share ? (
           <>
             {share.clientFallback ? (
-              <p className="mb-3 rounded-xl border border-primary/35 bg-primary/[0.12] px-3 py-2 text-xs leading-relaxed text-amber-950 dark:text-amber-100">
+              <p className="mb-3 rounded-xl border border-primary/35 bg-primary/[0.12] px-3 py-2 text-xs leading-relaxed text-status-warning dark:text-status-warning/90">
                 Share service is unavailable (404/503). Showing links built from this page until the API is ready.
               </p>
             ) : null}

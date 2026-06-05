@@ -363,7 +363,7 @@ export default function EditEventPage() {
             <button
               type="submit"
               disabled={updateEvent.isPending}
-              className="w-full py-3.5 bg-blue-600 hover:bg-brand-blue disabled:opacity-50 rounded-xl font-bold text-white transition-colors"
+              className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue disabled:opacity-50 rounded-xl font-bold text-white transition-colors"
             >
               {updateEvent.isPending ? "Saving…" : "Save Changes"}
             </button>

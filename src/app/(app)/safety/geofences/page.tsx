@@ -61,7 +61,7 @@ const TYPE_COLORS: Record<GeofenceType, string> = {
 
 const TYPE_DOT_CLASS: Record<GeofenceType, string> = {
   safe_zone: 'bg-primary/10 border-2 border-primary',
-  alert_zone: 'bg-primary/10 border-2 border-amber-500',
+  alert_zone: 'bg-status-warning/10 border-2 border-status-warning',
   restricted_zone: 'bg-brand-red/10 border-2 border-brand-red',
 };
 
@@ -272,7 +272,7 @@ export default function GeofencesPage() {
                     a.type === 'restricted_zone'
                       ? 'border-red-700 bg-red-900/20 text-brand-red'
                       : a.type === 'alert_zone'
-                      ? 'border-amber-700 bg-amber-900/20 text-amber-300'
+                      ? 'border-status-warning/70 bg-status-warning/15 text-status-warning'
                       : 'border-green-700 bg-green-900/20 text-primary'
                   }`}
                 >

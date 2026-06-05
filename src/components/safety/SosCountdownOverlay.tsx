@@ -37,7 +37,7 @@ export default function SosCountdownOverlay({
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm px-6"
     >
       <div className="relative flex h-56 w-56 items-center justify-center">
-        <span className="absolute inset-0 rounded-full bg-red-600/30 animate-ping" />
+        <span className="absolute inset-0 rounded-full bg-brand-red/30 animate-ping" />
         <span className="absolute inset-2 rounded-full border-4 border-brand-red/70" />
         <div className="relative flex flex-col items-center">
           <span className="text-7xl font-black tabular-nums text-brand-red drop-shadow">
@@ -64,7 +64,7 @@ export default function SosCountdownOverlay({
         type="button"
         onClick={onCancel}
         disabled={cancelling}
-        className="mt-8 w-full max-w-xs rounded-2xl bg-white px-6 py-4 text-lg font-bold text-red-600 shadow-lg transition-transform active:scale-95 disabled:opacity-60"
+        className="mt-8 w-full max-w-xs rounded-2xl bg-white px-6 py-4 text-lg font-bold text-brand-red shadow-lg transition-transform active:scale-95 disabled:opacity-60"
       >
         {cancelling ? "Cancelling…" : "Cancel SOS"}
       </button>

@@ -98,7 +98,7 @@ export default function MediaDownloadButton({
     <button
       onClick={handleDownload}
       disabled={loading}
-      className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/90 hover:bg-white text-[var(--neu-text-muted)] hover:text-blue-600 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/90 hover:bg-white text-[var(--neu-text-muted)] hover:text-status-info transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       title="Download media"
     >
       {loading ? (

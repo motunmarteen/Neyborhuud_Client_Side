@@ -101,7 +101,7 @@ export default function NotificationsPage() {
                 <button
                   onClick={() => markAllRead.mutate()}
                   disabled={markAllRead.isPending}
-                  className="text-sm text-brand-blue hover:text-blue-600 font-medium disabled:opacity-50"
+                  className="text-sm text-brand-blue hover:text-status-info font-medium disabled:opacity-50"
                 >
                   Mark all as read
                 </button>

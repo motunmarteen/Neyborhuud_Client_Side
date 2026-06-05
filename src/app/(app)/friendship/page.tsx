@@ -160,22 +160,20 @@ const TabPill = ({
   count?: number;
 }) => (
   <button
+    type="button"
+    role="tab"
     onClick={onClick}
-    className={`flex-1 min-w-[76px] py-3 text-xs font-bold transition-all duration-200 relative whitespace-nowrap px-1 ${
-      active ? 'text-[#00D431]' : 'text-slate-500 hover:text-slate-800'
-    }`}
+    aria-selected={active ? 'true' : 'false'}
+    className={`segmented-tab ${active ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex-1 min-w-[76px] py-2 text-[13px] font-semibold transition-all duration-200 whitespace-nowrap px-3 rounded-full active:scale-[0.97]`}
   >
-    <span className="flex items-center justify-center gap-1">
+    <span className="flex items-center justify-center gap-1.5">
       {children}
       {count != null && count > 0 && (
-        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${active ? 'bg-[#00D431] text-white' : 'bg-slate-100 text-slate-600'}`}>
+        <span className="segmented-tab__count text-[10px] px-1.5 py-0.5 rounded-full font-bold">
           {count > 99 ? '99+' : count}
         </span>
       )}
     </span>
-    {active && (
-      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] w-1/2 bg-[#00D431] rounded-full" />
-    )}
   </button>
 );
 
@@ -374,19 +372,25 @@ export default function FriendshipPage() {
           </div>
         )}
 
-        <div className="flex overflow-x-auto border-b border-gray-100 no-scrollbar scroll-smooth">
-          <TabPill active={mainTab === 'near_me'} onClick={() => handleMainTab('near_me')}>
-            Near me
-          </TabPill>
-          <TabPill active={mainTab === 'following'} onClick={() => handleMainTab('following')} count={following.length || undefined}>
-            Following
-          </TabPill>
-          <TabPill active={mainTab === 'followers'} onClick={() => handleMainTab('followers')} count={followers.length || undefined}>
-            Followers
-          </TabPill>
-          <TabPill active={mainTab === 'map'} onClick={() => handleMainTab('map')}>
-            Map
-          </TabPill>
+        <div className="px-4 pb-3">
+          <div
+            role="tablist"
+            aria-label="Friendship sections"
+            className="flex items-center gap-0.5 overflow-x-auto rounded-full border border-black/[0.05] bg-brand-surface/60 p-1 no-scrollbar scroll-smooth"
+          >
+            <TabPill active={mainTab === 'near_me'} onClick={() => handleMainTab('near_me')}>
+              Near me
+            </TabPill>
+            <TabPill active={mainTab === 'following'} onClick={() => handleMainTab('following')} count={following.length || undefined}>
+              Following
+            </TabPill>
+            <TabPill active={mainTab === 'followers'} onClick={() => handleMainTab('followers')} count={followers.length || undefined}>
+              Followers
+            </TabPill>
+            <TabPill active={mainTab === 'map'} onClick={() => handleMainTab('map')}>
+              Map
+            </TabPill>
+          </div>
         </div>
       </header>
 
@@ -411,6 +415,7 @@ export default function FriendshipPage() {
                     Allow location access to discover active neighbours near you.
                   </p>
                   <button
+                    type="button"
                     onClick={requestCoords}
                     className="mt-2.5 px-4 py-2 rounded-xl bg-[#00D431] text-white text-xs font-bold hover:brightness-105 active:scale-95 transition-all"
                   >

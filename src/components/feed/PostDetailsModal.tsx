@@ -211,17 +211,17 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                         <span className="material-symbols-outlined text-[14px]" style={{ color: 'var(--neu-text-muted)' }}>group</span>
                                         <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>Audience:</span>
                                         {details.content.targetAudience.ageRange && (details.content.targetAudience.ageRange.min || details.content.targetAudience.ageRange.max) && (
-                                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-teal-400 font-medium">
+                                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-brand-green-dark font-medium">
                                                 {details.content.targetAudience.ageRange.min || '?'}-{details.content.targetAudience.ageRange.max || '?'} yrs
                                             </span>
                                         )}
                                         {details.content.targetAudience.gender && details.content.targetAudience.gender !== 'all' && (
-                                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-teal-400 font-medium capitalize">
+                                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-brand-green-dark font-medium capitalize">
                                                 {details.content.targetAudience.gender}
                                             </span>
                                         )}
                                         {details.content.targetAudience.interests && details.content.targetAudience.interests.map((interest: string, i: number) => (
-                                            <span key={i} className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-teal-400 font-medium">
+                                            <span key={i} className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-brand-green-dark font-medium">
                                                 {interest}
                                             </span>
                                         ))}

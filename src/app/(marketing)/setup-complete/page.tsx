@@ -8,7 +8,7 @@ import {
   getNeedsGpsLocationVerification,
   getStoredCommunity,
 } from '@/lib/communityContext';
-import { hasCompletedProductTour } from '@/lib/onboarding';
+import { hasCompletedProductTour, markProductTourComplete } from '@/lib/onboarding';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
@@ -72,7 +72,12 @@ export default function SetupCompletePage() {
       return;
     }
 
+    // Mark tour complete now — next app open goes straight to /feed.
+    markProductTourComplete();
     setReady(true);
+    // Safety net: never leave the user stuck on the loading spinner.
+    const t = setTimeout(() => setReady(true), 3000);
+    return () => clearTimeout(t);
   }, [router]);
 
   if (!ready) {
@@ -143,7 +148,7 @@ export default function SetupCompletePage() {
             </div>
             <div className="flex items-center gap-2 text-primary">
               <span className="text-3xl font-black leading-none">{walletBalance}</span>
-              <i className="bi bi-coin text-xl text-brand-amber" aria-hidden />
+              <i className="bi bi-coin text-xl text-status-warning" aria-hidden />
             </div>
           </div>
           <ul className="grid gap-1 border-t border-primary/10 pt-2">

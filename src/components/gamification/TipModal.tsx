@@ -214,7 +214,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
 
               {/* Insufficient balance warning */}
               {!hasEnough && (
-                <div className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-2 text-xs text-red-600 font-medium">
+                <div className="mb-4 rounded-xl bg-status-danger/8 border border-status-danger/20 px-4 py-2 text-xs text-status-danger font-medium">
                   You need {(selected - walletCoins).toLocaleString()} more HuudCoins to send this tip.
                   Earn them by posting, commenting, and participating in your community.
                 </div>

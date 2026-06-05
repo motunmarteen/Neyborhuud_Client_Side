@@ -192,7 +192,7 @@ export function LocationPicker({
                         <>
                             <div className="absolute left-[10%] top-[22%] h-2.5 w-32 rotate-12 rounded-full bg-brand-blue/18 shadow-[0_0_24px_rgba(74,144,217,0.16)]" aria-hidden />
                             <div className="absolute right-[8%] top-[41%] h-2.5 w-36 -rotate-12 rounded-full bg-primary/18 shadow-[0_0_24px_rgba(0,111,53,0.16)]" aria-hidden />
-                            <div className="absolute bottom-[24%] left-[18%] h-2.5 w-40 -rotate-6 rounded-full bg-brand-amber/22 shadow-[0_0_24px_rgba(245,166,35,0.16)]" aria-hidden />
+                            <div className="absolute bottom-[24%] left-[18%] h-2.5 w-40 -rotate-6 rounded-full bg-status-warning/22 shadow-[0_0_24px_rgba(245,158,11,0.16)]" aria-hidden />
                             <div className="absolute inset-x-8 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/28 to-transparent" aria-hidden />
                             <div className="absolute inset-y-8 left-1/2 w-px bg-gradient-to-b from-transparent via-brand-blue/22 to-transparent" aria-hidden />
                         </>

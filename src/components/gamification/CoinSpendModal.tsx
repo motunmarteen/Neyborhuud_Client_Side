@@ -82,9 +82,9 @@ export function CoinSpendModal({
 
         {/* Current active status */}
         {alreadyActive && activeUntil && !done && (
-          <div className="mb-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
+          <div className="mb-4 rounded-lg bg-status-info/8 p-3 text-sm text-status-info">
             Currently active until{" "}
-            <strong>{new Date(activeUntil).toLocaleDateString()}</strong>. Selecting
+            <strong>{new Date(activeUntil).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</strong>. Selecting
             another option will <em>extend</em> from the current end date.
           </div>
         )}
@@ -104,7 +104,7 @@ export function CoinSpendModal({
             </p>
             <button
               onClick={onClose}
-              className="mt-4 rounded-xl bg-brand-green-dark px-6 py-2 text-sm font-medium text-white hover:bg-green-700"
+              className="mt-4 rounded-xl bg-brand-green-dark px-6 py-2 text-sm font-medium text-white hover:bg-brand-green-dark"
             >
               Close
             </button>
@@ -145,7 +145,7 @@ export function CoinSpendModal({
 
             {/* Insufficient funds warning */}
             {!hasEnough && (
-              <p className="mb-3 text-center text-sm text-red-600">
+              <p className="mb-3 text-center text-sm text-status-danger">
                 You need{" "}
                 <strong>
                   {((selectedOption?.coins ?? 0) - walletCoins).toLocaleString()} more
@@ -158,7 +158,7 @@ export function CoinSpendModal({
             <button
               onClick={handleConfirm}
               disabled={!hasEnough || isPending}
-              className="w-full rounded-xl bg-primary py-3 font-semibold text-white transition-colors hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-xl bg-primary py-3 font-semibold text-white transition-colors hover:bg-status-warning/85 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPending
                 ? "Processing…"

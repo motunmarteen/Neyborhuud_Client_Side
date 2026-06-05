@@ -1,12 +1,17 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
 import { AuthFlowBackdrop } from '@/components/auth/AuthFlowBackdrop';
-import { AuthSignupMapBackdrop } from '@/components/auth/AuthSignupMapBackdrop';
 import type { SignupMapLocation } from '@/lib/signupMap';
+
+const AuthSignupMapBackdrop = dynamic(
+    () => import('@/components/auth/AuthSignupMapBackdrop').then((m) => m.AuthSignupMapBackdrop),
+    { ssr: false },
+);
 
 export type AuthFlowProgress = {
     active: number;
