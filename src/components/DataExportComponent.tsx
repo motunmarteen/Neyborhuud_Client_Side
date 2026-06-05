@@ -113,13 +113,13 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+        <div className="mb-4 p-3 bg-status-danger/8 border border-status-danger/30 rounded-md text-status-danger text-sm">
           {error}
         </div>
       )}
 
       {emailSent && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm">
+        <div className="mb-4 p-3 bg-status-success/10 border border-status-success/30 rounded-md text-status-success text-sm">
           Export has been sent to your email!
         </div>
       )}
