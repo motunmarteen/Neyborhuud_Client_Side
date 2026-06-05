@@ -158,7 +158,7 @@ function VerifyEmailContent() {
                     disabled={resendCooldown > 0 || isResending || !email}
                     className="auth-btn auth-btn-secondary"
                 >
-                    <i className={`bi shrink-0 ${isResending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
+                    <span className={`material-symbols-outlined shrink-0 text-[1.125rem] ${isResending ? 'animate-spin' : ''}`} aria-hidden="true">{isResending ? 'progress_activity' : 'send'}</span>
                     <span>{isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
                 </button>
                 <button
@@ -175,7 +175,7 @@ function VerifyEmailContent() {
                     ) : (
                         <>
                             <span>Verify</span>
-                            <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                         </>
                     )}
                 </button>
@@ -183,7 +183,7 @@ function VerifyEmailContent() {
         ) : step === 'success' ? (
             <button type="button" onClick={() => router.push(nextRoute)} className="auth-btn auth-btn-primary">
                 <span>Enter your Huud</span>
-                <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
             </button>
         ) : step === 'error' || step === 'expired' ? (
             <div className="auth-signup-actions">
@@ -205,7 +205,7 @@ function VerifyEmailContent() {
                     className="auth-btn auth-btn-primary"
                 >
                     <span>Enter code</span>
-                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                 </button>
             </div>
         ) : null;
@@ -218,12 +218,12 @@ function VerifyEmailContent() {
         <AuthFlowHero
             icon={
                 isSuccess
-                    ? 'bi-envelope-check-fill'
+                    ? 'mark_email_read'
                     : isError
-                      ? 'bi-exclamation-triangle-fill'
+                      ? 'warning'
                       : isLoading
-                        ? 'bi-envelope-open'
-                        : 'bi-shield-check'
+                        ? 'mail'
+                        : 'verified_user'
             }
             eyebrow={
                 isSuccess
@@ -265,7 +265,7 @@ function VerifyEmailContent() {
                         <PremiumInput
                             label="Email"
                             type="email"
-                            icon="bi-envelope"
+                            icon="mail"
                             placeholder="your@email.com"
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
@@ -282,7 +282,7 @@ function VerifyEmailContent() {
                     />
                     {errorMessage ? (
                         <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                            <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
                             <span>{errorMessage}</span>
                         </div>
                     ) : (
@@ -303,7 +303,7 @@ function VerifyEmailContent() {
             {step === 'success' && (
                 <div className="flex flex-col gap-3">
                     <div className="auth-flow-notice auth-flow-notice--success">
-                        <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
                         <span>Your email is verified. Welcome to the Huud.</span>
                     </div>
                     <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
@@ -315,7 +315,7 @@ function VerifyEmailContent() {
                             <span className="text-3xl font-black leading-none">
                                 {verifyCoinBalance ?? '—'}
                             </span>
-                            <i className="bi bi-coin text-xl text-status-warning" aria-hidden />
+                            <span className="material-symbols-outlined text-xl text-status-warning" aria-hidden="true">toll</span>
                         </div>
                     </div>
                     {verifyCoinBalance === null ? (
@@ -328,7 +328,7 @@ function VerifyEmailContent() {
 
             {(step === 'error' || step === 'expired') && errorMessage ? (
                 <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                    <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
                     <span>{errorMessage}</span>
                 </div>
             ) : null}

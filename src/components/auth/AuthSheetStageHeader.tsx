@@ -27,7 +27,7 @@ export function AuthSheetStageHeader({
                             {badge}
                         </span>
                     ) : null}
-                    <i className={`bi ${icon} text-xl`} aria-hidden />
+                    <span className="material-symbols-outlined text-[1.375rem]" aria-hidden="true">{icon}</span>
                 </div>
                 <div className="min-w-0 flex-1">
                     <div className="mb-1 flex items-center gap-2">
@@ -49,7 +49,7 @@ export function AuthSheetStageHeader({
             </div>
             {error ? (
                 <div className="auth-flow-notice auth-flow-notice--error mb-3" role="alert">
-                    <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
                     <span>{error}</span>
                 </div>
             ) : null}

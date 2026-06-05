@@ -8,21 +8,21 @@ import { hasCompletedProductTour, markProductTourComplete } from '@/lib/onboardi
 const FEED_TIPS = [
     {
         id: 'sos',
-        icon: 'bi-exclamation-octagon-fill',
+        icon: 'warning',
         label: 'SOS',
         description: 'Tap the red button anytime — guardians get your location instantly.',
         iconClass: 'bg-brand-red text-white',
     },
     {
         id: 'feed',
-        icon: 'bi-newspaper',
+        icon: 'newspaper',
         label: 'Your feed',
         description: 'Posts, FYI alerts, jobs, and events from your street — live.',
         iconClass: 'bg-primary text-white',
     },
     {
         id: 'coins',
-        icon: 'bi-coin',
+        icon: 'toll',
         label: 'HuudCoins',
         description: 'Check in daily and participate to earn — already started from signup.',
         iconClass: 'bg-status-warning text-[#0a1a0f]',
@@ -37,7 +37,7 @@ function WelcomePeek({ huudName, handle }: { huudName: string; handle: string })
     return (
         <div className="auth-signup-location-peek">
             <span className="auth-signup-location-peek__icon" aria-hidden>
-                <i className="bi bi-stars" />
+                <span className="material-symbols-outlined"  aria-hidden="true">auto_awesome</span>
             </span>
             <div className="min-w-0 flex-1 text-left">
                 <p className="auth-signup-location-peek__label">Welcome to the Huud</p>
@@ -47,7 +47,7 @@ function WelcomePeek({ huudName, handle }: { huudName: string; handle: string })
                 </p>
             </div>
             <span className="auth-signup-location-peek__chevron" aria-hidden>
-                <i className="bi bi-chevron-up" />
+                <span className="material-symbols-outlined"  aria-hidden="true">expand_less</span>
             </span>
         </div>
     );
@@ -92,14 +92,14 @@ export function FeedWelcomeSheet() {
                 <div className="auth-signup-actions pb-[max(0.25rem,env(safe-area-inset-bottom))]">
                     <button type="button" onClick={dismiss} className="auth-btn auth-btn-primary">
                         <span>Explore my Huud</span>
-                        <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                     </button>
                 </div>
             }
         >
             <div className="auth-flow-hero-card mb-4">
                 <span className="auth-flow-hero-card__icon" aria-hidden>
-                    <i className="bi bi-stars" />
+                    <span className="material-symbols-outlined"  aria-hidden="true">auto_awesome</span>
                 </span>
                 <div className="min-w-0 flex-1">
                     <p className="auth-flow-hero-card__eyebrow">Welcome to the Huud</p>

@@ -28,7 +28,7 @@ const RESOLVE_ACTIONS = [
   { value: 'dismiss',  label: 'Dismiss',      color: 'bg-slate-600 hover:bg-slate-500' },
   { value: 'warn',     label: 'Warn User',    color: 'bg-amber-600 hover:bg-primary' },
   { value: 'remove',   label: 'Remove Content', color: 'bg-brand-red600 hover:bg-brand-red' },
-  { value: 'suspend',  label: 'Suspend User', color: 'bg-red-700 hover:bg-red-600' },
+  { value: 'suspend',  label: 'Suspend User', color: 'bg-status-danger hover:bg-status-danger/85' },
 ] as const;
 
 // ── Review side panel ─────────────────────────────────────────────────────────

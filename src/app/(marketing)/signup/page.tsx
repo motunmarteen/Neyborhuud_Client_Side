@@ -131,9 +131,9 @@ function SignupPageContent() {
         formData.acceptTermsAndPrivacy &&
         !loading;
     const signupStages = [
-        { id: 'location', label: 'Location', icon: 'bi-geo-alt-fill' },
-        { id: 'identity', label: 'Identity', icon: 'bi-person-badge' },
-        { id: 'security', label: 'Secure', icon: 'bi-shield-lock' },
+        { id: 'location', label: 'Location', icon: 'location_on' },
+        { id: 'identity', label: 'Identity', icon: 'badge' },
+        { id: 'security', label: 'Secure', icon: 'lock' },
     ] as const;
     const activeStageIndex = signupStages.findIndex(item => item.id === signupStage);
     const huudName = resolvedAddress?.neighborhood || resolvedAddress?.lga || (location ? 'Huud point captured' : 'Finding your Huud');
@@ -531,7 +531,7 @@ function SignupPageContent() {
                 keyboardAware
                 hero={
                     <AuthFlowHero
-                        icon="bi-shield-check"
+                        icon="verified_user"
                         eyebrow={verificationError ? 'Try again' : 'Almost there'}
                         title="Check your email"
                         meta={`${formData.email} · ${huudName}`}
@@ -546,7 +546,7 @@ function SignupPageContent() {
                             disabled={resendCooldown > 0 || isResending}
                             className="auth-btn auth-btn-secondary"
                         >
-                            <i className={`bi shrink-0 ${isResending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
+                            <span className={`material-symbols-outlined shrink-0 text-[1.125rem] ${isResending ? 'animate-spin' : ''}`} aria-hidden="true">{isResending ? 'progress_activity' : 'send'}</span>
                             <span>{isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
                         </button>
                         <button
@@ -563,7 +563,7 @@ function SignupPageContent() {
                             ) : (
                                 <>
                                     <span>Verify</span>
-                                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                                 </>
                             )}
                         </button>
@@ -584,12 +584,12 @@ function SignupPageContent() {
                     </p>
                     {verificationError ? (
                         <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                            <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
                             <span>{verificationError}</span>
                         </div>
                     ) : verificationNotice ? (
                         <div className="auth-flow-notice auth-flow-notice--success">
-                            <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
                             <span>{verificationNotice}</span>
                         </div>
                     ) : null}
@@ -609,7 +609,7 @@ function SignupPageContent() {
                 mapLocation={location}
                 hero={
                     <AuthFlowHero
-                        icon="bi-person-check-fill"
+                        icon="how_to_reg"
                         eyebrow="You're in"
                         title="Welcome, Neybor"
                         meta={`${identityHandle} · ${huudName}`}
@@ -628,7 +628,7 @@ function SignupPageContent() {
                         className="auth-btn auth-btn-primary"
                     >
                         <span>{getNeedsCommunitySelection() ? 'Pick your Huud' : 'Enter my Huud'}</span>
-                        <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                     </button>
                 }
             >
@@ -641,7 +641,7 @@ function SignupPageContent() {
                         <span className="text-3xl font-black leading-none">
                             {signupCoinBalance ?? '—'}
                         </span>
-                        <i className="bi bi-coin text-xl text-status-warning" aria-hidden />
+                        <span className="material-symbols-outlined text-xl text-status-warning" aria-hidden="true">toll</span>
                     </div>
                 </div>
                 {signupCoinBalance === null ? (
@@ -747,14 +747,14 @@ function SignupPageContent() {
                     peek={
                         <div className="auth-signup-location-peek">
                             <span className="auth-signup-location-peek__icon" aria-hidden>
-                                <i className="bi bi-geo-alt-fill" />
+                                <span className="material-symbols-outlined"  aria-hidden="true">location_on</span>
                             </span>
                             <div className="min-w-0 flex-1">
                                 <p className="auth-signup-location-peek__label">{huudStatus}</p>
                                 <p className="auth-signup-location-peek__name truncate">{huudName}</p>
                             </div>
-                            <span className="auth-signup-location-peek__chevron" aria-hidden>
-                                <i className={`bi ${locationSheetCollapsed ? 'bi-chevron-up' : 'bi-chevron-down'}`} />
+                            <span className="auth-signup-location-peek__chevron" aria-hidden="true">
+                                <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">{locationSheetCollapsed ? 'expand_less' : 'expand_more'}</span>
                             </span>
                         </div>
                     }
@@ -767,7 +767,7 @@ function SignupPageContent() {
                                     disabled={isResolving}
                                     className="auth-btn auth-btn-secondary disabled:opacity-40"
                                 >
-                                    <i className={`bi shrink-0 ${isResolving ? 'bi-arrow-repeat animate-spin' : 'bi-broadcast'}`} aria-hidden />
+                                    <span className={`material-symbols-outlined shrink-0 text-[1.125rem] ${isResolving ? 'animate-spin' : ''}`} aria-hidden="true">{isResolving ? 'progress_activity' : 'cell_tower'}</span>
                                     <span>{isResolving ? 'Finding…' : 'Use my location'}</span>
                                 </button>
                                 <button
@@ -777,7 +777,7 @@ function SignupPageContent() {
                                     className="auth-btn auth-btn-primary disabled:opacity-40"
                                 >
                                     <span>Confirm my street</span>
-                                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                                 </button>
                             </div>
                             {!canContinueLocation ? (
@@ -795,7 +795,7 @@ function SignupPageContent() {
                         <div className="mb-3 flex items-center gap-3">
                             <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
                                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-primary shadow-md">N</span>
-                                <i className="bi bi-geo-alt-fill text-xl" aria-hidden />
+                                <span className="material-symbols-outlined text-xl" aria-hidden="true">location_on</span>
                             </div>
                             <div className="min-w-0 flex-1">
                                 <div className="mb-1 flex items-center gap-2">
@@ -809,7 +809,7 @@ function SignupPageContent() {
                         </div>
                         {locError ? (
                             <div className="mb-3 flex items-start gap-2 rounded-xl border border-brand-red/15 bg-brand-red/10 px-3 py-2 text-[11px] font-semibold leading-relaxed text-brand-red">
-                                <i className="bi bi-exclamation-circle-fill mt-0.5 shrink-0" aria-hidden />
+                                <span className="material-symbols-outlined mt-0.5 shrink-0" aria-hidden="true">error</span>
                                 <span>{locError}</span>
                             </div>
                         ) : null}
@@ -834,8 +834,8 @@ function SignupPageContent() {
                                 <p className="auth-signup-identity-peek__label">Pick your @name</p>
                                 <p className="auth-signup-identity-peek__name truncate">{identityHandle}</p>
                             </div>
-                            <span className="auth-signup-identity-peek__chevron" aria-hidden>
-                                <i className={`bi ${identitySheetCollapsed ? 'bi-chevron-up' : 'bi-chevron-down'}`} />
+                            <span className="auth-signup-identity-peek__chevron" aria-hidden="true">
+                                <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">{identitySheetCollapsed ? 'expand_less' : 'expand_more'}</span>
                             </span>
                         </div>
                     }
@@ -847,7 +847,7 @@ function SignupPageContent() {
                                     onClick={() => setSignupStage('location')}
                                     className="auth-btn auth-btn-secondary"
                                 >
-                                    <i className="bi bi-arrow-left shrink-0" aria-hidden />
+                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_back</span>
                                     <span>Back</span>
                                 </button>
                                 <button
@@ -857,7 +857,7 @@ function SignupPageContent() {
                                     className="auth-btn auth-btn-primary"
                                 >
                                     <span>Set up my profile</span>
-                                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                                 </button>
                             </div>
                             {identityContinueHint ? (
@@ -918,7 +918,7 @@ function SignupPageContent() {
                         <PremiumInput
                             label="Email"
                             type="email"
-                            icon="bi-envelope"
+                            icon="mail"
                             placeholder="nancy@example.com"
                             className="py-0.5"
                             value={formData.email}
@@ -935,7 +935,7 @@ function SignupPageContent() {
                         {showInviteField ? (
                             <PremiumInput
                                 label="Invite"
-                                icon="bi-gift"
+                                icon="redeem"
                                 placeholder="Username or invite code"
                                 className="py-0.5"
                                 value={referralCodeInput}
@@ -947,7 +947,7 @@ function SignupPageContent() {
                                 className="auth-signup-invite-toggle"
                                 onClick={() => setShowInviteField(true)}
                             >
-                                <i className="bi bi-gift" aria-hidden />
+                                <span className="material-symbols-outlined" aria-hidden="true">redeem</span>
                                 Have an invite code?
                             </button>
                         )}
@@ -967,7 +967,7 @@ function SignupPageContent() {
                                     onClick={() => setSignupStage('identity')}
                                     className="auth-btn auth-btn-secondary"
                                 >
-                                    <i className="bi bi-arrow-left shrink-0" aria-hidden />
+                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_back</span>
                                     <span>Back</span>
                                 </button>
                                 <button
@@ -983,7 +983,7 @@ function SignupPageContent() {
                                     ) : (
                                         <>
                                             <span>Join NeyborHuud</span>
-                                            <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                                         </>
                                     )}
                                 </button>
@@ -1002,7 +1002,7 @@ function SignupPageContent() {
                             <PremiumInput
                                 label="Secure Password"
                                 type="password"
-                                icon="bi-lock"
+                                icon="lock"
                                 placeholder="12+ chars, mixed case, number"
                                 className="py-1"
                                 value={formData.password}

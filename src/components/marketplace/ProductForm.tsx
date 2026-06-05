@@ -8,6 +8,7 @@ import { useProductMutations } from "@/hooks/useMarketplace";
 import { Product } from "@/services/marketplace.service";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { glassField, glassFieldError, glassLabel } from "@/lib/glass-form-styles";
+import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
 
 interface ProductFormProps {
   product?: Product;
@@ -207,21 +208,14 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       </div>
 
       {/* Description */}
-      <div>
-        <label className={glassLabel}>
-          Description <span className="text-brand-red">*</span>
-        </label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Describe your product in detail..."
-          rows={6}
-          className={`${glassField} resize-none ${errors.description ? glassFieldError : ""}`}
-        />
-        {errors.description && (
-          <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.description}</p>
-        )}
-      </div>
+      <PremiumTextArea
+        label="Description *"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Describe your product in detail..."
+        rows={6}
+        error={errors.description}
+      />
 
       {/* Price and Category Row */}
       <div className="grid gap-4 sm:grid-cols-2">

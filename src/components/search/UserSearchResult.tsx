@@ -46,7 +46,7 @@ export const UserSearchResult = ({ user, onClose }: Props) => {
             {user.name}
           </span>
           {user.isVerified && (
-            <i className="bi bi-patch-check-fill text-primary text-sm shrink-0" />
+            <span className="material-symbols-outlined text-primary text-sm shrink-0"  aria-hidden="true">verified</span>
           )}
         </div>
         <p className="text-sm text-[var(--neu-text-muted)] dark:text-text-secondary-dark truncate">@{user.username}</p>

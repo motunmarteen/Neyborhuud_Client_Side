@@ -30,7 +30,7 @@ function Meta({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 
 // ─── Card shell ───────────────────────────────────────────────────────────────
 function CardShell({ icon, label, color, children, mine, msg }: {
-  icon: string; label: string; color: string; children: React.ReactNode; mine: boolean; msg: ChatMessage;
+  icon: string; label: string; color: string; children: ReactNode; mine: boolean; msg: ChatMessage;
 }) {
   return (
     <div className={`overflow-hidden rounded-2xl ${color} max-w-[280px] sm:max-w-xs`}>
@@ -56,7 +56,7 @@ function LocationCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const mapsUrl = lat && lng ? `https://www.google.com/maps?q=${lat},${lng}` : null;
 
   return (
-    <CardShell icon="📍" label="Location" color="bg-green-900" mine={mine} msg={msg}>
+    <CardShell icon="📍" label="Location" color="bg-status-success/20" mine={mine} msg={msg}>
       {lat && lng && (
         <p className="font-mono text-[10px] text-primary">{Number(lat).toFixed(5)}, {Number(lng).toFixed(5)}</p>
       )}
@@ -144,7 +144,7 @@ function KidnappingCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const sessionRef = msg.trackingSessionRef;
   const statusColor = status === 'resolved' ? 'text-primary' : status === 'suspected' ? 'text-primary400' : 'text-brand-red';
   return (
-    <CardShell icon="🚨" label="Kidnapping Alert" color="bg-red-950" mine={mine} msg={msg}>
+    <CardShell icon="🚨" label="Kidnapping Alert" color="bg-status-danger/25" mine={mine} msg={msg}>
       {status && <p className={`text-xs font-bold uppercase ${statusColor}`}>{status}</p>}
       {sessionRef && <p className="text-[10px] text-[var(--neu-text-muted)] font-mono mt-0.5">Session: {sessionRef}</p>}
       <p className="text-sm text-[var(--neu-text-muted)] mt-0.5">{msg.content}</p>
@@ -157,7 +157,7 @@ function SOSCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const sev = severity ?? 'high';
   const sevColor = sev === 'critical' ? 'text-brand-red' : sev === 'high' ? 'text-brand-red' : sev === 'medium' ? 'text-primary400' : 'text-brand-blue';
   return (
-    <CardShell icon="🆘" label="SOS" color="bg-red-900" mine={mine} msg={msg}>
+    <CardShell icon="🆘" label="SOS" color="bg-status-danger/20" mine={mine} msg={msg}>
       <p className={`text-xs font-bold uppercase ${sevColor}`}>Severity: {sev}</p>
       {msg.emergencyRef && <p className="text-[10px] text-[var(--neu-text-muted)] font-mono mt-0.5">Ref: {msg.emergencyRef}</p>}
       <p className="text-sm text-[var(--neu-text-muted)] mt-0.5">{msg.content}</p>

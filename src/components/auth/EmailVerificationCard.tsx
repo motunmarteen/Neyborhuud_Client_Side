@@ -111,7 +111,7 @@ export function EmailVerificationCard({
       className={`rounded-2xl border border-primary/25 bg-primary/10 p-4 ${className}`.trim()}
     >
       <div className="flex items-start gap-3">
-        <i className="bi bi-envelope-check text-primary text-lg mt-0.5 shrink-0" aria-hidden />
+        <span className="material-symbols-outlined text-primary text-lg mt-0.5 shrink-0" aria-hidden="true">mark_email_read</span>
         <div className="min-w-0 flex-1 space-y-3">
           <div>
             <p className="text-sm font-bold text-charcoal mb-1">Verify your email</p>
@@ -148,7 +148,7 @@ export function EmailVerificationCard({
               ) : (
                 <>
                   <span>Verify email</span>
-                  <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                  <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                 </>
               )}
             </button>
@@ -158,10 +158,9 @@ export function EmailVerificationCard({
               disabled={resendCooldown > 0 || resending || verifying}
               className="auth-btn auth-btn-secondary !min-h-[44px] flex-1"
             >
-              <i
-                className={`bi shrink-0 ${resending ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`}
-                aria-hidden
-              />
+              <span className={`material-symbols-outlined shrink-0 text-[1.125rem] ${resending ? 'animate-spin' : ''}`} aria-hidden="true">
+                {resending ? 'progress_activity' : 'send'}
+              </span>
               <span>
                 {resending ? 'Sending…' : resendCooldown > 0 ? `Resend (${resendCooldown}s)` : 'Resend code'}
               </span>
@@ -170,12 +169,12 @@ export function EmailVerificationCard({
 
           {error ? (
             <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-              <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+              <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
               <span>{error}</span>
             </div>
           ) : notice ? (
             <div className="auth-flow-notice auth-flow-notice--success">
-              <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+              <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
               <span>{notice}</span>
             </div>
           ) : (

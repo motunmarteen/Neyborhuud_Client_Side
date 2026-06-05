@@ -102,7 +102,7 @@ export default function ChangePasswordPage() {
           <PremiumInput
             label="Current password"
             type="password"
-            icon="bi-key"
+            icon="key"
             placeholder="••••••••"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
@@ -111,7 +111,7 @@ export default function ChangePasswordPage() {
             <PremiumInput
               label="New password"
               type="password"
-              icon="bi-lock"
+              icon="lock"
               placeholder="12+ chars, mixed case, number, symbol"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -125,7 +125,7 @@ export default function ChangePasswordPage() {
           <PremiumInput
             label="Confirm new password"
             type="password"
-            icon="bi-lock-fill"
+            icon="lock"
             placeholder="••••••••"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}

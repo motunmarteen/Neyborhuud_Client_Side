@@ -99,7 +99,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                             <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
                         </div>
                     ) : isPostError ? (
-                        <div className="rounded-2xl border border-brand-red/25 bg-brand-red/10 px-4 py-8 text-center text-sm text-red-700 dark:text-red-100">
+                        <div className="rounded-2xl border border-status-danger/25 bg-status-danger/8 px-4 py-8 text-center text-sm text-status-danger">
                             Unable to load comments for this post.
                         </div>
                     ) : postDetails?.comments?.length ? (

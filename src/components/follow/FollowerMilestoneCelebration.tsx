@@ -120,11 +120,11 @@ function launchTier(tier: 1 | 2 | 3 | 4 | 5) {
 // ─── Tier UI ─────────────────────────────────────────────────────────────────
 
 const TIER_STYLES: Record<number, { bg: string; border: string; title: string; sub: string }> = {
-  1: { bg: 'bg-gradient-to-br from-emerald-400 to-teal-500',    border: 'border-primary/30', title: 'text-white',        sub: 'text-emerald-100' },
-  2: { bg: 'bg-gradient-to-br from-yellow-400 to-orange-500',  border: 'border-yellow-300',  title: 'text-white',        sub: 'text-primary100' },
-  3: { bg: 'bg-gradient-to-br from-brand-blue to-purple-600',    border: 'border-blue-300',    title: 'text-white',        sub: 'text-blue-100' },
-  4: { bg: 'bg-gradient-to-br from-purple-600 to-pink-600',    border: 'border-purple-300',  title: 'text-white',        sub: 'text-purple-100' },
-  5: { bg: 'bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-700', border: 'border-yellow-200', title: 'text-white', sub: 'text-primary100' },
+  1: { bg: 'bg-gradient-to-br from-emerald-400 to-teal-500',    border: 'border-primary/30', title: 'text-white', sub: 'text-white/70' },
+  2: { bg: 'bg-gradient-to-br from-yellow-400 to-orange-500',  border: 'border-status-warning/60', title: 'text-white', sub: 'text-white/70' },
+  3: { bg: 'bg-gradient-to-br from-brand-blue to-purple-600',  border: 'border-brand-blue/40',    title: 'text-white', sub: 'text-white/70' },
+  4: { bg: 'bg-gradient-to-br from-purple-600 to-pink-600',    border: 'border-white/30',         title: 'text-white', sub: 'text-white/70' },
+  5: { bg: 'bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-700', border: 'border-white/40', title: 'text-white', sub: 'text-white/70' },
 };
 
 const TIER_LABELS: Record<number, string> = {

@@ -211,7 +211,7 @@ export default function JobDetailPage() {
                     <button
                       onClick={() => closeJob.mutate(job.id)}
                       disabled={closeJob.isPending}
-                      className="flex-1 py-3 bg-red-900/40 hover:bg-red-900/60 border border-red-700 text-brand-red rounded-xl font-semibold transition-colors"
+                      className="flex-1 py-3 bg-status-danger/12 hover:bg-status-danger/22 border border-status-danger/40 text-status-danger rounded-xl font-semibold transition-colors"
                     >
                       Close Job
                     </button>

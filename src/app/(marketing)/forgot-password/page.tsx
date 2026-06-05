@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
 
     const hero = (
         <AuthFlowHero
-            icon={isError ? 'bi-exclamation-triangle-fill' : isSent ? 'bi-envelope-check-fill' : 'bi-key-fill'}
+            icon={isError ? 'warning' : isSent ? 'mark_email_read' : 'key'}
             eyebrow={isError ? 'Request failed' : isSent ? 'Inbox next' : 'Account recovery'}
             title={isError ? 'Try again' : isSent ? 'Check your inbox' : 'Reset password'}
             meta={email || 'Use your account email'}
@@ -123,7 +123,7 @@ export default function ForgotPasswordPage() {
                 ) : (
                     <>
                         <span>Send reset link</span>
-                        <i className="bi bi-send shrink-0" aria-hidden />
+                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">send</span>
                     </>
                 )}
             </button>
@@ -135,18 +135,18 @@ export default function ForgotPasswordPage() {
                     disabled={resendCooldown > 0 || loading}
                     className="auth-btn auth-btn-secondary"
                 >
-                    <i className={`bi shrink-0 ${loading ? 'bi-arrow-repeat animate-spin' : 'bi-send'}`} aria-hidden />
+                    <span className={`material-symbols-outlined shrink-0 text-[1.125rem] ${loading ? 'animate-spin' : ''}`} aria-hidden="true">{loading ? 'progress_activity' : 'send'}</span>
                     <span>{loading ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
                 </button>
                 <Link href="/login" className="auth-btn auth-btn-primary no-underline">
                     <span>Back to login</span>
-                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                 </Link>
             </div>
         ) : (
             <button type="button" onClick={() => setStep('form')} className="auth-btn auth-btn-primary">
                 <span>Try again</span>
-                <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
             </button>
         );
 
@@ -165,7 +165,7 @@ export default function ForgotPasswordPage() {
                     <PremiumInput
                         label="Email"
                         type="email"
-                        icon="bi-envelope"
+                        icon="mail"
                         placeholder="nancy@example.com"
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
@@ -182,14 +182,14 @@ export default function ForgotPasswordPage() {
 
             {step === 'sent' && (
                 <div className="auth-flow-notice auth-flow-notice--success">
-                    <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
                     <span>If an account exists for {email}, a reset link has been sent.</span>
                 </div>
             )}
 
             {step === 'error' && errorMessage ? (
                 <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                    <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
                     <span>{errorMessage}</span>
                 </div>
             ) : null}

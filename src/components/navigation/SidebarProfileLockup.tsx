@@ -90,15 +90,15 @@ export function SidebarProfileLockup({
             >
               @{handle}
             </p>
-            {isSky && <i className="bi bi-chevron-right text-[10px] opacity-70" aria-hidden />}
+            {isSky && <span className="material-symbols-outlined text-[10px] opacity-70" aria-hidden="true">chevron_right</span>}
           </div>
         ) : (
-          isSky && <i className="bi bi-chevron-right text-[10px] opacity-70 mt-0.5" aria-hidden />
+          isSky && <span className="material-symbols-outlined text-[10px] opacity-70 mt-0.5" aria-hidden="true">chevron_right</span>
         )}
       </div>
       {!isSky ? (
         <span className="auth-signup-location-peek__chevron shrink-0" aria-hidden>
-          <i className="bi bi-chevron-right" />
+          <span className="material-symbols-outlined"  aria-hidden="true">chevron_right</span>
         </span>
       ) : null}
     </Link>

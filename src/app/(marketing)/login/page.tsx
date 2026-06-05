@@ -109,7 +109,7 @@ function LoginPageContent() {
                 keyboardAware
                 hero={
                     <AuthFlowHero
-                        icon="bi-fingerprint"
+                        icon="fingerprint"
                         eyebrow={formData.email.trim() ? 'Pass ready' : 'Secure entry'}
                         title="Welcome back"
                         meta={loginIdentity}
@@ -126,12 +126,12 @@ function LoginPageContent() {
                             ) : (
                                 <>
                                     <span>Enter your Huud</span>
-                                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                                 </>
                             )}
                         </button>
                         <Link href="/signup" className="auth-btn auth-btn-secondary no-underline">
-                            <i className="bi bi-person-plus shrink-0" aria-hidden />
+                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">person_add</span>
                             <span>Join NeyborHuud</span>
                         </Link>
                     </div>
@@ -141,7 +141,7 @@ function LoginPageContent() {
                     <PremiumInput
                         label="Email"
                         type="email"
-                        icon="bi-envelope"
+                        icon="mail"
                         placeholder="nancy@example.com"
                         className="py-0.5"
                         value={formData.email}
@@ -155,7 +155,7 @@ function LoginPageContent() {
                     <PremiumInput
                         label="Password"
                         type="password"
-                        icon="bi-lock"
+                        icon="lock"
                         placeholder="Enter password"
                         className="py-0.5"
                         value={formData.password}
@@ -175,7 +175,7 @@ function LoginPageContent() {
                     </div>
                     {formError ? (
                         <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                            <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
                             <span>{formError}</span>
                         </div>
                     ) : (

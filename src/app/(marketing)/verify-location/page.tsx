@@ -137,14 +137,14 @@ export default function VerifyLocationPage() {
       peek={
         <div className="auth-signup-location-peek">
           <span className="auth-signup-location-peek__icon" aria-hidden>
-            <i className="bi bi-crosshair" />
+            <span className="material-symbols-outlined" aria-hidden="true">my_location</span>
           </span>
           <div className="min-w-0 flex-1">
             <p className="auth-signup-location-peek__label">Verify location</p>
             <p className="auth-signup-location-peek__name truncate">{communityName}</p>
           </div>
           <span className="auth-signup-location-peek__chevron" aria-hidden>
-            <i className="bi bi-chevron-up" />
+            <span className="material-symbols-outlined" aria-hidden="true">expand_less</span>
           </span>
         </div>
       }
@@ -164,7 +164,7 @@ export default function VerifyLocationPage() {
             ) : (
               <>
                 <span>Use my current location</span>
-                <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
               </>
             )}
           </button>
@@ -172,7 +172,7 @@ export default function VerifyLocationPage() {
       }
     >
       <AuthSheetStageHeader
-        icon="bi-crosshair"
+        icon="my_location"
         eyebrow="Almost there"
         title="Confirm your area"
         meta={communityName}
@@ -182,7 +182,7 @@ export default function VerifyLocationPage() {
 
       <div className="auth-signup-sheet-fields flex flex-col gap-3">
         <div className="auth-flow-notice auth-flow-notice--info">
-          <i className="bi bi-info-circle-fill shrink-0" aria-hidden />
+          <span className="material-symbols-outlined shrink-0" aria-hidden="true">info</span>
           <span>
             Your device location is compared to a reference point for{' '}
             <strong className="text-brand-black">{communityName}</strong> (LGA centroid or map center), within a
@@ -191,7 +191,7 @@ export default function VerifyLocationPage() {
         </div>
 
         <div className="auth-flow-notice auth-flow-notice--info">
-          <i className="bi bi-lightbulb-fill shrink-0 text-status-warning" aria-hidden />
+          <span className="material-symbols-outlined shrink-0 text-status-warning" aria-hidden="true">lightbulb</span>
           <span>
             Seeing &ldquo;too far&rdquo;? Try moving near a window or stepping outside. Admins can adjust area
             boundaries after running{' '}

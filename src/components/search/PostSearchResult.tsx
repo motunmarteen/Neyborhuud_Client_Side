@@ -53,7 +53,7 @@ export const PostSearchResult = ({ post, onClose }: Props) => {
               {post.author?.name || 'Unknown'}
             </span>
             {post.author?.isVerified && (
-              <i className="bi bi-patch-check-fill text-primary text-xs shrink-0" />
+              <span className="material-symbols-outlined text-primary text-xs shrink-0"  aria-hidden="true">verified</span>
             )}
             <span className="text-[var(--neu-text-muted)] dark:text-text-secondary-dark text-sm">
               · {formatTimeAgo(post.createdAt)}
@@ -87,11 +87,15 @@ export const PostSearchResult = ({ post, onClose }: Props) => {
           {/* Engagement Stats */}
           <div className="flex items-center gap-4 mt-2 text-sm text-[var(--neu-text-muted)] dark:text-text-secondary-dark">
             <span className="flex items-center gap-1">
-              <i className={`bi ${post.isLiked ? 'bi-heart-fill text-brand-red' : 'bi-heart'}`} />
+              <span
+                className={`material-symbols-outlined text-[1rem] ${post.isLiked ? 'text-brand-red' : ''}`}
+                data-filled={post.isLiked ? "true" : "false"}
+                aria-hidden="true"
+              >favorite</span>
               {post.likes || 0}
             </span>
             <span className="flex items-center gap-1">
-              <i className="bi bi-chat" />
+              <span className="material-symbols-outlined"  aria-hidden="true">chat_bubble_outline</span>
               {post.comments || 0}
             </span>
           </div>

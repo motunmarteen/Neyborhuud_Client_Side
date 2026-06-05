@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
 import { resolvePostAuthRoute, validateStoredSession } from '@/lib/authSession';
 import { LandingHeaderBrand } from '@/components/landing/LandingHeaderBrand';
+import { SocialProofBadge } from '@/components/landing/SocialProofBadge';
 import { BRAND_NAME } from '@/lib/brand';
 
 const LANDING_VIDEO = '/video/background-video.mp4';
@@ -140,6 +141,7 @@ export function LandingPage() {
                         <p className="landing-subcopy">
                             Know what&apos;s happening on your street. Before everyone else does.
                         </p>
+                        <SocialProofBadge />
                     </div>
 
                     <div className="landing-page-actions mt-auto">

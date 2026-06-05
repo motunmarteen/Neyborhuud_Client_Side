@@ -25,7 +25,7 @@ export default function NeumorphicDemo() {
                             : 'neumorphic text-deep-text/20'
                         }`}
                 >
-                    <i className={`bi bi-house-door${activeView === 'HOME' ? '-fill' : ''} text-2xl`}></i>
+                    <span className="material-symbols-outlined text-2xl" aria-hidden="true">home</span>
                 </button>
 
                 <button
@@ -35,7 +35,7 @@ export default function NeumorphicDemo() {
                             : 'neumorphic text-deep-text/20'
                         }`}
                 >
-                    <i className={`bi bi-shield-lock${activeView === 'AGENT' ? '-fill' : ''} text-2xl`}></i>
+                    <span className="material-symbols-outlined text-2xl" aria-hidden="true">lock</span>
                 </button>
             </div>
 
@@ -50,7 +50,7 @@ export default function NeumorphicDemo() {
                             {/* Header with back button */}
                             <div className="flex items-center gap-4 mb-2">
                                 <button className="w-10 h-10 rounded-xl neumorphic text-deep-text/40 flex items-center justify-center">
-                                    <i className="bi bi-arrow-left text-lg"></i>
+                                    <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span>
                                 </button>
                                 <div className="flex flex-col">
                                     <span className="text-xs text-deep-text/50 font-normal">Hello!</span>
@@ -61,19 +61,19 @@ export default function NeumorphicDemo() {
                             {/* Control Icons - Square Bento Tiles */}
                             <div className="flex gap-2 justify-between px-2">
                                 <button className="w-12 h-12 rounded-xl neumorphic-inset text-brand-blue flex items-center justify-center">
-                                    <i className="bi bi-tv text-lg"></i>
+                                    <span className="material-symbols-outlined text-lg" aria-hidden="true">tv</span>
                                 </button>
                                 <button className="w-12 h-12 rounded-xl neumorphic text-deep-text/10 flex items-center justify-center">
-                                    <i className="bi bi-lightbulb text-lg"></i>
+                                    <span className="material-symbols-outlined text-lg" aria-hidden="true">lightbulb</span>
                                 </button>
                                 <button className="w-12 h-12 rounded-xl neumorphic-inset text-brand-blue flex items-center justify-center">
-                                    <i className="bi bi-wifi text-lg"></i>
+                                    <span className="material-symbols-outlined text-lg" aria-hidden="true">wifi</span>
                                 </button>
                                 <button className="w-12 h-12 rounded-xl neumorphic text-deep-text/10 flex items-center justify-center">
-                                    <i className="bi bi-snow text-lg"></i>
+                                    <span className="material-symbols-outlined text-lg" aria-hidden="true">ac_unit</span>
                                 </button>
                                 <button className="w-12 h-12 rounded-xl neumorphic text-deep-text/20 flex items-center justify-center">
-                                    <i className="bi bi-plus-lg text-lg"></i>
+                                    <span className="material-symbols-outlined text-lg" aria-hidden="true">add</span>
                                 </button>
                             </div>
 
@@ -83,7 +83,7 @@ export default function NeumorphicDemo() {
                                     <div className="neumorphic-inset w-40 h-40 rounded-full flex flex-col items-center justify-center">
                                         <span className="text-[4rem] font-bold leading-none text-deep-text tracking-tighter">16<span className="text-2xl">°C</span></span>
                                         <div className="flex items-center gap-1.5 mt-3">
-                                            <i className="bi bi-snow text-brand-blue text-xs"></i>
+                                            <span className="material-symbols-outlined text-brand-blue text-xs" aria-hidden="true">ac_unit</span>
                                             <span className="text-[10px] font-medium text-deep-text/50">Cooling</span>
                                         </div>
                                     </div>
@@ -94,7 +94,7 @@ export default function NeumorphicDemo() {
                             <div className="flex flex-col gap-4">
                                 <NeumorphicCard className="flex items-center gap-5 py-5 px-6 rounded-2xl border border-white/20" isBtn={false}>
                                     <div className="w-12 h-12 rounded-xl neumorphic-inset flex items-center justify-center text-brand-blue">
-                                        <i className="bi bi-droplet-fill text-xl"></i>
+                                        <span className="material-symbols-outlined text-xl" aria-hidden="true">water_drop</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-xs font-medium text-deep-text/50">Humidity</span>
@@ -104,7 +104,7 @@ export default function NeumorphicDemo() {
 
                                 <NeumorphicCard className="flex items-center gap-5 py-5 px-6 rounded-2xl border border-white/20" isBtn={false}>
                                     <div className="w-12 h-12 rounded-xl neumorphic-inset flex items-center justify-center text-deep-text/40">
-                                        <i className="bi bi-wifi text-xl"></i>
+                                        <span className="material-symbols-outlined text-xl" aria-hidden="true">wifi</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-xs font-medium text-deep-text/50">Internet</span>
@@ -150,21 +150,21 @@ export default function NeumorphicDemo() {
                             {/* Top Metric Cards - Bento Grid */}
                             <div className="grid grid-cols-3 gap-3">
                                 <NeumorphicCard className="flex flex-col gap-2 py-5 px-4 items-center rounded-2xl border border-white/20" isBtn={false}>
-                                    <i className="bi bi-thermometer-half text-2xl text-brand-blue mb-1"></i>
+                                    <span className="material-symbols-outlined text-2xl text-brand-blue mb-1" aria-hidden="true">thermostat</span>
                                     <span className="text-[9px] font-medium text-deep-text/40">Temperature</span>
                                     <span className="text-xl font-bold text-deep-text leading-none">18.5°C</span>
                                     <span className="text-[8px] font-normal text-deep-text/30">Now</span>
                                 </NeumorphicCard>
 
                                 <NeumorphicCard className="flex flex-col gap-2 py-5 px-4 items-center rounded-2xl border border-white/20" isBtn={false}>
-                                    <i className="bi bi-lightning-fill text-2xl text-primary mb-1"></i>
+                                    <span className="material-symbols-outlined text-2xl text-primary mb-1" aria-hidden="true">bolt</span>
                                     <span className="text-[9px] font-medium text-deep-text/40">Electricity</span>
                                     <span className="text-xl font-bold text-deep-text leading-none">265</span>
                                     <span className="text-[8px] font-normal text-deep-text/30">Yesterday</span>
                                 </NeumorphicCard>
 
                                 <NeumorphicCard className="flex flex-col gap-2 py-5 px-4 items-center rounded-2xl border border-white/20" isBtn={false}>
-                                    <i className="bi bi-droplet-fill text-2xl text-brand-blue mb-1"></i>
+                                    <span className="material-symbols-outlined text-2xl text-brand-blue mb-1" aria-hidden="true">water_drop</span>
                                     <span className="text-[9px] font-medium text-deep-text/40">Humidity</span>
                                     <span className="text-xl font-bold text-deep-text leading-none">26%</span>
                                     <span className="text-[8px] font-normal text-deep-text/30">Today</span>

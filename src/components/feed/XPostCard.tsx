@@ -7,6 +7,7 @@
 import { MediaItem, Post, PostAuthor } from '@/types/api';
 import { useState, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { useFollow } from '@/hooks/useFollow';
@@ -377,9 +378,16 @@ export function XPostCard({
                     <div className="relative shrink-0">
                         <Link href={`/profile/${authorUsername}`} onClick={handleProfileClick}>
                             <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10">
-                                {authorAvatar ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={authorAvatar} alt={authorName} className="h-full w-full object-cover" onError={() => { if (!imageError) setImageError(true); }} />
+                                {authorAvatar && !imageError ? (
+                                    <Image
+                                        src={authorAvatar}
+                                        alt={authorName}
+                                        fill
+                                        sizes="40px"
+                                        className="object-cover"
+                                        onError={() => setImageError(true)}
+                                        unoptimized
+                                    />
                                 ) : (
                                     <span className="material-symbols-outlined text-[18px] text-white/55">person</span>
                                 )}
@@ -585,12 +593,14 @@ export function XPostCard({
                 </button>
                 </>
             ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
+                <Image
                     src={primaryMedia.url}
                     alt={textContent ? textContent.slice(0, 120) : `Post by ${authorName}`}
-                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
-                    onError={(e) => { e.currentTarget.src = 'https://i.pravatar.cc/600?u=fallback'; }}
+                    fill
+                    sizes="(max-width: 672px) 100vw, 672px"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                    loading="lazy"
+                    unoptimized
                 />
             )}
             <div

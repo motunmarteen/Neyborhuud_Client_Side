@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useCreateEvent } from "@/hooks/useEvents";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { toast } from 'sonner';
 import { CreateEventPayload } from "@/types/api";
 import { glassField, glassLabel, glassMutedLabel } from "@/lib/glass-form-styles";
+import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
+import { PostCreationSuccessSheet } from "@/components/shared/PostCreationSuccessSheet";
 
 const EVENT_TYPES = [
   "community",
@@ -20,8 +23,10 @@ const EVENT_TYPES = [
 const VISIBILITY_OPTIONS = ["public", "neighborhood", "private"] as const;
 
 export default function CreateEventForm() {
+  const router = useRouter();
   const { location } = useGeolocation();
   const createEvent = useCreateEvent();
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -85,12 +90,15 @@ export default function CreateEventForm() {
       tags: tags.length > 0 ? tags : undefined,
     };
 
-    createEvent.mutate({ payload, onProgress: setUploadProgress });
+    createEvent.mutate({ payload, onProgress: setUploadProgress }, {
+      onSuccess: () => setShowSuccess(true),
+    });
   }
 
   const isUploading = createEvent.isPending && uploadProgress > 0 && uploadProgress < 100;
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Cover image */}
       <div>
@@ -112,7 +120,7 @@ export default function CreateEventForm() {
             </div>
           )}
         </div>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
+        <input ref={fileRef} type="file" accept="image/*" aria-label="Upload cover image" className="hidden" onChange={handleCoverChange} />
         {isUploading && (
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-light)] dark:bg-white/10">
             <div className="h-full bg-gradient-to-r from-primary to-[#006F35] transition-all" style={{ width: `${uploadProgress}%` }} />
@@ -133,19 +141,14 @@ export default function CreateEventForm() {
         />
       </div>
 
-      <div>
-        <label className={glassLabel}>
-          Description <span className="text-brand-red">*</span>
-        </label>
-        <textarea
-          required
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Tell people what this event is about…"
-          rows={4}
-          className={`${glassField} resize-none`}
-        />
-      </div>
+      <PremiumTextArea
+        label="Description *"
+        required
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Tell people what this event is about…"
+        rows={4}
+      />
 
       <div>
         <label className={glassLabel}>
@@ -154,6 +157,7 @@ export default function CreateEventForm() {
         <select
           value={type}
           onChange={(e) => setType(e.target.value as (typeof EVENT_TYPES)[number])}
+          aria-label="Event type"
           className={`${glassField} capitalize`}
         >
           {EVENT_TYPES.map((t) => (
@@ -174,6 +178,7 @@ export default function CreateEventForm() {
             type="datetime-local"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
+            aria-label="Start date and time"
             className={glassField}
           />
         </div>
@@ -181,7 +186,7 @@ export default function CreateEventForm() {
           <label className={glassLabel}>
             End date &amp; time <span className="text-brand-red">*</span>
           </label>
-          <input required type="datetime-local" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} className={glassField} />
+          <input required type="datetime-local" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} aria-label="End date and time" className={glassField} />
         </div>
       </div>
 
@@ -213,7 +218,8 @@ export default function CreateEventForm() {
           <button
             type="button"
             role="switch"
-            aria-checked={isFree}
+            aria-checked={isFree ? "true" : "false"}
+            aria-label="Free event"
             onClick={() => setIsFree((v) => !v)}
             className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${isFree ? "bg-gradient-to-r from-primary to-[#006F35]" : "bg-[#3D5A3E]/25 dark:bg-white/15"}`}
           >
@@ -240,6 +246,7 @@ export default function CreateEventForm() {
         <select
           value={visibility}
           onChange={(e) => setVisibility(e.target.value as (typeof VISIBILITY_OPTIONS)[number])}
+          aria-label="Visibility"
           className={glassField}
         >
           <option value="public">Public</option>
@@ -296,5 +303,13 @@ export default function CreateEventForm() {
         {createEvent.isPending ? "Creating…" : "Create event"}
       </button>
     </form>
+
+    {showSuccess && (
+      <PostCreationSuccessSheet
+        type="event"
+        onDismiss={() => { setShowSuccess(false); router.push("/events"); }}
+      />
+    )}
+    </>
   );
 }

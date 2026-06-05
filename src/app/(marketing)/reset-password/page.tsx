@@ -67,7 +67,7 @@ function ResetPasswordContent() {
     const isError = step === 'error' || step === 'expired';
     const headline = step === 'success' ? 'Password updated' : step === 'expired' ? 'Link expired' : step === 'error' ? 'Reset failed' : 'Create new password';
     const status = step === 'success' ? 'Secure again' : step === 'expired' ? 'New link needed' : step === 'error' ? 'Needs attention' : 'Password reset';
-    const icon = step === 'success' ? 'bi-shield-check' : isError ? 'bi-exclamation-triangle-fill' : 'bi-lock-fill';
+    const icon = step === 'success' ? 'verified_user' : isError ? 'warning' : 'lock';
 
     const footer =
         step === 'form' ? (
@@ -85,14 +85,14 @@ function ResetPasswordContent() {
                 ) : (
                     <>
                         <span>Reset password</span>
-                        <i className="bi bi-shield-lock shrink-0" aria-hidden />
+                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">lock</span>
                     </>
                 )}
             </button>
         ) : step === 'success' ? (
             <Link href="/login" className="auth-btn auth-btn-primary no-underline">
                 <span>Enter your Huud</span>
-                <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
             </Link>
         ) : (
             <div className="auth-signup-actions">
@@ -106,7 +106,7 @@ function ResetPasswordContent() {
                 </button>
                 <Link href="/forgot-password" className="auth-btn auth-btn-primary no-underline">
                     <span>New link</span>
-                    <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                 </Link>
             </div>
         );
@@ -134,7 +134,7 @@ function ResetPasswordContent() {
                     <PremiumInput
                         label="New password"
                         type="password"
-                        icon="bi-lock"
+                        icon="lock"
                         placeholder="12+ chars, mixed case, number"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
@@ -147,7 +147,7 @@ function ResetPasswordContent() {
                     <PremiumInput
                         label="Confirm password"
                         type="password"
-                        icon="bi-lock-fill"
+                        icon="lock"
                         placeholder="Repeat password"
                         value={confirmPassword}
                         onChange={(event) => setConfirmPassword(event.target.value)}
@@ -161,14 +161,14 @@ function ResetPasswordContent() {
 
             {step === 'success' && (
                 <div className="auth-flow-notice auth-flow-notice--success">
-                    <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
                     <span>Your password has been updated. You can sign in with the new password.</span>
                 </div>
             )}
 
             {(step === 'error' || step === 'expired') && errorMessage ? (
                 <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                    <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
                     <span>{errorMessage}</span>
                 </div>
             ) : null}

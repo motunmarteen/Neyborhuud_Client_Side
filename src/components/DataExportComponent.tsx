@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Download, Mail, FileText, FileArchive, Table, Loader } from 'lucide-react';
 import { API_BASE_URL } from '@/lib/api';
 import apiClient from '@/lib/api-client';
@@ -21,7 +21,6 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
     setError('');
 
     try {
-      // Check if user is authenticated
       if (!apiClient.isAuthenticated()) {
         throw new Error('You must be logged in to export data');
       }
@@ -31,8 +30,7 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
         url += `?type=${csvType}`;
       }
 
-      // Use fetch with the token from apiClient for file download
-      const token = localStorage.getItem('neyborhuud_access_token') || 
+      const token = localStorage.getItem('neyborhuud_access_token') ||
                     sessionStorage.getItem('neyborhuud_access_token');
 
       const response = await fetch(`${apiBaseUrl}${url}`, {
@@ -47,7 +45,6 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
         throw new Error(errorData.message || 'Failed to download export');
       }
 
-      // Get filename from Content-Disposition header or generate one
       const contentDisposition = response.headers.get('content-disposition');
       let filename = `neyborhuud-export-${Date.now()}.${format}`;
       if (contentDisposition) {
@@ -57,7 +54,6 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
         }
       }
 
-      // Download the file
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -82,7 +78,6 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
     setEmailSent(false);
 
     try {
-      // Check if user is authenticated
       if (!apiClient.isAuthenticated()) {
         throw new Error('You must be logged in to export data');
       }
@@ -104,83 +99,66 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-2xl mx-auto p-6 rounded-2xl bg-white/5 border border-white/10">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-[var(--neu-text-muted)] mb-2">Download My Data</h2>
-        <p className="text-[var(--neu-text-secondary)] text-sm">
-          Export all your personal data from NeyborHuud. This includes your profile, posts, messages, trips, and more.
+        <h2 className="text-xl font-semibold text-white mb-1">Download My Data</h2>
+        <p className="text-white/50 text-sm">
+          Export all your personal data from NeyborHuud. Includes your profile, posts, messages, trips, and more.
         </p>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-status-danger/8 border border-status-danger/30 rounded-md text-status-danger text-sm">
+        <div className="mb-4 p-3 bg-status-danger/8 border border-status-danger/30 rounded-xl text-status-danger text-sm">
           {error}
         </div>
       )}
 
       {emailSent && (
-        <div className="mb-4 p-3 bg-status-success/10 border border-status-success/30 rounded-md text-status-success text-sm">
+        <div className="mb-4 p-3 bg-status-success/10 border border-status-success/30 rounded-xl text-status-success text-sm">
           Export has been sent to your email!
         </div>
       )}
 
       {/* Format Selection */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-[var(--neu-text-muted)] mb-3">
+        <label className="block text-sm font-medium text-white/60 mb-3">
           Export Format
         </label>
         <div className="grid grid-cols-3 gap-3">
-          <button
-            onClick={() => setFormat('zip')}
-            className={`p-4 border-2 rounded-lg flex flex-col items-center transition-all ${
-              format === 'zip'
-                ? 'border-brand-blue bg-blue-50 text-blue-700'
-                : 'border-black/[0.08] hover:border-black/[0.08]'
-            }`}
-          >
-            <FileArchive className="w-8 h-8 mb-2" />
-            <span className="font-medium">ZIP</span>
-            <span className="text-xs text-[var(--neu-text-muted)] mt-1">Complete archive</span>
-          </button>
-
-          <button
-            onClick={() => setFormat('json')}
-            className={`p-4 border-2 rounded-lg flex flex-col items-center transition-all ${
-              format === 'json'
-                ? 'border-brand-blue bg-blue-50 text-blue-700'
-                : 'border-black/[0.08] hover:border-black/[0.08]'
-            }`}
-          >
-            <FileText className="w-8 h-8 mb-2" />
-            <span className="font-medium">JSON</span>
-            <span className="text-xs text-[var(--neu-text-muted)] mt-1">Structured data</span>
-          </button>
-
-          <button
-            onClick={() => setFormat('csv')}
-            className={`p-4 border-2 rounded-lg flex flex-col items-center transition-all ${
-              format === 'csv'
-                ? 'border-brand-blue bg-blue-50 text-blue-700'
-                : 'border-black/[0.08] hover:border-black/[0.08]'
-            }`}
-          >
-            <Table className="w-8 h-8 mb-2" />
-            <span className="font-medium">CSV</span>
-            <span className="text-xs text-[var(--neu-text-muted)] mt-1">Spreadsheet</span>
-          </button>
+          {(['zip', 'json', 'csv'] as const).map((f) => {
+            const Icon = f === 'zip' ? FileArchive : f === 'json' ? FileText : Table;
+            const label = f === 'zip' ? 'ZIP' : f === 'json' ? 'JSON' : 'CSV';
+            const subtitle = f === 'zip' ? 'Complete archive' : f === 'json' ? 'Structured data' : 'Spreadsheet';
+            return (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFormat(f)}
+                className={`p-4 border-2 rounded-xl flex flex-col items-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+                  format === f
+                    ? 'border-brand-blue bg-brand-blue/10 text-brand-blue'
+                    : 'border-white/10 text-white/60 hover:border-white/25 hover:text-white'
+                }`}
+              >
+                <Icon className="w-7 h-7 mb-2" />
+                <span className="font-medium text-sm">{label}</span>
+                <span className="text-xs text-white/40 mt-0.5">{subtitle}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* CSV Type Selection */}
       {format === 'csv' && (
         <div className="mb-6">
-          <label className="block text-sm font-medium text-[var(--neu-text-muted)] mb-2">
+          <label className="block text-sm font-medium text-white/60 mb-2">
             Data Type
           </label>
           <select
             value={csvType}
             onChange={(e) => setCsvType(e.target.value)}
-            className="w-full p-2 border border-black/[0.08] rounded-md focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
+            className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
           >
             <option value="posts">Posts</option>
             <option value="comments">Comments</option>
@@ -197,7 +175,7 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
         <button
           onClick={handleDownloadExport}
           disabled={loading}
-          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-medium hover:bg-brand-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-brand-black"
         >
           {loading ? (
             <>
@@ -215,7 +193,7 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
         <button
           onClick={handleEmailExport}
           disabled={loading}
-          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-brand-black text-white rounded-lg font-medium hover:bg-brand-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-white/8 text-white rounded-xl font-medium hover:bg-white/12 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
           {loading ? (
             <>
@@ -232,10 +210,10 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
       </div>
 
       {/* Info Box */}
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-        <h3 className="font-medium text-blue-900 mb-2">What's Included?</h3>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Profile information & settings</li>
+      <div className="mt-6 p-4 bg-brand-blue/8 border border-brand-blue/20 rounded-xl">
+        <h3 className="font-medium text-white mb-2 text-sm">What's Included?</h3>
+        <ul className="text-sm text-white/60 space-y-1">
+          <li>• Profile information &amp; settings</li>
           <li>• All posts, comments, and likes</li>
           <li>• Messages and conversations</li>
           <li>• Safety data (trips, alerts, guardians)</li>
@@ -244,9 +222,8 @@ export default function DataExportComponent({ apiBaseUrl = API_BASE_URL }: DataE
         </ul>
       </div>
 
-      {/* Privacy Notice */}
-      <p className="mt-4 text-xs text-[var(--neu-text-muted)] text-center">
-        Your data export may take a few moments to generate. This feature complies with NDPR (Nigerian Data Protection Regulation).
+      <p className="mt-4 text-xs text-white/30 text-center">
+        Your data export may take a few moments to generate. Complies with NDPR (Nigerian Data Protection Regulation).
       </p>
     </div>
   );

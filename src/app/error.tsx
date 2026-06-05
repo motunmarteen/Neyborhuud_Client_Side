@@ -21,13 +21,13 @@ export default function GlobalError({ error, reset }: ErrorPageProps) {
     <div className="min-h-[100dvh] flex flex-col items-center justify-center px-6 py-12 bg-soft-bg">
       <div className="flex flex-col items-center gap-6 max-w-sm text-center">
         {/* Icon */}
-        <div className="w-20 h-20 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+        <div className="w-20 h-20 rounded-2xl bg-status-danger/8 flex items-center justify-center">
           <span className="material-symbols-outlined text-[42px] text-brand-red">error</span>
         </div>
 
         {/* Copy */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-black text-charcoal">Something went wrong</h1>
+          <h1 className="type-display font-black text-white">Something went wrong</h1>
           <p className="text-sm text-[var(--text-secondary-light)] dark:text-[var(--text-secondary-dark)]">
             We hit an unexpected error. This has been noted and we&apos;re looking into it.
           </p>

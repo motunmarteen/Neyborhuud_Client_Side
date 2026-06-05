@@ -149,7 +149,7 @@ export function LocationPicker({
                     </span>
                     {accuracy && accuracyQuality && (
                         <span className={`text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${accuracyColors[accuracyQuality]}`}>
-                            <i className="bi bi-broadcast"></i>
+                            <span className="material-symbols-outlined" aria-hidden="true">wifi_tethering</span>
                             {formatAccuracy(accuracy)}
                             {accuracyQuality === 'excellent' && ' GPS'}
                             {accuracyQuality === 'poor' && ' (Approximate)'}
@@ -167,7 +167,7 @@ export function LocationPicker({
                     <div className="relative z-10 flex flex-col items-center gap-3 text-center">
                         <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_18px_44px_rgba(26,26,46,0.16)]">
                             <span className="absolute h-16 w-16 animate-ping rounded-full bg-brand-blue/15" aria-hidden />
-                            <i className="bi bi-geo-alt-fill text-3xl text-brand-blue animate-bounce" aria-hidden />
+                            <span className="material-symbols-outlined text-3xl text-brand-blue animate-bounce" aria-hidden="true">location_on</span>
                         </div>
                         <span className="text-[10px] text-charcoal/50 font-black uppercase tracking-wider">
                             Detecting your location...
@@ -203,14 +203,14 @@ export function LocationPicker({
                             <div className="absolute h-32 w-32 rounded-full border border-brand-blue/18 bg-brand-blue/[0.035]" aria-hidden />
                             <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-[0_28px_62px_rgba(26,26,46,0.2)]">
                                 <span className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-black text-white shadow-[0_10px_22px_rgba(0,111,53,0.36)]">N</span>
-                                <i className="bi bi-geo-alt-fill text-5xl text-primary/70" aria-hidden />
+                                <span className="material-symbols-outlined text-5xl text-primary/70" aria-hidden="true">location_on</span>
                             </div>
                             <span className="sr-only">Location not available</span>
                         </div>
                     ) : (
                         <div className="relative z-10 flex flex-col items-center gap-3 text-center px-4">
                             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/95 shadow-[0_18px_44px_rgba(26,26,46,0.14)]">
-                                <i className="bi bi-geo-alt-fill text-4xl text-primary/35" aria-hidden />
+                                <span className="material-symbols-outlined text-4xl text-primary/35" aria-hidden="true">location_on</span>
                             </div>
                             <div className="space-y-1">
                                 <span className="block text-[11px] text-charcoal/60 font-black uppercase tracking-widest">
@@ -271,7 +271,7 @@ export function LocationPicker({
                             className="shrink-0 ml-2 w-8 h-8 rounded-lg btn-ghost flex items-center justify-center group"
                             title="Open in Google Maps"
                         >
-                            <i className="bi bi-box-arrow-up-right text-xs text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                            <span className="material-symbols-outlined text-xs text-charcoal/40 group-hover:text-brand-blue transition-colors" aria-hidden="true">open_in_new</span>
                         </button>
                     )}
                 </div>
@@ -280,7 +280,7 @@ export function LocationPicker({
             {/* Error message */}
             {!isSignupMap && error && (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-red50 border border-orange-200">
-                    <i className="bi bi-exclamation-triangle text-brand-red"></i>
+                    <span className="material-symbols-outlined text-brand-red" aria-hidden="true">warning</span>
                     <span className="text-[10px] text-brand-red600 font-medium">{error}</span>
                 </div>
             )}

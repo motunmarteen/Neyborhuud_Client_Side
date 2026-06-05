@@ -1,20 +1,24 @@
 "use client";
 
-/**
- * Create listing — glass sheet on doodle surface (same family as marketplace browse + offer modal)
- */
-
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProductForm } from "@/components/marketplace";
 import { Product } from "@/services/marketplace.service";
 import { GlassFormPage } from "@/components/ui/GlassFormPage";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
+import { PostCreationSuccessSheet } from "@/components/shared/PostCreationSuccessSheet";
 
 export default function CreateProductPage() {
   const router = useRouter();
+  const [createdProduct, setCreatedProduct] = useState<Product | null>(null);
 
   const handleSuccess = (product: Product) => {
-    const id = product.id;
+    setCreatedProduct(product);
+  };
+
+  const handleDismiss = () => {
+    const id = createdProduct?.id;
+    setCreatedProduct(null);
     router.push(id ? `/marketplace?product=${encodeURIComponent(id)}` : "/marketplace");
   };
 
@@ -32,6 +36,10 @@ export default function CreateProductPage() {
       >
         <ProductForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </GlassFormPage>
+
+      {createdProduct && (
+        <PostCreationSuccessSheet type="marketplace" onDismiss={handleDismiss} />
+      )}
     </LocalHuudSubpageShell>
   );
 }

@@ -6,6 +6,7 @@
 
 import { Product } from "@/services/marketplace.service";
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { formatDistance, haversineDistance } from "@/utils/distance";
 import { useProductLike } from "@/hooks/useMarketplace";
@@ -180,10 +181,12 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
         >
           <div className="relative aspect-[4/5] w-full overflow-hidden">
             {hasImage ? (
-              <img
+              <Image
                 src={primaryImage}
                 alt=""
-                className={`h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.03] ${isSold ? "opacity-55 grayscale-[0.2]" : ""}`}
+                fill
+                sizes="(max-width: 640px) 50vw, 320px"
+                className={`object-cover transition-transform duration-500 group-hover/card:scale-[1.03] ${isSold ? "opacity-55 grayscale-[0.2]" : ""}`}
                 onError={() => setImageError(true)}
               />
             ) : (

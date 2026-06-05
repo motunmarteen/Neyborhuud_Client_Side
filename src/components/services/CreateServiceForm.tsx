@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateService } from "@/hooks/useServices";
+import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
 
 const CATEGORIES = [
   "Cleaning",
@@ -141,20 +142,14 @@ export default function CreateServiceForm() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
-            Description <span style={{ color: "var(--brand-red)" }}>*</span>
-          </label>
-          <textarea
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-            required
-            rows={5}
-            placeholder="Describe what you offer, your experience, and what makes you stand out..."
-            className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all resize-none"
-            style={{ color: "var(--neu-text)" }}
-          />
-        </div>
+        <PremiumTextArea
+          label="Description *"
+          value={form.description}
+          onChange={(e) => set("description", e.target.value)}
+          required
+          rows={5}
+          placeholder="Describe what you offer, your experience, and what makes you stand out..."
+        />
 
         <div className="grid grid-cols-2 gap-4">
           <div>

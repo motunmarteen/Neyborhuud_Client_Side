@@ -9,6 +9,9 @@
     "orientation": "portrait-primary",
     "background_color": "#060908",
     "theme_color": "#060908",
+    "categories": ["social", "lifestyle", "utilities"],
+    "lang": "en",
+    "dir": "ltr",
     "icons": [
         {
             "src": "/icon-192.png",
@@ -27,6 +30,22 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/feed.png",
+            "sizes": "390x844",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "NeyborHuud Feed"
+        },
+        {
+            "src": "/screenshots/feed-wide.png",
+            "sizes": "1280x800",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "NeyborHuud on desktop"
         }
     ]
 }

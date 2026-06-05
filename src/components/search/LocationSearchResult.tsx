@@ -34,7 +34,7 @@ export const LocationSearchResult = ({ location, onClose }: Props) => {
     >
       {/* Location Icon */}
       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-        <i className="bi bi-geo-alt-fill text-primary text-xl" />
+        <span className="material-symbols-outlined text-primary text-xl"  aria-hidden="true">location_on</span>
       </div>
 
       {/* Location Info */}
@@ -50,7 +50,7 @@ export const LocationSearchResult = ({ location, onClose }: Props) => {
       {/* User Count */}
       {typeof location?.userCount === 'number' && (
         <div className="flex items-center gap-1 text-sm text-[var(--neu-text-muted)] dark:text-text-secondary-dark shrink-0">
-          <i className="bi bi-people" />
+          <span className="material-symbols-outlined"  aria-hidden="true">group</span>
           {location.userCount.toLocaleString()}
         </div>
       )}

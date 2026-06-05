@@ -96,12 +96,12 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
     };
 
     const navItems = [
-        { icon: 'bi-house-fill', iconOutline: 'bi-house', label: 'Home', href: '/feed', active: pathname === '/feed' },
-        { icon: 'bi-newspaper', iconOutline: 'bi-newspaper', label: 'Local News', href: '/local-news', active: pathname === '/local-news' || pathname.startsWith('/local-news/') },
-        { icon: 'bi-search', iconOutline: 'bi-search', label: 'Explore', href: '/feed?search=1', active: false },
-        { icon: 'bi-bell-fill', iconOutline: 'bi-bell', label: 'Notifications', href: '/feed', active: false },
-        { icon: 'bi-envelope-fill', iconOutline: 'bi-envelope', label: 'Messages', href: '/feed', active: false },
-        { icon: 'bi-person-fill', iconOutline: 'bi-person', label: 'Profile', href: user ? `/profile/${user.username}` : '/settings', active: pathname?.startsWith('/profile') || pathname === '/settings' },
+        { icon: 'home', label: 'Home', href: '/feed', active: pathname === '/feed' },
+        { icon: 'newspaper', label: 'Local News', href: '/local-news', active: pathname === '/local-news' || pathname.startsWith('/local-news/') },
+        { icon: 'search', label: 'Explore', href: '/feed?search=1', active: false },
+        { icon: 'notifications', label: 'Notifications', href: '/feed', active: false },
+        { icon: 'mail', label: 'Messages', href: '/feed', active: false },
+        { icon: 'person', label: 'Profile', href: user ? `/profile/${user.username}` : '/settings', active: pathname?.startsWith('/profile') || pathname === '/settings' },
     ];
 
     const handleNavClick = () => {
@@ -129,7 +129,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                 onClick={() => setShowUserMenu(false)}
                 className="flex items-center gap-3 w-full p-3 text-left hover:bg-brand-surface dark:hover:bg-brand-black/80 rounded-xl transition-colors text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]"
             >
-                <i className="bi bi-person text-xl" />
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">person</span>
                 <span className="font-medium">View Profile</span>
             </Link>
 
@@ -138,7 +138,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                 onClick={() => setShowUserMenu(false)}
                 className="flex items-center gap-3 w-full p-3 text-left hover:bg-brand-surface dark:hover:bg-brand-black/80 rounded-xl transition-colors text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]"
             >
-                <i className="bi bi-gear text-xl" />
+                <span className="material-symbols-outlined text-xl"  aria-hidden="true">settings</span>
                 <span className="font-medium">Settings</span>
             </Link>
 
@@ -146,7 +146,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                 onClick={handleLogout}
                 className="flex items-center gap-3 w-full p-3 text-left hover:bg-brand-surface dark:hover:bg-brand-black/80 rounded-xl transition-colors text-brand-red"
             >
-                <i className="bi bi-box-arrow-right text-xl" />
+                <span className="material-symbols-outlined text-xl"  aria-hidden="true">logout</span>
                 <span className="font-medium">Log out {userHandle}</span>
             </button>
         </div>
@@ -179,7 +179,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                             aria-label="Close menu"
                             title="Close menu"
                         >
-                            <i className="bi bi-x-lg text-xl" />
+                            <span className="material-symbols-outlined text-xl"  aria-hidden="true">close</span>
                         </button>
                     </div>
 
@@ -200,7 +200,11 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                                     : 'font-normal hover:bg-brand-surface dark:hover:bg-brand-black/80'
                                     }`}
                             >
-                                <i className={`bi ${item.active ? item.icon : item.iconOutline} text-2xl`} />
+                                <span
+                                  className="material-symbols-outlined text-[1.5rem]"
+                                  data-filled={item.active ? "true" : "false"}
+                                  aria-hidden="true"
+                                >{item.icon}</span>
                                 <span>{item.label}</span>
                             </Link>
                         ))}
@@ -234,7 +238,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                                 <p className="font-bold text-base truncate text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">{userDisplayName}</p>
                                 <p className="text-sm text-[var(--neu-text-muted)] truncate">{userHandle}</p>
                             </div>
-                            <i className="bi bi-three-dots text-[var(--neu-text-muted)]" />
+                            <span className="material-symbols-outlined text-[var(--neu-text-muted)]"  aria-hidden="true">more_horiz</span>
                         </button>
                     </div>
                 </div>
@@ -263,7 +267,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                         className="w-8 h-8 rounded-full hover:bg-brand-surface dark:hover:bg-brand-black/80 flex items-center justify-center transition-colors"
                         title="Collapse sidebar"
                     >
-                        <i className="bi bi-chevron-left text-lg" />
+                        <span className="material-symbols-outlined text-lg"  aria-hidden="true">chevron_left</span>
                     </button>
                 )}
                 {isCollapsed && (
@@ -272,7 +276,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                         className="absolute top-4 left-[72px] w-6 h-6 rounded-full bg-white dark:bg-brand-black border border-black/[0.08] dark:border-black/[0.08] hover:bg-brand-surface dark:hover:bg-brand-black/80 flex items-center justify-center transition-colors shadow-md"
                         title="Expand sidebar"
                     >
-                        <i className="bi bi-chevron-right text-sm" />
+                        <span className="material-symbols-outlined text-sm"  aria-hidden="true">chevron_right</span>
                     </button>
                 )}
             </div>
@@ -289,7 +293,11 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                             } ${isCollapsed ? 'justify-center' : ''}`}
                         title={isCollapsed ? item.label : undefined}
                     >
-                        <i className={`bi ${item.active ? item.icon : item.iconOutline} text-2xl`} />
+                        <span
+                          className="material-symbols-outlined text-[1.5rem]"
+                          data-filled={item.active ? "true" : "false"}
+                          aria-hidden="true"
+                        >{item.icon}</span>
                         {!isCollapsed && <span>{item.label}</span>}
                     </Link>
                 ))}
@@ -301,7 +309,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                         }`}
                     title={isCollapsed ? 'Post' : undefined}
                 >
-                    {isCollapsed ? <i className="bi bi-plus-lg text-xl" /> : 'Post'}
+                    {isCollapsed ? <span className="material-symbols-outlined text-xl"  aria-hidden="true">add</span> : 'Post'}
                 </button>
             </nav>
 
@@ -326,7 +334,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                                 <p className="font-bold text-sm truncate text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">{userDisplayName}</p>
                                 <p className="text-xs text-[var(--neu-text-muted)] truncate">{userHandle}</p>
                             </div>
-                            <i className="bi bi-three-dots text-lg" />
+                            <span className="material-symbols-outlined text-lg"  aria-hidden="true">more_horiz</span>
                         </>
                     )}
                 </button>

@@ -78,7 +78,7 @@ function SuspendModal({
           <button
             onClick={handleSubmit}
             disabled={!reason.trim() || suspend.isPending}
-            className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-black text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+            className="flex-1 rounded-xl bg-status-danger py-2.5 text-sm font-black text-white hover:bg-status-danger/85 disabled:opacity-50 transition-colors"
           >
             {suspend.isPending ? 'Suspending…' : 'Suspend'}
           </button>

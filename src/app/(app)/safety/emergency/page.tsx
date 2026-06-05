@@ -38,16 +38,16 @@ const EMERGENCY_TYPES: Array<{ value: EmergencyType; label: string; icon: string
 ];
 
 const SEVERITY_LEVELS = [
-  { value: 'low',      label: 'Low',      color: 'text-primary',  bg: 'bg-green-900/30 border-green-700' },
+  { value: 'low',      label: 'Low',      color: 'text-primary',  bg: 'bg-status-success/10 border-status-success/40' },
   { value: 'medium',   label: 'Medium',   color: 'text-primary400', bg: 'bg-primary900/30 border-yellow-700' },
   { value: 'high',     label: 'High',     color: 'text-brand-red', bg: 'bg-brand-red900/30 border-orange-700' },
-  { value: 'critical', label: 'Critical', color: 'text-brand-red',    bg: 'bg-brand-red/80/30 border-red-700' },
+  { value: 'critical', label: 'Critical', color: 'text-brand-red',    bg: 'bg-status-danger/15 border-status-danger/50' },
 ] as const;
 
 const STATUS_BADGE: Record<Emergency['status'], string> = {
-  active:      'bg-brand-red/80/50 text-brand-red border border-red-700',
-  responding:  'bg-brand-red900/50 text-brand-red300 border border-orange-700',
-  resolved:    'bg-green-900/50 text-primary border border-green-700',
+  active:      'bg-status-danger/15 text-status-danger border border-status-danger/40',
+  responding:  'bg-status-warning/15 text-status-warning border border-status-warning/40',
+  resolved:    'bg-status-success/10 text-status-success border border-status-success/40',
   false_alarm: 'bg-brand-black text-[var(--neu-text-muted)] border border-black/[0.08]',
 };
 
@@ -60,8 +60,8 @@ const SOURCE_LABEL: Record<EmergencySource, { icon: string; label: string }> = {
 
 const DISPATCH_BADGE: Record<DispatchStatus, string> = {
   pending:      'bg-primary900/40 text-primary border border-yellow-700',
-  sent:         'bg-green-900/40 text-primary border border-green-700',
-  failed:       'bg-brand-red/80/40 text-brand-red border border-red-700',
+  sent:         'bg-status-success/10 text-status-success border border-status-success/40',
+  failed:       'bg-status-danger/12 text-status-danger border border-status-danger/40',
   not_required: 'bg-brand-black text-[var(--neu-text-muted)] border border-black/[0.08]',
 };
 
@@ -217,7 +217,7 @@ export default function EmergencyPage() {
 
             {/* Active Emergencies panel */}
             {(activeLoading || active.length > 0) && (
-              <div className="neu-card-sm rounded-2xl p-5 border border-red-800/50">
+              <div className="neu-card-sm rounded-2xl p-5 border border-status-danger/30">
                 <h2 className="mb-3 font-semibold text-brand-red">🔴 Active Emergencies</h2>
                 {activeLoading ? (
                   <p className="text-sm text-[var(--neu-text-muted)]">Loading…</p>
@@ -227,7 +227,7 @@ export default function EmergencyPage() {
                       const typeInfo = EMERGENCY_TYPES.find((t) => t.value === em.type);
                       const src = em.source ? SOURCE_LABEL[em.source] : null;
                       return (
-                        <div key={em._id} className="flex items-center gap-3 rounded-xl border border-red-800/40 bg-brand-red/90/20 px-4 py-3">
+                        <div key={em._id} className="flex items-center gap-3 rounded-xl border border-status-danger/25 bg-status-danger/8 px-4 py-3">
                           <span className="text-lg">{typeInfo?.icon ?? '⚠️'}</span>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-[var(--neu-text-muted)] text-sm">{typeInfo?.label ?? em.type}</p>
@@ -257,7 +257,7 @@ export default function EmergencyPage() {
 
             {/* Success banner */}
             {submitted && (
-              <div className="rounded-2xl border border-green-700 bg-green-900/30 p-4">
+              <div className="rounded-2xl border border-status-success/40 bg-status-success/8 p-4">
                 <p className="font-semibold text-primary">✅ Emergency reported successfully</p>
                 <p className="mt-1 text-sm text-primary">
                   Assigned agency: <strong>{submitted.assignedAgency || '—'}</strong>
@@ -277,7 +277,7 @@ export default function EmergencyPage() {
 
             {/* Report form */}
             <div className="neu-card-sm rounded-2xl p-5">
-              <h2 className="mb-4 font-semibold text-[var(--neu-text)]">New Emergency Report</h2>
+              <h2 className="mb-4 type-display font-bold text-white">New Emergency Report</h2>
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
                 {/* Type selector */}

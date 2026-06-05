@@ -12,6 +12,7 @@ import {
 import { HuudCoinTierPanel } from "@/components/gamification/HuudCoinTierPanel";
 import { useWallet, useTransactions } from "@/hooks/useGamification";
 import { usePaymentHistory, usePaymentStats } from "@/hooks/usePayments";
+import { PaymentReceiptSheet } from "@/components/payments/PaymentReceiptSheet";
 import { Payment } from "@/types/api";
 
 type WalletTab = "overview" | "transactions" | "spends" | "tier";
@@ -160,6 +161,7 @@ export default function WalletPage() {
   const [tab, setTab] = useState<WalletTab>("overview");
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<TxType>("all");
+  const [receiptPaymentId, setReceiptPaymentId] = useState<string | null>(null);
 
   useEffect(() => {
     setTab(parseWalletTab(searchParams.get("tab")));
@@ -493,9 +495,11 @@ export default function WalletPage() {
               {!paymentsQuery.isLoading && allPayments.length > 0 && (
                 <div className="space-y-2">
                   {allPayments.map((p) => (
-                    <div
+                    <button
                       key={p.id ?? p.reference}
-                      className="mod-inset flex items-center gap-3 rounded-xl px-3 py-2.5"
+                      type="button"
+                      onClick={() => setReceiptPaymentId(p.id ?? p.reference)}
+                      className="mod-inset w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left active:scale-[0.98] transition-transform"
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-lg">
                         {PAYMENT_TYPE_ICONS[p.type] ?? "🪙"}
@@ -511,23 +515,23 @@ export default function WalletPage() {
                           {new Date(p.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
                       </div>
-                      <div className="flex shrink-0 flex-col items-end">
+                      <div className="flex shrink-0 flex-col items-end gap-1">
                         <span className="text-sm font-black text-brand-red tabular-nums">
                           -{p.coinsSpent.toLocaleString()} HC
                         </span>
-                        <span
-                          className={`text-xs capitalize ${
-                            p.status === "completed"
-                              ? "text-primary"
-                              : p.status === "refunded"
-                                ? "text-primary"
-                                : "text-brand-red"
-                          }`}
-                        >
-                          {p.status}
-                        </span>
+                        {p.status === "completed" ? (
+                          <span className="flex items-center gap-0.5 text-[10px] font-bold text-primary">
+                            <span className="material-symbols-outlined text-[12px]">verified</span>
+                            Confirmed
+                          </span>
+                        ) : (
+                          <span className={`text-xs capitalize ${p.status === "refunded" ? "text-primary" : "text-brand-red"}`}>
+                            {p.status}
+                          </span>
+                        )}
+                        <span className="material-symbols-outlined text-[14px] neu-text-muted">chevron_right</span>
                       </div>
-                    </div>
+                    </button>
                   ))}
 
                   {paymentsQuery.hasNextPage && (
@@ -548,6 +552,11 @@ export default function WalletPage() {
 
         {tab === "tier" && <HuudCoinTierPanel />}
       </div>
+
+      <PaymentReceiptSheet
+        paymentId={receiptPaymentId}
+        onClose={() => setReceiptPaymentId(null)}
+      />
     </AppBrowseLayout>
   );
 }

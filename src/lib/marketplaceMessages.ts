@@ -114,9 +114,9 @@ export function getOfferPillClass(action: OfferAction): string {
     case "new":
       return "bg-brand-red900/50 text-brand-red";
     case "accept":
-      return "bg-green-900/50 text-primary";
+      return "bg-status-success/15 text-status-success";
     case "reject":
-      return "bg-red-900/50 text-brand-red";
+      return "bg-status-danger/12 text-status-danger";
     case "counter":
       return "bg-purple-900/50 text-white/90";
   }

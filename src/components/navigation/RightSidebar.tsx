@@ -8,6 +8,7 @@
 
 import Link from 'next/link';
 import SidebarWeatherWidget from './SidebarWeatherWidget';
+import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
 import { useEvents } from '@/hooks/useEvents';
 import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 
@@ -21,7 +22,10 @@ export default function RightSidebar() {
     const recentListings = Array.isArray(listingsRaw) ? listingsRaw.slice(0, 2) : [];
 
     return (
-        <aside className="hidden xl:flex w-[480px] flex-col gap-6 p-6 neu-base overflow-y-auto shrink-0" style={{ boxShadow: '-4px 0 12px var(--neu-shadow-dark)' }}>
+        <aside className="hidden lg:flex w-[320px] xl:w-[400px] flex-col gap-6 p-5 xl:p-6 neu-base overflow-y-auto shrink-0" style={{ boxShadow: '-4px 0 12px var(--neu-shadow-dark)' }}>
+            {/* Onboarding checklist — hidden once complete */}
+            <OnboardingChecklist />
+
             {/* Weather Widget */}
             <SidebarWeatherWidget />
 

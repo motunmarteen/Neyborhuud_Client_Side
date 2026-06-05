@@ -270,10 +270,10 @@ export default function GeofencesPage() {
                   key={i}
                   className={`flex gap-3 items-start rounded-xl px-4 py-3 border text-sm ${
                     a.type === 'restricted_zone'
-                      ? 'border-red-700 bg-red-900/20 text-brand-red'
+                      ? 'border-status-danger/50 bg-status-danger/10 text-status-danger'
                       : a.type === 'alert_zone'
                       ? 'border-status-warning/70 bg-status-warning/15 text-status-warning'
-                      : 'border-green-700 bg-green-900/20 text-primary'
+                      : 'border-status-success/40 bg-status-success/8 text-status-success'
                   }`}
                 >
                   <span className="text-lg">
@@ -408,7 +408,7 @@ export default function GeofencesPage() {
                       onClick={() => setForm((p) => ({ ...p, type: t }))}
                       className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
                         form.type === t
-                          ? 'border-primary bg-green-900/30 text-primary'
+                          ? 'border-primary bg-status-success/10 text-primary'
                           : 'border-black/[0.08] text-[var(--neu-text-muted)] hover:border-black/[0.08]'
                       }`}
                     >

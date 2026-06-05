@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence, useDragControls, PanInfo } from 'framer-motion';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface BottomSheetProps {
     open: boolean;
@@ -10,6 +10,9 @@ interface BottomSheetProps {
     title?: string;
     snapPoints?: number[];
 }
+
+const FOCUSABLE =
+  'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 export function BottomSheet({
     open,
@@ -20,7 +23,10 @@ export function BottomSheet({
 }: BottomSheetProps) {
     const dragControls = useDragControls();
     const maxHeight = `${Math.round(snapPoints[snapPoints.length - 1] * 100)}vh`;
+    const panelRef = useRef<HTMLDivElement>(null);
+    const previousFocusRef = useRef<HTMLElement | null>(null);
 
+    // Lock body scroll
     useEffect(() => {
         if (!open) return;
         const prev = document.body.style.overflow;
@@ -29,6 +35,54 @@ export function BottomSheet({
             document.body.style.overflow = prev;
         };
     }, [open]);
+
+    // Save + restore focus
+    useEffect(() => {
+        if (open) {
+            previousFocusRef.current = document.activeElement as HTMLElement;
+        } else {
+            previousFocusRef.current?.focus();
+        }
+    }, [open]);
+
+    // Auto-focus first element when opened
+    useEffect(() => {
+        if (!open || !panelRef.current) return;
+        const first = panelRef.current.querySelector<HTMLElement>(FOCUSABLE);
+        first?.focus();
+    }, [open]);
+
+    // Escape + focus trap
+    useEffect(() => {
+        if (!open) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                onClose();
+                return;
+            }
+            if (e.key !== 'Tab' || !panelRef.current) return;
+
+            const focusable = Array.from(
+                panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE),
+            ).filter((el) => !el.closest('[aria-hidden="true"]'));
+
+            if (focusable.length === 0) { e.preventDefault(); return; }
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [open, onClose]);
 
     const handleDragEnd = useCallback(
         (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -46,6 +100,7 @@ export function BottomSheet({
                     <motion.button
                         type="button"
                         aria-label="Close sheet"
+                        tabIndex={-1}
                         className="fixed inset-0 z-[200] bg-brand-black/40 backdrop-blur-sm border-0 cursor-default"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -53,6 +108,7 @@ export function BottomSheet({
                         onClick={onClose}
                     />
                     <motion.div
+                        ref={panelRef}
                         role="dialog"
                         aria-modal="true"
                         aria-label={title}

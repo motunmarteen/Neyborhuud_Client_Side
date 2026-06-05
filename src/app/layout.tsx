@@ -1,7 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { AppViewport } from "@/components/AppViewport";
@@ -104,6 +103,22 @@ export default function RootLayout({
           <a href="#main-content" className="skip-to-content">
             Skip to main content
           </a>
+          {/* Polite live region for regular toasts */}
+          <div
+            id="sr-announcer"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          />
+          {/* Assertive live region for SOS / emergency alerts */}
+          <div
+            id="sr-alert-announcer"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            className="sr-only"
+          />
           <TextSizeApplier />
           <DailyCheckInModal />
           <div id="main-content" className="app-shell">

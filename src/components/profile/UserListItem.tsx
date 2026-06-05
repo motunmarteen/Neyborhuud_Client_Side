@@ -57,7 +57,7 @@ export function UserListItem({ user }: UserListItemProps) {
               {displayName}
             </p>
             {user.isVerified && (
-              <i className="bi bi-patch-check-fill text-primary text-sm shrink-0" />
+              <span className="material-symbols-outlined text-primary text-sm shrink-0"  aria-hidden="true">verified</span>
             )}
           </div>
           <p className="text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] text-sm truncate">
@@ -94,7 +94,7 @@ export function UserListItem({ user }: UserListItemProps) {
             >
               {isPending ? (
                 <span className="inline-flex items-center gap-1.5">
-                  <i className="bi bi-hourglass-split animate-spin text-xs" />
+                  <span className="material-symbols-outlined animate-spin text-xs"  aria-hidden="true">hourglass_empty</span>
                   <span className="hidden sm:inline">
                     {isFollowing ? 'Unfollowing…' : 'Following…'}
                   </span>

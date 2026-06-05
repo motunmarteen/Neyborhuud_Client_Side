@@ -25,10 +25,10 @@ const SIGNUP_REWARDS = [
 ] as const;
 
 const SETUP_CHECKLIST = [
-  { id: 'account', label: 'Account created', icon: 'bi-person-check-fill' },
-  { id: 'email', label: 'Email verified', icon: 'bi-envelope-check-fill' },
-  { id: 'huud', label: 'Huud selected', icon: 'bi-house-heart-fill' },
-  { id: 'location', label: 'Location confirmed', icon: 'bi-crosshair' },
+  { id: 'account', label: 'Account created', icon: 'how_to_reg' },
+  { id: 'email', label: 'Email verified', icon: 'mark_email_read' },
+  { id: 'huud', label: 'Huud selected', icon: 'home' },
+  { id: 'location', label: 'Location confirmed', icon: 'my_location' },
 ] as const;
 
 export default function SetupCompletePage() {
@@ -95,7 +95,7 @@ export default function SetupCompletePage() {
       progress={{ active: 3, total: 3, stepLabel: 'All set' }}
       hero={
         <AuthFlowHero
-          icon="bi-stars"
+          icon="auto_awesome"
           eyebrow="Registration successful"
           title={`You're in, ${handleName}`}
           meta={huudName}
@@ -109,7 +109,7 @@ export default function SetupCompletePage() {
             className="auth-btn auth-btn-primary"
           >
             <span>Enter your Huud</span>
-            <i className="bi bi-arrow-right shrink-0" aria-hidden />
+            <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
           </button>
         </div>
       }
@@ -121,7 +121,7 @@ export default function SetupCompletePage() {
     >
       <div className="flex flex-col gap-3">
         <div className="auth-flow-notice auth-flow-notice--success">
-          <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+          <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
           <span>Your account is ready. Welcome to the Huud.</span>
         </div>
 
@@ -132,10 +132,10 @@ export default function SetupCompletePage() {
               className="flex items-center gap-3 rounded-2xl border border-primary/12 bg-primary/5 px-3.5 py-2.5"
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
-                <i className={`bi ${item.icon} text-sm`} aria-hidden />
+                <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">{item.icon}</span>
               </span>
               <span className="text-sm font-semibold text-[var(--neu-text)]">{item.label}</span>
-              <i className="bi bi-check-lg ml-auto text-primary" aria-hidden />
+              <span className="material-symbols-outlined ml-auto text-primary" aria-hidden="true">check</span>
             </li>
           ))}
         </ul>
@@ -148,7 +148,7 @@ export default function SetupCompletePage() {
             </div>
             <div className="flex items-center gap-2 text-primary">
               <span className="text-3xl font-black leading-none">{walletBalance}</span>
-              <i className="bi bi-coin text-xl text-status-warning" aria-hidden />
+              <span className="material-symbols-outlined text-xl text-status-warning" aria-hidden="true">toll</span>
             </div>
           </div>
           <ul className="grid gap-1 border-t border-primary/10 pt-2">

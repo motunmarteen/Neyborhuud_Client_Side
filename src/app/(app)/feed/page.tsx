@@ -41,6 +41,7 @@ import { mergeDiscoveryIntoFeed, type BaseFeedItem, type DiscoveryFeedItem } fro
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
 import { useFeedTabSwipe } from '@/hooks/useFeedTabSwipe';
 import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
+import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
 
 function XFeedInner() {
     const router = useRouter();
@@ -413,6 +414,8 @@ function XFeedInner() {
                                     </span>
                                 </div>
                             )}
+
+                            {feedTab === 'your_huud' && <FeedProfilePrompt />}
 
                             {feedTab === 'your_huud' && placeContext && (
                                 <FrequentPlaceContextBanner context={placeContext} />

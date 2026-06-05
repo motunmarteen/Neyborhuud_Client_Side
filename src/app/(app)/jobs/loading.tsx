@@ -1,0 +1,33 @@
+export default function JobsLoading() {
+  return (
+    <div className="min-h-screen bg-brand-black pb-[var(--app-bottomnav-h)] pt-[var(--app-topnav-offset)]">
+      <div className="mx-auto max-w-2xl px-4 py-4 space-y-3">
+        {/* Header */}
+        <div className="h-7 w-24 animate-pulse rounded-full bg-white/8" />
+        {/* Filter row */}
+        <div className="flex gap-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-8 w-16 shrink-0 animate-pulse rounded-full bg-white/8" />
+          ))}
+        </div>
+        {/* Job cards */}
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="animate-pulse rounded-2xl bg-white/5 p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="h-11 w-11 shrink-0 rounded-xl bg-white/8" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3.5 w-3/4 rounded-full bg-white/10" />
+                <div className="h-3 w-1/2 rounded-full bg-white/6" />
+              </div>
+            </div>
+            <div className="h-3 w-full rounded-full bg-white/5" />
+            <div className="flex gap-2">
+              <div className="h-6 w-16 rounded-full bg-white/8" />
+              <div className="h-6 w-20 rounded-full bg-white/6" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Event } from "@/types/api";
@@ -70,7 +71,7 @@ export default function EventCard({ event, onAttend, attendPending, variant = "i
     >
       {event.coverImage ? (
         <div className="absolute inset-0">
-          <img src={event.coverImage} alt={event.title} className="h-full w-full object-cover" />
+          <Image src={event.coverImage} alt={event.title} fill sizes="(max-width: 480px) 100vw, 480px" className="object-cover" />
           <div
             className="absolute inset-0"
             style={{
@@ -109,7 +110,7 @@ export default function EventCard({ event, onAttend, attendPending, variant = "i
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/90 text-black font-black uppercase tracking-wide">Boosted</span>
             )}
             {isCancelled && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-red/35 text-red-100 font-bold uppercase tracking-wide">Cancelled</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-danger/25 text-status-danger font-bold uppercase tracking-wide">Cancelled</span>
             )}
           </div>
           <button
@@ -147,7 +148,7 @@ export default function EventCard({ event, onAttend, attendPending, variant = "i
             disabled={attendPending}
             className={`rounded-full px-3.5 py-1.5 text-xs font-bold border backdrop-blur-md transition-all disabled:opacity-50 ${
               event.isAttending
-                ? "bg-primary/30 border-brand-green-dark/40 text-green-100"
+                ? "bg-primary/30 border-brand-green-dark/40 text-status-success"
                 : "bg-white/10 border-white/20 text-white/85 hover:bg-white/15"
             }`}
           >

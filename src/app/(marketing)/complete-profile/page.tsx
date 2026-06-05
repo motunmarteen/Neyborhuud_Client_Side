@@ -199,7 +199,7 @@ export default function CompleteProfilePage() {
                 stepLabel="Profile complete"
                 hero={
                     <AuthFlowHero
-                        icon="bi-gift-fill"
+                        icon="redeem-fill"
                         eyebrow="Identity unlocked"
                         title="Profile complete"
                         meta="You are now a Tier 1 Neyborh"
@@ -213,14 +213,14 @@ export default function CompleteProfilePage() {
                             className="auth-btn auth-btn-primary"
                         >
                             <span>Enter the Huud</span>
-                            <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                         </button>
                     </div>
                 }
             >
                 <div className="flex flex-col gap-3">
                     <div className="auth-flow-notice auth-flow-notice--success">
-                        <i className="bi bi-check-circle-fill shrink-0" aria-hidden />
+                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
                         <span>Your trust score has increased. Welcome to the Huud.</span>
                     </div>
                     <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
@@ -232,7 +232,7 @@ export default function CompleteProfilePage() {
                             <span className="text-3xl font-black leading-none">
                                 {profileCoinBalance ?? '—'}
                             </span>
-                            <i className="bi bi-coin text-xl text-status-warning" aria-hidden />
+                            <span className="material-symbols-outlined text-xl text-status-warning" aria-hidden="true">toll</span>
                         </div>
                     </div>
                     {profileCoinBalance === null ? (
@@ -262,7 +262,7 @@ export default function CompleteProfilePage() {
                             <p className="auth-signup-identity-peek__name truncate">{displayName}</p>
                         </div>
                         <span className="auth-signup-identity-peek__chevron" aria-hidden>
-                            <i className="bi bi-chevron-up" />
+                            <span className="material-symbols-outlined"  aria-hidden="true">expand_less</span>
                         </span>
                     </div>
                 }
@@ -282,7 +282,7 @@ export default function CompleteProfilePage() {
                                 ) : (
                                     <>
                                         <span>Claim 100 HuudCoins</span>
-                                        <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
                                     </>
                                 )}
                             </button>
@@ -291,7 +291,7 @@ export default function CompleteProfilePage() {
                                 onClick={() => router.push('/feed')}
                                 className="auth-btn auth-btn-secondary"
                             >
-                                <i className="bi bi-skip-forward shrink-0" aria-hidden />
+                                <span className="material-symbols-outlined shrink-0" aria-hidden="true">skip_next</span>
                                 <span>I&apos;ll do this later</span>
                             </button>
                         </div>
@@ -302,7 +302,7 @@ export default function CompleteProfilePage() {
                 }
             >
                 <AuthSheetStageHeader
-                    icon="bi-person-badge-fill"
+                    icon="badge"
                     eyebrow="Unlock your reward"
                     title={displayName}
                     meta="100 HuudCoins when you finish"
@@ -331,7 +331,7 @@ export default function CompleteProfilePage() {
                     <PremiumInput
                         label="Phone (Nigerian) — required for SOS & live tracking"
                         type="tel"
-                        icon="bi-telephone"
+                        icon="phone"
                         placeholder="08012345678"
                         className="py-0.5"
                         value={formData.phone}
@@ -370,14 +370,14 @@ export default function CompleteProfilePage() {
                     <PremiumInput
                         label="Date of Birth"
                         type="date"
-                        icon="bi-calendar-event"
+                        icon="event"
                         className="py-0.5"
                         value={formData.dob}
                         onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
                     />
 
                     <div className="auth-flow-notice auth-flow-notice--info">
-                        <i className="bi bi-shield-check shrink-0" aria-hidden />
+                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">verified_user</span>
                         <span>
                             Verified profiles help build a safer NeyborHuud. We never share your personal ID details.
                         </span>

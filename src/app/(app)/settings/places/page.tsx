@@ -126,7 +126,7 @@ export default function MyPlacesPage() {
                           type="button"
                           onClick={() => remove.mutate(p.id)}
                           disabled={remove.isPending}
-                          className="shrink-0 rounded-lg p-2 text-charcoal/40 hover:bg-red-50 hover:text-brand-red"
+                          className="shrink-0 rounded-lg p-2 text-white/30 hover:bg-status-danger/10 hover:text-status-danger"
                           aria-label={`Remove ${p.label}`}
                         >
                           <span className="material-symbols-outlined text-[18px]">delete</span>

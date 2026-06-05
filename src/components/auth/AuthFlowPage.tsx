@@ -126,11 +126,11 @@ export function AuthFlowPage({
                 <div className={`auth-signup-top${hasBack ? ' auth-flow-chrome' : ''}`}>
                     {onBackClick ? (
                         <button type="button" onClick={onBackClick} className="auth-flow-back" aria-label={backLabel}>
-                            <i className="bi bi-arrow-left" aria-hidden />
+                            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
                         </button>
                     ) : backHref ? (
                         <Link href={backHref} className="auth-flow-back" aria-label={backLabel}>
-                            <i className="bi bi-arrow-left" aria-hidden />
+                            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
                         </Link>
                     ) : null}
 

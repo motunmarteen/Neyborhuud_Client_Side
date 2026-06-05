@@ -180,23 +180,23 @@ export const INCIDENT_SEVERITY_META: Record<
   IncidentSeverity,
   { label: string; bgClass: string; textClass: string; borderClass: string }
 > = {
-  low:      { label: "Low",      bgClass: "bg-green-100 dark:bg-green-900/30",   textClass: "text-green-700 dark:text-primary",  borderClass: "border-green-300 dark:border-green-700" },
-  medium:   { label: "Medium",   bgClass: "bg-primary100 dark:bg-primary900/30", textClass: "text-primary700 dark:text-primary400", borderClass: "border-yellow-300 dark:border-yellow-700" },
-  high:     { label: "High",     bgClass: "bg-brand-red100 dark:bg-brand-red900/30", textClass: "text-brand-red700 dark:text-brand-red", borderClass: "border-orange-300 dark:border-orange-700" },
-  critical: { label: "Critical", bgClass: "bg-red-100 dark:bg-red-900/30",       textClass: "text-red-700 dark:text-brand-red",       borderClass: "border-red-300 dark:border-red-700" },
+  low:      { label: "Low",      bgClass: "bg-status-success/10",   textClass: "text-status-success",  borderClass: "border-status-success/40" },
+  medium:   { label: "Medium",   bgClass: "bg-status-warning/10",   textClass: "text-status-warning",  borderClass: "border-status-warning/40" },
+  high:     { label: "High",     bgClass: "bg-status-warning/15",   textClass: "text-status-warning",  borderClass: "border-status-warning/50" },
+  critical: { label: "Critical", bgClass: "bg-status-danger/10",    textClass: "text-status-danger",   borderClass: "border-status-danger/40" },
 };
 
 export const INCIDENT_STATUS_META: Record<
   IncidentStatus,
   { label: string; bgClass: string; textClass: string }
 > = {
-  open:         { label: "Open",         bgClass: "bg-blue-100 dark:bg-blue-900/30",   textClass: "text-blue-700 dark:text-brand-blue" },
-  under_review: { label: "Under Review", bgClass: "bg-primary100 dark:bg-primary900/30", textClass: "text-primary700 dark:text-primary400" },
-  escalated:    { label: "Escalated",    bgClass: "bg-brand-red100 dark:bg-brand-red900/30", textClass: "text-brand-red700 dark:text-brand-red" },
-  in_progress:  { label: "In Progress",  bgClass: "bg-purple-100 dark:bg-purple-900/30", textClass: "text-purple-700 dark:text-brand-blue" },
-  resolved:     { label: "Resolved",     bgClass: "bg-green-100 dark:bg-green-900/30",  textClass: "text-green-700 dark:text-primary" },
-  closed:       { label: "Closed",       bgClass: "bg-brand-surface dark:bg-brand-black",       textClass: "text-[var(--neu-text-secondary)] dark:text-[var(--neu-text-muted)]" },
-  disputed:     { label: "Disputed",     bgClass: "bg-red-100 dark:bg-red-900/30",      textClass: "text-red-700 dark:text-brand-red" },
+  open:         { label: "Open",         bgClass: "bg-status-info/10",    textClass: "text-status-info" },
+  under_review: { label: "Under Review", bgClass: "bg-status-pending/10", textClass: "text-status-warning" },
+  escalated:    { label: "Escalated",    bgClass: "bg-status-danger/10",  textClass: "text-status-danger" },
+  in_progress:  { label: "In Progress",  bgClass: "bg-status-info/10",    textClass: "text-status-info" },
+  resolved:     { label: "Resolved",     bgClass: "bg-status-success/10", textClass: "text-status-success" },
+  closed:       { label: "Closed",       bgClass: "bg-white/5",           textClass: "text-white/40" },
+  disputed:     { label: "Disputed",     bgClass: "bg-status-danger/8",   textClass: "text-status-danger" },
 };
 
 // ── News types ────────────────────────────────────────────────────────────────

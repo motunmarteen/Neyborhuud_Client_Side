@@ -12,9 +12,9 @@ export function AuthFlowHero({ icon, eyebrow, title, meta, error, pulse }: AuthF
         <div className="auth-flow-hero-card">
             <span
                 className={`auth-flow-hero-card__icon${error ? ' auth-flow-hero-card__icon--error' : ''}`}
-                aria-hidden
+                aria-hidden="true"
             >
-                <i className={`bi ${icon}${pulse ? ' animate-pulse' : ''}`} />
+                <span className={`material-symbols-outlined${pulse ? ' animate-pulse' : ''}`} aria-hidden="true">{icon}</span>
             </span>
             <div className="min-w-0 flex-1">
                 <p className={`auth-flow-hero-card__eyebrow${error ? ' auth-flow-hero-card__eyebrow--error' : ''}`}>

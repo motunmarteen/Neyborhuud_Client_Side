@@ -83,7 +83,7 @@ export function PasswordStrengthMeter({
         </div>
         {meetsPolicy ? (
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-status-success dark:text-primary">
-            <i className="bi bi-check-lg text-base" aria-hidden />
+            <span className="material-symbols-outlined text-base" aria-hidden="true">check</span>
           </span>
         ) : null}
       </div>
@@ -105,11 +105,11 @@ export function PasswordStrengthMeter({
                 aria-hidden
               >
                 {item.pending ? (
-                  <i className="bi bi-circle text-[0.65rem]" />
+                  <span className="material-symbols-outlined text-[0.65rem]" aria-hidden="true">circle</span>
                 ) : item.ok ? (
-                  <i className="bi bi-check-circle-fill text-status-success dark:text-primary text-sm" />
+                  <span className="material-symbols-outlined text-status-success dark:text-primary text-sm"  aria-hidden="true">check_circle</span>
                 ) : (
-                  <i className="bi bi-dash-circle text-status-warning dark:text-primary text-sm" />
+                  <span className="material-symbols-outlined text-status-warning dark:text-primary text-sm"  aria-hidden="true">remove_circle</span>
                 )}
               </span>
               <span

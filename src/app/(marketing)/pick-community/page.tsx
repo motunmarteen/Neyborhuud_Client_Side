@@ -219,7 +219,7 @@ function PickCommunityContent() {
       peek={
         <div className="auth-signup-location-peek">
           <span className="auth-signup-location-peek__icon" aria-hidden>
-            <i className="bi bi-house-heart-fill" />
+            <span className="material-symbols-outlined" aria-hidden="true">home</span>
           </span>
           <div className="min-w-0 flex-1">
             <p className="auth-signup-location-peek__label">
@@ -230,7 +230,7 @@ function PickCommunityContent() {
             </p>
           </div>
           <span className="auth-signup-location-peek__chevron" aria-hidden>
-            <i className="bi bi-chevron-up" />
+            <span className="material-symbols-outlined"  aria-hidden="true">expand_less</span>
           </span>
         </div>
       }
@@ -250,7 +250,7 @@ function PickCommunityContent() {
             ) : (
               <>
                 <span>{isChangingCommunity ? 'Update area' : 'Confirm area'}</span>
-                <i className="bi bi-arrow-right shrink-0" aria-hidden />
+                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
               </>
             )}
           </button>
@@ -258,7 +258,7 @@ function PickCommunityContent() {
             href={isChangingCommunity ? '/settings' : '/feed'}
             className="auth-btn auth-btn-secondary no-underline"
           >
-            <i className={`bi ${isChangingCommunity ? 'bi-x-lg' : 'bi-skip-forward'} shrink-0`} aria-hidden />
+            <span className="material-symbols-outlined shrink-0 text-[1.125rem]" aria-hidden="true">{isChangingCommunity ? 'close' : 'skip_next'}</span>
             <span>{isChangingCommunity ? 'Cancel' : 'Skip for now'}</span>
           </Link>
         </div>
@@ -291,7 +291,7 @@ function PickCommunityContent() {
       }
     >
       <AuthSheetStageHeader
-        icon="bi-house-heart-fill"
+        icon="home"
         eyebrow={isChangingCommunity ? 'Select new area' : 'Confirm your area'}
         title={selectedOption?.name || (isChangingCommunity ? 'Change your Huud' : 'Choose your Huud')}
         meta={locationMeta}
@@ -323,7 +323,7 @@ function PickCommunityContent() {
                     selectedId ? 'bg-primary text-white' : 'bg-[#F1F5F9] text-[var(--neu-text-muted)]'
                   }`}
                 >
-                  <i className={`bi ${selectedId ? 'bi-check-lg' : 'bi-geo'} text-sm`} aria-hidden />
+                  <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">{selectedId ? 'check' : 'location_on'}</span>
                 </div>
                 {selectedId ? (
                   <span className="flex-1 truncate text-left text-sm font-semibold text-primary">
@@ -335,7 +335,7 @@ function PickCommunityContent() {
                   </span>
                 )}
                 <i
-                  className={`bi bi-chevron-down shrink-0 text-xs text-[var(--neu-text-muted)] transition-transform duration-200 ${
+                  className={`material-symbols-outlined shrink-0 text-xs text-[var(--neu-text-muted)] transition-transform duration-200 ${
                     dropdownOpen ? 'rotate-180' : ''
                   }`}
                   aria-hidden
@@ -346,7 +346,7 @@ function PickCommunityContent() {
                 <div className="mt-2 overflow-hidden rounded-2xl border border-charcoal/5 bg-white shadow-[0_8px_24px_rgba(26,26,46,0.12)]">
                   <div className="border-b border-charcoal/5 px-3 pb-2 pt-3">
                     <div className="flex items-center gap-2 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2">
-                      <i className="bi bi-search text-xs text-[var(--neu-text-muted)]" aria-hidden />
+                      <span className="material-symbols-outlined text-xs text-[var(--neu-text-muted)]" aria-hidden="true">search</span>
                       <input
                         type="text"
                         placeholder="Search areas…"
@@ -362,7 +362,7 @@ function PickCommunityContent() {
                           className="text-[var(--neu-text-muted)] transition-colors hover:text-brand-black"
                           aria-label="Clear search"
                         >
-                          <i className="bi bi-x-lg text-xs" />
+                          <span className="material-symbols-outlined text-xs"  aria-hidden="true">close</span>
                         </button>
                       ) : null}
                     </div>
@@ -397,7 +397,7 @@ function PickCommunityContent() {
                                 }`}
                               >
                                 {isSelected ? (
-                                  <i className="bi bi-check text-[10px] text-white" />
+                                  <span className="material-symbols-outlined text-[10px] text-white" aria-hidden="true">check</span>
                                 ) : null}
                               </div>
                               <span className="flex-1 truncate text-sm font-medium">{o.name}</span>
@@ -416,7 +416,7 @@ function PickCommunityContent() {
 
             {seedRequired ? (
               <div className="auth-flow-notice auth-flow-notice--info">
-                <i className="bi bi-exclamation-triangle-fill shrink-0" aria-hidden />
+                <span className="material-symbols-outlined shrink-0" aria-hidden="true">warning</span>
                 <span>
                   Areas not seeded yet. Ask your backend admin to run{' '}
                   <code className="rounded bg-black/5 px-1 text-[10px]">pnpm run seed:communities</code>, then retry.
@@ -426,7 +426,7 @@ function PickCommunityContent() {
 
             {error && selectedId ? (
               <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                <i className="bi bi-exclamation-circle-fill shrink-0" aria-hidden />
+                <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
                 <span>{error}</span>
               </div>
             ) : (

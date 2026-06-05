@@ -126,7 +126,7 @@ export const StackedGallery: React.FC<StackedGalleryProps> = ({ images }) => {
                     className="w-10 h-10 rounded-full glass flex items-center justify-center text-charcoal/60 dark:text-text-secondary-dark hover:text-brand-blue dark:hover:text-primary hover:bg-white dark:hover:bg-surface-dark active:scale-95 transition-all"
                     title="Previous"
                 >
-                    <i className="bi bi-arrow-counterclockwise text-lg"></i>
+                    <span className="material-symbols-outlined text-lg" aria-hidden="true">replay</span>
                 </button>
 
                 {/* Counter & Grid Link */}
@@ -145,7 +145,7 @@ export const StackedGallery: React.FC<StackedGalleryProps> = ({ images }) => {
                     className="w-10 h-10 rounded-full glass flex items-center justify-center text-charcoal/60 dark:text-text-secondary-dark hover:text-primary hover:bg-white dark:hover:bg-surface-dark active:scale-95 transition-all"
                     title="Next"
                 >
-                    <i className="bi bi-arrow-right text-lg"></i>
+                    <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
                 </button>
             </div>
 
@@ -175,7 +175,7 @@ const Lightbox = ({ images, onClose }: { images: string[]; onClose: () => void }
                     onClick={onClose}
                     className="w-12 h-12 rounded-full bg-charcoal/5 dark:bg-surface-dark flex items-center justify-center hover:bg-charcoal/10 dark:hover:bg-surface-base-dark transition-colors"
                 >
-                    <i className="bi bi-x-lg text-xl text-charcoal dark:text-white"></i>
+                    <span className="material-symbols-outlined text-xl text-charcoal dark:text-white" aria-hidden="true">close</span>
                 </button>
             </div>
 
@@ -186,7 +186,7 @@ const Lightbox = ({ images, onClose }: { images: string[]; onClose: () => void }
                             <>
                                 <video src={img} className="w-full h-full object-cover" muted />
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                                    <i className="bi bi-play-circle-fill text-white text-3xl"></i>
+                                    <span className="material-symbols-outlined text-white text-3xl" aria-hidden="true">play_circle</span>
                                 </div>
                             </>
                         ) : (

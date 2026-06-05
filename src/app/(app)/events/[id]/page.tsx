@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
 import {
   useEvent,
@@ -166,7 +167,7 @@ function ReportModal({
           rows={2}
           maxLength={1000}
           placeholder="Additional details (optional)…"
-          className="w-full resize-none rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:border-red-300/50 focus:outline-none"
+          className="w-full resize-none rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:border-status-danger/50 focus:outline-none"
         />
         <div className="flex gap-3">
           <button
@@ -178,7 +179,7 @@ function ReportModal({
           <button
             onClick={() => onSubmit(reason, description.trim() || undefined)}
             disabled={isPending}
-            className="flex-1 rounded-xl border border-red-300/25 bg-brand-red/20 py-2.5 text-sm font-semibold text-red-100 transition-colors hover:bg-brand-red/30 disabled:opacity-50"
+            className="flex-1 rounded-xl border border-status-danger/30 bg-status-danger/15 py-2.5 text-sm font-semibold text-status-danger transition-colors hover:bg-status-danger/25 disabled:opacity-50"
           >
             {isPending ? "Reporting…" : "Submit Report"}
           </button>
@@ -360,7 +361,7 @@ export default function EventDetailPage() {
               <div className="relative min-h-[90vh] overflow-hidden">
                 {event.coverImage ? (
                   <div className="absolute inset-0">
-                    <img src={event.coverImage} alt={eventTitle} className="h-full w-full object-cover" />
+                    <Image src={event.coverImage} alt={eventTitle} fill priority sizes="100vw" className="object-cover" />
                     <div
                       className="absolute inset-0"
                       style={{
@@ -452,7 +453,7 @@ export default function EventDetailPage() {
                     {isCancelled && event.cancelReason && (
                       <div className="rounded-2xl border border-brand-red/25 bg-brand-red/15 p-3 backdrop-blur-md">
                         <p className="mb-1 text-xs font-bold text-brand-red">Cancellation reason</p>
-                        <p className="text-sm text-red-100">{event.cancelReason}</p>
+                        <p className="text-sm text-white/80">{event.cancelReason}</p>
                       </div>
                     )}
 
@@ -538,7 +539,7 @@ export default function EventDetailPage() {
                       <div className="grid gap-3 sm:grid-cols-3">
                         <Link
                           href={`/events/${eventId}/edit`}
-                          className="rounded-2xl border border-blue-300/25 bg-brand-blue/15 py-3 text-center text-sm font-bold text-blue-100 backdrop-blur-md transition-all hover:bg-brand-blue/25"
+                          className="rounded-2xl border border-brand-blue/30 bg-brand-blue/15 py-3 text-center text-sm font-bold text-brand-blue backdrop-blur-md transition-all hover:bg-brand-blue/25"
                         >
                           Edit Event
                         </Link>
@@ -556,7 +557,7 @@ export default function EventDetailPage() {
                               deleteEvent.mutate(eventId);
                           }}
                           disabled={deleteEvent.isPending}
-                          className="rounded-2xl border border-red-300/25 bg-brand-red/15 py-3 text-sm font-bold text-red-100 backdrop-blur-md transition-all hover:bg-brand-red/25 disabled:opacity-50"
+                          className="rounded-2xl border border-status-danger/30 bg-status-danger/12 py-3 text-sm font-bold text-status-danger backdrop-blur-md transition-all hover:bg-status-danger/22 disabled:opacity-50"
                         >
                           Delete
                         </button>

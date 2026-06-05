@@ -793,7 +793,7 @@ export default function SettingsPage() {
                                                 <p className="text-xs text-charcoal/40">{option.desc}</p>
                                             </div>
                                             {privacy.profileVisibility === option.value && (
-                                                <i className="bi bi-check-circle-fill text-primary"></i>
+                                                <span className="material-symbols-outlined text-primary" aria-hidden="true">check_circle</span>
                                             )}
                                         </div>
                                     </button>
@@ -841,7 +841,7 @@ export default function SettingsPage() {
                                         <span className="text-[10px] text-charcoal/50">View and unblock NeyburHs you&apos;ve blocked</span>
                                     </div>
                                 </div>
-                                <i className="bi bi-chevron-right text-charcoal/30" />
+                                <span className="material-symbols-outlined text-charcoal/30"  aria-hidden="true">chevron_right</span>
                             </a>
                         </div>
 
@@ -934,9 +934,9 @@ export default function SettingsPage() {
                                                 if (next) void loadAccessLog();
                                             }}
                                         >
-                                            <i
-                                                className={`bi ${accessLogOpen ? 'bi-chevron-up' : 'bi-chevron-down'}`}
-                                            />
+                                            <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">
+                                                {accessLogOpen ? 'expand_less' : 'expand_more'}
+                                            </span>
                                             Data access history
                                         </button>
                                         {accessLogOpen && (
@@ -1002,10 +1002,10 @@ export default function SettingsPage() {
                                 className="flex items-center justify-between py-3 px-4 rounded-xl bg-primary/10 border border-primary/20 min-h-[44px] touch-manipulation active:bg-primary/20 transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <i className="bi bi-person-plus text-primary text-lg" aria-hidden />
+                                    <span className="material-symbols-outlined text-primary text-lg" aria-hidden="true">person_add</span>
                                     <span className="text-sm font-bold text-charcoal">Complete your profile</span>
                                 </div>
-                                <i className="bi bi-chevron-right text-charcoal/40" aria-hidden />
+                                <span className="material-symbols-outlined text-charcoal/40" aria-hidden="true">chevron_right</span>
                             </Link>
                         </div>
 
@@ -1156,13 +1156,13 @@ export default function SettingsPage() {
                                 className="flex items-center justify-between py-4 border-t border-charcoal/5 group"
                             >
                                 <div className="flex items-center gap-3">
-                                    <i className="bi bi-geo-alt text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                                    <span className="material-symbols-outlined text-charcoal/40 group-hover:text-brand-blue transition-colors" aria-hidden="true">location_on</span>
                                     <div>
                                         <span className="text-sm font-bold text-charcoal block">Change Community</span>
                                         <span className="text-[10px] text-charcoal/40">Switch to a different ward or area</span>
                                     </div>
                                 </div>
-                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                                <span className="material-symbols-outlined text-charcoal/20" aria-hidden="true">chevron_right</span>
                             </Link>
                             
                             <Link
@@ -1170,13 +1170,13 @@ export default function SettingsPage() {
                                 className="flex items-center justify-between py-4 group"
                             >
                                 <div className="flex items-center gap-3">
-                                    <i className="bi bi-crosshair text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                                    <span className="material-symbols-outlined text-charcoal/40 group-hover:text-brand-blue transition-colors" aria-hidden="true">my_location</span>
                                     <div>
                                         <span className="text-sm font-bold text-charcoal block">Update GPS Location</span>
                                         <span className="text-[10px] text-charcoal/40">Re-detect your current location</span>
                                     </div>
                                 </div>
-                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                                <span className="material-symbols-outlined text-charcoal/20" aria-hidden="true">chevron_right</span>
                             </Link>
                         </div>
 
@@ -1197,9 +1197,9 @@ export default function SettingsPage() {
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm font-bold text-charcoal">{user.email}</span>
                                             {emailVerified ? (
-                                                <i className="bi bi-patch-check-fill text-primary text-sm"></i>
+                                                <span className="material-symbols-outlined text-primary text-sm" aria-hidden="true">verified</span>
                                             ) : (
-                                                <i className="bi bi-exclamation-circle text-primary text-sm"></i>
+                                                <span className="material-symbols-outlined text-primary text-sm" aria-hidden="true">error</span>
                                             )}
                                         </div>
                                     </div>
@@ -1229,7 +1229,7 @@ export default function SettingsPage() {
                                         <span className="text-[10px] text-charcoal/40">Home, work, chill spots &amp; more</span>
                                     </div>
                                 </div>
-                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                                <span className="material-symbols-outlined text-charcoal/20" aria-hidden="true">chevron_right</span>
                             </Link>
                             <Link
                                 href="/settings/location"
@@ -1239,7 +1239,7 @@ export default function SettingsPage() {
                                     <span className="material-symbols-outlined text-[18px] text-charcoal/40 group-hover:text-brand-blue transition-colors">location_on</span>
                                     <span className="text-sm font-bold text-charcoal">Location &amp; Radius</span>
                                 </div>
-                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                                <span className="material-symbols-outlined text-charcoal/20" aria-hidden="true">chevron_right</span>
                             </Link>
 
                             {/* Font size */}
@@ -1285,10 +1285,10 @@ export default function SettingsPage() {
                                     className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <i className="bi bi-shield-check text-status-success group-hover:text-brand-blue transition-colors"></i>
+                                        <span className="material-symbols-outlined text-status-success group-hover:text-brand-blue transition-colors" aria-hidden="true">verified_user</span>
                                         <span className="text-sm font-bold text-charcoal">Admin Panel</span>
                                     </div>
-                                    <i className="bi bi-chevron-right text-charcoal/20"></i>
+                                    <span className="material-symbols-outlined text-charcoal/20" aria-hidden="true">chevron_right</span>
                                 </Link>
                             )}
                             
@@ -1297,10 +1297,10 @@ export default function SettingsPage() {
                                 className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
                             >
                                 <div className="flex items-center gap-3">
-                                    <i className="bi bi-key text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                                    <span className="material-symbols-outlined text-charcoal/40 group-hover:text-brand-blue transition-colors" aria-hidden="true">key</span>
                                     <span className="text-sm font-bold text-charcoal">Change Password</span>
                                 </div>
-                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                                <span className="material-symbols-outlined text-charcoal/20" aria-hidden="true">chevron_right</span>
                             </Link>
                             
                             <Link 
@@ -1308,15 +1308,15 @@ export default function SettingsPage() {
                                 className="flex items-center justify-between py-4 border-b border-charcoal/5 group"
                             >
                                 <div className="flex items-center gap-3">
-                                    <i className="bi bi-envelope text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                                    <span className="material-symbols-outlined text-charcoal/40 group-hover:text-brand-blue transition-colors" aria-hidden="true">mail</span>
                                     <span className="text-sm font-bold text-charcoal">Forgot password</span>
                                 </div>
-                                <i className="bi bi-chevron-right text-charcoal/20"></i>
+                                <span className="material-symbols-outlined text-charcoal/20" aria-hidden="true">chevron_right</span>
                             </Link>
                             
                             <button className="flex items-center justify-between py-4 w-full group">
                                 <div className="flex items-center gap-3">
-                                    <i className="bi bi-shield-lock text-charcoal/40 group-hover:text-brand-blue transition-colors"></i>
+                                    <span className="material-symbols-outlined text-charcoal/40 group-hover:text-brand-blue transition-colors" aria-hidden="true">lock</span>
                                     <span className="text-sm font-bold text-charcoal">Two-Factor Auth</span>
                                 </div>
                                 <span className="text-xs text-charcoal/30 uppercase">Coming Soon</span>
@@ -1333,7 +1333,7 @@ export default function SettingsPage() {
                                 onClick={() => void handleLogout()}
                                 className="flex w-full items-center gap-3 rounded-xl py-3 px-4 text-left text-brand-red/70 hover:text-brand-red hover:bg-brand-red/5 transition-colors min-h-[44px] touch-manipulation"
                             >
-                                <i className="bi bi-box-arrow-right text-lg" aria-hidden />
+                                <span className="material-symbols-outlined text-lg" aria-hidden="true">logout</span>
                                 <span className="text-sm font-bold">Sign out</span>
                             </button>
                         </div>
@@ -1355,7 +1355,7 @@ export default function SettingsPage() {
                                 onClick={() => void handleExportMyData()}
                                 className="flex items-center gap-3 py-3 w-full text-left text-charcoal/70 hover:text-brand-blue transition-colors disabled:opacity-50"
                             >
-                                <i className="bi bi-download"></i>
+                                <span className="material-symbols-outlined" aria-hidden="true">download</span>
                                 <span className="text-sm font-bold">
                                     {accountActionLoading === 'export'
                                         ? 'Preparing export…'
@@ -1368,7 +1368,7 @@ export default function SettingsPage() {
                                 onClick={() => void handleDeleteAccount()}
                                 className="flex items-center gap-3 py-3 w-full text-left text-brand-red/60 hover:text-brand-red transition-colors disabled:opacity-50"
                             >
-                                <i className="bi bi-trash3"></i>
+                                <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                                 <span className="text-sm font-bold">
                                     {accountActionLoading === 'delete'
                                         ? 'Deleting…'
@@ -1413,7 +1413,7 @@ export default function SettingsPage() {
                                             </span>
                                         </div>
                                         {currentLanguage === lang && (
-                                            <i className="bi bi-check-circle-fill text-primary"></i>
+                                            <span className="material-symbols-outlined text-primary" aria-hidden="true">check_circle</span>
                                         )}
                                     </button>
                                 ))}
