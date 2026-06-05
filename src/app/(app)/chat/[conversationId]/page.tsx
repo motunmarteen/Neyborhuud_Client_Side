@@ -29,6 +29,7 @@ import {
 } from '@/lib/chatSender';
 import { ChatRoomHeader } from '@/components/chat/ChatRoomHeader';
 import { ChatComposer } from '@/components/chat/ChatComposer';
+import { useCall } from '@/components/calls/CallProvider';
 import { convAvatarMeta, convDisplayName, convSubtitle } from '@/lib/chatDisplay';
 import type { ActionResult } from '@/components/chat/ChatActionMenu';
 import { unwrapApiData } from '@/lib/apiPayload';
@@ -478,6 +479,25 @@ export default function ConversationPage() {
     [conv, user?.id],
   );
 
+  // ── Audio/Video calling ───────────────────────────────────────────────────
+  // Only offered on direct 1-on-1 conversations where we know the peer.
+  const { startCall, phase: callPhase } = useCall();
+  // 'direct' type already excludes incident threads, so no separate check needed.
+  const canCall =
+    conv?.type === 'direct' && !!peerUserId && !isPlaceholder;
+  const beginCall = useCallback(
+    (type: 'audio' | 'video') => {
+      if (!peerUserId) return;
+      void startCall({
+        peerId: peerUserId,
+        peerName: convDisplayName(conv, user?.id),
+        conversationId: isPlaceholder ? null : conversationId,
+        type,
+      });
+    },
+    [peerUserId, startCall, conv, user?.id, isPlaceholder, conversationId],
+  );
+
   const enrichOutgoing = useCallback(
     (msg: ChatMessage) => enrichMessageReceipt(msg, user?.id, peerUserId),
     [user?.id, peerUserId],
@@ -925,6 +945,9 @@ export default function ConversationPage() {
           encrypted={conv?.type === 'direct'}
           showKeyPanel={showKeyPanel}
           onToggleKeys={() => setShowKeyPanel((s) => !s)}
+          onAudioCall={canCall ? () => beginCall('audio') : undefined}
+          onVideoCall={canCall ? () => beginCall('video') : undefined}
+          callDisabled={callPhase !== 'idle'}
         />
       }
       banners={banners}
@@ -988,6 +1011,47 @@ export default function ConversationPage() {
                       if (isSystem) {
                         const c = msg.content ?? '';
                         const msgMeta = (msg as { meta?: Record<string, unknown> }).meta;
+
+                        // ── Call summary entry (missed / ended / declined) ──
+                        if (msgMeta?.kind === 'call') {
+                          const callType = msgMeta.callType === 'video' ? 'video' : 'audio';
+                          const callStatus = String(msgMeta.callStatus ?? '');
+                          const negative =
+                            callStatus === 'missed' ||
+                            callStatus === 'cancelled' ||
+                            callStatus === 'rejected' ||
+                            callStatus === 'failed';
+                          // "missed" is shown from the receiver's side; the caller
+                          // sees it as "cancelled" but we display the same neutral label.
+                          const callerId = String(msgMeta.caller ?? '');
+                          const iAmCaller = callerId === user?.id;
+                          const icon = callType === 'video' ? 'videocam' : 'call';
+                          const directionIcon = negative
+                            ? (iAmCaller ? 'call_made' : 'call_missed')
+                            : (iAmCaller ? 'call_made' : 'call_received');
+                          return (
+                            <div
+                              key={id}
+                              ref={isLastOverall ? lastMsgRef : undefined}
+                              className="my-3 flex justify-center px-2"
+                            >
+                              <span
+                                className={`chat-room__system-pill mod-chip inline-flex items-center gap-1.5 ${
+                                  negative ? 'text-brand-red' : 'text-[var(--neu-text-muted)]'
+                                }`}
+                              >
+                                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                                  {directionIcon}
+                                </span>
+                                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                                  {icon}
+                                </span>
+                                {c}
+                              </span>
+                            </div>
+                          );
+                        }
+
                         const structuredEvent =
                           msgMeta?.offerAction && msgMeta?.actorRole
                             ? {

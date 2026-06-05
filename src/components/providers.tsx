@@ -26,8 +26,37 @@ import { PageTransition } from '@/components/ui/PageTransition';
 import { SwipeBackProvider } from '@/contexts/SwipeBackContext';
 import { GuardianAlertsProvider } from '@/contexts/GuardianAlertsContext';
 import { SosProvider } from '@/contexts/SosContext';
+import { CallProvider } from '@/components/calls/CallProvider';
+import { CallOverlay } from '@/components/calls/CallOverlay';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
+
+/** Pipes sr:announce (polite) and sr:alert (assertive) events into the aria-live regions in layout.tsx */
+function SrToastAnnouncer() {
+  useEffect(() => {
+    const writeToRegion = (id: string, msg: string) => {
+      const el = document.getElementById(id);
+      if (!el || !msg) return;
+      el.textContent = '';
+      requestAnimationFrame(() => { el.textContent = msg; });
+    };
+
+    const politeHandler = (e: Event) => {
+      writeToRegion('sr-announcer', (e as CustomEvent<string>).detail);
+    };
+    const assertiveHandler = (e: Event) => {
+      writeToRegion('sr-alert-announcer', (e as CustomEvent<string>).detail);
+    };
+
+    window.addEventListener('sr:announce', politeHandler);
+    window.addEventListener('sr:alert', assertiveHandler);
+    return () => {
+      window.removeEventListener('sr:announce', politeHandler);
+      window.removeEventListener('sr:alert', assertiveHandler);
+    };
+  }, []);
+  return null;
+}
 
 /**
  * Emits the socket `authenticate` event whenever the current user changes
@@ -286,6 +315,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <SwipeBackProvider>
       <SosProvider>
       <GuardianAlertsProvider>
+      <CallProvider>
       <SocketAuthenticator />
       <SmartLocationSync />
       <LocationSyncOrchestrator />
@@ -293,13 +323,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <PwaInstallTracker />
       <PwaInstallPrompt />
       <PageTransition>{children}</PageTransition>
+      <CallOverlay />
+      </CallProvider>
       </GuardianAlertsProvider>
       </SosProvider>
       </SwipeBackProvider>
-      <Toaster 
-        position="top-right" 
-        richColors 
-        closeButton 
+      <Toaster
+        position="top-right"
+        richColors
+        closeButton
         duration={4000}
         toastOptions={{
           style: {
@@ -308,7 +340,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
             border: '1px solid var(--border)',
           },
         }}
+        visibleToasts={4}
+        expand={false}
       />
+      {/* Announcer: Sonner toasts are visual-only; this mirrors them into the
+          aria-live region so screen readers hear every notification. */}
+      <SrToastAnnouncer />
       {process.env.NODE_ENV === 'development' && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}

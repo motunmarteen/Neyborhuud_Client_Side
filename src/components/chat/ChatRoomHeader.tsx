@@ -12,6 +12,12 @@ export type ChatRoomHeaderProps = {
   showKeyPanel?: boolean;
   onToggleKeys?: () => void;
   backHref?: string;
+  /** When provided, shows an audio-call button (direct 1-on-1 chats). */
+  onAudioCall?: () => void;
+  /** When provided, shows a video-call button (direct 1-on-1 chats). */
+  onVideoCall?: () => void;
+  /** Disables call buttons (e.g. while a call is already in progress). */
+  callDisabled?: boolean;
 };
 
 export function ChatRoomHeader({
@@ -24,6 +30,9 @@ export function ChatRoomHeader({
   showKeyPanel = false,
   onToggleKeys,
   backHref = '/chat',
+  onAudioCall,
+  onVideoCall,
+  callDisabled = false,
 }: ChatRoomHeaderProps) {
   return (
     <header
@@ -48,7 +57,7 @@ export function ChatRoomHeader({
           ) : (
             <div
               className={`chat-room__avatar neu-avatar flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                isIncident ? 'bg-red-500/20 text-brand-red/70' : 'bg-primary/15 text-primary'
+                isIncident ? 'bg-status-danger/15 text-status-danger/70' : 'bg-primary/15 text-primary'
               }`}
               aria-hidden
             >
@@ -66,6 +75,30 @@ export function ChatRoomHeader({
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
+          {onAudioCall ? (
+            <button
+              type="button"
+              onClick={onAudioCall}
+              disabled={callDisabled}
+              className="chat-room__keys mod-inset disabled:opacity-40"
+              title="Audio call"
+              aria-label="Start audio call"
+            >
+              <span className="material-symbols-outlined text-[20px]">call</span>
+            </button>
+          ) : null}
+          {onVideoCall ? (
+            <button
+              type="button"
+              onClick={onVideoCall}
+              disabled={callDisabled}
+              className="chat-room__keys mod-inset disabled:opacity-40"
+              title="Video call"
+              aria-label="Start video call"
+            >
+              <span className="material-symbols-outlined text-[20px]">videocam</span>
+            </button>
+          ) : null}
           {encrypted && !isIncident ? (
             <span className="chat-room__trust mod-chip hidden items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-primary sm:inline-flex">
               <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
