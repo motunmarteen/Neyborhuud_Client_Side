@@ -451,8 +451,15 @@ export function CallProvider({ children }: { children: ReactNode }) {
       const pc = pcRef.current;
       if (!pc || !data.candidate) return;
       if (pc.remoteDescription && pc.remoteDescription.type) {
-        try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch { /* noop */ }
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          console.log('[Call] added remote candidate');
+        } catch (err) {
+          console.warn('[Call] failed to add remote candidate', err);
+        }
       } else {
+        // Buffer until remoteDescription is set (flushed in accept/answer).
+        console.log('[Call] buffering remote candidate (no remoteDescription yet)');
         pendingCandidatesRef.current.push(data.candidate);
       }
     };
