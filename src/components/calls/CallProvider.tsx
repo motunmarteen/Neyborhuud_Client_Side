@@ -170,6 +170,14 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const createPeerConnection = useCallback(
     async () => {
       const iceServers = await callService.getIceServers();
+      // Diagnostic: log whether TURN actually made it into the ICE config.
+      const hasTurn = iceServers.some((s) => {
+        const u = s.urls;
+        const list = Array.isArray(u) ? u : [u];
+        return list.some((x) => typeof x === 'string' && x.startsWith('turn'));
+      });
+      console.log('[Call] ICE servers loaded:', iceServers.length, 'TURN present:', hasTurn);
+
       const pc = new RTCPeerConnection({ iceServers });
 
       // A single MediaStream we add remote tracks onto, so audio + video that
@@ -179,7 +187,17 @@ export function CallProvider({ children }: { children: ReactNode }) {
       remoteStreamRef.current = remote;
 
       pc.onicecandidate = (e) => {
-        if (e.candidate) sendLocalCandidate(e.candidate.toJSON());
+        if (e.candidate) {
+          // Diagnostic: 'relay' = via TURN, 'srflx' = STUN, 'host' = local.
+          console.log('[Call] local candidate:', e.candidate.type, e.candidate.protocol);
+          sendLocalCandidate(e.candidate.toJSON());
+        } else {
+          console.log('[Call] ICE gathering complete');
+        }
+      };
+
+      pc.oniceconnectionstatechange = () => {
+        console.log('[Call] ICE connection state:', pc.iceConnectionState);
       };
 
       pc.ontrack = (e) => {
@@ -195,6 +213,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
 
       pc.onconnectionstatechange = () => {
         const st = pc.connectionState;
+        console.log('[Call] connection state:', st);
         if (st === 'connected') setPhase('active');
         if (st === 'failed') {
           const id = liveCallIdRef.current;
