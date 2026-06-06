@@ -34,20 +34,21 @@ export function CallOverlay() {
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
-  // Bind streams to media elements.
+  // Bind streams to media elements. Because the media elements are ALWAYS
+  // mounted (toggled with CSS, never conditionally rendered), the refs are
+  // stable and the stream always attaches — this is what fixes the "remote
+  // video never shows" bug where the <video> was unmounted when the effect ran.
   useEffect(() => {
-    if (localVideoRef.current && localStream) {
-      localVideoRef.current.srcObject = localStream;
-    }
+    if (localVideoRef.current) localVideoRef.current.srcObject = localStream;
   }, [localStream]);
 
   useEffect(() => {
-    if (remoteVideoRef.current && remoteStream) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-    if (remoteAudioRef.current && remoteStream) {
-      remoteAudioRef.current.srcObject = remoteStream;
-    }
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
+    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = remoteStream;
+    // Autoplay can be blocked until a user gesture; nudge play() and ignore the
+    // rejection (the accept/answer tap already counts as a gesture).
+    remoteVideoRef.current?.play?.().catch(() => {});
+    remoteAudioRef.current?.play?.().catch(() => {});
   }, [remoteStream]);
 
   // Call timer — runs while active.
@@ -79,40 +80,59 @@ export function CallOverlay() {
     .slice(0, 2)
     .toUpperCase();
 
+  // Show remote video only once it's flowing AND this is a video call.
   const showRemoteVideo = isVideo && phase === 'active' && !!remoteStream;
+  // The big avatar/initials placeholder shows for audio calls always, and for
+  // video calls until the remote video is actually flowing.
+  const showAvatar = !showRemoteVideo;
 
   return (
     <div className="fixed inset-0 z-[300] flex flex-col bg-[#0a1a0f] text-white">
-      {/* Remote audio always present so audio calls have sound */}
+      {/* Remote audio — ALWAYS mounted so audio (and audio of video calls)
+          plays regardless of UI phase. */}
       <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
 
-      {/* Remote video fills the screen for video calls */}
-      {showRemoteVideo ? (
-        <video
-          ref={remoteVideoRef}
-          autoPlay
-          playsInline
-          className="absolute inset-0 h-full w-full bg-black object-cover"
-        />
-      ) : (
+      {/* Remote video — ALWAYS mounted; hidden with CSS until it's flowing.
+          Conditionally rendering this was the cause of the one-way/black
+          remote video: the element didn't exist when the stream bound to it. */}
+      <video
+        ref={remoteVideoRef}
+        autoPlay
+        playsInline
+        className={`absolute inset-0 h-full w-full bg-black object-cover ${
+          showRemoteVideo ? '' : 'hidden'
+        }`}
+      />
+
+      {/* Avatar / initials placeholder (audio calls, and pre-connect video). */}
+      {showAvatar && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
-          <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/30 text-4xl font-black ring-4 ring-primary/40">
-            {initials || '👤'}
-          </div>
+          {call.peerAvatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={call.peerAvatar}
+              alt=""
+              className="h-32 w-32 rounded-full object-cover ring-4 ring-primary/40"
+            />
+          ) : (
+            <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/30 text-5xl font-black ring-4 ring-primary/40">
+              {initials || '👤'}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Local preview (picture-in-picture) for video calls */}
-      {isVideo && localStream && (
-        <video
-          ref={localVideoRef}
-          autoPlay
-          playsInline
-          muted
-          className="absolute right-4 top-4 z-10 h-40 w-28 rounded-2xl border-2 border-white/20 bg-black object-cover shadow-xl"
-          style={{ transform: 'scaleX(-1)' }}
-        />
-      )}
+      {/* Local preview (picture-in-picture) — mounted whenever we have a local
+          video track; CSS-hidden if not a video call. */}
+      <video
+        ref={localVideoRef}
+        autoPlay
+        playsInline
+        muted
+        className={`local-call-preview absolute right-4 top-4 z-10 h-40 w-28 rounded-2xl border-2 border-white/20 bg-black object-cover shadow-xl ${
+          isVideo && localStream ? '' : 'hidden'
+        }`}
+      />
 
       {/* Header: name + status */}
       <div className="relative z-10 flex flex-col items-center gap-1 px-6 pt-12 text-center">

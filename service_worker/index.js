@@ -65,6 +65,7 @@ var REQUIRE_INTERACTION_TYPES = [
   "trip_overdue",
   "geofence_alert",
   "safety_alert",
+  "incoming_call",
 ];
 
 /** Types that get action buttons */
@@ -92,6 +93,7 @@ self.addEventListener("push", function (event) {
   var type = notifData.type || "general";
 
   var isSafety = SAFETY_TYPES.indexOf(type) !== -1;
+  var isCall = type === "incoming_call";
   var requireInteraction = REQUIRE_INTERACTION_TYPES.indexOf(type) !== -1;
 
   var options = {
@@ -99,16 +101,29 @@ self.addEventListener("push", function (event) {
     icon: "/icon-192.png",
     badge: "/icon-192.png",
     data: notifData,
-    tag: type + (notifData.notificationId ? "_" + notifData.notificationId : ""),
+    // Call notifications use the callId tag so a hangup can replace/clear them.
+    tag: isCall
+      ? "call-" + (notifData.callId || "")
+      : type + (notifData.notificationId ? "_" + notifData.notificationId : ""),
     renotify: true,
     requireInteraction: requireInteraction,
-    vibrate: isSafety ? [200, 100, 200, 100, 200] : [100, 50, 100],
-    actions: isSafety
+    // Phone-style repeating vibration for incoming calls.
+    vibrate: isCall
+      ? [400, 200, 400, 200, 400, 200, 400]
+      : isSafety
+        ? [200, 100, 200, 100, 200]
+        : [100, 50, 100],
+    actions: isCall
       ? [
-          { action: "view", title: "View" },
-          { action: "dismiss", title: "Dismiss" },
+          { action: "accept", title: "Accept" },
+          { action: "decline", title: "Decline" },
         ]
-      : [{ action: "view", title: "Open" }],
+      : isSafety
+        ? [
+            { action: "view", title: "View" },
+            { action: "dismiss", title: "Dismiss" },
+          ]
+        : [{ action: "view", title: "Open" }],
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
@@ -121,6 +136,43 @@ self.addEventListener("notificationclick", function (event) {
   if (event.action === "dismiss") return;
 
   var d = event.notification.data || {};
+
+  // Incoming-call notification: "decline" just notifies open clients and closes;
+  // tapping the body or "accept" opens/focuses the app and signals it to answer.
+  if (d.type === "incoming_call") {
+    event.waitUntil(
+      clients
+        .matchAll({ type: "window", includeUncontrolled: true })
+        .then(function (clientList) {
+          var action = event.action === "decline" ? "decline" : "accept";
+          // Tell any open client about the user's choice.
+          for (var i = 0; i < clientList.length; i++) {
+            clientList[i].postMessage({
+              source: "neyborhuud-call",
+              action: action,
+              callId: d.callId,
+            });
+          }
+          if (action === "decline") return;
+          // Accept (or tap): focus an existing window or open one at the chat.
+          var url = d.url || "/chat";
+          for (var j = 0; j < clientList.length; j++) {
+            var c = clientList[j];
+            if (
+              typeof c.url === "string" &&
+              c.url.indexOf(self.registration.scope) === 0 &&
+              "focus" in c
+            ) {
+              c.navigate(url);
+              return c.focus();
+            }
+          }
+          if (clients.openWindow) return clients.openWindow(url);
+        }),
+    );
+    return;
+  }
+
   var url = resolveUrl(d);
 
   event.waitUntil(

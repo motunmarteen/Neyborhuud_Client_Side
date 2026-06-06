@@ -491,6 +491,7 @@ export default function ConversationPage() {
       void startCall({
         peerId: peerUserId,
         peerName: convDisplayName(conv, user?.id),
+        peerAvatar: convAvatarMeta(conv)?.url ?? null,
         conversationId: isPlaceholder ? null : conversationId,
         type,
       });

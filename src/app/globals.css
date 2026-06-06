@@ -7437,3 +7437,6 @@ button:focus-visible:not([class*="focus-visible"]) {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* Self-view in a call is mirrored so it feels natural, like a front camera. */
+.local-call-preview { transform: scaleX(-1); }

@@ -31,6 +31,7 @@ import {
 import socketService from '@/lib/socket';
 import { callService, type CallType } from '@/services/call.service';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
+import * as ringtone from '@/lib/callRingtone';
 
 export type CallPhase =
   | 'idle'
@@ -44,6 +45,7 @@ export interface ActiveCall {
   callId: string;
   peerId: string;
   peerName: string;
+  peerAvatar: string | null;
   conversationId: string | null;
   type: CallType;
   isCaller: boolean;
@@ -59,6 +61,7 @@ interface CallContextValue {
   startCall: (args: {
     peerId: string;
     peerName: string;
+    peerAvatar?: string | null;
     conversationId: string | null;
     type: CallType;
   }) => Promise<void>;
@@ -238,11 +241,13 @@ export function CallProvider({ children }: { children: ReactNode }) {
     async ({
       peerId,
       peerName,
+      peerAvatar = null,
       conversationId,
       type,
     }: {
       peerId: string;
       peerName: string;
+      peerAvatar?: string | null;
       conversationId: string | null;
       type: CallType;
     }) => {
@@ -252,6 +257,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         callId: '',
         peerId,
         peerName,
+        peerAvatar,
         conversationId,
         type,
         isCaller: true,
@@ -277,13 +283,16 @@ export function CallProvider({ children }: { children: ReactNode }) {
           conversationId,
           type,
           sdp: offer,
+          // So the callee's incoming screen can show our name + photo.
+          fromName: user?.username ? `@${user.username}` : (user?.firstName ?? 'Neybor'),
+          fromAvatar: user?.avatarUrl ?? null,
         });
       } catch (err) {
         console.error('[Call] startCall failed', err);
         endCall('ended');
       }
     },
-    [phase, myId, setCallState, createPeerConnection, attachLocalMedia, endCall],
+    [phase, myId, user, setCallState, createPeerConnection, attachLocalMedia, endCall],
   );
 
   const acceptCall = useCallback(async () => {
@@ -342,6 +351,15 @@ export function CallProvider({ children }: { children: ReactNode }) {
     setCameraEnabled(enabled);
   }, [cameraEnabled]);
 
+  // Ringtone: ring while a call is incoming, ringback while outgoing, silence
+  // otherwise. Stops on unmount too.
+  useEffect(() => {
+    if (phase === 'incoming') ringtone.ring();
+    else if (phase === 'outgoing') ringtone.ringback();
+    else ringtone.stop();
+    return () => ringtone.stop();
+  }, [phase]);
+
   // Keep the latest endCall/hangup in a ref so the socket-listener effect can
   // call fresh versions without depending on them (the effect must run once per
   // user session, not re-subscribe whenever a callback identity changes — that
@@ -374,6 +392,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       callId: string;
       from: string;
       fromName: string;
+      fromAvatar?: string | null;
       conversationId: string | null;
       type: CallType;
       sdp: RTCSessionDescriptionInit;
@@ -388,6 +407,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         callId: data.callId,
         peerId: data.from,
         peerName: data.fromName || 'Neybor',
+        peerAvatar: data.fromAvatar ?? null,
         conversationId: data.conversationId,
         type: data.type,
         isCaller: false,
@@ -447,6 +467,25 @@ export function CallProvider({ children }: { children: ReactNode }) {
     // accessed via handlersRef, so they never need to re-subscribe.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myId]);
+
+  // Bridge from the service worker: when the user taps Accept/Decline on an
+  // incoming-call push notification, the SW posts a message here so we can
+  // answer or decline the live call (the offer arrives over the socket).
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.serviceWorker) return;
+    const onMessage = (event: MessageEvent) => {
+      const msg = event.data;
+      if (!msg || msg.source !== 'neyborhuud-call') return;
+      const current = callRef.current;
+      if (!current || current.isCaller) return;
+      // Only act on the matching call.
+      if (msg.callId && current.callId && msg.callId !== current.callId) return;
+      if (msg.action === 'accept') void acceptCall();
+      else if (msg.action === 'decline') rejectCall();
+    };
+    navigator.serviceWorker.addEventListener('message', onMessage);
+    return () => navigator.serviceWorker.removeEventListener('message', onMessage);
+  }, [acceptCall, rejectCall]);
 
   return (
     <CallContext.Provider
