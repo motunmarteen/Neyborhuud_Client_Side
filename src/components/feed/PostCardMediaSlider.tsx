@@ -224,10 +224,37 @@ export function PostCardMediaSlider({
             ))}
           </div>
 
+          {/* Navigation Arrows */}
+          {activeIndex > 0 && (
+            <button
+              type="button"
+              className="post-card-media-slider__nav-btn post-card-media-slider__nav-btn--left"
+              onClick={(e) => {
+                e.stopPropagation();
+                const track = trackRef.current;
+                const slide = track?.children[activeIndex - 1] as HTMLElement | undefined;
+                slide?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+              }}
+              aria-label="Previous slide"
+            >
+              <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+            </button>
+          )}
+
           {activeIndex < count - 1 && (
-            <div className="post-card-media-slider__peek-hint" aria-hidden>
-              <span className="material-symbols-outlined text-[15px]">chevron_right</span>
-            </div>
+            <button
+              type="button"
+              className="post-card-media-slider__nav-btn post-card-media-slider__nav-btn--right"
+              onClick={(e) => {
+                e.stopPropagation();
+                const track = trackRef.current;
+                const slide = track?.children[activeIndex + 1] as HTMLElement | undefined;
+                slide?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+              }}
+              aria-label="Next slide"
+            >
+              <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+            </button>
           )}
         </>
       )}
