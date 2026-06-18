@@ -1,12 +1,13 @@
 /**
- * FeedSkyHero — Full-width ambient sky scene hero
- * Spans from below TopNav to just before the first post card.
- * Contains weather overlay + city silhouette.
+ * FeedSkyHero — Full-width ambient sky scene hero with Category shortcuts row.
+ * Refined for a premium, sleek hybrid aesthetic (Facebook + Instagram style).
  */
 
 'use client';
 
 import { useState, useEffect, useMemo, type MouseEvent } from 'react';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   getTimePeriod,
   getSkyTheme,
@@ -160,6 +161,9 @@ export function FeedSkyHero() {
   const authUser = mounted ? user : null;
   const huudName = useHuudDisplayName(authUser);
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   // SSR-safe hour
   const [currentHour, setCurrentHour] = useState(12);
   useEffect(() => {
@@ -198,8 +202,70 @@ export function FeedSkyHero() {
       })
     : '';
 
+  const handleShortcutClick = (type: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (params.get('type') === type) {
+      params.delete('type');
+    } else {
+      params.set('type', type);
+    }
+    router.replace(`/feed?${params.toString()}`);
+  };
+
+  const shortcuts = [
+    { type: 'marketplace', label: 'Marketplace', imgSrc: '/illustration_marketplace.png', activeBorderCls: 'border-brand-blue' },
+    { type: 'services', label: 'Services', imgSrc: '/illustration_services.png', activeBorderCls: 'border-primary' },
+    { type: 'job', label: 'Jobs', imgSrc: '/illustration_jobs.png', activeBorderCls: 'border-brand-blue' },
+    { type: 'event', label: 'Events', imgSrc: '/illustration_events.png', activeBorderCls: 'border-status-warning' },
+    { type: 'fyi', label: 'FYI', imgSrc: '/illustration_fyi.png', activeBorderCls: 'border-primary' },
+    { type: 'help_request', label: 'Help', imgSrc: '/illustration_help.png', activeBorderCls: 'border-brand-blue' },
+    { type: 'community_alert', label: 'Community Alert', imgSrc: '/illustration_community_alert.png', activeBorderCls: 'border-brand-red' },
+    { type: 'incident_report', label: 'Incident Report', imgSrc: '/illustration_safety.png', activeBorderCls: 'border-brand-red' },
+  ];
+
+  const activeType = searchParams.get('type') || '';
+
+  const categoryRow = (
+    <div className="category-shortcuts-row w-full px-4 flex gap-3 overflow-x-auto pb-2 scrollbar-none items-start">
+      {shortcuts.map((s) => {
+        const isActive = activeType === s.type;
+        return (
+          <button
+            key={s.type}
+            onClick={() => handleShortcutClick(s.type)}
+            className={`flex flex-col items-center justify-start gap-1.5 p-1 transition-all flex-shrink-0 relative w-[96px] ${
+              isActive 
+                ? `scale-105 opacity-100` 
+                : 'opacity-85 hover:opacity-100 hover:scale-105'
+            }`}
+            type="button"
+          >
+            {/* Image container */}
+            <div className="w-20 h-20 flex items-center justify-center">
+              <Image
+                src={s.imgSrc}
+                alt={s.label}
+                width={80}
+                height={80}
+                loading="lazy"
+                className={`w-full h-full object-contain drop-shadow-sm transition-transform duration-300 ${isActive ? 'scale-110' : ''}`}
+              />
+            </div>
+            {/* Label */}
+            <span className={`text-[10px] font-black tracking-wide text-center leading-[1.15] w-full whitespace-normal break-words ${
+              isActive ? 'text-brand-green-dark dark:text-primary' : 'text-neutral-700 dark:text-neutral-300'
+            }`}>
+              {s.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <section className="feed-sky-hero">
+    <section className="feed-sky-hero flex flex-col">
+      {/* Sky Scene (Atmospheric gradient backgrounds and weather greeting card) */}
       <div className="feed-sky-scene relative transition-all duration-[2000ms]">
         <div className="feed-sky-scene__atmosphere" aria-hidden>
           <div
@@ -218,8 +284,19 @@ export function FeedSkyHero() {
           <SkyWeatherEffects theme={theme} isDark={isDark} size="hero" />
         </div>
 
-        <div className="feed-sky-scene__content">
-          <div className="feed-sky-scene__weather">
+        {/* Content overlaid inside the sky scene */}
+        <div className="feed-sky-scene__content flex flex-col justify-center gap-4 h-full pt-4 pb-6">
+          {/* Centered Glassmorphic Weather Panel */}
+          <div 
+            className="feed-sky-scene__weather"
+            style={{
+              background: 'rgba(255, 255, 255, 0.02)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: 'none',
+              boxShadow: 'none',
+            }}
+          >
             {weatherLoading ? (
               <div className="feed-sky-scene__weather-skeleton animate-pulse" aria-hidden>
                 <div className="feed-sky-scene__weather-skeleton-label" />
@@ -229,25 +306,24 @@ export function FeedSkyHero() {
             ) : weather ? (
               <>
                 <p
-                  className="feed-sky-scene__label"
-                  style={{ color: theme.textColor, textShadow: '0 1px 4px rgba(0,0,0,0.22)' }}
+                  className="feed-sky-scene__label text-[10px] uppercase tracking-wider font-extrabold text-white/90"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.18)' }}
                 >
                   {greeting}
                 </p>
 
                 <p
-                  className="feed-sky-scene__temp"
+                  className="feed-sky-scene__temp text-4xl font-black text-white"
                   style={{
-                    color: theme.textColor,
-                    textShadow: '0 4px 24px rgba(0,0,0,0.38), 0 1px 4px rgba(0,0,0,0.25)',
+                    textShadow: '0 2px 10px rgba(0,0,0,0.25)',
                   }}
                 >
                   {weather.temp}°
                 </p>
 
                 <p
-                  className="feed-sky-scene__condition"
-                  style={{ color: theme.textColor, textShadow: '0 1px 4px rgba(0,0,0,0.22)' }}
+                  className="feed-sky-scene__condition font-bold text-xs text-white/95 mt-0.5"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.18)' }}
                 >
                   {expressiveWeather}
                 </p>
@@ -255,38 +331,57 @@ export function FeedSkyHero() {
             ) : null}
           </div>
 
-          <div className="feed-sky-scene__composer">
-            <BrandPinAvatar
-              src={avatarUrl}
-              alt={authUser?.firstName || authUser?.username || 'You'}
-              fallbackInitial={avatarInitial}
-              size="md"
-              className="feed-sky-scene__composer-pin"
-            />
-            <div
-              className="feed-sky-scene__composer-pill"
-              style={{ color: theme.textColor }}
-            >
-              <button
-                type="button"
-                className="feed-sky-scene__composer-text"
+          {/* Separated Floating Composer Layout */}
+          <div 
+            className="feed-sky-scene__composer z-30" 
+            style={{ 
+              marginLeft: '-4px', 
+              marginRight: '-4px', 
+              width: 'calc(100% + 8px)', 
+              paddingLeft: 0, 
+              paddingRight: 0 
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 w-full">
+              {/* Left Avatar (Outside Pill) */}
+              <div className="shrink-0 flex items-center justify-center relative cursor-pointer transition-transform hover:scale-105" onClick={openComposer}>
+                <div className="absolute inset-0 bg-white/30 blur-md rounded-full"></div>
+                <BrandPinAvatar
+                  src={avatarUrl}
+                  alt={authUser?.firstName || authUser?.username || 'You'}
+                  fallbackInitial={avatarInitial}
+                  size="lg"
+                />
+              </div>
+
+              {/* Center Glass Pill */}
+              <div 
+                className="flex-1 min-w-0 py-3.5 px-5 rounded-[20px] cursor-pointer group transition-all duration-300 hover:scale-[1.02] hover:!bg-white/[0.12]"
                 onClick={openComposer}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
+                  backdropFilter: 'blur(20px) saturate(1.2)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(1.2)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  boxShadow: '0 6px 20px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.2)',
+                  position: 'relative',
+                  top: '-4px',
+                }}
               >
-                {composerPrompt}
-              </button>
-              <button
-                type="button"
-                className="feed-sky-scene__composer-media"
-                onClick={openComposerWithMedia}
-                aria-label="Add photo or video"
-              >
-                <span className="material-symbols-outlined" aria-hidden="true">perm_media</span>
-              </button>
+                <div className="text-[14px] font-semibold text-white/60 tracking-tight group-hover:text-white/80 transition-colors truncate text-center">
+                  {composerPrompt}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <CitySilhouette color={theme.silhouetteColor} />
+      </div>
+
+      {/* Category Shortcuts wrapper seamlessly blending into the feed */}
+      <div className="category-shortcuts-wrapper pt-4 pb-0 relative z-10">
+        {categoryRow}
       </div>
     </section>
   );

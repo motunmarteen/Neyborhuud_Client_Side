@@ -60,11 +60,13 @@ describe('canPopHistory', () => {
     vi.unstubAllGlobals();
   });
 
-  it('returns false with no window', () => {
-    const originalWindow = globalThis.window;
-    // @ts-expect-error test shim
-    delete globalThis.window;
+  it('returns false when history stack is shallow', () => {
+    vi.stubGlobal('history', { length: 1 });
     expect(canPopHistory()).toBe(false);
-    globalThis.window = originalWindow;
+  });
+
+  it('returns true when history stack can pop', () => {
+    vi.stubGlobal('history', { length: 2 });
+    expect(canPopHistory()).toBe(true);
   });
 });

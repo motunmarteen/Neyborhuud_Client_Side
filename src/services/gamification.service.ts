@@ -142,4 +142,12 @@ export const gamificationService = {
       { days },
     );
   },
+
+  async getUserVerification(userId: string) {
+    return await apiClient.get<{
+      tier: string;
+      progress: import("@/types/api").User["verificationProgress"];
+      metrics: Record<string, number>;
+    }>(`/gamification/users/${userId}/verification`);
+  },
 };

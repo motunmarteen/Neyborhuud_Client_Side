@@ -8,6 +8,37 @@ import { useState, useCallback } from "react";
 import { followService } from "@/services/follow.service";
 import { handleApiError } from "@/lib/error-handler";
 import { useAwardCoins } from "@/hooks/useGamification";
+import type { FollowStatus } from "@/types/follow";
+
+function extractFollowStatus(raw: unknown): FollowStatus | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const r = raw as Record<string, unknown>;
+  const nested = r.data;
+  if (nested && typeof nested === "object" && "isFollowing" in (nested as object)) {
+    const d = nested as FollowStatus;
+    return {
+      isFollowing: Boolean(d.isFollowing),
+      followsYou: Boolean(d.followsYou),
+      isMutual: Boolean(d.isMutual),
+    };
+  }
+  if ("isFollowing" in r) {
+    return {
+      isFollowing: Boolean(r.isFollowing),
+      followsYou: Boolean(r.followsYou),
+      isMutual: Boolean(r.isMutual),
+    };
+  }
+  return undefined;
+}
+
+function followStatusCache(userId: string, status: FollowStatus) {
+  return {
+    success: true,
+    message: "Follow status",
+    data: status,
+  };
+}
 
 export interface MilestonePayload {
   count: number;
@@ -46,6 +77,7 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
   const queryClient = useQueryClient();
   const awardCoins = useAwardCoins();
   const [pendingMilestone, setPendingMilestone] = useState<MilestonePayload | null>(null);
+  const [optimisticFollowing, setOptimisticFollowing] = useState<boolean | null>(null);
   const clearMilestone = useCallback(() => setPendingMilestone(null), []);
 
   // Get follow status - only if explicitly enabled and userId exists
@@ -74,14 +106,14 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
   const followMutation = useMutation({
     mutationFn: () => followService.followUser(userId!),
     onSuccess: (response: unknown) => {
-      // Update follow status cache
-      queryClient.setQueryData(["follow-status", userId], {
-        data: {
-          isFollowing: true,
-          followsYou: followStatusData?.data?.followsYou || false,
-          isMutual: followStatusData?.data?.followsYou || false ? true : false,
-        },
-      });
+      const current = extractFollowStatus(followStatusData);
+      const nextStatus: FollowStatus = {
+        isFollowing: true,
+        followsYou: current?.followsYou ?? false,
+        isMutual: current?.followsYou ?? false,
+      };
+      queryClient.setQueryData(["follow-status", userId], followStatusCache(userId!, nextStatus));
+      setOptimisticFollowing(null);
 
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ["follow-status", userId] });
@@ -97,15 +129,17 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
       if (m) setPendingMilestone(m);
     },
     onError: (error: { response?: { status?: number } }) => {
+      setOptimisticFollowing(null);
       if (error.response?.status === 409) {
-        // Update state to reflect that user is following
-        queryClient.setQueryData(["follow-status", userId], {
-          data: {
+        const current = extractFollowStatus(followStatusData);
+        queryClient.setQueryData(
+          ["follow-status", userId],
+          followStatusCache(userId!, {
             isFollowing: true,
-            followsYou: followStatusData?.data?.followsYou || false,
-            isMutual: followStatusData?.data?.followsYou || false,
-          },
-        });
+            followsYou: current?.followsYou ?? false,
+            isMutual: current?.followsYou ?? false,
+          }),
+        );
         // Refresh the data from server
         queryClient.invalidateQueries({ queryKey: ["follow-status", userId] });
         queryClient.invalidateQueries({ queryKey: ["followers", userId] });
@@ -120,14 +154,16 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
   const unfollowMutation = useMutation({
     mutationFn: () => followService.unfollowUser(userId!),
     onSuccess: () => {
-      // Update follow status cache
-      queryClient.setQueryData(["follow-status", userId], {
-        data: {
+      const current = extractFollowStatus(followStatusData);
+      queryClient.setQueryData(
+        ["follow-status", userId],
+        followStatusCache(userId!, {
           isFollowing: false,
-          followsYou: followStatusData?.data?.followsYou || false,
+          followsYou: current?.followsYou ?? false,
           isMutual: false,
-        },
-      });
+        }),
+      );
+      setOptimisticFollowing(null);
 
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ["follow-status", userId] });
@@ -136,15 +172,17 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
       queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
     },
     onError: (error: { response?: { status?: number } }) => {
+      setOptimisticFollowing(null);
       if (error.response?.status === 404) {
-        // Update state to reflect that user is not following
-        queryClient.setQueryData(["follow-status", userId], {
-          data: {
+        const current = extractFollowStatus(followStatusData);
+        queryClient.setQueryData(
+          ["follow-status", userId],
+          followStatusCache(userId!, {
             isFollowing: false,
-            followsYou: followStatusData?.data?.followsYou || false,
+            followsYou: current?.followsYou ?? false,
             isMutual: false,
-          },
-        });
+          }),
+        );
         // Refresh the data from server
         queryClient.invalidateQueries({ queryKey: ["follow-status", userId] });
         queryClient.invalidateQueries({ queryKey: ["followers", userId] });
@@ -155,23 +193,27 @@ export function useFollow(userId: string | undefined, options?: { enabled?: bool
     },
   });
 
+  const serverStatus = extractFollowStatus(followStatusData);
+  const isFollowing = optimisticFollowing ?? serverStatus?.isFollowing ?? false;
+
   const toggleFollow = () => {
     if (!userId) return;
 
-    const isCurrentlyFollowing = followStatusData?.data?.isFollowing;
+    const nextFollowing = !isFollowing;
+    setOptimisticFollowing(nextFollowing);
 
-    if (isCurrentlyFollowing) {
-      unfollowMutation.mutate();
-    } else {
+    if (nextFollowing) {
       followMutation.mutate();
+    } else {
+      unfollowMutation.mutate();
     }
   };
 
   return {
-    followStatus: followStatusData?.data,
-    isFollowing: followStatusData?.data?.isFollowing ?? false,
-    followsYou: followStatusData?.data?.followsYou ?? false,
-    isMutual: followStatusData?.data?.isMutual ?? false,
+    followStatus: serverStatus,
+    isFollowing,
+    followsYou: serverStatus?.followsYou ?? false,
+    isMutual: serverStatus?.isMutual ?? false,
     isLoadingStatus,
     statusError,
     followUser: followMutation.mutate,

@@ -13,6 +13,7 @@
 
 const net = require("node:net");
 const { spawn } = require("node:child_process");
+const fs = require("node:fs");
 
 function isPortAvailable(port) {
   return new Promise((resolve) => {
@@ -38,17 +39,35 @@ async function pickPort({ requestedPort, startPort = 3000, maxPort = 3010 }) {
 }
 
 (async () => {
-  const rawArg = process.argv[2];
-  const requestedPort = rawArg ? Number(rawArg) : null;
-  if (rawArg && (!Number.isFinite(requestedPort) || requestedPort <= 0)) {
-    console.error(`❌ Invalid port: ${rawArg}`);
+  const args = process.argv.slice(2);
+  // Default to Webpack to prevent Turbopack compilation loops and memory issues,
+  // but allow explicit opt-in to Turbopack via --turbopack.
+  const useWebpack = !args.includes("--turbopack");
+  const doClean = args.includes("--clean");
+
+  // Find port argument (any argument that is a number)
+  const portArg = args.find((arg) => !arg.startsWith("-") && Number.isFinite(Number(arg)));
+  const requestedPort = portArg ? Number(portArg) : null;
+
+  if (portArg && (!Number.isFinite(requestedPort) || requestedPort <= 0)) {
+    console.error(`❌ Invalid port: ${portArg}`);
     process.exit(1);
   }
 
   const port = await pickPort({ requestedPort });
   const distDir = `.next-${port}`;
 
-  console.log(`🚀 Starting Next.js dev server on port ${port}`);
+  if (doClean && fs.existsSync(distDir)) {
+    console.log(`🧹 Cleaning build directory: ${distDir}`);
+    try {
+      fs.rmSync(distDir, { recursive: true, force: true });
+      console.log(`✓ Cleaned ${distDir}`);
+    } catch (err) {
+      console.error(`⚠️ Failed to clean ${distDir}: ${err.message}`);
+    }
+  }
+
+  console.log(`🚀 Starting Next.js dev server on port ${port} (${useWebpack ? "Webpack" : "Turbopack"})`);
   console.log(`📁 Using build directory: ${distDir}`);
 
   // Turbopack on Windows compiling several heavy routes (maps, chat, feed) can
@@ -68,11 +87,19 @@ async function pickPort({ requestedPort, startPort = 3000, maxPort = 3010 }) {
     NODE_OPTIONS: nodeOptions,
   };
 
+  const devArgs = ["exec", "next", "dev"];
+  if (useWebpack) {
+    devArgs.push("--webpack");
+  } else {
+    devArgs.push("--turbopack");
+  }
+  // --hostname 0.0.0.0 so other devices on the LAN (e.g. a phone on the same
+  // WiFi) can reach the dev server, not just localhost.
+  devArgs.push("--hostname", "0.0.0.0", "--port", String(port));
+
   const child = spawn(
     "pnpm",
-    // --hostname 0.0.0.0 so other devices on the LAN (e.g. a phone on the same
-    // WiFi) can reach the dev server, not just localhost.
-    ["exec", "next", "dev", "--turbopack", "--hostname", "0.0.0.0", "--port", String(port)],
+    devArgs,
     {
       env,
       stdio: "inherit",

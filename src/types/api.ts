@@ -103,6 +103,18 @@ export interface PostAuthor {
   avatarUrl: string | null;
   profilePicture?: string | null;
   isVerified?: boolean;
+  emailVerified?: boolean;
+  identityVerified?: boolean;
+  trustScore?: number | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  phoneNumber?: string | null;
+  points?: number | null;
+  vouchCount?: number | null;
+  verificationTier?: 'none' | 'bronze' | 'silver' | 'gold' | 'diamond' | 'platinum';
+  bio?: string | null;
+  assignedCommunityId?: string | null;
+  createdAt?: string | null;
   verificationBadge?: 'neighbor' | 'business' | 'emergency_responder' | 'community_leader';
 }
 
@@ -188,6 +200,20 @@ export interface User {
   dateOfBirth?: string;
   location: LocationData;
   verificationStatus: "unverified" | "pending" | "verified";
+  verificationTier?: 'none' | 'bronze' | 'silver' | 'gold' | 'diamond' | 'platinum';
+  verificationProgress?: {
+    tier: 'none' | 'bronze' | 'silver' | 'gold' | 'diamond' | 'platinum';
+    nextTier: 'none' | 'bronze' | 'silver' | 'gold' | 'diamond' | 'platinum' | null;
+    percentToNext: number;
+    axes: Array<{ id: string; label: string; percent: number; done: boolean; detail: string }>;
+    blockers: string[];
+    tooltip: string;
+  };
+  vouchCount?: number;
+  streakDays?: number;
+  walletSpendCount?: number;
+  earnedHuudCoins90d?: number;
+  leaderboardPercentile?: number;
   identityVerified: boolean;
   isAdmin: boolean;
   role: "user" | "moderator" | "admin" | "super_admin";
@@ -249,6 +275,8 @@ export interface Post {
   _feedLayer?: "local" | "extended" | "explore";
   availableActions?: string[];
   savedCollection?: string | null;
+  parentId?: string;
+  quotedPost?: Post;
   /** Post body – prefer content; backend sends both (GET /feed, GET /content/posts) */
   content: string;
   body?: string;

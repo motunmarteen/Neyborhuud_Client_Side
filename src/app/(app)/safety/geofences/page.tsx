@@ -34,6 +34,7 @@ import {
   type GeofenceAlertEvent,
 } from '@/services/safety.service';
 import { io, type Socket } from 'socket.io-client';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 // ─── Lazy-load map (SSR-incompatible) ─────────────────────────────────────────
 const GeofenceMap = dynamicImport(() => import('@/components/safety/GeofenceMap'), {
@@ -361,7 +362,7 @@ export default function GeofencesPage() {
               <button
                 type="button"
                 onClick={() => {
-                  navigator.geolocation?.getCurrentPosition(
+                  getGeolocation()?.getCurrentPosition(
                     (pos) =>
                       setForm((p) => ({
                         ...p,

@@ -18,6 +18,7 @@ import {
   fetchNominatimReverse,
 } from '@/lib/nominatimClient';
 import { SkyWeatherEffects } from '@/components/ambient/SkyWeatherEffects';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 interface WeatherData {
   temp: number;
@@ -228,7 +229,8 @@ export function FeedInfoCards() {
 
   // Fetch weather — watches location and updates automatically
   useEffect(() => {
-    if (!navigator.geolocation) {
+    const geo = getGeolocation();
+    if (!geo) {
       setWeather({ temp: 32, condition: 'Sunny', city: 'Lagos', wmoCode: 0 });
       setWeatherLoading(false);
       return;
@@ -326,7 +328,7 @@ export function FeedInfoCards() {
       }
     };
 
-    const watchId = navigator.geolocation.watchPosition(
+    const watchId = geo.watchPosition(
       (pos) => updateWeather(pos.coords.latitude, pos.coords.longitude),
       () => {
         setWeather({ temp: 31, condition: 'Partly Cloudy', city: 'Lagos', wmoCode: 2 });
@@ -341,7 +343,7 @@ export function FeedInfoCards() {
     }, 10 * 60_000);
 
     return () => {
-      navigator.geolocation.clearWatch(watchId);
+      geo.clearWatch(watchId);
       clearInterval(refreshInterval);
     };
   }, []);

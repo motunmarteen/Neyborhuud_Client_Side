@@ -19,14 +19,21 @@ import { useFYIList } from '@/hooks/useFYI';
 import { useAuth } from '@/hooks/useAuth';
 import { Post } from '@/types/api';
 import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
+import { usePostMutations } from '@/hooks/usePosts';
+import { ReportModal } from '@/components/feed/ReportModal';
+import { contentService } from '@/services/content.service';
 
 function FYIPageInner() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [subtypeFilter, setSubtypeFilter] = useState<FYISubtype>('');
   const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
   const [commentsAnchor, setCommentsAnchor] = useState<{ left: number; width: number } | null>(null);
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+  const [reportingPostId, setReportingPostId] = useState<string | null>(null);
+
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { deletePost } = usePostMutations();
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const {
@@ -58,6 +65,17 @@ function FYIPageInner() {
     },
     [isFetchingNextPage, hasNextPage, fetchNextPage],
   );
+
+  const handleDeletePost = async () => {
+    if (!deletingPostId) return;
+    try {
+      await deletePost(deletingPostId);
+      setDeletingPostId(null);
+      queryClient.invalidateQueries({ queryKey: ['fyi'] });
+    } catch (error) {
+      console.error('Delete fyi bulletin error:', error);
+    }
+  };
 
   return (
     <>
@@ -144,6 +162,8 @@ function FYIPageInner() {
                     }
                     setCommentsPostId(id);
                   }}
+                  onDelete={(id) => setDeletingPostId(id)}
+                  onReport={(id) => setReportingPostId(id)}
                 />
               </div>
             );
@@ -175,6 +195,44 @@ function FYIPageInner() {
           setCommentsAnchor(null);
         }}
       />
+
+      {/* Report Modal */}
+      {reportingPostId && (
+        <ReportModal
+          postId={reportingPostId}
+          onClose={() => setReportingPostId(null)}
+          onSubmit={async (postId, reason, description) => {
+            await contentService.reportPost(postId, reason, description);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deletingPostId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setDeletingPostId(null)}>
+          <div className="mod-modal rounded-2xl p-6 mx-4 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--neu-text)' }}>Delete Bulletin</h3>
+            <p className="text-sm mb-6" style={{ color: 'var(--neu-text-muted)' }}>
+              Are you sure you want to delete this bulletin? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setDeletingPostId(null)}
+                className="px-4 py-2 rounded-xl text-sm font-bold mod-chip"
+                style={{ color: 'var(--neu-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeletePost}
+                className="px-4 py-2 rounded-xl text-sm font-bold bg-brand-red/20 text-brand-red mod-chip hover:bg-brand-red/30 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

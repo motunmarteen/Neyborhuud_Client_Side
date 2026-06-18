@@ -14,8 +14,6 @@ import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayo
 import { safetyService } from '@/services/safety.service';
 import type { IncidentSummary } from '@/types/api';
 
-export const dynamic = 'force-dynamic';
-
 const TIMELINE_ICON: Record<IncidentSummary['timeline'][number]['event'], string> = {
   sos_created: 'flag',
   countdown_ended: 'timer',

@@ -23,6 +23,7 @@ import {
   type TrackingSummary,
   type LocationSource,
 } from '@/services/safety.service';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 // ─── Offline queue helpers ────────────────────────────────────────────────────
 
@@ -290,7 +291,12 @@ export function useKidnappingTracking(
 
     try {
         const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
+        const geo = getGeolocation();
+        if (!geo) {
+          reject(new Error('Geolocation not supported on this device'));
+          return;
+        }
+        geo.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
           timeout: 15_000,
           maximumAge: 30_000,

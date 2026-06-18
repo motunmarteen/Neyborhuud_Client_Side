@@ -128,9 +128,17 @@ class ApiClient {
    */
   setToken(token: string) {
     this.token = token;
-    // Store in localStorage
+    // localStorage is the synchronous read mirror (web + native WebView).
     if (typeof window !== "undefined") {
       localStorage.setItem("neyborhuud_access_token", token);
+      // Native build: also persist to OS-backed secure storage (durable + sandboxed).
+      // Fire-and-forget — reads always come from the localStorage mirror above.
+      // No-op on web.
+      void import("@/lib/secureToken")
+        .then((m) => m.secureSet("neyborhuud_access_token", token))
+        .catch(() => {
+          /* secure storage is best-effort; localStorage mirror is authoritative */
+        });
     }
   }
 
@@ -151,11 +159,21 @@ class ApiClient {
     this.token = null;
     if (typeof window !== "undefined") {
       localStorage.removeItem("neyborhuud_access_token");
+      localStorage.removeItem("neyborhuud_refresh_token");
       localStorage.removeItem("neyborhuud_user");
       localStorage.removeItem("neyborhuud_community");
       localStorage.removeItem("neyborhuud_needs_community");
       localStorage.removeItem("neyborhuud_picker_context");
       localStorage.removeItem("neyborhuud_needs_gps_verify");
+      // Native build: also wipe tokens from secure storage. No-op on web.
+      void import("@/lib/secureToken")
+        .then((m) => {
+          void m.secureRemove("neyborhuud_access_token");
+          void m.secureRemove("neyborhuud_refresh_token");
+        })
+        .catch(() => {
+          /* best-effort */
+        });
     }
   }
 

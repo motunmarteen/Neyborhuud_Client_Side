@@ -4,8 +4,9 @@
  */
 
 import type { Post } from "@/types/api";
-import type { Event, Job } from "@/types/api";
+import type { Event, Job, Service, User } from "@/types/api";
 import type { Product } from "@/services/marketplace.service";
+import type { RssArticle } from "@/types/incident";
 
 export type BaseFeedItem = { _type: "post"; data: Post };
 
@@ -14,12 +15,20 @@ export type DiscoveryFeedItem =
   /** Horizontal strip of listings in the feed */
   | { _type: "discovery_marketplace"; products: Product[]; key: string }
   | { _type: "discovery_event"; data: Event; key: string }
-  | { _type: "discovery_job"; data: Job; key: string };
+  | { _type: "discovery_job"; data: Job; key: string }
+  | { _type: "discovery_help"; requests: Post[]; key: string }
+  | { _type: "discovery_services"; services: Service[]; key: string }
+  | { _type: "discovery_news"; articles: RssArticle[]; key: string }
+  | { _type: "discovery_neighbors"; users: User[]; key: string };
 
 export type DiscoveryPools = {
   marketplace: Product[];
   events: Event[];
   jobs: Job[];
+  helpRequests: Post[];
+  services: Service[];
+  news: RssArticle[];
+  neighbors: User[];
 };
 
 function unitRandom(s: string): number {
@@ -55,7 +64,13 @@ export function mergeDiscoveryIntoFeed(
   }
 
   const hasAnyPool =
-    pools.marketplace.length > 0 || pools.events.length > 0 || pools.jobs.length > 0;
+    pools.marketplace.length > 0 || 
+    pools.events.length > 0 || 
+    pools.jobs.length > 0 ||
+    pools.helpRequests.length > 0 ||
+    pools.services.length > 0 ||
+    pools.news.length > 0 ||
+    pools.neighbors.length > 0;
   if (!hasAnyPool) {
     return base as DiscoveryFeedItem[];
   }
@@ -70,12 +85,16 @@ export function mergeDiscoveryIntoFeed(
     3 + Math.floor(unitRandom(`${salt}:gap0`) * 4); // first slot after ~3–6 items
   let rotate = Math.floor(unitRandom(`${salt}:rot`) * 48);
 
-  const kindOrder = ["marketplace", "event", "job"] as const;
+  const kindOrder = ["marketplace", "event", "job", "help", "service", "news", "neighbor"] as const;
 
-  const pickPool = (kind: (typeof kindOrder)[number]): Product[] | Event[] | Job[] => {
+  const pickPool = (kind: (typeof kindOrder)[number]): any[] => {
     if (kind === "marketplace") return pools.marketplace;
     if (kind === "event") return pools.events;
-    return pools.jobs;
+    if (kind === "job") return pools.jobs;
+    if (kind === "help") return pools.helpRequests;
+    if (kind === "service") return pools.services;
+    if (kind === "news") return pools.news;
+    return pools.neighbors;
   };
 
   while (baseIdx < base.length) {
@@ -132,7 +151,7 @@ export function mergeDiscoveryIntoFeed(
             key: `de-${id}-${injections}`,
           });
           placed = true;
-        } else {
+        } else if (kind === "job") {
           const poolJ = pool as Job[];
           const j = poolJ[pickIdx % poolJ.length];
           const id = j.id || (j as { _id?: string })._id;
@@ -141,6 +160,71 @@ export function mergeDiscoveryIntoFeed(
             _type: "discovery_job",
             data: j,
             key: `dj-${id}-${injections}`,
+          });
+          placed = true;
+        } else if (kind === "help") {
+          const mp = pool as Post[];
+          const stripLen = Math.min(8, mp.length);
+          const start = pickIdx % mp.length;
+          const requests: Post[] = [];
+          for (let i = 0; i < stripLen; i++) {
+            const p = mp[(start + i) % mp.length];
+            if (p?.id) requests.push(p);
+          }
+          if (requests.length === 0) continue;
+          out.push({
+            _type: "discovery_help",
+            requests,
+            key: `dh-${requests[0].id}-${injections}-${baseIdx}`,
+          });
+          placed = true;
+        } else if (kind === "service") {
+          const mp = pool as Service[];
+          const stripLen = Math.min(8, mp.length);
+          const start = pickIdx % mp.length;
+          const services: Service[] = [];
+          for (let i = 0; i < stripLen; i++) {
+            const s = mp[(start + i) % mp.length];
+            if (s?.id) services.push(s);
+          }
+          if (services.length === 0) continue;
+          out.push({
+            _type: "discovery_services",
+            services,
+            key: `ds-${services[0].id}-${injections}-${baseIdx}`,
+          });
+          placed = true;
+        } else if (kind === "news") {
+          const mp = pool as RssArticle[];
+          const stripLen = Math.min(8, mp.length);
+          const start = pickIdx % mp.length;
+          const articles: RssArticle[] = [];
+          for (let i = 0; i < stripLen; i++) {
+            const a = mp[(start + i) % mp.length];
+            if (a?.id) articles.push(a);
+          }
+          if (articles.length === 0) continue;
+          out.push({
+            _type: "discovery_news",
+            articles,
+            key: `dn-${articles[0].id}-${injections}-${baseIdx}`,
+          });
+          placed = true;
+        } else if (kind === "neighbor") {
+          const mp = pool as User[];
+          const stripLen = Math.min(8, mp.length);
+          const start = pickIdx % mp.length;
+          const users: User[] = [];
+          for (let i = 0; i < stripLen; i++) {
+            const u = mp[(start + i) % mp.length];
+            if (u?.id || (u as any)._id) users.push(u);
+          }
+          if (users.length === 0) continue;
+          const firstId = users[0].id || (users[0] as any)._id;
+          out.push({
+            _type: "discovery_neighbors",
+            users,
+            key: `dnb-${firstId}-${injections}-${baseIdx}`,
           });
           placed = true;
         }

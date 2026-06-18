@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchCurrentWeather, type CurrentWeather } from '@/lib/weatherClient';
 import { resolveHuudDisplayName } from '@/lib/huudName';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 function withHuudCity(
   weather: CurrentWeather,
@@ -75,7 +76,8 @@ export function useAmbientWeather() {
       return false;
     };
 
-    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+    const geo = getGeolocation();
+    if (!geo) {
       if (!tryProfileCoords()) {
         const fallbackCity = resolveHuudDisplayName(user);
         publish({
@@ -88,7 +90,7 @@ export function useAmbientWeather() {
       return;
     }
 
-    const watchId = navigator.geolocation.watchPosition(
+    const watchId = geo.watchPosition(
       (pos) => updateWeather(pos.coords.latitude, pos.coords.longitude),
       () => {
         if (!tryProfileCoords()) {
@@ -111,7 +113,7 @@ export function useAmbientWeather() {
     }, 10 * 60_000);
 
     return () => {
-      navigator.geolocation.clearWatch(watchId);
+      geo.clearWatch(watchId);
       clearInterval(refreshInterval);
     };
   }, [

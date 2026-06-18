@@ -129,14 +129,22 @@ export function LandingPage() {
                     </div>
                 </header>
 
-                <div className="landing-page-body flex min-h-0 flex-1 flex-col px-6 pb-[max(0.65rem,1.125rem)]">
-                    <div className="landing-page-copy">
+                <div className="landing-page-body flex min-h-0 flex-1 flex-col">
+                    <div className="landing-page-copy my-auto flex flex-col justify-center">
                         <div className="landing-headline-stack">
-                            {HEADLINE_LINES.map((line) => (
-                                <h1 key={line} className="landing-headline landing-headline--white">
-                                    {line}
-                                </h1>
-                            ))}
+                            {HEADLINE_LINES.map((line) => {
+                                const isGreen = line === 'Huud.';
+                                return (
+                                    <h1
+                                        key={line}
+                                        className={`landing-headline ${
+                                            isGreen ? 'brand-name-hero' : 'landing-headline--white'
+                                        }`}
+                                    >
+                                        {line}
+                                    </h1>
+                                );
+                            })}
                         </div>
                         <p className="landing-subcopy">
                             Know what&apos;s happening on your street. Before everyone else does.

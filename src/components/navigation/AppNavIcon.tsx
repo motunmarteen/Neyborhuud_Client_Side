@@ -13,6 +13,8 @@ import {
   Shield,
   Siren,
   Users,
+  Phone,
+  User,
 } from 'lucide-react';
 
 export type AppNavIconName =
@@ -26,7 +28,9 @@ export type AppNavIconName =
   | 'shield'
   | 'connect'
   | 'localHuud'
-  | 'sos';
+  | 'sos'
+  | 'call'
+  | 'profile';
 
 type AppNavIconProps = {
   name: AppNavIconName;
@@ -46,6 +50,8 @@ const lucideIcons: Record<Exclude<AppNavIconName, 'menu'>, LucideIcon> = {
   connect: Users,
   localHuud: LayoutGrid,
   sos: Siren,
+  call: Phone,
+  profile: User,
 };
 
 function MenuIcon() {

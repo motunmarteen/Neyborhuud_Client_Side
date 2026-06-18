@@ -19,6 +19,7 @@ import apiClient, { shouldConnectSocket } from '@/lib/api-client';
 import socketService from '@/lib/socket';
 import { safetyService, type SosEvent } from '@/services/safety.service';
 import type { IncidentSummary } from '@/types/api';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 export type SosPhase = 'idle' | 'pending' | 'active' | 'resolved' | 'cancelled';
 
@@ -207,11 +208,12 @@ function useSosState(): UseSosReturn {
   const getCoords = useCallback(
     () =>
       new Promise<GeolocationCoordinates>((resolve, reject) => {
-        if (!navigator.geolocation) {
+        const geo = getGeolocation();
+        if (!geo) {
           reject(new Error('Geolocation not supported on this device'));
           return;
         }
-        navigator.geolocation.getCurrentPosition(
+        geo.getCurrentPosition(
           (pos) => resolve(pos.coords),
           (err) => reject(new Error(err.message || 'Unable to fetch location')),
           { enableHighAccuracy: true, timeout: 8000, maximumAge: 30_000 },

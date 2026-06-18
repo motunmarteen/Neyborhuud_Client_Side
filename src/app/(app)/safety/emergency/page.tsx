@@ -14,6 +14,7 @@ import {
 } from '@/services/safety.service';
 import type { IncidentReplay } from '@/types/api';
 import { toast } from 'sonner';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -140,13 +141,14 @@ export default function EmergencyPage() {
     setSubmitError(null);
     setSubmitting(true);
 
-    if (!navigator.geolocation) {
+    const geo = getGeolocation();
+    if (!geo) {
       setSubmitError('Geolocation is not supported on this device.');
       setSubmitting(false);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    geo.getCurrentPosition(
       async (pos) => {
         try {
           const res = await safetyService.reportEmergency({

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { usePostMutations } from '@/hooks/usePosts';
 import { getCurrentLocation } from '@/lib/geolocation';
+import { pickNativePhotos, canUseNativeCamera } from '@/lib/nativeCamera';
 import { isUserInNigeria } from '@/lib/nigeriaCheck';
 import { useTranslation } from '@/lib/i18n';
 import { CreatePostPayload, ContentType, AppLanguage } from '@/types/api';
@@ -146,6 +147,26 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
             setSelectedFiles(files);
             setPostType('image');
         }
+    };
+
+    // On native, open the OS camera/gallery prompt instead of the WebView file
+    // picker; on web (or if the native picker is unavailable) fall back to the
+    // hidden <input>. Mirrors handleFileSelect's "replace selection" behaviour.
+    const handlePickMedia = async () => {
+        if (canUseNativeCamera()) {
+            const files = await pickNativePhotos({ source: 'prompt', multiple: true });
+            if (files === null) {
+                // Native picker unavailable — fall back to the file input.
+                fileInputRef.current?.click();
+                return;
+            }
+            if (files.length > 0) {
+                setSelectedFiles(files);
+                setPostType('image');
+            }
+            return;
+        }
+        fileInputRef.current?.click();
     };
 
     const handleRemoveFile = (index: number) => {
@@ -999,7 +1020,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
-                                onClick={() => fileInputRef.current?.click()}
+                                onClick={handlePickMedia}
                                 disabled={isSubmitting}
                                 className="flex items-center justify-center p-2 rounded-xl btn-ghost transition-all text-primary disabled:opacity-50 active:shadow-[inset_3px_3px_6px_var(--neu-shadow-dark),inset_-3px_-3px_6px_var(--neu-shadow-light)]"
                             >

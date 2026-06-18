@@ -1,11 +1,12 @@
-import { redirect } from 'next/navigation';
+import LocalNewsLegacyRedirectClient from './PageClient';
+import { capStaticParams } from '@/lib/staticExportParams';
 
-/** Legacy URLs — redirect old gossip detail paths to Huud Gist threads */
-export default async function LegacyLocalNewsDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  redirect(`/local-news/gist/${encodeURIComponent(id)}`);
+export const dynamicParams = true;
+export function generateStaticParams() {
+  return capStaticParams('id');
+}
+
+/** Legacy URLs — redirect old gossip detail paths to Huud Gist threads. */
+export default function LegacyLocalNewsDetailPage() {
+  return <LocalNewsLegacyRedirectClient />;
 }

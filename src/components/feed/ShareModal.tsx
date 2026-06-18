@@ -10,10 +10,11 @@
  *  3. Shows a toast with points earned
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import apiClient from '@/lib/api-client';
+import { isNativePlatform } from '@/lib/platform';
 
 // ─── Platform definitions ──────────────────────────────────────────────────
 
@@ -144,6 +145,16 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
   const [loading, setLoading] = useState<string | null>(null); // platform id being processed
   const [copied, setCopied] = useState(false);
   const [earnedLink, setEarnedLink] = useState<string | null>(null);
+  // Show the "More options" share-sheet button when a share mechanism exists:
+  // native (Capacitor Share) or web (navigator.share). Computed on mount to
+  // avoid SSR/client divergence.
+  const [canNativeShare, setCanNativeShare] = useState(false);
+  useEffect(() => {
+    setCanNativeShare(
+      isNativePlatform() ||
+        (typeof navigator !== 'undefined' && 'share' in navigator),
+    );
+  }, []);
 
   const shareText = postContent.length > 100
     ? `${postContent.substring(0, 97)}…`
@@ -207,19 +218,22 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
   };
 
   const handleNativeShare = async () => {
-    if (!navigator.share || loading) return;
+    if (loading) return;
     setLoading('native');
     try {
       const { link, points_earned } = earnedLink
         ? { link: earnedLink, points_earned: 5 }
         : await getTrackingLink('native');
       setEarnedLink(link);
-      await navigator.share({
+      const { share } = await import('@/lib/nativeShare');
+      const shared = await share({
         title: 'NeyborHuud Post',
         text: shareText,
         url: link,
       });
-      toast.success(`+${points_earned} HuudCoins earned for sharing! 🎉`, { duration: 3000 });
+      if (shared) {
+        toast.success(`+${points_earned} HuudCoins earned for sharing! 🎉`, { duration: 3000 });
+      }
     } catch {
       // user cancelled — no error toast
     } finally {
@@ -303,8 +317,8 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
             </button>
           </div>
 
-          {/* Native share (mobile) */}
-          {typeof navigator !== 'undefined' && 'share' in navigator && (
+          {/* Native share (mobile / Capacitor) */}
+          {(canNativeShare) && (
             <button
               onClick={handleNativeShare}
               disabled={!!loading}

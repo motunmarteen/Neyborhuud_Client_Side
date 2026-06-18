@@ -21,12 +21,12 @@ const TAB_CONFIG: Array<{ key: FeedTab; label: string }> = [
 
 export function FeedTabs({ activeTab, onTabChange, className }: FeedTabsProps) {
     return (
-        <div className={`mod-card rounded-2xl overflow-hidden${className ? ` ${className}` : ''}`}>
+        <div className={`glass-card p-1 rounded-full border border-glass-border shadow-sm max-w-[580px] mx-auto w-full overflow-hidden${className ? ` ${className}` : ''}`}>
             {/* eslint-disable-next-line jsx-a11y/role-has-required-aria-props -- tab children are rendered via motion.button in the map below */}
             <div
                 role="tablist"
                 aria-label="Feed layers"
-                className="grid grid-cols-3 relative gap-0.5 p-1"
+                className="grid grid-cols-3 relative gap-1"
             >
                 {TAB_CONFIG.map((tab) => {
                     const active = activeTab === tab.key;

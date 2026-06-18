@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
 import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
 import { tripService, type Trip } from '@/services/trip.service';
@@ -270,8 +271,9 @@ function GuardianTripViewPageInner({ userId }: { userId: string }) {
   );
 }
 
-export default async function GuardianTripViewPage({ params }: { params: Promise<{ userId: string }> }) {
-  const { userId } = await params;
+export default function GuardianTripViewPage() {
+  const params = useParams<{ userId: string }>();
+  const userId = params?.userId ?? '';
   return (
     <Suspense>
       <GuardianTripViewPageInner userId={userId} />

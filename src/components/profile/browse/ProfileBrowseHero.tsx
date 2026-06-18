@@ -26,6 +26,9 @@ type ProfileBrowseHeroProps = {
   settingLocation?: boolean;
   savingMapLocation?: boolean;
   identityVerified?: boolean;
+  /** Grey badge while verification journey is underway */
+  verificationInProgress?: boolean;
+  verificationTierLabel?: string;
   vouchReceived?: number;
   vouchGiven?: number;
 };
@@ -49,6 +52,8 @@ export function ProfileBrowseHero({
   settingLocation,
   savingMapLocation,
   identityVerified,
+  verificationInProgress = false,
+  verificationTierLabel,
   vouchReceived = 0,
   vouchGiven = 0,
 }: ProfileBrowseHeroProps) {
@@ -146,10 +151,20 @@ export function ProfileBrowseHero({
         ) : null}
 
         <div className="mt-2 flex flex-wrap gap-2">
-          {identityVerified ? (
+          {verificationTierLabel ? (
+            <span className="mod-chip mod-chip-active inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-primary">
+              <span className="material-symbols-outlined text-[12px]">verified</span>
+              {verificationTierLabel}
+            </span>
+          ) : identityVerified ? (
             <span className="mod-chip mod-chip-active inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-primary">
               <span className="material-symbols-outlined text-[12px]">verified</span>
               Verified
+            </span>
+          ) : verificationInProgress ? (
+            <span className="mod-chip inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold opacity-80">
+              <span className="material-symbols-outlined text-[12px]">verified</span>
+              Verifying
             </span>
           ) : null}
           <span

@@ -1,26 +1,29 @@
 /**
- * XPostCard — Immersive feed card
- * Three modes: text-only (ambient spheres), media-only (full-bleed), mixed (media bg + text panel)
- * iOS-inspired Liquid Glass action rail
+ * XPostCard — Premium hybrid feed post card (Facebook + Instagram style)
+ * Natural document-flow, glassmorphic layout with horizontal actions below content.
  */
 
+'use client';
+
 import { MediaItem, Post, PostAuthor } from '@/types/api';
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { formatTimeAgo } from '@/utils/timeAgo';
 import { useFollow } from '@/hooks/useFollow';
-import { chatService } from '@/services/chat.service';
 import ShareModal from './ShareModal';
-import { SPHERE_PALETTES, TYPE_BADGE, EMERGENCY_ACTION_CLS } from '@/lib/brand-styles';
+import { EMERGENCY_ACTION_CLS } from '@/lib/brand-styles';
 import { useLongPress } from '@/hooks/useLongPress';
-import { LongPressMenu, type LongPressMenuItem } from '@/components/ui/LongPressMenu';
-
-const CARD_HEIGHT = '90vh';
-const TEXT_CARD_HEIGHT = 'min(58vh, 440px)';
-
-const isVideoUrl = (url: string) => /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url);
+import { PostCardActionsSheet } from '@/components/feed/PostCardActionsSheet';
+import { PostCardMenuIcon } from '@/components/feed/PostCardMenuIcon';
+import { usePostCardMenuActions } from '@/hooks/usePostCardMenuActions';
+import { XReplyIcon, XRepostIcon, XLikeIcon, XViewIcon, XBookmarkIcon, XShareIcon, XThumbUpIcon } from '@/components/icons/XIcons';
+import { PostSentinelLink } from '@/components/feed/PostSentinelLink';
+import { PostCardFollowButton } from '@/components/feed/PostCardFollowButton';
+import { PostCardAuthorLines } from '@/components/feed/PostCardAuthorLines';
+import { PostCardMediaSlider } from '@/components/feed/PostCardMediaSlider';
+import { QuotedPostEmbed } from '@/components/feed/QuotedPostEmbed';
+import { RepostComposerSheet } from '@/components/feed/RepostComposerSheet';
+import { getPostAuthorUserId } from '@/lib/postAuthor';
 
 const formatCompactCount = (value?: number) => {
     if (!value) return undefined;
@@ -29,68 +32,9 @@ const formatCompactCount = (value?: number) => {
     return `${value}`;
 };
 
-// ── iOS 26 Liquid Glass action button ─────────────────────────────────────────
-interface GlassBtnProps {
-    icon: string;
-    count?: number;
-    active?: boolean;
-    activeIconClass?: string;
-    onClick: (e: React.MouseEvent) => void;
-    label?: string;
-    filled?: boolean;
-}
-
-function GlassBtn({ icon, count, active, activeIconClass, onClick, label, filled }: GlassBtnProps) {
-    const [burst, setBurst] = useState(false);
-    const handleClick = (e: React.MouseEvent) => {
-        if (filled && !active) {
-            setBurst(true);
-            window.setTimeout(() => setBurst(false), 420);
-        }
-        onClick(e);
-    };
-    return (
-        <button
-            onClick={handleClick}
-            className="group flex flex-col items-center gap-1 transition-transform duration-200 ease-out active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/60"
-            aria-label={label}
-        >
-            <span
-                className="flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 group-hover:scale-105"
-                style={{
-                    background: active ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.10)',
-                    backdropFilter: 'blur(16px) saturate(170%)',
-                    WebkitBackdropFilter: 'blur(16px) saturate(170%)',
-                    border: '1px solid rgba(255,255,255,0.16)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.18)',
-                }}
-            >
-                <span
-                    className={`material-symbols-outlined text-[21px] transition-transform duration-200 ${burst ? 'animate-like-burst' : ''} ${active ? (activeIconClass || 'text-white') : 'text-white'}`}
-                    style={{
-                        ...(filled && active ? { fontVariationSettings: '"FILL" 1' } : {}),
-                        filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.55))',
-                    }}
-                >
-                    {icon}
-                </span>
-            </span>
-            {(count !== undefined && count > 0) && (
-                <span className="text-[10px] font-black tracking-tight text-white" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
-                    {formatCompactCount(count)}
-                </span>
-            )}
-            {label && !(count !== undefined && count > 0) && (
-                <span className="text-[9px] font-semibold text-white/80" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}>{label}</span>
-            )}
-        </button>
-    );
-}
-
 // ── Emergency action buttons ───────────────────────────────────────────────────
 function EmergencyActions({ post, onEmergencyAction }: { post: Post; onEmergencyAction: (a: string) => void }) {
     const actions = [
-        { key: 'acknowledge', icon: 'visibility', label: 'Seen', active: post.isAcknowledged, cls: EMERGENCY_ACTION_CLS.acknowledge },
         { key: 'aware', icon: 'notifications_active', label: 'Aware', active: post.isAware, cls: EMERGENCY_ACTION_CLS.aware },
         { key: 'nearby', icon: 'location_on', label: 'Nearby', active: post.isNearby, cls: EMERGENCY_ACTION_CLS.nearby },
         { key: 'safe', icon: 'shield', label: 'Safe', active: post.isSafe, cls: EMERGENCY_ACTION_CLS.safe },
@@ -98,14 +42,16 @@ function EmergencyActions({ post, onEmergencyAction }: { post: Post; onEmergency
         { key: 'dispute', icon: 'cancel', label: 'Dispute', active: post.confirmDisputeAction === 'dispute', cls: EMERGENCY_ACTION_CLS.dispute },
     ].filter(a => !post.availableActions || post.availableActions.includes(a.key));
 
+    if (actions.length === 0) return null;
+
     return (
-        <div className="flex flex-wrap gap-2 px-4 py-3 border-t border-white/10 bg-black/50 backdrop-blur-md">
+        <div className="flex flex-wrap gap-1.5 pt-3 border-t border-brand-red/10 mt-2">
             {actions.map(a => (
                 <button
                     key={a.key}
                     onClick={(e) => { e.stopPropagation(); onEmergencyAction(a.key); }}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border transition-all ${
-                        a.active ? a.cls : 'bg-white/10 text-white/70 border-white/15 hover:bg-white/15'
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        a.active ? a.cls : 'bg-brand-red/5 text-brand-red/70 border border-brand-red/10 hover:bg-brand-red/10'
                     }`}
                 >
                     <span className="material-symbols-outlined text-[14px]">{a.icon}</span>
@@ -131,7 +77,9 @@ interface XPostCardProps {
     onReport?: (postId: string) => void;
     onPin?: (postId: string) => void;
     onHelpful?: () => void;
+    onReposted?: () => void;
     userLocation?: { lat: number; lng: number } | null;
+    onFeedPreferenceApplied?: (postId: string, signal: 'not_interested' | 'hide') => void;
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
@@ -148,15 +96,16 @@ export function XPostCard({
     onReport,
     onPin,
     onHelpful,
+    onReposted,
+    onFeedPreferenceApplied,
 }: XPostCardProps) {
     const [imageError, setImageError] = useState(false);
     const [showShare, setShowShare] = useState(false);
-    const [longPressOpen, setLongPressOpen] = useState(false);
-    const [isMuted, setIsMuted] = useState(true);
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const router = useRouter();
+    const [showRepostComposer, setShowRepostComposer] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [expanded, setExpanded] = useState(false);
 
-    const longPress = useLongPress(() => setLongPressOpen(true));
+    const longPress = useLongPress(() => setMenuOpen(true));
 
     const author = post.author as PostAuthor;
     const authorName = author?.name || 'Anonymous';
@@ -165,23 +114,12 @@ export function XPostCard({
 
     const isAnonymousAuthor = !author?.id || author.id === 'anonymous';
     const isOwnerPost = currentUserId && (author?.id === currentUserId || post.authorId === currentUserId);
+    const authorUserId = getPostAuthorUserId(post);
 
-    const handleMessageAuthor = useCallback(async (e?: React.MouseEvent) => {
-        e?.stopPropagation();
-        const authorId = author?.id;
-        if (!authorId || isAnonymousAuthor) return;
-        try {
-            const res = await chatService.getOrCreateDirectConversation(authorId);
-            const conv = (res.data as any)?.conversation ?? (res.data as any);
-            const convId = conv?._id ?? conv?.conversationId ?? conv?.id;
-            if (convId) router.push(`/chat/${convId}`);
-        } catch { /* silent */ }
-    }, [author?.id, isAnonymousAuthor, router]);
-
-    const canFollow = !isOwnerPost && !isAnonymousAuthor;
+    const canFollow = !isOwnerPost && !isAnonymousAuthor && !!authorUserId;
     const { isFollowing, toggleFollow, isPending: isFollowPending } = useFollow(
-        canFollow ? author?.id : undefined,
-        { enabled: canFollow && !!author?.id }
+        authorUserId,
+        { enabled: canFollow },
     );
 
     const mediaItems: Array<{ url: string; type?: MediaItem['type']; thumbnailUrl?: string }> = Array.isArray(post.media)
@@ -189,72 +127,47 @@ export function XPostCard({
             .map((m) => (typeof m === 'string' ? { url: m } : { url: m.url, type: m.type, thumbnailUrl: m.thumbnailUrl }))
             .filter((m) => Boolean(m.url))
         : [];
-    const mediaUrls = mediaItems.map((m) => m.url);
-    const primaryMedia = mediaItems[0];
-    const isPrimaryVideo = Boolean(primaryMedia && (primaryMedia.type === 'video' || isVideoUrl(primaryMedia.url)));
 
+    const hasMedia = mediaItems.length > 0;
+
+    /** Red left stripe — only for real emergency/SOS posts, not generic #safety tags */
     const isSafetyAlert =
         post.contentType === 'emergency' ||
-        post.cardStyle === 'emergency_red' ||
-        post.tags?.includes('safety') ||
-        post.tags?.includes('SAFETY') ||
-        (post as unknown as Record<string, unknown>).category === 'SAFETY';
+        post.cardStyle === 'emergency_red';
 
-    const feedLayerLabel =
-        post._feedLayer === 'explore' ? 'Street Radar' :
-        post._feedLayer === 'extended' ? 'Following Places' :
-        'Your Huud';
-
-    const severityLabel = post.severity ? post.severity.toUpperCase() : null;
-
-    const hasMedia = mediaUrls.length > 0;
     const textContent = post.content || post.body || '';
-    const hasText = textContent.trim().length > 0;
+    const isQuoteRepost = post.mood === 'repost' && !!post.quotedPost;
+    const quoteComment = isQuoteRepost ? textContent.trim() : '';
+    const isSimpleRepost = isQuoteRepost && !quoteComment;
+    const displayText = isQuoteRepost ? quoteComment : textContent;
+    const hasText = displayText.trim().length > 0;
 
-    const mode: 'text' | 'media' | 'mixed' = hasMedia ? (hasText ? 'mixed' : 'media') : 'text';
+    const postId = post.id ?? (post as { _id?: string })._id ?? '';
 
-    const wordCount = textContent.trim().split(/\s+/).filter(Boolean).length;
-    const textSizeClass =
-        wordCount <= 6  ? 'text-[32px] leading-tight' :
-        wordCount <= 15 ? 'text-[24px] leading-snug' :
-        wordCount <= 35 ? 'text-[19px] leading-snug' :
-        wordCount <= 70 ? 'text-[16px] leading-relaxed' :
-        'text-[14px] leading-relaxed';
-
-    const spheres = SPHERE_PALETTES[post.contentType || 'post'] || SPHERE_PALETTES.post;
-    const typeBadge = post.contentType ? TYPE_BADGE[post.contentType] : undefined;
+    const { sections: menuSections } = usePostCardMenuActions({
+        post,
+        postId,
+        authorId: authorUserId,
+        authorName,
+        authorUsername,
+        isOwnerPost: !!isOwnerPost,
+        isAnonymousAuthor,
+        isFollowing,
+        onEdit,
+        onDelete,
+        onPin,
+        onReport,
+        onFeedPreferenceApplied,
+    });
 
     const handleProfileClick = (e: React.MouseEvent) => e.stopPropagation();
 
     const handleCardClick = (e: React.MouseEvent) => {
         const target = e.target as HTMLElement;
-        if (!target.closest('button') && !target.closest('a')) onCardClick?.();
+        if (!target.closest('button') && !target.closest('a') && !target.closest('video')) {
+            onCardClick?.();
+        }
     };
-
-    const longPressItems: LongPressMenuItem[] = useMemo(() => {
-        const postId = post.id ?? (post as { _id?: string })._id ?? '';
-        const items: LongPressMenuItem[] = [
-            { id: 'save',    label: 'Save post', icon: 'bookmark',    onSelect: onSave },
-            { id: 'share',   label: 'Share',     icon: 'share',       onSelect: () => setShowShare(true) },
-            { id: 'comment', label: 'Comment',   icon: 'chat_bubble', onSelect: onComment },
-        ];
-        if (!isOwnerPost && !isAnonymousAuthor) {
-            items.push({ id: 'message', label: 'Message', icon: 'chat', onSelect: () => handleMessageAuthor() });
-        }
-        if (isOwnerPost && onEdit) {
-            items.push({ id: 'edit', label: 'Edit', icon: 'edit', onSelect: () => onEdit(post) });
-        }
-        if (isOwnerPost && onPin && postId) {
-            items.push({ id: 'pin', label: post.isPinned ? 'Extend Pin' : 'Pin to Feed', icon: 'push_pin', onSelect: () => onPin(postId) });
-        }
-        if (isOwnerPost && onDelete && postId) {
-            items.push({ id: 'delete', label: 'Delete', icon: 'delete', danger: true, onSelect: () => onDelete(postId) });
-        }
-        if (onReport && postId && !isOwnerPost) {
-            items.push({ id: 'report', label: 'Report', icon: 'flag', danger: true, onSelect: () => onReport(postId) });
-        }
-        return items;
-    }, [post, onSave, onComment, onReport, onEdit, onDelete, onPin, isOwnerPost, isAnonymousAuthor, handleMessageAuthor]);
 
     const articleGestureProps = {
         onPointerDown: longPress.onPointerDown,
@@ -271,113 +184,136 @@ export function XPostCard({
         },
     };
 
-    const longPressMenu = (
-        <LongPressMenu open={longPressOpen} onClose={() => setLongPressOpen(false)} items={longPressItems} />
+    const postActionsSheet = (
+        <PostCardActionsSheet
+            open={menuOpen}
+            onClose={() => setMenuOpen(false)}
+            authorName={isAnonymousAuthor ? 'Anonymous Neyborh' : authorName}
+            authorUsername={authorUsername}
+            authorAvatar={authorAvatar}
+            sections={menuSections}
+        />
     );
 
-    // ── Shared: Top utility layer ─────────────────────────────────────────────
-    const authorHeader = (
-        <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 px-4 pt-4 pb-20 bg-gradient-to-b from-black/60 via-black/18 to-transparent">
-            <div className="pointer-events-auto flex items-start justify-between gap-3">
-                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                    {typeBadge && (
-                        <span
-                            className={`text-[9px] px-2.5 py-[4px] rounded-full font-black tracking-[0.08em] uppercase border ${typeBadge.cls}`}
-                            style={{ backdropFilter: 'blur(14px) saturate(160%)', WebkitBackdropFilter: 'blur(14px) saturate(160%)' }}
-                        >
-                            {typeBadge.label}
-                        </span>
-                    )}
-                    <span
-                        className="inline-flex items-center gap-1 text-[9px] px-2.5 py-[4px] rounded-full font-bold tracking-[0.06em] uppercase text-white/75"
-                        style={{
-                            background: 'rgba(255,255,255,0.12)',
-                            backdropFilter: 'blur(14px) saturate(160%)',
-                            WebkitBackdropFilter: 'blur(14px) saturate(160%)',
-                            border: '1px solid rgba(255,255,255,0.16)',
-                        }}
-                    >
-                        <span className="material-symbols-outlined text-[11px]" style={{ fontVariationSettings: '"FILL" 1' }}>location_on</span>
-                        {feedLayerLabel}
-                    </span>
-                </div>
-                <div className="relative shrink-0">
+    // ── Shared structured content blocks ────────────────────────────────────
+    const eventBlock = post.contentType === 'event' && post.eventDate ? (
+        <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-brand-blue/5 border border-brand-blue/10 mt-2">
+            <span className="inline-flex items-center gap-1 text-[12px] font-bold text-brand-blue">
+                <span className="material-symbols-outlined text-[14px]" aria-hidden>calendar_today</span>
+                {new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(post.eventDate))}
+            </span>
+            {post.eventTime && (
+                <span className="inline-flex items-center gap-1 text-[11px] text-neu-text-secondary dark:text-white/60">
+                    <span className="material-symbols-outlined text-[14px]" aria-hidden>schedule</span>
+                    {post.eventTime}
+                </span>
+            )}
+            {post.venue?.name && (
+                <span className="inline-flex items-center gap-1 text-[11px] text-neu-text-secondary dark:text-white/60">
+                    <span className="material-symbols-outlined text-[14px]" aria-hidden>location_on</span>
+                    {post.venue.name}
+                </span>
+            )}
+            {post.ticketInfo === 'paid' && post.ticketPrice && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-blue/15 text-brand-blue font-bold">₦{Number(post.ticketPrice).toLocaleString()}</span>
+            )}
+            {post.ticketInfo === 'free' && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/20 text-brand-green-dark font-bold">FREE</span>
+            )}
+        </div>
+    ) : null;
+
+    const marketBlock = post.contentType === 'marketplace' ? (
+        <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-primary/5 border border-primary/10 mt-2">
+            {post.price != null && <span className="text-sm font-black text-brand-green-dark dark:text-primary">₦{Number(post.price).toLocaleString()}</span>}
+            {post.isNegotiable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-brand-green-dark font-bold">Negotiable</span>}
+            {post.itemCondition && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/15 text-brand-green-dark font-bold capitalize">
+                    {post.itemCondition === 'used' ? 'Tokunbo' : post.itemCondition}
+                </span>
+            )}
+            {post.availability && post.availability !== 'available' && (
+                <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${post.availability === 'sold' ? 'bg-brand-red/10 text-brand-red' : 'bg-primary/20 text-brand-green-dark'}`}>
+                    {post.availability === 'sold' ? 'SOLD' : 'RESERVED'}
+                </span>
+            )}
+        </div>
+    ) : null;
+
+    // ── Core Layout ───────────────────────────────────────────────────────────
+    const cardStyleClass = isSafetyAlert
+        ? 'border-l-[4px] border-l-brand-red border-t-0 border-r-0 border-b border-black/[0.06] dark:border-white/[0.06] shadow-none'
+        : 'border-0 border-b border-black/[0.06] dark:border-white/[0.06] shadow-none';
+
+    const renderTextContent = () => {
+        if (!hasText) return null;
+        const shouldTruncate = displayText.length > 280 && !expanded;
+        const visibleText = shouldTruncate ? `${displayText.slice(0, 260)}...` : displayText;
+
+        return (
+            <div className="px-1 text-sm font-medium text-neu-text dark:text-white/90 leading-relaxed whitespace-pre-wrap break-words">
+                {visibleText}
+                {shouldTruncate && (
                     <button
-                        onClick={(e) => { e.stopPropagation(); setLongPressOpen(true); }}
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-white/75 transition-all hover:scale-105 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:ring-offset-black/50"
-                        style={{
-                            background: 'rgba(255,255,255,0.11)',
-                            backdropFilter: 'blur(16px) saturate(170%)',
-                            border: '1px solid rgba(255,255,255,0.16)',
-                        }}
-                        aria-label="Post options"
-                        aria-haspopup="dialog"
+                        onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
+                        className="ml-1 text-primary hover:text-brand-green-dark font-black hover:underline cursor-pointer"
                     >
-                        <span className="material-symbols-outlined text-[19px]">more_horiz</span>
+                        Show more
                     </button>
-                </div>
+                )}
+                {expanded && displayText.length > 280 && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
+                        className="ml-1 text-primary hover:text-brand-green-dark font-black hover:underline cursor-pointer"
+                    >
+                        Show less
+                    </button>
+                )}
             </div>
-        </div>
-    );
+        );
+    };
 
-    // ── Shared: Action rail ───────────────────────────────────────────────────
-    const actionRail = (
-        <div className="feed-post-card__action-rail absolute right-3 z-30 flex flex-col items-center gap-2.5 sm:right-4">
-            <GlassBtn
-                icon="favorite"
-                count={post.likes || undefined}
-                active={post.isLiked === true}
-                activeIconClass="text-brand-red"
-                filled
-                onClick={(e) => { e.stopPropagation(); onLike(); }}
-                label={post.isLiked ? 'Unlike' : 'Like'}
-            />
-            <GlassBtn
-                icon="chat_bubble"
-                count={post.comments || undefined}
-                onClick={(e) => { e.stopPropagation(); onComment(); }}
-                label="Comment"
-            />
-            <GlassBtn
-                icon="send"
-                onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
-                label="Share"
-            />
-            <GlassBtn
-                icon="bookmark"
-                active={post.isSaved === true}
-                activeIconClass="text-white"
-                filled
-                onClick={(e) => { e.stopPropagation(); onSave(); }}
-                label={post.isSaved ? 'Saved' : undefined}
-            />
-            {post.contentType === 'fyi' && onHelpful && (
-                <GlassBtn
-                    icon="thumb_up"
-                    count={(post.helpfulCount || 0) || undefined}
-                    active={post.isHelpful === true}
-                    activeIconClass="text-primary"
-                    filled
-                    onClick={(e) => { e.stopPropagation(); onHelpful(); }}
-                label="Helpful"
+    const renderRepostBody = () => {
+        if (!isQuoteRepost || !post.quotedPost) return null;
+        return (
+            <>
+                {isSimpleRepost && (
+                    <div className="post-card-repost-label px-1">
+                        <XRepostIcon size={14} />
+                        <span>Reposted</span>
+                    </div>
+                )}
+                {renderTextContent()}
+                <QuotedPostEmbed
+                    post={post.quotedPost}
+                    onClick={() => onCardClick?.()}
                 />
-            )}
-            {(post.views || 0) > 0 && (
-                <div className="flex flex-col items-center gap-0.5">
-                    <span className="material-symbols-outlined text-[18px] text-white/35">visibility</span>
-                    <span className="text-[10px] font-medium text-white/45">{formatCompactCount(post.views)}</span>
-                </div>
-            )}
-        </div>
-    );
+            </>
+        );
+    };
 
-    const renderBottomAuthorPanel = (includeText = mode !== 'text') => (
-        <div className="feed-post-card__author-panel absolute left-4 right-[76px] z-20 sm:left-5 sm:right-24">
-            <div className="flex max-w-[560px] flex-col gap-3">
-                <div className="flex items-center gap-2.5">
+    const renderMedia = () => {
+        if (!hasMedia) return null;
+        return (
+            <PostCardMediaSlider
+                items={mediaItems}
+                altPrefix={textContent ? textContent.slice(0, 80) : `Post by ${authorName}`}
+            />
+        );
+    };
+
+    return (
+        <>
+        <article
+            className={`bg-white dark:bg-[#121b14] p-5 mx-auto w-full select-none ${cardStyleClass} max-w-none rounded-none flex flex-col gap-4`}
+            {...articleGestureProps}
+        >
+            {/* Header Row */}
+            <div className="flex items-center justify-between gap-3 w-full">
+                <div className="flex items-center gap-2.5 min-w-0">
                     <div className="relative shrink-0">
                         <Link href={`/profile/${authorUsername}`} onClick={handleProfileClick}>
-                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10">
+                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-glass-border bg-black/[0.04] dark:bg-white/10">
                                 {authorAvatar && !imageError ? (
                                     <Image
                                         src={authorAvatar}
@@ -389,408 +325,144 @@ export function XPostCard({
                                         unoptimized
                                     />
                                 ) : (
-                                    <span className="material-symbols-outlined text-[18px] text-white/55">person</span>
+                                    <span className="material-symbols-outlined text-[18px] text-neu-text-secondary dark:text-white/60">person</span>
                                 )}
                             </div>
                         </Link>
-                        {canFollow && !isFollowing && (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); toggleFollow(); }}
-                                disabled={isFollowPending}
-                                className="absolute -bottom-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-black/30 bg-primary text-black shadow-lg transition-transform hover:scale-110 active:scale-95"
-                            >
-                                <span className="material-symbols-outlined text-[11px] font-bold">add</span>
-                            </button>
-                        )}
                     </div>
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-1">
-                            <Link
-                                href={`/profile/${authorUsername}`}
-                                onClick={handleProfileClick}
-                                className="block max-w-[140px] overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-black leading-[1.05] text-white hover:underline"
-                                style={{ textShadow: '0 1px 10px rgba(0,0,0,0.8)' }}
-                            >
-                                {isAnonymousAuthor ? 'Anonymous Neyborh' : authorName}
-                            </Link>
-                            {author?.isVerified && (
-                                <span
-                                    className={`material-symbols-outlined icon-filled text-[13px] shrink-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)] ${
-                                        author.verificationBadge === 'emergency_responder' ? 'text-brand-red' :
-                                        author.verificationBadge === 'community_leader'   ? 'text-status-warning' :
-                                        'text-brand-blue'
-                                    }`}
-                                    aria-label={
-                                        author.verificationBadge === 'emergency_responder' ? 'Emergency responder' :
-                                        author.verificationBadge === 'community_leader'   ? 'Community leader' :
-                                        'Verified Neyborh'
-                                    }
-                                    role="img"
-                                >
-                                    {author.verificationBadge === 'emergency_responder' ? 'shield' : 'verified'}
-                                </span>
-                            )}
-                        </div>
-                        <div className="mt-1 text-[10px] font-bold leading-none text-white/58">
-                            {formatTimeAgo(post.createdAt)}
-                        </div>
-                    </div>
+                    <PostCardAuthorLines
+                        authorName={authorName}
+                        authorUsername={authorUsername}
+                        author={author}
+                        isAnonymousAuthor={isAnonymousAuthor}
+                        isVerified={author?.isVerified}
+                        verificationBadge={author?.verificationBadge}
+                        createdAt={post.createdAt}
+                        postLocation={post.location as { lga?: string; state?: string } | undefined}
+                        authorLocation={(author as { location?: { lga?: string; state?: string } })?.location}
+                        onProfileClick={handleProfileClick}
+                    />
                 </div>
-                {includeText && hasText && (
-                    <p
-                        className={`${mode === 'text' ? textSizeClass : 'text-[14px] leading-snug sm:text-[15px]'} line-clamp-4 whitespace-pre-wrap break-words font-semibold text-white`}
-                        style={{ textShadow: '0 2px 18px rgba(0,0,0,0.92)' }}
+
+                <div className="flex items-center gap-1 shrink-0">
+                    <PostCardFollowButton
+                        visible={canFollow}
+                        isFollowing={isFollowing}
+                        isPending={isFollowPending}
+                        onToggle={toggleFollow}
+                    />
+                    {post.isPinned && (
+                        <span className="material-symbols-outlined text-[16px] text-status-warning" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
+                    )}
+
+                    <PostSentinelLink />
+
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
+                        className="post-card-actions-trigger post-card-header__icon-btn"
+                        aria-label="Post options"
+                        aria-haspopup="menu"
+                        aria-expanded={menuOpen ? 'true' : 'false'}
                     >
-                        {textContent}
-                    </p>
+                        <PostCardMenuIcon />
+                    </button>
+                </div>
+            </div>
+
+            {/* Body Section */}
+            {isQuoteRepost ? renderRepostBody() : (
+                <>
+                    {renderTextContent()}
+                    {renderMedia()}
+                </>
+            )}
+
+            {eventBlock}
+            {marketBlock}
+
+            {/* Action Bar (Horizontal Row) */}
+            <div className="post-card-action-bar flex items-center justify-between mt-2.5 text-[11px] font-bold">
+                {/* Comment action */}
+                <button
+                    onClick={(e) => { e.stopPropagation(); onComment(); }}
+                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
+                    aria-label="Comment"
+                >
+                    <XReplyIcon size={18} className="group-hover:text-brand-blue" />
+                    <span className="group-hover:text-brand-blue tabular-nums">{post.comments ? formatCompactCount(post.comments) : '0'}</span>
+                </button>
+
+                {/* FYI Helpful action / Repost action */}
+                {post.contentType === 'fyi' && onHelpful ? (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onHelpful(); }}
+                        className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl transition-colors cursor-pointer group ${post.isHelpful ? 'text-primary' : 'hover:text-primary hover:bg-primary/10'}`}
+                        aria-label="Helpful"
+                    >
+                        <XThumbUpIcon size={18} filled={!!post.isHelpful} className="group-hover:text-primary" />
+                        <span className="group-hover:text-primary tabular-nums">{post.helpfulCount ? formatCompactCount(post.helpfulCount) : '0'}</span>
+                    </button>
+                ) : (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setShowRepostComposer(true); }}
+                        className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl hover:text-brand-green-dark hover:bg-brand-green-dark/10 transition-colors cursor-pointer group"
+                        aria-label="Repost"
+                    >
+                        <XRepostIcon size={18} className="group-hover:text-brand-green-dark" />
+                        <span className="group-hover:text-brand-green-dark tabular-nums">{post.shares ? formatCompactCount(post.shares) : '0'}</span>
+                    </button>
                 )}
 
-                <div className="flex flex-col gap-2">
-                    {eventBlock}
-                    {marketBlock}
-                    {tagsBlock}
-                    {post.updatedAt && post.updatedAt !== post.createdAt && (
-                        <span className="text-[10px] italic text-white/35">edited</span>
-                    )}
-                </div>
+                {/* Like action */}
                 <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); onComment(); }}
-                    className="flex h-9 w-full max-w-[230px] items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 text-left text-[12px] font-medium text-white/65 backdrop-blur-md transition-all hover:border-white/25 hover:bg-white/15 hover:text-white/85 active:scale-[0.98]"
-                    aria-label="Add comment"
-                    style={{ WebkitBackdropFilter: 'blur(12px)' }}
+                    onClick={(e) => { e.stopPropagation(); onLike(); }}
+                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl transition-colors cursor-pointer group ${post.isLiked ? 'text-brand-red' : 'hover:text-brand-red hover:bg-brand-red/10'}`}
+                    aria-label="Like"
                 >
-                    <span className="material-symbols-outlined text-[16px] text-white/55">chat_bubble</span>
-                    Say something…
+                    <XLikeIcon size={18} filled={post.isLiked} className={`transition-transform active:scale-75 group-hover:text-brand-red ${post.isLiked ? 'text-brand-red' : ''}`} />
+                    <span className="group-hover:text-brand-red tabular-nums">{post.likes ? formatCompactCount(post.likes) : '0'}</span>
+                </button>
+
+                {/* Views action */}
+                <div className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1" aria-label="Views">
+                    <XViewIcon size={18} />
+                    <span className="tabular-nums">{post.views ? formatCompactCount(post.views) : '1.2K'}</span>
+                </div>
+
+                {/* Save action */}
+                <button
+                    onClick={(e) => { e.stopPropagation(); onSave(); }}
+                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl transition-colors cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'hover:text-brand-blue hover:bg-brand-blue/10'}`}
+                    aria-label="Bookmark"
+                >
+                    <XBookmarkIcon size={18} filled={post.isSaved} className="group-hover:text-brand-blue" />
+                </button>
+
+                {/* Share action */}
+                <button
+                    onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
+                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
+                    aria-label="Share"
+                >
+                    <XShareIcon size={18} className="group-hover:text-brand-blue" />
                 </button>
             </div>
-        </div>
-    );
 
-    // ── Shared: structured content blocks ────────────────────────────────────
-    const eventBlock = post.contentType === 'event' && post.eventDate ? (
-        <div
-            className="flex flex-wrap items-center gap-2 p-3 rounded-2xl"
-            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
-        >
-            <span className="inline-flex items-center gap-1 text-[12px] font-bold text-brand-blue">
-                <span className="material-symbols-outlined text-[13px]" aria-hidden>calendar_today</span>
-                {new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(post.eventDate))}
-            </span>
-            {post.eventTime && (
-                <span className="inline-flex items-center gap-1 text-[11px] text-white/65">
-                    <span className="material-symbols-outlined text-[13px]" aria-hidden>schedule</span>
-                    {post.eventTime}
-                </span>
-            )}
-            {post.venue?.name && (
-                <span className="inline-flex items-center gap-1 text-[11px] text-white/65">
-                    <span className="material-symbols-outlined text-[13px]" aria-hidden>location_on</span>
-                    {post.venue.name}
-                </span>
-            )}
-            {post.ticketInfo === 'paid' && post.ticketPrice && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-blue/30 text-white/90 font-bold">₦{Number(post.ticketPrice).toLocaleString()}</span>
-            )}
-            {post.ticketInfo === 'free' && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/30 text-primary font-bold">FREE</span>
-            )}
-            {post.eventCategory && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{post.eventCategory}</span>
-            )}
-        </div>
-    ) : null;
-
-    const marketBlock = post.contentType === 'marketplace' ? (
-        <div
-            className="flex flex-wrap items-center gap-2 p-3 rounded-2xl"
-            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
-        >
-            {post.price != null && <span className="text-base font-bold text-primary">₦{Number(post.price).toLocaleString()}</span>}
-            {post.isNegotiable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/20 text-white/90 font-medium">Negotiable</span>}
-            {post.itemCondition && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/20 text-white/90 font-medium capitalize">
-                    {post.itemCondition === 'used' ? 'Tokunbo' : post.itemCondition}
-                </span>
-            )}
-            {post.itemCategory && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium">{post.itemCategory}</span>}
-            {post.deliveryOption && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/55 font-medium capitalize">{post.deliveryOption}</span>}
-            {post.availability && post.availability !== 'available' && (
-                <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${post.availability === 'sold' ? 'bg-brand-red/30 text-brand-red' : 'bg-primary/30 text-primary'}`}>
-                    {post.availability === 'sold' ? 'SOLD' : 'RESERVED'}
-                </span>
-            )}
-        </div>
-    ) : null;
-
-    const tagsBlock = post.tags && post.tags.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5">
-            {post.tags.map((tag, i) => (
-                <span
-                    key={i}
-                    className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-white/70"
-                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(10px)' }}
-                >
-                    #{tag}
-                </span>
-            ))}
-        </div>
-    ) : null;
-
-    const pinnedBadge = post.isPinned ? (
-        <div
-            className="absolute top-4 left-4 z-40 flex items-center gap-1 px-2.5 py-1.5 rounded-full"
-            style={{ background: 'rgba(251,191,36,0.95)', backdropFilter: 'blur(10px)' }}
-        >
-            <span className="material-symbols-outlined text-[12px] text-black" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
-            <span className="text-black text-[10px] font-black uppercase tracking-wide">Pinned</span>
-        </div>
-    ) : null;
-
-    const safetyAlertPill = isSafetyAlert ? (
-        <div className="absolute left-4 top-[64px] z-30 flex items-center gap-1.5 rounded-full border border-brand-red/30 bg-brand-red/25 px-3 py-1.5 backdrop-blur-md">
-            <span className="material-symbols-outlined text-[14px] text-brand-red300">warning</span>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-red100">Safety Alert</span>
-            {severityLabel && <span className="rounded-full bg-brand-red/30 px-1.5 py-0.5 text-[10px] font-bold text-brand-red100">{severityLabel}</span>}
-        </div>
-    ) : null;
-
-    const multiMediaIndicator = mediaUrls.length > 1 ? (
-        <div
-            className="absolute right-16 top-4 z-30 flex items-center gap-1 rounded-full px-2.5 py-1.5"
-            style={{ background: 'rgba(0,0,0,0.38)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.16)' }}
-        >
-            <span className="material-symbols-outlined text-[14px] text-white">photo_library</span>
-            <span className="text-[11px] font-bold text-white">{mediaUrls.length}</span>
-        </div>
-    ) : null;
-
-    const mediaBackground = primaryMedia ? (
-        <div className="absolute inset-0">
-            {isPrimaryVideo ? (
-                <>
-                <video
-                    ref={videoRef}
-                    src={primaryMedia.url}
-                    poster={primaryMedia.thumbnailUrl}
-                    className="h-full w-full object-cover"
-                    muted={isMuted}
-                    loop
-                    playsInline
-                    autoPlay
-                    preload="metadata"
-                    aria-label={textContent ? textContent.slice(0, 120) : `Video post by ${authorName}`}
-                />
-                <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setIsMuted(v => !v); }}
-                    className="feed-post-card__mute-btn absolute top-14 right-3 z-30 flex h-8 w-8 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:ring-offset-black/50"
-                    aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-                >
-                    <span className="material-symbols-outlined text-[16px] text-white">
-                        {isMuted ? 'volume_off' : 'volume_up'}
-                    </span>
-                </button>
-                </>
-            ) : (
-                <Image
-                    src={primaryMedia.url}
-                    alt={textContent ? textContent.slice(0, 120) : `Post by ${authorName}`}
-                    fill
-                    sizes="(max-width: 672px) 100vw, 672px"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
-                    loading="lazy"
-                    unoptimized
-                />
-            )}
-            <div
-                className="absolute inset-0"
-                style={{
-                    background: 'linear-gradient(180deg, rgba(0,0,0,0.60) 0%, rgba(0,0,0,0.10) 28%, rgba(0,0,0,0.12) 52%, rgba(0,0,0,0.92) 100%)',
-                }}
-            />
-            <div
-                aria-hidden
-                className="absolute inset-0 opacity-70"
-                style={{
-                    background: 'radial-gradient(circle at 84% 44%, rgba(0,255,190,0.18), transparent 28%), radial-gradient(circle at 8% 88%, rgba(0,111,53,0.20), transparent 34%)',
-                }}
-            />
-            <div aria-hidden className="pointer-events-none absolute -right-24 bottom-8 h-72 w-72 rounded-full border border-primary/30/20 blur-[0.3px]" />
-        </div>
-    ) : null;
-
-    // ── TEXT-ONLY MODE ────────────────────────────────────────────────────────
-    if (mode === 'text') {
-        return (
-            <>
-            <article
-                className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-brand-red/50' : ''}`}
-                style={{ background: 'var(--brand-black)', height: TEXT_CARD_HEIGHT, minHeight: '320px' }}
-                {...articleGestureProps}
-            >
-                {/* Ambient sphere background */}
-                <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-                    <div className="absolute -top-28 -left-28 h-[360px] w-[360px] rounded-full animate-soft-float" style={{ background: spheres[0], filter: 'blur(96px)' }} />
-                    <div className="absolute top-[28%] -right-24 h-[340px] w-[340px] rounded-full" style={{ background: spheres[1], filter: 'blur(88px)' }} />
-                    <div className="absolute -bottom-24 left-[8%] h-[320px] w-[320px] rounded-full animate-soft-float" style={{ background: spheres[2], filter: 'blur(82px)', animationDelay: '1.2s' }} />
-                    <div className="absolute -right-24 bottom-20 h-80 w-80 rounded-full border border-primary/30/20" />
-                    <div className="absolute -right-10 bottom-16 h-96 w-96 rounded-full border border-brand-green-dark/30/15" />
-                </div>
-                {/* Subtle vignette */}
-                <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 38%, transparent 26%, rgba(0,0,0,0.62) 100%), linear-gradient(180deg, rgba(0,0,0,0.60), transparent 30%, rgba(0,0,0,0.86))' }} />
-
-                {pinnedBadge}
-
-                {safetyAlertPill}
-
-                {authorHeader}
-                {actionRail}
-
-                {/* Center: hero text */}
-                <div
-                    className="absolute inset-x-0 z-20 flex flex-col justify-center gap-4 px-6 pr-20"
-                    style={{ top: '88px', bottom: '178px' }}
-                >
-                    {/* Priority badge */}
-                    {post.priority && post.priority !== 'normal' && (
-                        <span
-                            className={`self-start text-[10px] px-2.5 py-1 rounded-full font-bold backdrop-blur-sm border ${
-                                post.priority === 'critical' ? 'bg-brand-red/25 text-brand-red border-brand-red/25' :
-                                post.priority === 'high' ? 'bg-brand-red/25 text-brand-red border-brand-red/25' :
-                                'bg-brand-blue/25 text-brand-blue border-brand-blue/25'
-                            }`}
-                        >
-                            {post.priority.charAt(0).toUpperCase() + post.priority.slice(1)} Priority
-                        </span>
-                    )}
-
-                    {/* Main text */}
-                    <p
-                        className={`whitespace-pre-wrap break-words font-black tracking-[-0.035em] text-white ${textSizeClass}`}
-                        style={{ textShadow: '0 3px 34px rgba(0,0,0,0.65), 0 0 34px rgba(0,212,49,0.18)' }}
-                    >
-                        {textContent}
-                    </p>
-
-                    {eventBlock}
-                    {marketBlock}
-
-                    {/* Cultural context */}
-                    {post.culturalContext && post.culturalContext.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                            {post.culturalContext.map((ctx, i) => (
-                                <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-brand-blue/20 text-white/90 border border-brand-blue/20 backdrop-blur-sm">
-                                    <span className="material-symbols-outlined text-[12px]">language</span>
-                                    {ctx}
-                                </span>
-                            ))}
-                        </div>
-                    )}
-
-                    {tagsBlock}
-
-                    {post.fyiStatus && post.fyiStatus !== 'active' && (
-                        <span className={`self-start text-[10px] px-2.5 py-1 rounded-full font-bold backdrop-blur-sm border ${
-                            ['found','returned','resolved'].includes(post.fyiStatus)
-                                ? 'bg-primary/25 text-primary border-brand-green-dark/20'
-                                : 'bg-white/10 text-white/60 border-white/10'
-                        }`}>
-                            {post.fyiStatus.charAt(0).toUpperCase() + post.fyiStatus.slice(1)}
-                        </span>
-                    )}
-
-                    {post.expiresAt && (
-                        <span className="self-start text-[10px] px-2.5 py-1 rounded-full bg-primary/20 text-primary200 font-medium border border-yellow-400/20 backdrop-blur-sm">
-                            Expires {new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(post.expiresAt))}
-                        </span>
-                    )}
-
-                    {post.updatedAt && post.updatedAt !== post.createdAt && (
-                        <span className="text-[10px] italic text-white/25">edited</span>
-                    )}
-                </div>
-
-                {renderBottomAuthorPanel(false)}
-
-                {/* Emergency actions — bottom strip */}
-                {isSafetyAlert && onEmergencyAction && (
-                    <div className="absolute bottom-0 left-0 right-0 z-30">
-                        <EmergencyActions post={post} onEmergencyAction={onEmergencyAction} />
-                    </div>
-                )}
-            </article>
-            {showShare && (
-                <ShareModal postId={post.id ?? post._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
-            )}
-            {longPressMenu}
-            </>
-        );
-    }
-
-    // ── MEDIA-ONLY MODE ───────────────────────────────────────────────────────
-    if (mode === 'media') {
-        return (
-            <>
-            <article
-                className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-brand-red/50' : ''}`}
-                style={{ height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
-                {...articleGestureProps}
-            >
-                {mediaBackground}
-
-                {pinnedBadge}
-                {multiMediaIndicator}
-                {safetyAlertPill}
-
-                {authorHeader}
-                {actionRail}
-                {renderBottomAuthorPanel(false)}
-
-                {/* Emergency actions */}
-                {isSafetyAlert && onEmergencyAction && (
-                    <div className="absolute bottom-0 left-0 right-0 z-30">
-                        <EmergencyActions post={post} onEmergencyAction={onEmergencyAction} />
-                    </div>
-                )}
-            </article>
-            {showShare && (
-                <ShareModal postId={post.id ?? post._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
-            )}
-            {longPressMenu}
-            </>
-        );
-    }
-
-    // ── MIXED MODE (media + text) ─────────────────────────────────────────────
-    return (
-        <>
-        <article
-            className={`feed-post-card group relative mx-auto w-full cursor-pointer overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${isSafetyAlert ? 'ring-2 ring-brand-red/50' : ''}`}
-            style={{ height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
-            {...articleGestureProps}
-        >
-            {mediaBackground}
-
-            {pinnedBadge}
-            {multiMediaIndicator}
-            {safetyAlertPill}
-
-            {authorHeader}
-            {actionRail}
-            {renderBottomAuthorPanel(true)}
-
-            {/* Emergency actions */}
             {isSafetyAlert && onEmergencyAction && (
-                <div className="absolute bottom-0 left-0 right-0 z-30">
-                    <EmergencyActions post={post} onEmergencyAction={onEmergencyAction} />
-                </div>
+                <EmergencyActions post={post} onEmergencyAction={onEmergencyAction} />
             )}
         </article>
+
         {showShare && (
             <ShareModal postId={post.id ?? post._id ?? ''} postContent={post.content ?? ''} onClose={() => setShowShare(false)} />
         )}
-        {longPressMenu}
+        <RepostComposerSheet
+            open={showRepostComposer}
+            sourcePost={post}
+            onClose={() => setShowRepostComposer(false)}
+            onReposted={onReposted}
+        />
+        {postActionsSheet}
         </>
     );
 }

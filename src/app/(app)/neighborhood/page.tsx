@@ -12,6 +12,7 @@ import { BrowseFilterChip } from '@/components/layout/BrowseFilterChip';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { getPostId, TrendingPostRow } from '@/components/feed/TrendingPostRow';
 import type { ContentType, FeedTab, Post } from '@/types/api';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 export const dynamic = 'force-dynamic';
 
@@ -171,8 +172,9 @@ function HuudBrowseInner() {
   }, [searchParams, router]);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
+    const geo = getGeolocation();
+    if (geo) {
+      geo.getCurrentPosition(
         (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
         () => setCoords({ lat: 9.0765, lng: 7.3986 }),
       );

@@ -1,4 +1,6 @@
 // src/lib/geolocation.ts
+import { getGeolocation } from './nativeGeolocation';
+
 export interface LocationCoords {
     lat: number;
     lng: number;
@@ -12,7 +14,8 @@ export interface LocationCoords {
  */
 export const getCurrentLocation = (): Promise<LocationCoords | null> => {
     return new Promise((resolve) => {
-        if (!navigator.geolocation) {
+        const geo = getGeolocation();
+        if (!geo) {
             console.warn('Geolocation not supported');
             resolve(null);
             return;
@@ -37,7 +40,7 @@ export const getCurrentLocation = (): Promise<LocationCoords | null> => {
             const highAccuracy = attempts === 1;
             console.log(`📍 Getting location (attempt ${attempts}/${maxAttempts}, highAccuracy=${highAccuracy})...`);
 
-            navigator.geolocation.getCurrentPosition(
+            geo.getCurrentPosition(
                 (position) => {
                     const coords = {
                         lat: position.coords.latitude,

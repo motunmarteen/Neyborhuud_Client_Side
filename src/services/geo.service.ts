@@ -4,6 +4,7 @@
  */
 
 import apiClient from "@/lib/api-client";
+import { getGeolocation } from "@/lib/nativeGeolocation";
 import { LocationData, User, Post, Event } from "@/types/api";
 
 export type VerifyLocationResult = {
@@ -123,12 +124,13 @@ export const geoService = {
    */
   getCurrentPosition(): Promise<GeolocationPosition> {
     return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
+      const geo = getGeolocation();
+      if (!geo) {
         reject(new Error("Geolocation is not supported by your browser"));
         return;
       }
 
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
+      geo.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 300000, // 5 minutes
@@ -143,11 +145,12 @@ export const geoService = {
     onSuccess: (position: GeolocationPosition) => void,
     onError?: (error: GeolocationPositionError) => void,
   ): number {
-    if (!navigator.geolocation) {
+    const geo = getGeolocation();
+    if (!geo) {
       throw new Error("Geolocation is not supported by your browser");
     }
 
-    return navigator.geolocation.watchPosition(onSuccess, onError, {
+    return geo.watchPosition(onSuccess, onError, {
       enableHighAccuracy: true,
       timeout: 10000,
       maximumAge: 300000,
@@ -158,8 +161,9 @@ export const geoService = {
    * Clear location watch
    */
   clearWatch(watchId: number) {
-    if (navigator.geolocation) {
-      navigator.geolocation.clearWatch(watchId);
+    const geo = getGeolocation();
+    if (geo) {
+      geo.clearWatch(watchId);
     }
   },
 

@@ -1,14 +1,15 @@
-import { redirect } from "next/navigation";
+import MarketplaceLegacyRedirectClient from './PageClient';
+import { capStaticParams } from '@/lib/staticExportParams';
+
+export const dynamicParams = true;
+export function generateStaticParams() {
+  return capStaticParams('id');
+}
 
 /**
- * Product detail UI now lives on marketplace listing cards (expandable description, etc.).
+ * Product detail UI now lives on marketplace listing cards.
  * Old /marketplace/[id] links redirect to the main browse view.
  */
-export default async function MarketplaceProductLegacyRedirectPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  redirect(`/marketplace?product=${encodeURIComponent(id)}`);
+export default function MarketplaceProductLegacyRedirectPage() {
+  return <MarketplaceLegacyRedirectClient />;
 }

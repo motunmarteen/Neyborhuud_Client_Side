@@ -4,19 +4,14 @@
  * Edit marketplace listing — same glass shell as create
  */
 
-import { use } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useProduct } from "@/hooks/useMarketplace";
 import { ProductForm } from "@/components/marketplace";
 import { Product } from "@/services/marketplace.service";
 import { GlassFormPage } from "@/components/ui/GlassFormPage";
 
-export default function EditProductPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function EditProductPage() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: product, isLoading, error } = useProduct(id);
 

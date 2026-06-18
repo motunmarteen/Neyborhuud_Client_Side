@@ -18,10 +18,13 @@ vi.mock('@/lib/api-client', () => ({
 vi.mock('@/lib/communityContext', () => ({
   getNeedsCommunitySelection: vi.fn(() => false),
   getNeedsGpsLocationVerification: vi.fn(() => false),
+  getStoredCommunity: vi.fn(() => null),
 }));
 
 vi.mock('@/lib/onboarding', () => ({
   getPostSetupRoute: vi.fn(() => '/setup-complete'),
+  hasCompletedProductTour: vi.fn(() => false),
+  markProductTourComplete: vi.fn(),
 }));
 
 import {

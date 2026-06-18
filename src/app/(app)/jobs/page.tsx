@@ -55,9 +55,9 @@ export default function JobsPage() {
       }
     >
       {isLoading && (
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="mod-card h-32 animate-pulse rounded-2xl" />
+            <div key={i} className="mod-card aspect-[4/5] animate-pulse rounded-2xl" />
           ))}
         </div>
       )}
@@ -80,7 +80,7 @@ export default function JobsPage() {
       )}
 
       {!isLoading && !error && jobs.length > 0 && (
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
           {jobs.map((job: any, idx: number) => (
             <JobCard
               key={job.id || job._id || `job-${idx}`}
@@ -89,7 +89,7 @@ export default function JobsPage() {
               onSave={(id, isSaved) => saveJob.mutate({ jobId: id, saved: isSaved })}
             />
           ))}
-          <div ref={loadMoreRef} className="flex justify-center py-2">
+          <div ref={loadMoreRef} className="col-span-2 flex justify-center py-2">
             {isFetchingNextPage ? (
               <span className="text-sm text-[var(--neu-text-muted)]">Loading more…</span>
             ) : null}

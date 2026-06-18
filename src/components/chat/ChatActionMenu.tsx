@@ -21,6 +21,7 @@ import { useBottomSheetDrag } from '@/hooks/useBottomSheetDrag';
 import { toast } from 'sonner';
 import { ChatMessage, ChatMessageMeta, ChatMessageType } from '@/types/api';
 import VoiceRecorder from './VoiceRecorder';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 // ─── MIME Whitelist (single source of truth for frontend validation) ──────────
 export const ALLOWED_MIME: Record<string, string[]> = {
@@ -91,7 +92,13 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
   const detect = () => {
     setLoading(true);
     setError('');
-    navigator.geolocation.getCurrentPosition(
+    const geo = getGeolocation();
+    if (!geo) {
+      setError('Location is not supported on this device.');
+      setLoading(false);
+      return;
+    }
+    geo.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
         setLoc({ lat: latitude, lng: longitude, address: `${latitude.toFixed(5)}, ${longitude.toFixed(5)}` });

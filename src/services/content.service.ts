@@ -5,6 +5,11 @@
 
 import apiClient from "@/lib/api-client";
 import {
+  extractVerificationIdentityInput,
+  getVerificationTier,
+  isCommunityVerified,
+} from "@/lib/userVerification";
+import {
   Post,
   Comment,
   PostDetails,
@@ -28,23 +33,54 @@ function normalizeFeedItem(item: any): Post {
     }
     return 0;
   };
-  const authorId = item?.authorId ?? item?.author;
-  const fullName = [authorId?.firstName, authorId?.lastName]
+  const authorRaw =
+    item?.author && typeof item.author === "object"
+      ? item.author
+      : item?.authorId && typeof item.authorId === "object"
+        ? item.authorId
+        : null;
+  const authorIdString =
+    typeof item?.authorId === "string"
+      ? item.authorId
+      : authorRaw?._id?.toString?.() ??
+        authorRaw?.id?.toString?.() ??
+        authorRaw?._id ??
+        authorRaw?.id ??
+        "";
+  const fullName = [authorRaw?.firstName, authorRaw?.lastName]
     .filter(Boolean)
     .join(" ")
     .trim();
-  const name = authorId?.name ?? (fullName || authorId?.username || "");
+  const name = authorRaw?.name ?? (fullName || authorRaw?.username || "");
+  const verificationInput = extractVerificationIdentityInput(authorRaw as Record<string, unknown>);
+  const verificationTier =
+    (authorRaw?.verificationTier as Post["author"]["verificationTier"]) ??
+    getVerificationTier(verificationInput);
   const postContent = item?.content ?? item?.body ?? "";
   return {
     id: item?.id ?? item?._id ?? "",
     content: postContent,
     body: item?.body ?? postContent,
-    author: authorId
+    authorId: authorIdString,
+    author: authorRaw || authorIdString
       ? {
-          id: authorId._id ?? authorId.id ?? "",
+          id: String(authorIdString ?? ""),
           name: name ?? "",
-          username: authorId?.username ?? "",
-          avatarUrl: authorId?.avatarUrl ?? authorId?.profilePicture ?? null,
+          username: authorRaw?.username ?? "",
+          avatarUrl: authorRaw?.avatarUrl ?? authorRaw?.profilePicture ?? null,
+          emailVerified: authorRaw?.emailVerified,
+          identityVerified: authorRaw?.identityVerified,
+          trustScore: authorRaw?.trustScore,
+          firstName: authorRaw?.firstName,
+          lastName: authorRaw?.lastName,
+          phoneNumber: authorRaw?.phoneNumber,
+          bio: authorRaw?.bio,
+          assignedCommunityId: authorRaw?.assignedCommunityId,
+          createdAt: authorRaw?.createdAt,
+          points: authorRaw?.points,
+          vouchCount: authorRaw?.vouchCount,
+          verificationTier,
+          isVerified: isCommunityVerified(verificationInput),
         }
       : ({} as Post["author"]),
     media: item?.mediaUrls ?? item?.media,
@@ -90,6 +126,9 @@ function normalizeFeedItem(item: any): Post {
     expiresAt: item?.expiresAt ?? item?.metadata?.expiryDate,
     endorsements: item?.endorsements,
     metadata: item?.metadata,
+    mood: item?.mood,
+    parentId: item?.parentId?.toString?.() ?? item?.parentId,
+    quotedPost: item?.quotedPost ? normalizeFeedItem(item.quotedPost) : undefined,
   };
 }
 
@@ -322,14 +361,24 @@ export const contentService = {
    * Save a post
    */
   async savePost(postId: string) {
-    return await apiClient.post(`/content/posts/${postId}/save`);
+    return await apiClient.post(`/content/posts/${postId}/save`, {});
   },
 
   /**
-   * Unsave a post
+   * Repost or quote-repost a post
+   */
+  async repostPost(postId: string, comment?: string) {
+    return await apiClient.post(`/content/posts/${postId}/repost`, {
+      content: comment?.trim() ?? '',
+    });
+  },
+
+  /**
+   * Unsave a post.
+   * Uses POST with `{ unsave: true }` so it works on APIs that don't expose DELETE /save yet.
    */
   async unsavePost(postId: string) {
-    return await apiClient.delete(`/content/posts/${postId}/save`);
+    return await apiClient.post(`/content/posts/${postId}/save`, { unsave: true });
   },
 
   /**

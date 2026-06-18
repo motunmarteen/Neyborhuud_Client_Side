@@ -19,6 +19,7 @@ import { io, type Socket } from "socket.io-client";
 import { tripService, type Trip, type StartTripPayload, type TripLocation } from "@/services/trip.service";
 import { useAuth } from "@/hooks/useAuth";
 import { useOfflineQueue } from "@/hooks/useOfflineQueue";
+import { getGeolocation } from "@/lib/nativeGeolocation";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -33,10 +34,11 @@ function getSocketBaseUrl(): string {
 
 function getCurrentPosition(options?: PositionOptions): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
+    const geo = getGeolocation();
+    if (!geo) {
       reject(new Error("Geolocation not supported"));
     } else {
-      navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      geo.getCurrentPosition(resolve, reject, options);
     }
   });
 }
@@ -126,7 +128,7 @@ export function useTripMonitor(): UseTripMonitor {
 
   const stopTracking = useCallback(() => {
     if (gpsWatchIdRef.current !== null) {
-      navigator.geolocation?.clearWatch(gpsWatchIdRef.current);
+      getGeolocation()?.clearWatch(gpsWatchIdRef.current);
       gpsWatchIdRef.current = null;
     }
     if (locationPingRef.current) {
@@ -142,7 +144,8 @@ export function useTripMonitor(): UseTripMonitor {
 
   const startTracking = useCallback(
     (trip: Trip) => {
-      if (!navigator.geolocation) return;
+      const geo = getGeolocation();
+      if (!geo) return;
 
       const pingLocation = async (lat: number, lng: number, accuracy?: number) => {
         const location: TripLocation = { latitude: lat, longitude: lng };
@@ -169,7 +172,7 @@ export function useTripMonitor(): UseTripMonitor {
       };
 
       // High-accuracy watch — fires on significant movement
-      gpsWatchIdRef.current = navigator.geolocation.watchPosition(
+      gpsWatchIdRef.current = geo.watchPosition(
         (pos) => {
           pingLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
         },
@@ -241,7 +244,7 @@ export function useTripMonitor(): UseTripMonitor {
   // the current position so the trip location record stays accurate.
   //
   useEffect(() => {
-    if (!navigator.geolocation) return;
+    if (!getGeolocation()) return;
 
     const onVisibilityChange = () => {
       if (document.visibilityState !== 'visible') return;
@@ -397,7 +400,7 @@ export function useTripMonitor(): UseTripMonitor {
       setError(null);
       try {
         // Try to attach current GPS to origin if not provided
-        if (!payload.originLocation && navigator.geolocation) {
+        if (!payload.originLocation && getGeolocation()) {
           try {
             const pos = await getCurrentPosition({ enableHighAccuracy: true, timeout: 8000 });
             payload = {
@@ -428,7 +431,7 @@ export function useTripMonitor(): UseTripMonitor {
     setError(null);
     try {
       let location: TripLocation | undefined;
-      if (navigator.geolocation) {
+      if (getGeolocation()) {
         try {
           const pos = await getCurrentPosition({ enableHighAccuracy: false, timeout: 6000 });
           location = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };

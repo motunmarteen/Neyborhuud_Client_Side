@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "node start-dev.js",
-    "dev:fresh": "node scripts/kill-dev.cjs && node start-dev.js",
+    "dev:webpack": "node start-dev.js --webpack",
+    "dev:fresh": "node scripts/kill-dev.cjs && node start-dev.js --clean",
+    "dev:webpack:fresh": "node scripts/kill-dev.cjs && node start-dev.js --webpack --clean",
     "kill:all": "node scripts/kill-dev.cjs",
     "dev:clean": "node scripts/dev-clean.mjs",
     "dev:stable": "next dev",
@@ -14,6 +16,7 @@
     "dev:3002": "set NEXT_DIST_DIR=.next-3002&& set PORT=3002&& next dev --turbopack --port 3002",
     "dev:3003": "set NEXT_DIST_DIR=.next-3003&& set PORT=3003&& next dev --turbopack --port 3003",
     "build": "next build --webpack",
+    "build:cap": "node scripts/cap-build.mjs",
     "start": "next start",
     "lint": "node run-lint.mjs",
     "lint:strict": "eslint . --max-warnings 0",
@@ -27,6 +30,16 @@
     "check:all": "npm run typecheck && npm run lint && npm run build && npm run test"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/camera": "^8.2.0",
+    "@capacitor/geolocation": "^8.2.0",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/network": "^8.0.1",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@react-google-maps/api": "^2.20.8",
     "@tanstack/react-query": "^5.90.20",
     "@types/leaflet": "^1.9.21",
@@ -48,6 +61,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "^5.91.2",
     "@testing-library/jest-dom": "^6.9.1",
@@ -63,9 +78,11 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "jsdom": "^29.1.1",
+    "playwright": "^1.60.0",
     "sharp": "0.33.5",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "ws": "^8.21.0"
   }
 }

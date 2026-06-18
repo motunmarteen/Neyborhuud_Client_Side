@@ -112,9 +112,9 @@ export default function ServicesPage() {
       }
     >
       {isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="mod-card h-48 animate-pulse rounded-2xl" />
+            <div key={i} className="mod-card aspect-[4/5] animate-pulse rounded-2xl" />
           ))}
         </div>
       )}
@@ -137,7 +137,7 @@ export default function ServicesPage() {
       )}
 
       {!isLoading && services.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           {services.map((service: any, i: number) => (
             <ServiceCard
               key={service.id ?? service._id ?? i}

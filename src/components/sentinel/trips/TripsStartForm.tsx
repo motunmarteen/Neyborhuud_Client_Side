@@ -3,6 +3,7 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import type { StartTripPayload } from '@/services/trip.service';
 import { fetchNominatimReverse, fetchNominatimSearch } from '@/lib/nominatimClient';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 type TripsStartFormProps = {
   onStart: (payload: StartTripPayload) => Promise<void>;
@@ -32,14 +33,15 @@ export function TripsStartForm({ onStart, disabled }: TripsStartFormProps) {
   const [err, setErr] = useState<string | null>(null);
 
   const handleUseMyLocation = useCallback(() => {
-    if (!navigator.geolocation) {
+    const geo = getGeolocation();
+    if (!geo) {
       setGpsError('Geolocation is not supported by your browser.');
       return;
     }
     setGpsLoading(true);
     setGpsError(null);
 
-    navigator.geolocation.getCurrentPosition(
+    geo.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
         setOriginCoords({ latitude, longitude });

@@ -90,7 +90,7 @@ export default function NotificationsPage() {
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
-        <Suspense fallback={<div className="w-64" />}>
+        <Suspense fallback={<div className="hidden lg:block lg:w-80 shrink-0" />}>
           <LeftSidebar />
         </Suspense>
         <main className="flex-1 overflow-y-auto px-4 py-6">

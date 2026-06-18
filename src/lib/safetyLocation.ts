@@ -1,4 +1,5 @@
 import { getErrorMessage } from '@/lib/error-handler';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 /** Resolve coordinates for safety status / SOS — GPS first, then profile fallback. */
 
@@ -26,11 +27,12 @@ function coordsFromProfile(loc?: ProfileLocation | null): SafetyCoords | null {
 
 function readPosition(options: PositionOptions): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
+    const geo = getGeolocation();
+    if (!geo) {
       reject(new Error('Geolocation is not supported on this device'));
       return;
     }
-    navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    geo.getCurrentPosition(resolve, reject, options);
   });
 }
 
@@ -40,7 +42,7 @@ function readPosition(options: PositionOptions): Promise<GeolocationPosition> {
 export async function resolveSafetyCoords(
   profileLocation?: ProfileLocation | null,
 ): Promise<SafetyCoords | null> {
-  if (typeof navigator !== 'undefined' && navigator.geolocation) {
+  if (getGeolocation()) {
     const attempts: PositionOptions[] = [
       { enableHighAccuracy: false, timeout: 12_000, maximumAge: 300_000 },
       { enableHighAccuracy: true, timeout: 20_000, maximumAge: 120_000 },

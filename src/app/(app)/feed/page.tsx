@@ -9,7 +9,6 @@ import {
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
-import { FeedTabs } from '@/components/feed/FeedTabs';
 import { FeedSkyHero } from '@/components/feed/FeedSkyHero';
 import { XPostCard } from '@/components/feed/XPostCard';
 import { ReportModal } from '@/components/feed/ReportModal';
@@ -39,9 +38,79 @@ import { FeedDiscoveryBlock } from '@/components/feed/FeedDiscoveryBlock';
 import { FrequentPlaceContextBanner } from '@/components/feed/FrequentPlaceContextBanner';
 import { mergeDiscoveryIntoFeed, type BaseFeedItem, type DiscoveryFeedItem } from '@/lib/feedDiscoveryMerge';
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
-import { useFeedTabSwipe } from '@/hooks/useFeedTabSwipe';
 import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
 import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
+
+const getFilterBannerData = (type: string) => {
+    switch (type) {
+        case 'marketplace':
+            return {
+                imageSrc: '/illustration_marketplace.png',
+                title: 'Local Marketplace',
+                desc: 'Browse items offered by neighbors in your area. Secure transactions and direct handovers.',
+                borderCls: 'border-primary/20',
+                bgCls: 'bg-primary/5',
+            };
+        case 'emergency':
+            return {
+                imageSrc: '/illustration_safety.png',
+                title: 'Sentinel Safety Watch',
+                desc: 'Active neighborhood safety watches, incident reports, and real-time security alerts.',
+                borderCls: 'border-brand-red/25',
+                bgCls: 'bg-brand-red/5 text-brand-red',
+            };
+        case 'community_alert':
+            return {
+                imageSrc: '/illustration_community_alert.png',
+                title: 'Community Alerts',
+                desc: 'Stay informed with critical neighborhood notices, real-time safety warnings, and community broadcast alerts.',
+                borderCls: 'border-brand-red/25',
+                bgCls: 'bg-brand-red/5 text-brand-red',
+            };
+        case 'incident_report':
+            return {
+                imageSrc: '/illustration_safety.png',
+                title: 'Incident Reports',
+                desc: 'View and track neighborhood incident reports, security updates, and witness accounts.',
+                borderCls: 'border-brand-red/25',
+                bgCls: 'bg-brand-red/5 text-brand-red',
+            };
+        case 'job':
+            return {
+                imageSrc: '/illustration_jobs.png',
+                title: 'Local Careers & Opportunities',
+                desc: 'Find part-time work, gig jobs, co-working alerts, and local service hiring nearby.',
+                borderCls: 'border-brand-blue/20',
+                bgCls: 'bg-brand-blue/5',
+            };
+        case 'event':
+            return {
+                imageSrc: '/illustration_events.png',
+                title: 'Gatherings & Events',
+                desc: 'Neighborhood block parties, community cleanup drives, and fun gatherings near you.',
+                borderCls: 'border-status-warning/20',
+                bgCls: 'bg-status-warning/5',
+            };
+        case 'services':
+            return {
+                imageSrc: '/illustration_services.png',
+                title: 'Huud Services & Experts',
+                desc: 'Find handymen, plumbers, technicians, and local service providers recommended by neighbors.',
+                borderCls: 'border-primary/20',
+                bgCls: 'bg-primary/5',
+            };
+        case 'help_request':
+            return {
+                imageSrc: '/illustration_help.png',
+                title: 'Mutual Help & Requests',
+                desc: 'Neighbors helping neighbors. Offer a hand or request assistance from local volunteers.',
+                borderCls: 'border-brand-blue/20',
+                bgCls: 'bg-brand-blue/5',
+            };
+        default:
+            return null;
+    }
+};
 
 function XFeedInner() {
     const router = useRouter();
@@ -61,14 +130,16 @@ function XFeedInner() {
     const queryClient = useQueryClient();
     const canPost = isUserInNigeria();
     const mainRef = useRef<HTMLElement>(null);
-    const lastScrollY = useRef(0);
-    const [navHidden, setNavHidden] = useState(false);
-    const feedSwipe = useFeedTabSwipe(feedTab, setFeedTab);
 
     // Derive contentTypeFilter from URL search params (set by sidebar / search overlay)
-    const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'help_request', 'job', 'event', 'marketplace', 'emergency'];
+    const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'help_request', 'job', 'event', 'marketplace', 'emergency', 'community_alert', 'incident_report'];
     const typeParam = searchParams.get('type') || '';
-    const contentTypeFilter: ContentType | undefined = CONTENT_TYPE_TABS.includes(typeParam) ? (typeParam as ContentType) : undefined;
+    const contentTypeFilter: ContentType | undefined = 
+        (typeParam === 'community_alert' || typeParam === 'incident_report')
+            ? 'emergency'
+            : CONTENT_TYPE_TABS.includes(typeParam)
+            ? (typeParam as ContentType)
+            : undefined;
 
     // Legacy gossip filter → Huud Gist in Local News
     useEffect(() => {
@@ -88,23 +159,7 @@ function XFeedInner() {
         return () => window.removeEventListener('open-create-post', handler);
     }, []);
 
-    // Auto-hide navs on scroll down, show on scroll up
-    useEffect(() => {
-        const el = mainRef.current;
-        if (!el) return;
-        const THRESHOLD = 10;
-        const handleScroll = () => {
-            const y = el.scrollTop;
-            if (y - lastScrollY.current > THRESHOLD) {
-                setNavHidden(true);
-            } else if (lastScrollY.current - y > THRESHOLD) {
-                setNavHidden(false);
-            }
-            lastScrollY.current = y;
-        };
-        el.addEventListener('scroll', handleScroll, { passive: true });
-        return () => el.removeEventListener('scroll', handleScroll);
-    }, []);
+
 
     // Fetch departments for filter dropdown
     const { data: departments = [] } = useDepartments();
@@ -190,6 +245,9 @@ function XFeedInner() {
         setCommentsTarget(target);
     };
 
+    /** Mixed marketplace / events / jobs when not using a content-type sidebar filter */
+    const discoveryEnabled = !contentTypeFilter;
+
     // Flatten posts from all pages
     const posts: Post[] = useMemo(
         () =>
@@ -198,14 +256,14 @@ function XFeedInner() {
     );
 
     const mergedFeed: BaseFeedItem[] = useMemo(
-        () => posts.map((p) => ({ _type: 'post' as const, data: p })),
-        [posts],
+        () => posts
+                .filter(p => !(discoveryEnabled && p.contentType === 'help_request'))
+                .map((p) => ({ _type: 'post' as const, data: p })),
+        [posts, discoveryEnabled],
     );
     const missedAlerts = feedData?.pages?.[0]?.meta?.missedAlerts ?? null;
     const placeContext = feedData?.pages?.[0]?.meta?.placeContext ?? null;
 
-    /** Mixed marketplace / events / jobs when not using a content-type sidebar filter */
-    const discoveryEnabled = !contentTypeFilter;
     const { pools: discoveryPools } = useFeedDiscoveryPools(discoveryEnabled, {
         lat: location?.lat ?? null,
         lng: location?.lng ?? null,
@@ -373,7 +431,7 @@ function XFeedInner() {
     return (
         <div className="relative flex h-app w-full max-w-[100vw] overflow-hidden neu-base">
             {/* Left Sidebar */}
-            <Suspense fallback={<div className="w-64" />}>
+            <Suspense fallback={<div className="hidden lg:block lg:w-80 shrink-0" />}>
                 <LeftSidebar mode="both" />
             </Suspense>
 
@@ -385,176 +443,194 @@ function XFeedInner() {
               ref={mainRef}
               data-app-scroll-root
               className="feed-scroll-main feed-scroll-main--sky-feed min-h-0 flex-1 overflow-y-auto scroll-smooth"
-              onTouchStart={feedSwipe.onTouchStart}
-              onTouchEnd={feedSwipe.onTouchEnd}
+              style={{ backgroundColor: 'var(--background-premium)' }}
             >
                 <div className="feed-page-scroll flex flex-col pb-[var(--app-scroll-bottom)]">
                         <div className="feed-hero-stack shrink-0">
                           <FeedSkyHero />
-                          <FeedTabs
-                              activeTab={feedTab}
-                              onTabChange={(tab) => setFeedTab(tab)}
-                              className="feed-tabs-below-hero"
-                          />
                         </div>
-                        <div className="feed-sky-feed-body flex flex-col gap-4">
-                            <div className="px-4 flex flex-col gap-4 pt-3">
+                        <div className="feed-sky-feed-body flex flex-col gap-2 pt-0">
                             {/* Active content-type filter chip */}
-                            {contentTypeFilter && (
-                                <div className="flex items-center gap-2">
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold mod-chip mod-chip-active text-primary">
-                                        {t(`contentType.${contentTypeFilter}`)}
-                                        <button
-                                            onClick={() => router.replace('/feed')}
-                                            className="ml-1 hover:opacity-70 transition-opacity"
-                                            aria-label="Clear filter"
-                                        >
-                                            <span className="material-symbols-outlined text-sm">close</span>
-                                        </button>
-                                    </span>
+                            {contentTypeFilter && (() => {
+                                const banner = getFilterBannerData(contentTypeFilter);
+                                if (!banner) return null;
+                                return (
+                                    <div className="w-full">
+                                        <div className={`glass-card p-4 flex gap-4 items-center border ${banner.borderCls} ${banner.bgCls} w-full`}>
+                                            <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-black/[0.02] border border-glass-border">
+                                                <img src={banner.imageSrc} alt={banner.title} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-sm font-black text-neu-text dark:text-white leading-tight flex items-center gap-1.5 flex-wrap">
+                                                    {banner.title}
+                                                    <button
+                                                        onClick={() => router.replace('/feed')}
+                                                        className="ml-auto flex items-center justify-center h-6 w-6 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 text-neu-text-secondary dark:text-white/60 cursor-pointer text-xs"
+                                                        aria-label="Clear filter"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[14px]">close</span>
+                                                    </button>
+                                                </h3>
+                                                <p className="text-[11px] font-medium text-neu-text-secondary dark:text-white/60 mt-1.5 leading-snug">{banner.desc}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {feedTab === 'your_huud' && (
+                                <div className="w-full">
+                                    <FeedProfilePrompt />
                                 </div>
                             )}
 
-                            {feedTab === 'your_huud' && <FeedProfilePrompt />}
-
                             {feedTab === 'your_huud' && placeContext && (
-                                <FrequentPlaceContextBanner context={placeContext} />
+                                <div className="w-full">
+                                    <FrequentPlaceContextBanner context={placeContext} />
+                                </div>
                             )}
 
                             {/* FYI Subtype Filter — only when FYI type active */}
                             {contentTypeFilter === 'fyi' && (
-                                <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                                    {['all', 'safety_notice', 'lost_found', 'community_announcement', 'local_news', 'alert'].map(st => (
-                                        <button key={st} onClick={() => setFyiSubtypeFilter(st === 'all' ? '' : st)}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${fyiSubtypeFilter === (st === 'all' ? '' : st) ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'}`}>
-                                            {st === 'all' ? 'All' : st.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                                        </button>
-                                    ))}
+                                <div className="w-full px-5">
+                                    <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                                        {['all', 'safety_notice', 'lost_found', 'community_announcement', 'local_news', 'alert'].map(st => (
+                                            <button key={st} onClick={() => setFyiSubtypeFilter(st === 'all' ? '' : st)}
+                                                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${fyiSubtypeFilter === (st === 'all' ? '' : st) ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'}`}>
+                                                {st === 'all' ? 'All' : st.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 
-                        {missedAlerts && missedAlerts.count > 0 && (
-                            <div
-                                className="rounded-2xl px-4 py-3.5 animate-fade-in"
-                                style={{
-                                    background: 'linear-gradient(135deg, rgba(255,0,0,0.06), rgba(255,255,255,0.9))',
-                                    border: '1px solid rgba(255,0,0,0.16)',
-                                    boxShadow: '0 4px 16px rgba(255,0,0,0.06)',
-                                }}
-                            >
-                                <div className="flex items-start gap-3">
+                            {missedAlerts && missedAlerts.count > 0 && (
+                                <div className="w-full">
                                     <div
-                                        className="rounded-xl size-10 shrink-0 flex items-center justify-center text-brand-red"
-                                        style={{ background: 'rgba(255,0,0,0.1)' }}
+                                        className="px-5 py-3.5 animate-fade-in"
+                                        style={{
+                                            background: 'linear-gradient(135deg, rgba(255,0,0,0.06), rgba(255,255,255,0.9))',
+                                            borderBottom: '1px solid rgba(255,0,0,0.16)',
+                                            boxShadow: '0 4px 16px rgba(255,0,0,0.06)',
+                                        }}
                                     >
-                                        <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: '"FILL" 1' }}>shield</span>
+                                        <div className="flex items-start gap-3">
+                                            <div
+                                                className="rounded-xl size-10 shrink-0 flex items-center justify-center text-brand-red"
+                                                style={{ background: 'rgba(255,0,0,0.1)' }}
+                                            >
+                                                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: '"FILL" 1' }}>shield</span>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+                                                    {missedAlerts.count === 1
+                                                        ? '1 nearby alert while you were away'
+                                                        : `${missedAlerts.count} nearby alerts while you were away`}
+                                                </p>
+                                                <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
+                                                    Highest severity: {missedAlerts.highestSeverity}. Areas: {missedAlerts.lgas.join(', ')}.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
-                                            {missedAlerts.count === 1
-                                                ? '1 nearby alert while you were away'
-                                                : `${missedAlerts.count} nearby alerts while you were away`}
+                                </div>
+                            )}
+
+                            {/* Loading State */}
+                            {isLoading && (
+                                <div className="w-full">
+                                    <FeedSkeleton count={5} />
+                                </div>
+                            )}
+
+                            {/* Error State */}
+                            {isError && (
+                                <div className="w-full">
+                                    <div className="flex flex-col items-center justify-center py-12 px-5 mod-card w-full">
+                                        <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
+                                            <span className="material-symbols-outlined text-[32px] text-brand-red">warning</span>
+                                        </div>
+                                        <p className="text-sm text-center mb-2" style={{ color: 'var(--neu-text)' }}>
+                                            {locationError || t('feed.failedToLoad')}
                                         </p>
-                                        <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
-                                            Highest severity: {missedAlerts.highestSeverity}. Areas: {missedAlerts.lgas.join(', ')}.
+                                        {error && (
+                                            <p className="text-xs text-center mb-2" style={{ color: 'var(--neu-text-muted)' }}>
+                                                {error instanceof Error ? error.message : 'Unknown error'}
+                                            </p>
+                                        )}
+                                        <button
+                                            onClick={() => refetchFeed()}
+                                            disabled={isRefetching}
+                                            className="mt-2 px-6 py-2.5 mod-chip rounded-xl text-sm font-bold disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+                                            style={{ color: 'var(--neu-text)' }}
+                                        >
+                                            {isRefetching ? (
+                                                <>
+                                                    <div className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                                                    {t('feed.retrying')}
+                                                </>
+                                            ) : (
+                                                t('feed.retry')
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Empty State */}
+                            {!isLoading && !isError && !location && locationError && (
+                                <div className="w-full">
+                                    <div className="flex flex-col items-center justify-center py-12 px-5 mod-card w-full">
+                                        <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
+                                            <span className="material-symbols-outlined text-[32px] text-brand-red">location_off</span>
+                                        </div>
+                                        <p className="text-sm text-center" style={{ color: 'var(--neu-text)' }}>
+                                            {locationError}
                                         </p>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Loading State */}
-                        {isLoading && <FeedSkeleton count={5} />}
-
-                        {/* Error State */}
-                        {isError && (
-                            <div className="flex flex-col items-center justify-center py-12 px-5 mod-card rounded-2xl">
-                                <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
-                                    <span className="material-symbols-outlined text-3xl text-brand-red">warning</span>
+                            {!isLoading && !isError && location && mergedFeed.length === 0 && timeline.length === 0 && (
+                                <div className="w-full">
+                                    <div className="glass-card flex flex-col items-center justify-center py-12 px-6 text-center w-full border border-glass-border shadow-md">
+                                        <div className="w-full max-w-[280px] h-[140px] rounded-2xl overflow-hidden mb-6 border border-glass-border/30 bg-black/[0.02]">
+                                            <img src="/illustration_services.png" alt="Welcome" className="w-full h-full object-cover" />
+                                        </div>
+                                        <p className="text-base font-bold text-neu-text dark:text-white">
+                                            {t('feed.noPostsTitle')}
+                                        </p>
+                                        <p className="text-sm mt-2 max-w-xs text-neu-text-secondary dark:text-white/60">
+                                            {t('feed.noPostsSubtitle')}
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
+                                            className="mt-6 px-6 py-3 text-xs bg-primary hover:bg-brand-green-dark text-black hover:text-white font-black rounded-xl transition-all shadow-sm cursor-pointer"
+                                        >
+                                            Start a conversation
+                                        </button>
+                                    </div>
                                 </div>
-                                <p className="text-sm text-center mb-2" style={{ color: 'var(--neu-text)' }}>
-                                    {locationError || t('feed.failedToLoad')}
-                                </p>
-                                {error && (
-                                    <p className="text-xs text-center mb-2" style={{ color: 'var(--neu-text-muted)' }}>
-                                        {error instanceof Error ? error.message : 'Unknown error'}
-                                    </p>
-                                )}
-                                <button
-                                    onClick={() => refetchFeed()}
-                                    disabled={isRefetching}
-                                    className="mt-2 px-6 py-2.5 mod-chip rounded-xl text-sm font-bold disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
-                                    style={{ color: 'var(--neu-text)' }}
-                                >
-                                    {isRefetching ? (
-                                        <>
-                                            <div className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-                                            {t('feed.retrying')}
-                                        </>
-                                    ) : (
-                                        t('feed.retry')
-                                    )}
-                                </button>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Empty State */}
-                        {!isLoading && !isError && !location && locationError && (
-                            <div className="flex flex-col items-center justify-center py-12 px-5 mod-card rounded-2xl">
-                                <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
-                                    <span className="material-symbols-outlined text-3xl text-brand-red">location_off</span>
-                                </div>
-                                <p className="text-sm text-center" style={{ color: 'var(--neu-text)' }}>
-                                    {locationError}
-                                </p>
-                            </div>
-                        )}
-
-                        {!isLoading && !isError && location && mergedFeed.length === 0 && timeline.length === 0 && (
-                            <div className="flex flex-col items-center justify-center py-14 px-6 mod-card rounded-3xl text-center">
-                                <div
-                                    className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5 animate-scale-in"
-                                    style={{
-                                        background: 'linear-gradient(140deg, rgba(0,212,49,0.14), rgba(0,111,53,0.08))',
-                                        border: '1px solid rgba(0,111,53,0.12)',
-                                    }}
-                                >
-                                    <span className="material-symbols-outlined text-4xl text-brand-green-dark" style={{ fontVariationSettings: '"FILL" 1' }}>waving_hand</span>
-                                </div>
-                                <p className="text-base font-bold" style={{ color: 'var(--neu-text)' }}>
-                                    {t('feed.noPostsTitle')}
-                                </p>
-                                <p className="text-sm mt-2 max-w-xs" style={{ color: 'var(--neu-text-muted)' }}>
-                                    {t('feed.noPostsSubtitle')}
-                                </p>
-                                <button
-                                    type="button"
-                                    onClick={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
-                                    className="btn-glass-primary mt-6 px-6 py-3 text-xs"
-                                >
-                                    Start a conversation
-                                </button>
-                            </div>
-                        )}
-                            </div>
-
-                            {/* Posts stream */}
-                            {timeline.length > 0 && (
-                            <div className="feed-posts-stream mt-3 flex flex-col gap-5 pb-4 md:items-center">
+                        {/* Posts stream */}
+                        {timeline.length > 0 && (
+                        <div className="feed-posts-stream flex flex-col gap-0 pb-0">
                             {timeline.map((item) => {
                                 if (
                                     item._type === 'discovery_marketplace' ||
                                     item._type === 'discovery_event' ||
-                                    item._type === 'discovery_job'
+                                    item._type === 'discovery_job' ||
+                                    item._type === 'discovery_help' ||
+                                    item._type === 'discovery_services' ||
+                                    item._type === 'discovery_news' ||
+                                    item._type === 'discovery_neighbors'
                                 ) {
                                     return (
                                         <div
                                             key={item.key}
-                                            className={
-                                                item._type === 'discovery_marketplace'
-                                                    ? 'w-full max-w-[min(640px,calc(100vw-1rem))] md:mx-auto md:max-w-[580px] md:snap-center'
-                                                    : 'w-full md:max-w-[480px] md:snap-center'
-                                            }
+                                            className="w-full"
                                         >
                                             <FeedDiscoveryBlock
                                                 item={item}
@@ -565,29 +641,19 @@ function XFeedInner() {
                                     );
                                 }
                                 const post = item.data;
-                                if (post.contentType === 'fyi') {
-                                    return (
-                                        <div key={post.id} className="w-full md:max-w-[480px] md:snap-center" data-comment-anchor={`post-${post.id}`}>
-                                            <FYICard
-                                                post={post}
-                                                currentUserId={currentUserId || undefined}
-                                                onComment={(id) => {
-                                                    const el = document.querySelector(`[data-comment-anchor="post-${id}"]`) as HTMLElement | null;
-                                                    openCommentsFromElement({ kind: 'post', id }, el);
-                                                }}
-                                            />
-                                        </div>
-                                    );
-                                }
                                 if (post.contentType === 'help_request') {
                                     return (
-                                        <div key={post.id} className="w-full md:max-w-[480px] md:snap-center" data-comment-anchor={`post-${post.id}`}>
+                                        <div key={post.id} className="w-full md:snap-center" data-comment-anchor={`post-${post.id}`}>
                                             <HelpRequestCard
                                                 post={post}
                                                 onComment={(id) => {
                                                     const el = document.querySelector(`[data-comment-anchor="post-${id}"]`) as HTMLElement | null;
                                                     openCommentsFromElement({ kind: 'post', id }, el);
                                                 }}
+                                                onEdit={handleEditPost}
+                                                onDelete={(id) => setDeletingPostId(id)}
+                                                onReport={(id) => setReportingPostId(id)}
+                                                onPin={(id) => setPinningPostId(id)}
                                             />
                                         </div>
                                     );
@@ -610,6 +676,7 @@ function XFeedInner() {
                                             onReport={(id) => setReportingPostId(id)}
                                             onPin={(id) => setPinningPostId(id)}
                                             onEmergencyAction={(action) => handleEmergencyAction(post, action)}
+                                            onReposted={() => queryClient.invalidateQueries({ queryKey: ['locationFeed'] })}
                                             onCardClick={() => openPostDetails(post.id)}
                                         />
                                     </div>
@@ -630,6 +697,8 @@ function XFeedInner() {
                                 )}
                             </div>
                         )}
+                        {/* Mobile bottom nav spacing clearance */}
+                        <div className="h-4 shrink-0" />
                         </div>
                     </div>
                 </main>
@@ -641,7 +710,7 @@ function XFeedInner() {
             {/* Mobile Bottom Navigation */}
             <div className="md:hidden">
                 <Suspense fallback={<div className="h-16" />}>
-                    <BottomNav hidden={navHidden} />
+                    <BottomNav />
                 </Suspense>
             </div>
 

@@ -7,8 +7,15 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
+import { resolveDynamicParam } from '@/lib/staticExportParams';
+import {
+  extractVerificationIdentityInput,
+  getVerificationProgress,
+  getVerificationTierMeta,
+} from '@/lib/verificationIdentity';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { socialService } from '@/services/social.service';
+import { gamificationService } from '@/services/gamification.service';
 import { useAuth } from '@/hooks/useAuth';
 import { useFollow, useFollowCounts, useFollowers, useMyMilestoneStatus, type MilestoneInfo } from '@/hooks/useFollow';
 import type { MilestonePayload } from '@/hooks/useFollow';
@@ -56,6 +63,7 @@ import { getNextTrustTier, normalizeTrustScore } from '@/lib/trust-economy';
 import { getPrivilegesForTier } from '@/lib/trust-privileges';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 
 type ProfileTab = 'overview' | 'posts' | 'trust' | 'listings';
 
@@ -74,7 +82,9 @@ function parseProfileTab(value: string | null): ProfileTab {
 export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
-  const username = params.username as string;
+  // In the Capacitor static export the generated shell's useParams() returns the
+  // "__id" placeholder, so resolve the real username from the URL when native.
+  const username = resolveDynamicParam(params.username as string, 0);
   const { user: currentUser, uploadProfilePicture } = useAuth();
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
@@ -140,9 +150,10 @@ export default function ProfilePage() {
   };
 
   const handleSetLocation = async () => {
-    if (!navigator.geolocation) return;
+    const geo = getGeolocation();
+    if (!geo) return;
     setIsSettingLocation(true);
-    navigator.geolocation.getCurrentPosition(
+    geo.getCurrentPosition(
       async (position) => {
         try {
           await apiClient.put('/auth/location/update', {
@@ -199,6 +210,16 @@ export default function ProfilePage() {
   });
 
   const profile = profileData?.data;
+  const profileUserId = (profile as { id?: string } | undefined)?.id;
+
+  const { data: verificationApiData } = useQuery({
+    queryKey: ['userVerification', profileUserId],
+    queryFn: () => gamificationService.getUserVerification(profileUserId!),
+    enabled: !!profileUserId && apiClient.isAuthenticated(),
+    staleTime: 60_000,
+  });
+
+  const verificationMetrics = verificationApiData?.data?.metrics;
   const cachedProfileUser = authService.getCachedUser();
   const isOwnProfile =
     currentUser?.username?.toLowerCase() === username.toLowerCase() ||
@@ -540,9 +561,48 @@ export default function ProfilePage() {
   const joinedLabel = profile.createdAt
     ? new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
     : 'Recently';
+  const profileVerificationInput = extractVerificationIdentityInput({
+    ...(profile as unknown as Record<string, unknown>),
+    trustScore: profile.trustScore ?? profile.gamification?.trustScore,
+    huudCoins,
+    streakDays:
+      verificationMetrics?.streakDays ??
+      (profile as { streakDays?: number }).streakDays ??
+      profile.gamification?.streak,
+    vouchCount:
+      verificationMetrics?.vouchCount ??
+      vouchMetrics?.received ??
+      vouchStatus?.vouchCount ??
+      (profile as { vouchCount?: number }).vouchCount,
+    walletSpendCount:
+      verificationMetrics?.walletSpendCount ??
+      (profile as { walletSpendCount?: number }).walletSpendCount,
+    earnedHuudCoins90d:
+      verificationMetrics?.earnedHuudCoins90d ??
+      (profile as { earnedHuudCoins90d?: number }).earnedHuudCoins90d,
+    leaderboardPercentile:
+      verificationMetrics?.leaderboardPercentile ??
+      (profile as { leaderboardPercentile?: number }).leaderboardPercentile,
+  });
+  const verificationProgress =
+    verificationApiData?.data?.progress ??
+    (profile as { verificationProgress?: ReturnType<typeof getVerificationProgress> })
+      .verificationProgress ??
+    getVerificationProgress(profileVerificationInput);
+  const verificationTierMeta = getVerificationTierMeta(verificationProgress.tier);
+  const profileCommunityVerified = ['gold', 'diamond', 'platinum'].includes(
+    verificationProgress.tier,
+  );
   const profileFacts = [
     { label: 'Joined', value: joinedLabel, icon: 'calendar_month' },
-    { label: 'Identity', value: profile.identityVerified ? 'Verified' : 'Pending', icon: profile.identityVerified ? 'verified' : 'shield' },
+    {
+      label: 'Verification',
+      value:
+        verificationProgress.tier === 'none'
+          ? 'Not started'
+          : `${verificationTierMeta.emoji} ${verificationTierMeta.label}`,
+      icon: profileCommunityVerified ? 'verified' : 'shield',
+    },
     { label: 'Role', value: profile.role?.replace('_', ' ') || 'user', icon: 'badge' },
   ];
 
@@ -624,7 +684,13 @@ export default function ProfilePage() {
             onMapLocationChange={isOwnProfile ? handleMapLocationChange : undefined}
             settingLocation={isSettingLocation}
             savingMapLocation={isSavingDraggedLocation}
-            identityVerified={profile.identityVerified}
+            identityVerified={profileCommunityVerified}
+            verificationInProgress={['bronze', 'silver'].includes(verificationProgress.tier)}
+            verificationTierLabel={
+              verificationProgress.tier !== 'none'
+                ? `${verificationTierMeta.emoji} ${verificationTierMeta.label}`
+                : undefined
+            }
             vouchReceived={vouchMetrics?.received ?? vouchStatus?.vouchCount ?? 0}
             vouchGiven={isOwnProfile ? (vouchMetrics?.given ?? 0) : 0}
           />
@@ -1012,12 +1078,57 @@ export default function ProfilePage() {
             </div>
 
             <div className="mod-card rounded-2xl p-4">
-              <ProfileBrowseEyebrow>Verification</ProfileBrowseEyebrow>
+              <ProfileBrowseEyebrow>Verification Journey</ProfileBrowseEyebrow>
+              <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
+                {verificationProgress.tier === 'none'
+                  ? 'Start earning your neighbour verification tiers'
+                  : `${verificationTierMeta.emoji} ${verificationTierMeta.label} · ${verificationTierMeta.description}`}
+              </p>
+              {verificationProgress.nextTier ? (
+                <p className="mt-1 text-xs text-[var(--neu-text-muted)]">
+                  Next: {getVerificationTierMeta(verificationProgress.nextTier).label} ·{' '}
+                  {verificationProgress.percentToNext}% overall progress
+                </p>
+              ) : null}
+              <div className="mt-3 space-y-2">
+                {verificationProgress.axes.map((axis) => (
+                  <div key={axis.id} className="mod-inset flex items-center gap-3 rounded-xl px-3 py-2">
+                    <span className="material-symbols-outlined text-[1rem] text-primary">
+                      {axis.done ? 'check_circle' : 'pending'}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--neu-text-muted)]">
+                        {axis.label}
+                      </p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
+                        {axis.detail}
+                      </p>
+                    </div>
+                    <span className="text-xs font-bold tabular-nums text-primary">{axis.percent}%</span>
+                  </div>
+                ))}
+              </div>
+              {verificationProgress.blockers.length > 0 ? (
+                <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 px-3 py-2">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-primary">Next steps</p>
+                  <ul className="mt-1 space-y-1 text-xs text-[var(--neu-text-muted)]">
+                    {verificationProgress.blockers.slice(0, 4).map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="mod-card rounded-2xl p-4">
+              <ProfileBrowseEyebrow>Verification checklist</ProfileBrowseEyebrow>
               <div className="mt-3 space-y-2">
                 {[
-                  { label: 'Location anchored', done: !!profile.location?.latitude },
-                  { label: 'Identity confirmed', done: !!profile.identityVerified },
-                  { label: 'Community ready', done: !!profile.assignedCommunityId || !!locationLabel },
+                  { label: 'Email verified', done: Boolean((profile as { emailVerified?: boolean }).emailVerified || profile.verificationStatus === 'verified') },
+                  { label: 'Profile ready (photo + bio)', done: Boolean(profile.firstName && profile.lastName && (profile.avatarUrl || profile.profilePicture) && (profile.bio?.trim().length ?? 0) >= 10) },
+                  { label: 'Community joined', done: !!profile.assignedCommunityId },
+                  { label: 'Location pinned', done: !!profile.location?.latitude },
+                  { label: 'Gold trust earned', done: profileCommunityVerified },
                 ].map((item) => (
                   <div key={item.label} className="mod-inset flex items-center gap-3 rounded-xl px-3 py-2">
                     <span className="material-symbols-outlined text-[1rem] text-primary">{item.done ? 'check_circle' : 'pending'}</span>

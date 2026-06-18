@@ -1,10 +1,10 @@
 /**
- * Wipe bloated Turbopack cache and start dev (fixes 10+ min /feed compiles on Windows).
+ * Wipe bloated Next.js and Turbopack cache directories, including node_modules/.cache.
+ * This completely clears out any corrupted compiler files on Windows.
  *
  * Usage: pnpm run dev:clean
  */
 import { rmSync, existsSync, readdirSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -14,6 +14,8 @@ const projectRoot = path.resolve(root, "..");
 const entries = existsSync(projectRoot)
   ? readdirSync(projectRoot, { withFileTypes: true })
   : [];
+
+// Find all .next and .next-* cache folders
 const nextDirs = entries
   .filter(
     (e) =>
@@ -21,19 +23,23 @@ const nextDirs = entries
   )
   .map((e) => path.join(projectRoot, e.name));
 
-if (nextDirs.length > 0) {
-  console.log("Removing Next.js cache…");
-  for (const dir of nextDirs) rmSync(dir, { recursive: true, force: true });
-  console.log(`✓ Cleared ${nextDirs.length} folder(s)\n`);
-} else {
-  console.log("No .next folders — starting fresh.\n");
+// Include node_modules/.cache if it exists
+const cacheDir = path.join(projectRoot, "node_modules", ".cache");
+if (existsSync(cacheDir)) {
+  nextDirs.push(cacheDir);
 }
 
-console.log("Starting dev…\n");
-const result = spawnSync("pnpm", ["run", "dev"], {
-  cwd: projectRoot,
-  stdio: "inherit",
-  shell: true,
-});
-
-process.exit(result.status ?? 1);
+if (nextDirs.length > 0) {
+  console.log("🧹 Removing Next.js build caches and node_modules/.cache...");
+  for (const dir of nextDirs) {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+      console.log(`✓ Removed: ${path.basename(dir)}`);
+    } catch (err) {
+      console.log(`⚠️ Could not remove ${path.basename(dir)}: ${err.message}`);
+    }
+  }
+  console.log(`\n✓ Successfully cleared all cache folders.`);
+} else {
+  console.log("No cache folders found — already clean.\n");
+}

@@ -7,6 +7,8 @@ import { AppViewport } from "@/components/AppViewport";
 import DailyCheckInModal from "@/components/gamification/DailyCheckInModalLoader";
 import TextSizeApplier from "@/components/TextSizeApplier";
 import { ThemeSync } from "@/components/theme/ThemeSync";
+import CapacitorInit from "@/components/capacitor/CapacitorInit";
+import SpaRouteRescue from "@/components/capacitor/SpaRouteRescue";
 import { SYSTEM_THEME_BOOT_SCRIPT } from "@/lib/systemTheme";
 import { BRAND_NAME } from "@/lib/brand";
 import AutoTopNav from "@/components/navigation/AutoTopNav";
@@ -99,6 +101,8 @@ export default function RootLayout({
       >
         <AppViewport />
         <ThemeSync />
+        <CapacitorInit />
+        <SpaRouteRescue />
         <Providers>
           <a href="#main-content" className="skip-to-content">
             Skip to main content
