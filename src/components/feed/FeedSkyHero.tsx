@@ -226,7 +226,7 @@ export function FeedSkyHero() {
   const activeType = searchParams.get('type') || '';
 
   const categoryRow = (
-    <div className="category-shortcuts-row w-full px-4 flex gap-2 overflow-x-auto pb-2 pt-1 scrollbar-none items-start">
+    <div className="category-shortcuts-row w-full px-4 flex gap-1.5 overflow-x-auto pb-2 pt-1 scrollbar-none items-start">
       {shortcuts.map((s) => {
         const isActive = activeType === s.type;
         return (
