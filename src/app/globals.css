@@ -7469,12 +7469,12 @@ button:focus-visible:not([class*="focus-visible"]) {
   margin-top: 0.5rem;
   border-radius: 1rem;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: none;
   background: rgba(0, 0, 0, 0.03);
 }
 
 .dark .post-card-media-slider {
-  border-color: rgba(255, 255, 255, 0.08);
+  border: none;
 }
 
 .post-card-media-slider__track {
@@ -7734,13 +7734,14 @@ button:focus-visible:not([class*="focus-visible"]) {
   margin-top: 0.5rem;
   padding: 0.75rem;
   border-radius: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: transparent;
+  border: none;
+  background: rgba(0, 0, 0, 0.02);
   text-align: left;
 }
 
 .dark .quoted-post-embed {
-  border-color: rgba(255, 255, 255, 0.12);
+  border: none;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .quoted-post-embed--interactive {
@@ -7849,3 +7850,5 @@ button:focus-visible:not([class*="focus-visible"]) {
     scroll-behavior: auto;
   }
 }
+
+

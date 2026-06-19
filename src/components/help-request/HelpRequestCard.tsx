@@ -249,7 +249,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
 
     // ── Structured components ──
     const fundingBlock = targetAmount != null && targetAmount > 0 ? (
-        <div className="p-3.5 rounded-2xl flex flex-col gap-2.5 bg-primary/[0.04] border border-primary/10 mt-2">
+        <div className="p-3.5 rounded-2xl flex flex-col gap-2.5 bg-primary/[0.04] mt-2">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[17px] text-primary" style={{ fontVariationSettings: '"FILL" 1' }}>savings</span>
@@ -298,8 +298,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                         {updateReceivedMutation.isPending ? '…' : 'Save'}
                     </button>
                     <button type="button" onClick={(e) => { e.stopPropagation(); setShowUpdateReceived(false); }}
-                        className="px-2.5 py-1.5 rounded-xl text-[12px] font-bold text-neu-text-secondary hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                        style={{ border: '1px solid var(--glass-border)' }}>
+                        className="px-2.5 py-1.5 rounded-xl text-[12px] font-bold text-neu-text-secondary hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer">
                         ✕
                     </button>
                 </div>
@@ -308,7 +307,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
     ) : null;
 
     const accountBlock = accountDetails && (accountDetails.bankName || accountDetails.accountName || accountDetails.accountNumber) ? (
-        <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/5 border border-glass-border/40 flex flex-col gap-2 mt-2">
+        <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/5 flex flex-col gap-2 mt-2">
             <div className="flex items-center gap-1.5 mb-1">
                 <span className="material-symbols-outlined text-[16px] text-neu-text-secondary dark:text-white/40">account_balance</span>
                 <span className="text-[10px] font-black uppercase text-neu-text-secondary dark:text-white/40 tracking-wider">How to Help</span>
@@ -338,7 +337,6 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                                 style={{
                                     background: copied ? 'rgba(0,212,49,0.15)' : 'rgba(0,0,0,0.04)',
                                     color: copied ? 'var(--primary)' : 'var(--neu-text-secondary)',
-                                    border: '1px solid var(--glass-border)',
                                 }}
                             >
                                 <span className="material-symbols-outlined text-[12px]">{copied ? 'check' : 'content_copy'}</span>

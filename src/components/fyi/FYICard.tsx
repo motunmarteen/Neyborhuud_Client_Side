@@ -321,7 +321,7 @@ export function FYICard({
 
             {/* Contact info Block */}
             {contactInfo && (
-                <div className="flex items-center gap-2 p-3 rounded-2xl bg-status-warning/5 border border-status-warning/10 mt-2">
+                <div className="flex items-center gap-2 p-3 rounded-2xl bg-status-warning/5 mt-2">
                     <span className="material-symbols-outlined text-[16px] text-status-warning">contact_phone</span>
                     <span className="text-[12px] text-neu-text-secondary dark:text-white/70 font-semibold">{contactInfo}</span>
                 </div>

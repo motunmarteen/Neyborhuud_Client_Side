@@ -213,50 +213,62 @@ export function FeedSkyHero() {
   };
 
   const shortcuts = [
-    { type: 'marketplace', label: 'Marketplace', imgSrc: '/illustration_marketplace.png', activeBorderCls: 'border-brand-blue' },
-    { type: 'services', label: 'Services', imgSrc: '/illustration_services.png', activeBorderCls: 'border-primary' },
-    { type: 'job', label: 'Jobs', imgSrc: '/illustration_jobs.png', activeBorderCls: 'border-brand-blue' },
-    { type: 'event', label: 'Events', imgSrc: '/illustration_events.png', activeBorderCls: 'border-status-warning' },
-    { type: 'fyi', label: 'FYI', imgSrc: '/illustration_fyi.png', activeBorderCls: 'border-primary' },
-    { type: 'help_request', label: 'Help', imgSrc: '/illustration_help.png', activeBorderCls: 'border-brand-blue' },
-    { type: 'community_alert', label: 'Community Alert', imgSrc: '/illustration_community_alert.png', activeBorderCls: 'border-brand-red' },
-    { type: 'incident_report', label: 'Incident Report', imgSrc: '/illustration_safety.png', activeBorderCls: 'border-brand-red' },
+    { type: 'marketplace', label: 'Marketplace', imgSrc: '/illustration_marketplace.png', gradient: 'linear-gradient(135deg, #1a4a28 0%, #0d8a3e 50%, #00c431 100%)' },
+    { type: 'services', label: 'Services', imgSrc: '/illustration_services.png', gradient: 'linear-gradient(135deg, #1a3a2a 0%, #2a6a4a 50%, #00a555 100%)' },
+    { type: 'job', label: 'Jobs', imgSrc: '/illustration_jobs.png', gradient: 'linear-gradient(135deg, #2a1a4a 0%, #6a3a9a 50%, #9a5acf 100%)' },
+    { type: 'event', label: 'Events', imgSrc: '/illustration_events.png', gradient: 'linear-gradient(135deg, #1a2a4a 0%, #2a4a8a 50%, #1a56ff 100%)' },
+    { type: 'fyi', label: 'FYI', imgSrc: '/illustration_fyi.png', gradient: 'linear-gradient(135deg, #1a2a3a 0%, #2a4a6a 50%, #3a6a9a 100%)' },
+    { type: 'help_request', label: 'Help', imgSrc: '/illustration_help.png', gradient: 'linear-gradient(135deg, #4a1a1a 0%, #8a2a2a 50%, #cc3333 100%)' },
+    { type: 'community_alert', label: 'Alerts', imgSrc: '/illustration_community_alert.png', gradient: 'linear-gradient(135deg, #5a2010 0%, #9a3f20 50%, #d45a00 100%)' },
+    { type: 'incident_report', label: 'Safety', imgSrc: '/illustration_safety.png', gradient: 'linear-gradient(135deg, #300a0a 0%, #601a1a 50%, #a82020 100%)' },
   ];
 
   const activeType = searchParams.get('type') || '';
 
   const categoryRow = (
-    <div className="category-shortcuts-row w-full px-4 flex gap-3 overflow-x-auto pb-2 scrollbar-none items-start">
+    <div className="category-shortcuts-row w-full px-4 flex gap-2 overflow-x-auto pb-2 pt-1 scrollbar-none items-start">
       {shortcuts.map((s) => {
         const isActive = activeType === s.type;
         return (
           <button
             key={s.type}
             onClick={() => handleShortcutClick(s.type)}
-            className={`flex flex-col items-center justify-start gap-1.5 p-1 transition-all flex-shrink-0 relative w-[96px] ${
+            className={`flex-shrink-0 relative w-[100px] aspect-[4/5] rounded-[18px] overflow-hidden group/card shadow-sm cursor-pointer select-none transition-all duration-300 block ${
               isActive 
-                ? `scale-105 opacity-100` 
-                : 'opacity-85 hover:opacity-100 hover:scale-105'
+                ? 'ring-2 ring-primary ring-offset-2 ring-offset-white dark:ring-offset-[#121b14] scale-102 opacity-100 shadow-md' 
+                : 'opacity-85 hover:opacity-100 hover:scale-[1.02] active:scale-[0.98]'
             }`}
+            style={{ background: s.gradient }}
             type="button"
           >
-            {/* Image container */}
-            <div className="w-20 h-20 flex items-center justify-center">
+            {/* Full-bleed category photo */}
+            <div className="absolute inset-0 w-full h-full">
               <Image
                 src={s.imgSrc}
                 alt={s.label}
-                width={80}
-                height={80}
+                fill
+                sizes="100px"
                 loading="lazy"
-                className={`w-full h-full object-contain drop-shadow-sm transition-transform duration-300 ${isActive ? 'scale-110' : ''}`}
+                className={`w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105 ${
+                  isActive ? 'scale-105' : ''
+                }`}
               />
             </div>
-            {/* Label */}
-            <span className={`text-[10px] font-black tracking-wide text-center leading-[1.15] w-full whitespace-normal break-words ${
-              isActive ? 'text-brand-green-dark dark:text-primary' : 'text-neutral-700 dark:text-neutral-300'
-            }`}>
-              {s.label}
-            </span>
+
+            {/* Gradient overlay for text readability */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+
+            {/* Bottom overlaid content */}
+            <div className="absolute inset-x-0 bottom-0 z-10 p-2 space-y-0.5 flex flex-col justify-end min-h-[50%]">
+              <h4 className="text-[10px] font-black text-white leading-tight uppercase tracking-wider text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
+                {s.label}
+              </h4>
+              {isActive && (
+                <span className="mx-auto px-2 py-0.5 bg-primary text-black text-[8px] font-black rounded-md leading-none uppercase select-none">
+                  Active
+                </span>
+              )}
+            </div>
           </button>
         );
       })}
@@ -380,7 +392,7 @@ export function FeedSkyHero() {
       </div>
 
       {/* Category Shortcuts wrapper seamlessly blending into the feed */}
-      <div className="category-shortcuts-wrapper pt-4 pb-0 relative z-10">
+      <div className="category-shortcuts-wrapper pt-1 pb-0 relative z-10">
         {categoryRow}
       </div>
     </section>

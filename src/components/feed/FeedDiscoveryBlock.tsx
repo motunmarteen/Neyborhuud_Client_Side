@@ -228,17 +228,14 @@ function CategoryCoverCard({
       style={{ width: 160 }}
     >
       <div className="relative w-full aspect-[4/5] overflow-hidden" style={{ background: gradient || "linear-gradient(135deg, #0e4a1f 0%, #1a8a3e 50%, #00d431 100%)" }}>
-        {/* Illustration image centered */}
-        <div className="absolute inset-0 flex items-center justify-center p-4">
-          <Image
-            src={imageSrc}
-            alt={title}
-            width={120}
-            height={120}
-            loading="lazy"
-            className="w-full h-full object-contain drop-shadow-lg transition-transform duration-500 group-hover/cover:scale-110"
-          />
-        </div>
+        <Image
+          src={imageSrc}
+          alt={title}
+          fill
+          sizes="160px"
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover/cover:scale-105"
+        />
 
         {/* Gradient overlay for text */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
@@ -272,7 +269,7 @@ function NeighborFollowCard({ user, currentUserId }: { user: User; currentUserId
 
   return (
     <div
-      className="horizontal-carousel-item group relative flex flex-col items-center overflow-hidden rounded-2xl shrink-0 p-3 bg-black/[0.02] dark:bg-[#18231c] border border-black/[0.06] dark:border-white/[0.06] transition-transform duration-200 hover:scale-[1.02]"
+      className="horizontal-carousel-item group relative flex flex-col items-center overflow-hidden rounded-2xl shrink-0 p-3 bg-black/[0.02] dark:bg-[#18231c] transition-transform duration-200 hover:scale-[1.02]"
       style={{ width: 140 }}
     >
       <Link href={`/profile/${user.username}`} className="flex flex-col items-center w-full">
@@ -301,7 +298,7 @@ function NeighborFollowCard({ user, currentUserId }: { user: User; currentUserId
           disabled={isPending || !currentUserId}
           className={`mt-3 w-full py-1.5 rounded-full text-[11px] font-black transition-all ${
             isFollowing
-              ? "border border-black/[0.08] dark:border-white/[0.08] text-[var(--neu-text-muted)] dark:text-white/60 hover:bg-brand-red/10 hover:text-brand-red hover:border-brand-red"
+              ? "bg-black/[0.04] text-[var(--neu-text-muted)] dark:bg-white/10 dark:text-white/60 hover:bg-brand-red/10 hover:text-brand-red"
               : "bg-primary text-black hover:bg-brand-green-dark"
           } disabled:opacity-50`}
         >
@@ -360,7 +357,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
                 fallbackGradient="linear-gradient(135deg, #0e2a18 0%, #1a3a22 100%)"
                 topBadge={
                   p.condition ? (
-                    <span className="rounded-full bg-black/50 px-2 py-0.5 text-[8px] font-black uppercase text-white/90 backdrop-blur-sm border border-white/10">
+                    <span className="rounded-full bg-black/50 px-2 py-0.5 text-[8px] font-black uppercase text-white/90 backdrop-blur-sm">
                       {formatConditionLabel(p.condition)}
                     </span>
                   ) : undefined

@@ -197,7 +197,7 @@ export function XPostCard({
 
     // ── Shared structured content blocks ────────────────────────────────────
     const eventBlock = post.contentType === 'event' && post.eventDate ? (
-        <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-brand-blue/5 border border-brand-blue/10 mt-2">
+        <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-brand-blue/5 mt-2">
             <span className="inline-flex items-center gap-1 text-[12px] font-bold text-brand-blue">
                 <span className="material-symbols-outlined text-[14px]" aria-hidden>calendar_today</span>
                 {new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(post.eventDate))}
@@ -224,7 +224,7 @@ export function XPostCard({
     ) : null;
 
     const marketBlock = post.contentType === 'marketplace' ? (
-        <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-primary/5 border border-primary/10 mt-2">
+        <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-primary/5 mt-2">
             {post.price != null && <span className="text-sm font-black text-brand-green-dark dark:text-primary">₦{Number(post.price).toLocaleString()}</span>}
             {post.isNegotiable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-brand-green-dark font-bold">Negotiable</span>}
             {post.itemCondition && (

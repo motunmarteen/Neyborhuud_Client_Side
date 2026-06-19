@@ -23,7 +23,7 @@ export function PostCardFollowButton({
       disabled={isPending}
       className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
         isFollowing
-          ? 'border border-neu-text-secondary/30 bg-black/[0.04] text-neu-text dark:border-white/20 dark:bg-white/10 dark:text-white/80 hover:border-brand-red/50 hover:bg-brand-red/10 hover:text-brand-red'
+          ? 'bg-black/[0.04] text-neu-text dark:bg-white/10 dark:text-white/80 hover:bg-brand-red/10 hover:text-brand-red'
           : 'bg-primary text-black hover:bg-primary/90'
       }`}
       aria-label={isFollowing ? 'Unfollow' : 'Follow'}
