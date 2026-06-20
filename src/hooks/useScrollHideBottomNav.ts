@@ -151,3 +151,79 @@ export function useScrollHideBottomNav(enabled = true, resetKey?: string) {
 
   return hidden;
 }
+
+/**
+ * Detect if the page is scrolled past a threshold (e.g. to toggle TopNav background).
+ */
+export function useIsScrolled(threshold = 20) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const attached = new Map<HTMLElement, () => void>();
+    let windowAttached = false;
+
+    const checkScroll = () => {
+      let isScrolled = false;
+      const roots = collectAppScrollRoots();
+      
+      for (const el of roots) {
+        if (el.scrollTop > threshold) isScrolled = true;
+      }
+      if (roots.length === 0 && window.scrollY > threshold) {
+        isScrolled = true;
+      }
+      setScrolled(isScrolled);
+    };
+
+    const onScroll = () => checkScroll();
+
+    const syncRoots = () => {
+      for (const el of collectAppScrollRoots()) {
+        if (attached.has(el)) continue;
+        el.addEventListener('scroll', onScroll, { passive: true });
+        attached.set(el, () => el.removeEventListener('scroll', onScroll));
+      }
+      const hasRoots = collectAppScrollRoots().length > 0;
+      if (!hasRoots && !windowAttached) {
+        window.addEventListener('scroll', onScroll, { passive: true });
+        windowAttached = true;
+      } else if (hasRoots && windowAttached) {
+        window.removeEventListener('scroll', onScroll);
+        windowAttached = false;
+      }
+      checkScroll();
+    };
+
+    syncRoots();
+
+    const ro = new ResizeObserver(() => syncRoots());
+    collectAppScrollRoots().forEach((el) => ro.observe(el));
+    const shell = document.querySelector('.app-shell');
+    if (shell instanceof HTMLElement) ro.observe(shell);
+
+    const mo = new MutationObserver(() => requestAnimationFrame(syncRoots));
+    if (shell) mo.observe(shell, { childList: true, subtree: true });
+
+    return () => {
+      attached.forEach((off) => off());
+      attached.clear();
+      if (windowAttached) window.removeEventListener('scroll', onScroll);
+      ro.disconnect();
+      mo.disconnect();
+    };
+  }, [threshold]);
+
+  return scrolled;
+}
+
+/**
+ * Smoothly scrolls the main app containers back to the top.
+ */
+export function scrollToTop() {
+  const roots = collectAppScrollRoots();
+  if (roots.length > 0) {
+    roots.forEach(el => el.scrollTo({ top: 0, behavior: 'smooth' }));
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}

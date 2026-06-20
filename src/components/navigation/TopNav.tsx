@@ -8,7 +8,7 @@ import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { AppNavIcon } from '@/components/navigation/AppNavIcon';
 import { TopNavChatAction, CHAT_INBOX_HREF } from '@/components/navigation/TopNavChatAction';
 import { useUnreadCount } from '@/hooks/useNotifications';
-import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
+import { useScrollHideBottomNav, useIsScrolled, scrollToTop } from '@/hooks/useScrollHideBottomNav';
 
 type TopNavOrigin = 'page' | 'global';
 
@@ -76,9 +76,10 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
   const isOnFeed = pathname === '/feed' || pathname === '/';
   const title = useMemo(() => (pathname ? getRouteTitle(pathname) : 'NeyborHuud'), [pathname]);
   const { data: unreadCount = 0 } = useUnreadCount();
-  const scrollHidden = useScrollHideBottomNav(true, pathname);
+  const scrollHidden = useScrollHideBottomNav();
+  const isScrolled = useIsScrolled(60);
 
-  const skyOverlay = isOnFeed;
+  const skyOverlay = isOnFeed && !isScrolled;
 
   return (
     <>
@@ -89,7 +90,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
     <header
       data-topnav="1"
       data-topnav-origin={origin}
-      className={`app-topnav ${isOnFeed ? 'app-topnav--sky' : 'app-topnav--solid'}`}
+      className={`app-topnav ${skyOverlay ? 'app-topnav--sky' : 'app-topnav--solid'}`}
     >
       <button
         type="button"
@@ -101,8 +102,17 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
       </button>
 
       {isOnFeed ? (
-        <Link href="/feed" className="flex shrink-0 items-center min-w-0 cursor-pointer">
-          <NeyborHuudLogo layout="wordmark" size="chrome" tone="light" />
+        <Link 
+          href="/feed" 
+          className="flex shrink-0 items-center min-w-0 cursor-pointer"
+          onClick={(e) => {
+            if (pathname === '/feed' || pathname === '/') {
+              e.preventDefault();
+              scrollToTop();
+            }
+          }}
+        >
+          <NeyborHuudLogo layout="wordmark" size="chrome" tone={skyOverlay ? 'light' : 'primary'} />
         </Link>
       ) : (
         <div className="flex shrink-0 items-center min-w-0">

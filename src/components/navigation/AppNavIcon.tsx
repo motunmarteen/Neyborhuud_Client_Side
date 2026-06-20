@@ -64,6 +64,27 @@ function MenuIcon() {
   );
 }
 
+export function SentinelIcon({ active, className, ...props }: React.SVGProps<SVGSVGElement> & { active?: boolean }) {
+  return (
+    <svg className={className || "app-nav-icon__glyph"} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      {/* Filled Quadrants: Top-Right and Bottom-Left */}
+      <path 
+        d="M12 2L20 5V12H12Z M12 12H4C4 18 12 22 12 22Z" 
+        fill="#00d431" 
+        fillOpacity={active ? 1 : 0.8}
+      />
+      {/* Shield Outline and Cross Divider */}
+      <path 
+        d="M20 12V5l-8-3-8 3v7c0 6 8 10 8 10s8-4 8-10z M12 2v20 M4 12h16" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+      />
+    </svg>
+  );
+}
+
 function NavIconShell({
   name,
   className,
@@ -120,6 +141,8 @@ export function AppNavIcon({ name, className, active = false }: AppNavIconProps)
     <NavIconShell name={name} className={className}>
       {name === 'menu' ? (
         <MenuIcon />
+      ) : name === 'shield' ? (
+        <SentinelIcon active={filled} />
       ) : (
         (() => {
           const Icon = lucideIcons[name];

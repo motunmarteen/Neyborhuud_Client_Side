@@ -93,10 +93,10 @@ export function DiscoveryChrome({
   children: ReactNode;
 }) {
   return (
-    <div className="bg-white dark:bg-[#121b14] border-b border-black/[0.06] dark:border-white/[0.06] overflow-hidden w-full max-w-none mx-auto">
+    <div className="bg-white dark:bg-[#121b14] border-b-[8px] border-[#f2f4f7] dark:border-[#0a0c0a] overflow-hidden w-full max-w-none mx-auto">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-none bg-primary/10 text-primary border border-primary/20">
             <span className="material-symbols-outlined text-[16px] font-black">{icon}</span>
           </span>
           <div className="min-w-0">
@@ -197,7 +197,8 @@ export function StakeCard({
   subtitle,
   statDot,
   statText,
-  aspectClass = "aspect-[4/5]",
+  aspectClass = "aspect-square",
+  width = 200,
 }: {
   href: string;
   imageSrc?: string | null;
@@ -210,6 +211,7 @@ export function StakeCard({
   statDot?: string;
   statText?: string;
   aspectClass?: string;
+  width?: number;
 }) {
   const [imgErr, setImgErr] = useState(false);
   const hasImage = imageSrc && !imgErr;
@@ -217,8 +219,8 @@ export function StakeCard({
   return (
     <Link
       href={href}
-      className="horizontal-carousel-item group/stake relative block overflow-hidden rounded-2xl shrink-0 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
-      style={{ width: 160 }}
+      className="horizontal-carousel-item group/stake relative block overflow-hidden rounded-none shrink-0 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+      style={{ width }}
     >
       <div className={`relative w-full ${aspectClass} overflow-hidden`}>
         {hasImage ? (
@@ -284,6 +286,8 @@ export function CategoryCoverCard({
   buttonLabel,
   buttonHref,
   gradient,
+  priority = false,
+  width = 200,
 }: {
   imageSrc: string;
   title: string;
@@ -291,20 +295,23 @@ export function CategoryCoverCard({
   buttonLabel: string;
   buttonHref: string;
   gradient?: string;
+  priority?: boolean;
+  width?: number;
 }) {
   return (
     <Link
       href={buttonHref}
-      className="horizontal-carousel-item group/cover relative block overflow-hidden rounded-2xl shrink-0 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
-      style={{ width: 160 }}
+      className="horizontal-carousel-item group/cover relative block overflow-hidden rounded-none shrink-0 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+      style={{ width: width || 100 }}
     >
-      <div className="relative w-full aspect-[4/5] overflow-hidden" style={{ background: gradient || "linear-gradient(135deg, #0e4a1f 0%, #1a8a3e 50%, #00d431 100%)" }}>
+      <div className="relative w-full aspect-square overflow-hidden" style={{ background: gradient || "linear-gradient(135deg, #0e4a1f 0%, #1a8a3e 50%, #00d431 100%)" }}>
         <Image
           src={imageSrc}
           alt={title}
           fill
           sizes="160px"
-          loading="lazy"
+          priority={priority}
+          loading={priority ? undefined : "lazy"}
           className="w-full h-full object-cover transition-transform duration-500 group-hover/cover:scale-105"
         />
 
@@ -319,7 +326,7 @@ export function CategoryCoverCard({
           <p className="text-[9px] font-bold text-white/60 uppercase tracking-wider leading-tight truncate">
             {subtitle}
           </p>
-          <span className="inline-block mt-1 px-3 py-1 bg-primary hover:bg-brand-green-dark text-black text-[10px] font-black rounded-lg text-center transition-all shadow-sm">
+          <span className="inline-block mt-1 px-3 py-1 bg-primary hover:bg-brand-green-dark text-black text-[10px] font-black rounded-none text-center transition-all shadow-sm">
             {buttonLabel}
           </span>
         </div>
@@ -340,8 +347,8 @@ function NeighborFollowCard({ user, currentUserId }: { user: User; currentUserId
 
   return (
     <div
-      className="horizontal-carousel-item group relative flex flex-col items-center overflow-hidden rounded-2xl shrink-0 p-3 bg-black/[0.02] dark:bg-[#18231c] transition-transform duration-200 hover:scale-[1.02]"
-      style={{ width: 140 }}
+      className="horizontal-carousel-item group relative flex flex-col items-center overflow-hidden rounded-none shrink-0 p-3 bg-black/[0.02] dark:bg-[#18231c] transition-transform duration-200 hover:scale-[1.02]"
+      style={{ width: 200 }}
     >
       <Link href={`/profile/${user.username}`} className="flex flex-col items-center w-full">
         <MapPinAvatar
@@ -367,7 +374,7 @@ function NeighborFollowCard({ user, currentUserId }: { user: User; currentUserId
             }
           }}
           disabled={isPending || !currentUserId}
-          className={`mt-3 w-full py-1.5 rounded-full text-[11px] font-black transition-all ${
+          className={`mt-3 w-full py-1.5 rounded-none text-[11px] font-black transition-all ${
             isFollowing
               ? "bg-black/[0.04] text-[var(--neu-text-muted)] dark:bg-white/10 dark:text-white/60 hover:bg-brand-red/10 hover:text-brand-red"
               : "bg-primary text-black hover:bg-brand-green-dark"
@@ -398,6 +405,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             buttonLabel="Shop Now"
             buttonHref="/marketplace"
             gradient="linear-gradient(135deg, #1a4a28 0%, #0d8a3e 50%, #00c431 100%)"
+            priority={true}
           />
           {products.map((p) => {
             const id = p.id || (p as { _id?: string })._id;
@@ -428,7 +436,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
                 fallbackGradient="linear-gradient(135deg, #0e2a18 0%, #1a3a22 100%)"
                 topBadge={
                   p.condition ? (
-                    <span className="rounded-full bg-black/50 px-2 py-0.5 text-[8px] font-black uppercase text-white/90 backdrop-blur-sm">
+                    <span className="rounded-none bg-black/50 px-2 py-0.5 text-[8px] font-black uppercase text-white/90 backdrop-blur-sm">
                       {formatConditionLabel(p.condition)}
                     </span>
                   ) : undefined
@@ -471,7 +479,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             fallbackIcon="event"
             fallbackGradient="linear-gradient(135deg, #1a2a4a 0%, #2a4a8a 100%)"
             topBadge={
-              <span className="rounded-full bg-brand-blue/80 px-2 py-0.5 text-[8px] font-black uppercase text-white/90 backdrop-blur-sm">
+              <span className="rounded-none bg-brand-blue/80 px-2 py-0.5 text-[8px] font-black uppercase text-white/90 backdrop-blur-sm">
                 {ev.type}
               </span>
             }
@@ -514,9 +522,11 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             fallbackIcon="work"
             fallbackGradient="linear-gradient(135deg, #2a1a4a 0%, #4a2a7a 100%)"
             topBadge={
-              <span className="rounded-full bg-primary/80 px-2 py-0.5 text-[8px] font-black uppercase text-white backdrop-blur-sm">
-                {job.type.replace("-", " ")}
-              </span>
+              job.type ? (
+                <span className="rounded-none bg-primary/80 px-2 py-0.5 text-[8px] font-black uppercase text-white backdrop-blur-sm">
+                  {job.type.replace("-", " ")}
+                </span>
+              ) : undefined
             }
             title={job.title}
             subtitle={salary || employerName || undefined}
@@ -554,7 +564,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               fallbackIcon="volunteer_activism"
               fallbackGradient="linear-gradient(135deg, #3a1a1a 0%, #5a2a2a 100%)"
               topBadge={
-                <span className="rounded-full bg-brand-red/80 px-2 py-0.5 text-[8px] font-black uppercase text-white backdrop-blur-sm">
+                <span className="rounded-none bg-brand-red/80 px-2 py-0.5 text-[8px] font-black uppercase text-white backdrop-blur-sm">
                   Help
                 </span>
               }
@@ -592,7 +602,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               fallbackGradient="linear-gradient(135deg, #1a2a22 0%, #2a4a32 100%)"
               topBadge={
                 srv.category ? (
-                  <span className="rounded-full bg-primary/70 px-2 py-0.5 text-[8px] font-black uppercase text-white backdrop-blur-sm">
+                  <span className="rounded-none bg-primary/70 px-2 py-0.5 text-[8px] font-black uppercase text-white backdrop-blur-sm">
                     {srv.category}
                   </span>
                 ) : undefined
@@ -621,6 +631,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             buttonLabel="Read News"
             buttonHref="/local-news?tab=nigeria"
             gradient="linear-gradient(135deg, #1a2a3a 0%, #2a4a6a 50%, #3a6a9a 100%)"
+            width={200}
           />
           {articles.map(art => (
             <StakeCard
@@ -630,7 +641,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               fallbackIcon="newspaper"
               fallbackGradient="linear-gradient(135deg, #1a2a3a 0%, #2a3a5a 100%)"
               topBadge={
-                <span className="rounded-full bg-brand-blue/70 px-2 py-0.5 text-[8px] font-black uppercase text-white/90 backdrop-blur-sm">
+                <span className="rounded-none bg-brand-blue/70 px-2 py-0.5 text-[8px] font-black uppercase text-white/90 backdrop-blur-sm">
                   {art.region === 'international' ? 'Global' : 'Nigeria'} • {art.sourceName}
                 </span>
               }
@@ -638,6 +649,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               subtitle={art.sourceName}
               statDot="#1A56FF"
               statText={formatTimeAgo(art.pubDate)}
+              width={200}
             />
           ))}
         </AutoScrollCarousel>

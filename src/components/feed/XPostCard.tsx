@@ -204,7 +204,7 @@ export function XPostCard({
     // ── Structured content narrative block ─────────────────────────────────
     const narrative = generatePostNarrative(post);
     const narrativeBlock = narrative ? (
-        <div className={`flex flex-col gap-2 p-3.5 rounded-2xl ${narrative.accentBg} border ${narrative.accentBorder} mt-2`}>
+        <div className={`flex flex-col gap-2 p-3.5 rounded-none ${narrative.accentBg} border ${narrative.accentBorder} mt-2`}>
             <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
                     <span className="material-symbols-outlined text-[14px]">{narrative.icon}</span>
@@ -215,7 +215,7 @@ export function XPostCard({
                         e.stopPropagation();
                         window.location.href = `/chat?user=${authorUsername}`;
                     }}
-                    className="px-2.5 py-1 rounded-lg text-[9.5px] font-black uppercase border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-none text-[9.5px] font-black uppercase border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 active:scale-95 transition-all cursor-pointer flex items-center gap-1"
                 >
                     <span className="material-symbols-outlined text-[11px]">chat</span>
                     DM
@@ -229,8 +229,8 @@ export function XPostCard({
 
     // ── Core Layout ───────────────────────────────────────────────────────────
     const cardStyleClass = isSafetyAlert
-        ? 'border-l-[4px] border-l-brand-red border-t-0 border-r-0 border-b border-black/[0.06] dark:border-white/[0.06] shadow-none'
-        : 'border-0 border-b border-black/[0.06] dark:border-white/[0.06] shadow-none';
+        ? 'border-l-[4px] border-l-brand-red border-t-0 border-r-0 border-b-[8px] border-[#f2f4f7] dark:border-[#0a0c0a] shadow-none'
+        : 'border-0 border-b-[8px] border-[#f2f4f7] dark:border-[#0a0c0a] shadow-none';
 
     const renderTextContent = () => {
         if (!hasText) return null;
@@ -238,7 +238,7 @@ export function XPostCard({
         const visibleText = shouldTruncate ? `${displayText.slice(0, 260)}...` : displayText;
 
         return (
-            <div className="px-1 text-sm font-medium text-neu-text dark:text-white/90 leading-relaxed whitespace-pre-wrap break-words">
+            <div className="px-1 text-[15px] font-normal text-neu-text dark:text-[#E7E9EA] leading-[1.35] tracking-[-0.01em] whitespace-pre-wrap break-words">
                 {visibleText}
                 {shouldTruncate && (
                     <button
@@ -292,7 +292,7 @@ export function XPostCard({
     return (
         <>
         <article
-            className={`bg-white dark:bg-[#121b14] p-5 mx-auto w-full select-none ${cardStyleClass} max-w-none rounded-none flex flex-col gap-4`}
+            className={`bg-white dark:bg-[#121b14] px-3 py-4 mx-auto w-full select-none ${cardStyleClass} max-w-none rounded-none flex flex-col gap-4`}
             {...articleGestureProps}
         >
             {/* Repost Shared Origin Label */}
@@ -312,7 +312,7 @@ export function XPostCard({
                         <span className="material-symbols-outlined text-[13px] text-primary" style={{ transform: 'scaleX(-1)' }}>reply</span>
                         <span className="flex items-center gap-1.5">
                             {/* Mini avatar of the sharer */}
-                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full overflow-hidden border border-primary/20 shrink-0">
+                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-none overflow-hidden border border-primary/20 shrink-0">
                                 {sharerAvatar ? (
                                     /* eslint-disable-next-line @next/next/no-img-element */
                                     <img src={sharerAvatar} alt="" className="w-full h-full object-cover" />
@@ -332,7 +332,7 @@ export function XPostCard({
                 <div className="flex items-center gap-2.5 min-w-0">
                     <div className="relative shrink-0">
                         <Link href={`/profile/${authorUsername}`} onClick={handleProfileClick}>
-                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-glass-border bg-black/[0.04] dark:bg-white/10">
+                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-none border border-glass-border bg-black/[0.04] dark:bg-white/10">
                                 {authorAvatar && !imageError ? (
                                     <Image
                                         src={authorAvatar}
@@ -392,18 +392,20 @@ export function XPostCard({
             {isQuoteRepost ? renderRepostBody() : (
                 <>
                     {renderTextContent()}
-                    {renderMedia()}
+                    <div className="-mx-3">
+                        {renderMedia()}
+                    </div>
                 </>
             )}
 
             {narrativeBlock}
 
             {/* Action Bar (Horizontal Row) */}
-            <div className="post-card-action-bar flex items-center justify-between mt-2.5 text-[11px] font-bold">
+            <div className="post-card-action-bar flex items-center justify-between mt-2.5 text-[11px] font-bold w-full">
                 {/* Comment action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onComment(); }}
-                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
+                    className="post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
                     aria-label="Comment"
                 >
                     <XReplyIcon size={18} className="group-hover:text-brand-blue" />
@@ -414,7 +416,7 @@ export function XPostCard({
                 {post.contentType === 'fyi' && onHelpful ? (
                     <button
                         onClick={(e) => { e.stopPropagation(); onHelpful(); }}
-                        className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl transition-colors cursor-pointer group ${post.isHelpful ? 'text-primary' : 'hover:text-primary hover:bg-primary/10'}`}
+                        className={`post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl transition-colors cursor-pointer group ${post.isHelpful ? 'text-primary' : 'hover:text-primary hover:bg-primary/10'}`}
                         aria-label="Helpful"
                     >
                         <XThumbUpIcon size={18} filled={!!post.isHelpful} className="group-hover:text-primary" />
@@ -423,7 +425,7 @@ export function XPostCard({
                 ) : (
                     <button
                         onClick={(e) => { e.stopPropagation(); setShowRepostComposer(true); }}
-                        className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl hover:text-brand-green-dark hover:bg-brand-green-dark/10 transition-colors cursor-pointer group"
+                        className="post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl hover:text-brand-green-dark hover:bg-brand-green-dark/10 transition-colors cursor-pointer group"
                         aria-label="Repost"
                     >
                         <XRepostIcon size={18} className="group-hover:text-brand-green-dark" />
@@ -434,7 +436,7 @@ export function XPostCard({
                 {/* Like action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onLike(); }}
-                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl transition-colors cursor-pointer group ${post.isLiked ? 'text-brand-red' : 'hover:text-brand-red hover:bg-brand-red/10'}`}
+                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl transition-colors cursor-pointer group ${post.isLiked ? 'text-brand-red' : 'hover:text-brand-red hover:bg-brand-red/10'}`}
                     aria-label="Like"
                 >
                     <XLikeIcon size={18} filled={post.isLiked} className={`transition-transform active:scale-75 group-hover:text-brand-red ${post.isLiked ? 'text-brand-red' : ''}`} />
@@ -442,7 +444,7 @@ export function XPostCard({
                 </button>
 
                 {/* Views action */}
-                <div className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1" aria-label="Views">
+                <div className="post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5" aria-label="Views">
                     <XViewIcon size={18} />
                     <span className="tabular-nums">{post.views ? formatCompactCount(post.views) : '1.2K'}</span>
                 </div>
@@ -450,7 +452,7 @@ export function XPostCard({
                 {/* Save action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onSave(); }}
-                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl transition-colors cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'hover:text-brand-blue hover:bg-brand-blue/10'}`}
+                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl transition-colors cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'hover:text-brand-blue hover:bg-brand-blue/10'}`}
                     aria-label="Bookmark"
                 >
                     <XBookmarkIcon size={18} filled={post.isSaved} className="group-hover:text-brand-blue" />
@@ -459,7 +461,7 @@ export function XPostCard({
                 {/* Share action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
-                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
+                    className="post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
                     aria-label="Share"
                 >
                     <XShareIcon size={18} className="group-hover:text-brand-blue" />

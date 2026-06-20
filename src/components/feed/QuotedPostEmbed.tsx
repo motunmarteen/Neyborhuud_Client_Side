@@ -34,7 +34,7 @@ export function QuotedPostEmbed({ post, compact = true, onClick }: QuotedPostEmb
   const inner = (
     <>
       <div className="quoted-post-embed__header">
-        <div className="quoted-post-embed__avatar">
+        <div className="quoted-post-embed__avatar relative">
           {authorAvatar ? (
             <Image src={authorAvatar} alt={authorDisplayName} fill sizes="20px" className="object-cover" unoptimized />
           ) : (

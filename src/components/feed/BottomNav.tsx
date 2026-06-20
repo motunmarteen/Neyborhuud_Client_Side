@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSos } from '@/hooks/useSos';
 import { useNeighborhoodEmergency } from '@/hooks/useNeighborhoodEmergency';
 import { AppNavIcon, type AppNavIconName } from '@/components/navigation/AppNavIcon';
+import { useScrollHideBottomNav, scrollToTop } from '@/hooks/useScrollHideBottomNav';
 
 interface BottomNavProps {
   /** Set true only when the nav should be fully hidden (e.g. map overlay). */
@@ -22,7 +23,7 @@ type NavLinkTab = {
 
 const LINK_TABS: NavLinkTab[] = [
   { href: '/feed', label: 'Home', icon: 'home', match: (p) => p === '/feed' || p === '/' },
-  { href: '/safety', label: 'Safety', icon: 'shield', match: (p) => p.startsWith('/safety') || p.startsWith('/sentinel') },
+  { href: '/safety', label: 'Sentinel', icon: 'shield', match: (p) => p.startsWith('/safety') || p.startsWith('/sentinel') },
   { href: '/friendship', label: 'Connect', icon: 'connect', match: (p) => p.startsWith('/friendship') },
   { href: '/chat', label: 'Calls', icon: 'call', match: (p) => p.startsWith('/chat') },
 ];
@@ -49,6 +50,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const sos = useSos();
   const hasNeighborhoodEmergency = useNeighborhoodEmergency();
   const compact = useScrollCompact();
+  const scrollHidden = useScrollHideBottomNav();
 
   const isClient = useIsClient();
   const profileHref =
@@ -92,12 +94,19 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
       <Link
         key={tab.href}
         href={tab.href}
-        className={`app-bottomnav__item${active ? ' app-bottomnav__item--active' : ''}`}
-        aria-current={active ? 'page' : undefined}
+        className={`app-bottomnav__item ${active ? 'app-bottomnav__item--active' : ''}`}
         aria-label={tab.label}
+        aria-current={active ? 'page' : undefined}
+        onClick={(e) => {
+          if (active) {
+            e.preventDefault();
+            scrollToTop();
+          }
+        }}
       >
         <span className="app-bottomnav__icon-wrap">
           <AppNavIcon name={tab.icon} active={active} />
+          <span className="app-bottomnav__label">{tab.label}</span>
         </span>
       </Link>
     );
@@ -110,7 +119,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
       aria-label="Main navigation"
       data-compact={compact ? 'true' : undefined}
     >
-      <div className={`app-bottomnav__dock${hidden ? ' app-bottomnav__dock--hidden' : ''}`}>
+      <div className={`app-bottomnav__dock${hidden || scrollHidden ? ' app-bottomnav__dock--hidden' : ''}`}>
         <div className="app-bottomnav__pill app-bottomnav__glass">
           {LINK_TABS.map(renderLinkTab)}
 
@@ -122,6 +131,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
           >
             <span className="app-bottomnav__icon-wrap">
               <AppNavIcon name="profile" active={isProfile} />
+              <span className="app-bottomnav__label">Profile</span>
             </span>
           </Link>
         </div>

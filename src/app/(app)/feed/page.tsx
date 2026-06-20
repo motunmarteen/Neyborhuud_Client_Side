@@ -437,19 +437,20 @@ function XFeedInner() {
             </Suspense>
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                <TopNav />
+                {/* TopNav moved inside main to scroll with page */}
 
-            {/* Main scroll area — TopNav is fixed above */}
+            {/* Main scroll area */}
             <main
               ref={mainRef}
               data-app-scroll-root
               className="feed-scroll-main feed-scroll-main--sky-feed min-h-0 flex-1 overflow-y-auto scroll-smooth"
               style={{ backgroundColor: 'var(--background-premium)' }}
             >
-                <div className="feed-page-scroll flex flex-col pb-[var(--app-scroll-bottom)]">
-                        <div className="feed-hero-stack shrink-0">
-                          <FeedSkyHero />
-                        </div>
+                <div className="feed-page-scroll flex flex-col pb-[var(--app-scroll-bottom)] relative">
+                    <TopNav />
+                    <div className="feed-hero-stack shrink-0">
+                      <FeedSkyHero />
+                    </div>
                         <div className="feed-sky-feed-body flex flex-col gap-2 pt-0">
                             {/* Active content-type filter chip */}
                             {contentTypeFilter && (() => {

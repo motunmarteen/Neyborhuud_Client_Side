@@ -7,6 +7,8 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SENTINEL_FEATURES } from '@/lib/sentinel-catalog';
 import { CreatePostModal } from './CreatePostModal';
 import { AutoScrollCarousel } from './FeedDiscoveryBlock';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -150,6 +152,58 @@ function AnimatedClouds({ color }: { color: string }) {
   );
 }
 
+/* ── Sentinel Feature Cycler ── */
+function SentinelFeatureCycler() {
+  const router = useRouter();
+  const [index, setIndex] = useState(0);
+
+  // Cycle through the entire Sentinel catalog
+  const features = SENTINEL_FEATURES;
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % features.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [features.length]);
+
+  const currentFeature = features[index];
+
+  return (
+    <button
+      type="button"
+      onClick={() => router.push(currentFeature.href)}
+      className="ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded-none overflow-hidden relative cursor-pointer group shadow-sm transition-transform active:scale-95"
+      style={{
+        background: 'rgba(255, 255, 255, 0.15)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.25)',
+        color: 'inherit'
+      }}
+    >
+      <span className="material-symbols-outlined shrink-0" style={{ fontSize: '1.1rem' }}>
+        {currentFeature.icon}
+      </span>
+      <div className="relative h-5 w-24 overflow-hidden flex items-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentFeature.id}
+            initial={{ y: 15, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -15, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="absolute inset-0 flex items-center justify-start whitespace-nowrap"
+          >
+            <span className="text-[12px] font-bold tracking-wide" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+              {currentFeature.label}
+            </span>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </button>
+  );
+}
+
 /* ── Main Component ── */
 
 export function FeedSkyHero() {
@@ -198,6 +252,14 @@ export function FeedSkyHero() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showCursor, setShowCursor] = useState(true);
   const typewriterRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const textContainerRef = useRef<HTMLButtonElement>(null);
+
+  // Auto-scroll the text container so the cursor is always visible
+  useEffect(() => {
+    if (textContainerRef.current) {
+      textContainerRef.current.scrollLeft = textContainerRef.current.scrollWidth;
+    }
+  }, [displayText]);
 
   // Cursor blink
   useEffect(() => {
@@ -270,7 +332,7 @@ export function FeedSkyHero() {
 
   const categoryRow = (
     <AutoScrollCarousel 
-      className="category-shortcuts-row w-full px-4 flex gap-1.5 overflow-x-auto pb-2 pt-1 scrollbar-none items-start snap-x snap-mandatory"
+      className="category-shortcuts-row w-full px-4 flex gap-1.5 overflow-x-auto pb-0 pt-1 scrollbar-none items-start snap-x snap-mandatory"
       interval={4000}
     >
       {shortcuts.map((s) => {
@@ -279,7 +341,7 @@ export function FeedSkyHero() {
           <button
             key={s.type}
             onClick={() => handleShortcutClick(s.type)}
-            className={`flex-shrink-0 relative w-[100px] aspect-[4/5] rounded-[18px] overflow-hidden group/card shadow-sm cursor-pointer select-none transition-all duration-300 block ${
+            className={`flex-shrink-0 relative w-[100px] aspect-square rounded-none overflow-hidden group/card shadow-sm cursor-pointer select-none transition-all duration-300 block ${
               isActive 
                 ? 'ring-2 ring-primary ring-offset-2 ring-offset-white dark:ring-offset-[#121b14] scale-102 opacity-100 shadow-md' 
                 : 'opacity-85 hover:opacity-100 hover:scale-[1.02] active:scale-[0.98]'
@@ -396,34 +458,27 @@ export function FeedSkyHero() {
               className="feed-sky-scene__composer-pill group flex-1"
               style={{ color: theme.textColor, padding: '0.4rem 0.45rem' }}
             >
-              {/* Profile Avatar — on the left */}
+              {/* Plus / create icon — on the far left */}
               <button
                 type="button"
-                className="feed-sky-scene__composer-media mr-2 overflow-hidden flex items-center justify-center relative bg-white/95 rounded-full"
-                onClick={() => router.push(authUser?.username ? `/profile/${authUser.username}` : '/settings')}
-                aria-label="View Profile"
+                className="mr-2 flex items-center justify-center relative cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
+                onClick={openComposer}
+                aria-label="Create a post"
+                style={{ width: 'auto', padding: '0 4px 0 8px', color: 'inherit' }}
               >
-                {avatarUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={avatarUrl}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                ) : authUser?.username ? (
-                  <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-white" style={{ background: 'linear-gradient(135deg, #00c431, #009924)' }}>
-                    {authUser.username.slice(0, 2).toUpperCase()}
-                  </div>
-                ) : (
-                  <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', color: 'var(--brand-green-dark)' }}>person</span>
-                )}
+                <span className="material-symbols-outlined" aria-hidden="true"
+                  style={{ fontSize: '1.4rem', fontWeight: 300 }}>add</span>
               </button>
 
               <button
+                ref={textContainerRef}
                 type="button"
-                className="feed-sky-scene__composer-text flex-1 text-left px-1"
+                className="feed-sky-scene__composer-text flex-1 text-left px-1 whitespace-nowrap overflow-hidden relative min-w-0"
                 onClick={openComposer}
                 aria-label="Create a post"
+                style={{
+                  scrollBehavior: 'smooth'
+                }}
               >
                 {activeType
                   ? `Filtering: ${shortcuts.find((s) => s.type === activeType)?.label ?? activeType}`
@@ -431,16 +486,8 @@ export function FeedSkyHero() {
                 }
               </button>
 
-              {/* Plus / create icon — on the right */}
-              <button
-                type="button"
-                className="feed-sky-scene__composer-media ml-2"
-                onClick={openComposer}
-                aria-label="Create a post"
-              >
-                <span className="material-symbols-outlined" aria-hidden="true"
-                  style={{ fontSize: '1.15rem', fontWeight: 700 }}>add</span>
-              </button>
+              {/* Sentinel Features Cycler — on the right */}
+              <SentinelFeatureCycler />
             </div>
           </div>
         </div>

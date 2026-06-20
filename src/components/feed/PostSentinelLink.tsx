@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Shield } from 'lucide-react';
+import { SentinelIcon } from '@/components/navigation/AppNavIcon';
 import { usePathname } from 'next/navigation';
 import {
   appendSentinelFromParam,
@@ -29,7 +29,7 @@ export function PostSentinelLink({ className = '' }: PostSentinelLinkProps) {
       aria-label="Sentinel AI"
       title="Sentinel AI"
     >
-      <Shield className="post-sentinel-link__icon" strokeWidth={2} fill="none" aria-hidden />
+      <SentinelIcon className="post-sentinel-link__icon w-5 h-5" aria-hidden />
     </Link>
   );
 }

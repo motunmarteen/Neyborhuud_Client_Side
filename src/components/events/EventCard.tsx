@@ -64,7 +64,7 @@ export default function EventCard({ event, onAttend, attendPending, variant = "i
 
   return (
     <article
-      className={`feed-post-card group relative mx-auto w-full overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] sm:max-w-[480px] sm:rounded-[32px] sm:border ${
+      className={`feed-post-card group relative mx-auto w-full overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] ${
         isCancelled ? "ring-2 ring-brand-red/40" : ""
       } ${isFeedVariant ? "min-h-[260px] h-[min(52vh,420px)] max-h-[420px] sm:max-h-[440px]" : ""}`}
       style={isFeedVariant ? undefined : { height: "90vh", minHeight: "90vh" }}

@@ -60,9 +60,6 @@ function marketplaceNarrative(post: Post): string | null {
 
   // Opening — use the post content as description
   const desc = (post.content || post.body || '').trim();
-  if (desc) {
-    parts.push(desc);
-  }
 
   // Price line
   const price = formatNaira(post.price ?? post.metadata?.price);
@@ -106,9 +103,6 @@ function jobNarrative(post: Post): string | null {
   const parts: string[] = [];
 
   const desc = (post.content || post.body || '').trim();
-  if (desc) {
-    parts.push(desc);
-  }
 
   const title = meta.jobTitle;
   if (title) {
@@ -145,9 +139,6 @@ function servicesNarrative(post: Post): string | null {
   const parts: string[] = [];
 
   const desc = (post.content || post.body || '').trim();
-  if (desc) {
-    parts.push(desc);
-  }
 
   const name = meta.serviceName;
   if (name) {
@@ -186,9 +177,6 @@ function eventNarrative(post: Post): string | null {
   const parts: string[] = [];
 
   const desc = (post.content || post.body || '').trim();
-  if (desc) {
-    parts.push(desc);
-  }
 
   // Date and time
   const date = post.eventDate ?? post.metadata?.eventDate;
@@ -244,9 +232,6 @@ function helpRequestNarrative(post: Post): string | null {
   const parts: string[] = [];
 
   const desc = (post.content || post.body || '').trim();
-  if (desc) {
-    parts.push(desc);
-  }
 
   const cat = post.helpCategory ?? post.metadata?.helpCategory;
   if (cat) {
@@ -276,9 +261,6 @@ function emergencyNarrative(post: Post): string | null {
   const parts: string[] = [];
 
   const desc = (post.content || post.body || '').trim();
-  if (desc) {
-    parts.push(desc);
-  }
 
   const hazard = meta.hazardType;
   if (hazard) {
@@ -310,9 +292,6 @@ function alertNarrative(post: Post): string | null {
   const parts: string[] = [];
 
   const desc = (post.content || post.body || '').trim();
-  if (desc) {
-    parts.push(desc);
-  }
 
   if (meta.affectedArea) {
     parts.push(`📍 Affected area: ${meta.affectedArea}`);
