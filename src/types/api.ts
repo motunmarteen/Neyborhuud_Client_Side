@@ -37,7 +37,8 @@ export type ContentType =
   | "job"
   | "emergency"
   | "event"
-  | "marketplace";
+  | "marketplace"
+  | "services";
 
 /** Supported languages */
 export type AppLanguage = "en" | "ha" | "yo" | "ig" | "pcm";
@@ -256,7 +257,8 @@ export interface Post {
     | "job"
     | "emergency"
     | "event"
-    | "marketplace";
+    | "marketplace"
+    | "services";
   mood?: string;
   severity?: "low" | "medium" | "critical";
   emergencyType?: string;
@@ -363,6 +365,13 @@ export interface Post {
   status?: "active" | "pending" | "removed" | "archived";
   createdAt: string;
   updatedAt?: string;
+  /** Direct parent repost's author — populated by the feed for chain-of-post display */
+  sharedFrom?: {
+    id: string;
+    username: string;
+    name?: string;
+    avatarUrl?: string | null;
+  } | null;
 }
 
 export interface Comment {

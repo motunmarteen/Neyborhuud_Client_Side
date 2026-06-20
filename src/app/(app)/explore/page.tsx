@@ -1,12 +1,14 @@
 /**
- * Explore Page — X/Twitter-style full-screen search & discovery
- * Shows trending topics, browse-by-type, and search results
+ * Explore Page — Premium feed-style search & discovery hub.
+ * Shows category shortcuts, trending content, and filtered posts immediately.
+ * Search input is available but NOT auto-focused.
  */
 
 'use client';
 
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { useSearch } from '@/hooks/useSearch';
 import { UserSearchResult } from '@/components/search/UserSearchResult';
 import { PostSearchResult } from '@/components/search/PostSearchResult';
@@ -17,20 +19,40 @@ import RightSidebar from '@/components/navigation/RightSidebar';
 import TopNav from '@/components/navigation/TopNav';
 import { searchService } from '@/services/search.service';
 import { newsService } from '@/services/news.service';
+import { fyiService } from '@/services/fyi.service';
 import type { RssArticle } from '@/types/incident';
 import { LocalHuudMenu } from '@/components/navigation/LocalHuudMenu';
+import { contentService } from '@/services/content.service';
+import { XPostCard } from '@/components/feed/XPostCard';
+import type { Post } from '@/types/api';
+import { useAuth } from '@/hooks/useAuth';
+import { usePostMutations, useLocationFeed } from '@/hooks/usePosts';
+import { useQueryClient } from '@tanstack/react-query';
+import { getCurrentLocation } from '@/lib/geolocation';
 
 // ── Explore Tabs ──────────────────────────────────────────────
 const EXPLORE_TABS = [
-  { id: 'trending', label: 'Trending' },
-  { id: 'fyi', label: 'FYI Bulletins' },
-  { id: 'help_request', label: 'Help Requests' },
-  { id: 'jobs', label: 'Jobs' },
-  { id: 'events', label: 'Events' },
-  { id: 'marketplace', label: 'Marketplace' },
+  { id: 'trending', label: 'For You', icon: 'local_fire_department' },
+  { id: 'marketplace', label: 'Market', icon: 'storefront' },
+  { id: 'services', label: 'Services', icon: 'handyman' },
+  { id: 'jobs', label: 'Jobs', icon: 'work' },
+  { id: 'events', label: 'Events', icon: 'event' },
+  { id: 'fyi', label: 'FYI', icon: 'campaign' },
+  { id: 'help_request', label: 'Help', icon: 'volunteer_activism' },
 ] as const;
 
 type ExploreTab = typeof EXPLORE_TABS[number]['id'];
+
+const SHORTCUTS = [
+  { type: 'marketplace', label: 'Marketplace', imgSrc: '/illustration_marketplace.png', gradient: 'linear-gradient(135deg, #1a4a28 0%, #0d8a3e 50%, #00c431 100%)' },
+  { type: 'services', label: 'Services', imgSrc: '/illustration_services.png', gradient: 'linear-gradient(135deg, #1a3a2a 0%, #2a6a4a 50%, #00a555 100%)' },
+  { type: 'job', label: 'Jobs', imgSrc: '/illustration_jobs.png', gradient: 'linear-gradient(135deg, #2a1a4a 0%, #6a3a9a 50%, #9a5acf 100%)' },
+  { type: 'event', label: 'Events', imgSrc: '/illustration_events.png', gradient: 'linear-gradient(135deg, #1a2a4a 0%, #2a4a8a 50%, #1a56ff 100%)' },
+  { type: 'fyi', label: 'FYI', imgSrc: '/illustration_fyi.png', gradient: 'linear-gradient(135deg, #1a2a3a 0%, #2a4a6a 50%, #3a6a9a 100%)' },
+  { type: 'help_request', label: 'Help', imgSrc: '/illustration_help.png', gradient: 'linear-gradient(135deg, #4a1a1a 0%, #8a2a2a 50%, #cc3333 100%)' },
+  { type: 'community_alert', label: 'Alerts', imgSrc: '/illustration_community_alert.png', gradient: 'linear-gradient(135deg, #5a2010 0%, #9a3f20 50%, #d45a00 100%)' },
+  { type: 'incident_report', label: 'Safety', imgSrc: '/illustration_safety.png', gradient: 'linear-gradient(135deg, #300a0a 0%, #601a1a 50%, #a82020 100%)' },
+];
 
 // ── News article type ─────────────────────────────────────────
 interface NewsArticle {
@@ -58,16 +80,47 @@ export default function ExplorePage() {
   );
 }
 
+// ── Tab Posts Hook ─────────────────────────────────────────────
+function useTabPosts(tab: ExploreTab) {
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    getCurrentLocation().then((loc) => {
+      if (loc) setLocation({ lat: loc.lat, lng: loc.lng });
+    }).catch(console.error);
+  }, []);
+
+  const { data, isLoading, error } = useLocationFeed(
+    location?.lat || 0,
+    location?.lng || 0,
+    {
+      feedTab: tab === 'trending' ? undefined : undefined,
+      contentType: tab === 'trending' ? undefined : (tab as any),
+    }
+  );
+
+  const posts = useMemo(() => {
+    return data?.pages.flatMap((page: any) => page.content ?? page.data?.content ?? []) ?? [];
+  }, [data]);
+
+  return {
+    posts,
+    loading: isLoading && !!location,
+    error: error ? 'Failed to load posts' : null,
+  };
+}
+
 function ExplorePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const inputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   // Search state
   const {
     query, setQuery, type, setType,
-    results, loading, error, totalResults,
+    results, loading: searchLoading, error: searchError, totalResults,
   } = useSearch(initialQuery);
 
   // Explore tab state (shown when not searching)
@@ -78,14 +131,81 @@ function ExplorePageInner() {
   const [newsLoading, setNewsLoading] = useState(true);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
+  // Tab posts
+  const { posts: tabPosts, loading: tabPostsLoading, error: tabPostsError } = useTabPosts(activeTab);
+
+  const queryClient = useQueryClient();
+  const { likePost, unlikePost, savePost, unsavePost } = usePostMutations();
+
+  // Post interactions
+  const handleLike = async (post: Post) => {
+    try {
+        if (post.isLiked) {
+            await unlikePost(post.id);
+        } else {
+            await likePost(post.id);
+        }
+    } catch (error) {
+        console.error('Like error:', error);
+    }
+  };
+
+  const handleSave = async (post: Post) => {
+    try {
+        if (post.isSaved) {
+            await unsavePost(post.id);
+        } else {
+            await savePost(post.id);
+        }
+    } catch (error) {
+        console.error('Save error:', error);
+    }
+  };
+
+  const handleComment = (postId: string) => {
+    router.push(`/feed?post=${postId}`);
+  };
+
+  const handleHelpful = async (postId: string) => {
+    try {
+        await fyiService.markHelpful(postId);
+        queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+    } catch (error) {
+        console.error('Helpful error:', error);
+    }
+  };
+
+  const handleEmergencyAction = async (post: Post, action: string) => {
+    try {
+        switch (action) {
+            case 'acknowledge':
+                await contentService.acknowledgePost(post.id);
+                break;
+            case 'aware':
+                await contentService.toggleImAware(post.id);
+                break;
+            case 'nearby':
+                await contentService.toggleImNearby(post.id);
+                break;
+            case 'safe':
+                await contentService.toggleSafeMark(post.id);
+                break;
+            case 'confirm':
+                await contentService.confirmOrDispute(post.id, 'confirm');
+                break;
+            case 'dispute':
+                await contentService.confirmOrDispute(post.id, 'dispute');
+                break;
+        }
+        queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+    } catch (error) {
+        console.error(`Emergency action '${action}' error:`, error);
+    }
+  };
+
   const isSearching = query.length > 0;
 
-  // Auto-focus the input on mount
-  useEffect(() => {
-    // Small delay to ensure the page has rendered
-    const timer = setTimeout(() => inputRef.current?.focus(), 100);
-    return () => clearTimeout(timer);
-  }, []);
+  // DO NOT auto-focus the input on mount (user wants discovery content first)
 
   // Load trending topics
   useEffect(() => {
@@ -98,7 +218,6 @@ function ExplorePageInner() {
           setTrendingTopics(data);
         }
       } catch {
-        // Fallback trending topics for the community
         setTrendingTopics([
           '#SafetyFirst', '#NeyborHuud', '#CommunityAlert',
           '#MarketDay', '#LocalJobs', '#StreetGist',
@@ -111,7 +230,7 @@ function ExplorePageInner() {
     loadTrending();
   }, []);
 
-  // Load Nigeria news via unified news API
+  // Load Nigeria news
   useEffect(() => {
     const loadNews = async () => {
       setNewsLoading(true);
@@ -139,7 +258,7 @@ function ExplorePageInner() {
     loadNews();
   }, []);
 
-  // Load search history from localStorage
+  // Load search history
   useEffect(() => {
     try {
       const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
@@ -199,6 +318,43 @@ function ExplorePageInner() {
     return `${Math.floor(hours / 24)}d ago`;
   }, []);
 
+  // ── Post card rendering ─────────────────────────────────────
+  const renderPostCard = useCallback((post: Post) => (
+    <XPostCard
+      key={post.id || post._id}
+      post={post}
+      onLike={() => handleLike(post)}
+      onComment={() => handleComment(post.id || post._id || '')}
+      onShare={() => {}}
+      onSave={() => handleSave(post)}
+      onEmergencyAction={(a) => handleEmergencyAction(post, a)}
+      onHelpful={post.contentType === 'fyi' ? () => handleHelpful(post.id || post._id || '') : undefined}
+      onCardClick={() => router.push(`/feed?post=${post.id || post._id}`)}
+      currentUserId={user?.id || (user as any)?._id}
+    />
+  ), [handleLike, handleComment, handleSave, handleEmergencyAction, handleHelpful, router, user]);
+
+  // ── Skeleton posts ──────────────────────────────────────────
+  const postSkeletons = useMemo(() => (
+    <div className="space-y-0">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="animate-pulse p-5 border-b border-black/[0.06] dark:border-white/[0.06]">
+          <div className="flex gap-3 mb-3">
+            <div className="w-10 h-10 rounded-full" style={{ background: 'var(--neu-shadow-dark)' }} />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 rounded-full w-28" style={{ background: 'var(--neu-shadow-dark)' }} />
+              <div className="h-2.5 rounded-full w-20" style={{ background: 'var(--neu-shadow-dark)' }} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-3 rounded-full w-full" style={{ background: 'var(--neu-shadow-dark)' }} />
+            <div className="h-3 rounded-full w-3/4" style={{ background: 'var(--neu-shadow-dark)' }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  ), []);
+
   return (
     <div className="flex flex-col h-screen neu-base">
       <TopNav />
@@ -241,7 +397,7 @@ function ExplorePageInner() {
 
         {/* ── Tab Bar ── */}
         {!isSearching ? (
-          <div className="relative px-4 py-2">
+          <div className="relative px-3 pb-2">
             <div role="tablist" aria-label="Explore" className="flex items-center gap-0.5 overflow-x-auto no-scrollbar rounded-full border border-black/[0.05] bg-brand-surface/60 p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               {EXPLORE_TABS.map((tab) => {
                 const isActive = activeTab === tab.id;
@@ -252,8 +408,9 @@ function ExplorePageInner() {
                     role="tab"
                     aria-selected={isActive ? 'true' : 'false'}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`segmented-tab ${isActive ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex-shrink-0 px-4 py-2 text-[13px] font-semibold rounded-full whitespace-nowrap select-none active:scale-[0.97]`}
+                    className={`segmented-tab ${isActive ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex-shrink-0 px-3.5 py-2 text-[12px] font-semibold rounded-full whitespace-nowrap select-none active:scale-[0.97] flex items-center gap-1.5`}
                   >
+                    <span className="material-symbols-outlined text-[14px]">{tab.icon}</span>
                     {tab.label}
                   </button>
                 );
@@ -261,7 +418,7 @@ function ExplorePageInner() {
             </div>
           </div>
         ) : (
-          <div className="relative px-4 py-2">
+          <div className="relative px-3 pb-2">
             <div role="tablist" aria-label="Search results" className="flex items-center gap-0.5 overflow-x-auto no-scrollbar rounded-full border border-black/[0.05] bg-brand-surface/60 p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               {SEARCH_TABS.map((tab) => {
                 const count =
@@ -294,14 +451,14 @@ function ExplorePageInner() {
         {isSearching ? (
           /* ═══ Search Results ═══ */
           <div className="max-w-[680px] mx-auto">
-            {loading ? (
+            {searchLoading ? (
               <div className="flex items-center justify-center py-16 gap-3">
                 <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 <span className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>Searching…</span>
               </div>
-            ) : error ? (
+            ) : searchError ? (
               <div className="text-center py-16 px-4">
-                <p className="text-sm font-medium text-brand-red">{error}</p>
+                <p className="text-sm font-medium text-brand-red">{searchError}</p>
                 <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>Please try again</p>
               </div>
             ) : totalResults === 0 ? (
@@ -324,9 +481,9 @@ function ExplorePageInner() {
                     )}
                     <div className="space-y-1">
                       {results.users.data
-                        .filter(u => u && u._id && u.username)
+                        .filter(u => u && ((u as any).id || (u as any)._id) && u.username)
                         .map((u) => (
-                          <UserSearchResult key={u._id} user={u} onClose={() => saveSearchHistory(query)} />
+                          <UserSearchResult key={(u as any).id || (u as any)._id} user={u} onClose={() => saveSearchHistory(query)} />
                         ))
                       }
                     </div>
@@ -380,19 +537,49 @@ function ExplorePageInner() {
         ) : (
           /* ═══ Explore Content (no search query) ═══ */
           <div className="max-w-[680px] mx-auto">
+            {/* Category Shortcuts row */}
+            <div className="w-full px-4 pt-4 pb-2 flex gap-1.5 overflow-x-auto scrollbar-none items-start">
+              {SHORTCUTS.map((s) => (
+                <button
+                  key={s.type}
+                  onClick={() => router.push(`/feed?type=${s.type}`)}
+                  className="flex-shrink-0 relative w-[100px] aspect-[4/5] rounded-[18px] overflow-hidden group/card shadow-sm cursor-pointer select-none transition-all duration-300 hover:opacity-100 hover:scale-[1.02] active:scale-[0.98] opacity-90"
+                  style={{ background: s.gradient }}
+                  type="button"
+                >
+                  <div className="absolute inset-0 w-full h-full">
+                    <Image
+                      src={s.imgSrc}
+                      alt={s.label}
+                      fill
+                      sizes="100px"
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105"
+                    />
+                  </div>
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 z-10 p-2 space-y-0.5 flex flex-col justify-end min-h-[50%]">
+                    <h4 className="text-[10px] font-black text-white leading-tight uppercase tracking-wider text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
+                      {s.label}
+                    </h4>
+                  </div>
+                </button>
+              ))}
+            </div>
+
             {/* Local Huud — community utilities */}
-            <div className="px-4 pt-4 pb-2">
+            <div className="px-4 pt-2 pb-2">
               <LocalHuudMenu variant="panel" />
             </div>
 
             {/* Divider */}
             <div className="neu-divider mx-4 my-2" />
 
-            {/* Search History */}
+            {/* Search History (only when no tab content is loading) */}
             {searchHistory.length > 0 && (
               <div className="px-4 pt-2 pb-2">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Recent</h3>
+                  <h3 className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Recent Searches</h3>
                   <button
                     onClick={clearHistory}
                     className="text-xs text-primary font-medium hover:underline"
@@ -400,218 +587,178 @@ function ExplorePageInner() {
                     Clear all
                   </button>
                 </div>
-                <div className="space-y-0.5">
+                <div className="flex gap-2 overflow-x-auto no-scrollbar">
                   {searchHistory.map((h, i) => (
                     <button
                       key={i}
                       onClick={() => handleHistoryClick(h)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:opacity-80"
+                      className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:opacity-80 border border-black/[0.06] dark:border-white/[0.06]"
+                      style={{ color: 'var(--neu-text)', background: 'var(--brand-surface)' }}
                     >
-                      <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>history</span>
-                      <span className="text-sm flex-1 text-left truncate" style={{ color: 'var(--neu-text)' }}>{h}</span>
-                      <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>north_west</span>
+                      <span className="material-symbols-outlined text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>history</span>
+                      {h}
                     </button>
                   ))}
                 </div>
-                <div className="neu-divider mt-2" />
+                <div className="neu-divider mt-3" />
               </div>
             )}
 
-            {/* ══ Trending Tab Content: Mixed trends + news ══ */}
-            {activeTab === 'trending' && (
-              <div className="px-4 pt-3 pb-6">
-                {(trendingLoading && newsLoading) ? (
-                  <div className="space-y-4">
-                    {/* Hero skeleton */}
-                    <div className="animate-pulse rounded-2xl overflow-hidden" style={{ background: 'var(--neu-shadow-dark)' }}>
-                      <div className="h-48 w-full" />
-                      <div className="p-4 space-y-2">
-                        <div className="h-3 rounded-full w-20" style={{ background: 'var(--neu-shadow-light)' }} />
-                        <div className="h-5 rounded-full w-3/4" style={{ background: 'var(--neu-shadow-light)' }} />
-                        <div className="h-3 rounded-full w-1/2" style={{ background: 'var(--neu-shadow-light)' }} />
+            {/* ══ Trending Topics — compact pill cloud ══ */}
+            {activeTab === 'trending' && trendingTopics.length > 0 && (
+              <div className="px-4 pt-2 pb-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--neu-text-muted)' }}>
+                  <span className="material-symbols-outlined text-[13px] align-middle mr-1 text-primary">trending_up</span>
+                  Trending in Nigeria
+                </h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {trendingTopics.slice(0, 8).map((topic, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleTrendingClick(topic)}
+                      className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] border border-black/[0.06] dark:border-white/[0.06]"
+                      style={{ color: 'var(--neu-text)', background: 'var(--brand-surface)' }}
+                    >
+                      {topic}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ══ News Hero (trending tab only) ══ */}
+            {activeTab === 'trending' && newsArticles.length > 0 && (
+              <div className="px-4 pb-3">
+                <a
+                  href={newsArticles[0].url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-2xl overflow-hidden neu-card-sm transition-transform active:scale-[0.98]"
+                >
+                  {newsArticles[0].image ? (
+                    <div className="relative w-full h-40 bg-black/20">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={newsArticles[0].image}
+                        alt={newsArticles[0].title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="px-2 py-0.5 rounded-full bg-brand-red/90 text-white text-[10px] font-bold uppercase">Live</span>
+                          <span className="text-[11px] text-white/80">{newsArticles[0].source}</span>
+                        </div>
+                        <h3 className="text-sm font-bold text-white leading-snug line-clamp-2">{newsArticles[0].title}</h3>
                       </div>
                     </div>
-                    {[...Array(5)].map((_, i) => (
-                      <div key={i} className="animate-pulse flex gap-3">
-                        <div className="flex-1 space-y-2">
-                          <div className="h-3 rounded-full w-24" style={{ background: 'var(--neu-shadow-dark)' }} />
-                          <div className="h-4 rounded-full w-48" style={{ background: 'var(--neu-shadow-dark)' }} />
-                          <div className="h-3 rounded-full w-20" style={{ background: 'var(--neu-shadow-dark)' }} />
-                        </div>
-                        <div className="w-20 h-16 rounded-xl" style={{ background: 'var(--neu-shadow-dark)' }} />
+                  ) : (
+                    <div className="p-4 bg-gradient-to-r from-primary/10 to-brand-blue/10">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="px-2 py-0.5 rounded-full bg-brand-red/90 text-white text-[10px] font-bold uppercase">News</span>
+                        <span className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>{newsArticles[0].source}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-0">
-                    {/* ── Hero News Card (first article) ── */}
-                    {newsArticles[0] && (
-                      <a
-                        href={newsArticles[0].url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block rounded-2xl overflow-hidden neu-card-sm mb-4 transition-transform active:scale-[0.98]"
-                      >
-                        {newsArticles[0].image ? (
-                          <div className="relative w-full h-48 bg-black/20">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={newsArticles[0].image}
-                              alt={newsArticles[0].title}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                            <div className="absolute bottom-0 left-0 right-0 p-4">
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <span className="px-2 py-0.5 rounded-full bg-brand-red/90 text-white text-[10px] font-bold uppercase">Live</span>
-                                <span className="text-[11px] text-white/80">{newsArticles[0].source}</span>
-                              </div>
-                              <h3 className="text-base font-bold text-white leading-snug line-clamp-2">{newsArticles[0].title}</h3>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="p-4 bg-gradient-to-r from-primary/10 to-brand-blue/10">
-                            <div className="flex items-center gap-2 mb-1.5">
-                              <span className="px-2 py-0.5 rounded-full bg-brand-red/90 text-white text-[10px] font-bold uppercase">News</span>
-                              <span className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>{newsArticles[0].source}</span>
-                            </div>
-                            <h3 className="text-base font-bold leading-snug line-clamp-2" style={{ color: 'var(--neu-text)' }}>{newsArticles[0].title}</h3>
-                            {newsArticles[0].description && (
-                              <p className="text-xs mt-1 line-clamp-2" style={{ color: 'var(--neu-text-muted)' }}>{newsArticles[0].description}</p>
-                            )}
-                          </div>
-                        )}
-                      </a>
-                    )}
-
-                    {/* ── Interleaved: Trending topics + News articles ── */}
-                    {(() => {
-                      const items: Array<{ type: 'trend'; data: string; index: number } | { type: 'news'; data: NewsArticle }> = [];
-                      const remainingNews = newsArticles.slice(1);
-                      let newsIdx = 0;
-
-                      trendingTopics.forEach((topic, i) => {
-                        items.push({ type: 'trend', data: topic, index: i });
-                        // Insert a news card after every 2 trending topics
-                        if ((i + 1) % 2 === 0 && newsIdx < remainingNews.length) {
-                          items.push({ type: 'news', data: remainingNews[newsIdx] });
-                          newsIdx++;
-                        }
-                      });
-                      // Add any remaining news
-                      while (newsIdx < remainingNews.length) {
-                        items.push({ type: 'news', data: remainingNews[newsIdx] });
-                        newsIdx++;
-                      }
-
-                      return items.map((item, idx) => {
-                        if (item.type === 'trend') {
-                          return (
-                            <button
-                              key={`trend-${idx}`}
-                              onClick={() => handleTrendingClick(item.data)}
-                              className="w-full text-left py-3.5 transition-all hover:opacity-80 border-b flex items-center justify-between group"
-                              style={{ borderColor: 'var(--neu-shadow-dark)' }}
-                            >
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[11px] font-medium" style={{ color: 'var(--neu-text-muted)' }}>
-                                  {item.index + 1} · Trending in Nigeria
-                                </p>
-                                <p className="text-[15px] font-bold mt-0.5 truncate" style={{ color: 'var(--neu-text)' }}>
-                                  {item.data}
-                                </p>
-                                <p className="text-[11px] mt-0.5" style={{ color: 'var(--neu-text-muted)' }}>
-                                  Community · Trending
-                                </p>
-                              </div>
-                              <span className="material-symbols-outlined text-lg opacity-0 group-hover:opacity-60 transition-opacity shrink-0 ml-3" style={{ color: 'var(--neu-text-muted)' }}>
-                                north_east
-                              </span>
-                            </button>
-                          );
-                        } else {
-                          const article = item.data;
-                          return (
-                            <a
-                              key={`news-${idx}`}
-                              href={article.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex gap-3 py-3.5 border-b transition-all hover:opacity-80 group"
-                              style={{ borderColor: 'var(--neu-shadow-dark)' }}
-                            >
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5 mb-0.5">
-                                  <span className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-[10px] text-primary">newspaper</span>
-                                  </span>
-                                  <span className="text-[11px] font-medium" style={{ color: 'var(--neu-text-muted)' }}>{article.source}</span>
-                                  <span className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>· {formatNewsTime(article.publishedAt)}</span>
-                                </div>
-                                <p className="text-[14px] font-semibold leading-snug line-clamp-2" style={{ color: 'var(--neu-text)' }}>
-                                  {article.title}
-                                </p>
-                                {article.description && (
-                                  <p className="text-[12px] mt-0.5 line-clamp-1" style={{ color: 'var(--neu-text-muted)' }}>
-                                    {article.description}
-                                  </p>
-                                )}
-                              </div>
-                              {article.image && (
-                                <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-black/10">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img
-                                    src={article.image}
-                                    alt=""
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
-                            </a>
-                          );
-                        }
-                      });
-                    })()}
-                  </div>
-                )}
+                      <h3 className="text-sm font-bold leading-snug line-clamp-2" style={{ color: 'var(--neu-text)' }}>{newsArticles[0].title}</h3>
+                    </div>
+                  )}
+                </a>
               </div>
             )}
 
-            {/* ══ Other Tabs Placeholder ══ */}
-            {activeTab !== 'trending' && (
-              <div className="px-4 pt-3 pb-6">
-                <h2 className="text-lg font-bold mb-3" style={{ color: 'var(--neu-text)' }}>
-                  {activeTab === 'fyi' ? 'FYI Bulletins' :
-                   activeTab === 'help_request' ? 'Help Requests' :
-                   activeTab === 'jobs' ? 'Job Listings' :
-                   activeTab === 'events' ? 'Upcoming Events' :
-                   'Marketplace'}
-                </h2>
-                <div className="flex flex-col items-center py-10 gap-3">
-                  <span className="material-symbols-outlined text-4xl" style={{ color: 'var(--neu-text-muted)' }}>
-                    {activeTab === 'fyi' ? 'campaign' :
-                     activeTab === 'help_request' ? 'help' :
-                     activeTab === 'jobs' ? 'work' :
-                     activeTab === 'events' ? 'event' :
-                     'shopping_bag'}
-                  </span>
-                  <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-                    Browse {activeTab === 'fyi' ? 'bulletins' : activeTab === 'help_request' ? 'requests' : activeTab.replace('_', ' ')} in the feed
-                  </p>
-                  <button
-                    onClick={() => {
-                      const href =
-                        activeTab === 'fyi' ? '/fyi' :
-                        activeTab === 'help_request' ? '/help-request' :
-                        activeTab === 'jobs' ? '/jobs' :
-                        activeTab === 'events' ? '/events' :
-                        '/marketplace';
-                      router.push(href);
-                    }}
-                    className="px-4 py-2 rounded-full text-sm font-semibold bg-primary text-white hover:bg-primary/90 transition-colors"
-                  >
-                    View All
-                  </button>
+            {/* ══ Tab Section Header ══ */}
+            <div className="px-4 pt-1 pb-2 flex items-center justify-between">
+              <h2 className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--neu-text)' }}>
+                <span className="material-symbols-outlined text-[16px] text-primary">
+                  {EXPLORE_TABS.find(t => t.id === activeTab)?.icon || 'explore'}
+                </span>
+                {activeTab === 'trending' ? 'Latest in Your Huud' :
+                 activeTab === 'marketplace' ? 'Marketplace Listings' :
+                 activeTab === 'services' ? 'Local Services' :
+                 activeTab === 'jobs' ? 'Job Opportunities' :
+                 activeTab === 'events' ? 'Upcoming Events' :
+                 activeTab === 'fyi' ? 'FYI Bulletins' :
+                 'Help Requests'}
+              </h2>
+            </div>
+
+            {/* ══ Tab Posts ══ */}
+            {tabPostsLoading ? (
+              postSkeletons
+            ) : tabPostsError ? (
+              <div className="text-center py-12 px-4">
+                <span className="material-symbols-outlined text-4xl mb-2 block" style={{ color: 'var(--neu-text-muted)' }}>error_outline</span>
+                <p className="text-sm font-medium" style={{ color: 'var(--neu-text)' }}>{tabPostsError}</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>Pull down to refresh</p>
+              </div>
+            ) : tabPosts.length === 0 ? (
+              <div className="text-center py-12 px-4">
+                <span className="material-symbols-outlined text-4xl mb-2 block" style={{ color: 'var(--neu-text-muted)' }}>
+                  {activeTab === 'marketplace' ? 'storefront' :
+                   activeTab === 'services' ? 'handyman' :
+                   activeTab === 'jobs' ? 'work' :
+                   activeTab === 'events' ? 'event' :
+                   activeTab === 'fyi' ? 'campaign' :
+                   activeTab === 'help_request' ? 'volunteer_activism' :
+                   'explore'}
+                </span>
+                <p className="text-sm font-medium" style={{ color: 'var(--neu-text)' }}>
+                  No {activeTab === 'trending' ? 'posts' :
+                       activeTab === 'marketplace' ? 'listings' :
+                       activeTab === 'services' ? 'services' :
+                       activeTab === 'jobs' ? 'jobs' :
+                       activeTab === 'events' ? 'events' :
+                       activeTab === 'fyi' ? 'bulletins' :
+                       'requests'} yet
+                </p>
+                <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>Be the first to share in your neighborhood!</p>
+              </div>
+            ) : (
+              <div className="space-y-0">
+                {tabPosts.map(renderPostCard)}
+              </div>
+            )}
+
+            {/* ── Inline news articles (trending tab) ── */}
+            {activeTab === 'trending' && newsArticles.length > 1 && tabPosts.length > 0 && (
+              <div className="px-4 pt-4 pb-6">
+                <h3 className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--neu-text-muted)' }}>
+                  <span className="material-symbols-outlined text-[13px] align-middle mr-1">newspaper</span>
+                  More Headlines
+                </h3>
+                <div className="space-y-0">
+                  {newsArticles.slice(1, 6).map((article, idx) => (
+                    <a
+                      key={idx}
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex gap-3 py-3 border-b transition-all hover:opacity-80 group"
+                      style={{ borderColor: 'var(--neu-shadow-dark)' }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[10px] text-primary">newspaper</span>
+                          </span>
+                          <span className="text-[11px] font-medium" style={{ color: 'var(--neu-text-muted)' }}>{article.source}</span>
+                          <span className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>· {formatNewsTime(article.publishedAt)}</span>
+                        </div>
+                        <p className="text-[13px] font-semibold leading-snug line-clamp-2" style={{ color: 'var(--neu-text)' }}>
+                          {article.title}
+                        </p>
+                      </div>
+                      {article.image && (
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-black/10">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={article.image}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </a>
+                  ))}
                 </div>
               </div>
             )}

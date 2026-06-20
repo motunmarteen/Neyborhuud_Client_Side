@@ -24,6 +24,8 @@ import { PostCardMediaSlider } from '@/components/feed/PostCardMediaSlider';
 import { QuotedPostEmbed } from '@/components/feed/QuotedPostEmbed';
 import { RepostComposerSheet } from '@/components/feed/RepostComposerSheet';
 import { getPostAuthorUserId } from '@/lib/postAuthor';
+import { PostRepostChainModal } from './PostRepostChainModal';
+import { generatePostNarrative } from '@/lib/postNarrative';
 
 const formatCompactCount = (value?: number) => {
     if (!value) return undefined;
@@ -104,11 +106,15 @@ export function XPostCard({
     const [showRepostComposer, setShowRepostComposer] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const [expanded, setExpanded] = useState(false);
+    const [chainModalOpen, setChainModalOpen] = useState(false);
+    const handleOpenRepostChain = () => setChainModalOpen(true);
+
 
     const longPress = useLongPress(() => setMenuOpen(true));
 
     const author = post.author as PostAuthor;
-    const authorName = author?.name || 'Anonymous';
+    const fullName = author ? [author.firstName, author.lastName].filter(Boolean).join(' ') : '';
+    const authorName = fullName || author?.name || author?.username || 'Anonymous';
     const authorUsername = author?.username || 'user';
     const authorAvatar = author?.avatarUrl || author?.profilePicture || null;
 
@@ -195,48 +201,29 @@ export function XPostCard({
         />
     );
 
-    // ── Shared structured content blocks ────────────────────────────────────
-    const eventBlock = post.contentType === 'event' && post.eventDate ? (
-        <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-brand-blue/5 mt-2">
-            <span className="inline-flex items-center gap-1 text-[12px] font-bold text-brand-blue">
-                <span className="material-symbols-outlined text-[14px]" aria-hidden>calendar_today</span>
-                {new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(post.eventDate))}
-            </span>
-            {post.eventTime && (
-                <span className="inline-flex items-center gap-1 text-[11px] text-neu-text-secondary dark:text-white/60">
-                    <span className="material-symbols-outlined text-[14px]" aria-hidden>schedule</span>
-                    {post.eventTime}
+    // ── Structured content narrative block ─────────────────────────────────
+    const narrative = generatePostNarrative(post);
+    const narrativeBlock = narrative ? (
+        <div className={`flex flex-col gap-2 p-3.5 rounded-2xl ${narrative.accentBg} border ${narrative.accentBorder} mt-2`}>
+            <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
+                    <span className="material-symbols-outlined text-[14px]">{narrative.icon}</span>
+                    {narrative.typeLabel}
                 </span>
-            )}
-            {post.venue?.name && (
-                <span className="inline-flex items-center gap-1 text-[11px] text-neu-text-secondary dark:text-white/60">
-                    <span className="material-symbols-outlined text-[14px]" aria-hidden>location_on</span>
-                    {post.venue.name}
-                </span>
-            )}
-            {post.ticketInfo === 'paid' && post.ticketPrice && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-blue/15 text-brand-blue font-bold">₦{Number(post.ticketPrice).toLocaleString()}</span>
-            )}
-            {post.ticketInfo === 'free' && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/20 text-brand-green-dark font-bold">FREE</span>
-            )}
-        </div>
-    ) : null;
-
-    const marketBlock = post.contentType === 'marketplace' ? (
-        <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-primary/5 mt-2">
-            {post.price != null && <span className="text-sm font-black text-brand-green-dark dark:text-primary">₦{Number(post.price).toLocaleString()}</span>}
-            {post.isNegotiable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-brand-green-dark font-bold">Negotiable</span>}
-            {post.itemCondition && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/15 text-brand-green-dark font-bold capitalize">
-                    {post.itemCondition === 'used' ? 'Tokunbo' : post.itemCondition}
-                </span>
-            )}
-            {post.availability && post.availability !== 'available' && (
-                <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${post.availability === 'sold' ? 'bg-brand-red/10 text-brand-red' : 'bg-primary/20 text-brand-green-dark'}`}>
-                    {post.availability === 'sold' ? 'SOLD' : 'RESERVED'}
-                </span>
-            )}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        window.location.href = `/chat?user=${authorUsername}`;
+                    }}
+                    className="px-2.5 py-1 rounded-lg text-[9.5px] font-black uppercase border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+                >
+                    <span className="material-symbols-outlined text-[11px]">chat</span>
+                    DM
+                </button>
+            </div>
+            <p className="text-[12.5px] font-medium leading-relaxed whitespace-pre-line" style={{ color: 'var(--neu-text)' }}>
+                {narrative.text}
+            </p>
         </div>
     ) : null;
 
@@ -258,7 +245,7 @@ export function XPostCard({
                         onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
                         className="ml-1 text-primary hover:text-brand-green-dark font-black hover:underline cursor-pointer"
                     >
-                        Show more
+                        see more
                     </button>
                 )}
                 {expanded && displayText.length > 280 && (
@@ -266,7 +253,7 @@ export function XPostCard({
                         onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
                         className="ml-1 text-primary hover:text-brand-green-dark font-black hover:underline cursor-pointer"
                     >
-                        Show less
+                        see less
                     </button>
                 )}
             </div>
@@ -308,6 +295,38 @@ export function XPostCard({
             className={`bg-white dark:bg-[#121b14] p-5 mx-auto w-full select-none ${cardStyleClass} max-w-none rounded-none flex flex-col gap-4`}
             {...articleGestureProps}
         >
+            {/* Repost Shared Origin Label */}
+            {post.parentId && (() => {
+                const sharer = post.sharedFrom || (post.quotedPost?.author as { username?: string; avatarUrl?: string | null; name?: string } | undefined);
+                const sharerUsername = sharer?.username || 'neybor';
+                const sharerAvatar = sharer?.avatarUrl || null;
+                const sharerInitial = (sharer?.name || sharerUsername)[0]?.toUpperCase() || 'N';
+                return (
+                    <div
+                        className="flex items-center gap-2 px-1 -mt-1 -mb-2 text-[11px] text-neu-text-secondary/70 dark:text-white/40 font-semibold cursor-pointer w-fit hover:text-primary transition-colors group"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenRepostChain();
+                        }}
+                    >
+                        <span className="material-symbols-outlined text-[13px] text-primary" style={{ transform: 'scaleX(-1)' }}>reply</span>
+                        <span className="flex items-center gap-1.5">
+                            {/* Mini avatar of the sharer */}
+                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full overflow-hidden border border-primary/20 shrink-0">
+                                {sharerAvatar ? (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                    <img src={sharerAvatar} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="w-full h-full flex items-center justify-center text-[7px] font-black text-white" style={{ background: 'linear-gradient(135deg, #00c431, #009924)' }}>{sharerInitial}</span>
+                                )}
+                            </span>
+                            shared from <span className="text-primary font-bold group-hover:underline">@{sharerUsername}</span>
+                        </span>
+                        <span className="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-70 transition-opacity text-primary">hub</span>
+                    </div>
+                );
+            })()}
+
             {/* Header Row */}
             <div className="flex items-center justify-between gap-3 w-full">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -344,7 +363,7 @@ export function XPostCard({
                     />
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-3 shrink-0">
                     <PostCardFollowButton
                         visible={canFollow}
                         isFollowing={isFollowing}
@@ -377,8 +396,7 @@ export function XPostCard({
                 </>
             )}
 
-            {eventBlock}
-            {marketBlock}
+            {narrativeBlock}
 
             {/* Action Bar (Horizontal Row) */}
             <div className="post-card-action-bar flex items-center justify-between mt-2.5 text-[11px] font-bold">
@@ -462,6 +480,13 @@ export function XPostCard({
             onClose={() => setShowRepostComposer(false)}
             onReposted={onReposted}
         />
+        {chainModalOpen && (
+            <PostRepostChainModal
+                postId={postId}
+                open={chainModalOpen}
+                onClose={() => setChainModalOpen(false)}
+            />
+        )}
         {postActionsSheet}
         </>
     );
