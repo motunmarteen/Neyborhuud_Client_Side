@@ -11,6 +11,7 @@ import SidebarWeatherWidget from './SidebarWeatherWidget';
 import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
 import { useEvents } from '@/hooks/useEvents';
 import { useMarketplaceProducts } from '@/hooks/useMarketplace';
+import { NewsPanel } from '@/components/feed/NewsPanel';
 
 export default function RightSidebar() {
     const { data: eventsData, isLoading: eventsLoading } = useEvents();
@@ -134,6 +135,12 @@ export default function RightSidebar() {
                         })}
                     </div>
                 )}
+            </div>
+
+            {/* News Widget */}
+            <div className="flex flex-col gap-3">
+                <div className="neu-divider" />
+                <NewsPanel />
             </div>
         </aside>
     );

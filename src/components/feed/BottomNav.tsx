@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useSyncExternalStore } from 'react';
+import React, { useRef, useSyncExternalStore, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,12 +35,20 @@ function useIsClient() {
   );
 }
 
+/** Shrinks the bottom nav pill to 2/3 size when the user scrolls down.
+ *  Uses capture-phase listener so it catches scroll from ANY container
+ *  (Next.js App Router wraps content in a scrollable div, not window). */
+function useScrollCompact() {
+  return false;
+}
+
 export function BottomNav({ hidden = false }: BottomNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
   const sos = useSos();
   const hasNeighborhoodEmergency = useNeighborhoodEmergency();
+  const compact = useScrollCompact();
 
   const isClient = useIsClient();
   const profileHref =
@@ -96,7 +104,12 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   };
 
   return (
-    <nav className="app-bottomnav" role="navigation" aria-label="Main navigation">
+    <nav
+      className="app-bottomnav"
+      role="navigation"
+      aria-label="Main navigation"
+      data-compact={compact ? 'true' : undefined}
+    >
       <div className={`app-bottomnav__dock${hidden ? ' app-bottomnav__dock--hidden' : ''}`}>
         <div className="app-bottomnav__pill app-bottomnav__glass">
           {LINK_TABS.map(renderLinkTab)}

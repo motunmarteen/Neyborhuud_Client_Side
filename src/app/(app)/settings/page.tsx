@@ -15,7 +15,7 @@ import { EmailVerificationCard } from '@/components/auth/EmailVerificationCard';
 import { formatProfileBirthday, getZodiacFromBirthday } from '@/lib/profileSnapHelpers';
 import { getStoredTheme, setStoredTheme, applySystemTheme, getSystemPrefersDark } from '@/lib/systemTheme';
 
-type SettingsTab = 'notifications' | 'privacy' | 'account' | 'language';
+type SettingsTab = 'notifications' | 'privacy' | 'account' | 'language' | 'posts';
 
 function isEmailVerifiedStrict(user: unknown): boolean {
   if (!user || typeof user !== 'object') return false;
@@ -102,6 +102,36 @@ export default function SettingsPage() {
     const [accountActionLoading, setAccountActionLoading] = useState<'export' | 'delete' | null>(null);
 
     const [consentRows, setConsentRows] = useState<UserConsentRecord[]>([]);
+    const [postSettings, setPostSettings] = useState({
+        defaultLanguage: 'en',
+        defaultVisibility: 'public',
+        defaultPriorityStandard: 'normal',
+        defaultPriorityUrgent: 'critical',
+        autoHashtagLocation: true,
+        bankName: '',
+        accountName: '',
+        accountNumber: '',
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('neyborhuud_post_settings');
+            if (stored) {
+                try {
+                    setPostSettings((prev) => ({ ...prev, ...JSON.parse(stored) }));
+                } catch { /* ignore */ }
+            }
+        }
+    }, []);
+
+    const updatePostSettings = (updates: Partial<typeof postSettings>) => {
+        const next = { ...postSettings, ...updates };
+        setPostSettings(next);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('neyborhuud_post_settings', JSON.stringify(next));
+        }
+        toast.success('Post settings updated.');
+    };
     const [consentsLoading, setConsentsLoading] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
         if (typeof window === 'undefined') return false;
@@ -596,6 +626,7 @@ export default function SettingsPage() {
               tabs={[
                 { id: 'notifications', label: 'Notifications', icon: 'notifications' },
                 { id: 'privacy', label: 'Privacy', icon: 'shield' },
+                { id: 'posts', label: 'Posts', icon: 'post_add' },
                 { id: 'account', label: 'Account', icon: 'manage_accounts' },
                 { id: 'language', label: t('settings.language'), icon: 'translate' },
               ]}
@@ -1623,6 +1654,123 @@ export default function SettingsPage() {
                       )}
                     </button>
                   ))}
+                </div>
+              </Section>
+            </div>
+          ) : null}
+
+          {activeTab === 'posts' ? (
+            <div className="space-y-4">
+              <Section title="Post Defaults" description="Configure your global default values for new posts created on the feed.">
+                <div className="border-b py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
+                    Default Language
+                  </label>
+                  <select
+                    value={postSettings.defaultLanguage}
+                    onChange={(e) => updatePostSettings({ defaultLanguage: e.target.value })}
+                    className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input bg-transparent"
+                    style={{ color: 'var(--neu-text)' }}
+                  >
+                    <option value="en">English</option>
+                    <option value="ha">Hausa</option>
+                    <option value="yo">Yorùbá</option>
+                    <option value="ig">Igbo</option>
+                    <option value="pcm">Pidgin</option>
+                  </select>
+                </div>
+
+                <div className="border-b py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
+                    Default Visibility
+                  </label>
+                  <select
+                    value={postSettings.defaultVisibility}
+                    onChange={(e) => updatePostSettings({ defaultVisibility: e.target.value })}
+                    className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input bg-transparent"
+                    style={{ color: 'var(--neu-text)' }}
+                  >
+                    <option value="public">Public (Everyone)</option>
+                    <option value="neighborhood">NeyburH (Local)</option>
+                    <option value="ward">Ward</option>
+                  </select>
+                </div>
+
+                <div className="border-b py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
+                    Default Priority (General Posts)
+                  </label>
+                  <select
+                    value={postSettings.defaultPriorityStandard}
+                    onChange={(e) => updatePostSettings({ defaultPriorityStandard: e.target.value })}
+                    className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input bg-transparent"
+                    style={{ color: 'var(--neu-text)' }}
+                  >
+                    <option value="low">Low</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+
+                <div className="py-3">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
+                    Default Priority (Help, Safety & Urgent Alerts)
+                  </label>
+                  <select
+                    value={postSettings.defaultPriorityUrgent}
+                    onChange={(e) => updatePostSettings({ defaultPriorityUrgent: e.target.value })}
+                    className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input bg-transparent"
+                    style={{ color: 'var(--neu-text)' }}
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+              </Section>
+
+              <Section title="Auto-Hashtagging" description="Enrich your posts with neighborhood details automatically.">
+                <ToggleSwitch
+                  enabled={postSettings.autoHashtagLocation}
+                  onChange={(val) => updatePostSettings({ autoHashtagLocation: val })}
+                  label="Auto-Hashtag Active LGA"
+                  description="Appends a hashtag of your current Local Government Area (e.g. #Ikeja) to all new posts."
+                />
+              </Section>
+
+              <Section title="Saved Banking Profile" description="Pre-populate account details when creating Help Request templates.">
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-[var(--neu-text-muted)]">Bank Name</label>
+                    <input
+                      type="text"
+                      value={postSettings.bankName}
+                      onChange={(e) => updatePostSettings({ bankName: e.target.value })}
+                      placeholder="e.g. GTBank, Zenith"
+                      className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-[var(--neu-text-muted)]">Account Name</label>
+                    <input
+                      type="text"
+                      value={postSettings.accountName}
+                      onChange={(e) => updatePostSettings({ accountName: e.target.value })}
+                      placeholder="e.g. Yetunde Marteen"
+                      className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-[var(--neu-text-muted)]">Account Number</label>
+                    <input
+                      type="text"
+                      value={postSettings.accountNumber}
+                      onChange={(e) => updatePostSettings({ accountNumber: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      placeholder="10-digit NUBAN number"
+                      maxLength={10}
+                      className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input font-mono"
+                    />
+                  </div>
                 </div>
               </Section>
             </div>

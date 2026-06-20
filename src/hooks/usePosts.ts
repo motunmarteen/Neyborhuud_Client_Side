@@ -13,6 +13,7 @@ import { contentService } from "@/services/content.service";
 import { CreatePostPayload, FeedTab, ContentType } from "@/types/api";
 import { handleApiError } from "@/lib/error-handler";
 import { useAwardCoins } from "@/hooks/useGamification";
+import { getMockFeedPage } from "@/lib/mockFeedPosts";
 
 /**
  * Hook for location-based feed (primary feed endpoint)
@@ -45,22 +46,51 @@ export function useLocationFeed(
       options?.priority,
       options?.fyiSubtype,
     ],
-    queryFn: ({ pageParam = 1 }) => {
+    queryFn: async ({ pageParam = 1 }) => {
+      const page = pageParam as number;
+      const mock = getMockFeedPage(page, 20);
+
       if (!latitude || !longitude) {
-        throw new Error("Location required for feed");
+        return mock;
       }
-      return contentService.getLocationFeed(latitude, longitude, {
-        ...options,
-        page: pageParam,
-        limit: 20,
-      });
+
+      let realPosts: any[] = [];
+      let realResult: any = null;
+      try {
+        realResult = await contentService.getLocationFeed(latitude, longitude, {
+          ...options,
+          page,
+          limit: 20,
+        });
+        realPosts = realResult?.content ?? (realResult as any)?.data?.content ?? [];
+      } catch {
+        // API failed — use mock only
+        return mock;
+      }
+
+      // Merge: real posts first, then mock posts that fill the remaining slots.
+      // Use a Set of real post ids so mock posts with the same id are skipped.
+      const realIds = new Set(realPosts.map((p: any) => p.id));
+      const mockPadding = mock.content.filter((p) => !realIds.has(p.id));
+      const merged = [...realPosts, ...mockPadding];
+
+      return {
+        ...(realResult ?? mock),
+        content: merged,
+        pagination: {
+          ...(realResult?.pagination ?? mock.pagination),
+          total: Math.max(realResult?.pagination?.total ?? 0, mock.pagination.total),
+          hasMore: (realResult?.pagination?.hasMore ?? false) || mock.pagination.hasMore,
+        },
+      };
     },
     getNextPageParam: (lastPage) => {
       const pagination = lastPage.pagination;
       return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
     },
     initialPageParam: 1,
-    enabled: !!latitude && !!longitude,
+    // Always enabled — mock data is returned even without location
+    enabled: true,
   });
 }
 

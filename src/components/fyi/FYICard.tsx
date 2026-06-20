@@ -67,7 +67,8 @@ export function FYICard({
     const longPress = useLongPress(() => setMenuOpen(true));
 
     const author = post.author as PostAuthor;
-    const authorName = author?.name || 'Anonymous';
+    const fullName = author ? [author.firstName, author.lastName].filter(Boolean).join(' ') : '';
+    const authorName = fullName || author?.name || author?.username || 'Anonymous';
     const authorUsername = author?.username || 'user';
     const authorAvatar = author?.avatarUrl || author?.profilePicture || null;
 
@@ -223,7 +224,7 @@ export function FYICard({
                         onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
                         className="ml-1 text-primary hover:text-brand-green-dark font-black hover:underline cursor-pointer"
                     >
-                        Show more
+                        see more
                     </button>
                 )}
                 {expanded && textContent.length > 280 && (
@@ -231,7 +232,7 @@ export function FYICard({
                         onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
                         className="ml-1 text-primary hover:text-brand-green-dark font-black hover:underline cursor-pointer"
                     >
-                        Show less
+                        see less
                     </button>
                 )}
             </div>
@@ -290,7 +291,7 @@ export function FYICard({
                     />
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-3 shrink-0">
                     <PostCardFollowButton
                         visible={canFollow}
                         isFollowing={isFollowing}

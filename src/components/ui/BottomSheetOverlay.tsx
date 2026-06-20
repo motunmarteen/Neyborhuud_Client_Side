@@ -108,6 +108,7 @@ export function BottomSheetOverlay({
   return createPortal(
     <div
       className={`fixed inset-0 ${zIndexClass} flex ${alignClass}`}
+      style={{ zIndex: 9999 }}
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}

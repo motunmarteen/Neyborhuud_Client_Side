@@ -173,7 +173,26 @@ export function useFeedDiscoveryPools(enabled: boolean, geo: { lat: number | nul
   const news = useQuery({
     queryKey: ["feed-discovery", "news"],
     queryFn: async (): Promise<RssArticle[]> => {
-      return await newsService.getArticles({ region: 'nigeria', limit: 18 });
+      try {
+        const [ngRes, intRes] = await Promise.all([
+          newsService.getArticles({ region: 'nigeria', limit: 10 }).catch(() => []),
+          newsService.getArticles({ region: 'international', limit: 10 }).catch(() => []),
+        ]);
+
+        const ng = (ngRes || []).map(a => ({ ...a, region: 'nigeria' as const }));
+        const int = (intRes || []).map(a => ({ ...a, region: 'international' as const }));
+
+        const interleaved: RssArticle[] = [];
+        const maxLen = Math.max(ng.length, int.length);
+        for (let i = 0; i < maxLen; i++) {
+          if (i < ng.length) interleaved.push(ng[i]);
+          if (i < int.length) interleaved.push(int[i]);
+        }
+        return interleaved;
+      } catch (err) {
+        console.error("Error fetching feed news:", err);
+        return [];
+      }
     },
     enabled,
     staleTime: 5 * 60_000,
@@ -196,17 +215,58 @@ export function useFeedDiscoveryPools(enabled: boolean, geo: { lat: number | nul
     gcTime: 15 * 60_000,
   });
 
+  // --- MOCK FALLBACK DATA ---
+  const MOCK_EVENTS = useMemo(() => [
+    { id: 'evt-1', title: 'Community Cleanup Drive', description: 'Join us to clean the neighborhood park!', startDate: new Date(Date.now() + 86400000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1618477461853-cf6ed80fbfc9?w=500&q=80', type: 'Community', attendeesCount: 45, venue: 'Central Park' },
+    { id: 'evt-2', title: 'Weekend Farmers Market', description: 'Fresh organic produce', startDate: new Date(Date.now() + 172800000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=500&q=80', type: 'Market', attendeesCount: 120, venue: 'Town Square' },
+    { id: 'evt-3', title: 'Local Tech Meetup', description: 'Networking for devs', startDate: new Date(Date.now() + 345600000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=80', type: 'Tech', attendeesCount: 60, venue: 'Co-working Hub' },
+    { id: 'evt-4', title: 'Neighborhood Barbecue', description: 'Free food and drinks', startDate: new Date(Date.now() + 604800000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&q=80', type: 'Social', attendeesCount: 85, venue: 'Community Center' },
+    { id: 'evt-5', title: 'Yoga in the Park', description: 'Morning yoga session', startDate: new Date(Date.now() + 43200000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&q=80', type: 'Health', attendeesCount: 25, venue: 'Greenwood Park' }
+  ] as unknown as Event[], []);
+
+  const MOCK_JOBS = useMemo(() => [
+    { id: 'job-1', title: 'Barista (Part-time)', employerName: 'Daily Grind Coffee', location: { state: 'Lagos', lga: 'Ikeja' }, salary: '₦80,000/mo' },
+    { id: 'job-2', title: 'Front-End Developer', employerName: 'TechStart', location: { state: 'Lagos', lga: 'Yaba' }, salary: '₦400,000/mo' },
+    { id: 'job-3', title: 'Delivery Rider', employerName: 'QuickDrop Logistics', location: { state: 'Lagos', lga: 'Surulere' }, salary: '₦120,000/mo' },
+    { id: 'job-4', title: 'Retail Store Manager', employerName: 'SuperMart', location: { state: 'Lagos', lga: 'Lekki' }, salary: '₦250,000/mo' },
+    { id: 'job-5', title: 'Graphic Designer', employerName: 'Creative Hive', location: { state: 'Lagos', lga: 'Victoria Island' }, salary: '₦300,000/mo' }
+  ] as unknown as Job[], []);
+
+  const MOCK_HELP = useMemo(() => [
+    { id: 'help-1', content: 'Does anyone have a jump starter? Car battery is dead near the mall.', createdAt: new Date(Date.now() - 3600000).toISOString(), author: { name: 'Sarah O.', avatarUrl: 'https://i.pravatar.cc/150?u=sarah' } },
+    { id: 'help-2', content: 'Looking for recommendations for a reliable plumber urgently!', createdAt: new Date(Date.now() - 7200000).toISOString(), author: { name: 'Michael K.', avatarUrl: 'https://i.pravatar.cc/150?u=michael' } },
+    { id: 'help-3', content: 'Found a lost golden retriever with a blue collar around Elm St.', createdAt: new Date(Date.now() - 14400000).toISOString(), author: { name: 'Jessica T.', avatarUrl: 'https://i.pravatar.cc/150?u=jessica' } },
+    { id: 'help-4', content: 'Need someone to help lift a heavy couch up one flight of stairs today.', createdAt: new Date(Date.now() - 86400000).toISOString(), author: { name: 'David B.', avatarUrl: 'https://i.pravatar.cc/150?u=david' } },
+    { id: 'help-5', content: 'Can anyone recommend a good tutor for JSS3 Math?', createdAt: new Date(Date.now() - 172800000).toISOString(), author: { name: 'Amina S.', avatarUrl: 'https://i.pravatar.cc/150?u=amina' } }
+  ] as unknown as Post[], []);
+
+  const MOCK_SERVICES = useMemo(() => [
+    { id: 'srv-1', title: 'Professional House Cleaning', providerName: 'CleanSweep Co.', rating: 4.8, images: ['https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&q=80'] },
+    { id: 'srv-2', title: 'Expert AC Repair & Installation', providerName: 'CoolBreeze Tech', rating: 4.9, images: ['https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80'] },
+    { id: 'srv-3', title: 'Personal Fitness Trainer', providerName: 'FitLife by John', rating: 5.0, images: ['https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80'] },
+    { id: 'srv-4', title: 'Reliable Moving & Packing', providerName: 'SwiftMovers', rating: 4.7, images: ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&q=80'] },
+    { id: 'srv-5', title: 'Dog Walking & Pet Sitting', providerName: 'Happy Paws', rating: 4.9, images: ['https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=500&q=80'] }
+  ] as unknown as Service[], []);
+
+  const MOCK_NEIGHBORS = useMemo(() => [
+    { id: 'usr-1', username: 'alexandra_c', firstName: 'Alexandra', lastName: 'C.', avatarUrl: 'https://i.pravatar.cc/150?u=alex' },
+    { id: 'usr-2', username: 'sam_builder', firstName: 'Sam', lastName: 'Builder', avatarUrl: 'https://i.pravatar.cc/150?u=sam' },
+    { id: 'usr-3', username: 'cindy_tech', firstName: 'Cindy', lastName: 'T.', avatarUrl: 'https://i.pravatar.cc/150?u=cindy' },
+    { id: 'usr-4', username: 'mr_baker', firstName: 'Tom', lastName: 'Baker', avatarUrl: 'https://i.pravatar.cc/150?u=tom' },
+    { id: 'usr-5', username: 'emma_w', firstName: 'Emma', lastName: 'Watson', avatarUrl: 'https://i.pravatar.cc/150?u=emma' }
+  ] as unknown as User[], []);
+
   const pools = useMemo<DiscoveryPools>(
     () => ({
       marketplace: marketplace.data ?? [],
-      events: events.data ?? [],
-      jobs: jobs.data ?? [],
-      helpRequests: helpRequests.data ?? [],
-      services: services.data ?? [],
+      events: events.data?.length ? events.data : MOCK_EVENTS,
+      jobs: jobs.data?.length ? jobs.data : MOCK_JOBS,
+      helpRequests: helpRequests.data?.length ? helpRequests.data : MOCK_HELP,
+      services: services.data?.length ? services.data : MOCK_SERVICES,
       news: news.data ?? [],
-      neighbors: neighbors.data ?? [],
+      neighbors: neighbors.data?.length ? neighbors.data : MOCK_NEIGHBORS,
     }),
-    [marketplace.data, events.data, jobs.data, helpRequests.data, services.data, news.data, neighbors.data],
+    [marketplace.data, events.data, jobs.data, helpRequests.data, services.data, news.data, neighbors.data, MOCK_EVENTS, MOCK_JOBS, MOCK_HELP, MOCK_SERVICES, MOCK_NEIGHBORS],
   );
 
   const isLoading = marketplace.isLoading || events.isLoading || jobs.isLoading || helpRequests.isLoading || services.isLoading || news.isLoading || neighbors.isLoading;

@@ -23,7 +23,8 @@ function toMediaItems(post: Post): PostCardMediaItem[] {
 
 export function QuotedPostEmbed({ post, compact = true, onClick }: QuotedPostEmbedProps) {
   const author = post.author as PostAuthor;
-  const authorName = author?.name || 'Anonymous';
+  const fullName = author ? [author.firstName, author.lastName].filter(Boolean).join(' ') : '';
+  const authorDisplayName = fullName || author?.name || author?.username || 'Anonymous';
   const authorUsername = author?.username || 'user';
   const authorAvatar = author?.avatarUrl || author?.profilePicture || null;
   const text = (post.content || post.body || '').trim();
@@ -35,13 +36,13 @@ export function QuotedPostEmbed({ post, compact = true, onClick }: QuotedPostEmb
       <div className="quoted-post-embed__header">
         <div className="quoted-post-embed__avatar">
           {authorAvatar ? (
-            <Image src={authorAvatar} alt={authorName} fill sizes="20px" className="object-cover" unoptimized />
+            <Image src={authorAvatar} alt={authorDisplayName} fill sizes="20px" className="object-cover" unoptimized />
           ) : (
             <span className="material-symbols-outlined text-[14px] text-neu-text-secondary">person</span>
           )}
         </div>
         <div className="quoted-post-embed__meta min-w-0">
-          <span className="quoted-post-embed__name truncate">{authorName}</span>
+          <span className="quoted-post-embed__name truncate">{authorDisplayName}</span>
           <PostCardVerificationBadge author={author} />
           <span className="quoted-post-embed__handle truncate">@{authorUsername}</span>
           {post.createdAt && (
@@ -60,7 +61,7 @@ export function QuotedPostEmbed({ post, compact = true, onClick }: QuotedPostEmb
       {mediaItems.length > 0 && (
         <PostCardMediaSlider
           items={mediaItems}
-          altPrefix={`Post by ${authorName}`}
+          altPrefix={`Post by ${authorDisplayName}`}
           compact={compact}
           className="quoted-post-embed__media"
         />

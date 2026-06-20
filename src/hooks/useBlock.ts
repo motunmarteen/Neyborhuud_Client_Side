@@ -5,6 +5,7 @@
 
 'use client';
 
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { blockService } from "@/services/block.service";
 import { handleApiError } from "@/lib/error-handler";
@@ -27,6 +28,15 @@ export function useBlock(userId: string | undefined, options?: { enabled?: boole
     throwOnError: false,
     staleTime: 30000,
   });
+
+  useEffect(() => {
+    if (userId) {
+      console.log(`[useBlock] Debug status data for ${userId}:`, {
+        isBlocked: blockStatusData?.data?.isBlocked,
+        blockStatusData
+      });
+    }
+  }, [userId, blockStatusData]);
 
   // Block mutation
   const blockMutation = useMutation({

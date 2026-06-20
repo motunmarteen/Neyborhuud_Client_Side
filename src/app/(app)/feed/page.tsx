@@ -40,6 +40,7 @@ import { mergeDiscoveryIntoFeed, type BaseFeedItem, type DiscoveryFeedItem } fro
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
 import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
 import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
+import { FeedNewsCarouselBlock } from '@/components/feed/FeedNewsCarouselBlock';
 
 const getFilterBannerData = (type: string) => {
     switch (type) {
@@ -617,69 +618,81 @@ function XFeedInner() {
                         {/* Posts stream */}
                         {timeline.length > 0 && (
                         <div className="feed-posts-stream flex flex-col gap-0 pb-0">
-                            {timeline.map((item) => {
-                                if (
-                                    item._type === 'discovery_marketplace' ||
-                                    item._type === 'discovery_event' ||
-                                    item._type === 'discovery_job' ||
-                                    item._type === 'discovery_help' ||
-                                    item._type === 'discovery_services' ||
-                                    item._type === 'discovery_news' ||
-                                    item._type === 'discovery_neighbors'
-                                ) {
-                                    return (
-                                        <div
-                                            key={item.key}
-                                            className="w-full"
-                                        >
-                                            <FeedDiscoveryBlock
-                                                item={item}
-                                                userLocation={location}
-                                                currentUserId={currentUserId}
-                                            />
-                                        </div>
-                                    );
-                                }
-                                const post = item.data;
-                                if (post.contentType === 'help_request') {
+                            {timeline.map((item, index) => {
+                                const renderItem = () => {
+                                    if (
+                                        item._type === 'discovery_marketplace' ||
+                                        item._type === 'discovery_event' ||
+                                        item._type === 'discovery_job' ||
+                                        item._type === 'discovery_help' ||
+                                        item._type === 'discovery_services' ||
+                                        item._type === 'discovery_news' ||
+                                        item._type === 'discovery_neighbors'
+                                    ) {
+                                        return (
+                                            <div
+                                                key={item.key}
+                                                className="w-full"
+                                            >
+                                                <FeedDiscoveryBlock
+                                                    item={item}
+                                                    userLocation={location}
+                                                    currentUserId={currentUserId}
+                                                />
+                                            </div>
+                                        );
+                                    }
+                                    const post = item.data;
+                                    if (post.contentType === 'help_request') {
+                                        return (
+                                            <div key={post.id} className="w-full md:snap-center" data-comment-anchor={`post-${post.id}`}>
+                                                <HelpRequestCard
+                                                    post={post}
+                                                    onComment={(id) => {
+                                                        const el = document.querySelector(`[data-comment-anchor="post-${id}"]`) as HTMLElement | null;
+                                                        openCommentsFromElement({ kind: 'post', id }, el);
+                                                    }}
+                                                    onEdit={handleEditPost}
+                                                    onDelete={(id) => setDeletingPostId(id)}
+                                                    onReport={(id) => setReportingPostId(id)}
+                                                    onPin={(id) => setPinningPostId(id)}
+                                                />
+                                            </div>
+                                        );
+                                    }
                                     return (
                                         <div key={post.id} className="w-full md:snap-center" data-comment-anchor={`post-${post.id}`}>
-                                            <HelpRequestCard
+                                            <XPostCard
                                                 post={post}
-                                                onComment={(id) => {
-                                                    const el = document.querySelector(`[data-comment-anchor="post-${id}"]`) as HTMLElement | null;
-                                                    openCommentsFromElement({ kind: 'post', id }, el);
+                                                currentUserId={currentUserId || undefined}
+                                                userLocation={location}
+                                                onLike={() => handleLike(post)}
+                                                onComment={() => {
+                                                    const el = document.querySelector(`[data-comment-anchor="post-${post.id}"]`) as HTMLElement | null;
+                                                    openCommentsFromElement({ kind: 'post', id: post.id }, el);
                                                 }}
-                                                onEdit={handleEditPost}
-                                                onDelete={(id) => setDeletingPostId(id)}
+                                                onShare={() => handleShare(post)}
+                                                onSave={() => handleSave(post)}
+                                                onEdit={() => handleEditPost(post)}
+                                                onDelete={() => setDeletingPostId(post.id)}
                                                 onReport={(id) => setReportingPostId(id)}
                                                 onPin={(id) => setPinningPostId(id)}
+                                                onEmergencyAction={(action) => handleEmergencyAction(post, action)}
+                                                onReposted={() => queryClient.invalidateQueries({ queryKey: ['locationFeed'] })}
+                                                onCardClick={() => openPostDetails(post.id)}
                                             />
                                         </div>
                                     );
-                                }
+                                };
+
                                 return (
-                                    <div key={post.id} className="w-full md:snap-center" data-comment-anchor={`post-${post.id}`}>
-                                        <XPostCard
-                                            post={post}
-                                            currentUserId={currentUserId || undefined}
-                                            userLocation={location}
-                                            onLike={() => handleLike(post)}
-                                            onComment={() => {
-                                                const el = document.querySelector(`[data-comment-anchor="post-${post.id}"]`) as HTMLElement | null;
-                                                openCommentsFromElement({ kind: 'post', id: post.id }, el);
-                                            }}
-                                            onShare={() => handleShare(post)}
-                                            onSave={() => handleSave(post)}
-                                            onEdit={() => handleEditPost(post)}
-                                            onDelete={() => setDeletingPostId(post.id)}
-                                            onReport={(id) => setReportingPostId(id)}
-                                            onPin={(id) => setPinningPostId(id)}
-                                            onEmergencyAction={(action) => handleEmergencyAction(post, action)}
-                                            onReposted={() => queryClient.invalidateQueries({ queryKey: ['locationFeed'] })}
-                                            onCardClick={() => openPostDetails(post.id)}
-                                        />
-                                    </div>
+                                    <React.Fragment key={(item as any).key ?? (item as any).data?.id ?? `feed-item-${index}`}>
+                                        {renderItem()}
+                                        {/* Inject News Carousel exactly after the 3rd post (index 2) */}
+                                        {index === 2 && (
+                                            <FeedNewsCarouselBlock />
+                                        )}
+                                    </React.Fragment>
                                 );
                             })}
                             </div>
@@ -698,7 +711,7 @@ function XFeedInner() {
                             </div>
                         )}
                         {/* Mobile bottom nav spacing clearance */}
-                        <div className="h-4 shrink-0" />
+                        <div className="h-2 shrink-0" />
                         </div>
                     </div>
                 </main>

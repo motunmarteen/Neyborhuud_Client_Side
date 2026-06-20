@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import type { DiscoveryFeedItem } from "@/lib/feedDiscoveryMerge";
 import type { Post, Service, Event, Job, User } from "@/types/api";
 import type { RssArticle } from "@/types/incident";
@@ -77,17 +77,19 @@ function formatSalary(job: Job) {
 }
 
 /* ── Section chrome — header bar above a horizontal carousel ── */
-function DiscoveryChrome({
+export function DiscoveryChrome({
   icon,
   label,
   subtitle,
   href,
+  action,
   children,
 }: {
   icon: string;
   label: string;
   subtitle?: string;
   href?: string;
+  action?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -101,11 +103,14 @@ function DiscoveryChrome({
             <p className="text-[13px] font-extrabold text-[var(--neu-text)] dark:text-white leading-tight">{label}</p>
           </div>
         </div>
-        {href && (
-          <Link href={href} className="text-[12px] font-bold text-[var(--neu-text-muted)] dark:text-white/50 hover:text-primary transition-colors">
-            View All
-          </Link>
-        )}
+        <div className="flex items-center gap-3">
+          {href && (
+            <Link href={href} className="text-[12px] font-bold text-[var(--neu-text-muted)] dark:text-white/50 hover:text-primary transition-colors">
+              View All
+            </Link>
+          )}
+          {action}
+        </div>
       </div>
       <div className="px-3 pb-3">
         {children}
@@ -114,8 +119,74 @@ function DiscoveryChrome({
   );
 }
 
+/* ── Auto-scrolling carousel wrapper ── */
+export function AutoScrollCarousel({ children, interval = 3000, className = "horizontal-carousel items-start" }: { children: ReactNode; interval?: number; className?: string }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    const startScroll = () => {
+      timer = setInterval(() => {
+        if (!scrollRef.current) return;
+        const el = scrollRef.current;
+        
+        // Since we duplicated the contents, the true scroll width is half.
+        // We calculate the halfway point (the start of the second set).
+        const halfWidth = el.scrollWidth / 2;
+        
+        // If we've reached or passed the start of the cloned set
+        if (el.scrollLeft >= halfWidth - 5) {
+          // Instantly jump back to the equivalent position in the first set
+          el.scrollTo({ left: el.scrollLeft - halfWidth, behavior: "auto" });
+          
+          // Wait 1-2 frames so the browser registers the jump, then scroll smoothly
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              el.scrollBy({ left: 172, behavior: "smooth" });
+            });
+          });
+        } else {
+          el.scrollBy({ left: 172, behavior: "smooth" });
+        }
+      }, interval);
+    };
+
+    startScroll();
+
+    // Pause auto-scroll on interaction
+    const handleInteractionStart = () => clearInterval(timer);
+    const handleInteractionEnd = () => startScroll();
+
+    const currentEl = scrollRef.current;
+    if (currentEl) {
+      currentEl.addEventListener('mouseenter', handleInteractionStart);
+      currentEl.addEventListener('mouseleave', handleInteractionEnd);
+      currentEl.addEventListener('touchstart', handleInteractionStart, { passive: true });
+      currentEl.addEventListener('touchend', handleInteractionEnd, { passive: true });
+    }
+
+    return () => {
+      clearInterval(timer);
+      if (currentEl) {
+        currentEl.removeEventListener('mouseenter', handleInteractionStart);
+        currentEl.removeEventListener('mouseleave', handleInteractionEnd);
+        currentEl.removeEventListener('touchstart', handleInteractionStart);
+        currentEl.removeEventListener('touchend', handleInteractionEnd);
+      }
+    };
+  }, [interval]);
+
+  return (
+    <div ref={scrollRef} className={className}>
+      <div className="contents">{children}</div>
+      <div className="contents" aria-hidden="true">{children}</div>
+    </div>
+  );
+}
+
 /* ── Stake-style card: full-bleed image with overlaid content ── */
-function StakeCard({
+export function StakeCard({
   href,
   imageSrc,
   imageAlt,
@@ -206,7 +277,7 @@ function StakeCard({
 }
 
 /* ── Category cover card — vibrant gradient with illustration ── */
-function CategoryCoverCard({
+export function CategoryCoverCard({
   imageSrc,
   title,
   subtitle,
@@ -319,7 +390,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
         label="Marketplace"
         href="/marketplace"
       >
-        <div className="horizontal-carousel items-start">
+        <AutoScrollCarousel>
           <CategoryCoverCard
             imageSrc="/illustration_marketplace.png"
             title="Local Market"
@@ -369,7 +440,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               />
             );
           })}
-        </div>
+        </AutoScrollCarousel>
       </DiscoveryChrome>
     );
   }
@@ -384,7 +455,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
         label="Events"
         href="/events"
       >
-        <div className="horizontal-carousel items-start">
+        <AutoScrollCarousel>
           <CategoryCoverCard
             imageSrc="/illustration_events.png"
             title="Huud Gatherings"
@@ -409,7 +480,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             statDot="#1A56FF"
             statText={ev.attendeesCount != null ? `${ev.attendeesCount} going` : ev.venue || undefined}
           />
-        </div>
+        </AutoScrollCarousel>
       </DiscoveryChrome>
     );
   }
@@ -429,7 +500,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
         label="Jobs"
         href="/jobs"
       >
-        <div className="horizontal-carousel items-start">
+        <AutoScrollCarousel>
           <CategoryCoverCard
             imageSrc="/illustration_jobs.png"
             title="Local Careers"
@@ -456,7 +527,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
                 : undefined
             }
           />
-        </div>
+        </AutoScrollCarousel>
       </DiscoveryChrome>
     );
   }
@@ -466,7 +537,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
 
     return (
       <DiscoveryChrome icon="volunteer_activism" label="Help Needed" href="/help-request">
-        <div className="horizontal-carousel items-start">
+        <AutoScrollCarousel>
           <CategoryCoverCard
             imageSrc="/illustration_help.png"
             title="Community Help"
@@ -493,7 +564,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               statText={formatTimeAgo(req.createdAt)}
             />
           ))}
-        </div>
+        </AutoScrollCarousel> 
       </DiscoveryChrome>
     );
   }
@@ -503,7 +574,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
 
     return (
       <DiscoveryChrome icon="handyman" label="Local Services" href="/services">
-        <div className="horizontal-carousel items-start">
+        <AutoScrollCarousel>
           <CategoryCoverCard
             imageSrc="/illustration_services.png"
             title="Local Pros"
@@ -532,7 +603,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               statText={srv.location?.formattedAddress || "Local"}
             />
           ))}
-        </div>
+        </AutoScrollCarousel>
       </DiscoveryChrome>
     );
   }
@@ -541,14 +612,14 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
     const { articles } = item;
 
     return (
-      <DiscoveryChrome icon="newspaper" label="Local News" href="/local-news">
-        <div className="horizontal-carousel items-start">
+      <DiscoveryChrome icon="newspaper" label="Local News" href="/local-news?tab=nigeria">
+        <AutoScrollCarousel>
           <CategoryCoverCard
             imageSrc="/illustration_fyi.png"
-            title="Local Updates"
-            subtitle="Stay informed"
+            title="Country & World"
+            subtitle="Top RSS Headlines"
             buttonLabel="Read News"
-            buttonHref="/local-news"
+            buttonHref="/local-news?tab=nigeria"
             gradient="linear-gradient(135deg, #1a2a3a 0%, #2a4a6a 50%, #3a6a9a 100%)"
           />
           {articles.map(art => (
@@ -560,7 +631,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               fallbackGradient="linear-gradient(135deg, #1a2a3a 0%, #2a3a5a 100%)"
               topBadge={
                 <span className="rounded-full bg-brand-blue/70 px-2 py-0.5 text-[8px] font-black uppercase text-white/90 backdrop-blur-sm">
-                  {art.sourceName}
+                  {art.region === 'international' ? 'Global' : 'Nigeria'} • {art.sourceName}
                 </span>
               }
               title={art.title}
@@ -569,7 +640,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               statText={formatTimeAgo(art.pubDate)}
             />
           ))}
-        </div>
+        </AutoScrollCarousel>
       </DiscoveryChrome>
     );
   }

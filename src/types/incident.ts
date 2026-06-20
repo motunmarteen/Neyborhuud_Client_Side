@@ -241,6 +241,7 @@ export interface RssArticle {
   source: string;     // source id
   sourceName: string; // source display name
   imageUrl?: string;
+  region?: 'nigeria' | 'international';
 }
 
 // ── Community Emergency Post types ───────────────────────────────────────────

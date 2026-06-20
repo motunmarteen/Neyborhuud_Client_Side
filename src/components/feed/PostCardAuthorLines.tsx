@@ -39,7 +39,10 @@ export function PostCardAuthorLines({
   onProfileClick,
 }: PostCardAuthorLinesProps) {
   const place = locationLabel(postLocation, authorLocation);
-  const displayName = isAnonymousAuthor ? 'Anonymous Neyborh' : authorName;
+  const fullName = author ? [author.firstName, author.lastName].filter(Boolean).join(' ') : '';
+  const displayName = isAnonymousAuthor
+    ? 'Anonymous Neyborh'
+    : fullName || authorName || author?.name || author?.username || 'Anonymous';
 
   return (
     <div className="post-card-header__text min-w-0 flex-1">
@@ -47,7 +50,7 @@ export function PostCardAuthorLines({
         <Link
           href={`/profile/${authorUsername}`}
           onClick={onProfileClick}
-          className="truncate min-w-0 max-w-[46%] text-xs font-black text-neu-text dark:text-white hover:underline leading-tight"
+          className="truncate min-w-0 max-w-[55%] text-xs font-black text-neu-text dark:text-white hover:underline leading-tight"
         >
           {displayName}
         </Link>

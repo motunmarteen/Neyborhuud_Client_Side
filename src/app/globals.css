@@ -169,8 +169,8 @@ html.dark { color-scheme: dark; }
   --app-topnav-icon-size: 2rem;
   --app-topnav-text-size: 1.125rem;
   --app-topnav-logo-size: 1.4375rem;
-  --app-topnav-logo-tracking: 0.05em;
-  --app-nav-bottom: calc(var(--app-bottomnav-inner-height) + (var(--app-bottomnav-sos-size) / 2) + var(--safe-bottom));
+  --app-topnav-logo-tracking: -0.05em;
+  --app-nav-bottom: calc(4.25rem + var(--safe-bottom));
   --app-scroll-bottom: calc(var(--app-nav-bottom) + var(--viewport-bottom-inset));
   --app-topnav-offset: calc(var(--app-topnav-height) + var(--safe-top));
 
@@ -605,17 +605,17 @@ main.feed-scroll-main,
   justify-content: space-evenly;
   height: 3.5rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(24px) saturate(210%);
-  -webkit-backdrop-filter: blur(24px) saturate(210%);
-  border: 1px solid rgba(0, 111, 53, 0.08);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(28px) saturate(210%);
+  -webkit-backdrop-filter: blur(28px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 
-    0 10px 30px -5px rgba(0, 0, 0, 0.08),
-    0 2px 8px -2px rgba(0, 0, 0, 0.04);
+    0 12px 32px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .dark .app-bottomnav__pill {
-  background: rgba(18, 27, 20, 0.88);
+  background: rgba(18, 27, 20, 0.45);
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 
     0 12px 40px rgba(0, 0, 0, 0.45),
@@ -632,7 +632,7 @@ main.feed-scroll-main,
   min-width: 0;
   height: 100%;
   text-decoration: none;
-  color: rgba(60, 60, 67, 0.52);
+  color: rgba(26, 26, 26, 0.85); /* Darker text/icon for better visibility */
   touch-action: manipulation;
   transition: 
     color 180ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -641,7 +641,7 @@ main.feed-scroll-main,
 }
 
 .dark .app-bottomnav__item {
-  color: rgba(235, 235, 245, 0.48);
+  color: rgba(233, 246, 230, 0.80); /* Darker tint for dark mode */
 }
 
 button.app-bottomnav__item {
@@ -652,11 +652,11 @@ button.app-bottomnav__item {
 }
 
 .app-bottomnav__item:hover {
-  color: rgba(60, 60, 67, 0.82);
+  color: rgba(26, 26, 26, 1.0);
 }
 
 .dark .app-bottomnav__item:hover {
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 1.0);
 }
 
 .app-bottomnav__item--active {
@@ -720,18 +720,18 @@ button.app-bottomnav__item {
   width: 100%;
   height: 100%;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(24px) saturate(210%);
-  -webkit-backdrop-filter: blur(24px) saturate(210%);
-  border: 1px solid rgba(0, 111, 53, 0.08);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(28px) saturate(210%);
+  -webkit-backdrop-filter: blur(28px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 
-    0 10px 30px -5px rgba(0, 0, 0, 0.08),
-    0 2px 8px -2px rgba(0, 0, 0, 0.04);
+    0 12px 32px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   padding: 0.125rem;
 }
 
 .dark .app-bottomnav__sos-glass {
-  background: rgba(18, 27, 20, 0.88);
+  background: rgba(18, 27, 20, 0.45);
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 
     0 12px 40px rgba(0, 0, 0, 0.45),
@@ -931,6 +931,62 @@ button.app-bottomnav__item {
 .app-bottomnav__sos-ring--live {
   background: rgba(255, 0, 0, 0.35);
   animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ── Scroll-compact bottom nav ─────────────────────────────────────────────
+   When [data-compact] is on .app-bottomnav ONLY the pill shrinks to 2/3.
+   The SOS button is intentionally unaffected.
+────────────────────────────────────────────────────────────────────────── */
+.app-bottomnav[data-compact] .app-bottomnav__pill {
+  transform: scale(0.667);
+  transform-origin: bottom center;
+  opacity: 0.85;
+}
+
+/* Keep dock layout stable — prevent SOS from shifting */
+.app-bottomnav[data-compact] .app-bottomnav__dock {
+  align-items: flex-end;
+}
+
+/* ── Custom Styled Select / Dropdown ────────────────────────────────────── */
+select.create-post-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--neu-text);
+  background-color: rgba(0, 0, 0, 0.025);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+  /* Arrow icon via background SVG */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+select.create-post-select:focus {
+  outline: none;
+  border-color: rgba(0, 196, 49, 0.5);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.03),
+    0 0 0 3px rgba(0, 196, 49, 0.09);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+select.create-post-select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* Local Huud launcher sheet (bottom nav) */
@@ -1150,14 +1206,14 @@ button.app-bottomnav__item {
   font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
   text-transform: lowercase;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.05em;
 }
 
 /** App chrome — official product name (NeyborHuud), preserves casing */
 .brand-name {
   font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.05em;
 }
 
 /** Top nav wordmark — overrides .brand-name tight tracking */
@@ -3349,14 +3405,15 @@ html[data-scroll-locked] .feed-scroll-main {
   gap: 0.375rem;
   padding: 0.4rem 0.45rem 0.4rem 1rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(28px) saturate(2.2) brightness(1.08);
+  -webkit-backdrop-filter: blur(28px) saturate(2.2) brightness(1.08);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 6px 24px rgba(0, 0, 0, 0.16),
-    0 1px 3px rgba(0, 0, 0, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.22),
+    0 1px 3px rgba(0, 0, 0, 0.1);
   transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 
@@ -7850,5 +7907,112 @@ button:focus-visible:not([class*="focus-visible"]) {
     scroll-behavior: auto;
   }
 }
+
+/* ── Post card actions sheet (iOS-style premium bottom sheet grid) ── */
+.post-card-actions-sheet {
+  padding: 1.25rem;
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+.post-card-actions-sheet__header {
+  padding-bottom: 0.875rem;
+  margin-bottom: 0.875rem;
+  border-bottom: 1px solid rgba(0, 111, 53, 0.08);
+}
+
+.dark .post-card-actions-sheet__header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.post-card-actions-sheet__author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.post-card-actions-sheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-card-actions-sheet__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.post-card-actions-sheet__section-title {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--neu-text-muted);
+  padding-left: 0.25rem;
+}
+
+.post-card-actions-sheet__list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.post-card-actions-sheet__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--neu-text);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 0.35rem;
+  outline: none;
+}
+
+.dark .post-card-actions-sheet__item {
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+}
+
+.post-card-actions-sheet__item:hover:not(:disabled) {
+  background: rgba(0, 212, 49, 0.08);
+  transform: scale(1.02);
+}
+
+.dark .post-card-actions-sheet__item:hover:not(:disabled) {
+  background: rgba(0, 212, 49, 0.12);
+}
+
+.post-card-actions-sheet__item:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.post-card-actions-sheet__item--danger {
+  color: var(--brand-red) !important;
+}
+
+.post-card-actions-sheet__item--disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.post-card-actions-sheet__item-label {
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.post-card-actions-sheet__divider {
+  display: none; /* Handled by section gaps instead of line dividers */
+}
+
 
 

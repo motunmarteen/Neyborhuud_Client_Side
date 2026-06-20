@@ -76,13 +76,14 @@ export function mergeDiscoveryIntoFeed(
   }
 
   const salt = feedSalt(base);
-  const maxInjections = Math.min(16, Math.max(1, Math.floor(base.length / 3)));
+  // Allow up to 2 injections per 7 posts — scales with feed length
+  const maxInjections = Math.min(30, Math.max(10, Math.floor(base.length / 3)));
 
   const out: DiscoveryFeedItem[] = [];
   let baseIdx = 0;
   let injections = 0;
-  let nextInjectAt =
-    3 + Math.floor(unitRandom(`${salt}:gap0`) * 4); // first slot after ~3–6 items
+  // First injection after 3 posts, then every 5–8 posts for a natural feel
+  let nextInjectAt = 3;
   let rotate = Math.floor(unitRandom(`${salt}:rot`) * 48);
 
   const kindOrder = ["marketplace", "event", "job", "help", "service", "news", "neighbor"] as const;
@@ -105,17 +106,10 @@ export function mergeDiscoveryIntoFeed(
 
     if (baseIdx >= nextInjectAt) {
       let placed = false;
-      /** Marketplace first when the pool has rows; rotate event/job for variety */
+      // Rotate evenly across all available types — no marketplace bias
       const available = kindOrder.filter((k) => pickPool(k).length > 0);
-      const withMarketplaceFirst = [
-        ...available.filter((k) => k === "marketplace"),
-        ...(() => {
-          const rest = available.filter((k) => k !== "marketplace");
-          if (rest.length === 0) return rest;
-          const o = rotate % rest.length;
-          return [...rest.slice(o), ...rest.slice(0, o)];
-        })(),
-      ];
+      const o = rotate % available.length;
+      const withMarketplaceFirst = [...available.slice(o), ...available.slice(0, o)];
 
       for (const kind of withMarketplaceFirst) {
         if (placed) break;
@@ -235,7 +229,8 @@ export function mergeDiscoveryIntoFeed(
         rotate += 1 + Math.floor(unitRandom(`${salt}-${baseIdx}-placed`) * 2);
       }
 
-      nextInjectAt = baseIdx + 5 + Math.floor(unitRandom(`${salt}-next-${baseIdx}`) * 5);
+      // Space injections 5–8 posts apart for a natural feel
+      nextInjectAt = baseIdx + 5 + Math.floor(unitRandom(`${salt}-gap-${baseIdx}`) * 4);
     }
   }
 

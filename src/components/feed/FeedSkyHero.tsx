@@ -5,8 +5,10 @@
 
 'use client';
 
-import { useState, useEffect, useMemo, type MouseEvent } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
+import { CreatePostModal } from './CreatePostModal';
+import { AutoScrollCarousel } from './FeedDiscoveryBlock';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   getTimePeriod,
@@ -22,14 +24,10 @@ import {
   getExpressiveWeatherLine,
   getHuudComposerPrompt,
 } from '@/lib/feedSkyHeroCopy';
-import {
-  resolveProfileAvatarInitial,
-  resolveUserAvatarUrl,
-} from '@/lib/userAvatar';
 
 import { CitySilhouette } from '@/components/ambient/CitySilhouette';
 import { SkyWeatherEffects } from '@/components/ambient/SkyWeatherEffects';
-import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
+import { resolveUserAvatarUrl } from '@/lib/userAvatar';
 
 /* ── Sky scene elements ── */
 
@@ -181,16 +179,61 @@ export function FeedSkyHero() {
   const isDark = timePeriod === 'night' || timePeriod === 'evening';
   const greeting = getGreeting(timePeriod, authUser?.firstName, authUser?.username);
   const composerPrompt = getHuudComposerPrompt(timePeriod);
-  const avatarUrl = resolveUserAvatarUrl(authUser);
-  const avatarInitial = resolveProfileAvatarInitial(authUser, authUser?.username);
+  const avatarUrl = useMemo(() => resolveUserAvatarUrl(authUser), [authUser]);
+
+  // ── Typewriter effect for the composer placeholder ──
+  const COMPOSER_PROMPTS = useMemo(() => [
+    composerPrompt,
+    'What do you have in mind?',
+    'Anything to sell or give away?',
+    'Is there an upcoming event?',
+    'Looking for work or hiring?',
+    'Need help from your Huud?',
+    'Spotted something to report?',
+    'Share a local FYI with the Huud',
+  ], [composerPrompt]);
+
+  const [displayText, setDisplayText] = useState('');
+  const [promptIndex, setPromptIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showCursor, setShowCursor] = useState(true);
+  const typewriterRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cursor blink
+  useEffect(() => {
+    const blink = setInterval(() => setShowCursor((p) => !p), 530);
+    return () => clearInterval(blink);
+  }, []);
+
+  useEffect(() => {
+    const currentPrompt = COMPOSER_PROMPTS[promptIndex % COMPOSER_PROMPTS.length];
+    const TYPING_SPEED = 45;
+    const DELETING_SPEED = 22;
+    const PAUSE_AFTER_FULL = 2200;
+    const PAUSE_AFTER_EMPTY = 300;
+
+    if (!isDeleting && displayText === currentPrompt) {
+      // Fully typed — pause then start deleting
+      typewriterRef.current = setTimeout(() => setIsDeleting(true), PAUSE_AFTER_FULL);
+    } else if (isDeleting && displayText === '') {
+      // Fully deleted — move to next prompt
+      typewriterRef.current = setTimeout(() => {
+        setIsDeleting(false);
+        setPromptIndex((p) => (p + 1) % COMPOSER_PROMPTS.length);
+      }, PAUSE_AFTER_EMPTY);
+    } else {
+      typewriterRef.current = setTimeout(() => {
+        setDisplayText(isDeleting
+          ? currentPrompt.substring(0, displayText.length - 1)
+          : currentPrompt.substring(0, displayText.length + 1)
+        );
+      }, isDeleting ? DELETING_SPEED : TYPING_SPEED);
+    }
+    return () => { if (typewriterRef.current) clearTimeout(typewriterRef.current); };
+  }, [displayText, isDeleting, promptIndex, COMPOSER_PROMPTS]);
 
   const openComposer = () => {
     window.dispatchEvent(new CustomEvent('open-create-post'));
-  };
-
-  const openComposerWithMedia = (e: MouseEvent) => {
-    e.stopPropagation();
-    window.dispatchEvent(new CustomEvent('open-create-post', { detail: { focusMedia: true } }));
   };
 
   const expressiveWeather = weather
@@ -226,7 +269,10 @@ export function FeedSkyHero() {
   const activeType = searchParams.get('type') || '';
 
   const categoryRow = (
-    <div className="category-shortcuts-row w-full px-4 flex gap-1.5 overflow-x-auto pb-2 pt-1 scrollbar-none items-start">
+    <AutoScrollCarousel 
+      className="category-shortcuts-row w-full px-4 flex gap-1.5 overflow-x-auto pb-2 pt-1 scrollbar-none items-start snap-x snap-mandatory"
+      interval={4000}
+    >
       {shortcuts.map((s) => {
         const isActive = activeType === s.type;
         return (
@@ -272,7 +318,7 @@ export function FeedSkyHero() {
           </button>
         );
       })}
-    </div>
+    </AutoScrollCarousel>
   );
 
   return (
@@ -297,7 +343,7 @@ export function FeedSkyHero() {
         </div>
 
         {/* Content overlaid inside the sky scene */}
-        <div className="feed-sky-scene__content flex flex-col justify-center gap-4 h-full pt-4 pb-6">
+        <div className="feed-sky-scene__content">
           {/* Centered Glassmorphic Weather Panel */}
           <div 
             className="feed-sky-scene__weather"
@@ -343,47 +389,58 @@ export function FeedSkyHero() {
             ) : null}
           </div>
 
-          {/* Separated Floating Composer Layout */}
-          <div 
-            className="feed-sky-scene__composer z-30" 
-            style={{ 
-              marginLeft: '-4px', 
-              marginRight: '-4px', 
-              width: 'calc(100% + 8px)', 
-              paddingLeft: 0, 
-              paddingRight: 0 
-            }}
-          >
-            <div className="flex items-center justify-between gap-3 w-full">
-              {/* Left Avatar (Outside Pill) */}
-              <div className="shrink-0 flex items-center justify-center relative cursor-pointer transition-transform hover:scale-105" onClick={openComposer}>
-                <div className="absolute inset-0 bg-white/30 blur-md rounded-full"></div>
-                <BrandPinAvatar
-                  src={avatarUrl}
-                  alt={authUser?.firstName || authUser?.username || 'You'}
-                  fallbackInitial={avatarInitial}
-                  size="lg"
-                />
-              </div>
-
-              {/* Center Glass Pill */}
-              <div 
-                className="flex-1 min-w-0 py-3.5 px-5 rounded-[20px] cursor-pointer group transition-all duration-300 hover:scale-[1.02] hover:!bg-white/[0.12]"
-                onClick={openComposer}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-                  backdropFilter: 'blur(20px) saturate(1.2)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(1.2)',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                  boxShadow: '0 6px 20px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.2)',
-                  position: 'relative',
-                  top: '-4px',
-                }}
+          {/* Composer: Full-width glass pill with typewriter placeholder + plus button */}
+          <div className="feed-sky-scene__composer z-30 w-full">
+            {/* Full-width glass pill */}
+            <div
+              className="feed-sky-scene__composer-pill group flex-1"
+              style={{ color: theme.textColor, padding: '0.4rem 0.45rem' }}
+            >
+              {/* Profile Avatar — on the left */}
+              <button
+                type="button"
+                className="feed-sky-scene__composer-media mr-2 overflow-hidden flex items-center justify-center relative bg-white/95 rounded-full"
+                onClick={() => router.push(authUser?.username ? `/profile/${authUser.username}` : '/settings')}
+                aria-label="View Profile"
               >
-                <div className="text-[14px] font-semibold text-white/60 tracking-tight group-hover:text-white/80 transition-colors truncate text-center">
-                  {composerPrompt}
-                </div>
-              </div>
+                {avatarUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={avatarUrl}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : authUser?.username ? (
+                  <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-white" style={{ background: 'linear-gradient(135deg, #00c431, #009924)' }}>
+                    {authUser.username.slice(0, 2).toUpperCase()}
+                  </div>
+                ) : (
+                  <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', color: 'var(--brand-green-dark)' }}>person</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className="feed-sky-scene__composer-text flex-1 text-left px-1"
+                onClick={openComposer}
+                aria-label="Create a post"
+              >
+                {activeType
+                  ? `Filtering: ${shortcuts.find((s) => s.type === activeType)?.label ?? activeType}`
+                  : <span aria-hidden="true">{displayText}<span style={{ opacity: showCursor ? 1 : 0, transition: 'opacity 80ms' }}>|</span></span>
+                }
+              </button>
+
+              {/* Plus / create icon — on the right */}
+              <button
+                type="button"
+                className="feed-sky-scene__composer-media ml-2"
+                onClick={openComposer}
+                aria-label="Create a post"
+              >
+                <span className="material-symbols-outlined" aria-hidden="true"
+                  style={{ fontSize: '1.15rem', fontWeight: 700 }}>add</span>
+              </button>
             </div>
           </div>
         </div>

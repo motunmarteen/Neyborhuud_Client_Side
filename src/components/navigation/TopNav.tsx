@@ -72,12 +72,11 @@ function getRouteTitle(pathname: string) {
 }
 
 export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
-  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
   const isOnFeed = pathname === '/feed' || pathname === '/';
   const title = useMemo(() => (pathname ? getRouteTitle(pathname) : 'NeyborHuud'), [pathname]);
   const { data: unreadCount = 0 } = useUnreadCount();
-  const scrollHidden = useScrollHideBottomNav(!searchOpen, pathname);
+  const scrollHidden = useScrollHideBottomNav(true, pathname);
 
   const skyOverlay = isOnFeed;
 
@@ -114,14 +113,13 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
       <div className="flex-1" />
 
       <div className="app-topnav__actions">
-        <button
-          type="button"
-          onClick={() => setSearchOpen(true)}
+        <Link
+          href="/explore"
           className="app-topnav__action"
           aria-label="Search"
         >
           <AppNavIcon name="search" />
-        </button>
+        </Link>
         <Link
           href="/notifications"
           className="app-topnav__action"
@@ -144,23 +142,6 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
           <TopNavChatAction />
         </Suspense>
       </div>
-
-      {searchOpen && (
-        <div className="fixed inset-0 z-[100] bg-white flex flex-col">
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-black/[0.06]">
-            <button
-              onClick={() => setSearchOpen(false)}
-              className="app-topnav__action"
-              aria-label="Close search"
-            >
-              <AppNavIcon name="back" />
-            </button>
-            <div className="flex-1">
-              <GlobalSearch />
-            </div>
-          </div>
-        </div>
-      )}
     </header>
     </div>
     </>
