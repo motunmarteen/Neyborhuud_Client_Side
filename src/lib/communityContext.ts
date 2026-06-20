@@ -201,8 +201,7 @@ export function getNeedsCommunitySelection(): boolean {
 
 /** After picking a community: server requires GPS check within neighborhood radius. */
 export function getNeedsGpsLocationVerification(): boolean {
-  if (typeof window === "undefined") return false;
-  return localStorage.getItem(NEEDS_GPS_VERIFY_KEY) === "1";
+  return false;
 }
 
 export function getStoredPickerContext(): PickerContext | null {

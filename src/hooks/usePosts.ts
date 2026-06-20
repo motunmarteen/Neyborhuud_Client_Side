@@ -50,10 +50,6 @@ export function useLocationFeed(
       const page = pageParam as number;
       const mock = getMockFeedPage(page, 20);
 
-      if (!latitude || !longitude) {
-        return mock;
-      }
-
       let realPosts: any[] = [];
       let realResult: any = null;
       try {

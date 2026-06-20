@@ -179,28 +179,8 @@ function XFeedInner() {
         });
     }, [router]);
 
-    // Fetch user location on mount
-    useEffect(() => {
-        if (locationFetched.current) return;
-        locationFetched.current = true;
-
-        const fetchLocation = async () => {
-            try {
-                const loc = await getCurrentLocation();
-                if (loc) {
-                    setLocation({ lat: loc.lat, lng: loc.lng });
-                    triggerSmartLocationSync(loc.lat, loc.lng, loc.accuracy);
-                } else {
-                    setLocationError('Location access required for feed');
-                }
-            } catch (error) {
-                console.error('Location error:', error);
-                setLocationError('Failed to get location');
-            }
-        };
-
-        fetchLocation();
-    }, []);
+    // ── Location logic removed: Feed defaults to the user's saved community ──
+    // The feed relies on the user's saved location from registration unless they explicitly request otherwise.
 
     // Fetch feed with location - tab maps directly to the backend feed layers
     const {
@@ -579,8 +559,8 @@ function XFeedInner() {
                                 </div>
                             )}
 
-                            {/* Empty State */}
-                            {!isLoading && !isError && !location && locationError && (
+                            {/* Empty State: No Location and No Posts */}
+                            {!isLoading && !isError && !location && locationError && timeline.length === 0 && mergedFeed.length === 0 && (
                                 <div className="w-full">
                                     <div className="flex flex-col items-center justify-center py-12 px-5 mod-card w-full">
                                         <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">

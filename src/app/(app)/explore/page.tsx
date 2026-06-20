@@ -82,17 +82,9 @@ export default function ExplorePage() {
 
 // ── Tab Posts Hook ─────────────────────────────────────────────
 function useTabPosts(tab: ExploreTab) {
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-
-  useEffect(() => {
-    getCurrentLocation().then((loc) => {
-      if (loc) setLocation({ lat: loc.lat, lng: loc.lng });
-    }).catch(console.error);
-  }, []);
-
   const { data, isLoading, error } = useLocationFeed(
-    location?.lat || 0,
-    location?.lng || 0,
+    null,
+    null,
     {
       feedTab: tab === 'trending' ? undefined : undefined,
       contentType: tab === 'trending' ? undefined : (tab as any),
@@ -105,7 +97,7 @@ function useTabPosts(tab: ExploreTab) {
 
   return {
     posts,
-    loading: isLoading && !!location,
+    loading: isLoading,
     error: error ? 'Failed to load posts' : null,
   };
 }

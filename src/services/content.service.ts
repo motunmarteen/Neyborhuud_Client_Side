@@ -215,8 +215,8 @@ export const contentService = {
    * Falls back to /content/posts if /feed is 404 or 500 (server error)
    */
   async getLocationFeed(
-    latitude: number,
-    longitude: number,
+    latitude: number | null,
+    longitude: number | null,
     options?: {
       radius?: number;
       category?: string;
@@ -233,8 +233,8 @@ export const contentService = {
     try {
       const res = await apiClient.get<any>("/feed", {
         params: {
-          lat: latitude,
-          lng: longitude,
+          lat: latitude ?? undefined,
+          lng: longitude ?? undefined,
           radius: options?.radius || 5000,
           category: options?.category,
           page: options?.page || 1,

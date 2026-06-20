@@ -69,14 +69,9 @@ function LoginPageContent() {
         setFormError(null);
 
         try {
-            const deviceLocation = await getCurrentLocation();
             const response = await login({
                 identifier: formData.email.trim(),
                 password: formData.password,
-                deviceLocation: {
-                    lat: deviceLocation?.lat,
-                    lng: deviceLocation?.lng,
-                },
             });
 
             if (!response.success || !apiClient.isAuthenticated()) {

@@ -13,14 +13,9 @@ export function SmartLocationSync() {
   const ranRef = useRef(false);
 
   useEffect(() => {
-    if (!isAuthenticated || ranRef.current) return;
-    ranRef.current = true;
-
-    void (async () => {
-      const loc = await getCurrentLocation();
-      if (!loc) return;
-      await runSmartLocationSync(loc.lat, loc.lng, loc.accuracy);
-    })();
+    // Disabled automatic background location sync on startup to prevent unwanted permission prompts.
+    // Location is only requested when explicitly needed by specific features.
+    return;
   }, [isAuthenticated]);
 
   return null;
