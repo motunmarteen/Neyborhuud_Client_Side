@@ -367,9 +367,10 @@ export const contentService = {
   /**
    * Repost or quote-repost a post
    */
-  async repostPost(postId: string, comment?: string) {
+  async repostPost(postId: string, comment?: string, location?: { lat: number; lng: number }) {
     return await apiClient.post(`/content/posts/${postId}/repost`, {
       content: comment?.trim() ?? '',
+      location,
     });
   },
 
@@ -603,5 +604,13 @@ export const contentService = {
     return await apiClient.get("/feed", {
       params: { contentType: "emergency", ...(params ?? {}) },
     });
+  },
+
+  /**
+   * Get the chain of reposts for a post
+   */
+  async getRepostChain(postId: string) {
+    const res = await apiClient.get<any>(`/content/posts/${postId}/repost-chain`) as any;
+    return res.data?.data?.chain || res.data?.chain || res.chain || [];
   },
 };

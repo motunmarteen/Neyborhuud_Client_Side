@@ -7,6 +7,7 @@ import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import { QuotedPostEmbed } from '@/components/feed/QuotedPostEmbed';
 import { contentService } from '@/services/content.service';
 import { XRepostIcon } from '@/components/icons/XIcons';
+import { getCurrentLocation } from '@/lib/geolocation';
 
 type RepostComposerSheetProps = {
   open: boolean;
@@ -30,7 +31,13 @@ export function RepostComposerSheet({
 
     setIsSubmitting(true);
     try {
-      await contentService.repostPost(postId, comment);
+      const loc = await getCurrentLocation();
+      if (!loc) {
+        toast.error('Location is required to repost');
+        setIsSubmitting(false);
+        return;
+      }
+      await contentService.repostPost(postId, comment, { lat: loc.lat, lng: loc.lng });
       toast.success(comment.trim() ? 'Quote reposted to your feed' : 'Reposted to your feed');
       setComment('');
       onReposted?.();
@@ -48,8 +55,13 @@ export function RepostComposerSheet({
   if (!open) return null;
 
   return (
-    <BottomSheetOverlay open={open} onClose={onClose} ariaLabel="Repost composer">
-      <div className="px-4 pt-2 pb-2 border-b border-black/[0.06] dark:border-white/[0.08]">
+    <BottomSheetOverlay 
+      open={open} 
+      onClose={onClose} 
+      ariaLabel="Repost composer"
+      panelClassName="flex w-full flex-col overflow-hidden rounded-t-[32px] bg-white dark:bg-black border border-black/[0.08] dark:border-white/[0.08] md:max-w-[560px] shadow-2xl pb-4"
+    >
+      <div className="px-4 pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
         <h2 className="text-base font-black text-neu-text dark:text-white">Repost</h2>
       </div>
       <div className="flex flex-col gap-4 px-4 pb-6 pt-3">
