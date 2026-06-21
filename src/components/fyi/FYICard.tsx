@@ -280,7 +280,7 @@ export function FYICard({
                         </Link>
                         <div className="absolute -bottom-1 -right-1 z-10 flex h-[17px] w-[17px] items-center justify-center rounded-full bg-white dark:bg-[#121b14] border-[1.5px] border-white dark:border-[#121b14] shadow-sm select-none pointer-events-none">
                             <PostCardVerificationBadge
-                                author={author ?? { isVerified: author?.isVerified, verificationBadge: author?.verificationBadge }}
+                                author={author}
                                 hidden={isAnonymousAuthor}
                             />
                         </div>

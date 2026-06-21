@@ -163,14 +163,18 @@ function WeatherText({ text }: { text: string }) {
   return (
     <div ref={containerRef} className="w-full overflow-hidden px-1 whitespace-nowrap mt-0.5" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.18)' }}>
       {isOverflowing ? (
-        /* eslint-disable-next-line jsx-a11y/no-distracting-elements */
-        <marquee scrollamount="2" className="feed-sky-scene__condition font-bold text-xs text-white/95 w-full">
-          {text}
-        </marquee>
+        <div className="feed-weather-marquee">
+          <span ref={textRef} className="feed-weather-marquee__text feed-sky-scene__condition font-bold text-xs text-white/95">
+            {text}
+          </span>
+          <span aria-hidden className="feed-weather-marquee__text feed-sky-scene__condition font-bold text-xs text-white/95">
+            {text}
+          </span>
+        </div>
       ) : (
-        <p ref={textRef} className="feed-sky-scene__condition font-bold text-xs text-white/95 inline-block w-auto mx-auto text-center">
+        <span ref={textRef} className="feed-sky-scene__condition font-bold text-xs text-white/95 inline-block w-auto mx-auto text-center">
           {text}
-        </p>
+        </span>
       )}
     </div>
   );

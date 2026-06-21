@@ -3486,6 +3486,31 @@ html[data-scroll-locked] .feed-scroll-main {
   opacity: 0.92;
 }
 
+/* Weather condition marquee — CSS-driven scroll (replaces deprecated <marquee>) */
+.feed-weather-marquee {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.feed-weather-marquee__text {
+  flex-shrink: 0;
+  padding-right: 2.5rem;
+  animation: feed-weather-scroll 16s linear infinite;
+}
+@keyframes feed-weather-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed-weather-marquee__text {
+    animation: none;
+  }
+  .feed-weather-marquee__text:nth-child(2) {
+    display: none;
+  }
+}
+
 .feed-sky-scene__composer {
   display: flex;
   align-items: center;

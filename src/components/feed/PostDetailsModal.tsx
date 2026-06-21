@@ -25,7 +25,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
     const { data: details, isLoading, isError, error } = usePost(postId);
     const modalRef = useRef<HTMLDivElement>(null);
     const queryClient = useQueryClient();
-    const { toggleLike, savePost } = usePostMutations();
+    const { likePost, unlikePost, savePost } = usePostMutations();
     const [showShare, setShowShare] = useState(false);
     const [showEditHistory, setShowEditHistory] = useState(false);
     const [editHistory, setEditHistory] = useState<Array<{ _id: string; title?: string; body: string; editReason?: string; versionNumber: number; createdAt: string }>>([]);
@@ -140,13 +140,17 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                     <XPostCard
                                         post={details.content}
                                         currentUserId={currentUserId || undefined}
-                                        onLike={() => toggleLike.mutate(details.content.id)}
+                                        onLike={() => {
+                                            const id = details.content.id;
+                                            if (details.content.isLiked) void unlikePost(id);
+                                            else void likePost(id);
+                                        }}
                                         onComment={() => {
                                             const commentInput = document.querySelector('textarea[placeholder="Post your reply"]') as HTMLTextAreaElement;
                                             if (commentInput) commentInput.focus();
                                         }}
                                         onShare={() => setShowShare(true)}
-                                        onSave={() => savePost.mutate(details.content.id)}
+                                        onSave={() => void savePost(details.content.id)}
                                         onEdit={() => {}}
                                         onDelete={() => {}}
                                         onReport={() => {}}
