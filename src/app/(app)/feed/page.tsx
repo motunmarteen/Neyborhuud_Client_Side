@@ -43,7 +43,6 @@ import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
 import { FeedNewsTicker } from '@/components/feed/FeedNewsTicker';
 import { FeedSentinelRow } from '@/components/feed/FeedSentinelRow';
 import { FeedRadialCategories } from '@/components/feed/FeedRadialCategories';
-import { useScrollHideBottomNav, scrollToTop } from '@/hooks/useScrollHideBottomNav';
 
 const getFilterBannerData = (type: string) => {
     switch (type) {
@@ -134,8 +133,6 @@ function XFeedInner() {
     const queryClient = useQueryClient();
     const canPost = isUserInNigeria();
     const mainRef = useRef<HTMLElement>(null);
-    const [showScrollTop, setShowScrollTop] = useState(false);
-    const navHidden = useScrollHideBottomNav();
 
     // Derive contentTypeFilter from URL search params (set by sidebar / search overlay)
     const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'help_request', 'job', 'event', 'marketplace', 'emergency', 'community_alert', 'incident_report'];
@@ -164,17 +161,6 @@ function XFeedInner() {
         window.addEventListener('open-create-post', handler);
         return () => window.removeEventListener('open-create-post', handler);
     }, []);
-
-    // Show scroll-to-top pill when user has scrolled past 300px on the feed
-    useEffect(() => {
-        const el = mainRef.current;
-        if (!el) return;
-        const onScroll = () => setShowScrollTop(el.scrollTop > 300);
-        el.addEventListener('scroll', onScroll, { passive: true });
-        return () => el.removeEventListener('scroll', onScroll);
-    }, []);
-
-
 
     // Fetch departments for filter dropdown
     const { data: departments = [] } = useDepartments();
@@ -820,16 +806,6 @@ function XFeedInner() {
 
             {/* Radial category menu — floating half-wheel on the left edge */}
             <FeedRadialCategories />
-
-            {/* Scroll-to-top pill — visible when nav is hidden and user is far down the feed */}
-            <button
-                className={`feed-scroll-top-pill${(!showScrollTop || !navHidden) ? ' feed-scroll-top-pill--hidden' : ''}`}
-                onClick={() => scrollToTop()}
-                aria-label="Scroll to top"
-            >
-                <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: '"FILL" 1' }}>arrow_upward</span>
-                Back to top
-            </button>
         </div>
     );
 }

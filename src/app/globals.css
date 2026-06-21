@@ -8553,6 +8553,13 @@ button:focus-visible:not([class*="focus-visible"]) {
 .radial-dial--open .radial-dial__stage {
   transform: translateY(-50%) scale(1);
   opacity: 1;
+  /* Stage stays pass-through; only wedges + hub capture taps so empty
+     areas (and SVG transparent regions) fall through to the backdrop. */
+  pointer-events: none;
+}
+.radial-dial--open .radial-dial__stage .radial-dial__wedge,
+.radial-dial--open .radial-dial__stage .radial-dial__hub,
+.radial-dial--open .radial-dial__stage .radial-dial__hub-readout {
   pointer-events: auto;
 }
 
@@ -8561,6 +8568,11 @@ button:focus-visible:not([class*="focus-visible"]) {
   left: 0;
   top: 0;
   overflow: visible;
+  /* Let transparent SVG regions fall through to the backdrop */
+  pointer-events: none;
+}
+.radial-dial__svg .radial-dial__wedge {
+  pointer-events: auto;
 }
 
 .radial-dial__wedge {
