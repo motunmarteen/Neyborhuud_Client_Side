@@ -151,7 +151,6 @@ export function PostCardMediaSlider({
       <div
         className={`post-card-media-slider post-card-media-slider--duo${compact ? ' post-card-media-slider--compact' : ''} ${className}`.trim()}
         onClick={stopCardClick}
-        onPointerDown={stopCardClick}
       >
         <div className="post-card-media-slider__duo-grid" aria-label={`${altPrefix}, 2 images`}>
           {items.map((item, index) => (
@@ -168,7 +167,6 @@ export function PostCardMediaSlider({
     <div
       className={`post-card-media-slider ${isCarousel ? 'post-card-media-slider--carousel' : 'post-card-media-slider--single'}${compact ? ' post-card-media-slider--compact' : ''} ${className}`.trim()}
       onClick={stopCardClick}
-      onPointerDown={stopCardClick}
     >
       <div
         ref={trackRef}

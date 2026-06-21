@@ -21,10 +21,10 @@ export function PostCardFollowButton({
         onToggle();
       }}
       disabled={isPending}
-      className={`shrink-0 rounded-none px-3 py-1 text-[10px] font-black uppercase tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+      className={`shrink-0 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[13px] font-bold tracking-wide hover:underline cursor-pointer ${
         isFollowing
-          ? 'bg-black/[0.04] text-primary dark:bg-white/10 dark:text-primary hover:bg-brand-red/10 hover:text-brand-red'
-          : 'bg-primary text-white hover:bg-brand-green-dark'
+          ? 'text-primary dark:text-primary hover:text-brand-red'
+          : 'text-primary dark:text-primary hover:text-brand-green-dark'
       }`}
       aria-label={isFollowing ? 'Unfollow' : 'Follow'}
     >

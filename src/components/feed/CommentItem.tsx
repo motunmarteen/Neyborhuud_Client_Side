@@ -5,8 +5,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCommentMutations } from '@/hooks/useComments';
 import { CommentForm } from './CommentForm';
 import Link from 'next/link';
-import MapPinAvatar from '@/components/ui/MapPinAvatar';
-
 interface CommentItemProps {
     comment: Comment;
     postId: string;
@@ -47,13 +45,24 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
             {/* Avatar & Thread Line - Avatar is smaller for replies */}
             <Link 
                 href={`/profile/${username}`} 
-                className="flex flex-col items-center flex-shrink-0"
+                className="flex flex-col items-center flex-shrink-0 mt-1"
             >
-                <MapPinAvatar
-                    src={avatarUrl}
-                    alt={username}
-                    size={isReply ? 'xs' : 'sm'}
-                />
+                <div className={`flex ${isReply ? 'h-7 w-7' : 'h-9 w-9'} items-center justify-center overflow-hidden rounded-full border-[1.5px] border-black/5 dark:border-white/10 bg-black/5 dark:bg-[#1A221C] transition-transform hover:scale-105 active:scale-95`}>
+                    {avatarUrl ? (
+                        <img 
+                            src={avatarUrl} 
+                            alt={username} 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
+                                e.currentTarget.parentElement!.innerHTML = '<span class="material-symbols-outlined text-[16px] opacity-50">person</span>';
+                            }}
+                        />
+                    ) : (
+                        <span className="material-symbols-outlined text-[16px] opacity-50">person</span>
+                    )}
+                </div>
             </Link>
 
             {/* Content Container */}

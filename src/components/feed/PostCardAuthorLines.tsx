@@ -50,19 +50,15 @@ export function PostCardAuthorLines({
         <Link
           href={`/profile/${authorUsername}`}
           onClick={onProfileClick}
-          className="truncate min-w-0 max-w-[55%] text-xs font-black text-neu-text dark:text-white hover:underline leading-tight"
+          className="truncate min-w-0 max-w-[55%] text-[14px] font-bold text-neu-text dark:text-white hover:underline leading-tight"
         >
           {displayName}
         </Link>
-        <PostCardVerificationBadge
-          author={author ?? { isVerified, verificationBadge }}
-          hidden={isAnonymousAuthor}
-        />
-        <span className="truncate min-w-0 text-[11px] font-medium text-neu-text-secondary dark:text-white/50 leading-tight">
+        <span className="truncate min-w-0 text-[13px] font-normal text-neu-text-secondary dark:text-white/50 leading-tight">
           @{authorUsername}
         </span>
       </div>
-      <div className="post-card-header__meta flex items-center gap-1 mt-1 min-w-0 overflow-hidden text-[9px] font-bold text-neu-text-secondary dark:text-white/50 leading-tight">
+      <div className="post-card-header__meta flex items-center gap-1 mt-0.5 min-w-0 overflow-hidden text-[11px] font-normal text-neu-text-secondary dark:text-white/50 leading-tight">
         <span className="shrink-0">{formatTimeAgo(createdAt)}</span>
         {place ? (
           <>

@@ -79,7 +79,9 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
   const scrollHidden = useScrollHideBottomNav();
   const isScrolled = useIsScrolled(60);
 
-  const skyOverlay = isOnFeed && !isScrolled;
+  // If we are on the feed, and the nav is either at the top OR it is currently hiding,
+  // keep the transparent sky overlay so it doesn't flash solid white as it slides away.
+  const skyOverlay = isOnFeed && (!isScrolled || scrollHidden);
 
   return (
     <>

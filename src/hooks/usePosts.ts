@@ -444,12 +444,175 @@ export function usePostMutations() {
   });
 
   const sharePostMutation = useMutation({
-    mutationFn: ({ postId, message }: { postId: string; message?: string }) =>
-      contentService.sharePost(postId, message),
-    onSuccess: () => {
-      awardCoins("post_shared");
+    mutationFn: ({ postId, message, location }: { postId: string; message?: string; location?: {lat: number; lng: number} }) =>
+      contentService.repostPost(postId, message, location),
+    onMutate: async ({ postId }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["post", postId] });
+      await queryClient.cancelQueries({ queryKey: ["locationFeed"] });
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      // Snapshot previous values for rollback
+      const previousPost = queryClient.getQueryData(["post", postId]);
+      const previousFeed = queryClient.getQueriesData({
+        queryKey: ["locationFeed"],
+      });
+      const previousPosts = queryClient.getQueriesData({ queryKey: ["posts"] });
+
+      // Optimistically update single post cache
+      queryClient.setQueryData(["post", postId], (old: any) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            isShared: true,
+            shares: (old.data.shares || 0) + 1,
+          },
+        };
+      });
+
+      // Optimistically update feed caches
+      queryClient.setQueriesData({ queryKey: ["locationFeed"] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            content: (page.content ?? []).map((post: any) =>
+              post.id === postId
+                ? { ...post, isShared: true, shares: (post.shares || 0) + 1 }
+                : post,
+            ),
+          })),
+        };
+      });
+
+      queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            content: (page.content ?? []).map((post: any) =>
+              post.id === postId
+                ? { ...post, isShared: true, shares: (post.shares || 0) + 1 }
+                : post,
+            ),
+          })),
+        };
+      });
+
+      return { previousPost, previousFeed, previousPosts };
     },
-    onError: handleApiError,
+    onError: (err, { postId }, context) => {
+      // Rollback on error
+      if (context?.previousPost) {
+        queryClient.setQueryData(["post", postId], context.previousPost);
+      }
+      if (context?.previousFeed) {
+        for (const [key, data] of context.previousFeed) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+      if (context?.previousPosts) {
+        for (const [key, data] of context.previousPosts) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+      handleApiError(err);
+    },
+    onSettled: () => {
+      awardCoins("post_shared");
+      queryClient.invalidateQueries({ queryKey: ["locationFeed"] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["userPosts"] });
+    },
+  });
+
+  const unrepostPostMutation = useMutation({
+    mutationFn: (postId: string) => contentService.unrepostPost(postId),
+    onMutate: async (postId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["post", postId] });
+      await queryClient.cancelQueries({ queryKey: ["locationFeed"] });
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      // Snapshot previous values for rollback
+      const previousPost = queryClient.getQueryData(["post", postId]);
+      const previousFeed = queryClient.getQueriesData({
+        queryKey: ["locationFeed"],
+      });
+      const previousPosts = queryClient.getQueriesData({ queryKey: ["posts"] });
+
+      // Optimistically update single post cache
+      queryClient.setQueryData(["post", postId], (old: any) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            isShared: false,
+            shares: Math.max(0, (old.data.shares || 0) - 1),
+          },
+        };
+      });
+
+      // Optimistically update feed caches
+      queryClient.setQueriesData({ queryKey: ["locationFeed"] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            content: (page.content ?? []).map((post: any) =>
+              post.id === postId
+                ? { ...post, isShared: false, shares: Math.max(0, (post.shares || 0) - 1) }
+                : post,
+            ),
+          })),
+        };
+      });
+
+      queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            content: (page.content ?? []).map((post: any) =>
+              post.id === postId
+                ? { ...post, isShared: false, shares: Math.max(0, (post.shares || 0) - 1) }
+                : post,
+            ),
+          })),
+        };
+      });
+
+      return { previousPost, previousFeed, previousPosts };
+    },
+    onError: (err, postId, context) => {
+      // Rollback on error
+      if (context?.previousPost) {
+        queryClient.setQueryData(["post", postId], context.previousPost);
+      }
+      if (context?.previousFeed) {
+        for (const [key, data] of context.previousFeed) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+      if (context?.previousPosts) {
+        for (const [key, data] of context.previousPosts) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+      handleApiError(err);
+    },
+    onSettled: (_, __, postId) => {
+      queryClient.invalidateQueries({ queryKey: ["locationFeed"] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["userPosts"] });
+    },
   });
 
   return {
@@ -461,6 +624,7 @@ export function usePostMutations() {
     savePost: savePostMutation.mutateAsync,
     unsavePost: unsavePostMutation.mutateAsync,
     sharePost: sharePostMutation.mutateAsync,
+    unsharePost: unrepostPostMutation.mutateAsync,
 
     isCreating: createPostMutation.isPending,
     isUpdating: updatePostMutation.isPending,

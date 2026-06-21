@@ -67,19 +67,24 @@ function MenuIcon() {
 export function SentinelIcon({ active, className, ...props }: React.SVGProps<SVGSVGElement> & { active?: boolean }) {
   return (
     <svg className={className || "app-nav-icon__glyph"} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      {/* Filled Quadrants: Top-Right and Bottom-Left */}
-      <path 
-        d="M12 2L20 5V12H12Z M12 12H4C4 18 12 22 12 22Z" 
-        fill="#00d431" 
-        fillOpacity={active ? 1 : 0.8}
+      {/* Sleek outer shield with curved edges */}
+      <path
+        d="M12 21.5c0 0 8-4 8-10V5c0 0-4 0-8-3-4 3-8 3-8 3v6.5c0 6 8 10 8 10z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill={active ? "currentColor" : "none"}
       />
-      {/* Shield Outline and Cross Divider */}
-      <path 
-        d="M20 12V5l-8-3-8 3v7c0 6 8 10 8 10s8-4 8-10z M12 2v20 M4 12h16" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
+      {/* Primary AI Star inside */}
+      <path
+        d="M12 8c0 2 1.5 3.5 3.5 3.5-2 0-3.5 1.5-3.5 3.5 0-2-1.5-3.5-3.5-3.5C10.5 11.5 12 10 12 8z"
+        fill={active ? "#1A221C" : "#00c431"}
+      />
+      {/* Accent AI Star top right */}
+      <path
+        d="M16.5 5.5c0 .8.6 1.4 1.4 1.4-.8 0-1.4.6-1.4 1.4 0-.8-.6-1.4-1.4-1.4.8 0 1.4-.6 1.4-1.4z"
+        fill={active ? "#1A221C" : "#00c431"}
       />
     </svg>
   );

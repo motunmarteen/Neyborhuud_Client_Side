@@ -73,7 +73,7 @@ export function FeedNewsCarouselBlock() {
         label="News Flash" 
         href="/local-news?tab=nigeria"
       >
-        <AutoScrollCarousel interval={3500}>
+        <AutoScrollCarousel interval={2500}>
           {loading ? (
             // Loading skeleton matching StakeCard style
             Array.from({ length: 3 }).map((_, i) => (

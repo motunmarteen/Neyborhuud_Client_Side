@@ -12,6 +12,8 @@ import { contentService } from '@/services/content.service';
 import { fyiService } from '@/services/fyi.service';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
+import { XPostCard } from '@/components/feed/XPostCard';
+import { usePostMutations } from '@/hooks/usePosts';
 
 interface PostDetailsModalProps {
     postId: string | null;
@@ -23,6 +25,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
     const { data: details, isLoading, isError, error } = usePost(postId);
     const modalRef = useRef<HTMLDivElement>(null);
     const queryClient = useQueryClient();
+    const { toggleLike, savePost } = usePostMutations();
     const [showShare, setShowShare] = useState(false);
     const [showEditHistory, setShowEditHistory] = useState(false);
     const [editHistory, setEditHistory] = useState<Array<{ _id: string; title?: string; body: string; editReason?: string; versionNumber: number; createdAt: string }>>([]);
@@ -91,10 +94,10 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
         >
             <div
                 ref={modalRef}
-                className="neu-modal w-full max-w-2xl h-full sm:h-[90vh] sm:rounded-2xl overflow-hidden flex flex-col transition-all duration-300 animate-in slide-in-from-bottom-4"
+                className="bg-white dark:bg-[#121b14] w-full max-w-2xl h-full sm:h-[90vh] sm:rounded-2xl overflow-hidden flex flex-col transition-all duration-300 animate-in slide-in-from-bottom-4 shadow-2xl"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 sticky top-0 neu-base z-10" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
+                <div className="flex items-center justify-between px-4 py-3 sticky top-0 bg-white/90 dark:bg-[#121b14]/90 backdrop-blur-md border-b border-black/5 dark:border-white/5 z-10">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={onClose}
@@ -132,66 +135,26 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                     ) : (
                         <div>
                             {/* Main Post Section */}
-                            <div className="px-4 py-4">
-                                <div className="flex gap-3 mb-4">
-                                    <MapPinAvatar
-                                        src={(details.content.author as PostAuthor)?.avatarUrl}
-                                        alt="Author"
-                                        size="md"
+                            <div className="pb-0">
+                                <div className="pointer-events-auto">
+                                    <XPostCard
+                                        post={details.content}
+                                        currentUserId={currentUserId || undefined}
+                                        onLike={() => toggleLike.mutate(details.content.id)}
+                                        onComment={() => {
+                                            const commentInput = document.querySelector('textarea[placeholder="Post your reply"]') as HTMLTextAreaElement;
+                                            if (commentInput) commentInput.focus();
+                                        }}
+                                        onShare={() => setShowShare(true)}
+                                        onSave={() => savePost.mutate(details.content.id)}
+                                        onEdit={() => {}}
+                                        onDelete={() => {}}
+                                        onReport={() => {}}
+                                        onPin={() => {}}
+                                        onEmergencyAction={() => {}}
                                     />
-                                    <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                        <div className="font-bold text-[16px] hover:underline cursor-pointer" style={{ color: 'var(--neu-text)' }}>
-                                            {(details.content.author as PostAuthor)?.name || 'Anonymous'}
-                                        </div>
-                                        <div className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-                                            @{(details.content.author as PostAuthor)?.username || 'user'}
-                                        </div>
-                                    </div>
-                                    <button className="btn-ghost w-8 h-8 flex items-center justify-center rounded-xl transition-colors">
-                                        <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>more_horiz</span>
-                                    </button>
                                 </div>
-
-                                <div className="text-[18px] leading-normal mb-4 whitespace-pre-wrap break-words" style={{ color: 'var(--neu-text)' }}>
-                                    {details.content.content || details.content.body}
-                                </div>
-
-                                {/* Media Gallery */}
-                                {details.content.media && details.content.media.length > 0 && (
-                                    <div className="mb-4 neu-card-sm rounded-2xl overflow-hidden">
-                                        <div className={`grid gap-0.5 ${details.content.media.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                                            {details.content.media.map((m, idx) => {
-                                                const url = typeof m === 'string' ? m : m.url;
-                                                return (
-                                                    <div key={idx} className={`${details.content.media && details.content.media.length > 1 ? 'aspect-square' : 'aspect-auto max-h-[500px]'} relative neu-base`}>
-                                                        <img src={url} className="w-full h-full object-cover" alt="Post media" />
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="text-[15px] mb-4 flex items-center gap-3 flex-wrap" style={{ color: 'var(--neu-text-muted)' }}>
-                                    <span>{formatTimeAgo(details.content.createdAt)}</span>
-                                    {details.content.updatedAt && details.content.updatedAt !== details.content.createdAt && (
-                                        <button
-                                            onClick={handleViewEditHistory}
-                                            className="text-xs italic hover:text-primary hover:underline transition-colors cursor-pointer"
-                                        >
-                                            (edited)
-                                        </button>
-                                    )}
-                                    {details.content.priority && details.content.priority !== 'normal' && (
-                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                                            details.content.priority === 'critical' ? 'bg-brand-red/20 text-brand-red' :
-                                            details.content.priority === 'high' ? 'bg-brand-red/20 text-brand-red' :
-                                            'bg-brand-blue/20 text-brand-blue'
-                                        }`}>
-                                            {details.content.priority.charAt(0).toUpperCase() + details.content.priority.slice(1)}
-                                        </span>
-                                    )}
-                                </div>
+                                <div className="px-4">
 
                                 {/* Cultural Context */}
                                 {details.content.culturalContext && details.content.culturalContext.length > 0 && (
@@ -446,32 +409,12 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                     </div>
                                 )}
 
-                                <div className="neu-divider mb-3" />
 
-                                {/* Stats Bar */}
-                                <div className="flex items-center gap-8 py-3 px-1 overflow-x-auto no-scrollbar">
-                                    <div className="flex items-center gap-1.5 transition-colors group cursor-pointer hover:text-pink-400">
-                                        <span className="font-bold text-sm group-hover:text-pink-400" style={{ color: 'var(--neu-text)' }}>{details.content.likes || 0}</span>
-                                        <span className="text-sm group-hover:text-pink-400" style={{ color: 'var(--neu-text-muted)' }}>Likes</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 transition-colors group cursor-pointer hover:text-primary">
-                                        <span className="font-bold text-sm group-hover:text-primary" style={{ color: 'var(--neu-text)' }}>{details.content.comments || 0}</span>
-                                        <span className="text-sm group-hover:text-primary" style={{ color: 'var(--neu-text-muted)' }}>Replies</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 transition-colors group cursor-pointer hover:text-primary" onClick={() => setShowShare(true)}>
-                                        <span className="font-bold text-sm group-hover:text-primary" style={{ color: 'var(--neu-text)' }}>{details.content.shares || 0}</span>
-                                        <span className="text-sm group-hover:text-primary" style={{ color: 'var(--neu-text-muted)' }}>Share</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5" style={{ color: 'var(--neu-text-muted)' }}>
-                                        <span className="font-bold text-sm" style={{ color: 'var(--neu-text)' }}>{details.content.views || 0}</span>
-                                        <span className="text-sm">Views</span>
-                                    </div>
-                                </div>
-                                <div className="neu-divider" />
 
                                 {/* Post Comment Form */}
                                 <div className="mt-4">
                                     {postId && <CommentForm postId={postId} placeholder="Post your reply" />}
+                                </div>
                                 </div>
                             </div>
 

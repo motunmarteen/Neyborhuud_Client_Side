@@ -176,14 +176,14 @@ html.dark { color-scheme: dark; }
 
   /* ── Typography scale ────────────────────────────────────────────────────── */
   /* 6 named type roles — use these instead of arbitrary px/rem sizes.          */
-  --text-caption:    0.625rem;   /* 10px  — badges, chip labels, eyebrows      */
-  --text-label:      0.6875rem;  /* 11px  — secondary meta, timestamps         */
-  --text-body-sm:    0.8125rem;  /* 13px  — compact body, list items           */
-  --text-body:       0.875rem;   /* 14px  — default body copy                  */
-  --text-subheading: 1rem;       /* 16px  — section subheadings                */
-  --text-heading:    1.125rem;   /* 18px  — page/card headings                 */
-  --text-title:      1.375rem;   /* 22px  — section titles between heading and display */
-  --text-display:    1.75rem;    /* 28px  — hero/SOS/event feature headings    */
+  --text-caption:    0.5625rem;   /* 9px  — badges, chip labels, eyebrows      */
+  --text-label:      0.625rem;    /* 10px — secondary meta, timestamps         */
+  --text-body-sm:    0.75rem;     /* 12px — compact body, list items           */
+  --text-body:       0.8125rem;   /* 13px — default body copy                  */
+  --text-subheading: 0.9375rem;   /* 15px — section subheadings                */
+  --text-heading:    1.0625rem;   /* 17px — page/card headings                 */
+  --text-title:      1.25rem;     /* 20px — section titles between heading and display */
+  --text-display:    1.625rem;    /* 26px — hero/SOS/event feature headings    */
 
   /* ── Spacing scale (8px base) ───────────────────────────────────────────── */
   --space-1:   0.25rem;   /*  4px */
@@ -242,6 +242,15 @@ body::before {
   pointer-events: none;
 }
 
+/** Material Symbols — self-hosted variable font (no Google CDN dependency) */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url('/fonts/MaterialSymbolsOutlined.woff2') format('woff2');
+}
+
 /** Material Symbols — must override inherited display font on body */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
@@ -258,11 +267,13 @@ body::before {
   font-feature-settings: 'liga';
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
+  /* Default variation axes — ensures glyphs render even when no inline override */
+  font-variation-settings: 'opsz' 24, 'wght' 400, 'GRAD' 0, 'FILL' 0;
 }
 
 /* Fill variation driven by data attribute — avoids inline style on every icon */
-.material-symbols-outlined[data-filled="true"]  { font-variation-settings: 'FILL' 1; }
-.material-symbols-outlined[data-filled="false"] { font-variation-settings: 'FILL' 0; }
+.material-symbols-outlined[data-filled="true"]  { font-variation-settings: 'opsz' 24, 'wght' 400, 'GRAD' 0, 'FILL' 1; }
+.material-symbols-outlined[data-filled="false"] { font-variation-settings: 'opsz' 24, 'wght' 400, 'GRAD' 0, 'FILL' 0; }
 
 /** Global native-app shell */
 html {
@@ -349,6 +360,29 @@ html[data-standalone] .app-body {
   top: 0;
   z-index: 45;
   pointer-events: none;
+}
+
+/* iOS status bar solid background that remains even when top nav hides */
+.app-topnav-host::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--safe-top);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  z-index: -1;
+  transition: opacity 220ms ease;
+}
+
+.dark .app-topnav-host::before {
+  background: rgba(18, 24, 20, 0.96);
+}
+
+.app-topnav-host--sky-overlay::before {
+  opacity: 0;
 }
 
 @media (min-width: 1024px) {
@@ -584,15 +618,41 @@ main.feed-scroll-main,
 
 .app-bottomnav__dock {
   pointer-events: auto;
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   width: 100%;
   max-width: none;
   margin-inline: 0;
-  padding: 0 0 calc(env(safe-area-inset-bottom)) 0;
+  padding: 0 4rem var(--safe-bottom) 0;
   gap: 0;
   transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1), opacity 220ms ease;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.04);
+}
+
+/* Prevent iPhone rubber-banding bleed by extending the dock background infinitely downwards */
+.app-bottomnav__dock::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 50vh;
+  background: inherit;
+  backdrop-filter: inherit;
+  -webkit-backdrop-filter: inherit;
+  z-index: -1;
+}
+
+.dark .app-bottomnav__dock {
+  background: rgba(18, 24, 20, 0.96);
+  border-top-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.4);
 }
 
 .app-bottomnav__dock--hidden {
@@ -610,20 +670,9 @@ main.feed-scroll-main,
   justify-content: space-evenly;
   height: 4rem;
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  border-left: none;
-  border-right: none;
-  border-bottom: none;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.04);
 }
 
 .dark .app-bottomnav__pill {
-  background: rgba(18, 24, 20, 0.96);
-  border-top-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.4);
 }
 
 /* Individual navigation item inside the capsule */
@@ -673,14 +722,14 @@ button.app-bottomnav__item {
 
 /* Subtle active glow for active icons */
 .app-bottomnav__item--active .app-bottomnav__icon-wrap {
-  background: rgba(0, 212, 49, 0.08);
+  background: linear-gradient(180deg, rgba(0, 212, 49, 0.12) 0%, rgba(0, 212, 49, 0) 100%);
   border: none;
   box-shadow: inset 0 3px 0 rgba(0, 212, 49, 0.9);
   border-radius: 0;
 }
 
 .dark .app-bottomnav__item--active .app-bottomnav__icon-wrap {
-  background: rgba(0, 212, 49, 0.12);
+  background: linear-gradient(180deg, rgba(0, 212, 49, 0.18) 0%, rgba(0, 212, 49, 0) 100%);
   border: none;
   box-shadow: inset 0 3px 0 rgba(0, 212, 49, 0.9);
 }
@@ -720,12 +769,16 @@ button.app-bottomnav__item {
 
 /* Floating SOS Button Container */
 .app-bottomnav__sos {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  pointer-events: auto;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
   width: 4rem;
-  height: 4rem;
+  height: calc(4rem + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 /* Glass backing disc for the floating SOS button */
@@ -736,22 +789,11 @@ button.app-bottomnav__item {
   width: 100%;
   height: 100%;
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(40px) saturate(210%);
-  -webkit-backdrop-filter: blur(40px) saturate(210%);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-left: 1px solid rgba(0, 0, 0, 0.04);
-  border-right: none;
-  border-bottom: none;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.04);
   padding: 0;
 }
 
 .dark .app-bottomnav__sos-glass {
-  background: rgba(18, 27, 20, 0.98);
-  border-top-color: rgba(255, 255, 255, 0.1);
   border-left-color: rgba(255, 255, 255, 0.04);
-  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.4);
 }
 
 .app-bottomnav__sos-btn {
@@ -762,17 +804,40 @@ button.app-bottomnav__item {
   justify-content: center;
   width: 100%;
   height: 100%;
+  padding-bottom: var(--safe-bottom);
   border: 0;
   border-radius: 0;
-  background: radial-gradient(circle at 38% 30%, #ff4444 0%, #ff0000 50%, #cc0000 100%);
+  background: linear-gradient(135deg, #ff4d4d 0%, #e60000 50%, #b30000 100%);
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow:
-    0 6px 16px rgba(255, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    -4px 0 16px rgba(255, 0, 0, 0.15),
+    inset 2px 2px 8px rgba(255, 255, 255, 0.4),
+    inset -2px -2px 8px rgba(0, 0, 0, 0.2);
   touch-action: manipulation;
   user-select: none;
   transition: box-shadow 200ms ease, transform 150ms ease;
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden; /* Contains the shimmer sweep */
+}
+
+/* Premium glass shimmer sweep effect */
+.app-bottomnav__sos-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  animation: app-sos-shimmer 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes app-sos-shimmer {
+  0% { left: -150%; }
+  15% { left: 200%; }
+  100% { left: 200%; }
 }
 
 .app-bottomnav__sos-btn:hover {
@@ -798,6 +863,18 @@ button.app-bottomnav__item {
   width: var(--app-bottomnav-sos-icon-size);
   height: var(--app-bottomnav-sos-icon-size);
   color: #fff;
+  animation: app-sos-icon-float 3s ease-in-out infinite;
+}
+
+@keyframes app-sos-icon-float {
+  0%, 100% { 
+    transform: translateY(0); 
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); 
+  }
+  50% { 
+    transform: translateY(-2px); 
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); 
+  }
 }
 
 @keyframes app-nav-tap-spring {
@@ -939,9 +1016,14 @@ button.app-bottomnav__item {
 }
 
 .app-bottomnav__sos-ring--idle {
-  background: rgba(255, 0, 0, 0.06);
-  /* Static — pulse reserved for active emergencies only, preventing alert fatigue */
-  animation: none;
+  background: rgba(255, 0, 0, 1);
+  filter: blur(8px);
+  animation: app-sos-idle-breathe 4s ease-in-out infinite;
+}
+
+@keyframes app-sos-idle-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.08; }
+  50% { transform: scale(1.08); opacity: 0.18; }
 }
 
 .app-bottomnav__sos-ring--live {
@@ -2631,8 +2713,8 @@ html[data-scroll-locked] .feed-scroll-main {
 }
 
 .feed-scroll-main--sky-feed .feed-sky-feed-body {
-  background: var(--neu-bg);
-  border-radius: 1.25rem 1.25rem 0 0;
+  background: transparent;
+  border-radius: 0;
 }
 
 .feed-posts-stream {
@@ -3277,7 +3359,10 @@ html[data-scroll-locked] .feed-scroll-main {
 
 /* ── Feed sky hero — ambient scene (weather only) ── */
 .feed-sky-hero {
-  isolation: isolate;
+  /* Removed isolation:isolate — it was creating a new stacking context
+     that clipped the atmosphere extension behind the shortcuts row.
+     The scene and silhouette manage their own z-index fine without it. */
+  position: relative;
 }
 
 /* Feed sky hero — ambient scene sits below fixed TopNav; backdrop extends behind nav */
@@ -3297,10 +3382,10 @@ html[data-scroll-locked] .feed-scroll-main {
 
 .feed-sky-scene {
   position: relative;
-  height: 17.875rem;
-  isolation: isolate;
+  height: 13rem;
+  /* No isolation — lets the extended atmosphere bleed into the shortcut row below */
   overflow: visible;
-  --feed-sky-city-height: 2.625rem;
+  --feed-sky-city-height: 2.25rem;
   --feed-sky-nav-clearance: var(--app-topnav-offset);
 }
 
@@ -3308,7 +3393,10 @@ html[data-scroll-locked] .feed-scroll-main {
   position: absolute;
   inset-inline: 0;
   top: 0;
-  bottom: 0;
+  /* Extend below the scene height to cover category tiles (~7.5rem).
+     Ticker + sentinel are now inside feed-sky-hero via the below slot,
+     so the atmosphere reaches them through the section's own height. */
+  bottom: -7.5rem;
   overflow: hidden;
   z-index: 0;
   pointer-events: none;
@@ -3389,7 +3477,7 @@ html[data-scroll-locked] .feed-scroll-main {
 .feed-sky-scene__condition {
   margin: 0 auto;
   width: 100%;
-  max-width: 21rem;
+  max-width: none; padding: 0 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.45;
@@ -3419,22 +3507,28 @@ html[data-scroll-locked] .feed-scroll-main {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.4rem 0.45rem 0.4rem 1rem;
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(28px) saturate(2.2) brightness(1.08);
-  -webkit-backdrop-filter: blur(28px) saturate(2.2) brightness(1.08);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  padding: 0.4rem 0.45rem 0.4rem 1.25rem;
+  border-radius: 999px;
+  /* Semi-transparent — lets sky color show through. backdrop-filter
+     won't fire through isolation:isolate on the ancestor, so we rely
+     on a pure rgba tint that reads as glass over any sky gradient. */
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
-    0 8px 32px rgba(0, 0, 0, 0.22),
-    0 1px 3px rgba(0, 0, 0, 0.1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+    0 4px 24px rgba(0, 0, 0, 0.15),
+    0 1px 4px rgba(0, 0, 0, 0.08);
   transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 
 .feed-sky-scene__composer-pill:active {
   transform: scale(0.985);
+}
+
+.feed-sky-scene__composer-pill:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.38);
 }
 
 .feed-sky-scene__composer-text {
@@ -3477,10 +3571,6 @@ html[data-scroll-locked] .feed-scroll-main {
   opacity: 1;
 }
 
-.feed-sky-scene__composer-pill:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.42);
-}
 
 .feed-sky-scene__composer-media:hover {
   background: #ffffff;
@@ -3540,6 +3630,8 @@ html[data-scroll-locked] .feed-scroll-main {
   );
   z-index: 1;
 }
+
+/* No seam div needed — the sky hero already has .feed-sky-brand-glow blending the bottom edge */
 
 /* ── Feed hero (weather + headlines) — auth-flow aligned cards (legacy) ── */
 .feed-hero {
@@ -5303,7 +5395,7 @@ body,
   0% { transform: translateY(-12px) scaleY(0.8); opacity: 0; }
   8% { opacity: 1; }
   85% { opacity: 0.8; }
-  100% { transform: translateY(200px) scaleY(1); opacity: 0; }
+  100% { transform: translateY(600px) scaleY(1); opacity: 0; }
 }
 
 /** Sidebar: rain falls the full column height (sky → city). */
@@ -5349,7 +5441,7 @@ body,
     opacity: 1;
   }
   100% {
-    transform: translateY(220px) translateX(var(--snow-drift, 14px));
+    transform: translateY(600px) translateX(var(--snow-drift, 14px));
     opacity: 0;
   }
 }
@@ -7557,7 +7649,7 @@ button:focus-visible:not([class*="focus-visible"]) {
   scrollbar-width: none;
   -ms-overflow-style: none;
   gap: 0.25rem;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
 }
 
 .post-card-media-slider__track::-webkit-scrollbar {
@@ -7833,11 +7925,19 @@ button:focus-visible:not([class*="focus-visible"]) {
   width: 1.25rem;
   height: 1.25rem;
   overflow: hidden;
-  border-radius: 0;
-  background: rgba(0, 0, 0, 0.06);
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.dark .quoted-post-embed__avatar {
+  background: #1A221C;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.05);
 }
 
 .quoted-post-embed__meta {
@@ -8020,5 +8120,1006 @@ button:focus-visible:not([class*="focus-visible"]) {
   display: none; /* Handled by section gaps instead of line dividers */
 }
 
+/* ── Interactive Dancing Icons ── */
+@keyframes dance-like {
+  0% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.25) rotate(-12deg); }
+  50% { transform: scale(0.9) rotate(8deg); }
+  75% { transform: scale(1.1) rotate(-6deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes dance-comment {
+  0% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-4px) rotate(-12deg); }
+  50% { transform: translateY(1px) rotate(10deg); }
+  75% { transform: translateY(-2px) rotate(-6deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+@keyframes dance-repost {
+  0% { transform: rotate(0) scale(1); }
+  40% { transform: rotate(180deg) scale(1.2); }
+  70% { transform: rotate(360deg) scale(0.9); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes dance-save {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-5px) scaleY(1.15); }
+  60% { transform: translateY(2px) scaleY(0.85); }
+  100% { transform: translateY(0) scaleY(1); }
+}
+
+@keyframes dance-share {
+  0% { transform: translate(0, 0); }
+  30% { transform: translate(4px, -4px) rotate(20deg); }
+  60% { transform: translate(-1px, 1px) rotate(-8deg); }
+  100% { transform: translate(0, 0) rotate(0); }
+}
+
+.group:hover .group-hover\:animate-dance-like {
+  animation: dance-like 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+.group:hover .group-hover\:animate-dance-comment {
+  animation: dance-comment 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+.group:hover .group-hover\:animate-dance-repost {
+  animation: dance-repost 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+.group:hover .group-hover\:animate-dance-save {
+  animation: dance-save 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+.group:hover .group-hover\:animate-dance-share {
+  animation: dance-share 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
 
 
+
+.app-bottomnav__sos {
+  transition: all 500ms cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+.app-bottomnav__sos--floating {
+  bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  right: 1.25rem !important;
+  width: 4rem !important;
+  height: 4rem !important;
+  
+}
+.app-bottomnav__sos--floating .app-bottomnav__sos-glass,
+.app-bottomnav__sos--floating .app-bottomnav__sos-btn {
+  border-radius: 50% !important;
+  border: none !important;
+  padding-bottom: 0 !important;
+}
+.app-bottomnav__sos--floating .app-bottomnav__sos-btn {
+  box-shadow: 0 12px 32px rgba(255, 0, 0, 0.4), inset 2px 2px 8px rgba(255, 255, 255, 0.4) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOCAL NEWS FX STRIP
+   ═══════════════════════════════════════════════════════════════════ */
+
+.news-fx-strip {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 111, 53, 0.08) 0%,
+    rgba(26, 86, 255, 0.06) 100%
+  );
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+.dark .news-fx-strip {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 212, 49, 0.07) 0%,
+    rgba(26, 86, 255, 0.05) 100%
+  );
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* "Live FX" static badge */
+.news-fx-strip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+  padding-right: 0.75rem;
+  border-right: 1px solid rgba(0, 111, 53, 0.18);
+  margin-right: 0.75rem;
+  font-size: 0.5625rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand-green-dark);
+  white-space: nowrap;
+}
+.dark .news-fx-strip__label {
+  color: var(--primary);
+  border-right-color: rgba(0, 212, 49, 0.2);
+}
+
+.news-fx-strip__label-icon {
+  font-size: 0.875rem !important;
+  font-variation-settings: 'FILL' 1;
+  line-height: 1;
+}
+
+/* Scrollable rates row */
+.news-fx-strip__rates {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+  min-width: 0;
+}
+.news-fx-strip__rates::-webkit-scrollbar { display: none; }
+
+/* Individual rate pill */
+.news-fx-strip__rate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  transition: opacity 300ms ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.dark .news-fx-strip__rate {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.news-fx-strip__rate--visible {
+  opacity: 1;
+}
+
+/* Skeleton loading */
+.news-fx-strip__rate--skeleton {
+  width: 5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  animation: feed-skeleton-shimmer 1.4s ease-in-out infinite;
+  opacity: 1;
+}
+.dark .news-fx-strip__rate--skeleton {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.news-fx-strip__flag {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.news-fx-strip__currency {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--neu-text);
+}
+.dark .news-fx-strip__currency {
+  color: rgba(233, 246, 230, 0.85);
+}
+.news-fx-strip__eq {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--neu-text-muted);
+}
+
+.news-fx-strip__value {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--brand-green-dark);
+  letter-spacing: -0.01em;
+}
+.dark .news-fx-strip__value {
+  color: var(--primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FEED NEWS TICKER
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Outer shell — now inside feed-sky-hero, sky gradient shows through */
+.feed-news-ticker {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 2rem;
+  overflow: hidden;
+  /* Transparent — sky atmosphere is the background */
+  background: rgba(0, 0, 0, 0.32);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.dark .feed-news-ticker {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* "⚡ NEWS" static badge on the left */
+.feed-news-ticker__label {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+  padding: 0 0.625rem;
+  height: 100%;
+  background: var(--primary);
+  color: #0a1a0f;
+  font-size: 0.5625rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* Angled right edge */
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  padding-right: 1rem;
+}
+
+.feed-news-ticker__label-icon {
+  font-size: 0.875rem !important;
+  font-variation-settings: 'FILL' 1;
+  line-height: 1;
+}
+
+/* Scrolling viewport — clips the moving track */
+.feed-news-ticker__viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  height: 100%;
+  position: relative;
+  /* Left fade so headlines emerge cleanly from behind the label */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 2rem, black calc(100% - 1.5rem), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 2rem, black calc(100% - 1.5rem), transparent 100%);
+}
+
+/* The scrolling track — contains two copies of headlines for seamless loop */
+.feed-news-ticker__track {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: max-content;
+  animation: ticker-scroll 350s linear infinite;
+  will-change: transform;
+}
+
+.feed-news-ticker__track--paused {
+  animation-play-state: paused;
+}
+
+@keyframes ticker-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-news-ticker__track {
+    animation: none;
+    /* Show headlines stacked instead */
+    flex-direction: column;
+    height: auto;
+    width: 100%;
+    overflow: hidden;
+  }
+  .feed-news-ticker {
+    height: auto;
+    min-height: 2rem;
+  }
+}
+
+/* Individual headline button */
+.feed-news-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0 0.75rem;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: rgba(233, 246, 230, 0.88);
+  font-size: 0.6875rem;       /* 11px — tight, readable */
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 140ms ease;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+}
+
+.feed-news-ticker__item:hover {
+  color: var(--primary);
+}
+
+/* FX rate inline pill — green money tone stands out from white headlines */
+.feed-news-ticker__item--fx {
+  gap: 0.3rem;
+}
+.feed-news-ticker__fx-cur {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.75);
+}
+.feed-news-ticker__fx-eq {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+}
+.feed-news-ticker__fx-val {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.01em;
+}
+
+/* Divider dot between items */
+.feed-news-ticker__dot {
+  font-size: 0.5rem;
+  opacity: 0.35;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RADIAL CATEGORY DIAL — segmented donut immersed in the left edge
+   ═══════════════════════════════════════════════════════════════════ */
+
+.radial-dial {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 60;
+  pointer-events: none;
+  --dial-wedge-a: #3a3a3a;
+  --dial-wedge-b: #2b2b2b;
+}
+
+.radial-dial__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  border: none;
+  background: rgba(0, 0, 0, 0.40);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  cursor: pointer;
+  animation: radial-backdrop-in 220ms ease both;
+}
+@keyframes radial-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.radial-dial__stage {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 280px;
+  height: 280px;
+  transform: translateY(-50%) scale(0.2);
+  transform-origin: left center;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 420ms cubic-bezier(0.22, 1.3, 0.4, 1),
+    opacity 260ms ease;
+  filter: drop-shadow(8px 0 30px rgba(0, 0, 0, 0.35));
+}
+.radial-dial--open .radial-dial__stage {
+  transform: translateY(-50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.radial-dial__svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+
+.radial-dial__wedge {
+  cursor: pointer;
+  outline: none;
+}
+.radial-dial__wedge-path {
+  transition: fill 200ms ease, transform 200ms cubic-bezier(0.34, 1.4, 0.64, 1),
+              filter 200ms ease;
+  transform-origin: 0px 140px;
+  stroke: rgba(0, 0, 0, 0.25);
+  stroke-width: 1;
+}
+.radial-dial__wedge:hover .radial-dial__wedge-path {
+  transform: scale(1.035);
+  filter: brightness(1.15);
+}
+.radial-dial__wedge:focus-visible .radial-dial__wedge-path {
+  filter: brightness(1.2);
+}
+.radial-dial__wedge--active .radial-dial__wedge-path {
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.4));
+}
+
+.radial-dial__wedge-fo {
+  pointer-events: none;
+  overflow: visible;
+}
+.radial-dial__wedge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 1.25rem !important;
+  color: rgba(255, 255, 255, 0.82);
+  font-variation-settings: 'opsz' 24, 'wght' 500, 'GRAD' 0, 'FILL' 1;
+}
+.radial-dial__wedge-icon--active {
+  color: #fff;
+}
+
+.radial-dial__hub {
+  fill: #f6faf6;
+  stroke: rgba(0, 0, 0, 0.10);
+  stroke-width: 1.5;
+}
+.dark .radial-dial__hub {
+  fill: #132218;
+  stroke: rgba(255, 255, 255, 0.10);
+}
+
+.radial-dial__hub-readout {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(-2px, -50%);
+  width: 124px;
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+.radial-dial__hub-icon {
+  font-size: 1.5rem !important;
+  color: var(--brand-green-dark);
+  font-variation-settings: 'opsz' 24, 'wght' 500, 'GRAD' 0, 'FILL' 1;
+  margin-bottom: 0.1rem;
+}
+.dark .radial-dial__hub-icon { color: var(--primary); }
+.radial-dial__hub-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--neu-text);
+  line-height: 1.1;
+}
+.radial-dial__hub-sub {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--neu-text-muted);
+  margin-top: 0.15rem;
+}
+
+.radial-dial__fab {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.75rem;
+  height: 3.5rem;
+  border: none;
+  border-radius: 0 1.75rem 1.75rem 0;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--brand-green-dark) 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 4px 0 16px rgba(0, 111, 53, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  z-index: 2;
+  transition: opacity 200ms ease;
+}
+.radial-dial--open .radial-dial__fab {
+  opacity: 0;
+  pointer-events: none;
+}
+.radial-dial__fab-icon {
+  font-size: 1.5rem !important;
+  font-variation-settings: 'opsz' 24, 'wght' 500, 'GRAD' 0, 'FILL' 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radial-dial__stage { transition: opacity 200ms ease; transform: translateY(-50%) scale(1); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SENTINEL COMMAND BAR — calm "you're protected" strip, expands to grid
+   ═══════════════════════════════════════════════════════════════════ */
+
+.sentinel-bar-wrap {
+  width: 100%;
+  position: relative;
+  z-index: 20;
+}
+
+/* The bar itself — clean light surface, matches the feed */
+.sentinel-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--background);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: background 200ms ease;
+}
+.dark .sentinel-bar {
+  background: var(--background-dark);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+.sentinel-bar:active {
+  background: rgba(0, 0, 0, 0.02);
+}
+.dark .sentinel-bar:active {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Shield mark with live pulse */
+.sentinel-bar__mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: radial-gradient(circle at 40% 35%, rgba(0, 212, 49, 0.30), rgba(0, 212, 49, 0.12));
+  border: 1px solid rgba(0, 212, 49, 0.40);
+}
+.sentinel-bar__shield {
+  width: 1.375rem;
+  height: 1.375rem;
+  color: var(--primary);
+}
+.sentinel-bar__pulse {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 212, 49, 0.55);
+  animation: sentinel-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes sentinel-pulse {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sentinel-bar__pulse { animation: none; }
+}
+
+/* Identity + status text */
+.sentinel-bar__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.sentinel-bar__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--neu-text);
+}
+.sentinel-bar__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: rgba(0, 212, 49, 0.14);
+  border: 1px solid rgba(0, 212, 49, 0.30);
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+}
+.sentinel-bar__status-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 6px rgba(0, 212, 49, 0.8);
+  animation: sentinel-blink 2s ease-in-out infinite;
+}
+@keyframes sentinel-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+.sentinel-bar__sub {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--neu-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sentinel-bar__chevron {
+  font-size: 1.375rem !important;
+  color: var(--neu-text-muted);
+  flex-shrink: 0;
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sentinel-bar__chevron--open {
+  transform: rotate(180deg);
+}
+
+/* Expandable grid — collapses to 0 height when closed */
+.sentinel-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  background: var(--surface-light);
+  transition: grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dark .sentinel-grid {
+  background: var(--surface-dark);
+}
+.sentinel-grid--open {
+  grid-template-rows: 1fr;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.sentinel-grid__inner {
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.25rem;
+  padding: 0.75rem 0.5rem 0.25rem;
+}
+
+.sentinel-grid__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.625rem 0.25rem;
+  border-radius: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 160ms ease;
+}
+.sentinel-grid__item:active {
+  background: rgba(0, 0, 0, 0.04);
+}
+.dark .sentinel-grid__item:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sentinel-grid__icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+.dark .sentinel-grid__icon {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+.sentinel-grid__icon .material-symbols-outlined {
+  font-size: 1.375rem;
+  font-variation-settings: 'opsz' 24, 'wght' 400, 'GRAD' 0, 'FILL' 1;
+}
+.sentinel-grid__badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background: var(--brand-blue);
+  color: #fff;
+  font-size: 0.5rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 1px 4px;
+  border-radius: 999px;
+  line-height: 1.4;
+  border: 2px solid var(--surface-light);
+}
+.dark .sentinel-grid__badge {
+  border-color: var(--surface-dark);
+}
+.sentinel-grid__label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--neu-text);
+  max-width: 4.5rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.sentinel-grid__manage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: calc(100% - 1rem);
+  margin: 0.25rem 0.5rem 0.75rem;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--neu-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 160ms ease;
+}
+.dark .sentinel-grid__manage {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+.sentinel-grid__manage:active {
+  background: rgba(0, 0, 0, 0.06);
+}
+.dark .sentinel-grid__manage:active {
+  background: rgba(255, 255, 255, 0.10);
+}
+.sentinel-grid__manage .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FEED PREMIUM UPGRADES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Post card entrance animation ─────────────────────────────────
+   Each article in the feed fades + slides up as it enters the viewport.
+   Driven by IntersectionObserver (class toggled in JS) or pure CSS
+   animation-fill-mode for the initial render pass.
+──────────────────────────────────────────────────────────────────── */
+/* feed-posts-stream entrance animation already defined above (~line 2716) — no duplicate needed */
+
+/* ── Card elevation tiers ─────────────────────────────────────────
+   text-only = flat (default)
+   media     = subtle shadow lift
+   emergency = red-tinted depth
+──────────────────────────────────────────────────────────────────── */
+
+/* Media posts get a soft shadow to signal visual depth */
+article.feed-card--media {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.dark article.feed-card--media {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+/* Emergency posts get tinted background + stronger red border */
+article.feed-card--emergency {
+  background: rgba(255, 0, 0, 0.018) !important;
+  box-shadow: inset 3px 0 0 var(--brand-red), 0 2px 12px rgba(255, 0, 0, 0.06);
+}
+.dark article.feed-card--emergency {
+  background: rgba(255, 0, 0, 0.06) !important;
+  box-shadow: inset 3px 0 0 var(--brand-red), 0 2px 12px rgba(255, 0, 0, 0.12);
+}
+
+/* ── Action bar upgrade ───────────────────────────────────────────
+   Richer row above the actions — stronger separator, more breathing room.
+──────────────────────────────────────────────────────────────────── */
+.post-card-action-bar {
+  padding-top: 0.625rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  margin-top: 0.625rem !important;
+}
+.dark .post-card-action-bar {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+.post-card-action-bar__btn {
+  border-radius: 0.5rem;
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+  min-width: 2.25rem;
+  justify-content: center;
+}
+.post-card-action-bar__btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.dark .post-card-action-bar__btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.post-card-action-bar__btn:active {
+  transform: scale(0.93);
+}
+
+/* Increase icon visual weight to 20px instead of 18px via SVG sizing */
+.post-card-action-bar__btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+
+/* ── Narrative block interior polish ─────────────────────────────
+   Was using rounded-none which looked unintentional inside cards.
+   Override to give it a left-accent + small radius.
+──────────────────────────────────────────────────────────────────── */
+.post-narrative-block {
+  border-left: 3px solid var(--primary) !important;
+  border-radius: 0 0.375rem 0.375rem 0 !important;
+  background: rgba(0, 212, 49, 0.04) !important;
+}
+.dark .post-narrative-block {
+  background: rgba(0, 212, 49, 0.06) !important;
+}
+
+/* Emergency narrative gets a red accent */
+.post-narrative-block--emergency {
+  border-left-color: var(--brand-red) !important;
+  background: rgba(255, 0, 0, 0.04) !important;
+}
+.dark .post-narrative-block--emergency {
+  background: rgba(255, 0, 0, 0.07) !important;
+}
+
+/* ── Discovery block continuity ──────────────────────────────────
+   Make the discovery chrome header feel part of the post stream
+   instead of a foreign widget.
+──────────────────────────────────────────────────────────────────── */
+.feed-discovery-chrome-icon {
+  border-radius: 0.375rem;
+}
+
+/* ── Skeleton upgrade ────────────────────────────────────────────
+   Brand-tinted shimmer instead of generic grey.
+──────────────────────────────────────────────────────────────────── */
+@keyframes feed-skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.feed-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 212, 49, 0.06) 0%,
+    rgba(0, 212, 49, 0.14) 40%,
+    rgba(0, 212, 49, 0.06) 80%
+  );
+  background-size: 200% 100%;
+  animation: feed-skeleton-shimmer 1.6s ease-in-out infinite;
+}
+.dark .feed-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 212, 49, 0.04) 0%,
+    rgba(0, 212, 49, 0.10) 40%,
+    rgba(0, 212, 49, 0.04) 80%
+  );
+  background-size: 200% 100%;
+}
+
+/* ── Scroll-to-top pill ──────────────────────────────────────────
+   Floats above the bottom nav when the user has scrolled down.
+──────────────────────────────────────────────────────────────────── */
+.feed-scroll-top-pill {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  bottom: calc(var(--app-nav-bottom) + 0.75rem);
+  z-index: 48;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.45rem 1rem 0.45rem 0.75rem;
+  border-radius: 9999px;
+  background: var(--brand-black);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22), 0 1px 6px rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+  border: none;
+  transition: opacity 260ms ease, transform 260ms cubic-bezier(0.34, 1.2, 0.64, 1);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.dark .feed-scroll-top-pill {
+  background: rgba(233, 246, 230, 0.92);
+  color: var(--brand-black);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+}
+.feed-scroll-top-pill:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+}
+.feed-scroll-top-pill:active {
+  transform: translateX(-50%) scale(0.96);
+}
+.feed-scroll-top-pill--hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(10px);
+}
+
+/* ── Read More gradient — use CSS vars not hardcoded hex ─────────
+   Override via class; the inline Tailwind in XPostCard still works
+   but we add this for future-proofing via the class hook.
+──────────────────────────────────────────────────────────────────── */
+.post-read-more-fade {
+  background: linear-gradient(
+    to top,
+    var(--background) 0%,
+    color-mix(in srgb, var(--background) 85%, transparent) 50%,
+    transparent 100%
+  );
+}
+.dark .post-read-more-fade {
+  background: linear-gradient(
+    to top,
+    var(--background-dark) 0%,
+    color-mix(in srgb, var(--background-dark) 80%, transparent) 50%,
+    transparent 100%
+  );
+}
+
+/* ── Avatar size bump to 44px ────────────────────────────────────
+   The 40px default is minimum viable. 44px is the Apple HIG minimum
+   for primary interactive targets and feels premium.
+──────────────────────────────────────────────────────────────────── */
+.post-card-avatar {
+  width: 2.75rem !important;  /* 44px */
+  height: 2.75rem !important;
+}
+.post-card-avatar-badge {
+  bottom: -0.1875rem !important;
+  right: -0.1875rem !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}

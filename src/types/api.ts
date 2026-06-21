@@ -279,6 +279,13 @@ export interface Post {
   savedCollection?: string | null;
   parentId?: string;
   quotedPost?: Post;
+  repostedBy?: {
+    id: string;
+    name: string;
+    username: string;
+    avatarUrl?: string | null;
+  };
+  _isSimpleRepostUnrolled?: boolean;
   /** Post body – prefer content; backend sends both (GET /feed, GET /content/posts) */
   content: string;
   body?: string;
@@ -355,6 +362,7 @@ export interface Post {
   views: number;
   isLiked?: boolean;
   isSaved?: boolean;
+  isShared?: boolean;
   isAcknowledged?: boolean;
   isAware?: boolean;
   isNearby?: boolean;

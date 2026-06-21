@@ -23,8 +23,10 @@ import { XReplyIcon, XLikeIcon, XViewIcon, XBookmarkIcon, XShareIcon, XHelpIcon 
 import { PostSentinelLink } from '@/components/feed/PostSentinelLink';
 import { PostCardFollowButton } from '@/components/feed/PostCardFollowButton';
 import { PostCardAuthorLines } from '@/components/feed/PostCardAuthorLines';
+import { PostCardVerificationBadge } from '@/components/feed/PostCardVerificationBadge';
 import { PostCardMediaSlider } from '@/components/feed/PostCardMediaSlider';
 import { getPostAuthorUserId } from '@/lib/postAuthor';
+import { resolveUserAvatarUrl } from '@/lib/userAvatar';
 
 interface HelpRequestCardProps {
     post: Post;
@@ -70,7 +72,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
     const fullName = author ? [author.firstName, author.lastName].filter(Boolean).join(' ') : '';
     const authorName = fullName || author?.name || author?.username || 'Anonymous';
     const authorUsername = author?.username || 'user';
-    const authorAvatar = author?.avatarUrl || author?.profilePicture || null;
+    const authorAvatar = resolveUserAvatarUrl(author);
 
     const isOwner = !!(user && (user.id === author?.id || (user as any)._id === author?.id));
     const isAnonymousAuthor = !author?.id || author.id === 'anonymous';
@@ -216,7 +218,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
         const displayText = shouldTruncate ? `${textContent.slice(0, 260)}...` : textContent;
 
         return (
-            <div className="px-1 text-sm font-medium text-neu-text dark:text-white/90 leading-relaxed whitespace-pre-wrap break-words">
+            <div className="px-1 text-[14px] font-normal text-neu-text dark:text-white/90 leading-[19px] tracking-normal whitespace-pre-wrap break-words">
                 {displayText}
                 {shouldTruncate && (
                     <button
@@ -250,7 +252,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
 
     // ── Structured components ──
     const fundingBlock = targetAmount != null && targetAmount > 0 ? (
-        <div className="p-3.5 rounded-2xl flex flex-col gap-2.5 bg-primary/[0.04] mt-2">
+        <div className="p-3.5 rounded-2xl flex flex-col gap-2.5 bg-primary/[0.04] mt-3">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[17px] text-primary" style={{ fontVariationSettings: '"FILL" 1' }}>savings</span>
@@ -308,7 +310,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
     ) : null;
 
     const accountBlock = accountDetails && (accountDetails.bankName || accountDetails.accountName || accountDetails.accountNumber) ? (
-        <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/5 flex flex-col gap-2 mt-2">
+        <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/5 flex flex-col gap-2 mt-3">
             <div className="flex items-center gap-1.5 mb-1">
                 <span className="material-symbols-outlined text-[16px] text-neu-text-secondary dark:text-white/40">account_balance</span>
                 <span className="text-[10px] font-black uppercase text-neu-text-secondary dark:text-white/40 tracking-wider">How to Help</span>
@@ -353,7 +355,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
     return (
         <>
         <article
-            className="bg-white dark:bg-[#121b14] border-b-[8px] border-[#f2f4f7] dark:border-[#0a0c0a] px-3 py-4 mx-auto w-full select-none max-w-none rounded-none flex flex-col gap-4"
+            className="bg-white dark:bg-[#121b14] border-b border-black/5 dark:border-white/5 px-4 py-3.5 mx-auto w-full select-none max-w-none rounded-none flex flex-col gap-0"
             {...articleGestureProps}
         >
             {/* Top Header Row */}
@@ -377,6 +379,12 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                                 )}
                             </div>
                         </Link>
+                        <div className="absolute -bottom-1 -right-1 z-10 flex h-[17px] w-[17px] items-center justify-center rounded-full bg-white dark:bg-[#121b14] border-[1.5px] border-white dark:border-[#121b14] shadow-sm select-none pointer-events-none">
+                            <PostCardVerificationBadge
+                                author={author ?? { isVerified: author?.isVerified, verificationBadge: author?.verificationBadge }}
+                                hidden={isAnonymousAuthor}
+                            />
+                        </div>
                     </div>
                     <PostCardAuthorLines
                         authorName={authorName}
@@ -418,49 +426,53 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
             </div>
 
             {/* Body Section */}
-            {renderTextContent()}
-            {renderMedia()}
+            <div className="mt-2.5 w-full flex flex-col gap-3">
+                {renderTextContent()}
+                {hasMedia && (
+                    <div className="-mx-4 mt-0.5">
+                        {renderMedia()}
+                    </div>
+                )}
+            </div>
 
             {/* Financial and bank info blocks */}
             {fundingBlock}
             {accountBlock}
 
-
-
             {/* Action Bar (Horizontal Row) */}
-            <div className="post-card-action-bar flex items-center justify-between mt-2.5 text-[11px] font-bold w-full">
+            <div className="post-card-action-bar flex items-center justify-between mt-3 text-[11px] font-bold w-full">
                 {/* Comment action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onComment?.(postId); }}
-                    className="post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
+                    className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 active:scale-95 cursor-pointer group"
                     aria-label="Comment"
                 >
-                    <XReplyIcon size={18} className="group-hover:text-brand-blue" />
-                    <span className="group-hover:text-brand-blue tabular-nums">{post.comments ? formatCompactCount(post.comments) : '0'}</span>
+                    <XReplyIcon size={18} className="group-hover:text-brand-blue group-hover:animate-dance-comment" />
+                    <span className="group-hover:text-brand-blue tabular-nums transition-colors duration-200">{post.comments ? formatCompactCount(post.comments) : '0'}</span>
                 </button>
 
                 {/* Help action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); router.push(`/help-request/${postId}`); }}
-                    className="post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl hover:text-brand-green-dark hover:bg-brand-green-dark/10 transition-colors cursor-pointer group text-primary"
+                    className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-primary hover:text-brand-green-dark transition-colors duration-200 cursor-pointer group"
                     aria-label="Help"
                 >
-                    <XHelpIcon size={18} className="group-hover:text-brand-green-dark text-primary" />
+                    <XHelpIcon size={18} className="group-hover:text-brand-green-dark text-primary animate-pulse" />
                     <span className="font-black group-hover:text-brand-green-dark text-primary">Help</span>
                 </button>
 
                 {/* Like action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl transition-colors cursor-pointer group ${isLiked ? 'text-brand-red' : 'hover:text-brand-red hover:bg-brand-red/10'}`}
+                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 active:scale-95 cursor-pointer group ${isLiked ? 'text-brand-red' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-red'}`}
                     aria-label="Like"
                 >
-                    <XLikeIcon size={18} filled={isLiked} className={`transition-transform active:scale-75 group-hover:text-brand-red ${isLiked ? 'text-brand-red' : ''}`} />
-                    <span className="group-hover:text-brand-red tabular-nums">{post.likes ? formatCompactCount(post.likes) : '0'}</span>
+                    <XLikeIcon size={18} filled={isLiked} className={`transition-transform active:scale-75 group-hover:animate-dance-like group-hover:text-brand-red ${isLiked ? 'text-brand-red' : ''}`} />
+                    <span className="group-hover:text-brand-red tabular-nums transition-colors duration-200">{post.likes ? formatCompactCount(post.likes) : '0'}</span>
                 </button>
 
                 {/* Views action */}
-                <div className="post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5" aria-label="Views">
+                <div className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary dark:text-white/60" aria-label="Views">
                     <XViewIcon size={18} />
                     <span className="tabular-nums">{post.views ? formatCompactCount(post.views) : '1.2K'}</span>
                 </div>
@@ -468,19 +480,19 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                 {/* Save action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); saveMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl transition-colors cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'hover:text-brand-blue hover:bg-brand-blue/10'}`}
+                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 active:scale-95 cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-blue'}`}
                     aria-label="Bookmark"
                 >
-                    <XBookmarkIcon size={18} filled={post.isSaved} className="group-hover:text-brand-blue" />
+                    <XBookmarkIcon size={18} filled={post.isSaved} className="group-hover:animate-dance-save group-hover:text-brand-blue" />
                 </button>
 
                 {/* Share action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
-                    className="post-card-action-bar__btn flex items-center gap-1.5 px-1.5 py-1 -ml-1.5 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
+                    className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 active:scale-95 cursor-pointer group"
                     aria-label="Share"
                 >
-                    <XShareIcon size={18} className="group-hover:text-brand-blue" />
+                    <XShareIcon size={18} className="group-hover:animate-dance-share group-hover:text-brand-blue" />
                 </button>
             </div>
         </article>

@@ -24,8 +24,10 @@ import { XReplyIcon, XLikeIcon, XViewIcon, XBookmarkIcon, XShareIcon, XThumbUpIc
 import { PostSentinelLink } from '@/components/feed/PostSentinelLink';
 import { PostCardFollowButton } from '@/components/feed/PostCardFollowButton';
 import { PostCardAuthorLines } from '@/components/feed/PostCardAuthorLines';
+import { PostCardVerificationBadge } from '@/components/feed/PostCardVerificationBadge';
 import { PostCardMediaSlider } from '@/components/feed/PostCardMediaSlider';
 import { getPostAuthorUserId } from '@/lib/postAuthor';
+import { resolveUserAvatarUrl } from '@/lib/userAvatar';
 
 const formatCompactCount = (value?: number) => {
     if (!value) return undefined;
@@ -70,7 +72,7 @@ export function FYICard({
     const fullName = author ? [author.firstName, author.lastName].filter(Boolean).join(' ') : '';
     const authorName = fullName || author?.name || author?.username || 'Anonymous';
     const authorUsername = author?.username || 'user';
-    const authorAvatar = author?.avatarUrl || author?.profilePicture || null;
+    const authorAvatar = resolveUserAvatarUrl(author);
 
     const isAnonymousAuthor = !author?.id || author.id === 'anonymous';
     const isOwner = !!(currentAuthUser && (currentAuthUser.id === author?.id || (currentAuthUser as any)._id === author?.id || post.authorId === currentAuthUser.id));
@@ -217,7 +219,7 @@ export function FYICard({
         const displayText = shouldTruncate ? `${textContent.slice(0, 260)}...` : textContent;
 
         return (
-            <div className="px-1 text-sm font-medium text-neu-text dark:text-white/90 leading-relaxed whitespace-pre-wrap break-words">
+            <div className="px-1 text-[14px] font-normal text-neu-text dark:text-white/90 leading-[19px] tracking-normal whitespace-pre-wrap break-words">
                 {displayText}
                 {shouldTruncate && (
                     <button
@@ -252,7 +254,7 @@ export function FYICard({
     return (
         <>
         <article
-            className="bg-white dark:bg-[#121b14] p-5 mx-auto w-full select-none border-0 border-b border-black/[0.06] dark:border-white/[0.06] shadow-none max-w-[580px] rounded-none flex flex-col gap-4"
+            className="bg-white dark:bg-[#121b14] px-4 py-3.5 mx-auto w-full select-none border-0 border-b border-black/[0.06] dark:border-white/[0.06] shadow-none max-w-[580px] rounded-none flex flex-col gap-0"
             {...articleGestureProps}
         >
             {/* Top Header Row */}
@@ -276,6 +278,12 @@ export function FYICard({
                                 )}
                             </div>
                         </Link>
+                        <div className="absolute -bottom-1 -right-1 z-10 flex h-[17px] w-[17px] items-center justify-center rounded-full bg-white dark:bg-[#121b14] border-[1.5px] border-white dark:border-[#121b14] shadow-sm select-none pointer-events-none">
+                            <PostCardVerificationBadge
+                                author={author ?? { isVerified: author?.isVerified, verificationBadge: author?.verificationBadge }}
+                                hidden={isAnonymousAuthor}
+                            />
+                        </div>
                     </div>
                     <PostCardAuthorLines
                         authorName={authorName}
@@ -317,35 +325,39 @@ export function FYICard({
             </div>
 
             {/* Body Section */}
-            {renderTextContent()}
-            {renderMedia()}
+            <div className="mt-2.5 w-full flex flex-col gap-3">
+                {renderTextContent()}
+                {hasMedia && (
+                    <div className="-mx-4 mt-0.5">
+                        {renderMedia()}
+                    </div>
+                )}
+            </div>
 
             {/* Contact info Block */}
             {contactInfo && (
-                <div className="flex items-center gap-2 p-3 rounded-2xl bg-status-warning/5 mt-2">
+                <div className="flex items-center gap-2 p-3 rounded-2xl bg-status-warning/5 mt-3">
                     <span className="material-symbols-outlined text-[16px] text-status-warning">contact_phone</span>
                     <span className="text-[12px] text-neu-text-secondary dark:text-white/70 font-semibold">{contactInfo}</span>
                 </div>
             )}
 
-
-
             {/* Action Bar (Horizontal Row) */}
-            <div className="post-card-action-bar flex items-center justify-between mt-2.5 text-[11px] font-bold">
+            <div className="post-card-action-bar flex items-center justify-between mt-3 text-[11px] font-bold">
                 {/* Comment action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onComment?.(postId); }}
-                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
+                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 cursor-pointer group"
                     aria-label="Comment"
                 >
-                    <XReplyIcon size={18} className="group-hover:text-brand-blue" />
-                    <span className="group-hover:text-brand-blue tabular-nums">{post.comments ? formatCompactCount(post.comments) : '0'}</span>
+                    <XReplyIcon size={18} className="group-hover:text-brand-blue group-hover:animate-dance-comment" />
+                    <span className="group-hover:text-brand-blue tabular-nums transition-colors duration-200">{post.comments ? formatCompactCount(post.comments) : '0'}</span>
                 </button>
 
                 {/* Helpful action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); helpfulMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl transition-colors cursor-pointer group ${post.isHelpful ? 'text-primary' : 'hover:text-primary hover:bg-primary/10'}`}
+                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 transition-colors duration-200 cursor-pointer group ${post.isHelpful ? 'text-primary' : 'text-neu-text-secondary dark:text-white/60 hover:text-primary'}`}
                     aria-label="Helpful"
                 >
                     <XThumbUpIcon size={18} filled={!!post.isHelpful} className="group-hover:text-primary" />
@@ -355,15 +367,15 @@ export function FYICard({
                 {/* Like action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl transition-colors cursor-pointer group ${isLiked ? 'text-brand-red' : 'hover:text-brand-red hover:bg-brand-red/10'}`}
+                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 transition-colors duration-200 cursor-pointer group ${isLiked ? 'text-brand-red' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-red'}`}
                     aria-label="Like"
                 >
-                    <XLikeIcon size={18} filled={isLiked} className={`transition-transform active:scale-75 group-hover:text-brand-red ${isLiked ? 'text-brand-red' : ''}`} />
-                    <span className="group-hover:text-brand-red tabular-nums">{post.likes ? formatCompactCount(post.likes) : '0'}</span>
+                    <XLikeIcon size={18} filled={isLiked} className={`transition-transform active:scale-75 group-hover:animate-dance-like group-hover:text-brand-red ${isLiked ? 'text-brand-red' : ''}`} />
+                    <span className="group-hover:text-brand-red tabular-nums transition-colors duration-200">{post.likes ? formatCompactCount(post.likes) : '0'}</span>
                 </button>
 
                 {/* Views action */}
-                <div className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1" aria-label="Views">
+                <div className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary dark:text-white/60" aria-label="Views">
                     <XViewIcon size={18} />
                     <span className="tabular-nums">{post.views ? formatCompactCount(post.views) : '1.2K'}</span>
                 </div>
@@ -371,19 +383,19 @@ export function FYICard({
                 {/* Save action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); saveMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl transition-colors cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'hover:text-brand-blue hover:bg-brand-blue/10'}`}
+                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 transition-colors duration-200 cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-blue'}`}
                     aria-label="Bookmark"
                 >
-                    <XBookmarkIcon size={18} filled={post.isSaved} className="group-hover:text-brand-blue" />
+                    <XBookmarkIcon size={18} filled={post.isSaved} className="group-hover:animate-dance-save group-hover:text-brand-blue" />
                 </button>
 
                 {/* Share action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
-                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 rounded-xl hover:text-brand-blue hover:bg-brand-blue/10 transition-colors cursor-pointer group"
+                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 cursor-pointer group"
                     aria-label="Share"
                 >
-                    <XShareIcon size={18} className="group-hover:text-brand-blue" />
+                    <XShareIcon size={18} className="group-hover:animate-dance-share group-hover:text-brand-blue" />
                 </button>
             </div>
         </article>

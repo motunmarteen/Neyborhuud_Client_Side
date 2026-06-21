@@ -40,7 +40,10 @@ import { mergeDiscoveryIntoFeed, type BaseFeedItem, type DiscoveryFeedItem } fro
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
 import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
 import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
-import { FeedNewsCarouselBlock } from '@/components/feed/FeedNewsCarouselBlock';
+import { FeedNewsTicker } from '@/components/feed/FeedNewsTicker';
+import { FeedSentinelRow } from '@/components/feed/FeedSentinelRow';
+import { FeedRadialCategories } from '@/components/feed/FeedRadialCategories';
+import { useScrollHideBottomNav, scrollToTop } from '@/hooks/useScrollHideBottomNav';
 
 const getFilterBannerData = (type: string) => {
     switch (type) {
@@ -131,6 +134,8 @@ function XFeedInner() {
     const queryClient = useQueryClient();
     const canPost = isUserInNigeria();
     const mainRef = useRef<HTMLElement>(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const navHidden = useScrollHideBottomNav();
 
     // Derive contentTypeFilter from URL search params (set by sidebar / search overlay)
     const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'help_request', 'job', 'event', 'marketplace', 'emergency', 'community_alert', 'incident_report'];
@@ -158,6 +163,15 @@ function XFeedInner() {
         };
         window.addEventListener('open-create-post', handler);
         return () => window.removeEventListener('open-create-post', handler);
+    }, []);
+
+    // Show scroll-to-top pill when user has scrolled past 300px on the feed
+    useEffect(() => {
+        const el = mainRef.current;
+        if (!el) return;
+        const onScroll = () => setShowScrollTop(el.scrollTop > 300);
+        el.addEventListener('scroll', onScroll, { passive: true });
+        return () => el.removeEventListener('scroll', onScroll);
     }, []);
 
 
@@ -229,12 +243,18 @@ function XFeedInner() {
     /** Mixed marketplace / events / jobs when not using a content-type sidebar filter */
     const discoveryEnabled = !contentTypeFilter;
 
-    // Flatten posts from all pages
-    const posts: Post[] = useMemo(
-        () =>
-            feedData?.pages.flatMap((page: any) => page.content ?? page.data?.content ?? []) ?? [],
-        [feedData?.pages],
-    );
+    // Flatten posts from all pages (deduplicate by ID to avoid duplicate React keys
+    // when backend returns overlapping results across paginated pages)
+    const posts: Post[] = useMemo(() => {
+        const all = feedData?.pages.flatMap((page: any) => page.content ?? page.data?.content ?? []) ?? [];
+        const seen = new Set<string>();
+        return all.filter((p: Post) => {
+            const id = p.id || (p as any)._id;
+            if (!id || seen.has(id)) return false;
+            seen.add(id);
+            return true;
+        });
+    }, [feedData?.pages]);
 
     const mergedFeed: BaseFeedItem[] = useMemo(
         () => posts
@@ -424,14 +444,20 @@ function XFeedInner() {
               ref={mainRef}
               data-app-scroll-root
               className="feed-scroll-main feed-scroll-main--sky-feed min-h-0 flex-1 overflow-y-auto scroll-smooth"
-              style={{ backgroundColor: 'var(--background-premium)' }}
             >
                 <div className="feed-page-scroll flex flex-col pb-[var(--app-scroll-bottom)] relative">
                     <TopNav />
                     <div className="feed-hero-stack shrink-0">
-                      <FeedSkyHero />
+                      <FeedSkyHero
+                        below={
+                          <>
+                            <FeedNewsTicker />
+                            <FeedSentinelRow />
+                          </>
+                        }
+                      />
                     </div>
-                        <div className="feed-sky-feed-body flex flex-col gap-2 pt-0">
+                        <div className="feed-sky-feed-body flex flex-col gap-0 pt-0">
                             {/* Active content-type filter chip */}
                             {contentTypeFilter && (() => {
                                 const banner = getFilterBannerData(contentTypeFilter);
@@ -669,10 +695,6 @@ function XFeedInner() {
                                 return (
                                     <React.Fragment key={(item as any).key ?? (item as any).data?.id ?? `feed-item-${index}`}>
                                         {renderItem()}
-                                        {/* Inject News Carousel exactly after the 3rd post (index 2) */}
-                                        {index === 2 && (
-                                            <FeedNewsCarouselBlock />
-                                        )}
                                     </React.Fragment>
                                 );
                             })}
@@ -692,7 +714,7 @@ function XFeedInner() {
                             </div>
                         )}
                         {/* Mobile bottom nav spacing clearance */}
-                        <div className="h-2 shrink-0" />
+                        <div className="shrink-0 md:hidden" style={{ height: 'var(--app-nav-bottom)' }} />
                         </div>
                     </div>
                 </main>
@@ -795,6 +817,19 @@ function XFeedInner() {
             )}
 
             <FeedWelcomeSheet />
+
+            {/* Radial category menu — floating half-wheel on the left edge */}
+            <FeedRadialCategories />
+
+            {/* Scroll-to-top pill — visible when nav is hidden and user is far down the feed */}
+            <button
+                className={`feed-scroll-top-pill${(!showScrollTop || !navHidden) ? ' feed-scroll-top-pill--hidden' : ''}`}
+                onClick={() => scrollToTop()}
+                aria-label="Scroll to top"
+            >
+                <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: '"FILL" 1' }}>arrow_upward</span>
+                Back to top
+            </button>
         </div>
     );
 }

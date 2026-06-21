@@ -33,7 +33,7 @@ export function PostCardVerificationBadge({
 
   return (
     <span
-      className={`material-symbols-outlined text-[14px] post-card-verification-badge ${meta.colorClass}`}
+      className={`material-symbols-outlined text-[12px] post-card-verification-badge ${meta.colorClass}`}
       style={{ color: meta.color }}
       aria-label={tooltip}
       title={tooltip}

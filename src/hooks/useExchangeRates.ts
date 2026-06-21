@@ -13,7 +13,7 @@ const CURRENCIES: Omit<ExchangeRate, 'rate'>[] = [
   { currency: 'GBP', symbol: '£' },
   { currency: 'EUR', symbol: '€' },
   { currency: 'JPY', symbol: '¥' },
-  { currency: 'CNY', symbol: '¥' },
+  { currency: 'CNY', symbol: '元' },
 ];
 
 const FALLBACK_RATES: ExchangeRate[] = [
@@ -21,7 +21,7 @@ const FALLBACK_RATES: ExchangeRate[] = [
   { currency: 'GBP', symbol: '£', rate: 1834.16 },
   { currency: 'EUR', symbol: '€', rate: 1594.37 },
   { currency: 'JPY', symbol: '¥', rate: 8.47 },
-  { currency: 'CNY', symbol: '¥', rate: 197.53 },
+  { currency: 'CNY', symbol: '元', rate: 197.53 },
 ];
 
 export function useExchangeRates(cycleMs = 3000) {

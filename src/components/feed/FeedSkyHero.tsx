@@ -5,13 +5,9 @@
 
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SENTINEL_FEATURES } from '@/lib/sentinel-catalog';
+import { useState, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { CreatePostModal } from './CreatePostModal';
-import { AutoScrollCarousel } from './FeedDiscoveryBlock';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import {
   getTimePeriod,
   getSkyTheme,
@@ -152,68 +148,43 @@ function AnimatedClouds({ color }: { color: string }) {
   );
 }
 
-/* ── Sentinel Feature Cycler ── */
-function SentinelFeatureCycler() {
-  const router = useRouter();
-  const [index, setIndex] = useState(0);
-
-  // Cycle through the entire Sentinel catalog
-  const features = SENTINEL_FEATURES;
+/* ── Weather Text Marquee ── */
+function WeatherText({ text }: { text: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % features.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [features.length]);
-
-  const currentFeature = features[index];
+    if (containerRef.current && textRef.current) {
+      setIsOverflowing(textRef.current.scrollWidth > containerRef.current.clientWidth);
+    }
+  }, [text]);
 
   return (
-    <button
-      type="button"
-      onClick={() => router.push(currentFeature.href)}
-      className="ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded-none overflow-hidden relative cursor-pointer group shadow-sm transition-transform active:scale-95"
-      style={{
-        background: 'rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.25)',
-        color: 'inherit'
-      }}
-    >
-      <span className="material-symbols-outlined shrink-0" style={{ fontSize: '1.1rem' }}>
-        {currentFeature.icon}
-      </span>
-      <div className="relative h-5 w-24 overflow-hidden flex items-center">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentFeature.id}
-            initial={{ y: 15, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -15, opacity: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="absolute inset-0 flex items-center justify-start whitespace-nowrap"
-          >
-            <span className="text-[12px] font-bold tracking-wide" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
-              {currentFeature.label}
-            </span>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </button>
+    <div ref={containerRef} className="w-full overflow-hidden px-1 whitespace-nowrap mt-0.5" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.18)' }}>
+      {isOverflowing ? (
+        /* eslint-disable-next-line jsx-a11y/no-distracting-elements */
+        <marquee scrollamount="2" className="feed-sky-scene__condition font-bold text-xs text-white/95 w-full">
+          {text}
+        </marquee>
+      ) : (
+        <p ref={textRef} className="feed-sky-scene__condition font-bold text-xs text-white/95 inline-block w-auto mx-auto text-center">
+          {text}
+        </p>
+      )}
+    </div>
   );
 }
 
 /* ── Main Component ── */
 
-export function FeedSkyHero() {
+export function FeedSkyHero({ below }: { below?: ReactNode }) {
   const { weather, loading: weatherLoading } = useAmbientWeather();
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const authUser = mounted ? user : null;
   const huudName = useHuudDisplayName(authUser);
 
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // SSR-safe hour
@@ -236,16 +207,21 @@ export function FeedSkyHero() {
   const avatarUrl = useMemo(() => resolveUserAvatarUrl(authUser), [authUser]);
 
   // ── Typewriter effect for the composer placeholder ──
-  const COMPOSER_PROMPTS = useMemo(() => [
-    composerPrompt,
-    'What do you have in mind?',
-    'Anything to sell or give away?',
-    'Is there an upcoming event?',
-    'Looking for work or hiring?',
-    'Need help from your Huud?',
-    'Spotted something to report?',
-    'Share a local FYI with the Huud',
-  ], [composerPrompt]);
+  const COMPOSER_PROMPTS = useMemo(() => {
+    const name = authUser?.firstName ? `, ${authUser.firstName}` : '';
+    const huud = huudName !== 'your neighborhood' && huudName ? huudName : 'your neighborhood';
+    
+    return [
+      `What's happening in ${huud} today${name}?`,
+      `Any updates for ${huud}${name}?`,
+      'Anything to sell or give away?',
+      'Is there an upcoming event?',
+      'Looking for work or hiring?',
+      'Need help from your Huud?',
+      'Spotted something to report?',
+      'Share a local FYI with the Huud',
+    ];
+  }, [authUser?.firstName, huudName]);
 
   const [displayText, setDisplayText] = useState('');
   const [promptIndex, setPromptIndex] = useState(0);
@@ -307,81 +283,20 @@ export function FeedSkyHero() {
       })
     : '';
 
-  const handleShortcutClick = (type: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (params.get('type') === type) {
-      params.delete('type');
-    } else {
-      params.set('type', type);
-    }
-    router.replace(`/feed?${params.toString()}`);
-  };
-
+  // Category labels — used only for the composer "Filtering: X" placeholder.
+  // The category navigation itself now lives in the radial dial (FeedRadialCategories).
   const shortcuts = [
-    { type: 'marketplace', label: 'Marketplace', imgSrc: '/illustration_marketplace.png', gradient: 'linear-gradient(135deg, #1a4a28 0%, #0d8a3e 50%, #00c431 100%)' },
-    { type: 'services', label: 'Services', imgSrc: '/illustration_services.png', gradient: 'linear-gradient(135deg, #1a3a2a 0%, #2a6a4a 50%, #00a555 100%)' },
-    { type: 'job', label: 'Jobs', imgSrc: '/illustration_jobs.png', gradient: 'linear-gradient(135deg, #2a1a4a 0%, #6a3a9a 50%, #9a5acf 100%)' },
-    { type: 'event', label: 'Events', imgSrc: '/illustration_events.png', gradient: 'linear-gradient(135deg, #1a2a4a 0%, #2a4a8a 50%, #1a56ff 100%)' },
-    { type: 'fyi', label: 'FYI', imgSrc: '/illustration_fyi.png', gradient: 'linear-gradient(135deg, #1a2a3a 0%, #2a4a6a 50%, #3a6a9a 100%)' },
-    { type: 'help_request', label: 'Help', imgSrc: '/illustration_help.png', gradient: 'linear-gradient(135deg, #4a1a1a 0%, #8a2a2a 50%, #cc3333 100%)' },
-    { type: 'community_alert', label: 'Alerts', imgSrc: '/illustration_community_alert.png', gradient: 'linear-gradient(135deg, #5a2010 0%, #9a3f20 50%, #d45a00 100%)' },
-    { type: 'incident_report', label: 'Safety', imgSrc: '/illustration_safety.png', gradient: 'linear-gradient(135deg, #300a0a 0%, #601a1a 50%, #a82020 100%)' },
+    { type: 'marketplace', label: 'Marketplace' },
+    { type: 'services', label: 'Services' },
+    { type: 'job', label: 'Jobs' },
+    { type: 'event', label: 'Events' },
+    { type: 'fyi', label: 'FYI' },
+    { type: 'help_request', label: 'Help' },
+    { type: 'community_alert', label: 'Alerts' },
+    { type: 'incident_report', label: 'Safety' },
   ];
 
   const activeType = searchParams.get('type') || '';
-
-  const categoryRow = (
-    <AutoScrollCarousel 
-      className="category-shortcuts-row w-full px-4 flex gap-1.5 overflow-x-auto pb-0 pt-1 scrollbar-none items-start snap-x snap-mandatory"
-      interval={4000}
-    >
-      {shortcuts.map((s) => {
-        const isActive = activeType === s.type;
-        return (
-          <button
-            key={s.type}
-            onClick={() => handleShortcutClick(s.type)}
-            className={`flex-shrink-0 relative w-[100px] aspect-square rounded-none overflow-hidden group/card shadow-sm cursor-pointer select-none transition-all duration-300 block ${
-              isActive 
-                ? 'ring-2 ring-primary ring-offset-2 ring-offset-white dark:ring-offset-[#121b14] scale-102 opacity-100 shadow-md' 
-                : 'opacity-85 hover:opacity-100 hover:scale-[1.02] active:scale-[0.98]'
-            }`}
-            style={{ background: s.gradient }}
-            type="button"
-          >
-            {/* Full-bleed category photo */}
-            <div className="absolute inset-0 w-full h-full">
-              <Image
-                src={s.imgSrc}
-                alt={s.label}
-                fill
-                sizes="100px"
-                loading="lazy"
-                className={`w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105 ${
-                  isActive ? 'scale-105' : ''
-                }`}
-              />
-            </div>
-
-            {/* Gradient overlay for text readability */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-
-            {/* Bottom overlaid content */}
-            <div className="absolute inset-x-0 bottom-0 z-10 p-2 space-y-0.5 flex flex-col justify-end min-h-[50%]">
-              <h4 className="text-[10px] font-black text-white leading-tight uppercase tracking-wider text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
-                {s.label}
-              </h4>
-              {isActive && (
-                <span className="mx-auto px-2 py-0.5 bg-primary text-black text-[8px] font-black rounded-md leading-none uppercase select-none">
-                  Active
-                </span>
-              )}
-            </div>
-          </button>
-        );
-      })}
-    </AutoScrollCarousel>
-  );
 
   return (
     <section className="feed-sky-hero flex flex-col">
@@ -441,21 +356,15 @@ export function FeedSkyHero() {
                   {weather.temp}°
                 </p>
 
-                <p
-                  className="feed-sky-scene__condition font-bold text-xs text-white/95 mt-0.5"
-                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.18)' }}
-                >
-                  {expressiveWeather}
-                </p>
+                <WeatherText text={expressiveWeather} />
               </>
             ) : null}
           </div>
 
           {/* Composer: Full-width glass pill with typewriter placeholder + plus button */}
-          <div className="feed-sky-scene__composer z-30 w-full">
-            {/* Full-width glass pill */}
+          <div className="feed-sky-scene__composer z-30 w-full flex flex-col px-1">
             <div
-              className="feed-sky-scene__composer-pill group flex-1"
+              className="feed-sky-scene__composer-pill group w-full"
               style={{ color: theme.textColor, padding: '0.4rem 0.45rem' }}
             >
               {/* Plus / create icon — on the far left */}
@@ -485,9 +394,6 @@ export function FeedSkyHero() {
                   : <span aria-hidden="true">{displayText}<span style={{ opacity: showCursor ? 1 : 0, transition: 'opacity 80ms' }}>|</span></span>
                 }
               </button>
-
-              {/* Sentinel Features Cycler — on the right */}
-              <SentinelFeatureCycler />
             </div>
           </div>
         </div>
@@ -495,10 +401,13 @@ export function FeedSkyHero() {
         <CitySilhouette color={theme.silhouetteColor} />
       </div>
 
-      {/* Category Shortcuts wrapper seamlessly blending into the feed */}
-      <div className="category-shortcuts-wrapper pt-1 pb-0 relative z-10">
-        {categoryRow}
-      </div>
+      {/* Below slot — ticker + sentinel render here so sky atmosphere covers them */}
+      {below && (
+        <div className="feed-sky-below relative z-20">
+          {below}
+        </div>
+      )}
+
     </section>
   );
 }

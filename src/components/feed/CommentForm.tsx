@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useCommentMutations } from '@/hooks/useComments';
 import { useAuth } from '@/hooks/useAuth';
-import MapPinAvatar from '@/components/ui/MapPinAvatar';
-
 interface CommentFormProps {
     postId: string;
     parentId?: string;
@@ -59,11 +57,24 @@ export const CommentForm: React.FC<CommentFormProps> = ({
     return (
         <form onSubmit={handleSubmit} className="w-full">
             <div className="flex gap-3">
-                <MapPinAvatar
-                    src={user?.avatarUrl || user?.profilePicture}
-                    alt="Current user"
-                    size="xs"
-                />
+                <div className="shrink-0 mt-1">
+                    <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-black/5 dark:border-white/10 bg-black/5 dark:bg-[#1A221C]">
+                        {user?.avatarUrl || user?.profilePicture ? (
+                            <img 
+                                src={user.avatarUrl || user.profilePicture} 
+                                alt="Current user" 
+                                className="w-full h-full object-cover" 
+                                onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
+                                    e.currentTarget.parentElement!.innerHTML = '<span class="material-symbols-outlined text-[16px] opacity-50">person</span>';
+                                }}
+                            />
+                        ) : (
+                            <span className="material-symbols-outlined text-[16px] opacity-50">person</span>
+                        )}
+                    </div>
+                </div>
                 <div className="flex-1 min-w-0">
                     <label htmlFor="comment-input" className="sr-only">Write a comment</label>
                     <textarea

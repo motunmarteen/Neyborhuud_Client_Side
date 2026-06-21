@@ -93,7 +93,7 @@ export function DiscoveryChrome({
   children: ReactNode;
 }) {
   return (
-    <div className="bg-white dark:bg-[#121b14] border-b-[8px] border-[#f2f4f7] dark:border-[#0a0c0a] overflow-hidden w-full max-w-none mx-auto">
+    <div className="bg-white dark:bg-[#121b14] border-b border-black/5 dark:border-white/5 overflow-hidden w-full max-w-none mx-auto">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-none bg-primary/10 text-primary border border-primary/20">
@@ -120,7 +120,7 @@ export function DiscoveryChrome({
 }
 
 /* ── Auto-scrolling carousel wrapper ── */
-export function AutoScrollCarousel({ children, interval = 3000, className = "horizontal-carousel items-start" }: { children: ReactNode; interval?: number; className?: string }) {
+export function AutoScrollCarousel({ children, interval = 2500, className = "horizontal-carousel items-start" }: { children: ReactNode; interval?: number; className?: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -136,27 +136,28 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
           </Link>
         </div>
 
-        <div className="app-bottomnav__sos">
-          <div className="app-bottomnav__sos-glass app-bottomnav__glass app-bottomnav__glass--disc">
-            <button
-              type="button"
-              onPointerDown={startSosPress}
-              onPointerUp={cancelSosPress}
-              onPointerLeave={() => {
-                if (longPressTimer.current) clearTimeout(longPressTimer.current);
-              }}
-              onContextMenu={(e) => e.preventDefault()}
-              className={`app-bottomnav__sos-btn${sosActive ? ' app-bottomnav__sos-btn--active' : ''}`}
-              aria-current={sosActive ? 'page' : undefined}
-              aria-label="SOS — tap to open command center, long-press for silent SOS"
-            >
-              <span
-                className={`app-bottomnav__sos-ring ${(sos.phase !== 'idle' || hasNeighborhoodEmergency) ? 'app-bottomnav__sos-ring--live' : 'app-bottomnav__sos-ring--idle'}`}
-                aria-hidden
-              />
-              <AppNavIcon name="sos" />
-            </button>
-          </div>
+      </div>
+
+      <div className={`app-bottomnav__sos${hidden || scrollHidden ? ' app-bottomnav__sos--floating' : ''}`}>
+        <div className="app-bottomnav__sos-glass app-bottomnav__glass app-bottomnav__glass--disc">
+          <button
+            type="button"
+            onPointerDown={startSosPress}
+            onPointerUp={cancelSosPress}
+            onPointerLeave={() => {
+              if (longPressTimer.current) clearTimeout(longPressTimer.current);
+            }}
+            onContextMenu={(e) => e.preventDefault()}
+            className={`app-bottomnav__sos-btn${sosActive ? ' app-bottomnav__sos-btn--active' : ''}`}
+            aria-current={sosActive ? 'page' : undefined}
+            aria-label="SOS — tap to open command center, long-press for silent SOS"
+          >
+            <span
+              className={`app-bottomnav__sos-ring ${(sos.phase !== 'idle' || hasNeighborhoodEmergency) ? 'app-bottomnav__sos-ring--live' : 'app-bottomnav__sos-ring--idle'}`}
+              aria-hidden
+            />
+            <AppNavIcon name="sos" />
+          </button>
         </div>
       </div>
     </nav>

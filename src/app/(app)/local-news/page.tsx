@@ -29,6 +29,7 @@ import {
 import { buildGistSectionList } from '@/lib/huudGistConfig';
 import { huudGistService } from '@/services/huudGist.service';
 import { newsService } from '@/services/news.service';
+import { NewsFxStrip } from '@/components/news/NewsFxStrip';
 import type { GistSection, GistSectionId } from '@/types/huudGist';
 import type { NewsSource, RssArticle } from '@/types/incident';
 import { gistPostId, type HuudGistPost } from '@/types/huudGist';
@@ -201,6 +202,7 @@ function LocalNewsInner() {
       maxWidth="680"
       header={
         <>
+          <NewsFxStrip />
           <BrowseTabStrip
             tabs={[...LOCAL_NEWS_TABS]}
             activeId={activeTab}

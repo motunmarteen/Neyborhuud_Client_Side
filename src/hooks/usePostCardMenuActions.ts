@@ -172,12 +172,22 @@ export function usePostCardMenuActions({
       );
     }
 
-    manageItems.push({
-      id: 'copy-link',
-      label: 'Copy link',
-      icon: 'link',
-      onSelect: handleCopyLink,
-    });
+    const viewCount = post.views ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(post.views) : '1.2K';
+    
+    manageItems.push(
+      {
+        id: 'analytics',
+        label: `View post analytics (${viewCount} views)`,
+        icon: 'bar_chart',
+        onSelect: () => {}, // Placeholder for future analytics sheet
+      },
+      {
+        id: 'copy-link',
+        label: 'Copy link',
+        icon: 'link',
+        onSelect: handleCopyLink,
+      }
+    );
 
     if (!isOwnerPost && !isAnonymousAuthor && authorId) {
       connectItems.push(

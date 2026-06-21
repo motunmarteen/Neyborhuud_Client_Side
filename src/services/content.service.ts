@@ -92,10 +92,11 @@ function normalizeFeedItem(item: any): Post {
       item?.engagement?.commentsCount,
       item?.metadata?.commentsCount,
     ),
-    shares: toCount(item?.sharesCount, item?.shareCount, item?.shares),
+    shares: toCount(item?.sharesCount, item?.shareCount, item?.shares, item?.repostsCount, item?.repostCount),
     views: toCount(item?.viewsCount, item?.viewCount, item?.views),
     isLiked: item?.isLiked,
     isSaved: item?.isSaved,
+    isShared: !!(item?.isShared || item?.isReposted),
     isAcknowledged: item?.isAcknowledged,
     isAware: item?.isAware,
     isNearby: item?.isNearby,
@@ -129,6 +130,13 @@ function normalizeFeedItem(item: any): Post {
     mood: item?.mood,
     parentId: item?.parentId?.toString?.() ?? item?.parentId,
     quotedPost: item?.quotedPost ? normalizeFeedItem(item.quotedPost) : undefined,
+    repostedBy: item?.repostedBy ? {
+      id: item.repostedBy._id?.toString() || item.repostedBy.id,
+      name: [item.repostedBy.firstName, item.repostedBy.lastName].filter(Boolean).join(" ").trim() || item.repostedBy.name || item.repostedBy.username,
+      username: item.repostedBy.username,
+      avatarUrl: item.repostedBy.avatarUrl || item.repostedBy.profilePicture
+    } : undefined,
+    _isSimpleRepostUnrolled: item?._isSimpleRepostUnrolled,
   };
 }
 
@@ -372,6 +380,13 @@ export const contentService = {
       content: comment?.trim() ?? '',
       location,
     });
+  },
+
+  /**
+   * Remove a repost of a post
+   */
+  async unrepostPost(postId: string) {
+    return await apiClient.delete(`/content/posts/${postId}/repost`);
   },
 
   /**

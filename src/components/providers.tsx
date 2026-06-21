@@ -6,7 +6,7 @@
 'use client';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster, toast } from 'sonner';
 import { queryClient } from '@/lib/query-client';
 import { useEffect, useRef } from 'react';
@@ -346,9 +346,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {/* Announcer: Sonner toasts are visual-only; this mirrors them into the
           aria-live region so screen readers hear every notification. */}
       <SrToastAnnouncer />
-      {process.env.NODE_ENV === 'development' && (
+      {/* process.env.NODE_ENV === 'development' && (
         <ReactQueryDevtools initialIsOpen={false} />
-      )}
+      ) */}
     </QueryClientProvider>
     </I18nProvider>
   );

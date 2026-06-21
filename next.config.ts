@@ -31,6 +31,9 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  devIndicators: {
+    position: "top-right",
+  },
   images: {
     // Static export cannot use the Next.js image optimizer (no server).
     // Also disable in dev so slow upstream images (like picsum.photos) don't crash the optimizer.
