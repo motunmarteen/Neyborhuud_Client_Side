@@ -28,6 +28,8 @@ import { GuardianAlertsProvider } from '@/contexts/GuardianAlertsContext';
 import { SosProvider } from '@/contexts/SosContext';
 import { CallProvider } from '@/components/calls/CallProvider';
 import { CallOverlay } from '@/components/calls/CallOverlay';
+import { SentinelBottomSheetProvider } from '@/contexts/SentinelBottomSheetContext';
+import { SentinelBottomSheet } from '@/components/safety/SentinelBottomSheet';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
 
@@ -316,6 +318,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <SosProvider>
       <GuardianAlertsProvider>
       <CallProvider>
+      <SentinelBottomSheetProvider>
       <SocketAuthenticator />
       <SmartLocationSync />
       <LocationSyncOrchestrator />
@@ -323,7 +326,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <PwaInstallTracker />
       <PwaInstallPrompt />
       <PageTransition>{children}</PageTransition>
+      <SentinelBottomSheet />
       <CallOverlay />
+      </SentinelBottomSheetProvider>
       </CallProvider>
       </GuardianAlertsProvider>
       </SosProvider>

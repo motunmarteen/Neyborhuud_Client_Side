@@ -310,8 +310,6 @@ export function FYICard({
                         <span className="material-symbols-outlined text-[16px] text-status-warning" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
                     )}
 
-                    <PostSentinelLink />
-
                     <button
                         onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
                         className="post-card-actions-trigger post-card-header__icon-btn"

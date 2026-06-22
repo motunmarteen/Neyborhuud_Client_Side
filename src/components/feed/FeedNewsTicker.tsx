@@ -41,18 +41,18 @@ export function FeedNewsTicker() {
   // Nothing to show yet
   if (headlines.length === 0 && rates.length === 0) return null;
 
-  // Interleave: FX rate, then 2 headlines, repeat — so money + news weave together
+  // Interleave: 3 headlines, then 1 FX rate, repeat
   const items: PulseItem[] = [];
   let h = 0;
   let f = 0;
   const total = headlines.length + rates.length;
   while (items.length < total) {
+    for (let k = 0; k < 3 && h < headlines.length; k++) {
+      items.push({ kind: 'news', text: headlines[h++] });
+    }
     if (rates.length > 0 && f < rates.length) {
       const r = rates[f++];
       items.push({ kind: 'fx', currency: r.currency, symbol: r.symbol, rate: r.rate });
-    }
-    for (let k = 0; k < 2 && h < headlines.length; k++) {
-      items.push({ kind: 'news', text: headlines[h++] });
     }
     if (f >= rates.length && h >= headlines.length) break;
   }

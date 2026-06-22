@@ -28,6 +28,8 @@ const LINK_TABS: NavLinkTab[] = [
   { href: '/chat', label: 'Calls', icon: 'call', match: (p) => p.startsWith('/chat') },
 ];
 
+import { useSentinelBottomSheet } from '@/contexts/SentinelBottomSheetContext';
+
 function useIsClient() {
   return useSyncExternalStore(
     () => () => {},
@@ -51,6 +53,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const hasNeighborhoodEmergency = useNeighborhoodEmergency();
   const compact = useScrollCompact();
   const scrollHidden = useScrollHideBottomNav();
+  const { openSheet } = useSentinelBottomSheet();
 
   const isClient = useIsClient();
   const profileHref =
@@ -90,6 +93,8 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
 
   const renderLinkTab = (tab: NavLinkTab) => {
     const active = tab.match(pathname);
+    const isSentinelTab = tab.label === 'Sentinel';
+    
     return (
       <Link
         key={tab.href}
@@ -98,6 +103,11 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
         aria-label={tab.label}
         aria-current={active ? 'page' : undefined}
         onClick={(e) => {
+          if (isSentinelTab) {
+            e.preventDefault();
+            openSheet();
+            return;
+          }
           if (active) {
             e.preventDefault();
             scrollToTop();

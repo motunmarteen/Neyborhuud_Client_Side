@@ -438,7 +438,6 @@ function XFeedInner() {
                         below={
                           <>
                             <FeedNewsTicker />
-                            <FeedSentinelRow />
                           </>
                         }
                       />
