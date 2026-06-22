@@ -311,7 +311,7 @@ export function XPostCard({
         const isLongText = displayText.length > 280;
 
         return (
-            <div className={`relative px-1 text-[14px] font-normal text-neu-text dark:text-[#E7E9EA] leading-[19px] tracking-normal whitespace-pre-wrap break-words ${!expanded && isLongText ? 'max-h-[140px] overflow-hidden' : ''}`}>
+            <div className={`relative px-1 text-[14px] font-normal text-[#050505] dark:text-[#E4E6EB] leading-[1.45] tracking-normal whitespace-pre-wrap break-words ${!expanded && isLongText ? 'max-h-[140px] overflow-hidden' : ''}`}>
                 {renderFormattedText(displayText)}
                 
                 {!expanded && isLongText && (
@@ -489,6 +489,8 @@ export function XPostCard({
                         <span className="material-symbols-outlined text-[16px] text-status-warning" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
                     )}
 
+                    <PostSentinelLink />
+
                     <button
                         onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
                         className="post-card-actions-trigger post-card-header__icon-btn"
@@ -507,7 +509,7 @@ export function XPostCard({
                     <div className="flex flex-col gap-3">
                         {renderTextContent()}
                         {hasMedia && (
-                            <div className="-mx-4 mt-0.5">
+                            <div className="-mx-4 mt-2">
                                 {renderMedia()}
                             </div>
                         )}

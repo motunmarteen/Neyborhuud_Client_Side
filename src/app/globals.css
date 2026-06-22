@@ -7734,9 +7734,9 @@ button:focus-visible:not([class*="focus-visible"]) {
 .post-card-media-slider__duo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  aspect-ratio: 16 / 10;
-  max-height: 380px;
+  gap: 1px;
+  aspect-ratio: 1 / 1;
+  max-height: 500px;
   background: #fff;
 }
 

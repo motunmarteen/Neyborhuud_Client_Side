@@ -46,19 +46,19 @@ export function PostCardAuthorLines({
 
   return (
     <div className="post-card-header__text min-w-0 flex-1">
-      <div className="post-card-header__identity flex items-center gap-1 min-w-0">
+      <div className="post-card-header__identity flex items-center gap-1.5 min-w-0">
         <Link
           href={`/profile/${authorUsername}`}
           onClick={onProfileClick}
-          className="truncate min-w-0 max-w-[55%] text-[14px] font-bold text-neu-text dark:text-white hover:underline leading-tight"
+          className="truncate min-w-0 max-w-[55%] text-[14px] font-semibold text-[#050505] dark:text-[#E4E6EB] hover:underline leading-tight"
         >
           {displayName}
         </Link>
-        <span className="truncate min-w-0 text-[13px] font-normal text-neu-text-secondary dark:text-white/50 leading-tight">
+        <span className="truncate min-w-0 text-[13px] font-normal text-[#65676B] dark:text-[#B0B3B8] leading-tight">
           @{authorUsername}
         </span>
       </div>
-      <div className="post-card-header__meta flex items-center gap-1 mt-0.5 min-w-0 overflow-hidden text-[11px] font-normal text-neu-text-secondary dark:text-white/50 leading-tight">
+      <div className="post-card-header__meta flex items-center gap-1 mt-[2px] min-w-0 overflow-hidden text-[12px] font-normal text-[#65676B] dark:text-[#B0B3B8] leading-tight">
         <span className="shrink-0">{formatTimeAgo(createdAt)}</span>
         {place ? (
           <>

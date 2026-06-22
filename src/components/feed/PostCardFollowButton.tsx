@@ -1,3 +1,5 @@
+import { UserPlus, UserCheck, Loader2 } from 'lucide-react';
+
 type PostCardFollowButtonProps = {
   visible: boolean;
   isFollowing: boolean;
@@ -21,14 +23,21 @@ export function PostCardFollowButton({
         onToggle();
       }}
       disabled={isPending}
-      className={`shrink-0 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[13px] font-bold tracking-wide hover:underline cursor-pointer ${
-        isFollowing
-          ? 'text-primary dark:text-primary hover:text-brand-red'
-          : 'text-primary dark:text-primary hover:text-brand-green-dark'
+      className={`post-card-header__icon-btn disabled:opacity-50 disabled:cursor-not-allowed ${
+        isFollowing ? 'text-primary dark:text-primary hover:text-brand-red' : ''
       }`}
       aria-label={isFollowing ? 'Unfollow' : 'Follow'}
+      title={isFollowing ? 'Unfollow' : 'Follow'}
     >
-      {isPending ? '…' : isFollowing ? 'Unfollow' : 'Follow'}
+      <span className="flex items-center justify-center">
+        {isPending ? (
+          <Loader2 className="w-[18px] h-[18px] animate-spin" strokeWidth={1.5} />
+        ) : isFollowing ? (
+          <UserCheck className="w-[18px] h-[18px]" strokeWidth={1.5} />
+        ) : (
+          <UserPlus className="w-[18px] h-[18px]" strokeWidth={1.5} />
+        )}
+      </span>
     </button>
   );
 }

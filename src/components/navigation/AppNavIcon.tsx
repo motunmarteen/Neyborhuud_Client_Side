@@ -56,10 +56,9 @@ const lucideIcons: Record<Exclude<AppNavIconName, 'menu'>, LucideIcon> = {
 
 function MenuIcon() {
   return (
-    <svg className="app-nav-icon__glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M3 6.5h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M3 12h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M3 17.5h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <svg className="app-nav-icon__glyph" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true">
+      <rect x="2" y="5" width="12" height="2.25" rx="1.125" />
+      <rect x="2" y="10.75" width="8" height="2.25" rx="1.125" />
     </svg>
   );
 }
