@@ -60,13 +60,10 @@ export function MarketplaceCommentsSheet({
         <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
           <BottomSheetDragHandle handleProps={handleProps} className="pt-2.5 pb-1" />
 
-          <div
-            className="flex items-center justify-between border-b border-[var(--neu-shadow-dark)] px-4 py-2.5"
-            style={{ boxShadow: "0 1px 0 var(--neu-shadow-light)" }}
-          >
-            <h2 className="text-[15px] font-semibold tracking-tight text-[var(--neu-text)]">Comments</h2>
+          <div className="flex items-center justify-between border-b border-black/5 px-3 py-2.5 dark:border-white/5">
+            <h2 className="text-[15px] font-semibold tracking-tight text-[#050505] dark:text-[#E4E6EB]">Comments</h2>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-medium text-[var(--neu-text-secondary)]">{commentsCount}</span>
+              <span className="text-[12px] font-bold tabular-nums text-[#65676B] dark:text-[#B0B3B8]">{commentsCount}</span>
               <button
                 type="button"
                 onClick={onClose}
@@ -80,7 +77,7 @@ export function MarketplaceCommentsSheet({
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-2">
             <ProductComments productId={productId} currentUserId={currentUserId} embedded />
           </div>
         </div>

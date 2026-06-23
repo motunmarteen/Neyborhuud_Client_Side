@@ -394,7 +394,7 @@ const CONTEXT_ACTIONS: { key: ActiveModal & string; label: string; icon: string;
   { key: 'poll',           label: 'Poll',         icon: '📊', color: 'bg-brand-blue' },
   { key: 'tracking',       label: 'Tracking',     icon: '📡', color: 'bg-brand-blue' },
   { key: 'kidnapping_info',label: 'Kidnapping',   icon: '🚨', color: 'bg-brand-red' },
-  { key: 'sos',            label: 'SOS',          icon: '🆘', color: 'bg-brand-red' },
+  { key: 'sos',            label: 'Safety Alert',          icon: '🆘', color: 'bg-brand-red' },
 ];
 
 export default function ChatActionMenu({ disabled, onAction }: Props) {

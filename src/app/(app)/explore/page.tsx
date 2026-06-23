@@ -50,7 +50,6 @@ const SHORTCUTS = [
   { type: 'event', label: 'Events', imgSrc: '/illustration_events.png', gradient: 'linear-gradient(135deg, #1a2a4a 0%, #2a4a8a 50%, #1a56ff 100%)' },
   { type: 'fyi', label: 'FYI', imgSrc: '/illustration_fyi.png', gradient: 'linear-gradient(135deg, #1a2a3a 0%, #2a4a6a 50%, #3a6a9a 100%)' },
   { type: 'help_request', label: 'Help', imgSrc: '/illustration_help.png', gradient: 'linear-gradient(135deg, #4a1a1a 0%, #8a2a2a 50%, #cc3333 100%)' },
-  { type: 'community_alert', label: 'Alerts', imgSrc: '/illustration_community_alert.png', gradient: 'linear-gradient(135deg, #5a2010 0%, #9a3f20 50%, #d45a00 100%)' },
   { type: 'incident_report', label: 'Safety', imgSrc: '/illustration_safety.png', gradient: 'linear-gradient(135deg, #300a0a 0%, #601a1a 50%, #a82020 100%)' },
 ];
 

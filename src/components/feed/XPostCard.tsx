@@ -28,6 +28,7 @@ import { RepostComposerSheet } from '@/components/feed/RepostComposerSheet';
 import { getPostAuthorUserId } from '@/lib/postAuthor';
 import { resolveUserAvatarUrl } from '@/lib/userAvatar';
 import { PostRepostChainModal } from './PostRepostChainModal';
+import { PremiumSafetyAlertBlock } from './PremiumSafetyAlertBlock';
 import { generatePostNarrative } from '@/lib/postNarrative';
 import { usePostMutations } from '@/hooks/usePosts';
 
@@ -38,35 +39,7 @@ const formatCompactCount = (value?: number) => {
     return `${value}`;
 };
 
-// ── Emergency action buttons ───────────────────────────────────────────────────
-function EmergencyActions({ post, onEmergencyAction }: { post: Post; onEmergencyAction: (a: string) => void }) {
-    const actions = [
-        { key: 'aware', icon: 'notifications_active', label: 'Aware', active: post.isAware, cls: EMERGENCY_ACTION_CLS.aware },
-        { key: 'nearby', icon: 'location_on', label: 'Nearby', active: post.isNearby, cls: EMERGENCY_ACTION_CLS.nearby },
-        { key: 'safe', icon: 'shield', label: 'Safe', active: post.isSafe, cls: EMERGENCY_ACTION_CLS.safe },
-        { key: 'confirm', icon: 'check_circle', label: 'Confirm', active: post.confirmDisputeAction === 'confirm', cls: EMERGENCY_ACTION_CLS.confirm },
-        { key: 'dispute', icon: 'cancel', label: 'Dispute', active: post.confirmDisputeAction === 'dispute', cls: EMERGENCY_ACTION_CLS.dispute },
-    ].filter(a => !post.availableActions || post.availableActions.includes(a.key));
 
-    if (actions.length === 0) return null;
-
-    return (
-        <div className="flex flex-wrap gap-1.5 pt-3 border-t border-brand-red/10 mt-2">
-            {actions.map(a => (
-                <button
-                    key={a.key}
-                    onClick={(e) => { e.stopPropagation(); onEmergencyAction(a.key); }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                        a.active ? a.cls : 'bg-brand-red/5 text-brand-red/70 border border-brand-red/10 hover:bg-brand-red/10'
-                    }`}
-                >
-                    <span className="material-symbols-outlined text-[14px]">{a.icon}</span>
-                    {a.label}
-                </button>
-            ))}
-        </div>
-    );
-}
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 interface XPostCardProps {
@@ -224,8 +197,10 @@ export function XPostCard({
 
     // ── Structured content narrative block ─────────────────────────────────
     const narrative = generatePostNarrative(post);
-    const narrativeBlock = narrative ? (
-        <div className={`post-narrative-block${isSafetyAlert ? ' post-narrative-block--emergency' : ''} flex flex-col gap-2 p-3.5 border ${narrative.accentBorder} mt-3`}>
+    const narrativeBlock = isSafetyAlert ? (
+        <PremiumSafetyAlertBlock post={post} authorUsername={authorUsername} />
+    ) : narrative ? (
+        <div className={`post-narrative-block flex flex-col gap-2 p-3.5 border ${narrative.accentBorder} mt-3`}>
             <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
                     <span className="material-symbols-outlined text-[14px]">{narrative.icon}</span>
@@ -249,11 +224,7 @@ export function XPostCard({
     ) : null;
 
     // ── Core Layout ───────────────────────────────────────────────────────────
-    const elevationClass = isSafetyAlert
-        ? 'feed-card--emergency'
-        : hasMedia
-        ? 'feed-card--media'
-        : '';
+    const elevationClass = hasMedia ? 'feed-card--media' : '';
 
     const cardStyleClass = isSafetyAlert
         ? 'border-b border-black/5 dark:border-white/5'
@@ -311,11 +282,11 @@ export function XPostCard({
         const isLongText = displayText.length > 280;
 
         return (
-            <div className={`relative px-1 text-[14px] font-normal text-[#050505] dark:text-[#E4E6EB] leading-[1.45] tracking-normal whitespace-pre-wrap break-words ${!expanded && isLongText ? 'max-h-[140px] overflow-hidden' : ''}`}>
+            <div className={`relative text-[14px] font-normal text-[#050505] dark:text-[#E4E6EB] leading-[1.45] tracking-normal whitespace-pre-wrap break-words ${!expanded && isLongText ? 'max-h-[140px] overflow-hidden' : ''}`}>
                 {renderFormattedText(displayText)}
                 
                 {!expanded && isLongText && (
-                    <div className="post-read-more-fade absolute bottom-0 left-0 right-0 h-16 pointer-events-none flex items-end px-1 pb-0.5">
+                    <div className="post-read-more-fade absolute bottom-0 left-0 right-0 h-16 pointer-events-none flex items-end pb-0.5">
                         <button
                             onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
                             className="pointer-events-auto text-primary hover:text-brand-green-dark font-semibold hover:underline cursor-pointer px-1 -ml-1 rounded"
@@ -370,7 +341,7 @@ export function XPostCard({
     return (
         <>
         <article
-            className={`bg-white dark:bg-[#121b14] px-4 py-3.5 mx-auto w-full select-none ${cardStyleClass} ${elevationClass} max-w-none rounded-none flex flex-col gap-0`}
+            className={`bg-white dark:bg-[#121b14] px-3 py-2.5 mx-auto w-full select-none ${cardStyleClass} ${elevationClass} max-w-none rounded-none flex flex-col gap-0`}
             {...articleGestureProps}
         >
             {/* Repost Shared Origin Label */}
@@ -437,7 +408,7 @@ export function XPostCard({
             })()}
 
             {/* Header Row */}
-            <div className="flex items-center justify-between gap-3 w-full">
+            <div className="flex items-start justify-between gap-3 w-full">
                 <div className="flex items-center gap-2.5 min-w-0">
                     <div className="relative shrink-0">
                         <Link href={`/profile/${authorUsername}`} onClick={handleProfileClick}>
@@ -457,12 +428,11 @@ export function XPostCard({
                                 )}
                             </div>
                         </Link>
-                        <div className="post-card-avatar-badge absolute -bottom-1 -right-1 z-10 flex h-[20px] w-[20px] items-center justify-center rounded-full bg-white dark:bg-[#121b14] border-[1.5px] border-white dark:border-[#121b14] shadow-sm select-none pointer-events-none">
-                            <PostCardVerificationBadge
-                                author={author}
-                                hidden={isAnonymousAuthor}
-                            />
-                        </div>
+                        <PostCardVerificationBadge
+                            author={author}
+                            hidden={isAnonymousAuthor}
+                            withAvatarBackground
+                        />
                     </div>
                     <PostCardAuthorLines
                         authorName={authorName}
@@ -478,7 +448,7 @@ export function XPostCard({
                     />
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-3 shrink-0 mt-0.5">
                     <PostCardFollowButton
                         visible={canFollow}
                         isFollowing={isFollowing}
@@ -506,10 +476,10 @@ export function XPostCard({
             {/* Body Section */}
             <div className="mt-2.5 w-full">
                 {isQuoteRepost ? renderRepostBody() : (
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-0">
                         {renderTextContent()}
                         {hasMedia && (
-                            <div className="-mx-4 mt-2">
+                            <div className="-mx-3">
                                 {renderMedia()}
                             </div>
                         )}
@@ -585,9 +555,7 @@ export function XPostCard({
                 </button>
             </div>
 
-            {isSafetyAlert && onEmergencyAction && (
-                <EmergencyActions post={post} onEmergencyAction={onEmergencyAction} />
-            )}
+
         </article>
 
         {showShare && (

@@ -62,14 +62,6 @@ const getFilterBannerData = (type: string) => {
                 borderCls: 'border-brand-red/25',
                 bgCls: 'bg-brand-red/5 text-brand-red',
             };
-        case 'community_alert':
-            return {
-                imageSrc: '/illustration_community_alert.png',
-                title: 'Community Alerts',
-                desc: 'Stay informed with critical neighborhood notices, real-time safety warnings, and community broadcast alerts.',
-                borderCls: 'border-brand-red/25',
-                bgCls: 'bg-brand-red/5 text-brand-red',
-            };
         case 'incident_report':
             return {
                 imageSrc: '/illustration_safety.png',
@@ -135,19 +127,19 @@ function XFeedInner() {
     const mainRef = useRef<HTMLElement>(null);
 
     // Derive contentTypeFilter from URL search params (set by sidebar / search overlay)
-    const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'help_request', 'job', 'event', 'marketplace', 'emergency', 'community_alert', 'incident_report'];
+    const CONTENT_TYPE_TABS: string[] = ['post', 'fyi', 'help_request', 'job', 'event', 'marketplace', 'emergency', 'incident_report'];
     const typeParam = searchParams.get('type') || '';
-    const contentTypeFilter: ContentType | undefined = 
-        (typeParam === 'community_alert' || typeParam === 'incident_report')
+    const contentTypeFilter: ContentType | undefined =
+        (typeParam === 'incident_report')
             ? 'emergency'
             : CONTENT_TYPE_TABS.includes(typeParam)
             ? (typeParam as ContentType)
             : undefined;
 
-    // Legacy gossip filter → Huud Gist in Local News
+    // Legacy gossip filter → Huud Gist pillar
     useEffect(() => {
         if (typeParam === 'gossip') {
-            router.replace('/local-news?tab=huud-gist');
+            router.replace('/gist');
         }
     }, [typeParam, router]);
 

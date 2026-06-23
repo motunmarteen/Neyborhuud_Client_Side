@@ -187,7 +187,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
         // Show urgent toast notification
         const severity = data?.severity || 'critical';
-        const emergencyType = data?.emergencyType || 'Emergency';
+        const emergencyType = data?.emergencyType || 'Safety Alert';
         const message = data?.preview || data?.content || 'A new emergency alert has been posted nearby.';
 
         if (severity === 'critical') {

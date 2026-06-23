@@ -19,7 +19,7 @@ export function labelForSentinelPath(pathname: string): string {
     '/safety/manage': 'Dashboard',
     '/safety/trips': 'Safe trips',
     '/safety/kidnapping-tracking': 'Live tracking',
-    '/sos': 'SOS',
+    '/sos': 'Safety Alert',
     '/': 'Home',
     '/feed': 'Feed',
     '/gamification': 'Huud Economy',

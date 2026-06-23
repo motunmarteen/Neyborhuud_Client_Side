@@ -61,7 +61,7 @@ function getRouteTitle(pathname: string) {
     messages: 'Messages',
     chat: 'Chat',
     info: 'Info',
-    sos: 'SOS',
+    sos: 'Safety Alert',
     profile: 'Profile',
     gamification: 'Huud Economy',
     'huud-economy': 'Huud Economy',

@@ -25,7 +25,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; color: string; icon: stri
   medical:   { label: 'Medical',   color: 'text-brand-red bg-brand-red/10',     icon: 'local_hospital' },
   food:      { label: 'Food',      color: 'text-brand-red bg-brand-red/10',icon: 'restaurant' },
   shelter:   { label: 'Shelter',   color: 'text-brand-blue bg-brand-blue/10',   icon: 'home' },
-  emergency: { label: 'Emergency', color: 'text-pink-400 bg-pink-400/10',   icon: 'emergency' },
+  emergency: { label: 'Safety Alert', color: 'text-pink-400 bg-pink-400/10',   icon: 'emergency' },
 };
 
 const STATUS_CONFIG: Record<HelpStatus, { label: string; color: string; icon: string }> = {

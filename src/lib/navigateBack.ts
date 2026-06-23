@@ -26,7 +26,8 @@ const PREFIX_FALLBACKS: Array<[prefix: string, href: string]> = [
   ['/communities', '/feed'],
   ['/neighborhood', '/feed'],
   ['/popular', '/neighborhood'],
-  ['/gossip', '/local-news?tab=huud-gist'],
+  ['/gossip', '/gist'],
+  ['/gist', '/feed'],
 ];
 
 export function resolveBackFallback(pathname: string): string {

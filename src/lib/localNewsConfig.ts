@@ -2,12 +2,13 @@ import type { NewsSource } from '@/types/incident';
 import type { GistSectionId } from '@/types/huudGist';
 
 export const LOCAL_NEWS_TABS = [
-  { id: 'huud-gist', label: 'Huud Gist', icon: 'forum' },
   { id: 'nigeria', label: 'Nigeria', icon: 'flag' },
   { id: 'international', label: 'International', icon: 'public' },
 ] as const;
 
-export type LocalNewsTab = (typeof LOCAL_NEWS_TABS)[number]['id'];
+// Huud Gist moved to its own /gist pillar; the type keeps the legacy id so the
+// page can detect and redirect old ?tab=huud-gist deep links.
+export type LocalNewsTab = (typeof LOCAL_NEWS_TABS)[number]['id'] | 'huud-gist';
 
 export const NIGERIA_SOURCES: NewsSource[] = [
   { id: 'punch', name: 'Punch' },
@@ -79,8 +80,9 @@ export function sourcesForTab(tab: LocalNewsTab): NewsSource[] {
 }
 
 export function parseLocalNewsTab(value: string | null): LocalNewsTab {
+  if (value === 'huud-gist') return 'huud-gist'; // detected only to trigger redirect → /gist
   if (value && LOCAL_NEWS_TABS.some((t) => t.id === value)) return value as LocalNewsTab;
-  return 'huud-gist';
+  return 'nigeria';
 }
 
 export function parseNewsTopic(value: string | null): NewsTopicId {

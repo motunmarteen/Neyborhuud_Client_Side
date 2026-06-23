@@ -34,7 +34,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     'contentType.job': 'Job',
     'contentType.event': 'Event',
     'contentType.marketplace': 'Marketplace',
-    'contentType.emergency': 'Emergency',
+    'contentType.emergency': 'Safety Alert',
 
     // Create post
     'createPost.title': 'Create Post',
@@ -248,7 +248,7 @@ const dictionaries: Record<AppLanguage, Record<string, string>> = {
     'contentType.job': 'Job',
     'contentType.event': 'Event',
     'contentType.marketplace': 'Market',
-    'contentType.emergency': 'Emergency',
+    'contentType.emergency': 'Safety Alert',
     'createPost.title': 'Create Post',
     'createPost.postType': 'Post Type',
     'createPost.language': 'Language',

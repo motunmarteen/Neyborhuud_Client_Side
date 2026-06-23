@@ -13,7 +13,8 @@ import {
   useEventAttendees,
 } from "@/hooks/useEvents";
 import EventShareSheet from "@/components/events/EventShareSheet";
-import { useAuth } from "@/hooks/useAuth";
+import { EventComments } from "@/components/events/EventComments";
+import { useClientAuthUser } from "@/hooks/useClientAuthUser";
 
 const TYPE_COLORS: Record<string, string> = {
   community: "bg-brand-blue/20 text-brand-blue",
@@ -271,7 +272,7 @@ export default function EventDetailPage() {
   const rawId = params?.id;
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useClientAuthUser();
   const { data, isLoading, error } = useEvent(id ?? null);
   const cancelEvent = useCancelEvent();
   const deleteEvent = useDeleteEvent();
@@ -592,6 +593,17 @@ export default function EventDetailPage() {
                   </div>
                 </div>
               )}
+
+              {/* Discussion — unified comment design */}
+              <EventComments
+                eventId={eventId}
+                organizerId={String(
+                  (typeof event.organizerId === "object"
+                    ? (event.organizerId?._id ?? event.organizerId?.id)
+                    : event.organizerId) ?? "",
+                )}
+                currentUserId={user?.id}
+              />
             </div>
     </LocalHuudSubpageShell>
 

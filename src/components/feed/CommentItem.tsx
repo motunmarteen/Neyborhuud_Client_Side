@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCommentMutations } from '@/hooks/useComments';
 import { CommentForm } from './CommentForm';
 import Link from 'next/link';
+
 interface CommentItemProps {
     comment: Comment;
     postId: string;
@@ -15,6 +16,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
     const { user } = useAuth();
     const { deleteComment, likeComment, unlikeComment } = useCommentMutations(postId);
     const [isReplying, setIsReplying] = useState(false);
+    const [showReplies, setShowReplies] = useState(false);
 
     const author = typeof comment.userId === 'object' ? comment.userId : null;
     const authorId = author?.id || author?._id || (typeof comment.userId === 'string' ? comment.userId : '');
@@ -23,6 +25,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
     const displayName = [author?.firstName, author?.lastName].filter(Boolean).join(' ') || username;
 
     const isAuthor = user?.id === authorId;
+    const replyCount = comment.replies?.length || 0;
 
     const handleLike = () => {
         if (comment.isLiked) {
@@ -38,21 +41,57 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
         }
     };
 
+    // Detect status-update comments (emergency quick actions)
+    let isStatusUpdate = false;
+    let statusType = '';
+    let cleanBody = comment.body;
 
+    const statusMatch = comment.body.match(/^\[STATUS:(AWARE|NEARBY|SAFE|CONFIRM|DISPUTE)\]/);
+    if (statusMatch) {
+        isStatusUpdate = true;
+        statusType = statusMatch[1];
+        cleanBody = comment.body.replace(statusMatch[0], '').trim();
+    } else {
+        const legacyMap: Record<string, string> = {
+            '🔔 I am aware of this situation.': 'AWARE',
+            '📍 I am nearby and monitoring.': 'NEARBY',
+            '🛡️ I have marked myself as safe.': 'SAFE',
+            '✅ I can confirm this alert is accurate.': 'CONFIRM',
+            '❌ I am disputing this alert. Please verify.': 'DISPUTE',
+        };
+        if (legacyMap[comment.body]) {
+            isStatusUpdate = true;
+            statusType = legacyMap[comment.body];
+            cleanBody = '';
+        }
+    }
+
+    const statusMeta = (() => {
+        switch (statusType) {
+            case 'AWARE': return { icon: 'notifications_active', label: 'Aware of situation', colors: 'bg-brand-blue/10 text-brand-blue border-brand-blue/20' };
+            case 'NEARBY': return { icon: 'location_on', label: 'Nearby and monitoring', colors: 'bg-brand-red/10 text-brand-red border-brand-red/20' };
+            case 'SAFE': return { icon: 'shield', label: 'Marked as safe', colors: 'bg-brand-green/10 text-brand-green border-brand-green/20' };
+            case 'CONFIRM': return { icon: 'check_circle', label: 'Confirmed alert', colors: 'bg-primary/10 text-primary border-primary/20' };
+            case 'DISPUTE': return { icon: 'cancel', label: 'Disputed alert', colors: 'bg-brand-red/10 text-brand-red border-brand-red/20' };
+            default: return null;
+        }
+    })();
+
+    const hasBubbleContent = !isStatusUpdate || !!cleanBody;
 
     return (
-        <div className={`flex gap-3 ${isReply ? 'mt-3 pl-2 sm:pl-4' : 'py-4'}`} style={isReply ? { borderLeft: '2px solid var(--neu-shadow-dark)' } : {}}>
-            {/* Avatar & Thread Line - Avatar is smaller for replies */}
-            <Link 
-                href={`/profile/${username}`} 
-                className="flex flex-col items-center flex-shrink-0 mt-1"
+        <div className={`flex gap-2.5 ${isReply ? 'mt-2.5' : 'py-2'}`}>
+            {/* Avatar (smaller for replies — IG style) */}
+            <Link
+                href={`/profile/${username}`}
+                className="flex-shrink-0"
             >
-                <div className={`flex ${isReply ? 'h-7 w-7' : 'h-9 w-9'} items-center justify-center overflow-hidden rounded-full border-[1.5px] border-black/5 dark:border-white/10 bg-black/5 dark:bg-[#1A221C] transition-transform hover:scale-105 active:scale-95`}>
+                <div className={`flex ${isReply ? 'h-8 w-8' : 'h-10 w-10'} items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 dark:border-white/10 bg-white dark:bg-[#1A221C] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] transition-transform active:scale-95`}>
                     {avatarUrl ? (
-                        <img 
-                            src={avatarUrl} 
-                            alt={username} 
-                            className="w-full h-full object-cover" 
+                        <img
+                            src={avatarUrl}
+                            alt={username}
+                            className="h-full w-full object-cover"
                             onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                                 e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
@@ -65,93 +104,102 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                 </div>
             </Link>
 
-            {/* Content Container */}
-            <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-1">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                        <Link 
-                            href={`/profile/${username}`}
-                            className="font-bold text-[15px] hover:underline cursor-pointer"
-                            style={{ color: 'var(--neu-text)' }}
-                        >
-                            {displayName}
-                        </Link>
-                        <Link
-                            href={`/profile/${username}`}
-                            className="max-w-[100px] truncate text-[14px] text-[var(--neu-text-secondary)] hover:underline sm:max-w-none"
-                        >
-                            @{username}
-                        </Link>
-                        <span className="text-[var(--neu-text-muted)]">·</span>
-                        <span className="cursor-pointer text-[14px] text-[var(--neu-text-muted)] hover:underline">
-                            {formatTimeAgo(comment.createdAt)}
-                        </span>
-                    </div>
-
-                    {isAuthor && (
-                        <button
-                            onClick={handleDelete}
-                            className="rounded-full p-1.5 text-[var(--neu-text-muted)] transition-colors hover:bg-brand-red/10 hover:text-brand-red dark:hover:text-brand-red"
-                            title="Delete comment"
-                        >
-                            <span className="material-symbols-outlined text-sm">delete</span>
-                        </button>
-                    )}
-                </div>
-
-                {/* Comment Body */}
-                <div className="mt-0.5 whitespace-pre-wrap break-words text-[15px] leading-normal text-[var(--neu-text)]">
-                    {comment.body}
-                </div>
-
-                {/* Media Grid */}
-                {comment.mediaUrls && comment.mediaUrls.length > 0 && (
-                    <div className="mt-3 neu-card-sm rounded-xl overflow-hidden grid grid-cols-2 gap-0.5 max-w-md">
-                        {comment.mediaUrls.map((url, idx) => (
-                            <div key={idx} className={`${comment.mediaUrls?.length === 1 ? 'col-span-2' : ''} relative aspect-square`}>
-                                <img
-                                    src={url}
-                                    alt="Comment media"
-                                    className="w-full h-full object-cover cursor-zoom-in hover:brightness-90 transition-all"
-                                    onError={(e) => {
-                                        e.currentTarget.src = 'https://placehold.co/400x400?text=Image+Unavailable';
-                                    }}
-                                />
+            {/* Content */}
+            <div className="min-w-0 flex-1">
+                <div className="flex items-start gap-2">
+                    {/* Bubble (Facebook style) */}
+                    <div className="min-w-0 flex-1">
+                        {isStatusUpdate && statusMeta && (
+                            <div className={`mb-1 inline-flex w-fit items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold ${statusMeta.colors}`}>
+                                <span className="material-symbols-outlined text-[16px]">{statusMeta.icon}</span>
+                                {statusMeta.label}
                             </div>
-                        ))}
+                        )}
+
+                        {hasBubbleContent && (
+                            <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 dark:bg-white/[0.06]">
+                                <Link
+                                    href={`/profile/${username}`}
+                                    className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] hover:underline dark:text-[#E4E6EB]"
+                                >
+                                    {displayName}
+                                </Link>
+                                <span className="text-[12px] font-normal text-[#65676B] dark:text-[#B0B3B8]">@{username}</span>
+                                <span className="ml-1.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#E4E6EB]">
+                                    {isStatusUpdate ? cleanBody : comment.body}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Media Grid — fills the comment content width (feed-style) */}
+                        {comment.mediaUrls && comment.mediaUrls.length > 0 && (
+                            <div className="mt-2 grid w-full grid-cols-2 gap-0.5 overflow-hidden rounded-xl">
+                                {comment.mediaUrls.map((url, idx) => (
+                                    <div key={idx} className={`${comment.mediaUrls?.length === 1 ? 'col-span-2' : ''} relative aspect-square`}>
+                                        <img
+                                            src={url}
+                                            alt="Comment media"
+                                            className="h-full w-full cursor-zoom-in object-cover transition-all hover:brightness-90"
+                                            onError={(e) => {
+                                                e.currentTarget.src = 'https://placehold.co/400x400?text=Image+Unavailable';
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Micro action row (Facebook: Like · Reply · time) */}
+                        <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#65676B] dark:text-[#B0B3B8]">
+                            <button
+                                type="button"
+                                onClick={handleLike}
+                                className={`transition-colors ${comment.isLiked ? 'text-brand-red' : 'hover:text-[#050505] dark:hover:text-[#E4E6EB]'}`}
+                            >
+                                Like
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsReplying(!isReplying)}
+                                className={`transition-colors ${isReplying ? 'text-brand-blue' : 'hover:text-[#050505] dark:hover:text-[#E4E6EB]'}`}
+                            >
+                                Reply
+                            </button>
+                            <span className="font-normal">
+                                {formatTimeAgo(comment.createdAt)}
+                            </span>
+                            {isAuthor && (
+                                <button
+                                    type="button"
+                                    onClick={handleDelete}
+                                    className="transition-colors hover:text-brand-red"
+                                    title="Delete comment"
+                                >
+                                    Delete
+                                </button>
+                            )}
+                        </div>
                     </div>
-                )}
 
-                {/* Actions Toolbar */}
-                <div className="mt-3 flex items-center gap-6 text-[var(--neu-text-muted)]">
+                    {/* Right-edge heart (Instagram style) */}
                     <button
+                        type="button"
                         onClick={handleLike}
-                        className={`group flex items-center gap-2 transition-colors ${comment.isLiked ? 'text-brand-blue dark:text-pink-400' : 'hover:text-brand-blue dark:hover:text-pink-400'}`}
+                        className="mt-1 flex flex-shrink-0 flex-col items-center gap-0.5 pr-0.5 text-[var(--neu-text-muted)] transition-colors"
+                        aria-label={comment.isLiked ? 'Unlike comment' : 'Like comment'}
                     >
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center group-hover:bg-pink-400/10 transition-colors`}>
-                            <span className={`material-symbols-outlined text-[18px] ${comment.isLiked ? 'fill-1' : ''}`}>favorite</span>
-                        </div>
-                        {comment.likes > 0 && <span className="text-xs font-medium">{comment.likes}</span>}
-                    </button>
-
-                    <button
-                        onClick={() => setIsReplying(!isReplying)}
-                        className={`group flex items-center gap-2 transition-colors ${isReplying ? 'text-primary' : 'hover:text-primary'}`}
-                    >
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                            <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
-                        </div>
-                        <span className="text-xs font-medium">Reply</span>
-                    </button>
-
-                    <button className="group flex h-8 w-8 items-center justify-center rounded-xl transition-colors hover:bg-primary/10 hover:text-primary">
-                        <span className="material-symbols-outlined text-[18px]">share</span>
+                        <span className={`material-symbols-outlined text-[17px] ${comment.isLiked ? 'fill-1 text-brand-red' : ''}`}>
+                            favorite
+                        </span>
+                        {comment.likes > 0 && (
+                            <span className="text-[11px] font-semibold leading-none tabular-nums">{comment.likes}</span>
+                        )}
                     </button>
                 </div>
 
                 {/* Inline Reply Form */}
                 {isReplying && (
-                    <div className="mt-4 animate-in slide-in-from-top-2 duration-200">
+                    <div className="mt-3 animate-in slide-in-from-top-2 duration-200">
                         <CommentForm
                             postId={postId}
                             parentId={comment.id}
@@ -162,17 +210,32 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                     </div>
                 )}
 
-                {/* Recursive Nested Replies */}
-                {comment.replies && comment.replies.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                        {comment.replies.map((reply) => (
-                            <CommentItem
-                                key={reply.id}
-                                comment={reply}
-                                postId={postId}
-                                isReply
-                            />
-                        ))}
+                {/* Replies — collapsed behind a toggle (hybrid) */}
+                {replyCount > 0 && (
+                    <div className="mt-1.5">
+                        <button
+                            type="button"
+                            onClick={() => setShowReplies(!showReplies)}
+                            className="flex items-center gap-2 pl-1 text-[12px] font-bold text-[#65676B] transition-colors hover:text-[#050505] dark:text-[#B0B3B8] dark:hover:text-[#E4E6EB]"
+                        >
+                            <span className="h-px w-5 bg-[var(--neu-shadow-dark)]" aria-hidden />
+                            {showReplies
+                                ? 'Hide replies'
+                                : `View ${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}`}
+                        </button>
+
+                        {showReplies && (
+                            <div className="mt-1 space-y-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                                {comment.replies!.map((reply) => (
+                                    <CommentItem
+                                        key={reply.id}
+                                        comment={reply}
+                                        postId={postId}
+                                        isReply
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

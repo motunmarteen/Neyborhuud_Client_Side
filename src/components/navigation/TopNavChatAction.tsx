@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AppNavIcon } from '@/components/navigation/AppNavIcon';
 
-export const CHAT_INBOX_HREF = '/chat';
+export const CHAT_INBOX_HREF = '/friendship?tab=dms';
 export function TopNavChatAction() {
   const pathname = usePathname();
-  const isOnChat = pathname === '/chat';
+  const isOnChat = pathname === '/chat' || pathname === '/friendship';
 
   return (
     <Link

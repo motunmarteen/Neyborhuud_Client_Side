@@ -47,21 +47,50 @@ function CommentItem({ comment, currentUserId, onDelete }: {
   );
 
   return (
-    <div className="flex gap-3">
-      <div className="w-8 h-8 rounded-full neu-socket flex items-center justify-center flex-shrink-0">
-        <span className="material-symbols-outlined text-sm" style={{ color: 'var(--neu-text-muted)' }}>person</span>
+    <div className="flex gap-2.5 py-2">
+      {/* Avatar — feed-aligned */}
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-[#1A221C] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+        <span className="material-symbols-outlined text-[18px]" style={{ color: 'var(--neu-text-muted)' }}>
+          {comment.isAnonymous ? 'visibility_off' : 'person'}
+        </span>
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>{authorName}</span>
-          <span className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>{formatTimeAgo(comment.createdAt)}</span>
-          {isOwner && (
-            <button onClick={() => onDelete(comment.id)} className="ml-auto text-xs text-brand-red hover:text-brand-red">
-              Delete
-            </button>
-          )}
+
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            {/* Bubble (Facebook style) */}
+            <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 dark:bg-white/[0.06]">
+              <span className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] dark:text-[#E4E6EB]">
+                {authorName}
+              </span>
+              {/* Anonymous badge — incident-specific context */}
+              {comment.isAnonymous && (
+                <span className="mr-1.5 inline-flex items-center gap-0.5 rounded-full bg-black/[0.06] px-1.5 py-px align-middle text-[10px] font-bold text-[#65676B] dark:bg-white/10 dark:text-[#B0B3B8]">
+                  <span className="material-symbols-outlined text-[12px]">shield_person</span>
+                  Anonymous
+                </span>
+              )}
+              <span className="ml-0.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#E4E6EB]">
+                {comment.body}
+              </span>
+            </div>
+
+            {/* Micro action row */}
+            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#65676B] dark:text-[#B0B3B8]">
+              <span className="font-normal">{formatTimeAgo(comment.createdAt)}</span>
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={() => onDelete(comment.id)}
+                  className="transition-colors hover:text-brand-red"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-        <p className="text-sm" style={{ color: 'var(--neu-text)' }}>{comment.body}</p>
       </div>
     </div>
   );
@@ -445,32 +474,43 @@ function IncidentDetailInner() {
       )}
 
       {/* Comments */}
-      <div className="neu-card rounded-2xl p-5 flex flex-col gap-4">
-        <h2 className="text-sm font-bold" style={{ color: 'var(--neu-text-muted)' }}>
-          COMMENTS ({incident.commentsCount})
+      <div className="neu-card rounded-2xl p-5 flex flex-col gap-3">
+        <h2 className="text-[15px] font-semibold tracking-tight" style={{ color: 'var(--neu-text)' }}>
+          Comments <span className="text-[12px] font-bold tabular-nums" style={{ color: 'var(--neu-text-muted)' }}>{incident.commentsCount}</span>
         </h2>
 
-        {/* Add comment */}
+        {/* Add comment — unified pill (incident framing) */}
         {user && (
           <form onSubmit={handleAddComment} className="flex flex-col gap-2">
-            <textarea
-              value={commentText}
-              onChange={e => setCommentText(e.target.value)}
-              placeholder="Add a comment or share what you know..."
-              rows={2}
-              maxLength={1000}
-              className="w-full px-4 py-3 neu-input rounded-2xl text-sm resize-none"
-              style={{ color: 'var(--neu-text)', background: 'var(--neu-bg)' }}
-            />
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: 'var(--neu-text-muted)' }}>
-                <input type="checkbox" checked={commentAnon} onChange={e => setCommentAnon(e.target.checked)} className="w-3.5 h-3.5 rounded" />
-                Post anonymously
-              </label>
-              <button type="submit" disabled={submittingComment} className="px-5 py-2 mod-chip mod-chip-active rounded-2xl text-xs font-bold text-primary">
-                {submittingComment ? 'Posting...' : 'Post'}
+            <div className="flex items-end gap-2 rounded-[24px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 transition-all focus-within:border-black/10 dark:border-white/[0.06] dark:bg-white/[0.04] dark:focus-within:border-white/15">
+              <textarea
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                placeholder="Share what you know…"
+                aria-label="Share what you know"
+                rows={1}
+                maxLength={1000}
+                className="max-h-[120px] min-h-[36px] flex-1 resize-none border-none bg-transparent py-2 pl-2 text-[15px] placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:ring-0"
+                style={{ color: 'var(--neu-text)' }}
+              />
+              <button
+                type="submit"
+                disabled={submittingComment || !commentText.trim()}
+                className="mb-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-primary transition-all hover:bg-primary/10 active:scale-90 disabled:opacity-45"
+                aria-label="Post comment"
+              >
+                {submittingComment ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                ) : (
+                  <span className="material-symbols-outlined text-[20px] fill-1">send</span>
+                )}
               </button>
             </div>
+            <label className="flex w-fit cursor-pointer items-center gap-2 pl-1 text-[12px] font-semibold" style={{ color: 'var(--neu-text-muted)' }}>
+              <input type="checkbox" checked={commentAnon} onChange={e => setCommentAnon(e.target.checked)} className="h-3.5 w-3.5 rounded" />
+              <span className="material-symbols-outlined text-[15px]">shield_person</span>
+              Post anonymously
+            </label>
           </form>
         )}
 
@@ -480,11 +520,12 @@ function IncidentDetailInner() {
             <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : comments.length === 0 ? (
-          <p className="text-sm text-center py-4" style={{ color: 'var(--neu-text-muted)' }}>
-            No comments yet — be the first to share what you know.
-          </p>
+          <div className="py-10 text-center text-[var(--neu-text-muted)]">
+            <span className="material-symbols-outlined text-3xl opacity-40">forum</span>
+            <p className="mt-2 text-sm">No comments yet — be the first to share what you know.</p>
+          </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             {comments.map(c => (
               <CommentItem
                 key={c.id}

@@ -296,7 +296,6 @@ export function FeedSkyHero({ below }: { below?: ReactNode }) {
     { type: 'event', label: 'Events' },
     { type: 'fyi', label: 'FYI' },
     { type: 'help_request', label: 'Help' },
-    { type: 'community_alert', label: 'Alerts' },
     { type: 'incident_report', label: 'Safety' },
   ];
 

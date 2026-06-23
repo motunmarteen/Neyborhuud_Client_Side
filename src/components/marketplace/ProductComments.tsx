@@ -7,7 +7,6 @@ import { useProductComments, useProductCommentMutations } from "@/hooks/useMarke
 import { useState, useRef, useEffect } from "react";
 import { formatTimeAgo } from "@/utils/timeAgo";
 import { Comment } from "@/types/api";
-import { glassField } from "@/lib/glass-form-styles";
 
 interface ProductCommentsProps {
   productId: string;
@@ -88,80 +87,59 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
         </div>
       )}
 
-      {/* Comment Form */}
+      {/* Comment Form — unified pill design (marketplace framing) */}
       {currentUserId ? (
-        <form onSubmit={handleSubmitComment} className="space-y-3">
+        <form onSubmit={handleSubmitComment} className="space-y-2">
           {replyingTo && (
-            <div
-              className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${
-                embedded
-                  ? "border border-[var(--border-light)] bg-[var(--surface-light)]/80 dark:border-white/12 dark:bg-white/[0.06]"
-                  : "bg-brand-black/50"
-              }`}
-            >
-              <span className={embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}>Replying to comment</span>
+            <div className="flex items-center justify-between rounded-xl border border-black/5 bg-black/[0.03] px-3 py-2 text-[12px] dark:border-white/10 dark:bg-white/[0.04]">
+              <span className="font-semibold text-[#65676B] dark:text-[#B0B3B8]">Replying to comment</span>
               <button
                 type="button"
                 onClick={handleCancelReply}
-                className="text-brand-red hover:text-brand-red dark:text-brand-red dark:hover:text-brand-red"
+                className="font-bold text-brand-red transition-colors hover:opacity-80"
               >
                 Cancel
               </button>
             </div>
           )}
-          <div className="relative">
+          <div className="flex items-end gap-2 rounded-[24px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 transition-all focus-within:border-black/10 dark:border-white/[0.06] dark:bg-white/[0.04] dark:focus-within:border-white/15">
             <textarea
               ref={textareaRef}
               value={commentBody}
               onChange={(e) => setCommentBody(e.target.value)}
-              placeholder="Add a comment..."
-              className={
-                embedded
-                  ? `${glassField} min-h-[64px] resize-none`
-                  : `min-h-[80px] w-full resize-none rounded-lg border border-black/[0.08] bg-brand-black px-4 py-3 text-white outline-none placeholder:text-[var(--neu-text-muted)] focus:border-brand-blue focus:ring-1 focus:ring-brand-blue`
-              }
+              placeholder="Ask about this item…"
+              aria-label="Ask about this item"
+              className="max-h-[120px] min-h-[36px] flex-1 resize-none border-none bg-transparent py-2 pl-2 text-[15px] text-[var(--neu-text)] placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:ring-0"
+              rows={1}
               maxLength={1000}
             />
-            <div
-              className={`absolute bottom-3 right-3 text-xs ${
-                embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"
-              }`}
-            >
-              {commentBody.length}/1000
-            </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}`}>
-              Maximum 3 comments per minute
-            </span>
             <button
               type="submit"
               disabled={!commentBody.trim() || addComment.isPending}
-              className={
-                embedded
-                  ? "rounded-full bg-gradient-to-r from-primary to-[#006F35] px-6 py-2 text-sm font-bold text-white shadow-md transition-opacity disabled:cursor-not-allowed disabled:opacity-45 dark:from-emerald-500 dark:to-teal-600"
-                  : "rounded-lg bg-brand-blue px-6 py-2 font-semibold text-white transition-colors hover:bg-brand-blue disabled:cursor-not-allowed disabled:bg-brand-black disabled:text-[var(--neu-text-muted)]"
-              }
+              className="mb-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-primary transition-all hover:bg-primary/10 active:scale-90 disabled:opacity-45"
+              aria-label={replyingTo ? "Send reply" : "Post comment"}
             >
-              {addComment.isPending ? "Posting..." : "Post Comment"}
+              {addComment.isPending ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              ) : (
+                <span className="material-symbols-outlined text-[20px] fill-1">send</span>
+              )}
             </button>
+          </div>
+          <div className="flex items-center justify-between px-1 text-[11px] text-[var(--neu-text-muted)]">
+            <span>Be respectful — sellers and neighbors are reading.</span>
+            <span className="tabular-nums">{commentBody.length}/1000</span>
           </div>
         </form>
       ) : (
-        <div
-          className={`rounded-lg p-4 text-center ${
-            embedded
-              ? "border border-[var(--border-light)] bg-[var(--surface-light)]/70 text-[var(--neu-text-muted)] dark:border-white/12 dark:bg-white/[0.05]"
-              : "bg-brand-black/50 text-[var(--neu-text-muted)]"
-          }`}
-        >
-          Please log in to comment
+        <div className="rounded-xl border border-black/5 bg-black/[0.03] p-4 text-center text-[13px] text-[var(--neu-text-muted)] dark:border-white/10 dark:bg-white/[0.04]">
+          Please log in to ask about this item.
         </div>
       )}
 
       {/* Comments List */}
       {comments.length > 0 ? (
-        <div className="space-y-4">
+        <div className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {comments.map((comment) => (
             <CommentItem
               key={comment.id || comment._id}
@@ -173,8 +151,9 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
           ))}
         </div>
       ) : (
-        <div className={`py-8 text-center ${embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}`}>
-          No comments yet. Be the first to comment!
+        <div className="py-12 text-center text-[var(--neu-text-muted)]">
+          <span className="material-symbols-outlined text-3xl opacity-40">sell</span>
+          <p className="mt-2 text-sm">No questions yet — be the first to ask about this item.</p>
         </div>
       )}
 
@@ -207,83 +186,85 @@ interface CommentItemProps {
 function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemProps) {
   const user = comment.user || (comment as any).author || (typeof comment.userId === 'object' ? comment.userId : null);
   const username = user?.username || "Anonymous";
+  const displayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || username;
   const avatar = user?.avatar || user?.avatarUrl;
   const commentId = comment.id || comment._id || "";
   const likesCount = comment.likesCount || comment.likes || 0;
+  const isSeller = (comment as any).isSeller || (user as any)?.isSeller;
 
   return (
-    <div className="flex gap-3">
-      {/* Avatar */}
-      <div className="flex-shrink-0">
+    <div className="flex gap-2.5 py-2">
+      {/* Avatar — feed-aligned */}
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-[#1A221C] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
         {avatar ? (
-          <img
-            src={avatar}
-            alt={username}
-            className="w-10 h-10 rounded-full object-cover"
-          />
+          <img src={avatar} alt={username} className="h-full w-full object-cover" />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
-            {username[0]?.toUpperCase()}
-          </div>
+          <span className="text-[15px] font-bold text-[#65676B] dark:text-[#B0B3B8]">{username[0]?.toUpperCase()}</span>
         )}
       </div>
 
-      {/* Comment Content */}
+      {/* Content */}
       <div className="min-w-0 flex-1">
-        <div
-          className={
-            embedded
-              ? "rounded-xl border border-[var(--border-light)] bg-[var(--surface-light)]/75 px-4 py-3 dark:border-white/12 dark:bg-white/[0.06]"
-              : "rounded-lg bg-brand-black px-4 py-3"
-          }
-        >
-          {/* Username and time */}
-          <div className="mb-2 flex items-center gap-2">
-            <span className={`font-semibold ${embedded ? "text-[var(--neu-text)]" : "text-white"}`}>{username}</span>
-            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}`}>
-              {formatTimeAgo(comment.createdAt)}
-            </span>
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            {/* Bubble (Facebook style) */}
+            <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 dark:bg-white/[0.06]">
+              <span className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] dark:text-[#E4E6EB]">
+                {displayName}
+              </span>
+              {/* Seller badge — marketplace-specific context */}
+              {isSeller && (
+                <span className="mr-1.5 inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-px align-middle text-[10px] font-bold text-primary">
+                  <span className="material-symbols-outlined text-[12px]">storefront</span>
+                  Seller
+                </span>
+              )}
+              <span className="text-[12px] font-normal text-[#65676B] dark:text-[#B0B3B8]">@{username}</span>
+              <span className="ml-1.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#E4E6EB]">
+                {comment.body}
+              </span>
+            </div>
+
+            {/* Media — fills the comment content width */}
+            {comment.mediaUrls && comment.mediaUrls.length > 0 && (
+              <div className="mt-2 grid w-full grid-cols-2 gap-0.5 overflow-hidden rounded-xl">
+                {comment.mediaUrls.map((url, idx) => (
+                  <div key={idx} className={`${comment.mediaUrls?.length === 1 ? "col-span-2" : ""} relative aspect-square`}>
+                    <img
+                      src={url}
+                      alt={`Attachment ${idx + 1}`}
+                      className="h-full w-full cursor-zoom-in object-cover transition-all hover:brightness-90"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Micro action row (Facebook: Like · Reply · time) */}
+            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#65676B] dark:text-[#B0B3B8]">
+              <button type="button" className="transition-colors hover:text-[#050505] dark:hover:text-[#E4E6EB]">
+                Like
+              </button>
+              {currentUserId && (
+                <button
+                  type="button"
+                  onClick={() => onReply(commentId, username)}
+                  className="transition-colors hover:text-[#050505] dark:hover:text-[#E4E6EB]"
+                >
+                  Reply
+                </button>
+              )}
+              <span className="font-normal">{formatTimeAgo(comment.createdAt)}</span>
+            </div>
           </div>
 
-          {/* Body */}
-          <p
-            className={`whitespace-pre-wrap break-words ${embedded ? "text-[var(--neu-text-secondary)]" : "text-[var(--neu-text-muted)]"}`}
-          >
-            {comment.body}
-          </p>
-
-          {/* Media */}
-          {comment.mediaUrls && comment.mediaUrls.length > 0 && (
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {comment.mediaUrls.map((url, idx) => (
-                <img
-                  key={idx}
-                  src={url}
-                  alt={`Attachment ${idx + 1}`}
-                  className="rounded-lg w-full h-32 object-cover"
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="mt-2 flex items-center gap-4 px-4">
-          {likesCount > 0 && (
-            <span className={`text-xs ${embedded ? "text-[var(--neu-text-muted)]" : "text-[var(--neu-text-muted)]"}`}>
-              {likesCount} {likesCount === 1 ? "like" : "likes"}
-            </span>
-          )}
-          {currentUserId && (
-            <button
-              onClick={() => onReply(commentId, username)}
-              className={`text-xs transition-colors ${
-                embedded ? "text-[var(--neu-text-muted)] hover:text-primary" : "text-[var(--neu-text-muted)] hover:text-brand-blue"
-              }`}
-            >
-              Reply
-            </button>
-          )}
+          {/* Right-edge heart (Instagram style) */}
+          <div className="mt-1 flex flex-shrink-0 flex-col items-center gap-0.5 pr-0.5 text-[#65676B] dark:text-[#B0B3B8]">
+            <span className="material-symbols-outlined text-[17px]">favorite</span>
+            {likesCount > 0 && (
+              <span className="text-[11px] font-semibold leading-none tabular-nums">{likesCount}</span>
+            )}
+          </div>
         </div>
       </div>
     </div>

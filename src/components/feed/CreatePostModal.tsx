@@ -35,7 +35,7 @@ const POST_TYPES = [
     { value: 'marketplace', label: 'Marketplace', desc: 'Buy, sell or trade items', icon: '🛒', color: 'text-[#00c431] bg-[#00c431]/5 border-[#00c431]/10 hover:bg-[#00c431]/10' },
     { value: 'event', label: 'Event', desc: 'Gatherings & meetups', icon: '📅', color: 'text-brand-blue bg-brand-blue/5 border-brand-blue/10 hover:bg-brand-blue/10' },
     { value: 'job', label: 'Job', desc: 'Hiring or job postings', icon: '💼', color: 'text-[#9a5acf] bg-[#9a5acf]/5 border-[#9a5acf]/10 hover:bg-[#9a5acf]/10' },
-    { value: 'emergency', label: 'Safety Log', desc: 'Report incident or threat', icon: '🚨', color: 'text-brand-red bg-brand-red/5 border-brand-red/10 hover:bg-brand-red/10' },
+    { value: 'emergency', label: 'Safety Alert', desc: 'Report incident or threat', icon: '🚨', color: 'text-brand-red bg-brand-red/5 border-brand-red/10 hover:bg-brand-red/10' },
     { value: 'alert', label: 'Urgent Alert', desc: 'Critical hazard warning', icon: '⚠️', color: 'text-status-warning bg-status-warning/5 border-status-warning/10 hover:bg-status-warning/10' },
 ];
 
@@ -837,7 +837,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                          POST_TYPES.find(p => p.value === contentType)?.icon || '📝'}
                                                     </span>
                                                     <h3 className="text-[15px] font-black capitalize tracking-tight" style={{ color: 'var(--neu-text)' }}>
-                                                        {contentType === 'emergency' ? 'Safety Log' :
+                                                        {contentType === 'emergency' ? 'Safety Alert' :
                                                          (contentType === 'fyi' && fyiSubtype === 'alert') ? 'Urgent Alert' :
                                                          `Create ${contentType.replace('_', ' ')}`}
                                                     </h3>
@@ -905,7 +905,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     contentType === 'marketplace' ? 'Describe the item you are selling, details, or delivery logistics...' :
                                                     contentType === 'event' ? 'Describe the event, target audience, schedule details...' :
                                                     contentType === 'help_request' ? 'Explain the situation and what support is needed...' :
-                                                    contentType === 'emergency' ? 'Describe the safety incident, threat details, or recommended actions...' :
+                                                    contentType === 'emergency' ? "What's the situation? Add any advice or precautions..." :
                                                     contentType === 'services' ? 'Describe your services, skills, qualifications, or project highlights...' :
                                                     contentType === 'job' ? 'Describe the role, responsibilities, salary range, and application process...' :
                                                     (contentType === 'fyi' && fyiSubtype === 'alert') ? 'Describe the critical threat or alert detail...' :

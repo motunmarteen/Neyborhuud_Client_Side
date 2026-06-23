@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-/** Legacy /gossip — Huud Gist lives under Local News */
+/** Legacy /gossip — Huud Gist now lives at its own /gist pillar. */
 export default function GossipPage() {
-  redirect('/local-news?tab=huud-gist');
+  redirect('/gist');
 }

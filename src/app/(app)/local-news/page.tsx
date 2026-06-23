@@ -13,7 +13,7 @@ import { CreateHuudGistModal } from '@/components/huud-gist/CreateHuudGistModal'
 import { HuudGistRow } from '@/components/huud-gist/HuudGistRow';
 import { NewsArticleRow } from '@/components/news/NewsArticleRow';
 import { useHuudGistList } from '@/hooks/useHuudGist';
-import { useAuth } from '@/hooks/useAuth';
+import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import {
   LOCAL_NEWS_TABS,
   NEWS_TOPICS,
@@ -47,10 +47,18 @@ function sourcesForRegion(
 function LocalNewsInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user } = useClientAuthUser();
   const [activeTab, setActiveTab] = useState<LocalNewsTab>(() =>
     parseLocalNewsTab(searchParams.get('tab')),
   );
+
+  // Huud Gist is now its own pillar — redirect any legacy ?tab=huud-gist access.
+  useEffect(() => {
+    if (activeTab === 'huud-gist') {
+      const section = searchParams.get('section');
+      router.replace(section ? `/gist?section=${section}` : '/gist');
+    }
+  }, [activeTab, searchParams, router]);
   const [gistSection, setGistSection] = useState<GistSectionId>(() =>
     parseGistSection(searchParams.get('section')),
   );

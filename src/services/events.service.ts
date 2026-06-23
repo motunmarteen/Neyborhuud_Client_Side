@@ -9,7 +9,14 @@ import {
   PaginatedResponse,
   CreateEventPayload,
   User,
+  Comment,
 } from "@/types/api";
+
+export interface EventCommentInput {
+  body: string;
+  mediaUrls?: string[];
+  parentId?: string;
+}
 
 /** Share payload from GET /events/:id/share (also used when parsing wrapped API responses). */
 export interface EventSharePlatforms {
@@ -323,5 +330,32 @@ export const eventsService = {
       `/events/${eventId}/boost`,
       { days },
     );
+  },
+
+  // ── Comments ────────────────────────────────────────────────────────────────
+
+  /** List top-level comments for an event (public; optional auth). */
+  async listComments(eventId: string, page = 1, limit = 30) {
+    return await apiClient.get<{
+      comments: Comment[];
+      pagination: { page: number; limit: number; total: number; pages: number };
+    }>(`/events/${eventId}/comments`, { params: { page, limit } });
+  },
+
+  /** Add a comment (or reply, via parentId) to an event. */
+  async addComment(eventId: string, input: EventCommentInput) {
+    return await apiClient.post<{ comment: Comment }>(
+      `/events/${eventId}/comments`,
+      {
+        body: input.body,
+        ...(input.mediaUrls?.length ? { mediaUrls: input.mediaUrls } : {}),
+        ...(input.parentId ? { parentId: input.parentId } : {}),
+      },
+    );
+  },
+
+  /** Soft-delete a comment (author or admin). */
+  async deleteComment(commentId: string) {
+    return await apiClient.delete<null>(`/events/comments/${commentId}`);
   },
 };

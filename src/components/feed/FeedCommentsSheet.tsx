@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BottomSheetDragHandle } from '@/components/ui/BottomSheetDragHandle';
 import { useBottomSheetDrag } from '@/hooks/useBottomSheetDrag';
 import { useBottomSheetMount } from '@/hooks/useBottomSheetMount';
@@ -21,6 +21,7 @@ interface FeedCommentsSheetProps {
 export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = null }: FeedCommentsSheetProps) {
     const { mounted: isMounted, visible: isVisible } = useBottomSheetMount({ open: isOpen, onClose });
     const { handleProps, getPanelStyle, reset } = useBottomSheetDrag({ onDismiss: onClose });
+    const [sortBy, setSortBy] = useState<'relevant' | 'newest'>('relevant');
 
     const activeTarget = isOpen ? target : null;
     const activePostId = activeTarget?.id ?? null;
@@ -32,6 +33,20 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
         if (!activeTarget) return 0;
         return postDetails?.content?.comments || postDetails?.comments?.length || 0;
     }, [activeTarget, postDetails]);
+
+    const sortedComments = useMemo(() => {
+        const comments = postDetails?.comments;
+        if (!comments?.length) return [];
+        const copy = [...comments];
+        if (sortBy === 'newest') {
+            return copy.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+        // "Most relevant" — most-liked first, ties broken by recency
+        return copy.sort((a, b) => {
+            if ((b.likes || 0) !== (a.likes || 0)) return (b.likes || 0) - (a.likes || 0);
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+    }, [postDetails?.comments, sortBy]);
 
     useEffect(() => {
         if (isOpen) reset();
@@ -73,13 +88,10 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                 <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
                 <BottomSheetDragHandle handleProps={handleProps} className="pt-2.5 pb-1" />
 
-                <div
-                    className="flex items-center justify-between border-b border-[var(--neu-shadow-dark)] px-4 py-2.5"
-                    style={{ boxShadow: '0 1px 0 var(--neu-shadow-light)' }}
-                >
-                    <h2 className="text-[15px] font-semibold tracking-tight text-[var(--neu-text)]">Comments</h2>
+                <div className="flex items-center justify-between border-b border-black/5 px-3 py-2.5 dark:border-white/5">
+                    <h2 className="text-[15px] font-semibold tracking-tight text-[#050505] dark:text-[#E4E6EB]">Comments</h2>
                     <div className="flex items-center gap-3">
-                        <span className="text-xs font-medium text-[var(--neu-text-secondary)]">{commentsCount}</span>
+                        <span className="text-[12px] font-bold tabular-nums text-[#65676B] dark:text-[#B0B3B8]">{commentsCount}</span>
                         <button
                             type="button"
                             onClick={onClose}
@@ -93,7 +105,20 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-4 py-3">
+                <div className="flex-1 overflow-y-auto px-3 py-2">
+                    {/* Sort header (Facebook style) */}
+                    {!isPostLoading && !isPostError && !!postDetails?.comments?.length && (
+                        <div className="mb-1 flex items-center justify-between">
+                            <button
+                                type="button"
+                                onClick={() => setSortBy((prev) => (prev === 'relevant' ? 'newest' : 'relevant'))}
+                                className="flex items-center gap-1 text-[13px] font-bold text-[#050505] transition-colors hover:text-brand-blue dark:text-[#E4E6EB]"
+                            >
+                                {sortBy === 'relevant' ? 'Most relevant' : 'Newest'}
+                                <span className="material-symbols-outlined text-[18px]">expand_more</span>
+                            </button>
+                        </div>
+                    )}
                     {isPostLoading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
@@ -102,9 +127,9 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                         <div className="rounded-2xl border border-status-danger/25 bg-status-danger/8 px-4 py-8 text-center text-sm text-status-danger">
                             Unable to load comments for this post.
                         </div>
-                    ) : postDetails?.comments?.length ? (
-                        <div className="space-y-0.5">
-                            {postDetails.comments.map((comment) => (
+                    ) : sortedComments.length ? (
+                        <div className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+                            {sortedComments.map((comment) => (
                                 <CommentItem key={comment.id} comment={comment} postId={activeTarget.id} />
                             ))}
                         </div>
@@ -116,12 +141,10 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                     )}
                 </div>
 
-                <div
-                    className="relative z-[1] border-t border-[var(--neu-shadow-dark)] bg-[var(--neu-bg)]/88 px-4 py-3 backdrop-blur-xl"
-                    style={{ boxShadow: '0 -1px 0 var(--neu-shadow-light)' }}
-                >
+                <div className="relative z-[1] border-t border-black/5 bg-[var(--neu-bg)]/88 px-3 py-2.5 backdrop-blur-xl dark:border-white/5">
                     <CommentForm
                         postId={activeTarget.id}
+                        post={postDetails?.content}
                         placeholder={isPostingComment ? 'Posting...' : 'Add a comment...'}
                     />
                 </div>

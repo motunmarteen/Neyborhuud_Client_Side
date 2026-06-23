@@ -9,7 +9,7 @@ const FEED_TIPS = [
     {
         id: 'sos',
         icon: 'warning',
-        label: 'SOS',
+        label: 'Safety Alert',
         description: 'Tap the red button anytime — guardians get your location instantly.',
         iconClass: 'bg-brand-red text-white',
     },

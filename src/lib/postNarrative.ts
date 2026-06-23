@@ -392,7 +392,7 @@ export function generatePostNarrative(post: Post): PostNarrative | null {
         text,
         accentBg: 'bg-red-50/80 dark:bg-[#300a0a]/40',
         accentBorder: 'border-red-200/40 dark:border-red-800/30',
-        typeLabel: 'Safety Log',
+        typeLabel: 'Safety Alert',
         icon: 'warning',
       };
     }

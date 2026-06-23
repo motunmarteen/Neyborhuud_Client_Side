@@ -9,6 +9,7 @@ import {
   Home,
   LayoutGrid,
   MessageCircle,
+  MessagesSquare,
   Search,
   Shield,
   Siren,
@@ -30,6 +31,7 @@ export type AppNavIconName =
   | 'localHuud'
   | 'sos'
   | 'call'
+  | 'gist'
   | 'profile';
 
 type AppNavIconProps = {
@@ -51,14 +53,15 @@ const lucideIcons: Record<Exclude<AppNavIconName, 'menu'>, LucideIcon> = {
   localHuud: LayoutGrid,
   sos: Siren,
   call: Phone,
+  gist: MessagesSquare,
   profile: User,
 };
 
 function MenuIcon() {
   return (
     <svg className="app-nav-icon__glyph" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true">
-      <rect x="2" y="5" width="12" height="2.25" rx="1.125" />
-      <rect x="2" y="10.75" width="8" height="2.25" rx="1.125" />
+      <rect x="2" y="5.25" width="12" height="1.5" rx="0.75" />
+      <rect x="2" y="11.25" width="8" height="1.5" rx="0.75" />
     </svg>
   );
 }

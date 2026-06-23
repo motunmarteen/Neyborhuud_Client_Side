@@ -1,16 +1,18 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { Suspense, useState, useCallback, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import TopNav from '@/components/navigation/TopNav';
 import { useAuth } from '@/hooks/useAuth';
 import { followService } from '@/services/follow.service';
 import { geoService } from '@/services/geo.service';
 import { chatService } from '@/services/chat.service';
+import { FriendshipChatInbox } from '@/components/friendship/FriendshipChatInbox';
+import { CallLog } from '@/components/friendship/CallLog';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 const MapComponent = dynamic(() => import('@/app/map/MapComponent'), {
@@ -191,13 +193,24 @@ const EmptyState = ({ icon, title, subtitle }: { icon: string; title: string; su
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-type MainTab = 'near_me' | 'following' | 'followers' | 'map';
+type MainTab = 'calls' | 'near_me' | 'following' | 'followers' | 'map' | 'dms' | 'communities';
 
-export default function FriendshipPage() {
+const CHAT_TABS: MainTab[] = ['dms', 'communities'];
+
+function FriendshipPageContent() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const [mainTab, setMainTab] = useState<MainTab>('near_me');
+  const initialTab = ((): MainTab => {
+    const t = searchParams.get('tab');
+    if (t === 'calls') return 'calls';
+    if (t === 'dms' || t === 'direct') return 'dms';
+    if (t === 'communities' || t === 'groups') return 'communities';
+    if (t === 'following' || t === 'followers' || t === 'map' || t === 'near_me') return t as MainTab;
+    return 'near_me';
+  })();
+  const [mainTab, setMainTab] = useState<MainTab>(initialTab);
   const [search, setSearch] = useState('');
   const [followingState, setFollowingState] = useState<Record<string, boolean>>({});
   const [pendingUsers, setPendingUsers] = useState<Set<string>>(new Set());
@@ -316,7 +329,15 @@ export default function FriendshipPage() {
   const handleMainTab = (t: MainTab) => {
     setMainTab(t);
     setSearch('');
+    // Keep the URL in sync so deep links (and the /chat redirect) resolve correctly
+    const params = new URLSearchParams(searchParams.toString());
+    if (t === 'near_me') params.delete('tab');
+    else params.set('tab', t);
+    const q = params.toString();
+    router.replace(q ? `/friendship?${q}` : '/friendship', { scroll: false });
   };
+
+  const isChatTab = CHAT_TABS.includes(mainTab) || mainTab === 'calls';
 
   // ── Render helpers ──────────────────────────────────────────────────────────
 
@@ -357,7 +378,7 @@ export default function FriendshipPage() {
       <div className="app-chrome-below-topnav">
       {/* Search + tabs */}
       <header className="z-30 shrink-0 border-b border-gray-100 bg-white/95 backdrop-blur-md">
-        {mainTab !== 'map' && (
+        {mainTab !== 'map' && !isChatTab && (
           <div className="px-4 pb-3 pt-3">
             <div className="relative">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
@@ -378,6 +399,9 @@ export default function FriendshipPage() {
             aria-label="Friendship sections"
             className="flex items-center gap-0.5 overflow-x-auto rounded-full border border-black/[0.05] bg-brand-surface/60 p-1 no-scrollbar scroll-smooth"
           >
+            <TabPill active={mainTab === 'calls'} onClick={() => handleMainTab('calls')}>
+              Calls
+            </TabPill>
             <TabPill active={mainTab === 'near_me'} onClick={() => handleMainTab('near_me')}>
               Near me
             </TabPill>
@@ -389,6 +413,12 @@ export default function FriendshipPage() {
             </TabPill>
             <TabPill active={mainTab === 'map'} onClick={() => handleMainTab('map')}>
               Map
+            </TabPill>
+            <TabPill active={mainTab === 'dms'} onClick={() => handleMainTab('dms')}>
+              Messages
+            </TabPill>
+            <TabPill active={mainTab === 'communities'} onClick={() => handleMainTab('communities')}>
+              Communities
             </TabPill>
           </div>
         </div>
@@ -455,12 +485,37 @@ export default function FriendshipPage() {
           </div>
         )}
 
+        {/* Call log (read-only history) */}
+        {mainTab === 'calls' && <CallLog currentUserId={user?.id} />}
+
+        {/* Chat inbox (merged from /chat) */}
+        {mainTab === 'dms' && (
+          <FriendshipChatInbox inboxFilter="direct" hideSearchBar={false} />
+        )}
+        {mainTab === 'communities' && (
+          <FriendshipChatInbox inboxFilter="communities" hideSearchBar={false} />
+        )}
+
       </main>
       </div>
 
       {/* Bottom Navigation */}
       <BottomNav />
     </div>
+  );
+}
+
+export default function FriendshipPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[100dvh] items-center justify-center bg-white p-8 text-sm text-slate-400">
+          Loading…
+        </div>
+      }
+    >
+      <FriendshipPageContent />
+    </Suspense>
   );
 }
 

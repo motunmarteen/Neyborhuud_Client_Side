@@ -10,7 +10,7 @@ const CONTENT_LABELS: Record<string, string> = {
   fyi: 'FYI',
   help_request: 'Help',
   job: 'Job',
-  emergency: 'SOS',
+  emergency: 'Safety Alert',
   event: 'Event',
   marketplace: 'Market',
 };

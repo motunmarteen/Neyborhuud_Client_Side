@@ -1,7 +1,7 @@
 import type { Conversation } from '@/types/api';
 
-/** App routes for chat (inbox + thread). Prefer these over legacy `/messages`. */
-export const CHAT_HOME = '/chat';
+/** Inbox now lives in the unified Connect hub; threads stay at /chat/[id]. */
+export const CHAT_HOME = '/friendship?tab=dms';
 
 /** Inbox tab query value for hub + legacy group chats (same UX). */
 export const CHAT_TAB_COMMUNITIES = 'communities';

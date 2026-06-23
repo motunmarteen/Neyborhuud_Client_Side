@@ -24,8 +24,8 @@ type NavLinkTab = {
 const LINK_TABS: NavLinkTab[] = [
   { href: '/feed', label: 'Home', icon: 'home', match: (p) => p === '/feed' || p === '/' },
   { href: '/safety', label: 'Sentinel', icon: 'shield', match: (p) => p.startsWith('/safety') || p.startsWith('/sentinel') },
-  { href: '/friendship', label: 'Connect', icon: 'connect', match: (p) => p.startsWith('/friendship') },
-  { href: '/chat', label: 'Calls', icon: 'call', match: (p) => p.startsWith('/chat') },
+  { href: '/friendship', label: 'Connect', icon: 'connect', match: (p) => p.startsWith('/friendship') || p.startsWith('/chat') },
+  { href: '/gist', label: 'Gist', icon: 'gist', match: (p) => p.startsWith('/gist') },
 ];
 
 import { useSentinelBottomSheet } from '@/contexts/SentinelBottomSheetContext';

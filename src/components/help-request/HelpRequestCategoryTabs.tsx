@@ -18,7 +18,7 @@ const TABS: Array<{ key: HelpRequestCategory; label: string; icon: string }> = [
     { key: 'medical',   label: 'Medical',   icon: 'local_hospital' },
     { key: 'food',      label: 'Food',      icon: 'restaurant' },
     { key: 'shelter',   label: 'Shelter',   icon: 'home' },
-    { key: 'emergency', label: 'Emergency', icon: 'emergency' },
+    { key: 'emergency', label: 'Safety Alert', icon: 'emergency' },
 ];
 
 const ACTIVE_COLOR: Record<string, string> = {

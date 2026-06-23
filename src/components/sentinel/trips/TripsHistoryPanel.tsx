@@ -21,7 +21,7 @@ function statusChip(status: Trip['status']) {
     completed: 'Completed',
     cancelled: 'Cancelled',
     escalated: 'Escalated',
-    panic: 'SOS',
+    panic: 'Safety Alert',
   };
   return (
     <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${styles[status] ?? styles.cancelled}`}>

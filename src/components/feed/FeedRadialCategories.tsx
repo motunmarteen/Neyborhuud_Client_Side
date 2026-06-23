@@ -12,8 +12,7 @@ const CATEGORIES: Category[] = [
   { type: 'event', label: 'Events', icon: 'local_activity', accent: '#1A56FF' },
   { type: 'fyi', label: 'FYI', icon: 'lightbulb', accent: '#3A6A9A' },
   { type: 'help_request', label: 'Help', icon: 'favorite', accent: '#CC3333' },
-  { type: 'community_alert', label: 'Alerts', icon: 'emergency_home', accent: '#D45A00' },
-  { type: 'incident_report', label: 'Safety', icon: 'shield_person', accent: '#A82020' },
+  { type: 'incident_report', label: 'Safety Alert', icon: 'shield_person', accent: '#A82020' },
 ];
 
 /* ── Dial geometry ──────────────────────────────────────────────────

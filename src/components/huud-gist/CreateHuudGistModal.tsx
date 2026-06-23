@@ -126,7 +126,7 @@ export function CreateHuudGistModal({
       setBody('');
       setAnonymous(false);
       onClose();
-      if (id) router.push(`/local-news/gist/${id}`);
+      if (id) router.push(`/gist/${id}`);
     } catch (err: unknown) {
       setError(getErrorMessage(err as AxiosError) || 'Could not post thread.');
     }

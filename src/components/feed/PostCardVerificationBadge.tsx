@@ -12,6 +12,8 @@ type PostCardVerificationBadgeProps = {
   author?: VerificationIdentityInput | PostAuthor | null;
   verificationBadge?: PostAuthor['verificationBadge'];
   hidden?: boolean;
+  withAvatarBackground?: boolean;
+  avatarBadgeSize?: 'sm' | 'md';
 };
 
 export function PostCardVerificationBadge({
@@ -19,6 +21,8 @@ export function PostCardVerificationBadge({
   author,
   verificationBadge: _verificationBadge,
   hidden = false,
+  withAvatarBackground = false,
+  avatarBadgeSize = 'md',
 }: PostCardVerificationBadgeProps) {
   if (hidden) return null;
 
@@ -31,7 +35,7 @@ export function PostCardVerificationBadge({
 
   const meta = getVerificationTierMeta(tier);
 
-  return (
+  const badge = (
     <span
       className={`material-symbols-outlined text-[12px] post-card-verification-badge ${meta.colorClass}`}
       style={{ color: meta.color }}
@@ -41,4 +45,15 @@ export function PostCardVerificationBadge({
       verified
     </span>
   );
+
+  if (withAvatarBackground) {
+    const sizeClass = avatarBadgeSize === 'sm' ? 'h-[17px] w-[17px]' : 'h-[20px] w-[20px]';
+    return (
+      <div className={`post-card-avatar-badge absolute -bottom-1 -right-1 z-10 flex ${sizeClass} items-center justify-center rounded-full bg-white dark:bg-[#121b14] border-[1.5px] border-white dark:border-[#121b14] shadow-sm select-none pointer-events-none`}>
+        {badge}
+      </div>
+    );
+  }
+
+  return badge;
 }

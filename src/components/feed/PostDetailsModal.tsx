@@ -417,7 +417,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
 
                                 {/* Post Comment Form */}
                                 <div className="mt-4">
-                                    {postId && <CommentForm postId={postId} placeholder="Post your reply" />}
+                                    {postId && <CommentForm postId={postId} post={details?.content} placeholder="Post your reply" />}
                                 </div>
                                 </div>
                             </div>

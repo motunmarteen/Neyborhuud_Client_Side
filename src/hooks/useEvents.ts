@@ -141,6 +141,44 @@ export function useEventAttendees(eventId: string | null) {
   });
 }
 
+/** Top-level comments for an event */
+export function useEventComments(eventId: string | null) {
+  return useQuery({
+    queryKey: ["events", "comments", eventId],
+    queryFn: async () => {
+      const res = await eventsService.listComments(eventId!, 1, 50);
+      return res.data;
+    },
+    enabled: !!eventId,
+    staleTime: 15000,
+  });
+}
+
+/** Add / delete comments on an event */
+export function useEventCommentMutations(eventId: string | null) {
+  const queryClient = useQueryClient();
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["events", "comments", eventId] });
+    queryClient.invalidateQueries({ queryKey: ["events", "detail", eventId] });
+  };
+
+  const addComment = useMutation({
+    mutationFn: (input: { body: string; mediaUrls?: string[]; parentId?: string }) =>
+      eventsService.addComment(eventId!, input),
+    onSuccess: () => invalidate(),
+    onError: (error) => toast.error(getErrorMessage(error) || "Failed to post comment"),
+  });
+
+  const deleteComment = useMutation({
+    mutationFn: (commentId: string) => eventsService.deleteComment(commentId),
+    onSuccess: () => invalidate(),
+    onError: (error) => toast.error(getErrorMessage(error) || "Failed to delete comment"),
+  });
+
+  return { addComment, deleteComment };
+}
+
 /** RSVP to an event or un-RSVP */
 export function useAttendEvent() {
   const queryClient = useQueryClient();

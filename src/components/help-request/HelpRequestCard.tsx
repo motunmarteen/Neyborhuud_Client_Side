@@ -379,12 +379,12 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                                 )}
                             </div>
                         </Link>
-                        <div className="absolute -bottom-1 -right-1 z-10 flex h-[17px] w-[17px] items-center justify-center rounded-full bg-white dark:bg-[#121b14] border-[1.5px] border-white dark:border-[#121b14] shadow-sm select-none pointer-events-none">
-                            <PostCardVerificationBadge
-                                author={author}
-                                hidden={isAnonymousAuthor}
-                            />
-                        </div>
+                        <PostCardVerificationBadge
+                            author={author}
+                            hidden={isAnonymousAuthor}
+                            withAvatarBackground
+                            avatarBadgeSize="sm"
+                        />
                     </div>
                     <PostCardAuthorLines
                         authorName={authorName}

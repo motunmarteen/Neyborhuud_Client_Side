@@ -22,7 +22,7 @@ export function HuudGistRow({ post }: HuudGistRowProps) {
 
   return (
     <Link
-      href={`/local-news/gist/${id}`}
+      href={`/gist/${id}`}
       className="flex items-start gap-3 px-3 py-3 transition-colors hover:bg-black/[0.02]"
     >
       <div className="mod-inset flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-primary">
