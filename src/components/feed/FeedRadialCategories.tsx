@@ -3,12 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-type Category = { type: string; label: string; icon: string; accent: string };
+type Category = { type: string; label: string; icon: string; accent: string; href?: string };
 
 const CATEGORIES: Category[] = [
   { type: 'marketplace', label: 'Market', icon: 'shopping_bag', accent: '#00C431' },
-  { type: 'services', label: 'Services', icon: 'home_repair_service', accent: '#00A555' },
-  { type: 'job', label: 'Jobs', icon: 'badge', accent: '#9A5ACF' },
+  { type: 'work', label: 'Work', icon: 'work', accent: '#9A5ACF', href: '/work' },
   { type: 'event', label: 'Events', icon: 'local_activity', accent: '#1A56FF' },
   { type: 'fyi', label: 'FYI', icon: 'lightbulb', accent: '#3A6A9A' },
   { type: 'help_request', label: 'Help', icon: 'favorite', accent: '#CC3333' },
@@ -42,12 +41,18 @@ export function FeedRadialCategories() {
   const activeType = searchParams.get('type') || '';
   const activeCat = CATEGORIES.find(c => c.type === activeType);
 
-  const handleSelect = (type: string) => {
+  const handleSelect = (cat: Category) => {
+    // Some categories are real destinations (e.g. Work hub), not feed filters.
+    if (cat.href) {
+      router.push(cat.href);
+      setOpen(false);
+      return;
+    }
     // If clicking the already active type, toggle it off (go back to feed)
-    if (activeType === type) {
+    if (activeType === cat.type) {
       router.push('/feed');
     } else {
-      router.push(`/feed?type=${type}`);
+      router.push(`/feed?type=${cat.type}`);
     }
     setOpen(false);
   };
@@ -112,7 +117,7 @@ export function FeedRadialCategories() {
                     height: 56,
                     '--accent': c.accent
                   } as React.CSSProperties}
-                  onClick={() => handleSelect(c.type)}
+                  onClick={() => handleSelect(c)}
                   aria-label={c.label}
                   tabIndex={open ? 0 : -1}
                 >

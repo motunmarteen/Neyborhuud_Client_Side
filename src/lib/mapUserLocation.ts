@@ -3,23 +3,36 @@
  * GeoJSON stores [longitude, latitude].
  */
 
+type LatLngLike = {
+  lat?: number;
+  lng?: number;
+  latitude?: number;
+  longitude?: number;
+};
+
 export type MapUserLike = {
   _id?: string;
   id?: string;
   geoLocation?: { type?: string; coordinates?: [number, number] };
-  currentLocation?: {
-    lat?: number;
-    lng?: number;
-    latitude?: number;
-    longitude?: number;
-  };
-  primaryLocation?: {
-    lat?: number;
-    lng?: number;
-    latitude?: number;
-    longitude?: number;
-  };
+  // Better Auth persists primary/current location as a JSON STRING, but some
+  // payloads return it already parsed as an object — accept both.
+  currentLocation?: LatLngLike | string;
+  primaryLocation?: LatLngLike | string;
 };
+
+/** primary/current location may arrive as a JSON string or an object. */
+function asLocObject(loc: LatLngLike | string | undefined): LatLngLike | null {
+  if (!loc) return null;
+  if (typeof loc === 'string') {
+    try {
+      const parsed = JSON.parse(loc);
+      return parsed && typeof parsed === 'object' ? (parsed as LatLngLike) : null;
+    } catch {
+      return null;
+    }
+  }
+  return loc;
+}
 
 export function extractUserMapCoords(user: MapUserLike): { lat: number; lng: number } | null {
   const coords = user.geoLocation?.coordinates;
@@ -30,7 +43,8 @@ export function extractUserMapCoords(user: MapUserLike): { lat: number; lng: num
     }
   }
 
-  for (const loc of [user.currentLocation, user.primaryLocation]) {
+  for (const raw of [user.currentLocation, user.primaryLocation]) {
+    const loc = asLocObject(raw);
     if (!loc) continue;
     const lat = loc.lat ?? loc.latitude;
     const lng = loc.lng ?? loc.longitude;
@@ -39,6 +53,30 @@ export function extractUserMapCoords(user: MapUserLike): { lat: number; lng: num
     }
   }
 
+  return null;
+}
+
+/**
+ * Registered-HOME coordinates for the Connect map.
+ * Prioritises `primaryLocation` (the location the user declared at signup) and
+ * deliberately ignores `currentLocation`/live GPS — we plot where a neighbour
+ * says they live, not where their phone currently is.
+ */
+export function extractUserHomeCoords(user: MapUserLike): { lat: number; lng: number } | null {
+  const loc = asLocObject(user.primaryLocation);
+  if (loc) {
+    const lat = loc.lat ?? loc.latitude;
+    const lng = loc.lng ?? loc.longitude;
+    if (
+      typeof lat === 'number' &&
+      typeof lng === 'number' &&
+      Number.isFinite(lat) &&
+      Number.isFinite(lng) &&
+      (lat !== 0 || lng !== 0)
+    ) {
+      return { lat, lng };
+    }
+  }
   return null;
 }
 

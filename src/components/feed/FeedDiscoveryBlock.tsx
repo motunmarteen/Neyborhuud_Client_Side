@@ -506,7 +506,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
       <DiscoveryChrome
         icon="work"
         label="Jobs"
-        href="/jobs"
+        href="/work"
       >
         <AutoScrollCarousel>
           <CategoryCoverCard
@@ -514,7 +514,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             title="Local Careers"
             subtitle="Work nearby"
             buttonLabel="Browse Jobs"
-            buttonHref="/jobs"
+            buttonHref="/work"
             gradient="linear-gradient(135deg, #2a1a4a 0%, #6a3a9a 50%, #9a5acf 100%)"
           />
           <StakeCard
@@ -583,14 +583,14 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
     const { services } = item;
 
     return (
-      <DiscoveryChrome icon="handyman" label="Local Services" href="/services">
+      <DiscoveryChrome icon="handyman" label="Local Services" href="/work?tab=for_hire">
         <AutoScrollCarousel>
           <CategoryCoverCard
             imageSrc="/illustration_services.png"
             title="Local Pros"
             subtitle="Trusted professionals"
             buttonLabel="Browse Services"
-            buttonHref="/services"
+            buttonHref="/work?tab=for_hire"
             gradient="linear-gradient(135deg, #1a3a2a 0%, #2a6a4a 50%, #00a555 100%)"
           />
           {services.map(srv => (

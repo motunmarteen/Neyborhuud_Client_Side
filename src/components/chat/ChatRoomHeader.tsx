@@ -12,6 +12,8 @@ export type ChatRoomHeaderProps = {
   showKeyPanel?: boolean;
   onToggleKeys?: () => void;
   backHref?: string;
+  /** When provided, the back control runs this (smart history-aware back) instead of navigating to backHref. */
+  onBack?: () => void;
   /** When provided, shows an audio-call button (direct 1-on-1 chats). */
   onAudioCall?: () => void;
   /** When provided, shows a video-call button (direct 1-on-1 chats). */
@@ -30,6 +32,7 @@ export function ChatRoomHeader({
   showKeyPanel = false,
   onToggleKeys,
   backHref = '/chat',
+  onBack,
   onAudioCall,
   onVideoCall,
   callDisabled = false,
@@ -39,13 +42,24 @@ export function ChatRoomHeader({
       className={`chat-room__header shrink-0 ${isIncident ? 'chat-room__header--incident' : ''}`}
     >
       <div className="chat-room__header-inner">
-        <Link
-          href={backHref}
-          className="chat-room__back mod-inset"
-          aria-label="Back to chats"
-        >
-          <span className="material-symbols-outlined text-[22px]">arrow_back</span>
-        </Link>
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="chat-room__back mod-inset"
+            aria-label="Back"
+          >
+            <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+          </button>
+        ) : (
+          <Link
+            href={backHref}
+            className="chat-room__back mod-inset"
+            aria-label="Back to chats"
+          >
+            <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+          </Link>
+        )}
 
         <div className="chat-room__identity min-w-0 flex-1">
           {avatarUrl ? (

@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { navigateBack } from '@/lib/navigateBack';
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChatRoomLayout } from '@/components/chat/ChatRoomLayout';
@@ -68,8 +69,8 @@ function formatChatDateLabel(dt: Date, useLocale: boolean): string {
 function groupByDate(
   messages: ChatMessage[],
   useLocaleDates: boolean,
-): { date: string; msgs: ChatMessage[] }[] {
-  const groups: { date: string; msgs: ChatMessage[] }[] = [];
+): { key: string; date: string; msgs: ChatMessage[] }[] {
+  const groups: { key: string; date: string; msgs: ChatMessage[] }[] = [];
   let curKey = '';
   for (const m of messages) {
     const dt = m.createdAt ? new Date(m.createdAt) : null;
@@ -81,7 +82,9 @@ function groupByDate(
         : 'Today';
     if (key !== curKey) {
       curKey = key;
-      groups.push({ date: label, msgs: [] });
+      // Disambiguate if the same day re-appears non-consecutively, so React keys stay unique.
+      const uniqueKey = groups.some((g) => g.key === key) ? `${key}-${groups.length}` : key;
+      groups.push({ key: uniqueKey, date: label, msgs: [] });
     }
     groups[groups.length - 1].msgs.push(m);
   }
@@ -384,6 +387,7 @@ export default function ConversationPage() {
   const params = useParams<{ conversationId: string }>();
   const conversationId = params.conversationId;
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -946,6 +950,7 @@ export default function ConversationPage() {
           encrypted={conv?.type === 'direct'}
           showKeyPanel={showKeyPanel}
           onToggleKeys={() => setShowKeyPanel((s) => !s)}
+          onBack={() => navigateBack(router, { pathname, fallback: '/friendship?tab=chats' })}
           onAudioCall={canCall ? () => beginCall('audio') : undefined}
           onVideoCall={canCall ? () => beginCall('video') : undefined}
           callDisabled={callPhase !== 'idle'}
@@ -987,8 +992,8 @@ export default function ConversationPage() {
           </div>
         ) : (
           <div className="chat-thread-list">
-            {groups.map(({ date, msgs }) => (
-              <div key={date}>
+            {groups.map(({ key, date, msgs }) => (
+              <div key={key}>
                 <div className="chat-room__date">
                   <div className="chat-room__date-line" aria-hidden />
                   <span className="chat-room__date-pill">{date}</span>
@@ -1027,28 +1032,32 @@ export default function ConversationPage() {
                           const callerId = String(msgMeta.caller ?? '');
                           const iAmCaller = callerId === user?.id;
                           const icon = callType === 'video' ? 'videocam' : 'call';
-                          const directionIcon = negative
-                            ? (iAmCaller ? 'call_made' : 'call_missed')
-                            : (iAmCaller ? 'call_made' : 'call_received');
+                          const callTime = timeStr(msg.createdAt);
                           return (
                             <div
                               key={id}
                               ref={isLastOverall ? lastMsgRef : undefined}
-                              className="my-3 flex justify-center px-2"
+                              className={`my-1.5 flex px-2 ${iAmCaller ? 'justify-end' : 'justify-start'}`}
                             >
-                              <span
-                                className={`chat-room__system-pill mod-chip inline-flex items-center gap-1.5 ${
-                                  negative ? 'text-brand-red' : 'text-[var(--neu-text-muted)]'
-                                }`}
+                              <button
+                                type="button"
+                                onClick={() => canCall && beginCall(callType)}
+                                disabled={!canCall}
+                                aria-label={`Call back (${callType === 'video' ? 'video' : 'voice'})`}
+                                className={`chat-room__call-pill inline-flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-[13px] transition-transform active:scale-95 disabled:active:scale-100 ${
+                                  iAmCaller
+                                    ? 'bg-[#00D431]/12 text-[#00A555]'
+                                    : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--neu-text-secondary)]'
+                                } ${negative ? '!text-brand-red' : ''}`}
                               >
-                                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
-                                  {directionIcon}
-                                </span>
                                 <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                                   {icon}
                                 </span>
                                 {c}
-                              </span>
+                                {callTime && (
+                                  <span className="ml-0.5 text-[11px] opacity-60">{callTime}</span>
+                                )}
+                              </button>
                             </div>
                           );
                         }

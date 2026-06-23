@@ -90,6 +90,16 @@ export const geoService = {
   },
 
   /**
+   * NeyborHuud neighbours by REGISTERED HOME (same lga/state), excluding users
+   * the requester already follows. Powers the Connect hub "Near me" map/list.
+   */
+  async getNeighbors(limit = 50) {
+    return await apiClient.get<{ users: User[]; total: number }>("/geo/neighbors", {
+      params: { limit },
+    });
+  },
+
+  /**
    * Get nearby posts
    */
   async getNearbyPosts(

@@ -423,3 +423,52 @@ BUILD:
 - [ ] Phase 3 (Steps 5, 6)
 
 **CURRENT:** Phase 2.5 planned. Awaiting approval to build.
+
+---
+
+# COMMUNITY FEATURES — Item 4 scope (plan, pre-build)
+
+## Key finding: the community model already EXISTS
+The `hub-community` system already implements the requested model and should be
+the single "community" concept (chat-only `/chat/groups` become legacy):
+- Public to browse (`GET /hub-community` list), per-community group chat
+  (each hub has a `conversationId`).
+- **Admin-approved joins** already built: join-request + `reviewJoin`
+  (approve/reject), `listJoinRequests`.
+- Roles owner/admin/member; `onlyAdminsCanPost`.
+- `leaveHub`, `listMembers`, invites/join-by-code — all present.
+- Client: `/communities` list + `/communities/[id]` detail (members, leave,
+  role-aware) + hooks (list/get/members/create/join/leave).
+
+## Agreed requirements
+- Communities: **public to SEE**, **join only via admin approval** (already built).
+- Creating a community is gated by **BOTH** a reputation tier threshold **AND**
+  a HuudCoin spend.
+- Build group-management on **hub-community** (not chat-only groups).
+- Want: rename + edit photo/description, promote/demote admin, leave, group-info
+  screen.
+
+## Actual gaps to build (small — most exists)
+SERVER:
+1. **Edit hub** — new `PATCH /hub-community/:hubId` (admin-only): name, photo,
+   description, settings. (No edit endpoint today.)
+2. **Change member role** — new `POST /hub-community/:hubId/members/:userId/role`
+   (owner/admin-only): promote/demote admin. (Roles exist; no change endpoint.)
+3. **Coin + tier gate on create** — in `createHub`: check user tier ≥ threshold
+   AND `spendHuudCoins(cost)` before creating. (`spendHuudCoins` already exists;
+   `createHub` currently has NO gate.) Amount/tier = config (TBD value).
+CLIENT:
+4. **Group Info / admin screen** — extend `/communities/[id]` (or a header tap in
+   the chat thread) to surface: members list with roles, admin actions
+   (rename/edit, promote/demote, remove), pending join-requests review, leave.
+   Add hooks: `useEditHubCommunity`, `useChangeMemberRole`, `useReviewJoinRequest`.
+5. **Wire group-info entry** from the community chat thread header.
+
+## Open value to set
+- Creation cost (coins) + required tier (e.g. Silver/500 pts) — wire as config,
+  set the number later.
+
+## Sequencing
+- COMMIT current checkpoint FIRST (Phases 1,2,2.5,2.6, Step 6, call/nav fixes).
+- Then build Item 4: server gaps (1–3) → client (4–5) → typecheck gates.
+- Item 5 (Feed↔listings auto-post bridge) still deferred/unscoped.

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { Suspense, useState, useCallback, useMemo, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,21 +10,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { followService } from '@/services/follow.service';
 import { geoService } from '@/services/geo.service';
 import { chatService } from '@/services/chat.service';
-import { FriendshipChatInbox } from '@/components/friendship/FriendshipChatInbox';
-import { CallLog } from '@/components/friendship/CallLog';
+import { ChatsStream } from '@/components/friendship/ChatsStream';
+import { ConnectMap } from '@/components/friendship/ConnectMap';
+import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
 import { BottomNav } from '@/components/feed/BottomNav';
-
-const MapComponent = dynamic(() => import('@/app/map/MapComponent'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex min-h-[320px] flex-col items-center justify-center bg-white p-6 text-center">
-      <div className="mb-4 flex h-16 w-16 animate-pulse items-center justify-center rounded-3xl border border-black/[0.06] bg-brand-surface">
-        <span className="material-symbols-outlined text-[32px] text-primary">map</span>
-      </div>
-      <p className="text-sm font-semibold text-brand-black">Loading map…</p>
-    </div>
-  ),
-});
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -44,6 +32,8 @@ interface FollowUser {
   followedAt?: string;
   distanceMetres?: number;
   isFollowing?: boolean;
+  /** Registered home location (JSON string or object) — used for the Connect map. */
+  primaryLocation?: string | { lat?: number; lng?: number; latitude?: number; longitude?: number };
 }
 
 // ─── Small helpers ─────────────────────────────────────────────────────────────
@@ -193,9 +183,11 @@ const EmptyState = ({ icon, title, subtitle }: { icon: string; title: string; su
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-type MainTab = 'calls' | 'near_me' | 'following' | 'followers' | 'map' | 'dms' | 'communities';
+type MainTab = 'chats' | 'near_me' | 'following' | 'followers';
 
-const CHAT_TABS: MainTab[] = ['dms', 'communities'];
+/** Tabs that show the registered-home map header. */
+const MAP_TABS: MainTab[] = ['near_me', 'following', 'followers'];
+
 
 function FriendshipPageContent() {
   const { user } = useAuth();
@@ -204,19 +196,17 @@ function FriendshipPageContent() {
   const queryClient = useQueryClient();
   const initialTab = ((): MainTab => {
     const t = searchParams.get('tab');
-    if (t === 'calls') return 'calls';
-    if (t === 'dms' || t === 'direct') return 'dms';
-    if (t === 'communities' || t === 'groups') return 'communities';
-    if (t === 'following' || t === 'followers' || t === 'map' || t === 'near_me') return t as MainTab;
-    return 'near_me';
+    // Legacy comms tabs (calls/dms/communities) now fold into one "Chats" stream.
+    if (t === 'calls' || t === 'dms' || t === 'direct' || t === 'communities' || t === 'groups' || t === 'chats') return 'chats';
+    if (t === 'map') return 'near_me'; // legacy Map tab → Near me (map now a header)
+    if (t === 'following' || t === 'followers' || t === 'near_me') return t as MainTab;
+    return 'chats'; // Chats is the default landing tab
   })();
   const [mainTab, setMainTab] = useState<MainTab>(initialTab);
   const [search, setSearch] = useState('');
   const [followingState, setFollowingState] = useState<Record<string, boolean>>({});
   const [pendingUsers, setPendingUsers] = useState<Set<string>>(new Set());
   const [messagingUsers, setMessagingUsers] = useState<Set<string>>(new Set());
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [coordsRequested, setCoordsRequested] = useState(false);
 
   // ── Data queries ────────────────────────────────────────────────────────────
 
@@ -234,29 +224,12 @@ function FriendshipPageContent() {
     staleTime: 60_000,
   });
 
-  // Request geo location
-  const requestCoords = useCallback(() => {
-    if (coordsRequested) return;
-    setCoordsRequested(true);
-    geoService.getCurrentPosition()
-      .then(pos => setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }))
-      .catch(() => setUserCoords(null));
-  }, [coordsRequested]);
-
-  // Request location for near_me and map tabs
-  useEffect(() => {
-    if (mainTab === 'near_me' || mainTab === 'map') {
-      requestCoords();
-    }
-  }, [mainTab, requestCoords]);
-
-  const { data: nearbyData, isLoading: loadingNearby } = useQuery({
-    queryKey: ['nearby-users', userCoords?.lat, userCoords?.lng],
-    queryFn: () =>
-      userCoords
-        ? geoService.getNearbyUsers(userCoords.lat, userCoords.lng, 15000, 50)
-        : null,
-    enabled: !!userCoords && mainTab === 'near_me',
+  // "Near me" = neighbours by REGISTERED HOME (same lga/state), excluding
+  // people we already follow. Not live GPS — see Phase 2.5 location principle.
+  const { data: neighborsData, isLoading: loadingNearby } = useQuery({
+    queryKey: ['connect-neighbors'],
+    queryFn: () => geoService.getNeighbors(50),
+    enabled: !!user && mainTab === 'near_me',
     staleTime: 120_000,
   });
 
@@ -300,7 +273,7 @@ function FriendshipPageContent() {
 
   const followers: FollowUser[] = ((followersData?.data as any)?.followers ?? []);
   const following: FollowUser[] = ((followingData?.data as any)?.following ?? []).map((u: any) => ({ ...u, isFollowing: true }));
-  const nearbyUsers: FollowUser[] = ((nearbyData?.data as any)?.users ?? []);
+  const nearbyUsers: FollowUser[] = ((neighborsData?.data as any)?.users ?? []);
 
   // Active lookup set
   const followingIds = useMemo(() => {
@@ -337,7 +310,6 @@ function FriendshipPageContent() {
     router.replace(q ? `/friendship?${q}` : '/friendship', { scroll: false });
   };
 
-  const isChatTab = CHAT_TABS.includes(mainTab) || mainTab === 'calls';
 
   // ── Render helpers ──────────────────────────────────────────────────────────
 
@@ -367,31 +339,51 @@ function FriendshipPageContent() {
     );
   };
 
+  // Persistent, context-aware search placeholder per tab.
+  const searchPlaceholder = (() => {
+    switch (mainTab) {
+      case 'chats': return 'Search chats, calls & communities…';
+      case 'following': return 'Search people you follow…';
+      case 'followers': return 'Search your followers…';
+      default: return 'Search neighbours…';
+    }
+  })();
+
+  // Users plotted on the collapsible map, per active spatial tab.
+  const mapUsers =
+    mainTab === 'following' ? following :
+    mainTab === 'followers' ? followers :
+    mainTab === 'near_me' ? nearbyUsers : [];
+  const mapLoading =
+    mainTab === 'following' ? loadingFollowing :
+    mainTab === 'followers' ? loadingFollowers :
+    mainTab === 'near_me' ? loadingNearby : false;
+  const showMap = MAP_TABS.includes(mainTab);
+  // Map auto-hides while scrolling down the list, reappears at the top.
+  // Reuses the same scroll-direction signal the bottom nav uses; resetKey=tab
+  // so switching tabs re-opens the map.
+  const mapCollapsed = useScrollHideBottomNav(showMap, mainTab);
+
   return (
-    <div
-      className={`flex flex-col bg-white ${
-        mainTab === 'map' ? 'h-[100dvh] overflow-hidden' : 'h-[100dvh] overflow-hidden'
-      }`}
-    >
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-white">
       <TopNav />
 
       <div className="app-chrome-below-topnav">
       {/* Search + tabs */}
       <header className="z-30 shrink-0 border-b border-gray-100 bg-white/95 backdrop-blur-md">
-        {mainTab !== 'map' && !isChatTab && (
-          <div className="px-4 pb-3 pt-3">
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
-              <input
-                type="search"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search neighbours…"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-800 placeholder-slate-400 transition-all focus:border-[#00D431] focus:outline-none focus:ring-1 focus:ring-[#00D431]"
-              />
-            </div>
+        {/* Persistent, context-aware search — on every tab */}
+        <div className="px-4 pb-3 pt-3">
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
+            <input
+              type="search"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={searchPlaceholder}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-800 placeholder-slate-400 transition-all focus:border-[#00D431] focus:outline-none focus:ring-1 focus:ring-[#00D431]"
+            />
           </div>
-        )}
+        </div>
 
         <div className="px-4 pb-3">
           <div
@@ -399,8 +391,8 @@ function FriendshipPageContent() {
             aria-label="Friendship sections"
             className="flex items-center gap-0.5 overflow-x-auto rounded-full border border-black/[0.05] bg-brand-surface/60 p-1 no-scrollbar scroll-smooth"
           >
-            <TabPill active={mainTab === 'calls'} onClick={() => handleMainTab('calls')}>
-              Calls
+            <TabPill active={mainTab === 'chats'} onClick={() => handleMainTab('chats')}>
+              Chats
             </TabPill>
             <TabPill active={mainTab === 'near_me'} onClick={() => handleMainTab('near_me')}>
               Near me
@@ -411,54 +403,42 @@ function FriendshipPageContent() {
             <TabPill active={mainTab === 'followers'} onClick={() => handleMainTab('followers')} count={followers.length || undefined}>
               Followers
             </TabPill>
-            <TabPill active={mainTab === 'map'} onClick={() => handleMainTab('map')}>
-              Map
-            </TabPill>
-            <TabPill active={mainTab === 'dms'} onClick={() => handleMainTab('dms')}>
-              Messages
-            </TabPill>
-            <TabPill active={mainTab === 'communities'} onClick={() => handleMainTab('communities')}>
-              Communities
-            </TabPill>
           </div>
         </div>
       </header>
 
+      {/* Registered-home map header (spatial tabs only) — auto-hides on scroll. */}
+      {showMap && (
+        <div className="shrink-0 overflow-hidden border-b border-gray-100 bg-white transition-[height] duration-300 ease-out"
+          style={{ height: mapCollapsed ? '0px' : '30vh' }}
+        >
+          <ConnectMap
+            users={mapUsers}
+            loading={mapLoading}
+            emptyLabel={
+              mainTab === 'following'
+                ? 'People you follow will appear here once they set their location.'
+                : mainTab === 'followers'
+                  ? 'Your followers will appear here once they set their location.'
+                  : 'Neighbours in your area will appear here.'
+            }
+          />
+        </div>
+      )}
+
       {/* Content */}
       <main
-        data-app-scroll-root={mainTab !== 'map' ? true : undefined}
-        className={`flex-1 bg-white ${
-          mainTab === 'map'
-            ? 'relative min-h-0 overflow-hidden'
-            : 'feed-scroll-main min-h-0 overflow-y-auto scroll-smooth pb-24'
-        }`}
+        data-app-scroll-root
+        className="feed-scroll-main min-h-0 flex-1 overflow-y-auto scroll-smooth bg-white pb-24"
       >
         {/* Near me tab */}
         {mainTab === 'near_me' && (
           <>
-            {!userCoords && !loadingNearby && (
-              <div className="mx-4 mt-4 p-4 rounded-2xl bg-slate-50 border border-gray-100 flex items-start gap-3 shadow-sm">
-                <span className="material-symbols-outlined text-[24px] text-[#00D431] mt-0.5">my_location</span>
-                <div>
-                  <p className="text-slate-800 text-sm font-bold mb-0.5">Location Access Required</p>
-                  <p className="text-slate-500 text-xs leading-relaxed">
-                    Allow location access to discover active neighbours near you.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={requestCoords}
-                    className="mt-2.5 px-4 py-2 rounded-xl bg-[#00D431] text-white text-xs font-bold hover:brightness-105 active:scale-95 transition-all"
-                  >
-                    Enable Location
-                  </button>
-                </div>
-              </div>
-            )}
             {renderUserList(
               nearbyUsers,
               loadingNearby,
-              'No one found nearby',
-              'Expand your search radius on the map, or invite neighbours to join your Huud.',
+              'No neighbours found yet',
+              'Neighbours who registered in your area will appear here. Invite people to join your Huud.',
             )}
           </>
         )}
@@ -479,22 +459,8 @@ function FriendshipPageContent() {
           'When other neighbours connect with you on NeyborHuud, they will appear here.',
         )}
 
-        {mainTab === 'map' && (
-          <div className="absolute inset-0">
-            <MapComponent embedded />
-          </div>
-        )}
-
-        {/* Call log (read-only history) */}
-        {mainTab === 'calls' && <CallLog currentUserId={user?.id} />}
-
-        {/* Chat inbox (merged from /chat) */}
-        {mainTab === 'dms' && (
-          <FriendshipChatInbox inboxFilter="direct" hideSearchBar={false} />
-        )}
-        {mainTab === 'communities' && (
-          <FriendshipChatInbox inboxFilter="communities" hideSearchBar={false} />
-        )}
+        {/* Unified WhatsApp-style Chats: DMs + communities + call log, chronological */}
+        {mainTab === 'chats' && <ChatsStream currentUserId={user?.id} search={search} />}
 
       </main>
       </div>

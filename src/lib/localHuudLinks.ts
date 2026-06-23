@@ -16,10 +16,9 @@ export type LocalHuudLink = {
 export const LOCAL_HUUD_LINKS: LocalHuudLink[] = [
   { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi', href: '/fyi' },
   { icon: 'help', label: 'Help Requests', type: 'help_request', href: '/help-request' },
-  { icon: 'work', label: 'Jobs', type: 'job', href: '/jobs' },
+  { icon: 'work', label: 'Work', type: 'job', href: '/work' },
   { icon: 'event', label: 'Events', type: 'event', href: '/events' },
   { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace', href: '/marketplace' },
-  { icon: 'handyman', label: 'Services', type: 'services', href: '/services' },
   { icon: 'report', label: 'Incident Reports', type: 'incident', href: '/incident-reports' },
   { icon: 'add_alert', label: 'Community Alerts', type: 'emergency', href: '/community-emergency' },
 ];

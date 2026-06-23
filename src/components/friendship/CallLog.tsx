@@ -22,10 +22,28 @@ function partyObj(p: CallRecord['caller']): CallParty | null {
 
 interface CallLogProps {
   currentUserId?: string;
+  /** Optional name filter from the Connect hub's persistent search. */
+  search?: string;
 }
 
-export function CallLog({ currentUserId }: CallLogProps) {
-  const { data: calls, isLoading, isError, refetch } = useRecentCalls(30);
+export function CallLog({ currentUserId, search }: CallLogProps) {
+  const { data: callsRaw, isLoading, isError, refetch } = useRecentCalls(30);
+
+  const calls = (() => {
+    if (!callsRaw) return callsRaw;
+    const q = search?.trim().toLowerCase();
+    if (!q) return callsRaw;
+    return callsRaw.filter((call) => {
+      const iCalled = currentUserId ? partyId(call.caller) === currentUserId : false;
+      const other = iCalled ? partyObj(call.callee) : partyObj(call.caller);
+      const name = (
+        [other?.firstName, other?.lastName].filter(Boolean).join(' ') ||
+        other?.username ||
+        ''
+      ).toLowerCase();
+      return name.includes(q);
+    });
+  })();
 
   if (isLoading) {
     return (
