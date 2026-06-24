@@ -27,6 +27,7 @@ import { SwipeBackProvider } from '@/contexts/SwipeBackContext';
 import { GuardianAlertsProvider } from '@/contexts/GuardianAlertsContext';
 import { SosProvider } from '@/contexts/SosContext';
 import { CallProvider } from '@/components/calls/CallProvider';
+import { IncognitoInviteListener } from '@/components/chat/IncognitoInviteListener';
 import { CallOverlay } from '@/components/calls/CallOverlay';
 import { SentinelBottomSheetProvider } from '@/contexts/SentinelBottomSheetContext';
 import { SentinelBottomSheet } from '@/components/safety/SentinelBottomSheet';
@@ -320,6 +321,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <CallProvider>
       <SentinelBottomSheetProvider>
       <SocketAuthenticator />
+      <IncognitoInviteListener />
       <SmartLocationSync />
       <LocationSyncOrchestrator />
       <NotificationPermissionPrompt />

@@ -472,3 +472,45 @@ CLIENT:
 - COMMIT current checkpoint FIRST (Phases 1,2,2.5,2.6, Step 6, call/nav fixes).
 - Then build Item 4: server gaps (1–3) → client (4–5) → typecheck gates.
 - Item 5 (Feed↔listings auto-post bridge) still deferred/unscoped.
+
+---
+
+# CHAT FEATURES — Incognito Invite + @mentions + link highlighting (scope, pre-build)
+## Sequencing: build AFTER Item 4 (communities).
+
+## Feature A — "Incognito Invite" (time-boxed scoped invite)
+Bring 1+ extra people into an ongoing chat for a bounded session.
+- **Entry:** an original participant @mentions the person(s) to invite.
+- **Dual consent:** the OTHER original participant must approve before the
+  invitee is notified/added. (Protects both people.)
+- **Accept:** invitee gets a notification → accepts → joins.
+- **Timer:** the inviter sets a countdown; it starts the moment the invitee
+  ACCEPTS. At 0, the invitee is AUTO-REMOVED (no manual leave needed).
+- **Architecture: option B (filtered window) — USER'S CHOICE**, with a critical
+  safeguard:
+  - **Server-side filtering (REQUIRED):** the backend only ever sends the
+    invitee messages within their join→expiry window. Pre-join and post-expiry
+    messages NEVER reach the invitee's device. (Not client-side hiding.)
+  - On expiry: invitee keeps a **read-only copy of the session window** they
+    participated in (never the pre-join history).
+- **Honest limitation (must surface to users):** A or B can still screenshot or
+  paste old history into the session — no architecture prevents human sharing.
+  Promise "C doesn't get automatic access," not "C can never see it."
+- **Build needs:** invite/consent/accept flow, timer + auto-remove job,
+  per-participant message-window access control on the read API, notifications.
+
+## Feature B — @mentions in community chat (normal, NOT incognito)
+- `@username` in a community chat → that user gets a notification.
+- `@all` → notifies EVERYONE in the community. **Admins/owner ONLY** (anti-spam).
+- Build: mention parsing on send, notification fan-out, @all permission check.
+
+## Feature C — Rich link/entity highlighting in chat (1-on-1 + community)
+- Color URLs (http/www), emails, #hashtags, @mentions, and numbers as tappable
+  links — in BOTH direct and community chat message bodies.
+- **Mostly a PORT:** `XPostCard.renderFormattedText` already does this for the
+  feed (URLs/emails/@/#). Extract it into a shared util and apply to chat
+  message rendering. Add number styling.
+
+## Open values (set later)
+- Incognito timer min/max/default; whether invitee count is capped.
+- @all rate limits (if any) beyond admin-only.

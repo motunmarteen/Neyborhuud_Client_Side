@@ -29,6 +29,9 @@ import {
   shouldShowSenderLabel,
 } from '@/lib/chatSender';
 import { ChatRoomHeader } from '@/components/chat/ChatRoomHeader';
+import { IncognitoInviteSheet } from '@/components/chat/IncognitoInviteSheet';
+import { MentionInvitePicker } from '@/components/chat/MentionInvitePicker';
+import { GuestCountdownBanner } from '@/components/chat/GuestCountdownBanner';
 import { ChatComposer } from '@/components/chat/ChatComposer';
 import { useCall } from '@/components/calls/CallProvider';
 import { convAvatarMeta, convDisplayName, convSubtitle } from '@/lib/chatDisplay';
@@ -431,6 +434,14 @@ export default function ConversationPage() {
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
   const [showKeyPanel, setShowKeyPanel] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [mentionInvitee, setMentionInvitee] = useState<{ id: string; name: string; avatarUrl?: string | null } | null>(null);
+
+  // Active "@token" the user is typing (drives the invite mention picker).
+  const mentionQuery = useMemo(() => {
+    const m = inputText.match(/(?:^|\s)@(\w*)$/);
+    return m ? m[1].toLowerCase() : null;
+  }, [inputText]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [clientReady, setClientReady] = useState(false);
 
@@ -481,6 +492,30 @@ export default function ConversationPage() {
   const peerUserId = useMemo(
     () => resolvePeerUserId(conv, user?.id),
     [conv, user?.id],
+  );
+
+  // Participants already in this conversation (excluded from invite suggestions).
+  const participantIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (user?.id) ids.add(user.id);
+    if (peerUserId) ids.add(peerUserId);
+    const parts = (conv?.participants ?? []) as Array<{ userId?: string; id?: string; _id?: string }>;
+    for (const p of parts) {
+      const pid = (typeof p === 'string' ? p : p.userId ?? p.id ?? p._id) as string | undefined;
+      if (pid) ids.add(pid);
+    }
+    return Array.from(ids);
+  }, [conv, user?.id, peerUserId]);
+
+  // When a name is picked from the @mention dropdown: clear the @token and
+  // open the invite sheet pre-filled with that person.
+  const handleMentionPick = useCallback(
+    (person: { id: string; name: string; avatarUrl?: string | null }) => {
+      setInputText((prev) => prev.replace(/(?:^|\s)@\w*$/, '').trimEnd());
+      setMentionInvitee(person);
+      setInviteOpen(true);
+    },
+    [],
   );
 
   // ── Audio/Video calling ───────────────────────────────────────────────────
@@ -883,8 +918,13 @@ export default function ConversationPage() {
       ? `${baseSubtitle} · ${readLabel}`
       : baseSubtitle;
 
+  const viewerScoped = (conv as { viewerScoped?: { expiresAt?: string } } | undefined)?.viewerScoped;
   const banners = (
     <>
+      {viewerScoped?.expiresAt ? (
+        <GuestCountdownBanner expiresAt={viewerScoped.expiresAt} />
+      ) : null}
+
       {conv?.type === 'community' ? (
         <CommunityChatBanner conversationId={conversationId} />
       ) : null}
@@ -928,6 +968,13 @@ export default function ConversationPage() {
         <KeyBundlePanel conversationId={conversationId} onClose={() => setShowKeyPanel(false)} />
       ) : null}
 
+      <IncognitoInviteSheet
+        open={inviteOpen}
+        onClose={() => { setInviteOpen(false); setMentionInvitee(null); }}
+        conversationId={conversationId}
+        invitee={mentionInvitee}
+      />
+
       {conv?.contextType === 'marketplace' && conv.context?.productId && viewerRole === 'seller' ? (
         <InlineOfferBar
           productId={conv.context.productId}
@@ -951,6 +998,7 @@ export default function ConversationPage() {
           showKeyPanel={showKeyPanel}
           onToggleKeys={() => setShowKeyPanel((s) => !s)}
           onBack={() => navigateBack(router, { pathname, fallback: '/friendship?tab=chats' })}
+          onInviteGuest={conv?.type === 'direct' && !isPlaceholder ? () => setInviteOpen(true) : undefined}
           onAudioCall={canCall ? () => beginCall('audio') : undefined}
           onVideoCall={canCall ? () => beginCall('video') : undefined}
           callDisabled={callPhase !== 'idle'}
@@ -958,6 +1006,14 @@ export default function ConversationPage() {
       }
       banners={banners}
       composer={
+        <>
+        {conv?.type === 'direct' && !isPlaceholder && (
+          <MentionInvitePicker
+            query={mentionQuery}
+            excludeIds={participantIds}
+            onPick={handleMentionPick}
+          />
+        )}
         <ChatComposer
           inputText={inputText}
           onInputChange={setInputText}
@@ -968,6 +1024,7 @@ export default function ConversationPage() {
           textareaRef={textareaRef}
           onAction={handleActionResult}
         />
+        </>
       }
     >
       <div className="chat-room__messages">
@@ -1058,6 +1115,22 @@ export default function ConversationPage() {
                                   <span className="ml-0.5 text-[11px] opacity-60">{callTime}</span>
                                 )}
                               </button>
+                            </div>
+                          );
+                        }
+
+                        // ── Incognito Invite join/left notices ──
+                        if (msgMeta?.kind === 'incognito') {
+                          const event = String(msgMeta.event ?? '');
+                          const joined = event === 'joined';
+                          return (
+                            <div key={id} ref={isLastOverall ? lastMsgRef : undefined} className="my-3 flex justify-center px-2">
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00A555]/10 px-3 py-1.5 text-[12px] font-semibold text-[#00A555]">
+                                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                                  {joined ? 'visibility' : 'visibility_off'}
+                                </span>
+                                {c}
+                              </span>
                             </div>
                           );
                         }

@@ -14,6 +14,8 @@ export type ChatRoomHeaderProps = {
   backHref?: string;
   /** When provided, the back control runs this (smart history-aware back) instead of navigating to backHref. */
   onBack?: () => void;
+  /** When provided, shows an "invite a guest" (incognito) action. */
+  onInviteGuest?: () => void;
   /** When provided, shows an audio-call button (direct 1-on-1 chats). */
   onAudioCall?: () => void;
   /** When provided, shows a video-call button (direct 1-on-1 chats). */
@@ -33,6 +35,7 @@ export function ChatRoomHeader({
   onToggleKeys,
   backHref = '/chat',
   onBack,
+  onInviteGuest,
   onAudioCall,
   onVideoCall,
   callDisabled = false,
@@ -89,6 +92,17 @@ export function ChatRoomHeader({
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
+          {onInviteGuest ? (
+            <button
+              type="button"
+              onClick={onInviteGuest}
+              className="chat-room__keys mod-inset"
+              title="Invite a guest"
+              aria-label="Invite a guest for a limited time"
+            >
+              <span className="material-symbols-outlined text-[20px]">person_add</span>
+            </button>
+          ) : null}
           {onAudioCall ? (
             <button
               type="button"

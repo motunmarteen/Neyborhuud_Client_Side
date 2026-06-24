@@ -216,4 +216,26 @@ export const chatService = {
       `/chat/conversations/${conversationId}/calls/active`,
     );
   },
+
+  // ── Incognito Invite (time-boxed "witness" participants) ──
+
+  /** Propose inviting a user into this chat for `durationSeconds`. */
+  async proposeIncognitoInvite(conversationId: string, inviteeId: string, durationSeconds: number) {
+    return await apiClient.post<{ invite: { _id: string; status: string } }>(
+      `/chat/${conversationId}/incognito/invite`,
+      { inviteeId, durationSeconds },
+    );
+  },
+
+  /** Approve (or decline) a proposed invite (dual consent). */
+  async reviewIncognitoInvite(inviteId: string, approve: boolean) {
+    return await apiClient.post(`/chat/incognito/${inviteId}/approve`, { approve });
+  },
+
+  /** Invitee accepts an approved invite and joins for the window. */
+  async acceptIncognitoInvite(inviteId: string) {
+    return await apiClient.post<{ conversationId: string; windowStart: string; expiresAt: string }>(
+      `/chat/incognito/${inviteId}/accept`,
+    );
+  },
 };
