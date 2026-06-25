@@ -285,6 +285,7 @@ export interface Post {
     username: string;
     avatarUrl?: string | null;
   };
+  repostId?: string;
   _isSimpleRepostUnrolled?: boolean;
   /** Post body – prefer content; backend sends both (GET /feed, GET /content/posts) */
   content: string;

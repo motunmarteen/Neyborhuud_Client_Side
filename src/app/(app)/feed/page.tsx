@@ -670,7 +670,7 @@ function XFeedInner() {
                                 };
 
                                 return (
-                                    <React.Fragment key={(item as any).key ?? (item as any).data?.id ?? `feed-item-${index}`}>
+                                    <React.Fragment key={(item as any).data?.repostId ?? (item as any).key ?? (item as any).data?.id ?? `feed-item-${index}`}>
                                         {renderItem()}
                                     </React.Fragment>
                                 );

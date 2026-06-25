@@ -136,6 +136,7 @@ function normalizeFeedItem(item: any): Post {
       username: item.repostedBy.username,
       avatarUrl: item.repostedBy.avatarUrl || item.repostedBy.profilePicture
     } : undefined,
+    repostId: item?.repostId?.toString?.() ?? item?.repostId,
     _isSimpleRepostUnrolled: item?._isSimpleRepostUnrolled,
   };
 }
