@@ -162,6 +162,12 @@ export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalPr
           />
         </label>
 
+        {/* HuudCoin cost notice */}
+        <div className="mb-3 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-[12px] text-amber-700">
+          <span className="material-symbols-outlined text-[16px]">toll</span>
+          <span>Creating a community costs <strong>200 HuudCoins</strong> and requires a Silver balance (500+ coins).</span>
+        </div>
+
         {error ? <p className="mb-3 text-sm text-brand-red">{error}</p> : null}
 
         <button

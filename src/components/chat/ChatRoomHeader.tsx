@@ -16,6 +16,8 @@ export type ChatRoomHeaderProps = {
   onBack?: () => void;
   /** When provided, shows an "invite a guest" (incognito) action. */
   onInviteGuest?: () => void;
+  /** When provided, tapping the community name/avatar opens the info sheet. */
+  onCommunityInfo?: () => void;
   /** When provided, shows an audio-call button (direct 1-on-1 chats). */
   onAudioCall?: () => void;
   /** When provided, shows a video-call button (direct 1-on-1 chats). */
@@ -36,6 +38,7 @@ export function ChatRoomHeader({
   backHref = '/chat',
   onBack,
   onInviteGuest,
+  onCommunityInfo,
   onAudioCall,
   onVideoCall,
   callDisabled = false,
@@ -64,7 +67,14 @@ export function ChatRoomHeader({
           </Link>
         )}
 
-        <div className="chat-room__identity min-w-0 flex-1">
+        <div
+          className={`chat-room__identity min-w-0 flex-1 ${onCommunityInfo ? 'cursor-pointer active:opacity-70' : ''}`}
+          onClick={onCommunityInfo}
+          role={onCommunityInfo ? 'button' : undefined}
+          tabIndex={onCommunityInfo ? 0 : undefined}
+          onKeyDown={onCommunityInfo ? (e) => { if (e.key === 'Enter') onCommunityInfo(); } : undefined}
+          aria-label={onCommunityInfo ? 'Community info' : undefined}
+        >
           {avatarUrl ? (
             <img
               src={avatarUrl}

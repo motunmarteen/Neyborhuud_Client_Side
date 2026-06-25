@@ -32,6 +32,7 @@ import { ChatRoomHeader } from '@/components/chat/ChatRoomHeader';
 import { IncognitoInviteSheet } from '@/components/chat/IncognitoInviteSheet';
 import { MentionInvitePicker } from '@/components/chat/MentionInvitePicker';
 import { GuestCountdownBanner } from '@/components/chat/GuestCountdownBanner';
+import { CommunityInfoSheet } from '@/components/chat/CommunityInfoSheet';
 import { ChatComposer } from '@/components/chat/ChatComposer';
 import { useCall } from '@/components/calls/CallProvider';
 import { convAvatarMeta, convDisplayName, convSubtitle } from '@/lib/chatDisplay';
@@ -435,6 +436,7 @@ export default function ConversationPage() {
   const [sending, setSending] = useState(false);
   const [showKeyPanel, setShowKeyPanel] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [communityInfoOpen, setCommunityInfoOpen] = useState(false);
   const [mentionInvitee, setMentionInvitee] = useState<{ id: string; name: string; avatarUrl?: string | null } | null>(null);
 
   // Active "@token" the user is typing (drives the invite mention picker).
@@ -975,6 +977,12 @@ export default function ConversationPage() {
         invitee={mentionInvitee}
       />
 
+      <CommunityInfoSheet
+        open={communityInfoOpen}
+        onClose={() => setCommunityInfoOpen(false)}
+        conversationId={conversationId}
+      />
+
       {conv?.contextType === 'marketplace' && conv.context?.productId && viewerRole === 'seller' ? (
         <InlineOfferBar
           productId={conv.context.productId}
@@ -999,6 +1007,7 @@ export default function ConversationPage() {
           onToggleKeys={() => setShowKeyPanel((s) => !s)}
           onBack={() => navigateBack(router, { pathname, fallback: '/friendship?tab=chats' })}
           onInviteGuest={conv?.type === 'direct' && !isPlaceholder ? () => setInviteOpen(true) : undefined}
+          onCommunityInfo={isCommunityChat(conv ?? ({} as any)) && !isPlaceholder ? () => setCommunityInfoOpen(true) : undefined}
           onAudioCall={canCall ? () => beginCall('audio') : undefined}
           onVideoCall={canCall ? () => beginCall('video') : undefined}
           callDisabled={callPhase !== 'idle'}

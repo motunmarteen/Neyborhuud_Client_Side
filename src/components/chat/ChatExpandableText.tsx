@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { renderFormattedText } from '@/lib/renderFormattedText';
 
 const COLLAPSE_CHAR_LIMIT = 320;
 const COLLAPSE_LINE_LIMIT = 10;
@@ -15,17 +16,18 @@ export function ChatExpandableText({ text, className = 'chat-bubble__text' }: Ch
 
   const needsCollapse = useMemo(() => {
     if (text.length > COLLAPSE_CHAR_LIMIT) return true;
-    const lines = text.split('\n');
-    return lines.length > COLLAPSE_LINE_LIMIT;
+    return text.split('\n').length > COLLAPSE_LINE_LIMIT;
   }, [text]);
 
+  const rich = renderFormattedText(text);
+
   if (!needsCollapse) {
-    return <p className={className}>{text}</p>;
+    return <p className={className}>{rich}</p>;
   }
 
   return (
     <div className="chat-bubble__text-block">
-      <p className={`${className}${expanded ? '' : ' chat-bubble__text--clamped'}`}>{text}</p>
+      <p className={`${className}${expanded ? '' : ' chat-bubble__text--clamped'}`}>{rich}</p>
       <button
         type="button"
         className="chat-see-more"

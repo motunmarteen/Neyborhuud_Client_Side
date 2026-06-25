@@ -95,4 +95,12 @@ export const hubCommunityService = {
   ) {
     return apiClient.post(`${BASE}/${hubId}/join-requests/${requestId}/review`, { action });
   },
+
+  async update(hubId: string, patch: { name?: string; description?: string; imageUrl?: string }) {
+    return apiClient.patch(`${BASE}/${hubId}`, patch);
+  },
+
+  async changeMemberRole(hubId: string, userId: string, role: 'owner' | 'admin' | 'moderator' | 'member') {
+    return apiClient.patch(`${BASE}/${hubId}/members/${userId}/role`, { role });
+  },
 };

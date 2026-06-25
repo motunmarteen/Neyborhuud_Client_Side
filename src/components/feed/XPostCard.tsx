@@ -31,6 +31,7 @@ import { PostRepostChainModal } from './PostRepostChainModal';
 import { PremiumSafetyAlertBlock } from './PremiumSafetyAlertBlock';
 import { generatePostNarrative } from '@/lib/postNarrative';
 import { usePostMutations } from '@/hooks/usePosts';
+import { renderFormattedText } from '@/lib/renderFormattedText';
 
 const formatCompactCount = (value?: number) => {
     if (!value) return undefined;
@@ -230,52 +231,6 @@ export function XPostCard({
         ? 'border-b border-black/5 dark:border-white/5'
         : 'border-b border-black/5 dark:border-white/5 shadow-none';
 
-    const renderFormattedText = (text: string) => {
-        if (!text) return null;
-        // Split text by URLs, Emails, Mentions (@), and Hashtags (#)
-        // Order matters: URLs/Emails first, then Mentions so we don't accidentally split an email.
-        const regex = /(https?:\/\/[^\s]+|www\.[^\s]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|(?<!\w)@\w+|(?<!\w)#\w+)/g;
-        const parts = text.split(regex);
-        
-        return parts.map((part, i) => {
-            if (!part) return null;
-            
-            // Is it a URL?
-            if (/^(https?:\/\/|www\.)[^\s]+$/.test(part)) {
-                const href = part.startsWith('http') ? part : `https://${part}`;
-                return (
-                    <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
-                        {part}
-                    </a>
-                );
-            }
-            // Is it an email?
-            if (/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(part)) {
-                return (
-                    <a key={i} href={`mailto:${part}`} className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
-                        {part}
-                    </a>
-                );
-            }
-            // Is it a mention?
-            if (/^@\w+$/.test(part)) {
-                return (
-                    <Link key={i} href={`/profile/${part.slice(1)}`} className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
-                        {part}
-                    </Link>
-                );
-            }
-            // Is it a hashtag?
-            if (/^#\w+$/.test(part)) {
-                return (
-                    <Link key={i} href={`/explore?q=${encodeURIComponent(part)}`} className="text-brand-blue hover:underline" onClick={(e) => e.stopPropagation()}>
-                        {part}
-                    </Link>
-                );
-            }
-            return <span key={i}>{part}</span>;
-        });
-    };
 
     const renderTextContent = () => {
         if (!hasText) return null;
@@ -283,7 +238,7 @@ export function XPostCard({
 
         return (
             <div className={`relative text-[14px] font-normal text-[#050505] dark:text-[#E4E6EB] leading-[1.45] tracking-normal whitespace-pre-wrap break-words ${!expanded && isLongText ? 'max-h-[140px] overflow-hidden' : ''}`}>
-                {renderFormattedText(displayText)}
+                {renderFormattedText(displayText, { stopPropagation: true })}
                 
                 {!expanded && isLongText && (
                     <div className="post-read-more-fade absolute bottom-0 left-0 right-0 h-16 pointer-events-none flex items-end pb-0.5">

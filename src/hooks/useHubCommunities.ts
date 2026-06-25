@@ -83,3 +83,28 @@ export function useLeaveHubCommunity() {
     onError: handleApiError,
   });
 }
+
+export function useUpdateHubCommunity(hubId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (patch: { name?: string; description?: string; imageUrl?: string }) =>
+      hubCommunityService.update(hubId, patch),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hub-community', hubId] });
+      queryClient.invalidateQueries({ queryKey: ['hub-communities'] });
+    },
+    onError: handleApiError,
+  });
+}
+
+export function useChangeMemberRole(hubId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: 'owner' | 'admin' | 'moderator' | 'member' }) =>
+      hubCommunityService.changeMemberRole(hubId, userId, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hub-community-members', hubId] });
+    },
+    onError: handleApiError,
+  });
+}
