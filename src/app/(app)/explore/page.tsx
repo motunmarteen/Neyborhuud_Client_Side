@@ -310,9 +310,9 @@ function ExplorePageInner() {
   }, []);
 
   // ── Post card rendering ─────────────────────────────────────
-  const renderPostCard = useCallback((post: Post) => (
+  const renderPostCard = useCallback((post: Post, index: number) => (
     <XPostCard
-      key={post.id || post._id}
+      key={`${post.id || post._id}-${index}`}
       post={post}
       onLike={() => handleLike(post)}
       onComment={() => handleComment(post.id || post._id || '')}

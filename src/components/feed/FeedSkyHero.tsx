@@ -27,6 +27,23 @@ import { CitySilhouette } from '@/components/ambient/CitySilhouette';
 import { SkyWeatherEffects } from '@/components/ambient/SkyWeatherEffects';
 import { resolveUserAvatarUrl } from '@/lib/userAvatar';
 
+function formatDayLabel(dayName: string): string {
+  const lower = dayName.toLowerCase();
+  const d = new Date();
+  if (lower === 'yesterday') {
+    d.setDate(d.getDate() - 1);
+    return d.toLocaleDateString('en-US', { weekday: 'long' });
+  }
+  if (lower === 'today') {
+    return d.toLocaleDateString('en-US', { weekday: 'long' });
+  }
+  if (lower === 'tomorrow') {
+    d.setDate(d.getDate() + 1);
+    return d.toLocaleDateString('en-US', { weekday: 'long' });
+  }
+  return dayName;
+}
+
 /* ── Sky scene elements ── */
 
 function Stars() {
@@ -350,14 +367,43 @@ export function FeedSkyHero({ below }: { below?: ReactNode }) {
                   {greeting}
                 </p>
 
-                <p
-                  className="feed-sky-scene__temp text-4xl font-black text-white"
-                  style={{
-                    textShadow: '0 2px 10px rgba(0,0,0,0.25)',
-                  }}
-                >
-                  {weather.temp}°
-                </p>
+                {weather.forecast && weather.forecast.length >= 3 ? (
+                  <div className="flex items-center justify-center gap-10 mb-2">
+                    {weather.forecast.slice(0, 3).map((day, idx) => (
+                      <div key={idx} className="flex flex-col items-center">
+                        <p
+                          className={`${
+                            day.isToday
+                              ? 'text-5xl font-black text-white leading-none'
+                              : 'text-base font-bold text-white/45 mt-4'
+                          }`}
+                          style={{
+                            textShadow: day.isToday
+                              ? '0 3px 12px rgba(0,0,0,0.3)'
+                              : '0 1px 4px rgba(0,0,0,0.2)',
+                          }}
+                        >
+                          {day.isToday ? weather.temp : day.temp}°
+                        </p>
+                        <p
+                          className={`text-[9px] uppercase tracking-wider font-black mt-1.5 ${
+                            day.isToday ? 'text-white/95' : 'text-white/35'
+                          }`}
+                          style={{ textShadow: '0 1px 3px rgba(0,0,0,0.15)' }}
+                        >
+                          {formatDayLabel(day.dayName)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p
+                    className="feed-sky-scene__temp text-4xl font-black text-white"
+                    style={{ textShadow: '0 2px 10px rgba(0,0,0,0.25)' }}
+                  >
+                    {weather.temp}°
+                  </p>
+                )}
 
                 <WeatherText text={expressiveWeather} />
               </>
@@ -373,10 +419,10 @@ export function FeedSkyHero({ below }: { below?: ReactNode }) {
               {/* Plus / create icon — on the far left */}
               <button
                 type="button"
-                className="mr-2 flex items-center justify-center relative cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
+                className="mr-3 flex items-center justify-center relative cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
                 onClick={openComposer}
                 aria-label="Create a post"
-                style={{ width: 'auto', padding: '0 4px 0 8px', color: 'inherit' }}
+                style={{ width: 'auto', padding: '0 6px 0 10px', color: 'inherit' }}
               >
                 <span className="material-symbols-outlined" aria-hidden="true"
                   style={{ fontSize: '1.4rem', fontWeight: 300 }}>add</span>
@@ -385,7 +431,7 @@ export function FeedSkyHero({ below }: { below?: ReactNode }) {
               <button
                 ref={textContainerRef}
                 type="button"
-                className="feed-sky-scene__composer-text flex-1 text-left px-1 whitespace-nowrap overflow-hidden relative min-w-0"
+                className="feed-sky-scene__composer-text flex-1 text-left px-2 whitespace-nowrap overflow-hidden relative min-w-0"
                 onClick={openComposer}
                 aria-label="Create a post"
                 style={{

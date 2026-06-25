@@ -32,7 +32,7 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   devIndicators: {
-    position: "top-right",
+    position: "bottom-left",
   },
   images: {
     // Static export cannot use the Next.js image optimizer (no server).

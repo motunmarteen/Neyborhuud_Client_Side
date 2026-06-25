@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { fetchCurrentWeather, type CurrentWeather } from '@/lib/weatherClient';
+import { fetchCurrentWeather, getWeekdayName, type CurrentWeather } from '@/lib/weatherClient';
 import { resolveHuudDisplayName } from '@/lib/huudName';
 import { getGeolocation } from '@/lib/nativeGeolocation';
 
@@ -62,6 +62,11 @@ export function useAmbientWeather() {
           condition: 'Partly Cloudy',
           city: fallbackCity !== 'Your Huud' ? fallbackCity : 'Your Area',
           wmoCode: 2,
+          forecast: [
+            { dayName: getWeekdayName(-1), temp: 30, isToday: false },
+            { dayName: getWeekdayName(0), temp: 31, isToday: true },
+            { dayName: getWeekdayName(1), temp: 32, isToday: false },
+          ],
         });
       }
     };
@@ -85,6 +90,11 @@ export function useAmbientWeather() {
           condition: 'Sunny',
           city: fallbackCity !== 'Your Huud' ? fallbackCity : 'Lagos',
           wmoCode: 0,
+          forecast: [
+            { dayName: getWeekdayName(-1), temp: 31, isToday: false },
+            { dayName: getWeekdayName(0), temp: 32, isToday: true },
+            { dayName: getWeekdayName(1), temp: 33, isToday: false },
+          ],
         });
       }
       return;
@@ -100,6 +110,11 @@ export function useAmbientWeather() {
             condition: 'Partly Cloudy',
             city: fallbackCity !== 'Your Huud' ? fallbackCity : 'Lagos',
             wmoCode: 2,
+            forecast: [
+              { dayName: getWeekdayName(-1), temp: 30, isToday: false },
+              { dayName: getWeekdayName(0), temp: 31, isToday: true },
+              { dayName: getWeekdayName(1), temp: 32, isToday: false },
+            ],
           });
         }
       },

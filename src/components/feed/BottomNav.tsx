@@ -4,8 +4,6 @@ import React, { useRef, useSyncExternalStore, useEffect, useState } from 'react'
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { useSos } from '@/hooks/useSos';
-import { useNeighborhoodEmergency } from '@/hooks/useNeighborhoodEmergency';
 import { AppNavIcon, type AppNavIconName } from '@/components/navigation/AppNavIcon';
 import { useScrollHideBottomNav, scrollToTop } from '@/hooks/useScrollHideBottomNav';
 
@@ -20,13 +18,6 @@ type NavLinkTab = {
   icon: AppNavIconName;
   match: (p: string) => boolean;
 };
-
-const LINK_TABS: NavLinkTab[] = [
-  { href: '/feed', label: 'Home', icon: 'home', match: (p) => p === '/feed' || p === '/' },
-  { href: '/safety', label: 'Sentinel', icon: 'shield', match: (p) => p.startsWith('/safety') || p.startsWith('/sentinel') },
-  { href: '/friendship', label: 'Connect', icon: 'connect', match: (p) => p.startsWith('/friendship') || p.startsWith('/chat') },
-  { href: '/gist', label: 'Gist', icon: 'gist', match: (p) => p.startsWith('/gist') },
-];
 
 import { useSentinelBottomSheet } from '@/contexts/SentinelBottomSheetContext';
 
@@ -49,51 +40,30 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
-  const sos = useSos();
-  const hasNeighborhoodEmergency = useNeighborhoodEmergency();
   const compact = useScrollCompact();
   const scrollHidden = useScrollHideBottomNav();
   const { openSheet } = useSentinelBottomSheet();
 
   const isClient = useIsClient();
+
+
   const profileHref =
     isClient && user?.username ? `/profile/${user.username}` : '/settings';
   const isProfile =
     pathname.startsWith('/profile') ||
     (profileHref === '/settings' && pathname.startsWith('/settings'));
 
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const longPressFired = useRef(false);
-  const SOS_HREF = '/sos';
-  const sosActive = pathname.startsWith('/sos') || pathname.startsWith('/safety') || sos.phase !== 'idle';
-
-  const startSosPress = () => {
-    longPressFired.current = false;
-    longPressTimer.current = setTimeout(() => {
-      longPressFired.current = true;
-      void sos.triggerSos({ silent: true });
-    }, 600);
-  };
-
-  const cancelSosPress = (e: React.SyntheticEvent) => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-    if (longPressFired.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      longPressFired.current = false;
-      return;
-    }
-    if (e.type === 'pointerup' || e.type === 'touchend' || e.type === 'mouseup') {
-      router.push(SOS_HREF);
-    }
-  };
+  const LINK_TABS: NavLinkTab[] = [
+    { href: '/feed', label: 'Home', icon: 'home', match: (p) => p === '/feed' || p === '/' },
+    { href: '/explore', label: 'Search', icon: 'search', match: (p) => p.startsWith('/explore') && !p.startsWith('/map') },
+    { href: '/safety', label: 'Sentinel', icon: 'shield', match: (p) => p.startsWith('/safety') || p.startsWith('/sentinel') },
+    { href: '/map', label: 'Map', icon: 'mapPin', match: (p) => p.startsWith('/map') }, 
+    { href: '/friendship', label: 'Connect', icon: 'connect', match: (p) => p.startsWith('/friendship') || p.startsWith('/chat') },
+    { href: '/gist', label: 'Gist', icon: 'gist', match: (p) => p.startsWith('/gist') },
+  ];
 
   const renderLinkTab = (tab: NavLinkTab) => {
     const active = tab.match(pathname);
-    const isSentinelTab = tab.label === 'Sentinel';
     
     return (
       <Link
@@ -103,7 +73,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
         aria-label={tab.label}
         aria-current={active ? 'page' : undefined}
         onClick={(e) => {
-          if (isSentinelTab) {
+          if (tab.label === 'Sentinel') {
             e.preventDefault();
             openSheet();
             return;
@@ -116,7 +86,6 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
       >
         <span className="app-bottomnav__icon-wrap">
           <AppNavIcon name={tab.icon} active={active} />
-          <span className="app-bottomnav__label">{tab.label}</span>
         </span>
       </Link>
     );
@@ -132,43 +101,8 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
       <div className={`app-bottomnav__dock${hidden || scrollHidden ? ' app-bottomnav__dock--hidden' : ''}`}>
         <div className="app-bottomnav__pill app-bottomnav__glass">
           {LINK_TABS.map(renderLinkTab)}
-
-          <Link
-            href={profileHref}
-            className={`app-bottomnav__item${isProfile ? ' app-bottomnav__item--active' : ''}`}
-            aria-current={isProfile ? 'page' : undefined}
-            aria-label="Profile"
-          >
-            <span className="app-bottomnav__icon-wrap">
-              <AppNavIcon name="profile" active={isProfile} />
-              <span className="app-bottomnav__label">Profile</span>
-            </span>
-          </Link>
         </div>
 
-      </div>
-
-      <div className={`app-bottomnav__sos${hidden || scrollHidden ? ' app-bottomnav__sos--floating' : ''}`}>
-        <div className="app-bottomnav__sos-glass app-bottomnav__glass app-bottomnav__glass--disc">
-          <button
-            type="button"
-            onPointerDown={startSosPress}
-            onPointerUp={cancelSosPress}
-            onPointerLeave={() => {
-              if (longPressTimer.current) clearTimeout(longPressTimer.current);
-            }}
-            onContextMenu={(e) => e.preventDefault()}
-            className={`app-bottomnav__sos-btn${sosActive ? ' app-bottomnav__sos-btn--active' : ''}`}
-            aria-current={sosActive ? 'page' : undefined}
-            aria-label="SOS — tap to open command center, long-press for silent SOS"
-          >
-            <span
-              className={`app-bottomnav__sos-ring ${(sos.phase !== 'idle' || hasNeighborhoodEmergency) ? 'app-bottomnav__sos-ring--live' : 'app-bottomnav__sos-ring--idle'}`}
-              aria-hidden
-            />
-            <AppNavIcon name="sos" />
-          </button>
-        </div>
       </div>
     </nav>
   );

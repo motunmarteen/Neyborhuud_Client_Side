@@ -11,10 +11,22 @@ const PRECIP_THRESHOLD_MM = 0.2;
 
 export interface CurrentWeather {
   temp: number;
+  tempMin?: number;
   tempMax?: number;
+  forecast?: Array<{
+    dayName: string;
+    temp: number;
+    isToday: boolean;
+  }>;
   condition: string;
   city: string;
   wmoCode: number;
+}
+
+export function getWeekdayName(offset: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('en-US', { weekday: 'long' });
 }
 
 export function interpretWeatherCode(code: number): string {
@@ -158,9 +170,15 @@ async function reverseGeocodeCity(latitude: number, longitude: number): Promise<
     // fall through to Nominatim proxy
   }
 
-  const geoData = await fetchNominatimReverse(latitude, longitude, { zoom: 12, timeoutMs: 5_000 });
-  const fromOsm = cityLabelFromNominatimAddress(geoData?.address);
-  return fromOsm || 'Your Area';
+  try {
+    const geoData = await fetchNominatimReverse(latitude, longitude, { zoom: 12, timeoutMs: 5_000 });
+    const fromOsm = cityLabelFromNominatimAddress(geoData?.address);
+    if (fromOsm) return fromOsm;
+  } catch {
+    // ignore and fallback
+  }
+
+  return 'Your Area';
 }
 
 export async function fetchCurrentWeather(
@@ -171,7 +189,7 @@ export async function fetchCurrentWeather(
 
   const apiBase = getApiBaseUrl();
   // Frontend-only dev (no local backend): Open-Meteo works without the API.
-  if (apiBase && !isLocalDevHost(apiBase)) {
+  if (apiBase) {
     try {
       const backendRes = await fetch(
         `${apiBase}/weather/current?lat=${latitude}&lon=${longitude}`,
@@ -197,7 +215,13 @@ export async function fetchCurrentWeather(
           const city = cityName !== 'Your Area' ? cityName : (location?.name || cityName);
           return {
             temp: temperature?.current ?? 28,
+            tempMin: (temperature?.current ?? 28) - 4, // Mock tempMin for backend if unavailable
             tempMax: (temperature?.current ?? 28) + 4, // Mock tempMax for backend if unavailable
+            forecast: [
+              { dayName: getWeekdayName(-1), temp: (temperature?.current ?? 28) - 1, isToday: false },
+              { dayName: getWeekdayName(0), temp: (temperature?.current ?? 28), isToday: true },
+              { dayName: getWeekdayName(1), temp: (temperature?.current ?? 28) + 1, isToday: false },
+            ],
             condition,
             city,
             wmoCode,
@@ -211,7 +235,7 @@ export async function fetchCurrentWeather(
 
   const [defaultRes, ukmoRes] = await Promise.all([
     fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,rain,showers,precipitation&daily=temperature_2m_max&forecast_days=1&timezone=auto`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,rain,showers,precipitation&daily=temperature_2m_max,temperature_2m_min&past_days=1&forecast_days=2&timezone=auto`,
       { signal: AbortSignal.timeout(6000) },
     ).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     fetch(
@@ -249,18 +273,50 @@ export async function fetchCurrentWeather(
       ukmoPrecipMm,
     );
     const defaultDaily = defaultRes?.daily as {
+      time?: string[];
       temperature_2m_max?: number[];
+      temperature_2m_min?: number[];
     } | undefined;
-    const tempMax = defaultDaily?.temperature_2m_max?.[0] ? Math.round(defaultDaily.temperature_2m_max[0]) : temp + 4;
+    const tempMax = defaultDaily?.temperature_2m_max?.[1] ? Math.round(defaultDaily.temperature_2m_max[1]) : temp + 4;
+    const tempMin = defaultDaily?.temperature_2m_min?.[1] ? Math.round(defaultDaily.temperature_2m_min[1]) : temp - 4;
+
+    const forecast = [];
+    if (defaultDaily?.time && defaultDaily.temperature_2m_max) {
+      for (let i = 0; i < defaultDaily.time.length; i++) {
+        const d = new Date(defaultDaily.time[i]);
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+        const isToday = i === 1;
+        
+        forecast.push({
+          dayName,
+          temp: Math.round(defaultDaily.temperature_2m_max[i] ?? temp),
+          isToday,
+        });
+      }
+    }
 
     return {
       temp,
+      tempMin,
       tempMax,
+      forecast,
       condition: interpretWeatherCode(code),
       city: cityName,
       wmoCode: code,
     };
   }
 
-  return { temp: 31, tempMax: 35, condition: 'Partly Cloudy', city: cityName, wmoCode: 2 };
+  return { 
+    temp: 31, 
+    tempMin: 27, 
+    tempMax: 35, 
+    forecast: [
+      { dayName: getWeekdayName(-1), temp: 30, isToday: false },
+      { dayName: getWeekdayName(0), temp: 31, isToday: true },
+      { dayName: getWeekdayName(1), temp: 32, isToday: false },
+    ],
+    condition: 'Partly Cloudy', 
+    city: cityName, 
+    wmoCode: 2 
+  };
 }

@@ -13,6 +13,7 @@ import { SYSTEM_THEME_BOOT_SCRIPT } from "@/lib/systemTheme";
 import { BRAND_NAME } from "@/lib/brand";
 import AutoTopNav from "@/components/navigation/AutoTopNav";
 import AutoLeftSidebar from "@/components/navigation/AutoLeftSidebar";
+import { FloatingSosButton } from "@/components/sentinel/FloatingSosButton";
 
 const BRAND_TITLE = `${BRAND_NAME} — Your Huud Operating System`;
 
@@ -132,6 +133,7 @@ export default function RootLayout({
           <div id="main-content" className="app-shell">
             <AutoTopNav />
             <AutoLeftSidebar />
+            <FloatingSosButton />
             {children}
           </div>
         </Providers>
