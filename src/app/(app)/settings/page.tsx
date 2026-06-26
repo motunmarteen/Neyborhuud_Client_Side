@@ -73,7 +73,7 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <div className="py-6 border-b border-gray-150/40 last:border-b-0">
+    <div className="py-4 border-b border-gray-150/40 last:border-b-0">
       <p className="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400">
         {title}
       </p>
@@ -82,7 +82,7 @@ function Section({
           {description}
         </p>
       ) : null}
-      <div className="mt-4">{children}</div>
+      <div className="mt-2.5">{children}</div>
     </div>
   );
 }
@@ -686,7 +686,7 @@ export default function SettingsPage() {
             background-color: #ffffff !important;
           }
         ` }} />
-        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 space-y-4">
+        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 space-y-0">
           {!emailVerified && user?.email ? (
             <EmailVerificationCard
               email={user.email}

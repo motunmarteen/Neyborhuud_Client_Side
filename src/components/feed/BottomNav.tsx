@@ -59,9 +59,9 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
     { href: '/feed', label: 'Home', icon: 'home', match: (p) => p === '/feed' || p === '/' },
     { href: '/explore', label: 'Search', icon: 'search', match: (p) => p.startsWith('/explore') && !p.startsWith('/map') },
     { href: '/safety', label: 'Sentinel', icon: 'shield', match: (p) => p.startsWith('/safety') || p.startsWith('/sentinel') },
-    { href: '/map', label: 'Map', icon: 'mapPin', match: (p) => p.startsWith('/map') }, 
     { href: '/friendship', label: 'Connect', icon: 'connect', match: (p) => p.startsWith('/friendship') || p.startsWith('/chat') },
     { href: '/gist', label: 'Gist', icon: 'gist', match: (p) => p.startsWith('/gist') },
+    { href: profileHref, label: 'Profile', icon: 'profile', match: (p) => p.startsWith('/profile') || (profileHref === '/settings' && p.startsWith('/settings')) },
   ];
 
   const renderLinkTab = (tab: NavLinkTab) => {
