@@ -266,7 +266,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                     onClick={() => setShowDropdown(false)}
                     className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
                   >
-                    <span className="material-symbols-outlined text-[#007AFF]" style={{ fontSize: '38px' }}>shopping_bag</span>
+                    <span className="material-symbols-outlined text-[#007AFF]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>shopping_bag</span>
                     <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Marketplace</span>
                   </Link>
 
@@ -275,7 +275,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                     onClick={() => setShowDropdown(false)}
                     className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
                   >
-                    <span className="material-symbols-outlined text-[#FF9500]" style={{ fontSize: '38px' }}>work</span>
+                    <span className="material-symbols-outlined text-[#FF9500]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>work</span>
                     <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Work</span>
                   </Link>
 
@@ -284,7 +284,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                     onClick={() => setShowDropdown(false)}
                     className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
                   >
-                    <span className="material-symbols-outlined text-[#AF52DE]" style={{ fontSize: '38px' }}>local_activity</span>
+                    <span className="material-symbols-outlined text-[#AF52DE]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>local_activity</span>
                     <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Events</span>
                   </Link>
 
@@ -293,7 +293,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                     onClick={() => setShowDropdown(false)}
                     className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
                   >
-                    <span className="material-symbols-outlined text-[#FFCC00]" style={{ fontSize: '38px' }}>campaign</span>
+                    <span className="material-symbols-outlined text-[#FFCC00]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>campaign</span>
                     <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">FYI Bulletin</span>
                   </Link>
 
@@ -302,7 +302,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                     onClick={() => setShowDropdown(false)}
                     className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
                   >
-                    <span className="material-symbols-outlined text-[#34C759]" style={{ fontSize: '38px' }}>volunteer_activism</span>
+                    <span className="material-symbols-outlined text-[#34C759]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>volunteer_activism</span>
                     <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Help Request</span>
                   </Link>
 
@@ -311,7 +311,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                     onClick={() => setShowDropdown(false)}
                     className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
                   >
-                    <span className="material-symbols-outlined text-[#FF3B30]" style={{ fontSize: '38px' }}>gpp_maybe</span>
+                    <span className="material-symbols-outlined text-[#FF3B30]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>gpp_maybe</span>
                     <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Safety Alert</span>
                   </Link>
                 </div>
@@ -324,7 +324,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                   onClick={() => setShowDropdown(false)}
                   className="flex items-center gap-2 rounded-lg px-2 py-2 text-[14px] font-medium text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">support_agent</span>
+                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'wght' 300" }} aria-hidden="true">support_agent</span>
                   <span>Help Center</span>
                 </Link>
                 
@@ -333,7 +333,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                   className="flex items-center gap-2 rounded-lg px-2 py-2 text-[14px] font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
                 >
                   <span>Logout</span>
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">logout</span>
+                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'wght' 300" }} aria-hidden="true">logout</span>
                 </button>
               </div>
             </div>
