@@ -6998,21 +6998,22 @@ html.dark .chat-room__messages--doodle {
 
 .chat-attach-trigger {
   display: flex;
-  height: 2.75rem;
-  width: 2.75rem;
+  height: 2.5rem;
+  width: 2.5rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(0, 212, 49, 0.25);
+  border: none;
   border-radius: 999px;
-  background: rgba(0, 212, 49, 0.1);
-  color: var(--primary);
+  background: transparent;
+  color: #64748b; /* slate-500 */
   cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease, color 0.15s ease;
 }
 
 .chat-attach-trigger:hover:not(:disabled) {
-  background: rgba(0, 212, 49, 0.16);
+  background: #f1f5f9; /* slate-100 */
+  color: #334155; /* slate-700 */
 }
 
 .chat-attach-trigger--open {

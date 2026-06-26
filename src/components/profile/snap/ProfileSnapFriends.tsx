@@ -29,65 +29,67 @@ export function ProfileSnapFriends({
   pendingFollowRequests = 0,
 }: ProfileSnapFriendsProps) {
   return (
-    <div className="mod-card rounded-2xl p-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <ProfileBrowseEyebrow>Followers</ProfileBrowseEyebrow>
-        <Link href={`/profile/${username}/followers`} className="text-xs font-bold text-primary no-underline">
-          See all {followerCount > 0 ? `(${followerCount})` : ''}
-        </Link>
-      </div>
-
-      {isOwnProfile ? (
-        <Link
-          href="/explore"
-          className="mod-inset mb-3 flex items-center gap-3 rounded-xl px-3 py-2.5 no-underline"
-        >
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-primary">
-            <span className="material-symbols-outlined text-[18px]">person_add</span>
-            {pendingFollowRequests > 0 ? (
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-red text-[9px] font-bold text-white">
-                {pendingFollowRequests}
-              </span>
-            ) : null}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
-              Find people to follow
-            </p>
-            <p className="text-xs text-[var(--neu-text-muted)]">Discover neighbours nearby</p>
-          </div>
-        </Link>
-      ) : null}
-
-      {followers.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {followers.slice(0, 12).map((user) => {
-            const avatar = resolveUserAvatarUrl(user);
-            const initial =
-              user.firstName?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase() || '?';
-            return (
-              <Link
-                key={user.id}
-                href={`/profile/${user.username}`}
-                className="mod-inset flex h-11 w-11 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-primary no-underline"
-                title={`@${user.username}`}
-              >
-                {avatar ? (
-                  <img src={avatar} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  initial
-                )}
-              </Link>
-            );
-          })}
+    <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t-8 border-gray-50/80 py-5">
+      <div className="px-3">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <ProfileBrowseEyebrow>Followers</ProfileBrowseEyebrow>
+          <Link href={`/profile/${username}/followers`} className="text-xs font-bold text-blue-600 no-underline hover:underline">
+            See all {followerCount > 0 ? `(${followerCount})` : ''}
+          </Link>
         </div>
-      ) : (
-        <p className="text-sm text-[var(--neu-text-muted)]">
-          {isOwnProfile
-            ? 'Follow neighbours to see them here.'
-            : `@${username} has no followers yet.`}
-        </p>
-      )}
+
+        {isOwnProfile ? (
+          <Link
+            href="/explore"
+            className="flex items-center gap-3.5 border border-dashed border-gray-200 rounded-2xl px-4 py-3.5 mb-4 no-underline bg-gray-50/30 hover:bg-gray-50 transition-all"
+          >
+            <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 shadow-sm">
+              <span className="material-symbols-outlined text-[19px]">person_add</span>
+              {pendingFollowRequests > 0 ? (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                  {pendingFollowRequests}
+                </span>
+              ) : null}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-extrabold text-gray-800">
+                Find neighbours to follow
+              </p>
+              <p className="text-xs font-semibold text-gray-400 mt-0.5">Discover active locals around you</p>
+            </div>
+          </Link>
+        ) : null}
+
+        {followers.length > 0 ? (
+          <div className="flex flex-wrap gap-2.5">
+            {followers.slice(0, 12).map((user) => {
+              const avatar = resolveUserAvatarUrl(user);
+              const initial =
+                user.firstName?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase() || '?';
+              return (
+                <Link
+                  key={user.id}
+                  href={`/profile/${user.username}`}
+                  className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full text-sm font-bold bg-gray-100 hover:bg-gray-200 border border-white hover:border-gray-200/50 shadow-sm transition-all duration-200"
+                  title={`@${user.username}`}
+                >
+                  {avatar ? (
+                    <img src={avatar} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-gray-600">{initial}</span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm font-medium text-gray-400 mt-2">
+            {isOwnProfile
+              ? 'Follow neighbours to see them here.'
+              : `@${username} has no followers yet.`}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

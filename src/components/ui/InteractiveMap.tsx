@@ -30,6 +30,7 @@ interface InteractiveMapProps {
     className?: string;
     accuracyRadius?: number;
     customMarkerNode?: React.ReactNode;
+    showMarker?: boolean;
     markerInteractive?: boolean;
     dragHintLabel?: string;
     /** Floating pill at map bottom — off for fullscreen signup where hint lives in the sheet */
@@ -73,6 +74,7 @@ export function InteractiveMap({
     className = '',
     accuracyRadius,
     customMarkerNode,
+    showMarker = true,
     markerInteractive = false,
     dragHintLabel = 'Tap or drag to adjust',
     showDragHint = true,
@@ -186,32 +188,37 @@ export function InteractiveMap({
             return;
         }
 
-        const el = document.createElement('div');
-        if (!customMarkerNode) {
-            el.className = 'w-6 h-6 rounded-full border-[3px] border-white bg-brand-blue shadow-lg';
-        } else {
-            el.style.pointerEvents = markerInteractive ? 'auto' : 'none';
+        let marker: maplibregl.Marker | null = null;
+        if (showMarker) {
+            const el = document.createElement('div');
+            if (!customMarkerNode) {
+                el.className = 'w-6 h-6 rounded-full border-[3px] border-white bg-brand-blue shadow-lg';
+            } else {
+                el.style.pointerEvents = markerInteractive ? 'auto' : 'none';
+            }
+            setMarkerEl(el);
+
+            marker = new maplibregl.Marker({
+                element: el,
+                draggable: draggable && (!customMarkerNode || markerInteractive),
+            })
+                .setLngLat([center.lng, center.lat])
+                .addTo(map);
+
+            marker.on('dragend', () => {
+                const ll = marker!.getLngLat();
+                const pos = { lat: ll.lat, lng: ll.lng };
+                setMarkerPosition(pos);
+                onLocationChangeRef.current?.(pos);
+            });
+            markerRef.current = marker;
         }
-        setMarkerEl(el);
-
-        const marker = new maplibregl.Marker({
-            element: el,
-            draggable: draggable && (!customMarkerNode || markerInteractive),
-        })
-            .setLngLat([center.lng, center.lat])
-            .addTo(map);
-
-        marker.on('dragend', () => {
-            const ll = marker.getLngLat();
-            const pos = { lat: ll.lat, lng: ll.lng };
-            setMarkerPosition(pos);
-            onLocationChangeRef.current?.(pos);
-        });
-        markerRef.current = marker;
 
         return () => {
             if (longPressTimer.current) clearTimeout(longPressTimer.current);
-            marker.remove();
+            if (marker) {
+                marker.remove();
+            }
             map.remove();
             mapRef.current = null;
             markerRef.current = null;

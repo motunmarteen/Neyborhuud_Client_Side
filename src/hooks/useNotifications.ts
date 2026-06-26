@@ -33,11 +33,11 @@ export function useNotifications(filter?: "all" | "unread") {
 /**
  * Hook for unread notifications count
  */
-export function useUnreadCount() {
+export function useUnreadCount(type?: string, excludeType?: string) {
   return useQuery({
-    queryKey: ["unreadCount"],
+    queryKey: ["unreadCount", type, excludeType],
     queryFn: async () => {
-      const response = await notificationsService.getUnreadCount();
+      const response = await notificationsService.getUnreadCount(type, excludeType);
       return response.data?.count || 0;
     },
     refetchInterval: 30000, // Refetch every 30 seconds

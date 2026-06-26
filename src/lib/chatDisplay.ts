@@ -37,7 +37,7 @@ export function convSubtitle(c: Conversation | undefined): string {
     }
     return c.contextLabel ?? 'Marketplace chat';
   }
-  if (c.type === 'direct') return 'Direct · end-to-end ready';
+  if (c.type === 'direct') return '';
   return `${c.type} conversation`;
 }
 

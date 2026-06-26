@@ -17,6 +17,42 @@ import { getStoredTheme, setStoredTheme, applySystemTheme, getSystemPrefersDark 
 
 type SettingsTab = 'notifications' | 'privacy' | 'account' | 'language' | 'posts';
 
+const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
+  { id: 'notifications', label: 'Notifications' },
+  { id: 'privacy', label: 'Privacy' },
+  { id: 'posts', label: 'Posts' },
+  { id: 'account', label: 'Account' },
+  { id: 'language', label: 'Language' },
+];
+
+const SETTINGS_TAB_STYLES: Record<SettingsTab, { active: string; inactive: string; icon: string }> = {
+  notifications: {
+    active: 'bg-blue-600 border-blue-600 text-white shadow-[0_4px_16px_rgba(37,99,235,0.25)]',
+    inactive: 'bg-[#F0F5FF] border-blue-100/50 text-blue-600 hover:bg-blue-100/60',
+    icon: 'notifications',
+  },
+  privacy: {
+    active: 'bg-emerald-600 border-emerald-600 text-white shadow-[0_4px_16px_rgba(5,150,105,0.25)]',
+    inactive: 'bg-[#F0FDF4] border-emerald-100/50 text-emerald-600 hover:bg-emerald-100/60',
+    icon: 'shield',
+  },
+  posts: {
+    active: 'bg-purple-600 border-purple-600 text-white shadow-[0_4px_16px_rgba(147,51,234,0.25)]',
+    inactive: 'bg-[#FAF5FF] border-purple-100/50 text-purple-600 hover:bg-purple-100/60',
+    icon: 'post_add',
+  },
+  account: {
+    active: 'bg-slate-900 border-slate-950 text-white shadow-[0_4px_16px_rgba(15,23,42,0.25)]',
+    inactive: 'bg-slate-50 border-slate-100 text-slate-700 hover:bg-slate-100/60',
+    icon: 'manage_accounts',
+  },
+  language: {
+    active: 'bg-amber-600 border-amber-600 text-white shadow-[0_4px_16px_rgba(217,119,6,0.25)]',
+    inactive: 'bg-amber-50 border-amber-100/50 text-amber-700 hover:bg-amber-100/60',
+    icon: 'translate',
+  },
+};
+
 function isEmailVerifiedStrict(user: unknown): boolean {
   if (!user || typeof user !== 'object') return false;
   const u = user as Record<string, unknown>;
@@ -37,16 +73,16 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <div className="mod-card rounded-2xl p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">
+    <div className="py-6 border-b border-gray-150/40 last:border-b-0">
+      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400">
         {title}
       </p>
       {description ? (
-        <p className="mt-1 text-sm leading-relaxed text-[var(--neu-text-muted)]">
+        <p className="mt-1 text-xs leading-relaxed text-gray-500">
           {description}
         </p>
       ) : null}
-      <div className={description ? 'mt-4' : 'mt-3'}>{children}</div>
+      <div className="mt-4">{children}</div>
     </div>
   );
 }
@@ -572,30 +608,27 @@ export default function SettingsPage() {
       description?: string;
       disabled?: boolean;
     }) => (
-      <div
-        className="flex items-center justify-between gap-4 border-b py-3 last:border-0"
-        style={{ borderColor: 'var(--neu-shadow-dark)' }}
-      >
+      <div className="flex items-center justify-between gap-4 border-b border-gray-100 py-3.5 last:border-0">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
+          <p className="text-sm font-bold text-gray-800">
             {label}
           </p>
           {description ? (
-            <p className="mt-0.5 text-xs text-[var(--neu-text-muted)]">{description}</p>
+            <p className="mt-0.5 text-xs text-gray-400">{description}</p>
           ) : null}
         </div>
         <button
           type="button"
           disabled={disabled}
           onClick={() => !disabled && onChange(!enabled)}
-          className={`relative h-7 w-12 rounded-full transition-colors ${
-            disabled ? 'opacity-50' : ''
-          } ${enabled ? 'bg-primary' : 'bg-black/15'}`}
+          className={`relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none ${
+            disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+          } ${enabled ? 'bg-blue-600' : 'bg-gray-200'}`}
           aria-label={`${label}: ${enabled ? 'On' : 'Off'}`}
         >
           <span
-            className={`absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-              enabled ? 'translate-x-6' : 'translate-x-1'
+            className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+              enabled ? 'translate-x-5' : 'translate-x-0'
             }`}
             aria-hidden
           />
@@ -612,31 +645,48 @@ export default function SettingsPage() {
     return (
       <AppBrowseLayout
         maxWidth="680"
+        className="!bg-white !px-0 !pt-0 !min-h-[100dvh] flex-1"
         header={
-          <div className="space-y-3">
-            <div className="mod-card rounded-2xl p-4">
-              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">
-                Settings
-              </p>
-              <p className="mt-1 text-sm leading-relaxed text-[var(--neu-text-muted)]">
-                Control notifications, privacy, language, and account security.
-              </p>
+          <div className="bg-white pt-4">
+            <div className="relative bg-white border-b border-gray-150/40">
+              <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-4 flex items-center justify-around gap-2 overflow-x-auto no-scrollbar">
+                {SETTINGS_TABS.map((t) => {
+                  const isActive = activeTab === t.id;
+                  const style = SETTINGS_TAB_STYLES[t.id];
+                  const circleClass = `w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-200 ${
+                    isActive ? style.active : style.inactive
+                  }`;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setActiveTab(t.id)}
+                      className="flex flex-col items-center gap-1.5 focus:outline-none touch-manipulation group flex-shrink-0"
+                    >
+                      <div className={circleClass}>
+                        <span className="material-symbols-outlined text-[23px] select-none" style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                          {style.icon}
+                        </span>
+                      </div>
+                      <span className={`text-[11px] font-bold transition-colors uppercase tracking-wider ${
+                        isActive ? 'text-gray-900 font-extrabold' : 'text-gray-400 group-hover:text-gray-600'
+                      }`}>
+                        {t.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <BrowseTabStrip
-              tabs={[
-                { id: 'notifications', label: 'Notifications', icon: 'notifications' },
-                { id: 'privacy', label: 'Privacy', icon: 'shield' },
-                { id: 'posts', label: 'Posts', icon: 'post_add' },
-                { id: 'account', label: 'Account', icon: 'manage_accounts' },
-                { id: 'language', label: t('settings.language'), icon: 'translate' },
-              ]}
-              activeId={activeTab}
-              onChange={(id) => setActiveTab(id as SettingsTab)}
-            />
           </div>
         }
       >
-        <div className="space-y-4">
+        <style dangerouslySetInnerHTML={{ __html: `
+          main[data-app-scroll-root] {
+            background-color: #ffffff !important;
+          }
+        ` }} />
+        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 space-y-4">
           {!emailVerified && user?.email ? (
             <EmailVerificationCard
               email={user.email}
@@ -775,7 +825,7 @@ export default function SettingsPage() {
               <button
                 onClick={handleSaveNotifications}
                 disabled={saving}
-                className="mod-chip mod-chip-active w-full rounded-xl py-3 text-sm font-bold text-primary disabled:opacity-50"
+                className="w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
               >
                 {saving ? 'Saving…' : 'Save notification settings'}
               </button>
@@ -1453,34 +1503,36 @@ export default function SettingsPage() {
                     </div>
                 )}
           {activeTab === 'account' ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <Section title="Profile">
-                <div className="mod-inset rounded-xl p-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
-                    Status
-                  </p>
-                  <p className="mt-1 text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
-                    {isProfileCompleted ? 'Profile Completed' : 'Profile Incomplete'}
-                  </p>
+                <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-gray-400">
+                      Status
+                    </p>
+                    <p className="mt-1 text-sm font-bold text-gray-800">
+                      {isProfileCompleted ? 'Profile Completed' : 'Profile Incomplete'}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3 mt-3">
                   {birthday ? (
-                    <div className="mod-inset rounded-xl p-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
+                    <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-gray-400">
                         Birthday
                       </p>
-                      <p className="mt-1 text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+                      <p className="mt-1 text-sm font-bold text-gray-800">
                         {birthday}
                       </p>
                     </div>
                   ) : null}
                   {zodiac ? (
-                    <div className="mod-inset rounded-xl p-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
+                    <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-gray-400">
                         Sign
                       </p>
-                      <p className="mt-1 text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+                      <p className="mt-1 text-sm font-bold text-gray-800">
                         {zodiac.emoji} {zodiac.sign}
                       </p>
                     </div>
@@ -1489,7 +1541,7 @@ export default function SettingsPage() {
 
                 <Link
                   href="/complete-profile"
-                  className="mod-chip mod-chip-active mt-3 inline-flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-primary no-underline"
+                  className="mt-4 flex w-full items-center justify-center rounded-full bg-slate-900 hover:bg-slate-800 text-white py-3 text-sm font-bold shadow-sm transition-all duration-200 no-underline"
                 >
                   {isProfileCompleted ? 'Edit profile' : 'Complete profile'}
                 </Link>
@@ -1498,62 +1550,64 @@ export default function SettingsPage() {
               <Section title="Location">
                 <Link
                   href="/settings/location"
-                  className="mod-inset flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold no-underline"
+                  className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-gray-800 no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
                 >
-                  <span className="inline-flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                  <span className="inline-flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-[19px] text-blue-600">location_on</span>
                     Location &amp; Radius
                   </span>
-                  <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)]">
+                  <span className="material-symbols-outlined text-[19px] text-gray-400">
                     chevron_right
                   </span>
                 </Link>
               </Section>
 
               <Section title="Security">
-                {isAdminUser(user) ? (
+                <div className="space-y-2.5">
+                  {isAdminUser(user) ? (
+                    <Link
+                      href="/admin"
+                      className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-gray-800 no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
+                    >
+                      <span className="inline-flex items-center gap-2.5">
+                        <span className="material-symbols-outlined text-[19px] text-emerald-600">shield</span>
+                        Admin panel
+                      </span>
+                      <span className="material-symbols-outlined text-[19px] text-gray-400">
+                        chevron_right
+                      </span>
+                    </Link>
+                  ) : null}
+
                   <Link
-                    href="/admin"
-                    className="mod-inset flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold no-underline"
+                    href="/settings/password"
+                    className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-gray-800 no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
                   >
-                    <span className="inline-flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] text-primary">shield</span>
-                      Admin panel
+                    <span className="inline-flex items-center gap-2.5">
+                      <span className="material-symbols-outlined text-[19px] text-purple-600">key</span>
+                      Change password
                     </span>
-                    <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)]">
+                    <span className="material-symbols-outlined text-[19px] text-gray-400">
                       chevron_right
                     </span>
                   </Link>
-                ) : null}
-
-                <Link
-                  href="/settings/password"
-                  className="mod-inset mt-2 flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold no-underline"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px] text-primary">key</span>
-                    Change password
-                  </span>
-                  <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)]">
-                    chevron_right
-                  </span>
-                </Link>
+                </div>
               </Section>
 
               <Section title="Appearance">
-                <div className="mod-inset flex items-center justify-between rounded-xl px-4 py-3">
+                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
                   <div className="flex items-center gap-3">
                     <span
-                      className={`material-symbols-outlined text-[20px] text-primary ${isDarkMode ? 'icon-filled' : 'icon-outlined'}`}
+                      className={`material-symbols-outlined text-[20px] text-blue-600 ${isDarkMode ? 'icon-filled' : 'icon-outlined'}`}
                       aria-hidden
                     >
                       {isDarkMode ? 'dark_mode' : 'light_mode'}
                     </span>
                     <div>
-                      <p className="text-sm font-bold neu-text">
+                      <p className="text-sm font-bold text-gray-800">
                         {isDarkMode ? 'Dark mode' : 'Light mode'}
                       </p>
-                      <p className="text-xs neu-text-muted">
+                      <p className="text-xs text-gray-400">
                         {isDarkMode ? 'Easy on the eyes at night' : 'Clean and bright'}
                       </p>
                     </div>
@@ -1569,10 +1623,10 @@ export default function SettingsPage() {
                       setStoredTheme(next ? 'dark' : 'light');
                       applySystemTheme(next);
                     }}
-                    className={`theme-toggle-btn relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${isDarkMode ? 'bg-primary' : 'bg-[var(--neu-shadow-dark)]'}`}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus-visible:outline-none ${isDarkMode ? 'bg-blue-600' : 'bg-gray-200'}`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow-lg transition-transform duration-200 ${isDarkMode ? 'translate-x-5' : 'translate-x-0'}`}
+                      className={`pointer-events-none inline-block h-5 w-5 m-0.5 rounded-full bg-white shadow-md transition-transform duration-200 ${isDarkMode ? 'translate-x-5' : 'translate-x-0'}`}
                     />
                   </button>
                 </div>
@@ -1582,7 +1636,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => void handleLogout()}
-                  className="mod-chip w-full rounded-xl py-3 text-sm font-bold text-brand-red"
+                  className="w-full rounded-full border border-red-200 bg-red-50 hover:bg-red-100/55 py-3 text-sm font-bold text-red-600 transition-all duration-200"
                 >
                   Sign out
                 </button>
@@ -1591,9 +1645,9 @@ export default function SettingsPage() {
           ) : null}
 
           {activeTab === 'privacy' ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <Section title="Visibility">
-                <div className="flex gap-1 rounded-2xl p-1 mod-inset">
+                <div className="flex gap-1 rounded-full p-1 bg-gray-50 border border-gray-100">
                   {[
                     { value: 'public', label: 'Public' },
                     { value: 'friends', label: 'Friends' },
@@ -1603,10 +1657,10 @@ export default function SettingsPage() {
                       key={opt.value}
                       type="button"
                       onClick={() => setPrivacy({ ...privacy, profileVisibility: opt.value as any })}
-                      className={`flex-1 rounded-xl py-2 text-sm font-bold transition-colors ${
+                      className={`flex-1 rounded-full py-2.5 text-xs font-bold transition-all ${
                         privacy.profileVisibility === opt.value
-                          ? 'mod-chip mod-chip-active text-primary'
-                          : 'mod-chip text-[var(--neu-text-muted)]'
+                          ? 'bg-slate-900 text-white shadow-sm'
+                          : 'text-gray-400 hover:text-gray-600'
                       }`}
                     >
                       {opt.label}
@@ -1637,7 +1691,7 @@ export default function SettingsPage() {
               <button
                 onClick={handleSavePrivacy}
                 disabled={saving}
-                className="mod-chip mod-chip-active w-full rounded-xl py-3 text-sm font-bold text-primary disabled:opacity-50"
+                className="w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
               >
                 {saving ? 'Saving…' : 'Save privacy settings'}
               </button>
@@ -1645,9 +1699,9 @@ export default function SettingsPage() {
           ) : null}
 
           {activeTab === 'language' ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <Section title={t('settings.language')} description={t('settings.languageDesc')}>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {availableLanguages.map((lang) => (
                     <button
                       key={lang}
@@ -1656,16 +1710,16 @@ export default function SettingsPage() {
                         setLanguage(lang);
                         toast.success(t('settings.languageSaved'));
                       }}
-                      className="mod-inset flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold"
+                      className="flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-4 text-sm font-bold text-gray-800 hover:bg-gray-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
                     >
-                      <span className="inline-flex items-center gap-2">
-                        <span>{lang === 'en' ? '🇬🇧' : '🇳🇬'}</span>
-                        <span style={{ color: 'var(--neu-text)' }}>{languageNames[lang]}</span>
+                      <span className="inline-flex items-center gap-3">
+                        <span className="text-base">{lang === 'en' ? '🇬🇧' : '🇳🇬'}</span>
+                        <span>{languageNames[lang]}</span>
                       </span>
                       {currentLanguage === lang ? (
-                        <span className="material-symbols-outlined text-[18px] text-primary">check</span>
+                        <span className="material-symbols-outlined text-[19px] text-blue-600">check_circle</span>
                       ) : (
-                        <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)]">chevron_right</span>
+                        <span className="material-symbols-outlined text-[19px] text-gray-400">chevron_right</span>
                       )}
                     </button>
                   ))}
@@ -1675,17 +1729,16 @@ export default function SettingsPage() {
           ) : null}
 
           {activeTab === 'posts' ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <Section title="Post Defaults" description="Configure your global default values for new posts created on the feed.">
-                <div className="border-b py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
+                <div className="border-b border-gray-100 py-4">
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Default Language
                   </label>
                   <select
                     value={postSettings.defaultLanguage}
                     onChange={(e) => updatePostSettings({ defaultLanguage: e.target.value })}
-                    className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input bg-transparent"
-                    style={{ color: 'var(--neu-text)' }}
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
                   >
                     <option value="en">English</option>
                     <option value="ha">Hausa</option>
@@ -1695,15 +1748,14 @@ export default function SettingsPage() {
                   </select>
                 </div>
 
-                <div className="border-b py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
+                <div className="border-b border-gray-100 py-4">
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Default Visibility
                   </label>
                   <select
                     value={postSettings.defaultVisibility}
                     onChange={(e) => updatePostSettings({ defaultVisibility: e.target.value })}
-                    className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input bg-transparent"
-                    style={{ color: 'var(--neu-text)' }}
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
                   >
                     <option value="public">Public (Everyone)</option>
                     <option value="neighborhood">NeyburH (Local)</option>
@@ -1711,15 +1763,14 @@ export default function SettingsPage() {
                   </select>
                 </div>
 
-                <div className="border-b py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
+                <div className="border-b border-gray-100 py-4">
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Default Priority (General Posts)
                   </label>
                   <select
                     value={postSettings.defaultPriorityStandard}
                     onChange={(e) => updatePostSettings({ defaultPriorityStandard: e.target.value })}
-                    className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input bg-transparent"
-                    style={{ color: 'var(--neu-text)' }}
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
                   >
                     <option value="low">Low</option>
                     <option value="normal">Normal</option>
@@ -1727,15 +1778,14 @@ export default function SettingsPage() {
                   </select>
                 </div>
 
-                <div className="py-3">
-                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--neu-text)' }}>
+                <div className="py-4">
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Default Priority (Help, Safety & Urgent Alerts)
                   </label>
                   <select
                     value={postSettings.defaultPriorityUrgent}
                     onChange={(e) => updatePostSettings({ defaultPriorityUrgent: e.target.value })}
-                    className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input bg-transparent"
-                    style={{ color: 'var(--neu-text)' }}
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
                   >
                     <option value="normal">Normal</option>
                     <option value="high">High</option>
@@ -1754,36 +1804,36 @@ export default function SettingsPage() {
               </Section>
 
               <Section title="Saved Banking Profile" description="Pre-populate account details when creating Help Request templates.">
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold mb-1 text-[var(--neu-text-muted)]">Bank Name</label>
+                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Bank Name</label>
                     <input
                       type="text"
                       value={postSettings.bankName}
                       onChange={(e) => updatePostSettings({ bankName: e.target.value })}
                       placeholder="e.g. GTBank, Zenith"
-                      className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input"
+                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all placeholder:text-gray-400"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1 text-[var(--neu-text-muted)]">Account Name</label>
+                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Account Name</label>
                     <input
                       type="text"
                       value={postSettings.accountName}
                       onChange={(e) => updatePostSettings({ accountName: e.target.value })}
                       placeholder="e.g. Yetunde Marteen"
-                      className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input"
+                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all placeholder:text-gray-400"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1 text-[var(--neu-text-muted)]">Account Number</label>
+                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Account Number</label>
                     <input
                       type="text"
                       value={postSettings.accountNumber}
                       onChange={(e) => updatePostSettings({ accountNumber: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                       placeholder="10-digit NUBAN number"
                       maxLength={10}
-                      className="w-full p-2.5 rounded-xl text-sm focus:outline-none neu-input font-mono"
+                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all font-mono placeholder:text-gray-400"
                     />
                   </div>
                 </div>

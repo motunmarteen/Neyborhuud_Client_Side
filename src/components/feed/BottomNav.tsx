@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { AppNavIcon, type AppNavIconName } from '@/components/navigation/AppNavIcon';
 import { useScrollHideBottomNav, scrollToTop } from '@/hooks/useScrollHideBottomNav';
+import { useUnreadCount } from '@/hooks/useNotifications';
 
 interface BottomNavProps {
   /** Set true only when the nav should be fully hidden (e.g. map overlay). */
@@ -45,6 +46,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const { openSheet } = useSentinelBottomSheet();
 
   const isClient = useIsClient();
+  const { data: messageUnreadCount = 0 } = useUnreadCount('message');
 
 
   const profileHref =
@@ -64,12 +66,13 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
 
   const renderLinkTab = (tab: NavLinkTab) => {
     const active = tab.match(pathname);
+    const badgeCount = tab.label === 'Connect' ? messageUnreadCount : 0;
     
     return (
       <Link
         key={tab.href}
         href={tab.href}
-        className={`app-bottomnav__item ${active ? 'app-bottomnav__item--active' : ''}`}
+        className={`app-bottomnav__item ${active ? 'app-bottomnav__item--active' : ''} relative`}
         aria-label={tab.label}
         aria-current={active ? 'page' : undefined}
         onClick={(e) => {
@@ -85,7 +88,14 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
         }}
       >
         <span className="app-bottomnav__icon-wrap">
-          <AppNavIcon name={tab.icon} active={active} />
+          <div className="relative inline-flex items-center justify-center">
+            <AppNavIcon name={tab.icon} active={active} />
+            {badgeCount > 0 && (
+              <span className="absolute -top-1 -right-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-black">
+                {badgeCount > 99 ? '99+' : badgeCount}
+              </span>
+            )}
+          </div>
         </span>
       </Link>
     );

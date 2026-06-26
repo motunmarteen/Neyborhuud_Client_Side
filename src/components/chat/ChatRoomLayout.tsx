@@ -23,17 +23,17 @@ export function ChatRoomLayout({ header, banners, children, composer }: ChatRoom
   }, []);
 
   return (
-    <div className="chat-room chat-room--thread neu-base" data-chat-room="thread">
-      <div className="chat-room__frame">
-        <div className="chat-room__panel">
-          <div className="chat-room__chrome shrink-0">
-            {header}
-            {banners ? <div className="chat-room__banners">{banners}</div> : null}
-          </div>
-          <div className="chat-room__scroll">{children}</div>
-          {composer}
+    <div className="flex flex-col !h-[100dvh] !min-h-[100dvh] overflow-hidden !bg-white">
+      <div className="shrink-0">
+        {header}
+        {banners ? <div className="border-b border-gray-100">{banners}</div> : null}
+      </div>
+      <div className="flex-1 overflow-y-auto scroll-smooth !bg-white">
+        <div className="mx-auto w-full max-w-[600px] px-1 pb-4">
+          {children}
         </div>
       </div>
+      {composer}
     </div>
   );
 }

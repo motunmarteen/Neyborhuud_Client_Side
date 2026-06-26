@@ -3,10 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsService } from '@/services/notifications.service';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { toast } from 'sonner';
 import { Notification } from '@/types/api';
 import { useRouter } from 'next/navigation';
@@ -32,35 +29,74 @@ function NotificationCard({ notification, onRead }: { notification: Notification
     if (notification.actionUrl) router.push(notification.actionUrl);
   };
 
+  let actorName = notification.data?.actor?.firstName || notification.data?.user?.firstName || notification.data?.actor?.name || notification.data?.user?.name;
+  
+  if (!actorName && notification.message) {
+    const firstWord = notification.message.split(' ')[0];
+    if (firstWord && !firstWord.match(/^(someone|a)$/i)) {
+      actorName = firstWord.charAt(0).toUpperCase() + firstWord.slice(1);
+    }
+  }
+
+  let displayTitle = notification.title;
+  if (actorName && displayTitle.match(/^(Someone|A user)/i)) {
+    displayTitle = displayTitle.replace(/^(Someone|A user)/i, actorName);
+  }
+
   return (
     <div
       onClick={handleClick}
-      className={`flex items-start gap-4 p-4 rounded-2xl cursor-pointer transition-colors ${
-        notification.isRead ? 'opacity-60 hover:opacity-80' : 'bg-brand-blue/5 hover:bg-brand-blue/10'
+      className={`flex items-start gap-3 px-4 py-3.5 hover:bg-slate-50 transition-colors duration-150 border-b border-gray-100 group ${
+        notification.isRead ? 'opacity-80' : 'bg-brand-blue/5'
       }`}
     >
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-        notification.isRead ? 'bg-brand-surface' : 'bg-brand-blue/10'
+      <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+        notification.isRead ? 'bg-slate-100 text-slate-400' : 'bg-brand-blue/10 text-brand-blue'
       }`}>
-        <span className={`material-symbols-outlined text-[20px] ${notification.isRead ? 'text-[var(--neu-text-muted)]' : 'text-brand-blue'}`}>
+        <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'wght' 300" }}>
           {icon}
         </span>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm" style={{ color: 'var(--neu-text)' }}>{notification.title}</p>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--neu-text-muted)' }}>{notification.message}</p>
-        <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
+      <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <p className={`text-[14px] ${notification.isRead ? 'font-semibold text-slate-700' : 'font-bold text-slate-900'} truncate`}>
+          {displayTitle}
+          {notification.message && (
+            <span className="font-normal text-slate-500 ml-1">
+              - {notification.message}
+            </span>
+          )}
+        </p>
+        <p className="text-[11px] font-medium text-slate-400 mt-1 flex items-center gap-1">
+          <span className="material-symbols-outlined text-[12px]">schedule</span>
           {new Date(notification.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
       {!notification.isRead && (
-        <div className="w-2 h-2 rounded-full bg-brand-blue flex-shrink-0 mt-2" />
+        <div className="w-2 h-2 rounded-full bg-brand-blue flex-shrink-0 mt-2 shadow-sm" />
       )}
     </div>
   );
 }
 
+const EmptyState = ({ icon, title, subtitle }: { icon: string; title: string; subtitle: string }) => (
+  <div className="flex flex-col items-center justify-center py-16 px-8 text-center bg-white">
+    <div className={`w-[64px] h-[64px] rounded-full bg-brand-blue/10 flex items-center justify-center mb-4 shrink-0`}>
+      <span className={`material-symbols-outlined text-[32px] text-brand-blue`} style={{ fontVariationSettings: "'wght' 300" }}>{icon}</span>
+    </div>
+    <h3 className="font-bold text-slate-900 text-[16px] mb-2">{title}</h3>
+    <p className="text-gray-500 text-sm leading-relaxed max-w-xs">{subtitle}</p>
+  </div>
+);
+
 export default function NotificationsPage() {
+  return (
+    <Suspense>
+      <NotificationsPageInner />
+    </Suspense>
+  );
+}
+
+function NotificationsPageInner() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const queryClient = useQueryClient();
 
@@ -83,75 +119,70 @@ export default function NotificationsPage() {
     },
   });
 
-  const notifications: Notification[] = (data?.data as any)?.notifications ?? (data?.data as any)?.data ?? [];
+  const rawNotifications: Notification[] = (data?.data as any)?.notifications ?? (data?.data as any)?.data ?? [];
+  const notifications = rawNotifications.filter(n => n.type !== 'message');
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <Suspense fallback={<div className="hidden lg:block lg:w-80 shrink-0" />}>
-          <LeftSidebar />
-        </Suspense>
-        <main className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="mx-auto flex w-full max-w-[920px] flex-col gap-6 pb-24">
-            {/* Header */}
-            <div className={`flex items-center ${unreadCount > 0 ? 'justify-end' : 'hidden'}`}>
+    <AppBrowseLayout
+      className="!bg-white !px-0 !pt-0 !min-h-[100dvh]"
+      header={
+        <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+          <div className="py-3 flex flex-col gap-3 mx-auto w-[calc(100%-1.5rem)] max-w-[600px]">
+            {/* Filter Tabs (Explore Pill Style) */}
+            <div className="flex items-center justify-between w-full pt-1 pb-1">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                {(['all', 'unread'] as const).map(f => {
+                  const isActive = filter === f;
+                  return (
+                    <button
+                      key={f}
+                      onClick={() => setFilter(f)}
+                      className={`flex-shrink-0 px-4 py-2 rounded-full text-[13px] font-bold transition-all ${
+                        isActive
+                          ? 'bg-slate-800 text-white shadow-md'
+                          : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {f === 'all' ? 'All' : 'Unread'}
+                    </button>
+                  );
+                })}
+              </div>
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllRead.mutate()}
                   disabled={markAllRead.isPending}
-                  className="text-sm text-brand-blue hover:text-status-info font-medium disabled:opacity-50"
+                  className="flex-shrink-0 px-4 py-2 rounded-full text-[12px] font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 bg-white border border-gray-200 hover:bg-gray-50 text-slate-700 shadow-sm"
                 >
-                  Mark all as read
+                  Mark all read
                 </button>
-              )}
-            </div>
-
-            {/* Filter tabs */}
-            <div className="flex gap-2">
-              {(['all', 'unread'] as const).map(f => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    filter === f
-                      ? 'bg-brand-blue text-white'
-                      : 'hover:bg-brand-surface'
-                  }`}
-                  style={filter !== f ? { color: 'var(--neu-text-muted)' } : undefined}
-                >
-                  {f === 'all' ? 'All' : 'Unread'}
-                </button>
-              ))}
-            </div>
-
-            {/* List */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--neu-card)', border: '1px solid var(--neu-border)' }}>
-              {isLoading ? (
-                <div className="p-8 text-center" style={{ color: 'var(--neu-text-muted)' }}>Loading notifications…</div>
-              ) : notifications.length === 0 ? (
-                <div className="p-12 text-center flex flex-col items-center gap-3">
-                  <span className="material-symbols-outlined text-[48px] text-[var(--neu-text-muted)]">notifications_none</span>
-                  <p style={{ color: 'var(--neu-text-muted)' }}>
-                    {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
-                  </p>
-                </div>
-              ) : (
-                <div className="divide-y" style={{ borderColor: 'var(--neu-border)' }}>
-                  {notifications.map((n, i) => (
-                    <NotificationCard key={n.id ?? (n as any)._id ?? i} notification={n} onRead={id => markRead.mutate(id)} />
-                  ))}
-                </div>
               )}
             </div>
           </div>
-        </main>
-        <RightSidebar />
+        </div>
+      }
+    >
+      <div className="flex-1 bg-white pb-24 mx-auto w-full sm:w-[calc(100%-1.5rem)] max-w-[600px]">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div className="w-8 h-8 border-4 border-gray-200 border-t-brand-blue rounded-full animate-spin" />
+            <span className="text-[14px] font-medium text-gray-500">Loading notifications...</span>
+          </div>
+        ) : notifications.length === 0 ? (
+          <EmptyState 
+            icon={filter === 'unread' ? 'mark_email_read' : 'notifications_off'}
+            title={filter === 'unread' ? "You're all caught up" : 'No notifications yet'}
+            subtitle={filter === 'unread' ? 'You have no unread notifications at this time.' : 'When you receive notifications, they will appear here.'}
+          />
+        ) : (
+          <div className="flex flex-col sm:border sm:border-gray-100 sm:rounded-2xl sm:overflow-hidden sm:mt-2">
+            {notifications.map((n, i) => (
+              <NotificationCard key={n.id ?? (n as any)._id ?? i} notification={n} onRead={id => markRead.mutate(id)} />
+            ))}
+          </div>
+        )}
       </div>
-      <Suspense fallback={<div className="h-16" />}>
-        <BottomNav />
-      </Suspense>
-    </div>
+    </AppBrowseLayout>
   );
 }

@@ -585,7 +585,7 @@ export default function ConversationPage() {
   // ── Auto-scroll ───────────────────────────────────────────────────────────
   useEffect(() => {
     lastMsgRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [messages]);
+  }, [messages.length]);
 
   // ── Socket listeners ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -932,33 +932,33 @@ export default function ConversationPage() {
       ) : null}
 
       {conv?.contextType === 'marketplace' && conv.context ? (
-        <div className="chat-room__banner chat-room__banner--market mod-card rounded-none border-x-0 border-t-0">
+        <div className="flex items-center gap-3 bg-blue-50 px-4 py-3">
           {conv.context.productThumbnail ? (
             <img
               src={conv.context.productThumbnail}
               alt={conv.context.productTitle ?? 'Product'}
-              className="neu-avatar h-11 w-11 shrink-0 rounded-xl object-cover"
+              className="h-11 w-11 shrink-0 rounded-xl object-cover shadow-sm"
             />
           ) : (
-            <div className="mod-inset flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-lg">
               🛍️
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">Marketplace</p>
-            <p className="truncate text-sm font-bold text-[var(--neu-text)]">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-600">Marketplace</p>
+            <p className="truncate text-sm font-bold text-gray-900">
               {conv.context.productTitle ?? 'Product'}
             </p>
           </div>
           {conv.context.productPrice != null ? (
-            <span className="mod-chip shrink-0 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums text-primary">
+            <span className="shrink-0 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold tabular-nums text-blue-700">
               {conv.context.productCurrency ?? 'NGN'} {conv.context.productPrice.toLocaleString()}
             </span>
           ) : null}
           {conv.context.productId ? (
             <Link
               href={`/marketplace?product=${encodeURIComponent(String(conv.context.productId))}`}
-              className="mod-chip mod-chip-active shrink-0 rounded-full px-3 py-1.5 text-xs font-bold no-underline"
+              className="shrink-0 rounded-full bg-slate-800 px-3 py-1.5 text-xs font-bold text-white no-underline hover:bg-slate-900 active:bg-black"
             >
               View
             </Link>
@@ -1032,11 +1032,12 @@ export default function ConversationPage() {
           uploadProgress={uploadProgress}
           textareaRef={textareaRef}
           onAction={handleActionResult}
+          recipientName={displayName}
         />
         </>
       }
     >
-      <div className="chat-room__messages">
+      <div className="mx-auto flex w-full max-w-[600px] px-1 flex-col gap-1 pb-4 pt-4">
         {loading ? (
           <div className="flex flex-col gap-2">
             {[...Array(6)].map((_, i) => (
@@ -1047,23 +1048,21 @@ export default function ConversationPage() {
             ))}
           </div>
         ) : messages.length === 0 ? (
-          <div className="chat-room__empty">
-            <div className="chat-room__empty-icon">
-              <span className="material-symbols-outlined text-[28px]">waving_hand</span>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-3xl">
+              👋
             </div>
-            <p className="text-sm font-bold text-[var(--neu-text)]">Start the conversation</p>
-            <p className="max-w-xs text-xs text-[var(--neu-text-muted)]">
+            <p className="mt-4 text-base font-bold text-gray-900">Start the conversation</p>
+            <p className="mt-1 max-w-xs text-sm text-gray-500">
               Say hello — your messages stay on NeyborHuud with trust and safety built in.
             </p>
           </div>
         ) : (
-          <div className="chat-thread-list">
+          <div className="flex flex-col gap-1">
             {groups.map(({ key, date, msgs }) => (
-              <div key={key}>
-                <div className="chat-room__date">
-                  <div className="chat-room__date-line" aria-hidden />
-                  <span className="chat-room__date-pill">{date}</span>
-                  <div className="chat-room__date-line" aria-hidden />
+              <div key={key} className="flex flex-col gap-1">
+                <div className="my-6 flex items-center justify-center">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">{date}</span>
                 </div>
 
                 {msgs.map((msg, msgIdx) => {
@@ -1110,11 +1109,11 @@ export default function ConversationPage() {
                                 onClick={() => canCall && beginCall(callType)}
                                 disabled={!canCall}
                                 aria-label={`Call back (${callType === 'video' ? 'video' : 'voice'})`}
-                                className={`chat-room__call-pill inline-flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-[13px] transition-transform active:scale-95 disabled:active:scale-100 ${
+                                className={`inline-flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-[13px] font-medium transition-transform active:scale-95 disabled:active:scale-100 ${
                                   iAmCaller
-                                    ? 'bg-[#00D431]/12 text-[#00A555]'
-                                    : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--neu-text-secondary)]'
-                                } ${negative ? '!text-brand-red' : ''}`}
+                                    ? 'bg-blue-50 text-blue-700'
+                                    : 'bg-gray-100 text-gray-700'
+                                } ${negative ? '!bg-red-50 !text-red-700' : ''}`}
                               >
                                 <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                                   {icon}
@@ -1134,7 +1133,7 @@ export default function ConversationPage() {
                           const joined = event === 'joined';
                           return (
                             <div key={id} ref={isLastOverall ? lastMsgRef : undefined} className="my-3 flex justify-center px-2">
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00A555]/10 px-3 py-1.5 text-[12px] font-semibold text-[#00A555]">
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1.5 text-[12px] font-semibold text-green-700">
                                 <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                                   {joined ? 'visibility' : 'visibility_off'}
                                 </span>

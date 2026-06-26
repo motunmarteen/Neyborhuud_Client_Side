@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFollow } from '@/hooks/useFollow';
 import type { FollowerUser } from '@/types/follow';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
+import { useCall } from '@/components/calls/CallProvider';
 
 interface UserListItemProps {
   user: FollowerUser;
@@ -19,13 +20,31 @@ export function UserListItem({ user }: UserListItemProps) {
   const { user: currentUser } = useAuth();
   const isOwnProfile = currentUser?.id === user._id;
 
-  // Get follow status and actions
-  const {
-    isFollowing,
-    toggleFollow,
-    isPending,
-    isLoadingStatus,
-  } = useFollow(user._id, { enabled: !isOwnProfile && !!currentUser });
+  const { startCall } = useCall();
+
+  const handleAudioCall = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    startCall({
+      peerId: user._id,
+      peerName: displayName,
+      peerAvatar: user.profilePicture || user.avatarUrl || undefined,
+      type: 'audio',
+      conversationId: null,
+    });
+  };
+
+  const handleVideoCall = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    startCall({
+      peerId: user._id,
+      peerName: displayName,
+      peerAvatar: user.profilePicture || user.avatarUrl || undefined,
+      type: 'video',
+      conversationId: null,
+    });
+  };
 
   // Get display name
   const displayName =
@@ -71,46 +90,25 @@ export function UserListItem({ user }: UserListItemProps) {
         </div>
       </Link>
 
-      {/* Follow Button */}
+      {/* Call Icons */}
       {!isOwnProfile && currentUser && (
-        <div className="ml-3 shrink-0">
-          {isLoadingStatus ? (
-            <div className="px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-black/[0.08] animate-pulse">
-              <div className="w-16 h-4 bg-brand-surface dark:bg-brand-black rounded" />
-            </div>
-          ) : (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                toggleFollow();
-              }}
-              disabled={isPending}
-              className={`px-4 py-1.5 rounded-full font-semibold text-sm transition-all ${
-                isFollowing
-                  ? 'border border-black/[0.08] dark:border-black/[0.08] hover:border-brand-red dark:hover:border-brand-red hover:bg-brand-red/10 dark:hover:bg-brand-red/20 hover:text-brand-red dark:hover:text-brand-red group'
-                  : 'bg-brand-black dark:bg-white text-white dark:text-black hover:bg-brand-black dark:hover:bg-brand-surface'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-              type="button"
-            >
-              {isPending ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="material-symbols-outlined animate-spin text-xs"  aria-hidden="true">hourglass_empty</span>
-                  <span className="hidden sm:inline">
-                    {isFollowing ? 'Unfollowing…' : 'Following…'}
-                  </span>
-                </span>
-              ) : (
-                <>
-                  <span className="hidden group-hover:inline">
-                    {isFollowing ? 'Unfollow' : 'Follow'}
-                  </span>
-                  <span className="group-hover:hidden">
-                    {isFollowing ? 'Following' : 'Follow'}
-                  </span>
-                </>
-              )}
-            </button>
-          )}
+        <div className="flex shrink-0 items-center gap-1 ml-3">
+          <button
+            type="button"
+            onClick={handleAudioCall}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A555] transition-colors hover:bg-[#00D431]/10 active:scale-90"
+            aria-label="Audio call"
+          >
+            <span className="material-symbols-outlined text-[20px]">call</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleVideoCall}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A555] transition-colors hover:bg-[#00D431]/10 active:scale-90"
+            aria-label="Video call"
+          >
+            <span className="material-symbols-outlined text-[20px]">videocam</span>
+          </button>
         </div>
       )}
     </div>

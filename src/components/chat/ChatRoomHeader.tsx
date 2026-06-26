@@ -44,31 +44,29 @@ export function ChatRoomHeader({
   callDisabled = false,
 }: ChatRoomHeaderProps) {
   return (
-    <header
-      className={`chat-room__header shrink-0 ${isIncident ? 'chat-room__header--incident' : ''}`}
-    >
-      <div className="chat-room__header-inner">
+    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-gray-100">
+      <div className="mx-auto flex w-full max-w-[600px] px-1 h-14 items-center justify-between gap-3">
         {onBack ? (
           <button
             type="button"
             onClick={onBack}
-            className="chat-room__back mod-inset"
+            className="flex text-gray-700 hover:text-gray-900 transition-colors"
             aria-label="Back"
           >
-            <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+            <span className="material-symbols-outlined text-[26px]">chevron_left</span>
           </button>
         ) : (
           <Link
             href={backHref}
-            className="chat-room__back mod-inset"
+            className="flex text-gray-700 hover:text-gray-900 transition-colors"
             aria-label="Back to chats"
           >
-            <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+            <span className="material-symbols-outlined text-[26px]">chevron_left</span>
           </Link>
         )}
 
         <div
-          className={`chat-room__identity min-w-0 flex-1 ${onCommunityInfo ? 'cursor-pointer active:opacity-70' : ''}`}
+          className={`flex min-w-0 flex-1 items-center gap-3 ${onCommunityInfo ? 'cursor-pointer active:opacity-70' : ''}`}
           onClick={onCommunityInfo}
           role={onCommunityInfo ? 'button' : undefined}
           tabIndex={onCommunityInfo ? 0 : undefined}
@@ -79,12 +77,12 @@ export function ChatRoomHeader({
             <img
               src={avatarUrl}
               alt=""
-              className="chat-room__avatar neu-avatar h-11 w-11 shrink-0 rounded-full object-cover"
+              className="h-10 w-10 shrink-0 rounded-full object-cover shadow-sm"
             />
           ) : (
             <div
-              className={`chat-room__avatar neu-avatar flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                isIncident ? 'bg-status-danger/15 text-status-danger/70' : 'bg-primary/15 text-primary'
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-sm ${
+                isIncident ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
               }`}
               aria-hidden
             >
@@ -92,25 +90,25 @@ export function ChatRoomHeader({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-bold" style={{ color: 'var(--neu-text)' }}>
+            <p className="truncate text-[15px] font-bold tracking-tight text-gray-900">
               {displayName}
             </p>
             {subtitle ? (
-              <p className="truncate text-xs text-[var(--neu-text-muted)]">{subtitle}</p>
+              <p className="truncate text-xs font-medium text-gray-500">{subtitle}</p>
             ) : null}
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-3">
           {onInviteGuest ? (
             <button
               type="button"
               onClick={onInviteGuest}
-              className="chat-room__keys mod-inset"
+              className="flex text-gray-500 hover:text-gray-700 transition-colors"
               title="Invite a guest"
               aria-label="Invite a guest for a limited time"
             >
-              <span className="material-symbols-outlined text-[20px]">person_add</span>
+              <span className="material-symbols-outlined text-[22px]">person_add</span>
             </button>
           ) : null}
           {onAudioCall ? (
@@ -118,11 +116,11 @@ export function ChatRoomHeader({
               type="button"
               onClick={onAudioCall}
               disabled={callDisabled}
-              className="chat-room__keys mod-inset disabled:opacity-40"
+              className="flex text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-40"
               title="Audio call"
               aria-label="Start audio call"
             >
-              <span className="material-symbols-outlined text-[20px]">call</span>
+              <span className="material-symbols-outlined text-[22px]">call</span>
             </button>
           ) : null}
           {onVideoCall ? (
@@ -130,31 +128,11 @@ export function ChatRoomHeader({
               type="button"
               onClick={onVideoCall}
               disabled={callDisabled}
-              className="chat-room__keys mod-inset disabled:opacity-40"
+              className="flex text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-40"
               title="Video call"
               aria-label="Start video call"
             >
-              <span className="material-symbols-outlined text-[20px]">videocam</span>
-            </button>
-          ) : null}
-          {encrypted && !isIncident ? (
-            <span className="chat-room__trust mod-chip hidden items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-primary sm:inline-flex">
-              <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                lock
-              </span>
-              Secured
-            </span>
-          ) : null}
-          {onToggleKeys ? (
-            <button
-              type="button"
-              onClick={onToggleKeys}
-              className={`chat-room__keys mod-inset ${showKeyPanel ? 'chat-room__keys--active' : ''}`}
-              title="Encryption keys"
-              aria-label="View encryption keys"
-              aria-pressed={showKeyPanel}
-            >
-              <span className="material-symbols-outlined text-[20px]">encrypted</span>
+              <span className="material-symbols-outlined text-[22px]">videocam</span>
             </button>
           ) : null}
         </div>

@@ -7,23 +7,23 @@ import type { ChatMessage } from '@/types/api';
 
 const QUICK_EMOJI = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
-type MessageReactionsProps = {
+export type MessageReactionsProps = {
   msg: ChatMessage;
   currentUserId?: string;
-  /** Outgoing bubbles sit on the right — anchor picker so it grows leftward. */
   mine?: boolean;
   onUpdated?: (reactions: ChatMessage['reactions']) => void;
+  openPicker?: boolean;
+  onClosePicker?: () => void;
+  anchorRef?: React.RefObject<HTMLDivElement | null>;
 };
 
-export function MessageReactions({ msg, currentUserId, mine, onUpdated }: MessageReactionsProps) {
+export function MessageReactions({ msg, currentUserId, mine, onUpdated, openPicker, onClosePicker, anchorRef }: MessageReactionsProps) {
   const messageId = msg.id ?? msg._id;
-  const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({ visibility: 'hidden' });
-  const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const updatePosition = useCallback(() => {
-    const trigger = triggerRef.current;
+    const trigger = anchorRef?.current;
     const menu = menuRef.current;
     if (!trigger || !menu) return;
 
@@ -49,10 +49,10 @@ export function MessageReactions({ msg, currentUserId, mine, onUpdated }: Messag
       zIndex: 250,
       visibility: 'visible',
     });
-  }, [mine]);
+  }, [mine, anchorRef]);
 
   useEffect(() => {
-    if (!open || !messageId) return;
+    if (!openPicker || !messageId) return;
     const raf = requestAnimationFrame(updatePosition);
     const onReflow = () => updatePosition();
     window.addEventListener('resize', onReflow);
@@ -62,18 +62,18 @@ export function MessageReactions({ msg, currentUserId, mine, onUpdated }: Messag
       window.removeEventListener('resize', onReflow);
       window.removeEventListener('scroll', onReflow, true);
     };
-  }, [open, updatePosition, messageId]);
+  }, [openPicker, updatePosition, messageId]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!openPicker) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') onClosePicker?.();
     };
     const onPointer = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node;
-      if (triggerRef.current?.contains(target)) return;
+      if (anchorRef?.current?.contains(target)) return;
       if (menuRef.current?.contains(target)) return;
-      setOpen(false);
+      onClosePicker?.();
     };
     document.addEventListener('keydown', onKey);
     document.addEventListener('mousedown', onPointer);
@@ -83,11 +83,11 @@ export function MessageReactions({ msg, currentUserId, mine, onUpdated }: Messag
       document.removeEventListener('mousedown', onPointer);
       document.removeEventListener('touchstart', onPointer);
     };
-  }, [open]);
+  }, [openPicker, anchorRef, onClosePicker]);
 
   const handleReact = async (emoji: string) => {
     if (!messageId) return;
-    setOpen(false);
+    onClosePicker?.();
     try {
       const res = await chatService.setReaction(messageId, emoji);
       onUpdated?.(res.data?.reactions);
@@ -97,7 +97,7 @@ export function MessageReactions({ msg, currentUserId, mine, onUpdated }: Messag
   };
 
   const pickerMenu =
-    open && typeof document !== 'undefined'
+    openPicker && typeof document !== 'undefined'
       ? createPortal(
           <div
             ref={menuRef}
@@ -128,8 +128,10 @@ export function MessageReactions({ msg, currentUserId, mine, onUpdated }: Messag
   const reactions = msg.reactions ?? {};
   const entries = Object.entries(reactions).filter(([, v]) => v.count > 0);
 
+  if (entries.length === 0 && !openPicker) return null;
+
   return (
-    <div className="chat-reactions">
+    <div className={`mt-0.5 flex items-center gap-1.5 ${mine ? 'justify-end' : 'justify-start'}`}>
       {entries.map(([emoji, data]) => {
         const reacted = currentUserId && data.userIds.includes(currentUserId);
         return (
@@ -137,24 +139,17 @@ export function MessageReactions({ msg, currentUserId, mine, onUpdated }: Messag
             key={emoji}
             type="button"
             onClick={() => void handleReact(emoji)}
-            className={`chat-reactions__chip ${reacted ? 'chat-reactions__chip--mine' : ''}`}
+            className={`flex h-6 items-center gap-1 rounded-full px-2 text-[11px] font-bold transition-transform active:scale-95 ${
+              reacted
+                ? 'bg-green-100 text-green-700 ring-1 ring-inset ring-green-500/20'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
           >
             <span aria-hidden>{emoji}</span>
             <span className="tabular-nums">{data.count}</span>
           </button>
         );
       })}
-      <button
-        ref={triggerRef}
-        type="button"
-        className={`chat-reactions__add ${open ? 'chat-reactions__add--open' : ''}`}
-        aria-label="Add reaction"
-        aria-expanded={open}
-        aria-haspopup="menu"
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="material-symbols-outlined text-[16px]">add_reaction</span>
-      </button>
       {pickerMenu}
     </div>
   );

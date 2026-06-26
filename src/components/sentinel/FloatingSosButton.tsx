@@ -16,6 +16,10 @@ export function FloatingSosButton() {
   const { openSheet } = useSentinelBottomSheet();
   const scrollHidden = useScrollHideBottomNav();
 
+  if (pathname.startsWith('/chat/')) {
+    return null;
+  }
+
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFired = useRef(false);
   const sosActive = pathname.startsWith('/sos') || pathname.startsWith('/safety') || sos.phase !== 'idle';

@@ -15,17 +15,17 @@ export function ChatMessageTicks({ status = 'sent' }: ChatMessageTicksProps) {
 
   return (
     <span
-      className={`chat-bubble__ticks${read ? ' chat-bubble__ticks--read' : delivered ? ' chat-bubble__ticks--delivered' : ''}`}
+      className="flex items-center tracking-[-0.2em]"
       aria-label={label}
       title={label}
     >
       {delivered ? (
         <>
-          <span className="chat-bubble__tick">✓</span>
-          <span className="chat-bubble__tick chat-bubble__tick--second">✓</span>
+          <span className={`text-[12px] ${read ? 'text-[#34B7F1]' : 'text-gray-400'}`}>✓</span>
+          <span className={`text-[12px] ${read ? 'text-[#34B7F1]' : 'text-gray-400'}`}>✓</span>
         </>
       ) : (
-        <span className="chat-bubble__tick">✓</span>
+        <span className="text-[12px] text-gray-400">✓</span>
       )}
     </span>
   );

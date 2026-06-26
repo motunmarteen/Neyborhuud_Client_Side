@@ -81,7 +81,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
   const router = useRouter();
   const isOnFeed = pathname === '/feed' || pathname === '/';
   const title = useMemo(() => (pathname ? getRouteTitle(pathname) : 'NeyborHuud'), [pathname]);
-  const { data: unreadCount = 0 } = useUnreadCount();
+  const { data: unreadCount = 0 } = useUnreadCount(undefined, 'message');
   const scrollHidden = useScrollHideBottomNav();
   const isScrolled = useIsScrolled(60);
   const { user, logout } = useAuth();

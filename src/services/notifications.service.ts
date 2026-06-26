@@ -22,9 +22,10 @@ export const notificationsService = {
   /**
    * Get unread notifications count
    */
-  async getUnreadCount() {
+  async getUnreadCount(type?: string, excludeType?: string) {
     return await apiClient.get<{ count: number }>(
       "/notifications/unread-count",
+      { params: { type, excludeType } }
     );
   },
 

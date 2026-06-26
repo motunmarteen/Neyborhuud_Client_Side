@@ -26,22 +26,27 @@ function StatCard({
   href?: string;
 }) {
   const inner = (
-    <div className="mod-card flex items-center gap-3 rounded-xl p-3">
-      <div className="mod-inset flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-        <span className="text-lg leading-none">{icon}</span>
+    <div className="flex flex-col justify-between bg-gray-50/50 hover:bg-gray-50/80 border border-gray-100/50 rounded-2xl p-4 transition-all duration-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)] min-h-[96px] h-full cursor-pointer group">
+      <div className="flex items-center justify-between">
+        <span className="text-xl filter drop-shadow-sm select-none">{icon}</span>
+        {href && (
+          <span className="material-symbols-outlined text-[16px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+            arrow_forward
+          </span>
+        )}
       </div>
-      <div className="min-w-0">
-        <p className="truncate text-lg font-extrabold tabular-nums" style={{ color: 'var(--neu-text)' }}>
+      <div className="mt-2.5">
+        <p className="text-lg font-extrabold tracking-tight text-gray-900 leading-tight tabular-nums">
           {value}
         </p>
-        <p className="text-xs text-[var(--neu-text-muted)]">{label}</p>
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">{label}</p>
       </div>
     </div>
   );
 
   if (href) {
     return (
-      <Link href={href} className="block no-underline transition-opacity hover:opacity-90">
+      <Link href={href} className="block no-underline">
         {inner}
       </Link>
     );
@@ -64,41 +69,43 @@ export function ProfileSnapStatsRow({
   const zodiac = isOwnProfile ? getZodiacFromBirthday(dateOfBirth) : null;
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      {birthday ? <StatCard icon="🎈" label="Birthday" value={birthday} /> : null}
-      <StatCard
-        icon="🪙"
-        label="HuudCoins"
-        value={huudCoins.toLocaleString()}
-        href={isOwnProfile ? '/huud-economy/wallet' : undefined}
-      />
-      <StatCard
-        icon="🤜"
-        label="Vouches received"
-        value={vouchReceived.toLocaleString()}
-        href={`/profile/${username}?tab=trust`}
-      />
-      {isOwnProfile ? (
+    <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-2">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {birthday ? <StatCard icon="🎈" label="Birthday" value={birthday} /> : null}
         <StatCard
-          icon="🤝"
-          label="Vouches given"
-          value={vouchGiven.toLocaleString()}
+          icon="🪙"
+          label="HuudCoins"
+          value={huudCoins.toLocaleString()}
+          href={isOwnProfile ? '/huud-economy/wallet' : undefined}
+        />
+        <StatCard
+          icon="🤜"
+          label="Vouches"
+          value={vouchReceived.toLocaleString()}
           href={`/profile/${username}?tab=trust`}
         />
-      ) : null}
-      {zodiac ? <StatCard icon={zodiac.emoji} label="Sign" value={zodiac.sign} /> : null}
-      <StatCard
-        icon="👥"
-        label="Followers"
-        value={followerCount.toLocaleString()}
-        href={`/profile/${username}/followers`}
-      />
-      <StatCard
-        icon="↔"
-        label="Following"
-        value={followingCount.toLocaleString()}
-        href={`/profile/${username}/following`}
-      />
+        {isOwnProfile ? (
+          <StatCard
+            icon="🤝"
+            label="Vouches Given"
+            value={vouchGiven.toLocaleString()}
+            href={`/profile/${username}?tab=trust`}
+          />
+        ) : null}
+        {zodiac ? <StatCard icon={zodiac.emoji} label="Sign" value={zodiac.sign} /> : null}
+        <StatCard
+          icon="👥"
+          label="Followers"
+          value={followerCount.toLocaleString()}
+          href={`/profile/${username}/followers`}
+        />
+        <StatCard
+          icon="↔"
+          label="Following"
+          value={followingCount.toLocaleString()}
+          href={`/profile/${username}/following`}
+        />
+      </div>
     </div>
   );
 }

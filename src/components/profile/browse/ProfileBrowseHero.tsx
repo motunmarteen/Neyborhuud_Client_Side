@@ -74,16 +74,7 @@ export function ProfileBrowseHero({
           showDragHint={false}
           showNavigationControl={false}
           showAttribution={false}
-          customMarkerNode={
-            <BrandPinAvatar
-              src={resolved}
-              alt={displayName}
-              fallbackInitial={initial}
-              size="marker"
-              priority
-              className="brand-mark-hero drop-shadow-lg"
-            />
-          }
+          showMarker={false}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
         <div className="absolute right-2 top-2 flex gap-1.5">
@@ -165,37 +156,18 @@ export function ProfileBrowseHero({
           ) : null}
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          {isOwnProfile ? (
-            <>
-              <Link
-                href="/settings"
-                className="mod-chip mod-chip-active inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold text-primary"
-              >
-                My account
-              </Link>
-              <button
-                type="button"
-                onClick={onShare}
-                className="mod-chip inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold"
-              >
-                <span className="material-symbols-outlined text-[14px]">share</span>
-                Share
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={onMessage}
-                disabled={messaging}
-                className="mod-chip mod-chip-active inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold text-primary disabled:opacity-50"
-              >
-                {messaging ? 'Opening…' : 'Message'}
-              </button>
-            </>
-          )}
-        </div>
+        {!isOwnProfile ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={onMessage}
+              disabled={messaging}
+              className="mod-chip mod-chip-active inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold text-primary disabled:opacity-50"
+            >
+              {messaging ? 'Opening…' : 'Message'}
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );

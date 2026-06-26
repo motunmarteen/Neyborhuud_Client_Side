@@ -68,12 +68,35 @@ import { getGeolocation } from '@/lib/nativeGeolocation';
 
 type ProfileTab = 'overview' | 'posts' | 'trust' | 'listings';
 
-const PROFILE_TABS: { id: ProfileTab; label: string; icon: string }[] = [
-  { id: 'overview', label: 'Overview', icon: 'dashboard' },
-  { id: 'posts', label: 'Posts', icon: 'dynamic_feed' },
-  { id: 'trust', label: 'Trust', icon: 'verified_user' },
-  { id: 'listings', label: 'Listings', icon: 'storefront' },
+const PROFILE_TABS: { id: ProfileTab; label: string }[] = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'posts', label: 'Posts' },
+  { id: 'trust', label: 'Trust' },
+  { id: 'listings', label: 'Listings' },
 ];
+
+const TAB_STYLES: Record<ProfileTab, { active: string; inactive: string; icon: string }> = {
+  overview: {
+    active: 'bg-blue-600 border-blue-600 text-white shadow-[0_4px_16px_rgba(37,99,235,0.25)]',
+    inactive: 'bg-[#F0F5FF] border-blue-100/50 text-blue-600 hover:bg-blue-100/60',
+    icon: 'dashboard',
+  },
+  posts: {
+    active: 'bg-purple-600 border-purple-600 text-white shadow-[0_4px_16px_rgba(147,51,234,0.25)]',
+    inactive: 'bg-[#FAF5FF] border-purple-100/50 text-purple-600 hover:bg-purple-100/60',
+    icon: 'chat_bubble',
+  },
+  trust: {
+    active: 'bg-emerald-600 border-emerald-600 text-white shadow-[0_4px_16px_rgba(5,150,105,0.25)]',
+    inactive: 'bg-[#F0FDF4] border-emerald-100/50 text-emerald-600 hover:bg-emerald-100/60',
+    icon: 'verified_user',
+  },
+  listings: {
+    active: 'bg-orange-500 border-orange-500 text-white shadow-[0_4px_16px_rgba(249,115,22,0.25)]',
+    inactive: 'bg-[#FFF7ED] border-orange-100/50 text-orange-600 hover:bg-orange-100/60',
+    icon: 'storefront',
+  },
+};
 
 function parseProfileTab(value: string | null): ProfileTab {
   if (value === 'posts' || value === 'trust' || value === 'listings') return value;
@@ -351,9 +374,17 @@ export default function ProfilePage() {
   // Post mutations
   const { likePost, unlikePost, savePost, unsavePost } = usePostMutations();
 
-  // Flatten posts from all pages
-  const posts: Post[] =
-    postsData?.pages.flatMap((page: any) => page.content ?? []) ?? [];
+  // Flatten and deduplicate posts from all pages
+  const posts: Post[] = (() => {
+    const raw = postsData?.pages.flatMap((page: any) => page.content ?? []) ?? [];
+    const seen = new Set<string>();
+    return raw.filter((post) => {
+      if (!post?.id) return false;
+      if (seen.has(post.id)) return false;
+      seen.add(post.id);
+      return true;
+    });
+  })();
 
   // Infinite scroll
   const { ref: loadMoreRef, inView } = useInView({
@@ -596,35 +627,9 @@ export default function ProfilePage() {
 
       <AppBrowseLayout
         maxWidth="680"
-        header={
-          <BrowseTabStrip
-            tabs={PROFILE_TABS}
-            activeId={tab}
-            onChange={(id) => changeTab(id as ProfileTab)}
-            trailing={
-              isOwnProfile ? (
-                <Link
-                  href="/settings"
-                  className="mod-chip inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold"
-                  aria-label="Account settings"
-                >
-                  <span className="material-symbols-outlined text-[18px]">settings</span>
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowTipModal(true)}
-                  className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary"
-                >
-                  <span aria-hidden>🪙</span>
-                  Tip
-                </button>
-              )
-            }
-          />
-        }
+        className="!bg-white !px-0 !pt-0 !min-h-[100dvh] flex-1"
       >
-        <div className="space-y-4">
+        <div className="flex flex-col">
           <ProfileBrowseHero
             displayName={displayName}
             personalName={personalName}
@@ -652,27 +657,29 @@ export default function ProfilePage() {
           />
 
           {!isOwnProfile && (
-            <div className="mod-card flex flex-wrap gap-2 rounded-2xl p-3">
+            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 py-1 flex flex-wrap gap-2">
               {isLoadingStatus ? (
-                <div className="mod-chip animate-pulse px-4 py-2 opacity-60">Loading…</div>
+                <div className="px-4 py-2 text-xs font-bold text-gray-400 animate-pulse bg-gray-50 rounded-full">Loading…</div>
               ) : isBlocked ? (
                 <button
                   onClick={() => toggleBlock()}
                   disabled={isBlockPending}
-                  className="mod-chip inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold text-brand-red"
+                  className="inline-flex items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-600 px-5 py-2 text-xs font-bold shadow-sm"
                   type="button"
                 >
                   {isBlockPending ? 'Unblocking…' : 'Blocked'}
                 </button>
               ) : isBlockedByThem ? (
-                <div className="mod-chip cursor-not-allowed px-4 py-2 opacity-60">Unavailable</div>
+                <div className="px-4 py-2 text-xs font-bold text-gray-400 bg-gray-50 rounded-full opacity-60">Unavailable</div>
               ) : (
                 <>
                   <button
                     onClick={toggleFollow}
                     disabled={isFollowPending}
-                    className={`mod-chip inline-flex items-center rounded-full px-4 py-2 text-sm font-bold ${
-                      isFollowing ? '' : 'mod-chip-active text-primary'
+                    className={`inline-flex items-center justify-center rounded-full px-5 py-2 text-xs font-bold transition-all shadow-sm ${
+                      isFollowing
+                        ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                        : 'bg-slate-900 text-white hover:bg-slate-800'
                     }`}
                     type="button"
                   >
@@ -688,6 +695,63 @@ export default function ProfilePage() {
               )}
             </div>
           )}
+
+          <div className="relative bg-white border-b border-gray-100/80">
+            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-4 flex items-center justify-around gap-2 overflow-x-auto no-scrollbar">
+              {PROFILE_TABS.map((t) => {
+                const isActive = tab === t.id;
+                const style = TAB_STYLES[t.id];
+                const circleClass = `w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-200 ${
+                  isActive ? style.active : style.inactive
+                }`;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => changeTab(t.id)}
+                    className="flex flex-col items-center gap-1.5 focus:outline-none touch-manipulation group flex-shrink-0"
+                  >
+                    <div className={circleClass}>
+                      <span className="material-symbols-outlined text-[23px] select-none" style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                        {style.icon}
+                      </span>
+                    </div>
+                    <span className={`text-[11px] font-bold transition-colors uppercase tracking-wider ${
+                      isActive ? 'text-gray-900 font-extrabold' : 'text-gray-400 group-hover:text-gray-600'
+                    }`}>
+                      {t.label}
+                    </span>
+                  </button>
+                );
+              })}
+
+              {isOwnProfile ? (
+                <Link
+                  href="/settings"
+                  className="flex flex-col items-center gap-1.5 focus:outline-none touch-manipulation group flex-shrink-0"
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-50 border border-gray-150 text-gray-500 hover:bg-gray-100 hover:text-gray-700 shadow-sm transition-all duration-200">
+                    <span className="material-symbols-outlined text-[22px]">settings</span>
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-400 group-hover:text-gray-600 transition-colors uppercase tracking-wider">
+                    Settings
+                  </span>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowTipModal(true)}
+                  className="flex flex-col items-center gap-1.5 focus:outline-none touch-manipulation group flex-shrink-0"
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 border border-amber-100 text-amber-600 hover:bg-amber-100 hover:text-amber-700 shadow-sm transition-all duration-200">
+                    <span className="text-xl select-none">🪙</span>
+                  </div>
+                  <span className="text-[11px] font-bold text-amber-500 group-hover:text-amber-600 transition-colors uppercase tracking-wider">
+                    Tip
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
 
           {tab === 'overview' && (
             <>
@@ -717,36 +781,36 @@ export default function ProfilePage() {
         />
 
         {!isOwnProfile && !isBlocked && !isBlockedByThem && currentUser && (
-          <div className="mod-card flex flex-col gap-3 rounded-2xl p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
+          <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t border-gray-100 mt-4 pt-4 px-3">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <ProfileBrowseEyebrow>Community Trust</ProfileBrowseEyebrow>
                   {!vouchStatus?.hasVouched && (
                     vouchStatus?.locationRequired ? (
-                      <span className="inline-flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--surface-muted,#f4f4f5)] px-2 py-0.5 text-[10px] font-bold text-[var(--neu-text-muted)]">
-                        <span className="material-symbols-outlined text-[12px]">location_off</span>
+                      <span className="inline-flex items-center gap-0.5 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[9px] font-bold text-gray-400">
+                        <span className="material-symbols-outlined text-[11px]">location_off</span>
                         Location needed
                       </span>
                     ) : vouchStatus?.withinRange === true ? (
-                      <span className="inline-flex items-center gap-0.5 rounded-full border border-status-success/30 bg-status-success/10 px-2 py-0.5 text-[10px] font-bold text-status-success">
-                        <span className="material-symbols-outlined text-[12px]">my_location</span>
+                      <span className="inline-flex items-center gap-0.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600">
+                        <span className="material-symbols-outlined text-[11px]">my_location</span>
                         {vouchStatus.distanceMeters}m away ✓
                       </span>
                     ) : vouchStatus?.withinRange === false ? (
-                      <span className="inline-flex items-center gap-0.5 rounded-full border border-status-danger/30 bg-status-danger/8 px-2 py-0.5 text-[10px] font-bold text-status-danger">
-                        <span className="material-symbols-outlined text-[12px]">location_off</span>
+                      <span className="inline-flex items-center gap-0.5 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[9px] font-bold text-red-600">
+                        <span className="material-symbols-outlined text-[11px]">location_off</span>
                         {vouchStatus.distanceMeters != null ? `${vouchStatus.distanceMeters}m away` : 'Too far'} — 500m limit
                       </span>
                     ) : null
                   )}
                 </div>
-                <p className="text-base font-bold" style={{ color: 'var(--neu-text)' }}>
+                <p className="text-base font-extrabold text-gray-800 leading-tight">
                   {(vouchStatus?.vouchCount ?? 0) > 0
                     ? `${vouchStatus!.vouchCount} NeyborH${vouchStatus!.vouchCount === 1 ? '' : 's'} vouch for @${profile.username}`
                     : `@${profile.username} has no vouches yet`}
                 </p>
-                <p className="text-sm text-[var(--neu-text-muted)]">
+                <p className="text-[13px] font-medium text-gray-500 mt-1 leading-relaxed">
                   {vouchStatus?.hasVouched
                     ? 'You have vouched for this NeyborH. Their actions reflect on your trust.'
                     : vouchStatus?.canVouch === false
@@ -758,12 +822,12 @@ export default function ProfilePage() {
                           : 'Vouching puts your own NeyburH Score at stake.'}
                 </p>
               </div>
-              <div className="flex shrink-0 flex-col gap-2">
+              <div className="flex shrink-0 flex-col gap-2 mt-1">
                 {vouchStatus?.hasVouched ? (
                   <button
                     onClick={() => revokeMutation.mutate()}
                     disabled={isVouchPending}
-                    className="mod-chip inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold"
+                    className="inline-flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 transition shadow-sm"
                     type="button"
                   >
                     {isVouchPending ? '…' : '🤜 Vouched'}
@@ -792,7 +856,7 @@ export default function ProfilePage() {
                       vouchMutation.mutate();
                     }}
                     disabled={isVouchPending}
-                    className="mod-chip mod-chip-active inline-flex items-center rounded-full px-4 py-2 text-sm font-bold text-primary"
+                    className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold hover:bg-slate-800 transition shadow-sm"
                     type="button"
                   >
                     {isVouchPending ? '…' : '🤜 Vouch'}
@@ -802,7 +866,7 @@ export default function ProfilePage() {
                   <button
                     onClick={() => toggleBlock()}
                     disabled={isBlockPending}
-                    className="mod-chip inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold"
+                    className="inline-flex items-center justify-center rounded-full border border-gray-200 hover:bg-gray-50 px-3 py-1.5 text-[11px] font-semibold text-gray-500 shadow-sm"
                     type="button"
                   >
                     {isBlocked ? 'Unblock' : 'Block'}
@@ -811,13 +875,13 @@ export default function ProfilePage() {
               </div>
             </div>
             {(vouchStatus?.vouchesNeeded ?? 0) > 0 && !vouchStatus?.hasVouched && (
-              <div>
-                <div className="mb-1 flex items-center justify-between text-[10px] font-bold text-[var(--neu-text-muted)]">
+              <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between text-[10px] font-bold text-gray-400">
                   <span>Progress to Tree 🌳 tier</span>
                   <span>{vouchStatus?.vouchCount ?? 0} / 3 vouches</span>
                 </div>
                 <progress
-                  className="h-1.5 w-full overflow-hidden rounded-full accent-[var(--landing-green-deep,#006f35)]"
+                  className="h-1.5 w-full overflow-hidden rounded-full accent-blue-600 bg-gray-100"
                   value={Math.min(100, ((vouchStatus?.vouchCount ?? 0) / 3) * 100)}
                   max={100}
                   aria-label="Vouch progress to Tree tier"
@@ -834,114 +898,126 @@ export default function ProfilePage() {
           followerCount={followerCount}
         />
 
-        <div className="mod-card rounded-2xl p-4">
-          <div className="flex items-start justify-between gap-3">
-            <ProfileBrowseEyebrow>About this NeyburH</ProfileBrowseEyebrow>
-            {isOwnProfile ? (
-              <Link href="/settings" className="text-xs font-bold text-primary no-underline">
-                Edit bio
-              </Link>
-            ) : null}
+        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t-8 border-gray-50/80 py-5">
+          <div className="px-3">
+            <div className="flex items-start justify-between gap-3">
+              <ProfileBrowseEyebrow>About this NeyburH</ProfileBrowseEyebrow>
+              {isOwnProfile ? (
+                <Link href="/settings" className="text-xs font-bold text-blue-600 no-underline hover:underline">
+                  Edit bio
+                </Link>
+              ) : null}
+            </div>
+            <p className="mt-3 text-[14px] leading-relaxed text-gray-600 font-medium">
+              {profile.bio || `${displayName} is part of the ${locationLabel || 'NeyborHuud'} community.`}
+            </p>
           </div>
-          <p className="mt-2 text-sm leading-6 text-[var(--neu-text-muted)]">
-            {profile.bio || `${displayName} is part of the ${locationLabel || 'NeyborHuud'} community.`}
-          </p>
         </div>
 
         {(showHandleHistory || (!isOwnProfile && (followsYou || isMutual))) && (
-          <div className="flex flex-col gap-2">
-            {showHandleHistory ? (
-              <div className="mod-card rounded-2xl p-4">
-                <ProfileBrowseEyebrow>Handle history</ProfileBrowseEyebrow>
-                {renameAudit.length > 0 ? (
-                  <ul className="space-y-2 text-xs text-[var(--brand-black,#1a1a1a)]">
-                    {renameAudit.map((row, idx) => (
-                      <li key={`${row.previousUsername}-${row.newUsername}-${idx}`}>
-                        <span className="font-mono text-[var(--landing-green-deep,#006f35)]">@{row.previousUsername}</span>
-                        {' → '}
-                        <span className="font-mono">@{row.newUsername}</span>
-                        {row.changedAt ? (
-                          <span className="block text-[10px] opacity-70">
-                            {new Date(row.changedAt).toLocaleString()}
+          <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t-8 border-gray-50/80 py-5">
+            <div className="px-3 flex flex-col gap-4">
+              {showHandleHistory ? (
+                <div>
+                  <div className="pb-2">
+                    <ProfileBrowseEyebrow>Handle history</ProfileBrowseEyebrow>
+                  </div>
+                  {renameAudit.length > 0 ? (
+                    <ul className="space-y-2 text-xs text-gray-700">
+                      {renameAudit.map((row, idx) => (
+                        <li key={`${row.previousUsername}-${row.newUsername}-${idx}`} className="font-semibold">
+                          <span className="font-mono text-emerald-600">@{row.previousUsername}</span>
+                          {' → '}
+                          <span className="font-mono text-slate-800">@{row.newUsername}</span>
+                          {row.changedAt ? (
+                            <span className="block text-[10px] text-gray-400 font-normal mt-0.5">
+                              {new Date(row.changedAt).toLocaleString()}
+                            </span>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : hist.usernameTimeline && hist.usernameTimeline.length > 0 ? (
+                    <ul className="space-y-2 text-xs text-gray-700">
+                      {hist.usernameTimeline.map((row, idx) => (
+                        <li key={`${row.username}-${idx}`} className="font-semibold">
+                          <span className="font-mono text-slate-800">@{row.username}</span>
+                          <span className="block text-[10px] text-gray-400 font-normal mt-0.5">
+                            {new Date(row.effectiveFrom).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {row.effectiveTo
+                              ? ` – ${new Date(row.effectiveTo).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                              : ' – current'}
                           </span>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                ) : hist.usernameTimeline && hist.usernameTimeline.length > 0 ? (
-                  <ul className="space-y-1.5 text-xs text-[var(--brand-black,#1a1a1a)]">
-                    {hist.usernameTimeline.map((row, idx) => (
-                      <li key={`${row.username}-${idx}`}>
-                        <span className="font-mono font-semibold">@{row.username}</span>
-                        <span className="block text-[10px] opacity-70">
-                          {new Date(row.effectiveFrom).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          {row.effectiveTo
-                            ? ` – ${new Date(row.effectiveTo).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                            : ' – current'}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            ) : null}
-            {!isOwnProfile && (followsYou || isMutual) && (
-              <div className="flex flex-wrap gap-2">
-                {isMutual ? (
-                  <span className="mod-chip mod-chip-active inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-primary">
-                    <span className="material-symbols-outlined text-[14px]">link</span>
-                    Mutual follow
-                  </span>
-                ) : followsYou ? (
-                  <span className="mod-chip inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold">
-                    <span className="material-symbols-outlined text-[14px]">person_check</span>
-                    Follows you
-                  </span>
-                ) : null}
-              </div>
-            )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
+              {!isOwnProfile && (followsYou || isMutual) && (
+                <div className="flex flex-wrap gap-2">
+                  {isMutual ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-100 px-3 py-1.5 text-xs font-bold text-blue-600">
+                      <span className="material-symbols-outlined text-[14px]">link</span>
+                      Mutual follow
+                    </span>
+                  ) : followsYou ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600">
+                      <span className="material-symbols-outlined text-[14px]">person_check</span>
+                      Follows you
+                    </span>
+                  ) : null}
+                </div>
+              )}
+            </div>
           </div>
         )}
             </>
           )}
 
+
           {tab === 'trust' && (
-            <div className="space-y-4">
-            <div className="mod-card flex flex-col gap-4 rounded-2xl p-4">
-              <div className="flex items-center justify-between gap-3">
-                <ProfileBrowseEyebrow>TrustOS</ProfileBrowseEyebrow>
-                <span className="material-symbols-outlined text-[1.25rem] text-primary">verified_user</span>
-              </div>
-              <div>
-                <p className="text-4xl font-black leading-none tabular-nums" style={{ color: 'var(--neu-text)' }}>{trustScore}</p>
-                <p className="mt-1 text-sm font-semibold text-[var(--neu-text-muted)]">NeyburH Score</p>
-                <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--neu-text)' }}>
-                  {profileTrustTier.icon} {profileTrustTier.label}
-                  {nextTrustTier ? ` · ${Math.max(0, nextTrustTier.minScore - trustScore)} pts to ${nextTrustTier.label}` : ' · Top tier reached'}
-                </p>
-                {profilePrivileges.marketplaceBadge && (
-                  <span className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black ${profilePrivileges.marketplaceBadgeColor}`}>
-                    {profileTrustTier.icon} {profilePrivileges.marketplaceBadge}
-                  </span>
-                )}
-              </div>
-              <div>
-                <div className="mb-2 flex items-center justify-between text-xs font-bold text-[var(--neu-text-muted)]">
-                  <span>Community trust</span>
-                  <span>{scorePercent}%</span>
+            <div className="flex flex-col">
+              {/* TrustOS Info */}
+              <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-6 px-3">
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <ProfileBrowseEyebrow>TrustOS</ProfileBrowseEyebrow>
+                  <span className="material-symbols-outlined text-[20px] text-blue-600">verified_user</span>
                 </div>
-                <progress
-                  className="h-2 w-full overflow-hidden rounded-full accent-[var(--landing-green-deep,#006f35)]"
-                  value={scorePercent}
-                  max={100}
-                  aria-label="Community trust progress"
-                />
-              </div>
+                <div className="flex items-baseline gap-2.5">
+                  <p className="text-5xl font-black tracking-tight text-gray-900 leading-none tabular-nums">{trustScore}</p>
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">NeyburH Score</p>
+                    <p className="text-[13px] font-semibold text-gray-600 mt-0.5">
+                      {profileTrustTier.icon} {profileTrustTier.label}
+                      {nextTrustTier ? ` · ${Math.max(0, nextTrustTier.minScore - trustScore)} pts to ${nextTrustTier.label}` : ' · Top tier reached'}
+                    </p>
+                  </div>
+                </div>
+                {profilePrivileges.marketplaceBadge && (
+                  <div className="mt-3">
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-sm ${profilePrivileges.marketplaceBadgeColor}`}>
+                      {profileTrustTier.icon} {profilePrivileges.marketplaceBadge}
+                    </span>
+                  </div>
+                )}
+                <div className="mt-5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-bold text-gray-400">
+                    <span>Community trust</span>
+                    <span>{scorePercent}%</span>
+                  </div>
+                  <progress
+                    className="h-2 w-full overflow-hidden rounded-full accent-blue-600 bg-gray-100"
+                    value={scorePercent}
+                    max={100}
+                    aria-label="Community trust progress"
+                  />
+                </div>
 
                 {/* Voucher list */}
                 {voucherList.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)] mb-2">
+                  <div className="mt-6 border-t border-gray-100 pt-5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400 mb-3">
                       Vouched by
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -949,14 +1025,14 @@ export default function ProfilePage() {
                         <button
                           key={v.id}
                           onClick={() => router.push(`/profile/${v.voucherUsername}`)}
-                          className="flex items-center gap-1.5 rounded-full border border-status-success/20 bg-status-success/10 px-2 py-1 text-xs font-semibold text-status-success transition hover:bg-status-success/15"
+                          className="flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50/50 px-3 py-1 text-xs font-bold text-emerald-700 transition hover:bg-emerald-50 hover:shadow-sm"
                           type="button"
                           title={`View @${v.voucherUsername}`}
                         >
                           {v.voucherAvatar ? (
                             <img src={v.voucherAvatar} alt="" className="h-4 w-4 rounded-full object-cover" />
                           ) : (
-                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-status-success/25 text-[10px] font-black text-status-success">
+                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-200/50 text-[10px] font-bold text-emerald-700">
                               {v.voucherUsername[0]?.toUpperCase()}
                             </span>
                           )}
@@ -964,7 +1040,7 @@ export default function ProfilePage() {
                         </button>
                       ))}
                       {voucherList.length > 5 && (
-                        <span className="flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-[var(--neu-text-muted)]">
+                        <span className="flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-bold text-gray-500">
                           +{voucherList.length - 5} more
                         </span>
                       )}
@@ -973,12 +1049,12 @@ export default function ProfilePage() {
                 )}
 
                 {/* Tier Privileges mini-list */}
-                <div className="mt-4 border-t pt-4" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+                <div className="mt-5 border-t border-gray-100 pt-5">
                   <ProfileBrowseEyebrow>Tier Abilities</ProfileBrowseEyebrow>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2 mt-3">
                     {profilePrivileges.privilegeList.slice(0, 4).map((p) => (
-                      <div key={p.label} className={`flex items-center gap-2 text-xs ${p.unlocked ? 'text-slate-700' : 'text-[var(--neu-text-muted)]'}`}>
-                        <span className={`material-symbols-outlined text-[14px] ${p.unlocked ? 'text-primary' : 'text-slate-300'}`}
+                      <div key={p.label} className={`flex items-center gap-2 text-xs font-semibold ${p.unlocked ? 'text-gray-700' : 'text-gray-400'}`}>
+                        <span className={`material-symbols-outlined text-[15px] ${p.unlocked ? 'text-blue-500' : 'text-gray-300'}`}
                           style={{ fontVariationSettings: "'FILL' 1" }}>
                           {p.unlocked ? 'check_circle' : 'cancel'}
                         </span>
@@ -986,14 +1062,14 @@ export default function ProfilePage() {
                       </div>
                     ))}
                   </div>
-                  <p className="mt-2 text-[10px] text-[var(--neu-text-muted)]">{profilePrivileges.summary}</p>
+                  <p className="mt-3 text-[11px] font-medium text-gray-400 leading-normal">{profilePrivileges.summary}</p>
                 </div>
 
                 {/* Trust Activity preview (latest 3) */}
                 {trustRecentEvents.length > 0 && (
-                  <div className="mt-4 border-t pt-4" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+                  <div className="mt-5 border-t border-gray-100 pt-5">
                     <ProfileBrowseEyebrow>Recent Trust Events</ProfileBrowseEyebrow>
-                    <div className="space-y-1.5">
+                    <div className="space-y-2.5 mt-3">
                       {trustRecentEvents.slice(0, 3).map((event) => {
                         const meta = TRUST_EVENT_META[event.eventType as keyof typeof TRUST_EVENT_META] ?? {
                           label: event.eventType,
@@ -1002,11 +1078,11 @@ export default function ProfilePage() {
                         };
                         const isPos = meta.positive && event.pointsChange >= 0;
                         return (
-                          <div key={event.id} className="flex items-center gap-2">
-                            <span className={`material-symbols-outlined text-[13px] ${isPos ? 'text-primary' : 'text-brand-red500'}`}
+                          <div key={event.id} className="flex items-center gap-2 text-xs font-semibold">
+                            <span className={`material-symbols-outlined text-[15px] ${isPos ? 'text-emerald-500' : 'text-red-500'}`}
                               style={{ fontVariationSettings: "'FILL' 1" }}>{meta.icon}</span>
-                            <span className="min-w-0 flex-1 truncate text-xs text-slate-600">{meta.label}</span>
-                            <span className={`shrink-0 text-[11px] font-black tabular-nums ${isPos ? 'text-status-success' : 'text-brand-red500'}`}>
+                            <span className="min-w-0 flex-1 truncate text-gray-700">{meta.label}</span>
+                            <span className={`shrink-0 font-extrabold tabular-nums ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
                               {isPos ? '+' : ''}{event.pointsChange}
                             </span>
                           </div>
@@ -1015,459 +1091,491 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 )}
-            </div>
+              </div>
 
-            <div className="mod-card rounded-2xl p-4">
-              <ProfileBrowseEyebrow>Profile Snapshot</ProfileBrowseEyebrow>
-              <div className="mt-3 space-y-2">
-                {profileFacts.map((fact) => (
-                  <div key={`side-${fact.label}`} className="mod-inset flex items-center gap-3 rounded-xl px-3 py-2">
-                    <span className="material-symbols-outlined text-[1rem] text-primary">{fact.icon}</span>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--neu-text-muted)]">{fact.label}</p>
-                      <p className="text-sm font-semibold capitalize" style={{ color: 'var(--neu-text)' }}>{fact.value}</p>
-                    </div>
+              {/* Profile Snapshot */}
+              <div className="border-t-8 border-gray-50/80 py-5">
+                <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3">
+                  <div className="pb-3">
+                    <ProfileBrowseEyebrow>Profile Snapshot</ProfileBrowseEyebrow>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mod-card rounded-2xl p-4">
-              <ProfileBrowseEyebrow>Verification Journey</ProfileBrowseEyebrow>
-              <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
-                {verificationProgress.tier === 'none'
-                  ? 'Start earning your neighbour verification tiers'
-                  : `${verificationTierMeta.emoji} ${verificationTierMeta.label} · ${verificationTierMeta.description}`}
-              </p>
-              {verificationProgress.nextTier ? (
-                <p className="mt-1 text-xs text-[var(--neu-text-muted)]">
-                  Next: {getVerificationTierMeta(verificationProgress.nextTier).label} ·{' '}
-                  {verificationProgress.percentToNext}% overall progress
-                </p>
-              ) : null}
-              <div className="mt-3 space-y-2">
-                {verificationProgress.axes.map((axis) => (
-                  <div key={axis.id} className="mod-inset flex items-center gap-3 rounded-xl px-3 py-2">
-                    <span className="material-symbols-outlined text-[1rem] text-primary">
-                      {axis.done ? 'check_circle' : 'pending'}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--neu-text-muted)]">
-                        {axis.label}
-                      </p>
-                      <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
-                        {axis.detail}
-                      </p>
-                    </div>
-                    <span className="text-xs font-bold tabular-nums text-primary">{axis.percent}%</span>
-                  </div>
-                ))}
-              </div>
-              {verificationProgress.blockers.length > 0 ? (
-                <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 px-3 py-2">
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-primary">Next steps</p>
-                  <ul className="mt-1 space-y-1 text-xs text-[var(--neu-text-muted)]">
-                    {verificationProgress.blockers.slice(0, 4).map((item) => (
-                      <li key={item}>• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="mod-card rounded-2xl p-4">
-              <ProfileBrowseEyebrow>Verification checklist</ProfileBrowseEyebrow>
-              <div className="mt-3 space-y-2">
-                {[
-                  { label: 'Email verified', done: Boolean((profile as { emailVerified?: boolean }).emailVerified || profile.verificationStatus === 'verified') },
-                  { label: 'Profile ready (photo + bio)', done: Boolean(profile.firstName && profile.lastName && (profile.avatarUrl || profile.profilePicture) && (profile.bio?.trim().length ?? 0) >= 10) },
-                  { label: 'Community joined', done: !!profile.assignedCommunityId },
-                  { label: 'Location pinned', done: !!profile.location?.latitude },
-                  { label: 'Gold trust earned', done: profileCommunityVerified },
-                ].map((item) => (
-                  <div key={item.label} className="mod-inset flex items-center gap-3 rounded-xl px-3 py-2">
-                    <span className="material-symbols-outlined text-[1rem] text-primary">{item.done ? 'check_circle' : 'pending'}</span>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--neu-text-muted)]">Status</p>
-                      <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>{item.label}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <section className="mod-card rounded-2xl p-4">
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <div>
-                  <ProfileBrowseEyebrow>Badges</ProfileBrowseEyebrow>
-                  <ProfileBrowseSectionTitle>NeyborHuud credibility</ProfileBrowseSectionTitle>
-                </div>
-                <Link
-                  href={isOwnProfile ? '/huud-economy/score?tab=badges' : '/huud-economy/score'}
-                  className="mod-chip inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold no-underline"
-                >
-                  View all
-                </Link>
-              </div>
-
-              {isOwnProfile ? (
-                myBadges.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {myBadges.slice(0, 4).map((badge: any, i: number) => (
-                      <div key={badge.id ?? badge._id ?? i} className="mod-inset rounded-xl p-3">
-                        <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                          <span className="material-symbols-outlined text-[22px]">{badge.icon ?? 'military_tech'}</span>
+                  <div className="space-y-2.5">
+                    {profileFacts.map((fact) => (
+                      <div key={`side-${fact.label}`} className="flex items-center gap-3 bg-gray-50/60 border border-gray-100/50 rounded-2xl px-4 py-3 hover:bg-gray-50 transition-colors">
+                        <span className="material-symbols-outlined text-[18px] text-blue-500">{fact.icon}</span>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{fact.label}</p>
+                          <p className="text-sm font-extrabold text-gray-800 capitalize mt-0.5">{fact.value}</p>
                         </div>
-                        <p className="text-sm font-bold leading-tight" style={{ color: 'var(--neu-text)' }}>{badge.name ?? badge.title ?? 'Badge'}</p>
-                        <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">{badge.tier ?? badge.category ?? 'Earned'}</p>
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <BrowseEmptyState
-                    icon="military_tech"
-                    title="No badges earned yet"
-                    action={
-                      <Link href="/huud-economy" className="mod-chip mod-chip-active rounded-full px-3 py-1.5 text-xs font-bold text-primary no-underline">
-                        Earn your first badge
-                      </Link>
-                    }
-                  />
-                )
-              ) : (() => {
-                // Use real badges from profile.gamification.badges (sent by backend in public profile response)
-                const publicBadges: any[] = (() => {
-                  const b = profile.gamification?.badges;
-                  return Array.isArray(b) ? b : [];
-                })();
-                const rarityTone: Record<string, string> = {
-                  common:    'bg-slate-50    text-slate-600  ring-slate-100',
-                  uncommon:  'bg-status-success/10  text-status-success ring-status-success/20',
-                  rare:      'bg-sky-50      text-sky-700    ring-sky-100',
-                  epic:      'bg-brand-blue50   text-brand-blue700 ring-violet-100',
-                  legendary: 'bg-amber-50    text-amber-700  ring-amber-100',
-                };
-                if (publicBadges.length === 0) {
-                  return (
-                    <BrowseEmptyState
-                      icon="military_tech"
-                      title="No badges yet"
-                      description={`@${profile.username} hasn't earned any badges yet.`}
-                    />
-                  );
-                }
-                return (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {publicBadges.slice(0, 4).map((badge: any, i: number) => {
-                      const tone = rarityTone[badge.rarity ?? badge.tier ?? 'common'] ?? rarityTone.common;
-                      return (
-                        <div key={badge.id ?? badge._id ?? i} className="mod-inset rounded-xl p-3">
-                          <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ring-1 ${tone}`}>
-                            <span className="material-symbols-outlined text-[22px]">{badge.icon ?? 'military_tech'}</span>
-                          </div>
-                          <p className="text-sm font-bold leading-tight" style={{ color: 'var(--neu-text)' }}>{badge.name ?? badge.title ?? 'Badge'}</p>
-                          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
-                            {badge.rarity ?? badge.tier ?? badge.category ?? 'Earned'}
+                </div>
+              </div>
+
+              {/* Verification Journey */}
+              <div className="border-t-8 border-gray-50/80 py-5">
+                <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3">
+                  <div className="pb-2">
+                    <ProfileBrowseEyebrow>Verification Journey</ProfileBrowseEyebrow>
+                  </div>
+                  <p className="text-[14px] font-extrabold text-gray-800 leading-tight">
+                    {verificationProgress.tier === 'none'
+                      ? 'Start earning your neighbour verification tiers'
+                      : `${verificationTierMeta.emoji} ${verificationTierMeta.label} · ${verificationTierMeta.description}`}
+                  </p>
+                  {verificationProgress.nextTier ? (
+                    <p className="text-xs font-semibold text-gray-400 mt-1">
+                      Next: {getVerificationTierMeta(verificationProgress.nextTier).label} ·{' '}
+                      {verificationProgress.percentToNext}% overall progress
+                    </p>
+                  ) : null}
+                  <div className="mt-4 space-y-2.5">
+                    {verificationProgress.axes.map((axis) => (
+                      <div key={axis.id} className="flex items-center gap-3 bg-gray-50/60 border border-gray-100/50 rounded-2xl px-4 py-3 hover:bg-gray-50 transition-colors">
+                        <span className="material-symbols-outlined text-[18px] text-blue-500">
+                          {axis.done ? 'check_circle' : 'pending'}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                            {axis.label}
+                          </p>
+                          <p className="text-sm font-extrabold text-gray-800 mt-0.5">
+                            {axis.detail}
                           </p>
                         </div>
-                      );
-                    })}
+                        <span className="text-xs font-bold tabular-nums text-blue-600">{axis.percent}%</span>
+                      </div>
+                    ))}
                   </div>
-                );
-              })()}
-            </section>
+                  {verificationProgress.blockers.length > 0 ? (
+                    <div className="mt-4 rounded-2xl border border-blue-100/50 bg-blue-50/30 px-4 py-3">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">Next steps</p>
+                      <ul className="mt-1.5 space-y-1.5 text-xs font-semibold text-gray-500">
+                        {verificationProgress.blockers.slice(0, 4).map((item) => (
+                          <li key={item}>• {item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* Verification Checklist */}
+              <div className="border-t-8 border-gray-50/80 py-5">
+                <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3">
+                  <div className="pb-3">
+                    <ProfileBrowseEyebrow>Verification checklist</ProfileBrowseEyebrow>
+                  </div>
+                  <div className="space-y-2.5">
+                    {[
+                      { label: 'Email verified', done: Boolean((profile as { emailVerified?: boolean }).emailVerified || profile.verificationStatus === 'verified') },
+                      { label: 'Profile ready (photo + bio)', done: Boolean(profile.firstName && profile.lastName && (profile.avatarUrl || profile.profilePicture) && (profile.bio?.trim().length ?? 0) >= 10) },
+                      { label: 'Community joined', done: !!profile.assignedCommunityId },
+                      { label: 'Location pinned', done: !!profile.location?.latitude },
+                      { label: 'Gold trust earned', done: profileCommunityVerified },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center gap-3 bg-gray-50/60 border border-gray-100/50 rounded-2xl px-4 py-3 hover:bg-gray-50 transition-colors">
+                        <span className="material-symbols-outlined text-[18px] text-blue-500">{item.done ? 'check_circle' : 'pending'}</span>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Status</p>
+                          <p className="text-sm font-extrabold text-gray-800 mt-0.5">{item.label}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Badges Credibility */}
+              <div className="border-t-8 border-gray-50/80 py-5">
+                <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3">
+                  <div className="mb-4 flex items-center justify-between gap-4">
+                    <div>
+                      <ProfileBrowseEyebrow>Badges</ProfileBrowseEyebrow>
+                      <ProfileBrowseSectionTitle>NeyborHuud credibility</ProfileBrowseSectionTitle>
+                    </div>
+                    <Link
+                      href={isOwnProfile ? '/huud-economy/score?tab=badges' : '/huud-economy/score'}
+                      className="inline-flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200/50 px-4 py-2 text-xs font-bold text-gray-700 transition"
+                    >
+                      View all
+                    </Link>
+                  </div>
+
+                  {isOwnProfile ? (
+                    myBadges.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        {myBadges.slice(0, 4).map((badge: any, i: number) => (
+                          <div key={badge.id ?? badge._id ?? i} className="flex flex-col justify-between bg-gray-50/50 hover:bg-gray-50/80 border border-gray-100/50 rounded-2xl p-4 transition-all duration-200 min-h-[120px]">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 border border-blue-100 text-blue-600 shadow-sm">
+                              <span className="material-symbols-outlined text-[21px]">{badge.icon ?? 'military_tech'}</span>
+                            </div>
+                            <div className="mt-3">
+                              <p className="text-sm font-extrabold text-gray-800 leading-tight">{badge.name ?? badge.title ?? 'Badge'}</p>
+                              <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-gray-400">{badge.tier ?? badge.category ?? 'Earned'}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <BrowseEmptyState
+                        icon="military_tech"
+                        title="No badges earned yet"
+                        action={
+                          <Link href="/huud-economy" className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white px-5 py-2 text-xs font-bold hover:bg-slate-800 transition no-underline">
+                            Earn your first badge
+                          </Link>
+                        }
+                      />
+                    )
+                  ) : (() => {
+                    const publicBadges: any[] = (() => {
+                      const b = profile.gamification?.badges;
+                      return Array.isArray(b) ? b : [];
+                    })();
+                    const rarityTone: Record<string, string> = {
+                      common:    'bg-slate-50    text-slate-600  ring-slate-100',
+                      uncommon:  'bg-emerald-50  text-emerald-700 ring-emerald-100',
+                      rare:      'bg-sky-50      text-sky-700    ring-sky-100',
+                      epic:      'bg-indigo-50   text-indigo-700 ring-indigo-100',
+                      legendary: 'bg-amber-50    text-amber-700  ring-amber-100',
+                    };
+                    if (publicBadges.length === 0) {
+                      return (
+                        <BrowseEmptyState
+                          icon="military_tech"
+                          title="No badges yet"
+                          description={`@${profile.username} hasn't earned any badges yet.`}
+                        />
+                      );
+                    }
+                    return (
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        {publicBadges.slice(0, 4).map((badge: any, i: number) => {
+                          const tone = rarityTone[badge.rarity ?? badge.tier ?? 'common'] ?? rarityTone.common;
+                          return (
+                            <div key={badge.id ?? badge._id ?? i} className="flex flex-col justify-between bg-gray-50/50 hover:bg-gray-50/80 border border-gray-100/50 rounded-2xl p-4 transition-all duration-200 min-h-[120px]">
+                              <div className={`flex h-11 w-11 items-center justify-center rounded-full ring-1 ${tone}`}>
+                                <span className="material-symbols-outlined text-[21px]">{badge.icon ?? 'military_tech'}</span>
+                              </div>
+                              <div className="mt-3">
+                                <p className="text-sm font-extrabold text-gray-800 leading-tight">{badge.name ?? badge.title ?? 'Badge'}</p>
+                                <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-gray-400">
+                                  {badge.rarity ?? badge.tier ?? badge.category ?? 'Earned'}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
             </div>
           )}
 
           {tab === 'listings' && (
-            <div className="space-y-4">
-            {listingsLoading ? (
-              <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="mod-inset h-20 animate-pulse rounded-xl" />
-                ))}
-              </div>
-            ) : null}
-
-            {!listingsLoading && isOwnProfile && (
-              <section className="mod-card rounded-2xl p-4">
-                <ProfileBrowseEyebrow>Your HuudCoins activity</ProfileBrowseEyebrow>
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <Link
-                    href="/huud-economy/score"
-                    className="mod-inset flex items-center gap-3 rounded-xl p-3 no-underline transition-opacity hover:opacity-90"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                      <span className="material-symbols-outlined text-[22px]">emoji_events</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>Gamification Hub</p>
-                      <p className="text-[11px] text-[var(--neu-text-muted)]">Badges · Leaderboard</p>
-                    </div>
-                  </Link>
-                  <Link
-                    href="/huud-economy/wallet"
-                    className="mod-inset flex items-center gap-3 rounded-xl p-3 no-underline transition-opacity hover:opacity-90"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                      <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>HuudCoins Wallet</p>
-                      <p className="text-[11px] text-[var(--neu-text-muted)]">Balance · Transactions</p>
-                    </div>
-                  </Link>
+            <div className="flex flex-col">
+              {listingsLoading ? (
+                <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 py-5 space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-20 animate-pulse bg-gray-50 border border-gray-100/80 rounded-2xl" />
+                  ))}
                 </div>
-              </section>
-            )}
+              ) : null}
 
-            {!listingsLoading && userJobs.length === 0 && userEvents.length === 0 && userServices.length === 0 && userMarketplace.length === 0 && !isOwnProfile && (
-              <BrowseEmptyState
-                icon="storefront"
-                title="No listings yet"
-                description={`@${profile.username} hasn't posted jobs, events, services, or marketplace items yet.`}
-              />
-            )}
-
-            {!listingsLoading && userJobs.length === 0 && userEvents.length === 0 && userServices.length === 0 && userMarketplace.length === 0 && isOwnProfile && (
-              <BrowseEmptyState
-                icon="storefront"
-                title="Your listings"
-                description="Jobs, events, services, and marketplace items you post will show up here."
-                action={
-                  <div className="flex flex-wrap justify-center gap-2">
-                    <Link href="/jobs" className="mod-chip mod-chip-active rounded-full px-3 py-1.5 text-xs font-bold text-primary no-underline">Post a job</Link>
-                    <Link href="/events" className="mod-chip rounded-full px-3 py-1.5 text-xs font-semibold no-underline">Create event</Link>
-                    <Link href="/marketplace/sell" className="mod-chip rounded-full px-3 py-1.5 text-xs font-semibold no-underline">Sell item</Link>
+              {!listingsLoading && isOwnProfile && (
+                <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 py-5">
+                  <div className="pb-3">
+                    <ProfileBrowseEyebrow>Your HuudCoins activity</ProfileBrowseEyebrow>
                   </div>
-                }
-              />
-            )}
-
-            {userJobs.length > 0 && (
-              <section className="mod-card rounded-2xl p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <ProfileBrowseEyebrow>Jobs</ProfileBrowseEyebrow>
-                    <ProfileBrowseSectionTitle>Posted by {isOwnProfile ? 'you' : displayName}</ProfileBrowseSectionTitle>
-                  </div>
-                  <Link href={userId ? `/jobs?employerId=${userId}` : '/jobs'} className="text-xs font-bold text-primary no-underline">See all</Link>
-                </div>
-                <div className="space-y-2">
-                  {userJobs.map((job: any, i: number) => (
+                  <div className="grid grid-cols-2 gap-3">
                     <Link
-                      key={job.id ?? job._id ?? i}
-                      href={`/jobs/${job.id ?? job._id}`}
-                      className="mod-inset flex items-start gap-3 rounded-xl p-3 no-underline transition-opacity hover:opacity-90"
+                      href="/huud-economy/score"
+                      className="flex items-center gap-3.5 border border-gray-100 bg-gray-50/30 rounded-2xl p-4 no-underline transition-all hover:bg-gray-50 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                        <span className="material-symbols-outlined text-[18px]">work</span>
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-blue-600">
+                        <span className="material-symbols-outlined text-[20px]">emoji_events</span>
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-bold" style={{ color: 'var(--neu-text)' }}>{job.title ?? 'Job listing'}</p>
-                        <p className="text-[11px] text-[var(--neu-text-muted)]">
-                          {job.type?.replace('-', ' ')} · {job.workMode ?? '—'} · {job.location?.lga ?? job.location?.state ?? ''}
-                        </p>
+                        <p className="text-sm font-extrabold text-gray-800">Gamification Hub</p>
+                        <p className="text-[11px] font-semibold text-gray-400 mt-0.5">Badges · Leaderboard</p>
                       </div>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${job.status === 'open' ? 'bg-primary/15 text-primary' : 'text-[var(--neu-text-muted)]'}`}>
-                        {job.status ?? 'open'}
-                      </span>
                     </Link>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {userEvents.length > 0 && (
-              <section className="mod-card rounded-2xl p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <ProfileBrowseEyebrow>Events</ProfileBrowseEyebrow>
-                    <ProfileBrowseSectionTitle>Organised by {isOwnProfile ? 'you' : displayName}</ProfileBrowseSectionTitle>
-                  </div>
-                  <Link href={userId ? `/events?organizerId=${userId}` : '/events'} className="text-xs font-bold text-primary no-underline">See all</Link>
-                </div>
-                <div className="space-y-2">
-                  {userEvents.map((event: any, i: number) => (
                     <Link
-                      key={event.id ?? event._id ?? i}
-                      href={`/events/${event.id ?? event._id}`}
-                      className="mod-inset flex items-start gap-3 rounded-xl p-3 no-underline transition-opacity hover:opacity-90"
+                      href="/huud-economy/wallet"
+                      className="flex items-center gap-3.5 border border-gray-100 bg-gray-50/30 rounded-2xl p-4 no-underline transition-all hover:bg-gray-50 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                        <span className="material-symbols-outlined text-[18px]">event</span>
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-blue-600">
+                        <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold" style={{ color: 'var(--neu-text)' }}>{event.title ?? 'Event'}</p>
-                        <p className="text-[11px] text-[var(--neu-text-muted)]">
-                          {event.date ? new Date(event.date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date TBC'}
-                          {event.location?.lga ? ` · ${event.location.lga}` : ''}
-                        </p>
+                      <div className="min-w-0">
+                        <p className="text-sm font-extrabold text-gray-800">HuudCoins Wallet</p>
+                        <p className="text-[11px] font-semibold text-gray-400 mt-0.5">Balance · History</p>
                       </div>
-                      <span className="shrink-0 text-[11px] font-bold text-[var(--neu-text-muted)]">{event.attendees ?? 0} going</span>
                     </Link>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {userServices.length > 0 && (
-              <section className="mod-card rounded-2xl p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <ProfileBrowseEyebrow>Services</ProfileBrowseEyebrow>
-                    <ProfileBrowseSectionTitle>{isOwnProfile ? 'Your' : `${displayName}'s`} service offerings</ProfileBrowseSectionTitle>
                   </div>
-                  <Link href={userId ? `/services?providerId=${userId}` : '/services'} className="text-xs font-bold text-primary no-underline">See all</Link>
                 </div>
-                <div className="space-y-2">
-                  {userServices.map((service: any, i: number) => (
-                    <Link
-                      key={service.id ?? service._id ?? i}
-                      href={`/services/${service.id ?? service._id}`}
-                      className="mod-inset flex items-start gap-3 rounded-xl p-3 no-underline transition-opacity hover:opacity-90"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                        <span className="material-symbols-outlined text-[18px]">home_repair_service</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold" style={{ color: 'var(--neu-text)' }}>{service.title ?? 'Service'}</p>
-                        <p className="text-[11px] capitalize text-[var(--neu-text-muted)]">
-                          {service.category ?? '—'}
-                          {service.pricing?.amount ? ` · ₦${Number(service.pricing.amount).toLocaleString()}` : service.pricing?.type === 'custom' ? ' · Custom price' : ''}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-0.5 text-[11px] font-bold text-primary">
-                        <span className="material-symbols-outlined text-[13px]">star</span>
-                        {service.rating ? service.rating.toFixed(1) : 'New'}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
+              )}
 
-            {userMarketplace.length > 0 && (
-              <section className="mod-card rounded-2xl p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <ProfileBrowseEyebrow>Marketplace</ProfileBrowseEyebrow>
-                    <ProfileBrowseSectionTitle>{isOwnProfile ? 'Your' : `${displayName}'s`} listings</ProfileBrowseSectionTitle>
+              {!listingsLoading && userJobs.length === 0 && userEvents.length === 0 && userServices.length === 0 && userMarketplace.length === 0 && !isOwnProfile && (
+                <BrowseEmptyState
+                  icon="storefront"
+                  title="No listings yet"
+                  description={`@${profile.username} hasn't posted jobs, events, services, or marketplace items yet.`}
+                />
+              )}
+
+              {!listingsLoading && userJobs.length === 0 && userEvents.length === 0 && userServices.length === 0 && userMarketplace.length === 0 && isOwnProfile && (
+                <BrowseEmptyState
+                  icon="storefront"
+                  title="Your listings"
+                  description="Jobs, events, services, and marketplace items you post will show up here."
+                  action={
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <Link href="/jobs" className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white px-4.5 py-2 text-xs font-bold hover:bg-slate-800 transition no-underline">Post a job</Link>
+                      <Link href="/events" className="inline-flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 px-4.5 py-2 text-xs font-bold transition no-underline">Create event</Link>
+                      <Link href="/marketplace/sell" className="inline-flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 px-4.5 py-2 text-xs font-bold transition no-underline">Sell item</Link>
+                    </div>
+                  }
+                />
+              )}
+
+              {userJobs.length > 0 && (
+                <div className="border-t border-gray-100 py-6">
+                  <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3">
+                    <div className="mb-4 flex items-center justify-between">
+                      <div>
+                        <ProfileBrowseEyebrow>Jobs</ProfileBrowseEyebrow>
+                        <ProfileBrowseSectionTitle>Posted by {isOwnProfile ? 'you' : displayName}</ProfileBrowseSectionTitle>
+                      </div>
+                      <Link href={userId ? `/jobs?employerId=${userId}` : '/jobs'} className="text-xs font-bold text-blue-600 no-underline hover:underline">See all</Link>
+                    </div>
+                    <div className="space-y-2.5">
+                      {userJobs.map((job: any, i: number) => (
+                        <Link
+                          key={job.id ?? job._id ?? i}
+                          href={`/jobs/${job.id ?? job._id}`}
+                          className="flex items-start gap-3.5 border border-gray-100 bg-gray-50/20 rounded-2xl p-4 no-underline transition-all hover:bg-gray-50 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-blue-600">
+                            <span className="material-symbols-outlined text-[19px]">work</span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-extrabold text-gray-800">{job.title ?? 'Job listing'}</p>
+                            <p className="text-xs font-semibold text-gray-400 mt-1">
+                              {job.type?.replace('-', ' ')} · {job.workMode ?? '—'} · {job.location?.lga ?? job.location?.state ?? ''}
+                            </p>
+                          </div>
+                          <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${job.status === 'open' ? 'bg-emerald-50 border border-emerald-100 text-emerald-600' : 'bg-gray-50 border border-gray-100 text-gray-400'}`}>
+                            {job.status ?? 'open'}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-                  <Link href={userId ? `/marketplace?sellerId=${userId}` : '/marketplace'} className="text-xs font-bold text-primary no-underline">See all</Link>
                 </div>
-                <div className="space-y-2">
-                  {userMarketplace.map((item: any, i: number) => (
-                    <Link
-                      key={item.id ?? item._id ?? i}
-                      href={`/marketplace/${item.id ?? item._id}`}
-                      className="mod-inset flex items-start gap-3 rounded-xl p-3 no-underline transition-opacity hover:opacity-90"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                        <span className="material-symbols-outlined text-[18px]">storefront</span>
+              )}
+
+              {userEvents.length > 0 && (
+                <div className="border-t-8 border-gray-50/80 py-6">
+                  <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3">
+                    <div className="mb-4 flex items-center justify-between">
+                      <div>
+                        <ProfileBrowseEyebrow>Events</ProfileBrowseEyebrow>
+                        <ProfileBrowseSectionTitle>Organised by {isOwnProfile ? 'you' : displayName}</ProfileBrowseSectionTitle>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold" style={{ color: 'var(--neu-text)' }}>{item.title ?? 'Listing'}</p>
-                        <p className="text-[11px] text-[var(--neu-text-muted)]">
-                          {item.category ?? 'Item'}
-                          {item.price != null ? ` · ₦${Number(item.price).toLocaleString()}` : ''}
-                        </p>
-                      </div>
-                      <span className="shrink-0 text-[11px] font-bold capitalize text-primary">
-                        {item.condition ?? 'listed'}
-                      </span>
-                    </Link>
-                  ))}
+                      <Link href={userId ? `/events?organizerId=${userId}` : '/events'} className="text-xs font-bold text-blue-600 no-underline hover:underline">See all</Link>
+                    </div>
+                    <div className="space-y-2.5">
+                      {userEvents.map((event: any, i: number) => (
+                        <Link
+                          key={event.id ?? event._id ?? i}
+                          href={`/events/${event.id ?? event._id}`}
+                          className="flex items-start gap-3.5 border border-gray-100 bg-gray-50/20 rounded-2xl p-4 no-underline transition-all hover:bg-gray-50 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-purple-600">
+                            <span className="material-symbols-outlined text-[19px]">event</span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-extrabold text-gray-800">{event.title ?? 'Event'}</p>
+                            <p className="text-xs font-semibold text-gray-400 mt-1">
+                              {event.date ? new Date(event.date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date TBC'}
+                              {event.location?.lga ? ` · ${event.location.lga}` : ''}
+                            </p>
+                          </div>
+                          <span className="shrink-0 text-xs font-bold text-gray-400 mt-1">{event.attendees ?? 0} going</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </section>
-            )}
+              )}
+
+              {userServices.length > 0 && (
+                <div className="border-t-8 border-gray-50/80 py-6">
+                  <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3">
+                    <div className="mb-4 flex items-center justify-between">
+                      <div>
+                        <ProfileBrowseEyebrow>Services</ProfileBrowseEyebrow>
+                        <ProfileBrowseSectionTitle>{isOwnProfile ? 'Your' : `${displayName}'s`} service offerings</ProfileBrowseSectionTitle>
+                      </div>
+                      <Link href={userId ? `/services?providerId=${userId}` : '/services'} className="text-xs font-bold text-blue-600 no-underline hover:underline">See all</Link>
+                    </div>
+                    <div className="space-y-2.5">
+                      {userServices.map((service: any, i: number) => (
+                        <Link
+                          key={service.id ?? service._id ?? i}
+                          href={`/services/${service.id ?? service._id}`}
+                          className="flex items-start gap-3.5 border border-gray-100 bg-gray-50/20 rounded-2xl p-4 no-underline transition-all hover:bg-gray-50 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-teal-600">
+                            <span className="material-symbols-outlined text-[19px]">home_repair_service</span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-extrabold text-gray-800">{service.title ?? 'Service'}</p>
+                            <p className="text-xs font-semibold text-gray-400 mt-1 capitalize">
+                              {service.category ?? '—'}
+                              {service.pricing?.amount ? ` · ₦${Number(service.pricing.amount).toLocaleString()}` : service.pricing?.type === 'custom' ? ' · Custom price' : ''}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-0.5 text-xs font-bold text-blue-600 mt-1">
+                            <span className="material-symbols-outlined text-[14px]">star</span>
+                            {service.rating ? service.rating.toFixed(1) : 'New'}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {userMarketplace.length > 0 && (
+                <div className="border-t-8 border-gray-50/80 py-6">
+                  <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3">
+                    <div className="mb-4 flex items-center justify-between">
+                      <div>
+                        <ProfileBrowseEyebrow>Marketplace</ProfileBrowseEyebrow>
+                        <ProfileBrowseSectionTitle>{isOwnProfile ? 'Your' : `${displayName}'s`} listings</ProfileBrowseSectionTitle>
+                      </div>
+                      <Link href={userId ? `/marketplace?sellerId=${userId}` : '/marketplace'} className="text-xs font-bold text-blue-600 no-underline hover:underline">See all</Link>
+                    </div>
+                    <div className="space-y-2.5">
+                      {userMarketplace.map((item: any, i: number) => (
+                        <Link
+                          key={item.id ?? item._id ?? i}
+                          href={`/marketplace/${item.id ?? item._id}`}
+                          className="flex items-start gap-3.5 border border-gray-100 bg-gray-50/20 rounded-2xl p-4 no-underline transition-all hover:bg-gray-50 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-emerald-600">
+                            <span className="material-symbols-outlined text-[19px]">storefront</span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-extrabold text-gray-800">{item.title ?? 'Listing'}</p>
+                            <p className="text-xs font-semibold text-gray-400 mt-1">
+                              {item.category ?? 'Item'}
+                              {item.price != null ? ` · ₦${Number(item.price).toLocaleString()}` : ''}
+                            </p>
+                          </div>
+                          <span className="shrink-0 text-xs font-bold capitalize text-blue-600 mt-1">
+                            {item.condition ?? 'listed'}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
+
           {tab === 'posts' && (
-            <section className="mod-card rounded-2xl p-4">
+            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 py-5">
               <div className="mb-4">
                 <ProfileBrowseEyebrow>Activity</ProfileBrowseEyebrow>
                 <ProfileBrowseSectionTitle>Recent Huud posts</ProfileBrowseSectionTitle>
               </div>
 
               <div className="space-y-4">
-          {isLoadingPosts && (
-            <div>
-              <PostSkeleton />
-              <PostSkeleton />
-              <PostSkeleton />
-            </div>
-          )}
+                {isLoadingPosts && (
+                  <div>
+                    <PostSkeleton />
+                    <PostSkeleton />
+                    <PostSkeleton />
+                  </div>
+                )}
 
-          {isErrorPosts && !isLoadingPosts && (
-            <BrowseEmptyState
-              icon="error"
-              title="Failed to load posts"
-              description={postsError?.message || 'Something went wrong. Please try again.'}
-              action={
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary"
-                  type="button"
-                >
-                  Retry
-                </button>
-              }
-            />
-          )}
+                {isErrorPosts && !isLoadingPosts && (
+                  <BrowseEmptyState
+                    icon="error"
+                    title="Failed to load posts"
+                    description={postsError?.message || 'Something went wrong. Please try again.'}
+                    action={
+                      <button
+                        onClick={() => window.location.reload()}
+                        className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white px-5 py-2 text-xs font-bold hover:bg-slate-800 transition"
+                        type="button"
+                      >
+                        Retry
+                      </button>
+                    }
+                  />
+                )}
 
-          {!isLoadingPosts && !isErrorPosts && posts.length === 0 && (
-            <BrowseEmptyState
-              icon="dynamic_feed"
-              title="No posts yet"
-              description={`When ${isOwnProfile ? 'you post' : `@${profile.username} posts`}, they'll show up here.`}
-              action={
-                isOwnProfile ? (
-                  <button
-                    type="button"
-                    onClick={handleCreatePost}
-                    className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary"
-                  >
-                    Create your first post
-                  </button>
-                ) : undefined
-              }
-            />
-          )}
+                {!isLoadingPosts && !isErrorPosts && posts.length === 0 && (
+                  <BrowseEmptyState
+                    icon="dynamic_feed"
+                    title="No posts yet"
+                    description={`When ${isOwnProfile ? 'you post' : `@${profile.username} posts`}, they'll show up here.`}
+                    action={
+                      isOwnProfile ? (
+                        <button
+                          type="button"
+                          onClick={handleCreatePost}
+                          className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white px-5 py-2 text-xs font-bold hover:bg-slate-800 transition"
+                        >
+                          Create your first post
+                        </button>
+                      ) : undefined
+                    }
+                  />
+                )}
 
-          {!isLoadingPosts && !isErrorPosts && posts.length > 0 && (
-            <div>
-              {posts.map((post) => (
-                <XPostCard
-                  key={post.id}
-                  post={post}
-                  currentUserId={currentUser?.id}
-                  onLike={() => handleLike(post)}
-                  onComment={() => openPostDetails(post.id)}
-                  onShare={() => {}}
-                  onSave={() => handleSave(post)}
-                  onReport={(id) => setReportingPostId(id)}
-                  onCardClick={() => openPostDetails(post.id)}
-                />
-              ))}
+                {!isLoadingPosts && !isErrorPosts && posts.length > 0 && (
+                  <div className="space-y-4">
+                    {posts.map((post) => (
+                      <XPostCard
+                        key={post.id}
+                        post={post}
+                        currentUserId={currentUser?.id}
+                        onLike={() => handleLike(post)}
+                        onComment={() => openPostDetails(post.id)}
+                        onShare={() => {}}
+                        onSave={() => handleSave(post)}
+                        onReport={(id) => setReportingPostId(id)}
+                        onCardClick={() => openPostDetails(post.id)}
+                      />
+                    ))}
 
-              {hasNextPage && (
-                <div ref={loadMoreRef} className="flex items-center justify-center py-8">
-                  {isFetchingNextPage ? (
-                    <div className="flex items-center gap-2 text-sm font-bold text-[var(--neu-text-muted)]">
-                      <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-                      <span>Loading more posts…</span>
-                    </div>
-                  ) : (
-                    <div className="h-8" />
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+                    {hasNextPage && (
+                      <div ref={loadMoreRef} className="flex items-center justify-center py-8">
+                        {isFetchingNextPage ? (
+                          <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                            <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                            <span>Loading more posts…</span>
+                          </div>
+                        ) : (
+                          <div className="h-8" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            </section>
+            </div>
           )}
         </div>
 

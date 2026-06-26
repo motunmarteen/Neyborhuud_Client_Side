@@ -23,16 +23,18 @@ type ProfileSnapHubProps = {
 function HubRow({ item }: { item: HubItem }) {
   const content = (
     <>
-      <div className="mod-inset flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary">
-        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-50 text-gray-700 transition-colors group-hover:bg-slate-100">
+        <span className="material-symbols-outlined text-[21px]">{item.icon}</span>
       </div>
       <div className="min-w-0 flex-1 text-left">
-        <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
+        <p className="text-sm font-extrabold text-gray-800 transition-colors group-hover:text-gray-900">
           {item.title}
         </p>
-        <p className="text-xs text-[var(--neu-text-muted)]">{item.subtitle}</p>
+        <p className="text-xs font-semibold text-gray-400 mt-0.5">{item.subtitle}</p>
       </div>
-      <span className="material-symbols-outlined shrink-0 text-[var(--neu-text-muted)]">chevron_right</span>
+      <span className="material-symbols-outlined shrink-0 text-gray-400 transition-transform group-hover:translate-x-0.5">
+        chevron_right
+      </span>
     </>
   );
 
@@ -41,7 +43,7 @@ function HubRow({ item }: { item: HubItem }) {
       <button
         type="button"
         onClick={item.onClick}
-        className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-black/[0.02]"
+        className="flex w-full items-center gap-3.5 px-3 py-3 text-left rounded-2xl hover:bg-slate-50/50 transition-all duration-200 group"
       >
         {content}
       </button>
@@ -49,7 +51,7 @@ function HubRow({ item }: { item: HubItem }) {
   }
 
   return (
-    <Link href={item.href!} className="flex items-center gap-3 px-3 py-2.5 no-underline transition-colors hover:bg-black/[0.02]">
+    <Link href={item.href!} className="flex w-full items-center gap-3.5 px-3 py-3 no-underline rounded-2xl hover:bg-slate-50/50 transition-all duration-200 group">
       {content}
     </Link>
   );
@@ -125,56 +127,61 @@ export function ProfileSnapHub({
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="mod-card overflow-hidden rounded-2xl">
-        <div className="border-b px-4 py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
-          <ProfileBrowseEyebrow>Post to…</ProfileBrowseEyebrow>
-        </div>
-        {showPinPrompt ? (
-          <Link
-            href="/settings/location"
-            className="flex w-full items-center gap-3 border-b px-3 py-3 text-left no-underline"
-            style={{ borderColor: 'var(--neu-shadow-dark)' }}
-          >
-            <div className="mod-inset flex h-10 w-10 items-center justify-center rounded-xl text-primary">
-              <span className="material-symbols-outlined text-[20px]">add_location_alt</span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
-                Pin your Huud on the map
-              </p>
-              <p className="text-xs text-[var(--neu-text-muted)]">
-                Set location so neighbours can find you
-              </p>
-            </div>
-          </Link>
-        ) : null}
-        <div className="divide-y" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
-          {postItems.map((item) => (
-            <HubRow key={item.id} item={item} />
-          ))}
-        </div>
-      </div>
-
-      <div className="mod-card overflow-hidden rounded-2xl">
-        <div className="border-b px-4 py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
-          <ProfileBrowseEyebrow>Your Huud</ProfileBrowseEyebrow>
-        </div>
-        <div className="divide-y" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
-          {platformItems.map((item) => (
-            <HubRow key={item.id} item={item} />
-          ))}
+    <div className="w-full">
+      <div className="border-t-8 border-gray-50/80 py-4">
+        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px]">
+          <div className="px-3 pb-2.5">
+            <ProfileBrowseEyebrow>Post to…</ProfileBrowseEyebrow>
+          </div>
+          {showPinPrompt ? (
+            <Link
+              href="/settings/location"
+              className="flex w-full items-center gap-3.5 border border-dashed border-gray-200 rounded-2xl px-4 py-4 mb-3 text-left no-underline bg-gray-50/30 hover:bg-gray-50 transition-all"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 text-blue-600 shadow-sm">
+                <span className="material-symbols-outlined text-[22px]">add_location_alt</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-extrabold text-gray-800">
+                  Pin your Huud on the map
+                </p>
+                <p className="text-xs font-semibold text-gray-400 mt-0.5">
+                  Set location so neighbours can find you
+                </p>
+              </div>
+            </Link>
+          ) : null}
+          <div className="space-y-1">
+            {postItems.map((item) => (
+              <HubRow key={item.id} item={item} />
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="mod-card overflow-hidden rounded-2xl">
-        <div className="border-b px-4 py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
-          <ProfileBrowseEyebrow>Account &amp; Settings</ProfileBrowseEyebrow>
+      <div className="border-t-8 border-gray-50/80 py-4">
+        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px]">
+          <div className="px-3 pb-2.5">
+            <ProfileBrowseEyebrow>Your Huud</ProfileBrowseEyebrow>
+          </div>
+          <div className="space-y-1">
+            {platformItems.map((item) => (
+              <HubRow key={item.id} item={item} />
+            ))}
+          </div>
         </div>
-        <div className="divide-y" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
-          {accountItems.map((item) => (
-            <HubRow key={item.id} item={item} />
-          ))}
+      </div>
+
+      <div className="border-t-8 border-gray-50/80 py-4">
+        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px]">
+          <div className="px-3 pb-2.5">
+            <ProfileBrowseEyebrow>Account &amp; Settings</ProfileBrowseEyebrow>
+          </div>
+          <div className="space-y-1">
+            {accountItems.map((item) => (
+              <HubRow key={item.id} item={item} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

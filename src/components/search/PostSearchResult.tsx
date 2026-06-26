@@ -40,8 +40,8 @@ export const PostSearchResult = ({ post, onClose }: Props) => {
         {/* Author Avatar */}
         <MapPinAvatar
           src={post.author?.avatarUrl}
-          alt={post.author.name}
-          fallbackInitial={post.author.name.charAt(0).toUpperCase()}
+          alt={post.author?.name || 'Unknown User'}
+          fallbackInitial={(post.author?.name || 'U').charAt(0).toUpperCase()}
           size="sm"
         />
 

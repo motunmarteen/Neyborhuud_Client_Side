@@ -14,6 +14,7 @@ import { ChatsStream } from '@/components/friendship/ChatsStream';
 import { ConnectMap } from '@/components/friendship/ConnectMap';
 import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
 import { BottomNav } from '@/components/feed/BottomNav';
+import { useCall } from '@/components/calls/CallProvider';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -86,53 +87,78 @@ interface UserCardProps {
 function UserCard({ user, currentUserId, onFollowToggle, onMessage, pendingIds, messagingIds, isFollowing }: UserCardProps) {
   const userId = user._id || user.id;
   const isMe = !!userId && userId === currentUserId;
-  const pending = !!userId && pendingIds.has(userId);
-  const messaging = !!userId && messagingIds.has(userId);
+  const { startCall } = useCall();
+
+  const handleAudioCall = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!userId) return;
+    startCall({
+      peerId: userId,
+      peerName: `${user.firstName} ${user.lastName}`,
+      peerAvatar: user.avatarUrl || user.profilePicture || undefined,
+      type: 'audio',
+      conversationId: null,
+    });
+  };
+
+  const handleVideoCall = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!userId) return;
+    startCall({
+      peerId: userId,
+      peerName: `${user.firstName} ${user.lastName}`,
+      peerAvatar: user.avatarUrl || user.profilePicture || undefined,
+      type: 'video',
+      conversationId: null,
+    });
+  };
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition-colors duration-150 border-b border-gray-100 group">
-      <Link href={`/profile/${user.username}`} className="flex-shrink-0">
-        <Avatar user={user} size={48} />
+    <div className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50 transition-colors duration-150 border-b border-gray-100 group cursor-pointer">
+      <Link href={`/profile/${user.username}`} className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex-shrink-0">
+          <Avatar user={user} size={48} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="font-semibold text-slate-800 text-[15px] truncate">
+              {user.firstName} {user.lastName}
+            </span>
+            {user.isVerified && <VerifiedBadge />}
+          </div>
+          <p className="text-slate-400 text-xs truncate">@{user.username}</p>
+          {(user.lga || user.state) && (
+            <p className="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
+              <span className="material-symbols-outlined text-[12px] text-primary">location_on</span>
+              <span className="truncate">{[user.lga, user.state].filter(Boolean).join(', ')}</span>
+              {user.distanceMetres != null && (
+                <span className="text-[#00D431] font-bold ml-1">· {fmtDist(user.distanceMetres)}</span>
+              )}
+            </p>
+          )}
+          {user.bio && <p className="text-slate-500 text-xs truncate mt-1 opacity-90 italic">"{user.bio}"</p>}
+        </div>
       </Link>
 
-      <div className="flex-1 min-w-0">
-        <Link href={`/profile/${user.username}`} className="flex items-center gap-1 min-w-0">
-          <span className="font-semibold text-slate-800 text-sm truncate">
-            {user.firstName} {user.lastName}
-          </span>
-          {user.isVerified && <VerifiedBadge />}
-        </Link>
-        <p className="text-slate-400 text-xs truncate">@{user.username}</p>
-        {(user.lga || user.state) && (
-          <p className="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
-            <span className="material-symbols-outlined text-[12px] text-primary">location_on</span>
-            <span className="truncate">{[user.lga, user.state].filter(Boolean).join(', ')}</span>
-            {user.distanceMetres != null && (
-              <span className="text-[#00D431] font-bold ml-1">· {fmtDist(user.distanceMetres)}</span>
-            )}
-          </p>
-        )}
-        {user.bio && <p className="text-slate-500 text-xs truncate mt-1 opacity-90 italic">"{user.bio}"</p>}
-      </div>
-
       {!isMe && (
-        isFollowing ? (
+        <div className="flex shrink-0 items-center gap-1">
           <button
-            onClick={() => userId && onMessage(userId)}
-            disabled={!userId || messaging}
-            className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 bg-white/8 text-white/60 border border-white/10 hover:bg-status-danger/10 hover:text-status-danger hover:border-status-danger/30"
+            type="button"
+            onClick={handleAudioCall}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A555] transition-colors hover:bg-[#00D431]/10 active:scale-90"
+            aria-label="Audio call"
           >
-            {messaging ? '…' : 'Message'}
+            <span className="material-symbols-outlined text-[20px]">call</span>
           </button>
-        ) : (
           <button
-            onClick={() => userId && onFollowToggle(userId, false)}
-            disabled={!userId || pending}
-            className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 bg-[#00D431] text-white shadow-sm hover:brightness-105"
+            type="button"
+            onClick={handleVideoCall}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A555] transition-colors hover:bg-[#00D431]/10 active:scale-90"
+            aria-label="Video call"
           >
-            {pending ? '…' : 'Follow'}
+            <span className="material-symbols-outlined text-[20px]">videocam</span>
           </button>
-        )
+        </div>
       )}
     </div>
   );
@@ -140,32 +166,50 @@ function UserCard({ user, currentUserId, onFollowToggle, onMessage, pendingIds, 
 
 // ─── Tab pills ─────────────────────────────────────────────────────────────────
 
-const TabPill = ({
+const CONNECT_CATEGORIES = [
+  { id: 'chats', label: 'Chats', icon: 'chat', color: 'bg-blue-600', text: 'text-blue-600', bgSoft: 'bg-blue-600/10' },
+  { id: 'near_me', label: 'Near me', icon: 'location_on', color: 'bg-green-600', text: 'text-green-600', bgSoft: 'bg-green-600/10' },
+  { id: 'following', label: 'Following', icon: 'person_add', color: 'bg-purple-600', text: 'text-purple-600', bgSoft: 'bg-purple-600/10' },
+  { id: 'followers', label: 'Followers', icon: 'groups', color: 'bg-orange-600', text: 'text-orange-600', bgSoft: 'bg-orange-600/10' },
+] as const;
+
+const TabCircle = ({
   active,
   onClick,
-  children,
+  label,
+  icon,
   count,
+  color,
+  text,
+  bgSoft,
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  label: string;
+  icon: string;
   count?: number;
+  color: string;
+  text: string;
+  bgSoft: string;
 }) => (
   <button
     type="button"
     role="tab"
     onClick={onClick}
     aria-selected={active ? 'true' : 'false'}
-    className={`segmented-tab ${active ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex-1 min-w-[76px] py-2 text-[13px] font-semibold transition-all duration-200 whitespace-nowrap px-3 rounded-full active:scale-[0.97]`}
+    className="flex flex-col items-center justify-start gap-2 bg-transparent transition-transform active:opacity-60 w-[26vw] max-w-[96px] shrink-0"
   >
-    <span className="flex items-center justify-center gap-1.5">
-      {children}
+    <div className="relative">
+      <div className={`w-[64px] h-[64px] rounded-full flex items-center justify-center shrink-0 transition-colors ${active ? `${color} text-white shadow-md` : `${bgSoft} ${text}`}`}>
+        <span className="material-symbols-outlined text-[32px]" style={{ fontVariationSettings: "'wght' 300" }}>{icon}</span>
+      </div>
       {count != null && count > 0 && (
-        <span className="segmented-tab__count text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-          {count > 99 ? '99+' : count}
-        </span>
+        <div className="absolute top-0 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center shadow-sm">
+          <span className="text-[9px] font-bold text-white">{count > 99 ? '99+' : count}</span>
+        </div>
       )}
-    </span>
+    </div>
+    <span className={`text-[12px] text-center leading-tight tracking-tight break-words px-1 ${active ? 'font-bold text-gray-900' : 'font-medium text-gray-500'}`}>{label}</span>
   </button>
 );
 
@@ -173,11 +217,11 @@ const TabPill = ({
 
 const EmptyState = ({ icon, title, subtitle }: { icon: string; title: string; subtitle: string }) => (
   <div className="flex flex-col items-center justify-center py-16 px-8 text-center bg-white">
-    <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4 border border-gray-100">
-      <span className="material-symbols-outlined text-[32px] text-[#00D431] fill-1">{icon}</span>
+    <div className={`w-[64px] h-[64px] rounded-full bg-[#00D431]/10 flex items-center justify-center mb-4 shrink-0`}>
+      <span className={`material-symbols-outlined text-[32px] text-[#00D431]`} style={{ fontVariationSettings: "'wght' 300" }}>{icon}</span>
     </div>
-    <h3 className="font-bold text-slate-800 text-sm mb-1">{title}</h3>
-    <p className="text-slate-500 text-xs leading-relaxed max-w-xs">{subtitle}</p>
+    <h3 className="font-bold text-slate-900 text-[16px] mb-2">{title}</h3>
+    <p className="text-gray-500 text-sm leading-relaxed max-w-xs">{subtitle}</p>
   </div>
 );
 
@@ -365,45 +409,52 @@ function FriendshipPageContent() {
   const mapCollapsed = useScrollHideBottomNav(showMap, mainTab);
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-white">
+    <div className="flex flex-1 w-full !h-[100dvh] !min-h-[100dvh] flex-col overflow-hidden !bg-white">
       <TopNav />
 
-      <div className="app-chrome-below-topnav">
+      <div className="app-chrome-below-topnav mx-auto w-full max-w-[600px] !bg-white">
       {/* Search + tabs */}
-      <header className="z-30 shrink-0 border-b border-gray-100 bg-white/95 backdrop-blur-md">
+      <header className="z-30 shrink-0 bg-white/95 backdrop-blur-md">
         {/* Persistent, context-aware search — on every tab */}
-        <div className="px-4 pb-3 pt-3">
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
+        <div className="pb-6 pt-3">
+          <div className="relative w-full h-[3.2rem] px-4">
+            <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-[22px] text-gray-400" style={{ fontVariationSettings: "'wght' 300" }}>search</span>
             <input
               type="search"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-800 placeholder-slate-400 transition-all focus:border-[#00D431] focus:outline-none focus:ring-1 focus:ring-[#00D431]"
+              className="w-full h-full pl-[52px] pr-12 bg-[#F4F5F6] rounded-full text-[15px] font-medium text-gray-900 outline-none transition-all focus:bg-[#EDEDEE] placeholder:text-gray-500 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] border-none"
             />
           </div>
         </div>
 
-        <div className="px-4 pb-3">
+        {/* Edge-to-edge Circle Tabs */}
+        <div className="pl-4 pb-6 border-b border-gray-100 relative">
           <div
             role="tablist"
             aria-label="Friendship sections"
-            className="flex items-center gap-0.5 overflow-x-auto rounded-full border border-black/[0.05] bg-brand-surface/60 p-1 no-scrollbar scroll-smooth"
+            className="flex items-start gap-4 overflow-x-auto pt-1 pb-2 no-scrollbar pr-8"
           >
-            <TabPill active={mainTab === 'chats'} onClick={() => handleMainTab('chats')}>
-              Chats
-            </TabPill>
-            <TabPill active={mainTab === 'near_me'} onClick={() => handleMainTab('near_me')}>
-              Near me
-            </TabPill>
-            <TabPill active={mainTab === 'following'} onClick={() => handleMainTab('following')} count={following.length || undefined}>
-              Following
-            </TabPill>
-            <TabPill active={mainTab === 'followers'} onClick={() => handleMainTab('followers')} count={followers.length || undefined}>
-              Followers
-            </TabPill>
+            {CONNECT_CATEGORIES.map(cat => {
+              const count = cat.id === 'following' ? following.length : cat.id === 'followers' ? followers.length : 0;
+              return (
+                <TabCircle
+                  key={cat.id}
+                  active={mainTab === cat.id}
+                  onClick={() => handleMainTab(cat.id as MainTab)}
+                  label={cat.label}
+                  icon={cat.icon}
+                  count={count}
+                  color={cat.color}
+                  text={cat.text}
+                  bgSoft={cat.bgSoft}
+                />
+              );
+            })}
           </div>
+          {/* Fade out right edge indicator */}
+          <div className="absolute top-0 right-0 bottom-6 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
         </div>
       </header>
 
@@ -429,7 +480,7 @@ function FriendshipPageContent() {
       {/* Content */}
       <main
         data-app-scroll-root
-        className="feed-scroll-main min-h-0 flex-1 overflow-y-auto scroll-smooth bg-white pb-24"
+        className="feed-scroll-main min-h-0 flex-1 overflow-y-auto scroll-smooth !bg-white pb-36"
       >
         {/* Near me tab */}
         {mainTab === 'near_me' && (
