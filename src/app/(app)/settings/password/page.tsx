@@ -8,10 +8,7 @@ import { PremiumInput } from '@/components/ui/PremiumInput';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { authService } from '@/services/auth.service';
 import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
-import TopNav from '@/components/navigation/TopNav';
-import LeftSidebar from '@/components/navigation/LeftSidebar';
-import RightSidebar from '@/components/navigation/RightSidebar';
-import { BottomNav } from '@/components/feed/BottomNav';
+import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 
 export default function ChangePasswordPage() {
   const router = useRouter();
@@ -69,12 +66,8 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden neu-base">
-      <TopNav />
-      <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
-        <div className="flex-1 overflow-y-auto">
-      <div className="p-6 max-w-md mx-auto w-full">
+    <AppBrowseLayout>
+      <div className="max-w-md mx-auto w-full py-6">
         <div className="mt-8 mb-6">
           <Link
             href="/settings"
@@ -148,10 +141,6 @@ export default function ChangePasswordPage() {
           </button>
         </form>
       </div>
-        </div>
-        <RightSidebar />
-      </div>
-      <BottomNav />
-    </div>
+    </AppBrowseLayout>
   );
 }
