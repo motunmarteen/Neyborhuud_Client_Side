@@ -159,7 +159,7 @@ export function AppNavIcon({ name, className, active = false }: AppNavIconProps)
           return (
             <Icon
               className="app-nav-icon__glyph"
-              strokeWidth={2}
+              strokeWidth={1.5}
               fill={filled ? 'currentColor' : 'none'}
               aria-hidden
             />
