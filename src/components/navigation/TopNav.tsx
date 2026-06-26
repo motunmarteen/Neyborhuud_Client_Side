@@ -3,7 +3,7 @@
 import { Suspense, useMemo, useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Settings } from 'lucide-react';
 
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { AppNavIcon } from '@/components/navigation/AppNavIcon';
@@ -250,7 +250,11 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                   className="flex items-center justify-center text-brand-black dark:text-white hover:opacity-80 transition-opacity shrink-0"
                   aria-label="Settings"
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: '36px' }}>settings</span>
+                  <Settings 
+                    className="h-[30px] w-[30px]" 
+                    strokeWidth={1.5}
+                    style={{ animation: 'spin 12s linear infinite' }}
+                  />
                 </Link>
               </div>
               
