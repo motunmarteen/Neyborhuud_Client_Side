@@ -44,7 +44,7 @@ export function FloatingSosButton() {
       return;
     }
     if (e.type === 'pointerup' || e.type === 'touchend' || e.type === 'mouseup') {
-      openSheet();
+      router.push('/sos');
     }
   };
 

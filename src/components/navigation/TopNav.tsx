@@ -361,13 +361,6 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
             </span>
           )}
         </Link>
-        <Link
-          href={profileHref}
-          className="app-topnav__action"
-          aria-label="Profile"
-        >
-          <AppNavIcon name="profile" />
-        </Link>
       </div>
     </header>
     </div>
