@@ -144,7 +144,7 @@ function SidebarContent({ onNavigate, onClose, isDrawer }: { onNavigate?: () => 
             />
             <SidebarLink
               href="/help-center"
-              icon="support"
+              icon="support_agent"
               label="Help Center"
               active={isActive('/help-center')}
               onNavigate={onNavigate}

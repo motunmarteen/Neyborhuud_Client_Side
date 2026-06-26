@@ -1,36 +1,17 @@
 'use client';
 
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { BRAND_MARK_SRC } from '@/lib/brand-assets';
+import { useEffect, useState, useId } from 'react';
 import { resolveMediaUrl } from '@/lib/userAvatar';
-
-/** Pin asset aspect (w / h) — from `neyborhuud-mark-light.png` (326×402) */
-const MARK_ASPECT = 326 / 402;
-
-/**
- * Blue disc on the brand mark (measured from PNG pixel bounds).
- * Avatar circle is centered on the disc and sized to fully cover the H/house artwork.
- */
-const AVATAR = {
-  centerX: 49.85,
-  centerY: 40.42,
-  /** Diameter as % of mark height */
-  size: 52,
-} as const;
 
 type BrandPinSize = 'hero' | 'lg' | 'md' | 'marker' | 'sm' | 'xs';
 
-const SIZE_HEIGHT: Record<BrandPinSize, number> = {
-  hero: 116,
-  lg: 90,
-  md: 72,
-  /** Map marker — matches prior MapPinAvatar `marker` tier */
-  marker: 90,
-  /** Compact pin for tight rows (composer, chips) */
-  sm: 56,
-  /** Bottom nav profile tab */
-  xs: 36,
+const SIZE_MAP: Record<BrandPinSize, { w: number; h: number }> = {
+  hero:   { w: 94,  h: 116 },
+  lg:     { w: 73,  h: 90  },
+  md:     { w: 58,  h: 72  },
+  marker: { w: 73,  h: 90  },
+  sm:     { w: 45,  h: 56  },
+  xs:     { w: 29,  h: 36  },
 };
 
 type BrandPinAvatarProps = {
@@ -43,10 +24,6 @@ type BrandPinAvatarProps = {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
-/**
- * Official neyborhuud pin mark with user photo (or initial) in the logo disc —
- * same lockup as `/` landing, personalized for sidebar/profile.
- */
 export function BrandPinAvatar({
   src,
   alt = 'Profile',
@@ -56,8 +33,8 @@ export function BrandPinAvatar({
   priority = false,
   onClick,
 }: BrandPinAvatarProps) {
-  const markHeight = SIZE_HEIGHT[size];
-  const markWidth = Math.round(markHeight * MARK_ASPECT);
+  const uid = useId();
+  const s = SIZE_MAP[size];
   const [imgError, setImgError] = useState(false);
 
   const resolvedSrc = src?.trim() ? resolveMediaUrl(src.trim()) : null;
@@ -68,53 +45,57 @@ export function BrandPinAvatar({
     setImgError(false);
   }, [resolvedSrc]);
 
-  const avatarSize = (AVATAR.size / 100) * markHeight;
   const shellClass = `relative inline-flex shrink-0 ${className}`;
-  const shellStyle = { width: markWidth, height: markHeight };
+  const shellStyle = { width: s.w, height: s.h };
 
   const markContent = (
-    <>
-      <Image
-        src={BRAND_MARK_SRC}
-        alt=""
-        width={markWidth}
-        height={markHeight}
-        priority={priority}
-        aria-hidden
-        className="block h-full w-full object-contain drop-shadow-[0_4px_16px_rgba(0,111,53,0.28)]"
+    <svg viewBox="0 0 100 115" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id={`brand-shadow-${uid}`} x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity={0.15} />
+        </filter>
+        <clipPath id={`brand-clip-${uid}`}>
+          <path d="M50 6 C25.6 6 6 25.6 6 50 C6 81.5 50 109 50 109 C50 109 94 81.5 94 50 C94 25.6 74.4 6 50 6 Z" />
+        </clipPath>
+      </defs>
+      
+      {/* Background / Shadow / White Pin Base */}
+      <path 
+        d="M50 6 C25.6 6 6 25.6 6 50 C6 81.5 50 109 50 109 C50 109 94 81.5 94 50 C94 25.6 74.4 6 50 6 Z" 
+        fill="#ffffff" 
+        filter={`url(#brand-shadow-${uid})`}
       />
-      <div
-        className="absolute z-10 overflow-hidden rounded-full bg-brand-blue ring-[3px] ring-white"
-        style={{
-          left: `${AVATAR.centerX}%`,
-          top: `${AVATAR.centerY}%`,
-          width: avatarSize,
-          height: avatarSize,
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        {showPhoto ? (
-          <img
-            key={resolvedSrc}
-            src={resolvedSrc!}
-            alt={alt}
-            className="h-full w-full object-cover"
-            loading={priority ? 'eager' : 'lazy'}
-            decoding="async"
-            referrerPolicy="no-referrer"
-            onError={() => setImgError(true)}
-          />
-        ) : showInitial ? (
-          <span
-            className="flex h-full w-full items-center justify-center font-display text-white"
-            style={{ fontSize: Math.round(avatarSize * 0.42), fontWeight: 800 }}
-            aria-hidden
-          >
-            {fallbackInitial}
-          </span>
-        ) : null}
-      </div>
-    </>
+      
+      {/* Image / Fallback Masked into Inset Teardrop */}
+      <g clipPath={`url(#brand-clip-${uid})`}>
+        <foreignObject x="0" y="0" width="100" height="115">
+          {showPhoto ? (
+            <img 
+              src={resolvedSrc!} 
+              alt={alt} 
+              className="w-full h-full object-cover object-center" 
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="w-full h-full bg-brand-blue flex items-center justify-center pt-2 text-white">
+              {showInitial ? (
+                <span className="font-black" style={{ fontSize: '36px' }}>{fallbackInitial}</span>
+              ) : (
+                <span className="material-symbols-outlined" style={{ fontSize: '44px' }}>person</span>
+              )}
+            </div>
+          )}
+        </foreignObject>
+      </g>
+      
+      {/* Crisp White Outer Border Ring */}
+      <path 
+        d="M50 6 C25.6 6 6 25.6 6 50 C6 81.5 50 109 50 109 C50 109 94 81.5 94 50 C94 25.6 74.4 6 50 6 Z" 
+        fill="none" 
+        stroke="#ffffff"
+        strokeWidth="8" 
+      />
+    </svg>
   );
 
   if (onClick) {

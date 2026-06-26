@@ -407,7 +407,7 @@ html[data-standalone] .app-body {
   gap: 0.375rem;
   min-height: calc(var(--app-topnav-height) + var(--safe-top));
   padding-inline: 0.15rem;
-  padding-top: var(--safe-top);
+  padding-top: calc(var(--safe-top) + 1.25rem);
   padding-bottom: 0;
   white-space: nowrap;
   pointer-events: auto;
@@ -628,7 +628,7 @@ main.feed-scroll-main,
   padding: 0;
   gap: 0;
   border-radius: 9999px;
-  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1), opacity 220ms ease;
+  transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms ease;
   background: rgba(255, 255, 255, 0.90);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -655,7 +655,7 @@ main.feed-scroll-main,
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  height: 4rem;
+  height: 3.2rem;
   border-radius: 9999px;
   overflow: hidden;
 }
@@ -673,7 +673,7 @@ main.feed-scroll-main,
   min-width: 0;
   height: 100%;
   text-decoration: none;
-  color: rgba(26, 26, 26, 0.85); /* Darker text/icon for better visibility */
+  color: #000000; /* Pure black for inactive icons */
   touch-action: manipulation;
   transition: 
     color 180ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -682,7 +682,7 @@ main.feed-scroll-main,
 }
 
 .dark .app-bottomnav__item {
-  color: rgba(233, 246, 230, 0.80); /* Darker tint for dark mode */
+  color: #ffffff; /* Pure white for dark mode */
 }
 
 button.app-bottomnav__item {
@@ -3441,7 +3441,11 @@ html[data-scroll-locked] .feed-scroll-main {
 }
 
 .feed-sky-scene__weather {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
 }
 
 .feed-sky-scene__weather-skeleton {

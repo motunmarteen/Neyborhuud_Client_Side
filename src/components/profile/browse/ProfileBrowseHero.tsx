@@ -21,10 +21,6 @@ type ProfileBrowseHeroProps = {
   onMessage?: () => void;
   messaging?: boolean;
   onChangePhoto?: () => void;
-  onSetLocation?: () => void;
-  onMapLocationChange?: (loc: { lat: number; lng: number }) => void;
-  settingLocation?: boolean;
-  savingMapLocation?: boolean;
   identityVerified?: boolean;
   /** Grey badge while verification journey is underway */
   verificationInProgress?: boolean;
@@ -47,10 +43,6 @@ export function ProfileBrowseHero({
   onMessage,
   messaging,
   onChangePhoto,
-  onSetLocation,
-  onMapLocationChange,
-  settingLocation,
-  savingMapLocation,
   identityVerified,
   verificationInProgress = false,
   verificationTierLabel,
@@ -78,8 +70,7 @@ export function ProfileBrowseHero({
           center={center}
           height="100%"
           className="absolute inset-0 h-full w-full !rounded-none"
-          draggable={isOwnProfile}
-          onLocationChange={onMapLocationChange}
+          draggable={false}
           showDragHint={false}
           showNavigationControl={false}
           showAttribution={false}
@@ -104,19 +95,6 @@ export function ProfileBrowseHero({
             <span className="material-symbols-outlined text-[16px]">share</span>
             Share
           </button>
-          {isOwnProfile && onSetLocation ? (
-            <button
-              type="button"
-              onClick={onSetLocation}
-              disabled={settingLocation || savingMapLocation}
-              className="mod-chip inline-flex h-8 w-8 items-center justify-center rounded-full disabled:opacity-50"
-              aria-label="Set location"
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                {settingLocation || savingMapLocation ? 'hourglass_top' : 'my_location'}
-              </span>
-            </button>
-          ) : null}
         </div>
         {uploading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-black/30">

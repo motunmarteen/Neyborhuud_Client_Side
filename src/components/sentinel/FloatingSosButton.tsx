@@ -46,8 +46,11 @@ export function FloatingSosButton() {
 
   return (
     <div 
-      className={`fixed right-4 z-[40] transition-transform duration-300 w-14 h-14`} 
-      style={{ bottom: scrollHidden ? '2rem' : '6.5rem' }}
+      className={`fixed right-4 z-[40] w-14 h-14`} 
+      style={{ 
+        bottom: scrollHidden ? '1.5rem' : '4.5rem',
+        transition: 'bottom 400ms cubic-bezier(0.34, 1.56, 0.64, 1)'
+      }}
     >
       <div className="relative app-bottomnav__sos-glass app-bottomnav__glass app-bottomnav__glass--disc">
         <span

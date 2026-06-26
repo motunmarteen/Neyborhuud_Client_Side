@@ -42,7 +42,6 @@ import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
 import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
 import { FeedNewsTicker } from '@/components/feed/FeedNewsTicker';
 import { FeedSentinelRow } from '@/components/feed/FeedSentinelRow';
-import { FeedRadialCategories } from '@/components/feed/FeedRadialCategories';
 
 const getFilterBannerData = (type: string) => {
     switch (type) {
@@ -794,9 +793,6 @@ function XFeedInner() {
             )}
 
             <FeedWelcomeSheet />
-
-            {/* Radial category menu — floating half-wheel on the left edge */}
-            <FeedRadialCategories />
         </div>
     );
 }

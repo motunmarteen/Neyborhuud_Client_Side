@@ -1495,6 +1495,21 @@ export default function SettingsPage() {
                 </Link>
               </Section>
 
+              <Section title="Location">
+                <Link
+                  href="/settings/location"
+                  className="mod-inset flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold no-underline"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                    Location &amp; Radius
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)]">
+                    chevron_right
+                  </span>
+                </Link>
+              </Section>
+
               <Section title="Security">
                 {isAdminUser(user) ? (
                   <Link

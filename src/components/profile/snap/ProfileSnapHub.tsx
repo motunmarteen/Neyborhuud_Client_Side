@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { ProfileBrowseEyebrow } from '@/components/profile/browse/ProfileBrowseSectionTitle';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 type HubItem = {
   id: string;
@@ -15,7 +17,6 @@ type HubItem = {
 type ProfileSnapHubProps = {
   isOwnProfile: boolean;
   onCreatePost?: () => void;
-  onSetLocation?: () => void;
   showPinPrompt?: boolean;
 };
 
@@ -57,10 +58,24 @@ function HubRow({ item }: { item: HubItem }) {
 export function ProfileSnapHub({
   isOwnProfile,
   onCreatePost,
-  onSetLocation,
   showPinPrompt = false,
 }: ProfileSnapHubProps) {
+  const { logout } = useAuth();
+  const router = useRouter();
+
   if (!isOwnProfile) return null;
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      localStorage.removeItem('neyborhuud_token');
+      localStorage.removeItem('neyborhuud_user');
+      router.push('/login');
+    }
+  };
 
   const postItems: HubItem[] = [
     {
@@ -101,17 +116,24 @@ export function ProfileSnapHub({
     { id: 'safety', title: 'Sentinel & SOS', subtitle: 'Safety tools for your Huud', icon: 'shield', href: '/safety/manage' },
   ];
 
+  const accountItems: HubItem[] = [
+    { id: 'my-huud', title: 'My Huud', subtitle: 'View your local neighbourhood map', icon: 'location_on', href: '/neighborhood' },
+    { id: 'saved', title: 'Saved', subtitle: 'Access your bookmarked posts', icon: 'bookmark', href: '/saved' },
+    { id: 'economy', title: 'Huud Economy', subtitle: 'Manage your wallet and coins', icon: 'account_balance', href: '/huud-economy' },
+    { id: 'settings', title: 'Settings & Privacy', subtitle: 'Manage your profile and preferences', icon: 'settings', href: '/settings' },
+    { id: 'logout', title: 'Fans Out', subtitle: 'Sign out of your account', icon: 'logout', onClick: handleLogout },
+  ];
+
   return (
     <div className="space-y-4">
       <div className="mod-card overflow-hidden rounded-2xl">
         <div className="border-b px-4 py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
           <ProfileBrowseEyebrow>Post to…</ProfileBrowseEyebrow>
         </div>
-        {showPinPrompt && onSetLocation ? (
-          <button
-            type="button"
-            onClick={onSetLocation}
-            className="flex w-full items-center gap-3 border-b px-3 py-3 text-left"
+        {showPinPrompt ? (
+          <Link
+            href="/settings/location"
+            className="flex w-full items-center gap-3 border-b px-3 py-3 text-left no-underline"
             style={{ borderColor: 'var(--neu-shadow-dark)' }}
           >
             <div className="mod-inset flex h-10 w-10 items-center justify-center rounded-xl text-primary">
@@ -125,7 +147,7 @@ export function ProfileSnapHub({
                 Set location so neighbours can find you
               </p>
             </div>
-          </button>
+          </Link>
         ) : null}
         <div className="divide-y" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
           {postItems.map((item) => (
@@ -140,6 +162,17 @@ export function ProfileSnapHub({
         </div>
         <div className="divide-y" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
           {platformItems.map((item) => (
+            <HubRow key={item.id} item={item} />
+          ))}
+        </div>
+      </div>
+
+      <div className="mod-card overflow-hidden rounded-2xl">
+        <div className="border-b px-4 py-3" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+          <ProfileBrowseEyebrow>Account &amp; Settings</ProfileBrowseEyebrow>
+        </div>
+        <div className="divide-y" style={{ borderColor: 'var(--neu-shadow-dark)' }}>
+          {accountItems.map((item) => (
             <HubRow key={item.id} item={item} />
           ))}
         </div>

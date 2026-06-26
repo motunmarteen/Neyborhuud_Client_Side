@@ -5,7 +5,7 @@ type PostCardMenuIconProps = {
 };
 
 /** Modern 2-stroke hamburger icon for post cards */
-export function PostCardMenuIcon({ className = 'h-5 w-5' }: PostCardMenuIconProps) {
+export function PostCardMenuIcon({ className = 'h-[18px] w-[18px]' }: PostCardMenuIconProps) {
   return (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 

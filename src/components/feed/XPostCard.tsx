@@ -32,6 +32,7 @@ import { PremiumSafetyAlertBlock } from './PremiumSafetyAlertBlock';
 import { generatePostNarrative } from '@/lib/postNarrative';
 import { usePostMutations } from '@/hooks/usePosts';
 import { renderFormattedText } from '@/lib/renderFormattedText';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 const formatCompactCount = (value?: number) => {
     if (!value) return undefined;
@@ -316,13 +317,7 @@ export function XPostCard({
                         >
                             <span className="material-symbols-outlined text-[13px] text-brand-green" style={{ transform: 'scaleX(-1)' }}>reply</span>
                             <span className="flex items-center gap-1.5">
-                                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full overflow-hidden border-[1px] border-white/60 dark:border-white/10 bg-white dark:bg-[#1A221C] shrink-0">
-                                    {sharerAvatar ? (
-                                        <img src={sharerAvatar} alt="" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="w-full h-full flex items-center justify-center text-[7px] font-black text-white" style={{ background: 'linear-gradient(135deg, #00c431, #009924)' }}>{sharerInitial}</span>
-                                    )}
-                                </span>
+                                <MapPinAvatar src={sharerAvatar} fallbackInitial={sharerInitial} size="xs" />
                                 reposted by <span className="text-brand-green font-bold group-hover:underline">@{sharerUsername}</span>
                             </span>
                             <span className="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-70 transition-opacity text-brand-green">hub</span>
@@ -346,15 +341,7 @@ export function XPostCard({
                     >
                         <span className="material-symbols-outlined text-[13px] text-primary" style={{ transform: 'scaleX(-1)' }}>reply</span>
                         <span className="flex items-center gap-1.5">
-                            {/* Mini avatar of the sharer */}
-                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full overflow-hidden border-[1px] border-white/60 dark:border-white/10 shadow-[0_2px_4px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,0.4)] dark:shadow-[0_2px_4px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.05)] bg-white dark:bg-[#1A221C] shrink-0">
-                                {sharerAvatar ? (
-                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img src={sharerAvatar} alt="" className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="w-full h-full flex items-center justify-center text-[7px] font-black text-white" style={{ background: 'linear-gradient(135deg, #00c431, #009924)' }}>{sharerInitial}</span>
-                                )}
-                            </span>
+                            <MapPinAvatar src={sharerAvatar} fallbackInitial={sharerInitial} size="xs" />
                             shared from <span className="text-primary font-bold group-hover:underline">@{sharerUsername}</span>
                         </span>
                         <span className="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-70 transition-opacity text-primary">hub</span>
@@ -366,28 +353,14 @@ export function XPostCard({
             <div className="flex items-start justify-between gap-3 w-full">
                 <div className="flex items-center gap-2.5 min-w-0">
                     <div className="relative shrink-0">
-                        <Link href={`/profile/${authorUsername}`} onClick={handleProfileClick}>
-                            <div className="post-card-avatar flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 dark:border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.08),inset_0_2px_4px_rgba(255,255,255,0.4)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3),inset_0_2px_4px_rgba(255,255,255,0.05)] bg-white dark:bg-[#1A221C] transition-transform hover:scale-105 active:scale-95">
-                                {authorAvatar && !imageError ? (
-                                    <Image
-                                        src={authorAvatar}
-                                        alt={authorName}
-                                        fill
-                                        sizes="44px"
-                                        className="object-cover"
-                                        onError={() => setImageError(true)}
-                                        unoptimized
-                                    />
-                                ) : (
-                                    <span className="material-symbols-outlined text-[20px] text-neu-text-secondary dark:text-white/60">person</span>
-                                )}
-                            </div>
+                        <Link href={`/profile/${authorUsername}`} onClick={handleProfileClick} className="block transition-transform hover:scale-105 active:scale-95 drop-shadow-[0_4px_6px_rgba(0,0,0,0.08)]">
+                            <MapPinAvatar
+                                src={authorAvatar}
+                                alt={authorName}
+                                fallbackInitial={authorName[0]?.toUpperCase()}
+                                size="md"
+                            />
                         </Link>
-                        <PostCardVerificationBadge
-                            author={author}
-                            hidden={isAnonymousAuthor}
-                            withAvatarBackground
-                        />
                     </div>
                     <PostCardAuthorLines
                         authorName={authorName}

@@ -31,11 +31,11 @@ export function PostCardFollowButton({
     >
       <span className="flex items-center justify-center">
         {isPending ? (
-          <Loader2 className="w-5 h-5 animate-spin" strokeWidth={1.5} />
+          <Loader2 className="w-[18px] h-[18px] animate-spin" strokeWidth={1.5} />
         ) : isFollowing ? (
-          <UserCheck className="w-5 h-5" strokeWidth={1.5} />
+          <UserCheck className="w-[18px] h-[18px]" strokeWidth={1.5} />
         ) : (
-          <UserPlus className="w-5 h-5" strokeWidth={1.5} />
+          <UserPlus className="w-[18px] h-[18px]" strokeWidth={1.5} />
         )}
       </span>
     </button>

@@ -8,6 +8,12 @@ import { authService } from '@/services/auth.service';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import { BottomNav } from '@/components/feed/BottomNav';
+import { MiniMap } from '@/components/ui/InteractiveMap';
+import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
+import { resolveProfileAvatarInitial, resolveUserAvatarUrl } from '@/lib/userAvatar';
+import { resolveProfileMapCenter, PROFILE_MAP_DEFAULT } from '@/lib/profileSnapHelpers';
+import { getGeolocation } from '@/lib/nativeGeolocation';
+import apiClient from '@/lib/api-client';
 
 const PRESETS = [
   { label: 'Urban', km: 5,  description: 'Dense city areas' },
@@ -20,17 +26,53 @@ export default function LocationSettingsPage() {
   const [radius, setRadius] = useState(10);
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>(PROFILE_MAP_DEFAULT);
+  const [hasNewLocation, setHasNewLocation] = useState(false);
+  const [detectingGPS, setDetectingGPS] = useState(false);
 
-  // Load saved radius from local user data
+  // Load saved radius and coordinates from local user data
   useEffect(() => {
     const stored = localStorage.getItem('neyborhuud_user');
     if (stored) {
       const parsed = JSON.parse(stored);
+      setUser(parsed);
       const saved = parsed?.settings?.contentRadius;
       if (typeof saved === 'number') setRadius(saved);
+      
+      const center = resolveProfileMapCenter(parsed);
+      if (center) setMapCenter(center);
     }
     setLoaded(true);
   }, []);
+
+  const handleMapLocationChange = (loc: { lat: number; lng: number }) => {
+    setMapCenter(loc);
+    setHasNewLocation(true);
+  };
+
+  const handleSetLocationGPS = () => {
+    const geo = getGeolocation();
+    if (!geo) return;
+    setDetectingGPS(true);
+    geo.getCurrentPosition(
+      (position) => {
+        setMapCenter({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setHasNewLocation(true);
+        setDetectingGPS(false);
+        toast.success('Current GPS location detected. Click "Save Radius & Location" to apply.');
+      },
+      (err) => {
+        console.error('GPS error:', err.message);
+        toast.error('Could not get your location. Check permissions.');
+        setDetectingGPS(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -40,17 +82,27 @@ export default function LocationSettingsPage() {
         body: JSON.stringify({ contentRadius: radius }),
       });
 
+      if (hasNewLocation) {
+        await apiClient.put('/auth/location/update', {
+          type: 'current',
+          location: { latitude: mapCenter.lat, longitude: mapCenter.lng },
+        });
+      }
+
       // Update local storage
       const stored = localStorage.getItem('neyborhuud_user');
       if (stored) {
         const parsed = JSON.parse(stored);
-        localStorage.setItem(
-          'neyborhuud_user',
-          JSON.stringify({ ...parsed, settings: { ...parsed.settings, contentRadius: radius } }),
-        );
+        const updatedUser = {
+          ...parsed,
+          settings: { ...parsed.settings, contentRadius: radius },
+          location: hasNewLocation ? { ...parsed.location, latitude: mapCenter.lat, longitude: mapCenter.lng } : parsed.location
+        };
+        localStorage.setItem('neyborhuud_user', JSON.stringify(updatedUser));
       }
 
-      toast.success(`Content radius set to ${radius} km`);
+      toast.success(hasNewLocation ? 'Radius and Location coordinates updated' : `Content radius set to ${radius} km`);
+      setHasNewLocation(false);
     } catch {
       toast.error('Could not save. Please try again.');
     } finally {
@@ -80,6 +132,53 @@ export default function LocationSettingsPage() {
           </div>
 
           <div className="mx-auto max-w-md space-y-6 px-6 py-6">
+            {/* Map Pinning Card */}
+            <div className="neumorphic rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40">
+                    Pin Your Location
+                  </h2>
+                  <p className="text-xs text-charcoal/50">
+                    Drag the pin or use GPS to set your community center
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSetLocationGPS}
+                  disabled={detectingGPS}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary transition-opacity hover:opacity-85 disabled:opacity-50"
+                  title="Detect GPS Location"
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {detectingGPS ? 'hourglass_top' : 'my_location'}
+                  </span>
+                </button>
+              </div>
+
+              <div className="relative h-48 w-full overflow-hidden rounded-xl border border-charcoal/10">
+                <MiniMap
+                  center={mapCenter}
+                  height="100%"
+                  className="absolute inset-0 h-full w-full"
+                  draggable={true}
+                  onLocationChange={handleMapLocationChange}
+                  showDragHint={true}
+                  showNavigationControl={true}
+                  customMarkerNode={
+                    <BrandPinAvatar
+                      src={resolveUserAvatarUrl(user)}
+                      alt={user?.firstName || 'User'}
+                      fallbackInitial={resolveProfileAvatarInitial(user, user?.username || 'U')}
+                      size="marker"
+                      priority
+                      className="brand-mark-hero drop-shadow-lg"
+                    />
+                  }
+                />
+              </div>
+            </div>
+
             {/* Radius slider */}
             <div className="neumorphic rounded-2xl p-6">
               <h2 className="mb-1 text-sm font-black uppercase tracking-widest text-charcoal/40">
@@ -154,7 +253,7 @@ export default function LocationSettingsPage() {
               className="neumorphic-btn w-full rounded-2xl py-4"
             >
               <span className="text-xs font-black uppercase tracking-widest text-charcoal">
-                {saving ? 'Saving…' : 'Save Radius'}
+                {saving ? 'Saving…' : 'Save Radius & Location'}
               </span>
             </button>
           </div>

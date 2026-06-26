@@ -29,7 +29,7 @@ export function PostSentinelLink({ className = '' }: PostSentinelLinkProps) {
       aria-label="Sentinel AI"
       title="Sentinel AI"
     >
-      <SentinelIcon className="post-sentinel-link__icon w-5 h-5" aria-hidden />
+      <SentinelIcon className="post-sentinel-link__icon w-[18px] h-[18px]" aria-hidden />
     </Link>
   );
 }

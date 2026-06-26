@@ -50,6 +50,7 @@ import { ProfileSnapPlusCard } from '@/components/profile/snap/ProfileSnapPlusCa
 import { ProfileSnapHub } from '@/components/profile/snap/ProfileSnapHub';
 import { ProfileSnapFriends } from '@/components/profile/snap/ProfileSnapFriends';
 import { CreatePostModal } from '@/components/feed/CreatePostModal';
+import { AvatarAdjusterModal } from '@/components/profile/AvatarAdjusterModal';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
@@ -89,10 +90,9 @@ export default function ProfilePage() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
   const [reportingPostId, setReportingPostId] = useState<string | null>(null);
-  const [isSettingLocation, setIsSettingLocation] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
-  const [isSavingDraggedLocation, setIsSavingDraggedLocation] = useState(false);
+  const [adjustingFile, setAdjustingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -119,9 +119,14 @@ export default function ProfilePage() {
       return;
     }
 
+    setAdjustingFile(file);
+  };
+
+  const handleSaveAdjustedAvatar = async (croppedFile: File) => {
+    setAdjustingFile(null);
     try {
       setIsUploadingAvatar(true);
-      await uploadProfilePicture({ file });
+      await uploadProfilePicture({ file: croppedFile });
       queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       toast.success('Profile photo updated');
@@ -130,55 +135,6 @@ export default function ProfilePage() {
     } finally {
       setIsUploadingAvatar(false);
     }
-  };
-
-  const handleMapLocationChange = async (loc: { lat: number; lng: number }) => {
-    if (currentUser?.username !== username) return;
-    try {
-      setIsSavingDraggedLocation(true);
-      await apiClient.put('/auth/location/update', {
-        type: 'current',
-        location: { latitude: loc.lat, longitude: loc.lng },
-      });
-      queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-    } catch (err) {
-      console.error('Failed to update location:', err);
-    } finally {
-      setIsSavingDraggedLocation(false);
-    }
-  };
-
-  const handleSetLocation = async () => {
-    const geo = getGeolocation();
-    if (!geo) return;
-    setIsSettingLocation(true);
-    geo.getCurrentPosition(
-      async (position) => {
-        try {
-          await apiClient.put('/auth/location/update', {
-            type: 'current',
-            location: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            },
-          });
-          queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
-          queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-          toast.success('Location updated');
-        } catch (err) {
-          console.error('Failed to update location:', err);
-        } finally {
-          setIsSettingLocation(false);
-        }
-      },
-      (err) => {
-        console.error('GPS error:', err.message);
-        toast.error('Could not get your location. Check permissions and try again.');
-        setIsSettingLocation(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
   };
 
   // Fetch user profile — own profile uses /profile/me so first/last name are included
@@ -625,6 +581,10 @@ export default function ProfilePage() {
     router.push('/feed');
   };
 
+  const handleSetLocation = () => {
+    router.push('/settings/location');
+  };
+
   return (
     <>
       {(ownerMilestone ?? pendingMilestone) && (
@@ -680,10 +640,6 @@ export default function ProfilePage() {
             onMessage={!isOwnProfile ? handleStartChat : undefined}
             messaging={startingChat}
             onChangePhoto={isOwnProfile ? handleAvatarClick : undefined}
-            onSetLocation={isOwnProfile ? handleSetLocation : undefined}
-            onMapLocationChange={isOwnProfile ? handleMapLocationChange : undefined}
-            settingLocation={isSettingLocation}
-            savingMapLocation={isSavingDraggedLocation}
             identityVerified={profileCommunityVerified}
             verificationInProgress={['bronze', 'silver'].includes(verificationProgress.tier)}
             verificationTierLabel={
@@ -757,7 +713,6 @@ export default function ProfilePage() {
         <ProfileSnapHub
           isOwnProfile={isOwnProfile}
           onCreatePost={handleCreatePost}
-          onSetLocation={isOwnProfile ? handleSetLocation : undefined}
           showPinPrompt={!hasMapLocation}
         />
 
@@ -1581,6 +1536,14 @@ export default function ProfilePage() {
             setIsCreatePostOpen(false);
             queryClient.invalidateQueries({ queryKey: ['userPosts', userId] });
           }}
+        />
+      )}
+
+      {adjustingFile && (
+        <AvatarAdjusterModal
+          file={adjustingFile}
+          onSave={handleSaveAdjustedAvatar}
+          onCancel={() => setAdjustingFile(null)}
         />
       )}
     </>

@@ -103,7 +103,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
 
   useEffect(() => {
     if (!showDropdown) return;
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
       if (
         dropdownContainerRef.current &&
         !dropdownContainerRef.current.contains(event.target as Node)
@@ -112,8 +112,10 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [showDropdown]);
 
@@ -161,17 +163,28 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
             className={`flex h-10 w-10 items-center justify-center rounded-full cursor-pointer focus:outline-none select-none transition-colors -ml-2 ${skyOverlay ? 'hover:bg-white/10 text-white' : 'hover:bg-black/5 dark:hover:bg-white/10 text-brand-black dark:text-white'}`}
             aria-expanded={showDropdown}
             aria-haspopup="true"
+            aria-label="Toggle menu"
           >
-            {showDropdown ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <div className="relative w-5 h-4 flex flex-col justify-between items-center">
+              <span className={`absolute left-0 w-5 h-[2px] bg-current rounded-full transition-all duration-300 origin-center ${showDropdown ? 'rotate-45 top-[7px]' : 'top-0'}`} />
+              <span className={`absolute left-0 w-5 h-[2px] bg-current rounded-full transition-all duration-300 ${showDropdown ? 'opacity-0 scale-0' : 'top-[7px]'}`} />
+              <span className={`absolute left-0 w-5 h-[2px] bg-current rounded-full transition-all duration-300 origin-center ${showDropdown ? '-rotate-45 top-[7px]' : 'top-[14px]'}`} />
+            </div>
           </button>
           <div className="flex-shrink-0 cursor-pointer select-none" onClick={() => router.push('/feed')}>
             <NeyborHuudLogo layout="wordmark" size="chrome" tone={skyOverlay ? 'light' : 'primary'} />
           </div>
           
           {showDropdown && (
-            <div
-              className="fixed top-[72px] inset-x-1.5 mx-auto max-w-[400px] z-[100] overflow-hidden rounded-none border border-black/5 bg-white dark:bg-[#1c221e] p-3 shadow-[0_30px_60px_rgba(0,0,0,0.2)] pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-200"
-            >
+            <>
+              <div
+                className="fixed inset-0 z-[90] bg-transparent"
+                onClick={() => setShowDropdown(false)}
+                onTouchStart={() => setShowDropdown(false)}
+              />
+              <div
+                className="fixed top-[72px] inset-x-1.5 mx-auto max-w-[400px] z-[100] overflow-hidden rounded-none border border-black/5 bg-white dark:bg-[#1c221e] p-3 shadow-[0_30px_60px_rgba(0,0,0,0.2)] pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-200"
+              >
               <div className="mb-2 flex items-center justify-between px-2">
                 {user ? (
                   <Link
@@ -285,8 +298,8 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                     onClick={() => setShowDropdown(false)}
                     className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
                   >
-                    <span className="material-symbols-outlined text-[#34C759]" style={{ fontSize: '38px' }}>support_agent</span>
-                    <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Give Help</span>
+                    <span className="material-symbols-outlined text-[#34C759]" style={{ fontSize: '38px' }}>volunteer_activism</span>
+                    <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Help Request</span>
                   </Link>
 
                   <Link
@@ -307,7 +320,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                   onClick={() => setShowDropdown(false)}
                   className="flex items-center gap-2 rounded-lg px-2 py-2 text-[14px] font-medium text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">support</span>
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">support_agent</span>
                   <span>Help Center</span>
                 </Link>
                 
@@ -320,6 +333,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                 </button>
               </div>
             </div>
+            </>
           )}
         </div>
       ) : (

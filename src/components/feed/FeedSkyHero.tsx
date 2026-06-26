@@ -181,15 +181,15 @@ function WeatherText({ text }: { text: string }) {
     <div ref={containerRef} className="w-full overflow-hidden px-1 whitespace-nowrap mt-0.5" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.18)' }}>
       {isOverflowing ? (
         <div className="feed-weather-marquee">
-          <span ref={textRef} className="feed-weather-marquee__text feed-sky-scene__condition font-bold text-xs text-white/95">
+          <span ref={textRef} className="feed-weather-marquee__text feed-sky-scene__condition font-bold text-xs text-white">
             {text}
           </span>
-          <span aria-hidden className="feed-weather-marquee__text feed-sky-scene__condition font-bold text-xs text-white/95">
+          <span aria-hidden className="feed-weather-marquee__text feed-sky-scene__condition font-bold text-xs text-white">
             {text}
           </span>
         </div>
       ) : (
-        <span ref={textRef} className="feed-sky-scene__condition font-bold text-xs text-white/95 inline-block w-auto mx-auto text-center">
+        <span ref={textRef} className="feed-sky-scene__condition font-bold text-xs text-white inline-block w-auto mx-auto text-center">
           {text}
         </span>
       )}
@@ -341,17 +341,7 @@ export function FeedSkyHero({ below }: { below?: ReactNode }) {
 
         {/* Content overlaid inside the sky scene */}
         <div className="feed-sky-scene__content">
-          {/* Centered Glassmorphic Weather Panel */}
-          <div 
-            className="feed-sky-scene__weather"
-            style={{
-              background: 'rgba(255, 255, 255, 0.02)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: 'none',
-              boxShadow: 'none',
-            }}
-          >
+          <div className="feed-sky-scene__weather">
             {weatherLoading ? (
               <div className="feed-sky-scene__weather-skeleton animate-pulse" aria-hidden>
                 <div className="feed-sky-scene__weather-skeleton-label" />
@@ -361,14 +351,14 @@ export function FeedSkyHero({ below }: { below?: ReactNode }) {
             ) : weather ? (
               <>
                 <p
-                  className="feed-sky-scene__label text-[10px] uppercase tracking-wider font-extrabold text-white/90"
+                  className="feed-sky-scene__label text-xs tracking-wide font-extrabold text-white/90 mb-4"
                   style={{ textShadow: '0 1px 4px rgba(0,0,0,0.18)' }}
                 >
                   {greeting}
                 </p>
 
                 {weather.forecast && weather.forecast.length >= 3 ? (
-                  <div className="flex items-center justify-center gap-10 mb-2">
+                  <div className="flex items-center justify-center gap-4 mb-2">
                     {weather.forecast.slice(0, 3).map((day, idx) => (
                       <div key={idx} className="flex flex-col items-center">
                         <p
@@ -431,7 +421,7 @@ export function FeedSkyHero({ below }: { below?: ReactNode }) {
               <button
                 ref={textContainerRef}
                 type="button"
-                className="feed-sky-scene__composer-text flex-1 text-left px-2 whitespace-nowrap overflow-hidden relative min-w-0"
+                className="feed-sky-scene__composer-text flex-1 text-left px-2 whitespace-nowrap overflow-hidden relative min-w-0 text-[15px] font-medium opacity-40 hover:opacity-100 transition-opacity"
                 onClick={openComposer}
                 aria-label="Create a post"
                 style={{

@@ -47,6 +47,12 @@ export function PostCardAuthorLines({
   return (
     <div className="post-card-header__text min-w-0 flex-1">
       <div className="post-card-header__identity flex items-center gap-1.5 min-w-0">
+        <PostCardVerificationBadge
+          author={author}
+          hidden={isAnonymousAuthor}
+          isVerified={isVerified}
+          verificationBadge={verificationBadge}
+        />
         <Link
           href={`/profile/${authorUsername}`}
           onClick={onProfileClick}
