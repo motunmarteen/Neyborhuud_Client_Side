@@ -1418,6 +1418,7 @@ html[data-landing='true'] .app-shell {
     --landing-wordmark-size: clamp(1.625rem, 6vw, 2rem);
     --landing-logo-scale: 0.96;
     --landing-actions-pt: clamp(0.5rem, 1svh, 0.875rem);
+    --landing-btn-height: 48px;
   }
 }
 
@@ -1427,6 +1428,7 @@ html[data-landing='true'] .app-shell {
     --landing-mark-height: clamp(5.75rem, 20vw, 7.25rem);
     --landing-wordmark-size: clamp(1.5rem, 5.5vw, 1.75rem);
     --landing-logo-scale: 0.9;
+    --landing-btn-height: 44px;
   }
 }
 
@@ -1445,6 +1447,12 @@ html[data-landing='true'] .app-shell {
   margin-inline: auto;
   height: 100%;
   min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.landing-page-shell::-webkit-scrollbar {
+  display: none;
 }
 
 .landing-page-header {
@@ -1644,6 +1652,7 @@ html[data-landing='true'] .app-shell {
   flex-direction: column;
   gap: 0.625rem;
   padding-top: var(--landing-actions-pt);
+  padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
   flex-shrink: 0;
 }
 
@@ -1856,6 +1865,86 @@ html[data-auth='true'] .neu-base {
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--neu-text-secondary, #3d5a3e);
+}
+
+/* ── Google Sign-In Button ──────────────────────────────────────────── */
+.google-signin-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.google-signin-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding-block: 0.75rem;
+}
+
+.google-signin-divider__line {
+  flex: 1;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 1px;
+}
+
+.google-signin-divider__text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--neu-text-muted, #8a9e8a);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.google-signin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 50px;
+  padding-inline: 1.125rem;
+  border-radius: 1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+  /* White background — matches standard Google brand guidelines */
+  background-color: #ffffff;
+  color: #3c4043;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.google-signin-btn:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.google-signin-btn:active:not(:disabled) {
+  transform: scale(0.98);
+  background-color: #f1f3f4;
+}
+
+.google-signin-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.google-signin-btn__icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
 }
 
 .auth-signin-link a {
