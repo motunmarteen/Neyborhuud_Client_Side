@@ -38,6 +38,20 @@ const SEARCH_TABS = [
   { id: 'emergency', label: 'Safety Watch' },
 ] as const;
 
+const SEARCH_TAB_ACCENTS: Record<string, string> = {
+  all: 'bg-slate-900 shadow-[0_1px_6px_rgba(15,23,42,0.25)]',
+  users: 'bg-blue-600 shadow-[0_1px_6px_rgba(37,99,235,0.25)]',
+  posts: 'bg-slate-900 shadow-[0_1px_6px_rgba(15,23,42,0.25)]',
+  locations: 'bg-emerald-600 shadow-[0_1px_6px_rgba(5,150,105,0.25)]',
+  marketplace: 'bg-emerald-600 shadow-[0_1px_6px_rgba(5,150,105,0.25)]',
+  event: 'bg-purple-600 shadow-[0_1px_6px_rgba(147,51,234,0.25)]',
+  job: 'bg-orange-600 shadow-[0_1px_6px_rgba(249,115,22,0.25)]',
+  fyi: 'bg-slate-700 shadow-[0_1px_6px_rgba(71,85,105,0.25)]',
+  help_request: 'bg-teal-650 shadow-[0_1px_6px_rgba(13,148,136,0.25)]',
+  services: 'bg-blue-600 shadow-[0_1px_6px_rgba(37,99,235,0.25)]',
+  emergency: 'bg-brand-red shadow-[0_1px_6px_rgba(220,38,38,0.25)]',
+};
+
 interface NewsArticle {
   title: string;
   description: string;
@@ -168,8 +182,8 @@ function ExplorePageInner() {
     <AppBrowseLayout
       className="!bg-white !px-0 !pt-0 !min-h-[100dvh]"
       header={
-        <div className="sticky top-0 z-50 bg-white border-b border-gray-100">
-          <div className="py-3 flex flex-col gap-3">
+        <div className="sticky top-0 z-50 bg-white">
+          <div className="relative bg-white py-3 flex flex-col gap-3">
             <form onSubmit={handleSearchSubmit} className="relative flex items-center mx-auto w-[calc(100%-1.5rem)] max-w-[600px] h-[3.2rem]">
               <span className="material-symbols-outlined absolute left-5 text-gray-400 text-[22px]" style={{ fontVariationSettings: "'wght' 300" }}>search</span>
               <input
@@ -194,7 +208,7 @@ function ExplorePageInner() {
             {/* Search Tabs when actively searching */}
             {isSearching && (
               <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px]">
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-2">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-3">
                   {SEARCH_TABS.map((t) => {
                     let count = 0;
                     if (t.id === 'all') count = totalResults;
@@ -211,8 +225,8 @@ function ExplorePageInner() {
                       <button
                         key={t.id}
                         onClick={() => setActiveTab(t.id)}
-                        className={`flex-shrink-0 px-4 py-2 rounded-full text-[13px] font-bold transition-all ${
-                          isActive ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                        className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold transition-all ${
+                          isActive ? 'bg-slate-900 text-white shadow-[0_2px_8px_rgba(15,23,42,0.15)]' : 'bg-[#F4F5F6] text-gray-500 hover:bg-[#EDEDEE]'
                         }`}
                       >
                         {t.label} {count > 0 && <span className="opacity-70 font-medium ml-1">({count})</span>}
@@ -222,6 +236,8 @@ function ExplorePageInner() {
                 </div>
               </div>
             )}
+            {/* Dynamic Accent Line */}
+            <div className={`absolute bottom-0 left-0 right-0 h-[2.5px] transition-all duration-300 ${isSearching ? (SEARCH_TAB_ACCENTS[activeTab] ?? 'bg-slate-900') : 'bg-gray-100'}`} />
           </div>
         </div>
       }
@@ -254,7 +270,7 @@ function ExplorePageInner() {
               <div className="flex flex-col">
                 {/* Users Section */}
                 {(activeTab === 'all' || activeTab === 'users') && results?.users?.data && results.users.data.length > 0 && (
-                  <div className="px-4 py-5 border-b-8 border-gray-50">
+                  <div className="px-4 py-5 border-b border-gray-100 bg-white">
                     <h3 className="text-[16px] font-bold text-gray-900 mb-3 ml-1">People</h3>
                     <div className="space-y-4">
                       {results.users.data.map((u) => (
@@ -266,7 +282,7 @@ function ExplorePageInner() {
 
                 {/* Locations Section */}
                 {(activeTab === 'all' || activeTab === 'locations') && results?.locations?.data && results.locations.data.length > 0 && (
-                  <div className="px-4 py-5 border-b-8 border-gray-50">
+                  <div className="px-4 py-5 border-b border-gray-100 bg-white">
                     <h3 className="text-[16px] font-bold text-gray-900 mb-3 ml-1">Places</h3>
                     <div className="space-y-4">
                       {results.locations.data.map((l, i) => (
@@ -301,26 +317,6 @@ function ExplorePageInner() {
         ) : (
           /* ═══ Explore Dashboard (Clean state) ═══ */
           <div className="w-full pt-4 space-y-6">
-            
-            {/* Category Grid - Google Mobile Style */}
-            <section className="pl-4 border-b border-gray-100 pb-6 relative">
-              <div className="flex items-start gap-4 overflow-x-auto no-scrollbar pr-8">
-                {EXPLORE_CATEGORIES.slice(0, 8).map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => handleCategoryClick(cat.id)}
-                    className="flex flex-col items-center justify-start gap-2 bg-transparent transition-transform active:opacity-60 w-[26vw] max-w-[96px] shrink-0"
-                  >
-                    <div className={`w-[64px] h-[64px] rounded-full ${cat.bgSoft} flex items-center justify-center shrink-0`}>
-                      <span className={`material-symbols-outlined text-[32px] ${cat.text}`} style={{ fontVariationSettings: "'wght' 300" }}>{cat.icon}</span>
-                    </div>
-                    <span className="text-[12px] font-medium text-gray-800 text-center leading-tight tracking-tight break-words px-1">{cat.label}</span>
-                  </button>
-                ))}
-              </div>
-              {/* Fade out right edge indicator */}
-              <div className="absolute top-0 right-0 bottom-6 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-            </section>
 
             {/* Trending Topics - Google Mobile Style */}
             {trendingTopics.length > 0 && (
@@ -365,7 +361,7 @@ function ExplorePageInner() {
 
             {/* News Hero - Edge to Edge */}
             {newsArticles.length > 0 && (
-              <section className="border-t-8 border-gray-100">
+              <section className="border-t border-gray-100">
                 <div className="px-4 pt-4 pb-2">
                   <h3 className="text-[18px] font-normal text-gray-800">Discover</h3>
                 </div>

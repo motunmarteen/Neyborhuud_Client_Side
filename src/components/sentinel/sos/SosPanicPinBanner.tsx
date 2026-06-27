@@ -28,20 +28,20 @@ export function SosPanicPinBanner() {
     return (
       <Link
         href="/safety/panic-pin"
-        className="mod-card flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 p-4 no-underline transition-colors hover:bg-primary/10"
+        className="rounded-none border-y border-gray-100 bg-white px-6 py-5 shadow-none no-underline transition-colors hover:bg-gray-50 flex items-center gap-4"
       >
-        <div className="mod-inset flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-primary">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 border border-blue-100 text-blue-600">
           <span className="material-symbols-outlined text-[24px]">verified_user</span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+          <p className="text-sm font-bold text-gray-800">
             Panic PIN active
           </p>
-          <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+          <p className="text-xs text-gray-500 mt-0.5">
             Your duress code can silently trigger SOS. Tap to manage.
           </p>
         </div>
-        <span className="material-symbols-outlined text-primary">chevron_right</span>
+        <span className="material-symbols-outlined text-gray-400">chevron_right</span>
       </Link>
     );
   }
@@ -49,18 +49,18 @@ export function SosPanicPinBanner() {
   return (
     <Link
       href="/safety/panic-pin"
-      className="mod-card flex items-center gap-3 rounded-2xl border border-brand-red/25 bg-brand-red/8 p-4 no-underline transition-colors hover:bg-brand-red/12"
+      className="rounded-none border-y border-red-100 bg-red-50/20 px-6 py-5 shadow-none no-underline transition-colors hover:bg-red-50/30 flex items-center gap-4"
     >
-      <div className="mod-inset flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-brand-red">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white border border-red-100 text-red-600">
         <span className="material-symbols-outlined text-[24px]">pin</span>
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-brand-red">Set up your Panic PIN</p>
-        <p className="text-xs text-brand-red/80">
+        <p className="text-sm font-bold text-red-600">Set up your Panic PIN</p>
+        <p className="text-xs text-red-500 mt-0.5">
           A code that looks like unlock but triggers silent SOS in the background.
         </p>
       </div>
-      <span className="material-symbols-outlined text-brand-red">chevron_right</span>
+      <span className="material-symbols-outlined text-red-600">chevron_right</span>
     </Link>
   );
 }

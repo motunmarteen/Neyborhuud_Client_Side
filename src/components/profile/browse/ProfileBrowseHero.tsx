@@ -64,8 +64,8 @@ export function ProfileBrowseHero({
   const primaryLabel = hasFullName ? resolvedName : `@${handle}`;
 
   return (
-    <div className="mod-card overflow-hidden rounded-2xl">
-      <div className="relative h-32 w-full overflow-hidden sm:h-36">
+    <div className="w-full bg-white">
+      <div className="relative h-[110px] w-full overflow-hidden sm:h-[120px]">
         <MiniMap
           center={center}
           height="100%"
@@ -77,11 +77,11 @@ export function ProfileBrowseHero({
           showMarker={false}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-        <div className="absolute right-2 top-2 flex gap-1.5">
+        <div className="absolute right-4 top-4 flex gap-1.5">
           <button
             type="button"
             onClick={onShare}
-            className="mod-chip inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-semibold"
+            className="inline-flex h-8 items-center gap-1 rounded-full bg-white/95 backdrop-blur-sm px-3 text-xs font-bold text-slate-800 shadow-sm border border-slate-100 hover:bg-slate-50"
           >
             <span className="material-symbols-outlined text-[16px]">share</span>
             Share
@@ -94,8 +94,8 @@ export function ProfileBrowseHero({
         ) : null}
       </div>
 
-      <div className="relative px-4 pb-4">
-        <div className="-mt-10 mb-3">
+      <div className="relative px-6 pb-4">
+        <div className="-mt-12 mb-3">
           <BrandPinAvatar
             src={resolved}
             alt={displayName}
@@ -121,24 +121,24 @@ export function ProfileBrowseHero({
 
         <div className="mt-2 flex flex-wrap gap-2">
           {verificationTierLabel ? (
-            <span className="mod-chip mod-chip-active inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-primary">
-              <span className="material-symbols-outlined text-[12px]">verified</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-600">
+              <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               {verificationTierLabel}
             </span>
           ) : identityVerified ? (
-            <span className="mod-chip mod-chip-active inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-primary">
-              <span className="material-symbols-outlined text-[12px]">verified</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-600">
+              <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               Verified
             </span>
           ) : verificationInProgress ? (
-            <span className="mod-chip inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold opacity-80">
-              <span className="material-symbols-outlined text-[12px]">verified</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200/50 px-2.5 py-0.5 text-[10px] font-extrabold text-slate-500">
+              <span className="material-symbols-outlined text-[12px]">pending</span>
               Verifying
             </span>
           ) : null}
           <span
-            className={`mod-chip inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-              vouchReceived > 0 ? '' : 'opacity-60'
+            className={`inline-flex items-center gap-1 rounded-full bg-slate-50 border border-slate-100 px-2.5 py-0.5 text-[10px] font-extrabold text-slate-600 ${
+              vouchReceived > 0 ? '' : 'opacity-65'
             }`}
             aria-label={`Vouches received: ${vouchReceived}`}
           >
@@ -146,8 +146,8 @@ export function ProfileBrowseHero({
           </span>
           {isOwnProfile ? (
             <span
-              className={`mod-chip inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                vouchGiven > 0 ? '' : 'opacity-60'
+              className={`inline-flex items-center gap-1 rounded-full bg-slate-50 border border-slate-100 px-2.5 py-0.5 text-[10px] font-extrabold text-slate-600 ${
+                vouchGiven > 0 ? '' : 'opacity-65'
               }`}
               aria-label={`Vouches given: ${vouchGiven}`}
             >
@@ -162,7 +162,7 @@ export function ProfileBrowseHero({
               type="button"
               onClick={onMessage}
               disabled={messaging}
-              className="mod-chip mod-chip-active inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold text-primary disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800 px-5 py-2 text-xs font-bold shadow-sm transition disabled:opacity-50"
             >
               {messaging ? 'Opening…' : 'Message'}
             </button>

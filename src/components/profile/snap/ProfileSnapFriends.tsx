@@ -29,7 +29,7 @@ export function ProfileSnapFriends({
   pendingFollowRequests = 0,
 }: ProfileSnapFriendsProps) {
   return (
-    <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t-8 border-gray-50/80 py-5">
+    <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t border-slate-100 mt-4 pt-4">
       <div className="px-3">
         <div className="mb-4 flex items-center justify-between gap-2">
           <ProfileBrowseEyebrow>Followers</ProfileBrowseEyebrow>
@@ -41,9 +41,9 @@ export function ProfileSnapFriends({
         {isOwnProfile ? (
           <Link
             href="/explore"
-            className="flex items-center gap-3.5 border border-dashed border-gray-200 rounded-2xl px-4 py-3.5 mb-4 no-underline bg-gray-50/30 hover:bg-gray-50 transition-all"
+            className="flex items-center gap-3.5 border border-dashed border-slate-200 rounded-2xl px-4 py-3.5 mb-4 no-underline bg-slate-50/50 hover:bg-slate-50 transition-all"
           >
-            <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 shadow-sm">
+            <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 border border-blue-100">
               <span className="material-symbols-outlined text-[19px]">person_add</span>
               {pendingFollowRequests > 0 ? (
                 <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">

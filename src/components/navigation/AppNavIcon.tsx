@@ -17,6 +17,8 @@ import {
   Phone,
   User,
   MapPin,
+  Contact,
+  Speech,
 } from 'lucide-react';
 
 export type AppNavIconName =
@@ -51,11 +53,11 @@ const lucideIcons: Record<Exclude<AppNavIconName, 'menu'>, LucideIcon> = {
   back: ChevronLeft,
   home: Home,
   shield: Shield,
-  connect: Users,
+  connect: MessagesSquare,
   localHuud: LayoutGrid,
   sos: Siren,
   call: Phone,
-  gist: MessagesSquare,
+  gist: Speech,
   profile: User,
   mapPin: MapPin,
 };

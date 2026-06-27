@@ -43,11 +43,11 @@ function getRouteTitle(pathname: string) {
     return 'Huud Economy';
   }
   if (segment === 'local-news' && parts[1] === 'gist') {
-    return 'Huud Gist';
+    return 'HuudGist';
   }
 
   const map: Record<string, string> = {
-    friendship: 'Friendship',
+    friendship: 'Connections',
     marketplace: 'Marketplace',
     communities: 'Communities',
     neighborhood: 'My Huud',
@@ -62,7 +62,8 @@ function getRouteTitle(pathname: string) {
     map: 'Discovery',
     explore: 'Explore',
     popular: 'My Huud',
-    gossip: 'Huud Gist',
+    gossip: 'HuudGist',
+    gist: 'HuudGist',
     messages: 'Messages',
     chat: 'Chat',
     info: 'Info',
@@ -341,14 +342,14 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
           )}
         </div>
       ) : (
-        <div className="flex shrink-0 items-center min-w-0 pl-3 md:pl-4">
+        <div className="flex shrink-0 items-center min-w-0 pl-6">
           <h1 className="app-topnav__title truncate">{title}</h1>
         </div>
       )}
 
       <div className="flex-1" />
 
-      <div className="app-topnav__actions">
+      <div className="app-topnav__actions pr-6">
         <Link
           href="/notifications"
           className="app-topnav__action"

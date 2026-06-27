@@ -25,7 +25,7 @@ export function ProfileSnapPlusCard({
     <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-1">
       <Link
         href={href}
-        className="flex items-center gap-4 bg-gradient-to-r from-blue-50/65 via-indigo-50/40 to-slate-50 border border-blue-100/50 rounded-2xl p-4 no-underline transition-all hover:shadow-[0_4px_20px_rgba(59,130,246,0.06)] hover:scale-[1.005]"
+        className="flex items-center gap-4 bg-[#F4F5F6] hover:bg-[#EAEBED] rounded-2xl p-4 no-underline transition-all"
       >
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm border border-blue-100/40">
           <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>

@@ -102,10 +102,7 @@ export default function FollowingPage() {
           description={`@${username} isn't following anyone yet.`}
         />
       ) : (
-        <div
-          className="mod-card divide-y overflow-hidden rounded-2xl"
-          style={{ borderColor: 'var(--neu-shadow-dark)' }}
-        >
+        <div className="divide-y divide-slate-100">
           {following.map((user) => (
             <UserListItem key={user._id} user={user} />
           ))}

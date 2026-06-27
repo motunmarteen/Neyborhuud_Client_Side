@@ -26,20 +26,13 @@ function StatCard({
   href?: string;
 }) {
   const inner = (
-    <div className="flex flex-col justify-between bg-gray-50/50 hover:bg-gray-50/80 border border-gray-100/50 rounded-2xl p-4 transition-all duration-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)] min-h-[96px] h-full cursor-pointer group">
-      <div className="flex items-center justify-between">
-        <span className="text-xl filter drop-shadow-sm select-none">{icon}</span>
-        {href && (
-          <span className="material-symbols-outlined text-[16px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-            arrow_forward
-          </span>
-        )}
-      </div>
-      <div className="mt-2.5">
-        <p className="text-lg font-extrabold tracking-tight text-gray-900 leading-tight tabular-nums">
+    <div className="flex items-center gap-3 py-2 px-3 bg-[#F4F5F6] hover:bg-[#EAEBED] rounded-xl transition-colors cursor-pointer group">
+      <span className="text-lg filter drop-shadow-sm select-none shrink-0">{icon}</span>
+      <div className="min-w-0">
+        <p className="text-[13px] font-extrabold tracking-tight text-slate-800 leading-none tabular-nums truncate">
           {value}
         </p>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">{label}</p>
+        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">{label}</p>
       </div>
     </div>
   );

@@ -16,20 +16,20 @@ export function SosGuardiansNotifiedCard({ notifyMeta, phase }: SosGuardiansNoti
 
   return (
     <div
-      className={`mod-card rounded-2xl border p-4 ${
-        noneQueued ? 'border-status-warning/35 bg-status-warning/8' : 'border-primary/25 bg-primary/5'
+      className={`rounded-none border-y px-6 py-5 shadow-none ${
+        noneQueued ? 'border-amber-100 bg-amber-50/20' : 'border-blue-100 bg-blue-50/20'
       }`}
     >
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">
+      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-blue-600">
         Guardian sharing
       </p>
       {noneQueued ? (
-        <p className="mt-2 text-sm leading-relaxed text-status-warning/90 dark:text-status-warning/80">
+        <p className="mt-2 text-xs leading-relaxed text-amber-600 font-semibold">
           No accepted guardians were queued. Add trusted contacts under Prepare so people get your
           location when SOS fires.
         </p>
       ) : (
-        <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--neu-text)' }}>
+        <p className="mt-2 text-xs leading-relaxed text-gray-800">
           Your location and SOS status are being shared with{' '}
           <strong>{guardiansTotal}</strong> guardian{guardiansTotal === 1 ? '' : 's'}.
           {phase === 'pending'
@@ -37,17 +37,17 @@ export function SosGuardiansNotifiedCard({ notifyMeta, phase }: SosGuardiansNoti
             : ' They can open the alert, view your map pin, and tap “I’m responding.”'}
         </p>
       )}
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3.5 flex flex-wrap gap-2">
         <Link
           href="/safety/manage#guardians"
-          className="mod-chip px-3 py-1.5 text-xs font-semibold text-primary no-underline"
+          className="rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50/45 transition-colors no-underline shadow-sm"
         >
           Manage guardians
         </Link>
         {sosEventId && phase !== 'pending' ? (
           <Link
             href={`/safety/incident/${sosEventId}`}
-            className="mod-chip mod-chip-active px-3 py-1.5 text-xs font-bold text-primary no-underline"
+            className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs font-bold shadow-sm transition-colors no-underline"
           >
             See who responded
           </Link>
@@ -55,8 +55,7 @@ export function SosGuardiansNotifiedCard({ notifyMeta, phase }: SosGuardiansNoti
         {emergencyId ? (
           <Link
             href="/safety/emergency"
-            className="mod-chip px-3 py-1.5 text-xs font-semibold no-underline"
-            style={{ color: 'var(--neu-text-muted)' }}
+            className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-50 transition-colors no-underline shadow-sm"
           >
             Emergency record
           </Link>

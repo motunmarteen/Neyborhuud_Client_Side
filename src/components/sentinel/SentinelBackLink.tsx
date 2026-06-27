@@ -18,9 +18,11 @@ type SentinelBackLinkProps = {
 const linkClass =
   'inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary no-underline hover:underline';
 
+const fallbackDefault: SentinelBackTarget = { href: '/safety', label: 'Sentinel AI hub' };
+
 export function SentinelBackLink({ className, fallback }: SentinelBackLinkProps) {
   const searchParams = useSearchParams();
-  const [back, setBack] = useState<SentinelBackTarget>(() => fallback ?? getSentinelBack());
+  const [back, setBack] = useState<SentinelBackTarget>(() => fallback ?? fallbackDefault);
 
   useEffect(() => {
     applySentinelBackFromQuery(window.location.search);

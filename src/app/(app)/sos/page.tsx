@@ -59,6 +59,13 @@ const SOS_TAB_STYLES: Record<SosTab, { active: string; inactive: string; icon: s
   },
 };
 
+const TAB_ACCENTS: Record<SosTab, string> = {
+  now: 'bg-red-600 shadow-[0_1px_6px_rgba(220,38,38,0.25)]',
+  prepare: 'bg-blue-600 shadow-[0_1px_6px_rgba(37,99,235,0.25)]',
+  history: 'bg-slate-900 shadow-[0_1px_6px_rgba(15,23,42,0.25)]',
+  circle: 'bg-emerald-600 shadow-[0_1px_6px_rgba(5,150,105,0.25)]',
+};
+
 export default function SosPage() {
   const [tab, setTab] = useState<SosTab>('now');
   const sos = useSos();
@@ -79,12 +86,7 @@ export default function SosPage() {
         className="!bg-white !px-0 !pt-0 !min-h-[100dvh] flex-1"
         header={
           <div className="bg-white">
-            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 pt-4">
-              <Suspense fallback={null}>
-                <SentinelBackLink />
-              </Suspense>
-            </div>
-            <div className="relative bg-white border-b border-gray-150/40 mt-3">
+            <div className="relative bg-white">
               <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-4 flex items-center justify-around gap-2 overflow-x-auto no-scrollbar">
                 {TABS.map((t) => {
                   const isActive = tab === t.id;
@@ -113,6 +115,8 @@ export default function SosPage() {
                   );
                 })}
               </div>
+              {/* Dynamic Accent Line */}
+              <div className={`absolute bottom-0 left-0 right-0 h-[2.5px] transition-all duration-300 ${TAB_ACCENTS[tab]}`} />
             </div>
           </div>
         }
@@ -122,15 +126,17 @@ export default function SosPage() {
             background-color: #ffffff !important;
           }
         ` }} />
-        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 space-y-5">
-          <SosPageHero
-            phase={sos.phase}
-            secondsRemaining={sos.secondsRemaining}
-            escalationLevel={sos.activeSos?.escalationLevel ?? 0}
-            incidentHref={incidentHref}
-            onCancel={() => void sos.cancelSos('Cancelled from /sos page')}
-            onResolve={() => void sos.resolveSos()}
-          />
+        <div className="mx-auto w-full max-w-[600px] px-0 space-y-0">
+          {sos.phase !== 'idle' && (
+            <SosPageHero
+              phase={sos.phase}
+              secondsRemaining={sos.secondsRemaining}
+              escalationLevel={sos.activeSos?.escalationLevel ?? 0}
+              incidentHref={incidentHref}
+              onCancel={() => void sos.cancelSos('Cancelled from /sos page')}
+              onResolve={() => void sos.resolveSos()}
+            />
+          )}
 
           {tab === 'now' && (
             <>
@@ -144,11 +150,13 @@ export default function SosPage() {
           {tab === 'prepare' && (
             <>
               <SosPanicPinBanner />
-              <section className="space-y-3">
-                <SentinelSectionHeader
-                  title="Before an emergency"
-                  subtitle="Set these up once so SOS and your circle work when it matters."
-                />
+              <section className="space-y-0">
+                <div className="px-6 py-4">
+                  <SentinelSectionHeader
+                    title="Before an emergency"
+                    subtitle="Set these up once so SOS and your circle work when it matters."
+                  />
+                </div>
                 <SosQuickActions />
               </section>
               <SosLongPressTip />

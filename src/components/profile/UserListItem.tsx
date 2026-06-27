@@ -55,11 +55,11 @@ export function UserListItem({ user }: UserListItemProps) {
   const userInitial = displayName[0]?.toUpperCase() || 'U';
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 hover:bg-brand-surface dark:hover:bg-brand-black/80/50 transition-colors">
+    <div className="flex items-center justify-between px-6 py-3.5 hover:bg-slate-50/50 border-b border-slate-100 transition-colors">
       {/* User Info */}
       <Link
         href={`/profile/${user.username}`}
-        className="flex items-center gap-3 flex-1 min-w-0"
+        className="flex items-center gap-3.5 flex-1 min-w-0"
       >
         {/* Profile Picture */}
         <MapPinAvatar
@@ -72,18 +72,18 @@ export function UserListItem({ user }: UserListItemProps) {
         {/* Name and Username */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <p className="font-bold text-[var(--neu-text-muted)] dark:text-white truncate">
+            <p className="font-semibold text-slate-800 text-[15px] truncate">
               {displayName}
             </p>
             {user.isVerified && (
-              <span className="material-symbols-outlined text-primary text-sm shrink-0"  aria-hidden="true">verified</span>
+              <span className="material-symbols-outlined text-primary text-sm shrink-0" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">verified</span>
             )}
           </div>
-          <p className="text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] text-sm truncate">
+          <p className="text-slate-500 text-[13px] truncate">
             @{user.username}
           </p>
           {user.bio && (
-            <p className="text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] text-sm line-clamp-1 mt-0.5">
+            <p className="text-slate-400 text-[12px] line-clamp-1 mt-0.5">
               {user.bio}
             </p>
           )}

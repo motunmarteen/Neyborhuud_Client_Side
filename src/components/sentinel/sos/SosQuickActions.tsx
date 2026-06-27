@@ -47,41 +47,41 @@ const SOS_PREP_ACTIONS: SentinelFeature[] = [
 ];
 
 const ACCENT_ICON: Record<SentinelFeature['accent'], string> = {
-  primary: 'text-primary bg-primary/12',
-  blue: 'text-brand-blue bg-brand-blue/10',
-  red: 'text-brand-red bg-brand-red/10',
-  muted: 'text-[var(--neu-text-muted)] bg-[var(--neu-shadow-dark)]/30',
+  primary: 'text-blue-600 bg-blue-50 border-blue-100',
+  blue: 'text-blue-600 bg-blue-50 border-blue-100',
+  red: 'text-red-600 bg-red-50 border-red-100',
+  muted: 'text-gray-650 bg-gray-50 border-gray-100',
 };
 
 export function SosQuickActions() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="flex flex-col bg-white border-y border-gray-100">
       {SOS_PREP_ACTIONS.map((feature) => (
         <Link
           key={feature.id}
           href={feature.href}
-          className="mod-card mod-card-hover group flex min-h-[9rem] flex-col gap-2 rounded-2xl p-4 no-underline"
+          className="flex items-start gap-4 py-5 px-6 border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors no-underline rounded-none"
         >
           <div
-            className={`mod-inset flex h-10 w-10 items-center justify-center rounded-xl ${ACCENT_ICON[feature.accent]}`}
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${ACCENT_ICON[feature.accent]}`}
           >
-            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <span className="material-symbols-outlined text-[23px]" style={{ fontVariationSettings: "'FILL' 1" }}>
               {feature.icon}
             </span>
           </div>
-          <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
-            {feature.label}
-          </p>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
-            {feature.tagline}
-          </p>
-          <p
-            className="mt-auto border-t pt-2 text-[11px] leading-snug"
-            style={{ borderColor: 'var(--neu-shadow-dark)', color: 'var(--neu-text-secondary)' }}
-          >
-            <span className="font-semibold text-primary">How: </span>
-            {feature.howTo}
-          </p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-gray-800">
+              {feature.label}
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {feature.tagline}
+            </p>
+            <p className="text-[10px] text-gray-400 mt-1.5 leading-relaxed">
+              <span className="font-bold text-blue-600 uppercase tracking-wide">Setup: </span>
+              {feature.howTo}
+            </p>
+          </div>
+          <span className="material-symbols-outlined text-gray-400 self-center">chevron_right</span>
         </Link>
       ))}
     </div>

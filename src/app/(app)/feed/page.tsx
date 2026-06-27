@@ -440,8 +440,8 @@ function XFeedInner() {
                                 if (!banner) return null;
                                 return (
                                     <div className="w-full">
-                                        <div className={`glass-card p-4 flex gap-4 items-center border ${banner.borderCls} ${banner.bgCls} w-full`}>
-                                            <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-black/[0.02] border border-glass-border">
+                                        <div className={`p-4 flex gap-4 items-center border-b border-gray-100 bg-white w-full`}>
+                                            <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-black/[0.02] border border-gray-100">
                                                 <img src={banner.imageSrc} alt={banner.title} className="w-full h-full object-cover" />
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -513,7 +513,7 @@ function XFeedInner() {
                                                 </p>
                                                 <p className="text-xs mt-1" style={{ color: 'var(--neu-text-muted)' }}>
                                                     Highest severity: {missedAlerts.highestSeverity}. Areas: {missedAlerts.lgas.join(', ')}.
-                                                </p>
+                                                 </p>
                                             </div>
                                         </div>
                                     </div>
@@ -530,8 +530,8 @@ function XFeedInner() {
                             {/* Error State */}
                             {isError && (
                                 <div className="w-full">
-                                    <div className="flex flex-col items-center justify-center py-12 px-5 mod-card w-full">
-                                        <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
+                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white border-y border-gray-100 w-full">
+                                        <div className="w-16 h-16 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
                                             <span className="material-symbols-outlined text-[32px] text-brand-red">warning</span>
                                         </div>
                                         <p className="text-sm text-center mb-2" style={{ color: 'var(--neu-text)' }}>
@@ -564,8 +564,8 @@ function XFeedInner() {
                             {/* Empty State: No Location and No Posts */}
                             {!isLoading && !isError && !location && locationError && timeline.length === 0 && mergedFeed.length === 0 && (
                                 <div className="w-full">
-                                    <div className="flex flex-col items-center justify-center py-12 px-5 mod-card w-full">
-                                        <div className="w-16 h-16 rounded-full mod-inset flex items-center justify-center mb-4">
+                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white border-y border-gray-100 w-full">
+                                        <div className="w-16 h-16 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
                                             <span className="material-symbols-outlined text-[32px] text-brand-red">location_off</span>
                                         </div>
                                         <p className="text-sm text-center" style={{ color: 'var(--neu-text)' }}>
@@ -577,8 +577,8 @@ function XFeedInner() {
 
                             {!isLoading && !isError && location && mergedFeed.length === 0 && timeline.length === 0 && (
                                 <div className="w-full">
-                                    <div className="glass-card flex flex-col items-center justify-center py-12 px-6 text-center w-full border border-glass-border shadow-md">
-                                        <div className="w-full max-w-[280px] h-[140px] rounded-2xl overflow-hidden mb-6 border border-glass-border/30 bg-black/[0.02]">
+                                    <div className="flex flex-col items-center justify-center py-12 px-6 text-center w-full bg-white border-y border-gray-100">
+                                        <div className="w-full max-w-[280px] h-[140px] rounded-2xl overflow-hidden mb-6 border border-gray-100 bg-black/[0.02]">
                                             <img src="/illustration_services.png" alt="Welcome" className="w-full h-full object-cover" />
                                         </div>
                                         <p className="text-base font-bold text-neu-text dark:text-white">

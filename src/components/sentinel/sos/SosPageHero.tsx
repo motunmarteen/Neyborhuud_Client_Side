@@ -25,18 +25,18 @@ export function SosPageHero({
 
   return (
     <div
-      className={`mod-card rounded-2xl p-5 ${
+      className={`rounded-none border-b border-gray-100 p-6 shadow-none ${
         isActive
-          ? 'ring-2 ring-brand-red/35 bg-gradient-to-br from-brand-red/12 via-[var(--neu-bg)] to-brand-red/5'
+          ? 'bg-gradient-to-br from-red-50/70 via-white to-red-50/20 border-red-100'
           : isPending
-            ? 'ring-2 ring-primary/30 bg-gradient-to-br from-primary/10 via-[var(--neu-bg)] to-amber-500/5'
-            : 'bg-gradient-to-br from-brand-red/8 via-[var(--neu-bg)] to-brand-blue/6'
+            ? 'bg-gradient-to-br from-blue-50/60 via-white to-blue-50/20 border-blue-100'
+            : 'bg-gradient-to-br from-red-50/40 via-white to-blue-50/20'
       }`}
     >
       <div className="flex items-start gap-4">
         <div
-          className={`mod-inset flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${
-            isActive ? 'text-brand-red' : isPending ? 'text-primary' : 'text-brand-red'
+          className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white border border-gray-150/40 ${
+            isActive ? 'text-red-600' : isPending ? 'text-blue-600' : 'text-red-600'
           }`}
         >
           <span
@@ -48,17 +48,17 @@ export function SosPageHero({
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-brand-red">
+          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-red-600">
             SOS command center
           </p>
-          <h1 className="mt-1 text-lg font-extrabold leading-snug" style={{ color: 'var(--neu-text)' }}>
+          <h1 className="mt-1 text-lg font-extrabold leading-snug text-gray-800">
             {isActive
               ? 'Emergency alert is live'
               : isPending
                 ? `Arming — ${secondsRemaining}s left`
                 : 'Help when you need it most'}
           </h1>
-          <p className="mt-1.5 text-sm leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
+          <p className="mt-1.5 text-xs leading-relaxed text-gray-500">
             {isActive
               ? `Guardians notified · Escalation ${escalationLevel}. Mark safe when you are out of danger.`
               : isPending
@@ -74,7 +74,7 @@ export function SosPageHero({
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-full border border-primary/35 bg-[var(--neu-bg)] px-4 py-2.5 text-sm font-bold text-primary"
+              className="rounded-full border border-blue-200 bg-white px-5 py-2.5 text-xs font-bold text-blue-600 shadow-sm hover:bg-blue-50/45 transition-colors"
             >
               Cancel SOS
             </button>
@@ -83,7 +83,7 @@ export function SosPageHero({
               {incidentHref ? (
                 <Link
                   href={incidentHref}
-                  className="mod-chip mod-chip-active inline-flex items-center gap-1 rounded-full px-4 py-2.5 text-sm font-bold text-primary no-underline"
+                  className="inline-flex items-center gap-1 rounded-full bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 text-xs font-bold shadow-sm transition-all duration-200 no-underline"
                 >
                   View incident
                 </Link>
@@ -91,7 +91,7 @@ export function SosPageHero({
               <button
                 type="button"
                 onClick={onResolve}
-                className="rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-white"
+                className="rounded-full bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 text-xs font-bold shadow-sm transition-colors"
               >
                 I&apos;m safe now
               </button>

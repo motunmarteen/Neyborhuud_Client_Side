@@ -15,6 +15,7 @@ import { ConnectMap } from '@/components/friendship/ConnectMap';
 import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { useCall } from '@/components/calls/CallProvider';
+import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,6 +34,7 @@ interface FollowUser {
   followedAt?: string;
   distanceMetres?: number;
   isFollowing?: boolean;
+  isMutual?: boolean;
   /** Registered home location (JSON string or object) — used for the Connect map. */
   primaryLocation?: string | { lat?: number; lng?: number; latitude?: number; longitude?: number };
 }
@@ -41,26 +43,19 @@ interface FollowUser {
 
 const Avatar = ({ user, size = 48 }: { user: FollowUser; size?: number }) => {
   const src = user.avatarUrl || user.profilePicture;
-  const initials = `${(user.firstName || '')[0] || ''}${(user.lastName || '')[0] || ''}`.toUpperCase() || (user.username || '?')[0].toUpperCase();
-  if (src) {
-    return (
-      <Image
-        src={src}
-        alt={user.username}
-        width={size}
-        height={size}
-        className="rounded-full object-cover border border-slate-200 flex-shrink-0"
-        style={{ width: size, height: size }}
-        unoptimized
-      />
-    );
-  }
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || '?';
+  const initials = displayName[0]?.toUpperCase() ?? '?';
+
   return (
     <div
-      className="rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-[#00D431] to-[#006F35] border border-slate-200 flex-shrink-0"
-      style={{ width: size, height: size, fontSize: size * 0.38 }}
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-slate-100 shadow-sm"
+      style={{ width: size, height: size }}
     >
-      {initials}
+      {src ? (
+        <img src={src} alt={user.username} className="h-full w-full object-cover" />
+      ) : (
+        <span className="font-bold text-slate-400" style={{ fontSize: size * 0.35 }}>{initials}</span>
+      )}
     </div>
   );
 };
@@ -88,6 +83,7 @@ function UserCard({ user, currentUserId, onFollowToggle, onMessage, pendingIds, 
   const userId = user._id || user.id;
   const isMe = !!userId && userId === currentUserId;
   const { startCall } = useCall();
+  const router = useRouter();
 
   const handleAudioCall = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -113,34 +109,41 @@ function UserCard({ user, currentUserId, onFollowToggle, onMessage, pendingIds, 
     });
   };
 
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || `@${user.username}`;
+
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50 transition-colors duration-150 border-b border-gray-100 group cursor-pointer">
-      <Link href={`/profile/${user.username}`} className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="flex-shrink-0">
-          <Avatar user={user} size={48} />
-        </div>
+    <div
+      onClick={() => router.push(`/profile/${user.username}`)}
+      className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-slate-50 active:bg-slate-100 border-b border-gray-100"
+    >
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <Avatar user={user} size={48} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1 min-w-0">
-            <span className="font-semibold text-slate-800 text-[15px] truncate">
-              {user.firstName} {user.lastName}
-            </span>
+            <p className="truncate text-[15px] font-semibold text-slate-800">
+              {displayName}
+            </p>
             {user.isVerified && <VerifiedBadge />}
           </div>
-          <p className="text-slate-400 text-xs truncate">@{user.username}</p>
-          {(user.lga || user.state) && (
-            <p className="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
-              <span className="material-symbols-outlined text-[12px] text-primary">location_on</span>
+          
+          <div className="flex items-center gap-1.5 truncate text-[13px] text-slate-500 mt-0.5">
+            {user.firstName || user.lastName ? <span className="text-slate-400 font-medium">@{user.username}</span> : null}
+            {(user.firstName || user.lastName) && (user.lga || user.state) && <span className="text-slate-300">·</span>}
+            {user.lga || user.state ? (
               <span className="truncate">{[user.lga, user.state].filter(Boolean).join(', ')}</span>
-              {user.distanceMetres != null && (
-                <span className="text-[#00D431] font-bold ml-1">· {fmtDist(user.distanceMetres)}</span>
-              )}
-            </p>
-          )}
-          {user.bio && <p className="text-slate-500 text-xs truncate mt-1 opacity-90 italic">"{user.bio}"</p>}
+            ) : null}
+            {user.distanceMetres != null && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="text-[#00A555] font-bold shrink-0">{fmtDist(user.distanceMetres)}</span>
+              </>
+            )}
+          </div>
+          {user.bio && <p className="text-slate-400 text-xs truncate mt-1 italic">"{user.bio}"</p>}
         </div>
-      </Link>
+      </div>
 
-      {!isMe && (
+      {!isMe && user.isMutual && (
         <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
@@ -216,12 +219,13 @@ const TabCircle = ({
 // ─── Empty state ───────────────────────────────────────────────────────────────
 
 const EmptyState = ({ icon, title, subtitle }: { icon: string; title: string; subtitle: string }) => (
-  <div className="flex flex-col items-center justify-center py-16 px-8 text-center bg-white">
-    <div className={`w-[64px] h-[64px] rounded-full bg-[#00D431]/10 flex items-center justify-center mb-4 shrink-0`}>
-      <span className={`material-symbols-outlined text-[32px] text-[#00D431]`} style={{ fontVariationSettings: "'wght' 300" }}>{icon}</span>
-    </div>
-    <h3 className="font-bold text-slate-900 text-[16px] mb-2">{title}</h3>
-    <p className="text-gray-500 text-sm leading-relaxed max-w-xs">{subtitle}</p>
+  <div className="bg-white py-8 border-y border-gray-100">
+    <BrowseEmptyState
+      className="flex flex-col items-center gap-3 bg-white px-6 py-6 text-center rounded-none shadow-none border-0"
+      icon={icon}
+      title={title}
+      description={subtitle}
+    />
   </div>
 );
 
@@ -232,6 +236,13 @@ type MainTab = 'chats' | 'near_me' | 'following' | 'followers';
 /** Tabs that show the registered-home map header. */
 const MAP_TABS: MainTab[] = ['near_me', 'following', 'followers'];
 
+
+const CONNECT_TAB_ACCENTS: Record<MainTab, string> = {
+  chats: 'bg-blue-600 shadow-[0_1px_6px_rgba(37,99,235,0.25)]',
+  near_me: 'bg-green-600 shadow-[0_1px_6px_rgba(22,163,74,0.25)]',
+  following: 'bg-purple-600 shadow-[0_1px_6px_rgba(147,51,234,0.25)]',
+  followers: 'bg-orange-600 shadow-[0_1px_6px_rgba(249,115,22,0.25)]',
+};
 
 function FriendshipPageContent() {
   const { user } = useAuth();
@@ -417,8 +428,8 @@ function FriendshipPageContent() {
       <header className="z-30 shrink-0 bg-white/95 backdrop-blur-md">
         {/* Persistent, context-aware search — on every tab */}
         <div className="pb-6 pt-3">
-          <div className="relative w-full h-[3.2rem] px-4">
-            <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-[22px] text-gray-400" style={{ fontVariationSettings: "'wght' 300" }}>search</span>
+          <div className="relative flex items-center mx-auto w-[calc(100%-1.5rem)] max-w-[600px] h-[3.2rem]">
+            <span className="material-symbols-outlined absolute left-5 text-gray-400 text-[22px]" style={{ fontVariationSettings: "'wght' 300" }}>search</span>
             <input
               type="search"
               value={search}
@@ -430,7 +441,7 @@ function FriendshipPageContent() {
         </div>
 
         {/* Edge-to-edge Circle Tabs */}
-        <div className="pl-4 pb-6 border-b border-gray-100 relative">
+        <div className="pl-4 pb-6 relative">
           <div
             role="tablist"
             aria-label="Friendship sections"
@@ -455,6 +466,8 @@ function FriendshipPageContent() {
           </div>
           {/* Fade out right edge indicator */}
           <div className="absolute top-0 right-0 bottom-6 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+          {/* Dynamic Accent Line */}
+          <div className={`absolute bottom-0 left-0 right-0 h-[2.5px] transition-all duration-300 ${CONNECT_TAB_ACCENTS[mainTab]}`} />
         </div>
       </header>
 

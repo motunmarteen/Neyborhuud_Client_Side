@@ -102,10 +102,7 @@ export default function FollowersPage() {
           description={`When someone follows @${username}, they'll show up here.`}
         />
       ) : (
-        <div
-          className="mod-card divide-y overflow-hidden rounded-2xl"
-          style={{ borderColor: 'var(--neu-shadow-dark)' }}
-        >
+        <div className="divide-y divide-slate-100">
           {followers.map((follower) => (
             <UserListItem key={follower._id} user={follower} />
           ))}
