@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 function LoginPageContent() {
     const router = useRouter();
@@ -111,24 +112,27 @@ function LoginPageContent() {
                     />
                 }
                 footer={
-                    <div className="auth-signup-actions">
-                        <button type="submit" disabled={!canLogin} className="auth-btn auth-btn-primary">
-                            {loading ? (
-                                <>
-                                    <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
-                                    <span>Opening…</span>
-                                </>
-                            ) : (
-                                <>
-                                    <span>Enter your Huud</span>
-                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
-                                </>
-                            )}
-                        </button>
-                        <Link href="/signup" className="auth-btn auth-btn-secondary no-underline">
-                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">person_add</span>
-                            <span>Join NeyborHuud</span>
-                        </Link>
+                    <div>
+                        <div className="auth-signup-actions">
+                            <button type="submit" disabled={!canLogin} className="auth-btn auth-btn-primary">
+                                {loading ? (
+                                    <>
+                                        <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                                        <span>Opening…</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Enter your Huud</span>
+                                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                                    </>
+                                )}
+                            </button>
+                            <Link href="/signup" className="auth-btn auth-btn-secondary no-underline">
+                                <span className="material-symbols-outlined shrink-0" aria-hidden="true">person_add</span>
+                                <span>Join NeyborHuud</span>
+                            </Link>
+                        </div>
+                        <GoogleSignInButton />
                     </div>
                 }
             >

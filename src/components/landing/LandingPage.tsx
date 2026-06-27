@@ -8,6 +8,7 @@ import { resolvePostAuthRoute, validateStoredSession } from '@/lib/authSession';
 import { LandingHeaderBrand } from '@/components/landing/LandingHeaderBrand';
 import { SocialProofBadge } from '@/components/landing/SocialProofBadge';
 import { BRAND_NAME } from '@/lib/brand';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 const LANDING_VIDEO = '/video/background-video.mp4';
 /** Add `public/video/landing-poster.jpg` (first frame, ~120 KB) for instant paint. */
@@ -165,6 +166,13 @@ export function LandingPage() {
                         >
                             Enter your Huud
                         </Link>
+                        <GoogleSignInButton variant="landing" />
+                        <p className="landing-legal-text">
+                            By continuing, you agree to our{' '}
+                            <Link href="/terms" className="landing-legal-link">Terms of Service</Link>
+                            {' '}and{' '}
+                            <Link href="/privacy" className="landing-legal-link">Privacy Policy</Link>.
+                        </p>
                     </div>
                 </div>
             </div>
