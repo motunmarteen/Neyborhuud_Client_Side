@@ -2,8 +2,10 @@ import React from "react";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import "./simulator.css";
 import { Providers } from "@/components/providers";
 import { AppViewport } from "@/components/AppViewport";
+import DesktopPhoneFrame from "@/components/navigation/DesktopPhoneFrame";
 import DailyCheckInModal from "@/components/gamification/DailyCheckInModalLoader";
 import TextSizeApplier from "@/components/TextSizeApplier";
 import { ThemeSync } from "@/components/theme/ThemeSync";
@@ -130,12 +132,14 @@ export default function RootLayout({
           />
           <TextSizeApplier />
           <DailyCheckInModal />
-          <div id="main-content" className="app-shell">
-            <AutoTopNav />
-            <AutoLeftSidebar />
-            <FloatingSosButton />
-            {children}
-          </div>
+          <DesktopPhoneFrame>
+            <div id="main-content" className="app-shell">
+              <AutoTopNav />
+              <AutoLeftSidebar />
+              <FloatingSosButton />
+              {children}
+            </div>
+          </DesktopPhoneFrame>
         </Providers>
       </body>
     </html>
