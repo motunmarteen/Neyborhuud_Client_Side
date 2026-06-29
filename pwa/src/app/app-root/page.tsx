@@ -12,7 +12,7 @@ export default function AppRootPage() {
     if (apiClient.isAuthenticated()) {
       router.replace(resolvePostAuthRoute());
     } else {
-      router.replace("/login");
+      router.replace("/signup");
     }
   }, [router]);
 
