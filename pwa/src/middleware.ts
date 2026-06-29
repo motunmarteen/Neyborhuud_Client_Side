@@ -14,9 +14,9 @@ export function middleware(request: NextRequest) {
 
   if (isAppDomain) {
     // 2. Routing for the PWA app subdomain
-    // If they hit the root URL '/', rewrite internally to '/feed' or '/login' (handled by PWA layout/auth)
+    // If they hit the root URL '/', rewrite internally to '/app-root' (which handles auth redirect)
     if (url.pathname === "/") {
-      url.pathname = "/feed";
+      url.pathname = "/app-root";
       return NextResponse.rewrite(url);
     }
   } else {
