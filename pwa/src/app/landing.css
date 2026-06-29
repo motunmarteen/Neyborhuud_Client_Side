@@ -1,0 +1,540 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Brand Core (Consistent across themes) */
+  --primary: #00D431;
+  --brand-blue: #0000FF;
+  --brand-red: #FF0000;
+  --brand-green-dark: #006F35;
+  
+  /* Light Theme Defaults */
+  --bg-main: #E9F6E6; /* brand-surface */
+  --bg-secondary: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --text-main: #1A1A1A; /* brand-black */
+  --text-muted: #555555;
+  --border-subtle: rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-shadow: rgba(0, 0, 0, 0.05);
+  --doodle-stroke: rgba(0, 212, 49, 0.2);
+  --doodle-fill: rgba(0, 212, 49, 0.2);
+  
+  /* Inverse values for cards that are always dark (like The Fortress) */
+  --inverse-bg: #1A1A1A;
+  --inverse-text: #FFFFFF;
+  --inverse-text-muted: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme='dark'] {
+  /* Dark Theme Overrides */
+  --bg-main: #0B0F19; /* dark blue/black */
+  --bg-secondary: #121826;
+  --bg-card: #1A1F2E;
+  --text-main: #FFFFFF;
+  --text-muted: #9BA1B0;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(26, 31, 46, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.37);
+  --doodle-stroke: rgba(0, 111, 53, 0.4);
+  --doodle-fill: rgba(0, 111, 53, 0.4);
+}
+
+/* Let's scope landing page styles under the .landing-page class and marketing layout wrapper to avoid polluting the rest of PWA */
+.landing-page-wrapper {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.landing-page-wrapper h1, 
+.landing-page-wrapper h2, 
+.landing-page-wrapper h3, 
+.landing-page-wrapper h4, 
+.landing-page-wrapper h5, 
+.landing-page-wrapper h6 {
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.landing-page-wrapper a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Glassmorphism utility */
+.landing-page-wrapper .glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 var(--glass-shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.landing-page-wrapper .glass-dark {
+  background: var(--inverse-bg);
+  color: var(--inverse-text);
+  border-radius: 3rem;
+  margin: 0 24px;
+}
+
+/* Primary Button */
+.landing-page-wrapper .btn-glass-primary {
+  background: var(--primary);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 99px; /* Neumorphic pill shape */
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 900;
+  font-size: 0.875rem; /* text-sm */
+  text-transform: uppercase;
+  letter-spacing: 0.18em; /* tracking-[0.18em] */
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 212, 49, 0.3), inset 0 2px 4px rgba(255,255,255,0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Layout Utilities */
+.landing-page-wrapper .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.landing-page-wrapper .section {
+  padding: 120px 0;
+}
+
+/* Organic Shapes */
+.landing-page-wrapper .blob {
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  animation: morph 8s ease-in-out infinite;
+}
+
+@keyframes morph {
+  0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+  34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+  67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+}
+
+/* Responsive Typography and Spacing */
+.landing-page-wrapper .hero-title {
+  font-size: clamp(2.5rem, 5vw + 1rem, 4.5rem);
+  margin-bottom: 24px;
+}
+.landing-page-wrapper .section-title {
+  font-size: clamp(2rem, 4vw + 1rem, 3rem);
+  margin-bottom: 24px;
+}
+.landing-page-wrapper .hero-subtitle {
+  font-size: clamp(1.1rem, 2vw + 0.5rem, 1.25rem);
+  color: var(--text-muted);
+  margin-bottom: clamp(24px, 4vw, 40px);
+  line-height: 1.6;
+}
+
+.landing-page-wrapper .cta-section {
+  padding: clamp(80px, 15vw, 160px) 0;
+}
+
+/* Responsive Components */
+.landing-page-wrapper .nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.landing-page-wrapper .use-case-card {
+  display: flex;
+  background: var(--bg-main);
+  border-radius: 2.5rem;
+  overflow: hidden;
+}
+
+.landing-page-wrapper .mockup-container {
+  margin-top: clamp(40px, 8vw, 80px);
+  position: relative;
+  height: clamp(350px, 50vw, 500px);
+  width: 100%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  perspective: 1000px;
+}
+
+.landing-page-wrapper .grid-responsive-fortress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+  gap: clamp(32px, 5vw, 60px);
+}
+
+.landing-page-wrapper .floating-notification {
+  position: absolute;
+  padding: 16px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-secondary);
+}
+
+/* Media Queries for Layout Shifts */
+@media (max-width: 992px) {
+  .landing-page-wrapper .use-case-card {
+    flex-direction: column;
+  }
+  .landing-page-wrapper .use-case-card > div:first-child {
+    padding: clamp(32px, 5vw, 60px) !important;
+  }
+  .landing-page-wrapper .use-case-card > div:last-child {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-page-wrapper .section {
+    padding: 80px 0;
+  }
+  
+  .landing-page-wrapper .nav-links {
+    gap: 16px;
+  }
+  
+  .landing-page-wrapper .nav-links > a:not(.btn-glass-primary) {
+    display: none; /* Hide standard links on mobile */
+  }
+
+  .landing-page-wrapper .glass-dark {
+    margin: 0;
+    border-radius: 1.5rem;
+  }
+
+  /* Make floating notifications stack nicer on mobile */
+  .landing-page-wrapper .floating-notification {
+    width: 90%;
+    left: 5% !important;
+    right: 5% !important;
+  }
+
+  /* Adjust spacing in the Fortress section on mobile */
+  .landing-page-wrapper .container {
+    padding: 0 16px;
+  }
+}
+
+/* --- Awwwards Redesign Premium Utilities --- */
+
+/* Editorial Typography */
+.landing-page-wrapper .text-display-huge {
+  font-size: clamp(3.5rem, 8vw + 1rem, 8rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+
+.landing-page-wrapper .text-display-large {
+  font-size: clamp(2.5rem, 5vw + 1rem, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.landing-page-wrapper .text-display-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--text-main);
+}
+
+.landing-page-wrapper .text-display-outline-primary {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--primary);
+}
+
+.landing-page-wrapper .text-editorial {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+/* Premium Shadows & Depth */
+.landing-page-wrapper .shadow-premium {
+  box-shadow: 
+    0 20px 40px -15px var(--glass-shadow),
+    0 50px 80px -20px var(--glass-shadow);
+}
+
+/* Layout Hacks */
+.landing-page-wrapper .sticky-wrapper {
+  position: relative;
+  height: 300vh; /* Will hold 3 sticky cards */
+}
+
+.landing-page-wrapper .sticky-panel {
+  position: sticky;
+  top: 15vh;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Premium Overhaul Additions --- */
+
+/* Terminal style */
+.landing-page-wrapper .terminal-window {
+  background: rgba(10, 12, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  font-family: 'Courier New', Courier, monospace;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 212, 49, 0.1);
+}
+
+.landing-page-wrapper .terminal-header {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.landing-page-wrapper .terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.landing-page-wrapper .terminal-body {
+  padding: 20px;
+  min-height: 280px;
+  max-height: 400px;
+  overflow-y: auto;
+  color: #a3b8cc;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Custom scrollbar for terminal and lists */
+.landing-page-wrapper .custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.landing-page-wrapper .custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.landing-page-wrapper .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 99px;
+}
+.landing-page-wrapper .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Glowing text */
+.landing-page-wrapper .glow-text-green {
+  text-shadow: 0 0 8px rgba(0, 212, 49, 0.6);
+  color: var(--primary) !important;
+}
+
+.landing-page-wrapper .glow-text-blue {
+  text-shadow: 0 0 8px rgba(0, 0, 255, 0.6);
+  color: var(--brand-blue) !important;
+}
+
+.landing-page-wrapper .glow-text-red {
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+  color: var(--brand-red) !important;
+}
+
+/* Interactive Device styles */
+.landing-page-wrapper .device-container {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  height: 680px;
+  border-radius: 3rem;
+  padding: 12px;
+  background: rgba(20, 20, 25, 0.9);
+  border: 4px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.landing-page-wrapper .device-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 2.2rem;
+  overflow: hidden;
+  background: #0f131a;
+  display: flex;
+  flex-direction: column;
+}
+
+/* SOS active state styles */
+.landing-page-wrapper .sos-active {
+  animation: sos-shake 0.15s infinite, sos-glow 1.5s infinite alternate;
+  border-color: var(--brand-red) !important;
+}
+
+@keyframes sos-shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(0px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  75% { transform: translate(2px, 1px) rotate(-1deg); }
+  90% { transform: translate(-1px, -1px) rotate(1deg); }
+  100% { transform: translate(1px, -2px) rotate(0deg); }
+}
+
+@keyframes sos-glow {
+  from {
+    box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.4), 0 0 30px rgba(255, 0, 0, 0.2);
+  }
+  to {
+    box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.7), 0 0 50px rgba(255, 0, 0, 0.5);
+  }
+}
+
+.landing-page-wrapper .sos-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(180, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  color: white;
+  text-align: center;
+}
+
+/* Glass card enhancement */
+.landing-page-wrapper .glass-premium {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 var(--glass-shadow);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.landing-page-wrapper .glass-premium:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0, 212, 49, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 212, 49, 0.08), 0 0 20px rgba(0, 212, 49, 0.05);
+}
+
+/* Custom glow borders on cards */
+.landing-page-wrapper .glow-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-page-wrapper .glow-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  transition: 0.75s;
+  pointer-events: none;
+}
+
+.landing-page-wrapper .glow-card:hover::after {
+  left: 125%;
+}
+
+/* Circle radius slider style */
+.landing-page-wrapper .range-slider-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.landing-page-wrapper .radius-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.1);
+  outline: none;
+}
+
+.landing-page-wrapper .radius-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 10px var(--primary);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.landing-page-wrapper .radius-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Tab indicator style */
+.landing-page-wrapper .tab-indicator {
+  position: absolute;
+  bottom: 0;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 99px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Day in the Huud tabs */
+.landing-page-wrapper .day-tab-btn {
+  padding: 12px 24px;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.landing-page-wrapper .day-tab-btn.active {
+  color: var(--text-main);
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@media (min-width: 768px) {
+  .landing-page-wrapper .grid-span-2-md {
+    grid-column: span 2;
+  }
+}

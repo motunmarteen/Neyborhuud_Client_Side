@@ -1,8 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+**/node_modules
+**/.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -11,25 +11,25 @@
 !.yarn/versions
 
 # testing
-/coverage
+**/coverage
 
 # next.js
-/.next/
-/.next-*/
-/out/
+**/.next/
+**/.next-*/
+**/out/
 
 # capacitor
-/.cap-api-stash/
-/android/app/build/
-/android/.gradle/
-/android/build/
-/android/local.properties
-/ios/App/build/
-/ios/App/Pods/
-/ios/App/output/
+**/.cap-api-stash/
+**/android/app/build/
+**/android/.gradle/
+**/android/build/
+**/android/local.properties
+**/ios/App/build/
+**/ios/App/Pods/
+**/ios/App/output/
 
 # production
-/build
+**/build
 
 # misc
 .DS_Store
@@ -54,10 +54,10 @@ next-env.d.ts
 nul
 
 # Cache files
-cdn_rates.json
-rates.json
+**/cdn_rates.json
+**/rates.json
 
 # Dev/debug logs (never commit)
 *.log
-dev-server.log
-backend.log
+**/dev-server.log
+**/backend.log
