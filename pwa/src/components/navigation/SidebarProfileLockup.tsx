@@ -6,6 +6,8 @@ import { useHuudDisplayName } from '@/hooks/useHuudDisplayName';
 import {
   resolveProfileDisplayName,
   resolveProfilePersonalName,
+  getGuestUsername,
+  getGuestDisplayName,
   type ProfileNameSource,
 } from '@/lib/profileSnapHelpers';
 import {
@@ -28,10 +30,10 @@ export function SidebarProfileLockup({
   onNavigate,
   variant = 'default',
 }: SidebarProfileLockupProps) {
-  const handle = (user?.username ?? 'neybor').trim().toLowerCase();
+  const handle = (user?.username ?? getGuestUsername()).trim().toLowerCase();
   const resolvedAvatar = resolveUserAvatarUrl(user);
   const personalName = resolveProfilePersonalName(user, handle);
-  const displayName = resolveProfileDisplayName(user, handle);
+  const displayName = user ? resolveProfileDisplayName(user, handle) : getGuestDisplayName();
   const initial = resolveProfileAvatarInitial(user, handle);
   const isSky = variant === 'sky';
   const huudName = useHuudDisplayName(user);

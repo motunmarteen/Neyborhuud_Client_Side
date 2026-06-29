@@ -189,3 +189,48 @@ export async function shareProfileUrl(username: string, displayName: string): Pr
   }
   return false;
 }
+
+export function getGuestUsername(): string {
+  if (typeof window === 'undefined') return 'neybor';
+  
+  let guest = localStorage.getItem('neyborhuud_guest_username');
+  if (!guest) {
+    const funnyNames = [
+      'nosynoob',
+      'loudchewer',
+      'wifistealer',
+      'binrummager',
+      'gossipmonger',
+      'windowpeeper',
+      'curtaintwitcher',
+      'badparker',
+      'gatecrasher',
+      'soupslurper',
+      'keyloser',
+      'packagehoarder',
+      'loudsnorer',
+      'lawnmowerman',
+      'midnightdriller',
+      'heavystepper',
+      'binsneglecter',
+      'partypooper',
+      'dramachaser',
+      'opinionateduncle',
+      'uninvitedpundit'
+    ];
+    const randomIndex = Math.floor(Math.random() * funnyNames.length);
+    const randomNum = Math.floor(100 + Math.random() * 900);
+    guest = `neybor_${funnyNames[randomIndex]}_${randomNum}`;
+    localStorage.setItem('neyborhuud_guest_username', guest);
+  }
+  return guest;
+}
+
+export function getGuestDisplayName(): string {
+  const username = getGuestUsername();
+  return username
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+

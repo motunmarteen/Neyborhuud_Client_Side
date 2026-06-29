@@ -31,23 +31,32 @@ export default function AppRootPage() {
 
     let cancelled = false;
 
-    async function redirectIfAuthenticated() {
-      if (!apiClient.isAuthenticated()) {
-        setCheckingAuth(false);
-        return;
+    async function checkNavigation() {
+      // 1. Check if authenticated (logged-in user session)
+      if (apiClient.isAuthenticated()) {
+        const validation = await validateStoredSession();
+        if (cancelled) return;
+
+        if (validation === "valid") {
+          router.replace(resolvePostAuthRoute());
+          return;
+        }
       }
 
-      const validation = await validateStoredSession();
-      if (cancelled) return;
-
-      if (validation === "valid") {
-        router.replace(resolvePostAuthRoute());
+      // 2. Check if they have visited the PWA before
+      const hasVisited = localStorage.getItem("neyborhuud_has_visited");
+      if (hasVisited === "true") {
+        // Returning visitor -> go straight to feed
+        router.replace("/feed");
       } else {
+        // First-time visitor -> show the welcome screen
+        // Mark as visited so next launch skips this welcome page
+        localStorage.setItem("neyborhuud_has_visited", "true");
         setCheckingAuth(false);
       }
     }
 
-    void redirectIfAuthenticated();
+    void checkNavigation();
     return () => {
       cancelled = true;
     };
@@ -83,9 +92,63 @@ export default function AppRootPage() {
     };
   }, [checkingAuth]);
 
+  // Display a premium, native-feeling splash screen during auth verification & redirects
   if (checkingAuth) {
     return (
-      <div style={{ minHeight: "100vh", backgroundColor: "#060908" }} />
+      <div 
+        style={{ 
+          minHeight: "100vh", 
+          backgroundColor: "#060908",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          fontFamily: "var(--font-jakarta), sans-serif"
+        }}
+      >
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes splashScale {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          @keyframes pulseGlow {
+            0%, 100% { opacity: 0.65; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+          }
+          .splash-container {
+            animation: splashScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.25rem;
+          }
+          .splash-logo {
+            animation: pulseGlow 1.8s ease-in-out infinite;
+          }
+        `}} />
+        <div className="splash-container">
+          <img
+            src="/brand/neyborhuud-mark-light.png"
+            alt="NeyborHuud Logo"
+            className="splash-logo"
+            style={{
+              width: "110px",
+              height: "110px",
+              objectFit: "contain"
+            }}
+          />
+          <span 
+            style={{ 
+              color: "#ffffff", 
+              fontSize: "1.75rem", 
+              fontWeight: 800,
+              letterSpacing: "-0.03em"
+            }}
+          >
+            Neybor<span style={{ color: "#00d431" }}>Huud</span>
+          </span>
+        </div>
+      </div>
     );
   }
 

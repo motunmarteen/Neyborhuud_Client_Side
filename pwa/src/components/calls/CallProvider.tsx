@@ -32,6 +32,7 @@ import socketService from '@/lib/socket';
 import { callService, type CallType } from '@/services/call.service';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import * as ringtone from '@/lib/callRingtone';
+import { getGuestDisplayName } from '@/lib/profileSnapHelpers';
 
 export type CallPhase =
   | 'idle'
@@ -303,7 +304,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
           type,
           sdp: offer,
           // So the callee's incoming screen can show our name + photo.
-          fromName: user?.username ? `@${user.username}` : (user?.firstName ?? 'Neybor'),
+          fromName: user?.username ? `@${user.username}` : (user?.firstName ?? getGuestDisplayName()),
           fromAvatar: user?.avatarUrl ?? null,
         });
       } catch (err) {

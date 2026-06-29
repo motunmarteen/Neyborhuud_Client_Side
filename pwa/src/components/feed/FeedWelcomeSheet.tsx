@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AuthOverlaySheet } from '@/components/auth/AuthOverlaySheet';
 import { getStoredCommunity } from '@/lib/communityContext';
 import { hasCompletedProductTour, markProductTourComplete } from '@/lib/onboarding';
+import { getGuestDisplayName } from '@/lib/profileSnapHelpers';
 
 const FEED_TIPS = [
     {
@@ -68,7 +69,7 @@ export function FeedWelcomeSheet() {
 
     const community = useMemo(() => getStoredCommunity(), []);
     const huudName = community?.name || community?.communityName || 'your Huud';
-    const handle = user?.username ? `@${user.username}` : 'Neybor';
+    const handle = user?.username ? `@${user.username}` : getGuestDisplayName();
 
     useEffect(() => {
         if (hasCompletedProductTour()) return;

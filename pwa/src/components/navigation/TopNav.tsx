@@ -12,7 +12,7 @@ import { useScrollHideBottomNav, useIsScrolled, scrollToTop } from '@/hooks/useS
 import { useAuth } from '@/hooks/useAuth';
 import { PostCardMenuIcon } from '@/components/feed/PostCardMenuIcon';
 import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
-import { resolveProfileDisplayName } from '@/lib/profileSnapHelpers';
+import { resolveProfileDisplayName, getGuestUsername, getGuestDisplayName } from '@/lib/profileSnapHelpers';
 import { resolveProfileAvatarInitial, resolveUserAvatarUrl } from '@/lib/userAvatar';
 
 type TopNavOrigin = 'page' | 'global';
@@ -97,9 +97,9 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownContainerRef = useRef<HTMLDivElement>(null);
 
-  const handle = (user?.username ?? 'neybor').trim().toLowerCase();
+  const handle = (user?.username ?? getGuestUsername()).trim().toLowerCase();
   const resolvedAvatar = resolveUserAvatarUrl(user);
-  const displayName = resolveProfileDisplayName(user, handle);
+  const displayName = user ? resolveProfileDisplayName(user, handle) : getGuestDisplayName();
   const initial = resolveProfileAvatarInitial(user, handle);
 
   useEffect(() => {
