@@ -1,14 +1,14 @@
 "use client";
 
 import React, { ReactNode, useEffect, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function DesktopPhoneFrame({ children }: { children: ReactNode }) {
   const [isAppDomain, setIsAppDomain] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isInIframe, setIsInIframe] = useState(false);
+  const [iframeSrc, setIframeSrc] = useState("");
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
@@ -22,6 +22,9 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
 
       const inIframe = window.self !== window.top;
       setIsInIframe(inIframe);
+
+      // Sync path + query strings to iframe src on mount and pathname changes
+      setIframeSrc(window.location.pathname + window.location.search);
 
       // If on PWA desktop mode and NOT inside the iframe, apply overflow lock to parent shell
       if (isApp && !inIframe) {
@@ -43,7 +46,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
         };
       }
     }
-  }, []);
+  }, [pathname]);
 
   if (!mounted) {
     return <>{children}</>;
@@ -53,10 +56,6 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
   if (isInIframe || !isAppDomain) {
     return <>{children}</>;
   }
-
-  // Generate the current path to load inside the iframe
-  const searchStr = searchParams?.toString();
-  const iframeSrc = pathname + (searchStr ? `?${searchStr}` : "");
 
   return (
     <div className="app-simulator-layout">
@@ -69,17 +68,19 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
           <div className="phone-mockup-notch" />
           <div className="phone-mockup-speaker" />
           <div className="phone-mockup-screen" style={{ overflow: "hidden" }}>
-            <iframe
-              src={iframeSrc}
-              style={{
-                width: "100%",
-                height: "100%",
-                border: "none",
-                borderRadius: "34px",
-                overflow: "hidden"
-              }}
-              title="NeyborHuud App Simulator"
-            />
+            {iframeSrc && (
+              <iframe
+                src={iframeSrc}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  border: "none",
+                  borderRadius: "34px",
+                  overflow: "hidden"
+                }}
+                title="NeyborHuud App Simulator"
+              />
+            )}
           </div>
         </div>
       </div>
