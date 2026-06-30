@@ -8,6 +8,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
   const [isAppDomain, setIsAppDomain] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isInIframe, setIsInIframe] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [iframeSrc, setIframeSrc] = useState("");
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const pathname = usePathname();
@@ -28,7 +29,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
       // Set the initial iframe src ONLY once on mount to prevent reloading the iframe on clicks
       setIframeSrc(window.location.pathname + window.location.search);
 
-      // Generate a fully functioning, scannable QR Code that redirects to neyborhuud.com
+      // Generate a fully functioning, scannable QR Code that redirects to app.neyborhuud.com
       QRCode.toDataURL("https://app.neyborhuud.com", {
         margin: 1,
         width: 256,
@@ -40,25 +41,29 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
         .then((url) => setQrCodeDataUrl(url))
         .catch((err) => console.error("Failed to generate QR Code", err));
 
-      // If on PWA desktop mode and NOT inside the iframe, apply overflow lock to parent shell
-      if (isApp && !inIframe) {
-        const adjustScroll = () => {
-          if (window.innerWidth >= 1024) {
+      // Manage desktop viewport checks and scroll locks
+      const adjustLayout = () => {
+        const desktop = window.innerWidth >= 1024;
+        setIsDesktop(desktop);
+        
+        if (isApp && !inIframe) {
+          if (desktop) {
             document.documentElement.style.overflow = "hidden";
             document.body.style.overflow = "hidden";
           } else {
             document.documentElement.style.overflow = "";
             document.body.style.overflow = "";
           }
-        };
-        adjustScroll();
-        window.addEventListener("resize", adjustScroll);
-        return () => {
-          document.documentElement.style.overflow = "";
-          document.body.style.overflow = "";
-          window.removeEventListener("resize", adjustScroll);
-        };
-      }
+        }
+      };
+      
+      adjustLayout();
+      window.addEventListener("resize", adjustLayout);
+      return () => {
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+        window.removeEventListener("resize", adjustLayout);
+      };
     }
   }, []); // Run only on mount
 
@@ -80,8 +85,8 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
     return <>{children}</>;
   }
 
-  // If inside the iframe (PWA app child), or NOT on the app subdomain, render normally
-  if (isInIframe || !isAppDomain) {
+  // If inside the iframe (PWA app child), or NOT on the app subdomain, or on a mobile screen, render natively
+  if (isInIframe || !isAppDomain || !isDesktop) {
     return <>{children}</>;
   }
 
