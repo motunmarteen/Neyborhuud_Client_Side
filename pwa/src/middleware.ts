@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get("host") || "";
 
@@ -47,10 +47,15 @@ export function proxy(request: NextRequest) {
       let targetHost = "app.neyborhuud.com";
 
       // If we are developing locally, preserve the port and local domain
-      if (hostname.includes("localhost") || hostname.includes("local")) {
+      if (
+        hostname.includes("localhost") ||
+        hostname.includes("local") ||
+        hostname.includes(":")
+      ) {
         targetHost = hostname
           .replace("neyborhuud.local", "app.neyborhuud.local")
-          .replace("localhost", "app.localhost");
+          .replace("localhost", "app.localhost")
+          .replace("neyborhuud.com", "app.neyborhuud.com");
       }
 
       return NextResponse.redirect(

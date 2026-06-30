@@ -14,10 +14,19 @@ const getAppUrl = (path = "") => {
   const host = window.location.host;
   const protocol = window.location.protocol;
   
-  if (host.includes("localhost") || host.includes("local")) {
-    const targetHost = host
-      .replace("neyborhuud.local", "app.neyborhuud.local")
-      .replace("localhost", "app.localhost");
+  if (
+    host.includes("localhost") ||
+    host.includes("local") ||
+    host.includes(":")
+  ) {
+    let targetHost = host;
+    if (host.includes("neyborhuud.local")) {
+      targetHost = host.replace("neyborhuud.local", "app.neyborhuud.local");
+    } else if (host.includes("localhost")) {
+      targetHost = host.replace("localhost", "app.localhost");
+    } else if (host.includes("neyborhuud.com")) {
+      targetHost = host.replace("neyborhuud.com", "app.neyborhuud.com");
+    }
     return `${protocol}//${targetHost}${path}`;
   }
   return `https://app.neyborhuud.com${path}`;

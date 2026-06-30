@@ -5,14 +5,45 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/api-client";
 import { resolvePostAuthRoute, validateStoredSession } from "@/lib/authSession";
-import { LandingHeaderBrand } from "@/components/landing/LandingHeaderBrand";
 import { SocialProofBadge } from "@/components/landing/SocialProofBadge";
 import { BRAND_NAME } from "@/lib/brand";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { NeyborHuudLogo } from "@/components/brand/NeyborHuudLogo";
 
 const LANDING_VIDEO = "/video/background-video.mp4";
 const LANDING_POSTER = "/video/landing-poster.jpg";
-const HEADLINE_LINES = ["Safety.", "Neybor.", "Huud."];
+
+interface SlideData {
+  lines: { text: string; isGreen: boolean }[];
+  subcopy: string;
+}
+
+const slides: SlideData[] = [
+  {
+    lines: [
+      { text: "Safety.", isGreen: false },
+      { text: "Neybor.", isGreen: false },
+      { text: "Huud.", isGreen: true }
+    ],
+    subcopy: "Know what's happening on your street. Before everyone else does."
+  },
+  {
+    lines: [
+      { text: "Secure.", isGreen: false },
+      { text: "Escrow.", isGreen: false },
+      { text: "Trade.", isGreen: true }
+    ],
+    subcopy: "Buy, sell, and hire locally with verified neighbors under digital protection."
+  },
+  {
+    lines: [
+      { text: "Zero-Lag.", isGreen: false },
+      { text: "SOS.", isGreen: false },
+      { text: "Patrol.", isGreen: true }
+    ],
+    subcopy: "Instant emergency alerts co-signed by active neighborhood guardians."
+  }
+];
 
 export default function AppRootPage() {
   const router = useRouter();
@@ -20,6 +51,7 @@ export default function AppRootPage() {
   const [videoReady, setVideoReady] = useState(false);
   const [posterOk, setPosterOk] = useState(true);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-landing", "true");
@@ -53,8 +85,8 @@ export default function AppRootPage() {
       // 2. Check if they have visited the PWA before
       const hasVisited = localStorage.getItem("neyborhuud_has_visited");
       if (hasVisited === "true") {
-        // Returning visitor -> go straight to feed
-        router.replace("/feed");
+        // Returning visitor, but unauthenticated -> go to login
+        router.replace("/login");
       } else {
         // First-time visitor -> show the welcome screen
         // Mark as visited so next launch skips this welcome page
@@ -98,6 +130,15 @@ export default function AppRootPage() {
       motion.removeEventListener("change", syncPlayback);
     };
   }, [checkingAuth]);
+
+  // Slideshow auto-rotation (6s delay, resets on manual change)
+  useEffect(() => {
+    if (checkingAuth) return;
+    const interval = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % slides.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [checkingAuth, activeSlide]);
 
   // Display a premium, native-feeling splash screen during auth verification & redirects
   if (checkingAuth) {
@@ -159,6 +200,8 @@ export default function AppRootPage() {
     );
   }
 
+  const slide = slides[activeSlide];
+
   return (
     <div className="landing-page">
       <div className="landing-page-media" aria-hidden>
@@ -193,56 +236,72 @@ export default function AppRootPage() {
 
         <div className="landing-scrim absolute inset-0" />
         <div className="landing-scrim-bottom absolute inset-x-0 bottom-0 h-1/2" />
-
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.035] mix-blend-overlay"
-          style={{
-            backgroundImage:
-              'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
-          }}
-        />
       </div>
 
-      <div className="landing-page-shell relative z-10 mx-auto flex h-full min-h-0 w-full max-w-md flex-col">
-        <header className="landing-page-header">
-          <div className="landing-page-header-brand-anchor">
-            <LandingHeaderBrand />
+      <div className="landing-page-shell relative z-10 mx-auto flex h-full min-h-0 w-full max-w-md flex-col px-6">
+        <header 
+          className="w-full flex flex-col items-center justify-center shrink-0" 
+          style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 64px)", paddingBottom: "24px" }}
+        >
+          <div className="landing-page-header-brand flex flex-col items-center justify-center relative">
+            <div className="landing-logo-halo pointer-events-none" aria-hidden />
+            <div className="landing-page-header-mark-wrap">
+              <img
+                src="/brand/neyborhuud-mark-light.png"
+                alt="NeyborHuud Pin"
+                className="landing-page-header-mark brand-mark-hero object-contain"
+                style={{ width: "auto", height: "var(--landing-mark-height, 100px)", maxHeight: "15vh" }}
+              />
+            </div>
+            <div className="landing-page-header-wordmark">
+              <NeyborHuudLogo tone="hero" presentation="lockup" size="hero" />
+            </div>
           </div>
         </header>
 
         <div className="landing-page-body flex min-h-0 flex-1 flex-col">
-          <div className="landing-page-copy my-auto flex flex-col justify-center">
+          <div key={activeSlide} className="landing-page-copy mt-12 mb-auto flex flex-col items-center justify-center text-center animate-in fade-in duration-500">
             <div className="landing-headline-stack">
-              {HEADLINE_LINES.map((line) => {
-                const isGreen = line === "Huud.";
-                return (
-                  <h1
-                    key={line}
-                    className={`landing-headline ${
-                      isGreen ? "brand-name-hero" : "landing-headline--white"
-                    }`}
-                  >
-                    {line}
-                  </h1>
-                );
-              })}
+              {slide.lines.map((line) => (
+                <h1
+                  key={line.text}
+                  className={`landing-headline ${
+                    line.isGreen ? "brand-name-hero" : "landing-headline--white"
+                  }`}
+                >
+                  {line.text}
+                </h1>
+              ))}
             </div>
             <p className="landing-subcopy">
-              Know what&apos;s happening on your street. Before everyone else does.
+              {slide.subcopy}
             </p>
+            <div className="landing-carousel-dots">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveSlide(idx)}
+                  className={`landing-carousel-dot ${
+                    activeSlide === idx ? "active" : ""
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
             <SocialProofBadge />
           </div>
 
-          <div className="landing-page-actions mt-auto">
+          <div className="landing-page-actions mt-auto pb-12">
             <Link
               href="/signup"
-              className="landing-btn-primary landing-btn landing-btn--brand font-bold transition-transform"
+              className="landing-btn-primary landing-btn landing-btn--brand font-bold transition-transform active:scale-[0.98]"
             >
               Join {BRAND_NAME}
             </Link>
             <Link
               href="/login"
-              className="landing-btn-secondary landing-btn font-bold transition-transform"
+              className="landing-btn-secondary landing-btn font-bold transition-transform active:scale-[0.98]"
             >
               Enter your Huud
             </Link>

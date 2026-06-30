@@ -32,6 +32,7 @@ import { CallOverlay } from '@/components/calls/CallOverlay';
 import { SentinelBottomSheetProvider } from '@/contexts/SentinelBottomSheetContext';
 import { SentinelBottomSheet } from '@/components/safety/SentinelBottomSheet';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ClientRouteGuard } from '@/components/auth/ClientRouteGuard';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
 
@@ -329,7 +330,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <NotificationPermissionPrompt />
       <PwaInstallTracker />
       <PwaInstallPrompt />
-      <PageTransition>{children}</PageTransition>
+      <ClientRouteGuard>
+        <PageTransition>{children}</PageTransition>
+      </ClientRouteGuard>
       <SentinelBottomSheet />
       <CallOverlay />
       </SentinelBottomSheetProvider>

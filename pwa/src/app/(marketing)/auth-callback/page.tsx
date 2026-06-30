@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { authStorage } from '@/lib/auth';
+import apiClient from '@/lib/api-client';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 
 /**
@@ -97,6 +98,9 @@ function AuthCallbackContent() {
                     rememberMe: true, // social sign-in = always remember
                 },
             );
+
+            // Update in-memory token in Axios client immediately
+            apiClient.setToken(sessionToken);
 
             setStatusMessage('Loading your profile…');
 

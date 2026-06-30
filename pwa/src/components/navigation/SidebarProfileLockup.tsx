@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
 import { useHuudDisplayName } from '@/hooks/useHuudDisplayName';
@@ -30,13 +31,25 @@ export function SidebarProfileLockup({
   onNavigate,
   variant = 'default',
 }: SidebarProfileLockupProps) {
-  const handle = (user?.username ?? getGuestUsername()).trim().toLowerCase();
-  const resolvedAvatar = resolveUserAvatarUrl(user);
-  const personalName = resolveProfilePersonalName(user, handle);
-  const displayName = user ? resolveProfileDisplayName(user, handle) : getGuestDisplayName();
-  const initial = resolveProfileAvatarInitial(user, handle);
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const handle = (
+    isClient 
+      ? (user?.username ?? getGuestUsername()) 
+      : 'neybor'
+  ).trim().toLowerCase();
+
+  const resolvedAvatar = resolveUserAvatarUrl(isClient ? user : null);
+  const personalName = isClient ? resolveProfilePersonalName(user, handle) : '';
+  const displayName = isClient 
+    ? (user ? resolveProfileDisplayName(user, handle) : getGuestDisplayName())
+    : 'Neybor';
+  const initial = isClient ? resolveProfileAvatarInitial(user, handle) : 'N';
   const isSky = variant === 'sky';
-  const huudName = useHuudDisplayName(user);
+  const huudName = useHuudDisplayName(isClient ? user : null);
   const hasLegalName = Boolean(personalName) && displayName.toLowerCase() !== handle;
 
   return (
