@@ -2,12 +2,14 @@
 
 import React, { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import QRCode from "qrcode";
 
 export default function DesktopPhoneFrame({ children }: { children: ReactNode }) {
   const [isAppDomain, setIsAppDomain] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isInIframe, setIsInIframe] = useState(false);
   const [iframeSrc, setIframeSrc] = useState("");
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const pathname = usePathname();
 
   useEffect(() => {
@@ -25,6 +27,18 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
 
       // Set the initial iframe src ONLY once on mount to prevent reloading the iframe on clicks
       setIframeSrc(window.location.pathname + window.location.search);
+
+      // Generate a fully functioning, scannable QR Code that redirects to app.neyborhuud.com
+      QRCode.toDataURL("https://app.neyborhuud.com", {
+        margin: 1,
+        width: 256,
+        color: {
+          dark: "#1a1a1a",
+          light: "#ffffff",
+        },
+      })
+        .then((url) => setQrCodeDataUrl(url))
+        .catch((err) => console.error("Failed to generate QR Code", err));
 
       // If on PWA desktop mode and NOT inside the iframe, apply overflow lock to parent shell
       if (isApp && !inIframe) {
@@ -129,39 +143,15 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
           </p>
 
           <div className="qr-code-wrapper" style={{ display: "inline-flex", alignSelf: "flex-start", marginBottom: "1rem" }}>
-            <svg viewBox="0 0 100 100" style={{ width: "128px", height: "128px" }} fill="#1a1a1a">
-              <rect x="0" y="0" width="30" height="30" rx="4" fill="none" stroke="#1a1a1a" strokeWidth="6" />
-              <rect x="8" y="8" width="14" height="14" rx="2" />
-              <rect x="70" y="0" width="30" height="30" rx="4" fill="none" stroke="#1a1a1a" strokeWidth="6" />
-              <rect x="78" y="8" width="14" height="14" rx="2" />
-              <rect x="0" y="70" width="30" height="30" rx="4" fill="none" stroke="#1a1a1a" strokeWidth="6" />
-              <rect x="8" y="78" width="14" height="14" rx="2" />
-              
-              <rect x="40" y="0" width="6" height="6" rx="1" />
-              <rect x="50" y="6" width="12" height="6" rx="1" />
-              <rect x="40" y="18" width="18" height="6" rx="1" />
-              <rect x="50" y="28" width="6" height="12" rx="1" />
-              
-              <rect x="0" y="40" width="6" height="12" rx="1" />
-              <rect x="12" y="40" width="12" height="6" rx="1" />
-              <rect x="8" y="52" width="6" height="12" rx="1" />
-              
-              <rect x="70" y="40" width="12" height="6" rx="1" />
-              <rect x="88" y="40" width="12" height="12" rx="1" />
-              <rect x="70" y="52" width="6" height="6" rx="1" />
-              <rect x="82" y="58" width="6" height="12" rx="1" />
-
-              <rect x="40" y="40" width="18" height="18" rx="2" fill="none" stroke="#1a1a1a" strokeWidth="4" />
-              <rect x="46" y="46" width="6" height="6" rx="1" />
-
-              <rect x="40" y="70" width="6" height="12" rx="1" />
-              <rect x="50" y="78" width="12" height="6" rx="1" />
-              <rect x="40" y="88" width="18" height="6" rx="1" />
-
-              <rect x="70" y="70" width="12" height="6" rx="1" />
-              <rect x="88" y="70" width="6" height="12" rx="1" />
-              <rect x="76" y="82" width="18" height="6" rx="1" />
-            </svg>
+            {qrCodeDataUrl ? (
+              <img
+                src={qrCodeDataUrl}
+                alt="Scan to Install App"
+                style={{ width: "128px", height: "128px", display: "block", borderRadius: "10px" }}
+              />
+            ) : (
+              <div style={{ width: "128px", height: "128px", backgroundColor: "rgba(255, 255, 255, 0.05)", borderRadius: "10px" }} />
+            )}
           </div>
 
           <p style={{ fontSize: "10px", color: "#6b7280", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
