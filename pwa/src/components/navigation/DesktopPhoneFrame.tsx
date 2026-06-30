@@ -23,7 +23,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
       const inIframe = window.self !== window.top;
       setIsInIframe(inIframe);
 
-      // Sync path + query strings to iframe src on mount and pathname changes
+      // Set the initial iframe src ONLY once on mount to prevent reloading the iframe on clicks
       setIframeSrc(window.location.pathname + window.location.search);
 
       // If on PWA desktop mode and NOT inside the iframe, apply overflow lock to parent shell
@@ -46,7 +46,21 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
         };
       }
     }
-  }, [pathname]);
+  }, []); // Run only on mount
+
+  // Sync browser Back/Forward navigation back to the iframe
+  useEffect(() => {
+    if (typeof window === "undefined" || isInIframe) return;
+
+    const handlePopState = () => {
+      setIframeSrc(window.location.pathname + window.location.search);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [isInIframe]);
 
   if (!mounted) {
     return <>{children}</>;
