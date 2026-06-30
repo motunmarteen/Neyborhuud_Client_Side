@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
 import { useHuudDisplayName } from '@/hooks/useHuudDisplayName';
@@ -31,25 +30,13 @@ export function SidebarProfileLockup({
   onNavigate,
   variant = 'default',
 }: SidebarProfileLockupProps) {
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const handle = (
-    isClient 
-      ? (user?.username ?? getGuestUsername()) 
-      : 'neybor'
-  ).trim().toLowerCase();
-
-  const resolvedAvatar = resolveUserAvatarUrl(isClient ? user : null);
-  const personalName = isClient ? resolveProfilePersonalName(user, handle) : '';
-  const displayName = isClient 
-    ? (user ? resolveProfileDisplayName(user, handle) : getGuestDisplayName())
-    : 'Neybor';
-  const initial = isClient ? resolveProfileAvatarInitial(user, handle) : 'N';
+  const handle = (user?.username ?? getGuestUsername()).trim().toLowerCase();
+  const resolvedAvatar = resolveUserAvatarUrl(user);
+  const personalName = resolveProfilePersonalName(user, handle);
+  const displayName = user ? resolveProfileDisplayName(user, handle) : getGuestDisplayName();
+  const initial = resolveProfileAvatarInitial(user, handle);
   const isSky = variant === 'sky';
-  const huudName = useHuudDisplayName(isClient ? user : null);
+  const huudName = useHuudDisplayName(user);
   const hasLegalName = Boolean(personalName) && displayName.toLowerCase() !== handle;
 
   return (
@@ -70,6 +57,7 @@ export function SidebarProfileLockup({
             ? `View @${handle} profile`
             : `View @${handle} profile in ${huudName}`
       }
+      suppressHydrationWarning
     >
       <div className={isSky ? 'left-sidebar__sky-profile__avatar' : undefined}>
         <BrandPinAvatar
@@ -83,7 +71,7 @@ export function SidebarProfileLockup({
       </div>
       <div className={isSky ? 'left-sidebar__sky-profile__copy' : 'min-w-0 flex-1 text-left'}>
         {!isSky ? (
-          <p className="auth-signup-identity-card__eyebrow">{huudName}</p>
+          <p className="auth-signup-identity-card__eyebrow" suppressHydrationWarning>{huudName}</p>
         ) : null}
         <p
           className={
@@ -91,24 +79,26 @@ export function SidebarProfileLockup({
               ? 'left-sidebar__sky-profile__handle'
               : 'auth-signup-identity-card__handle !text-base truncate'
           }
+          suppressHydrationWarning
         >
           {displayName}
         </p>
         {hasLegalName ? (
-          <div className="flex items-center justify-center gap-1 mt-0.5">
+          <div className="flex items-center justify-center gap-1 mt-0.5" suppressHydrationWarning>
             <p
               className={
                 isSky
                   ? 'left-sidebar__sky-profile__handle !text-[11px] !font-semibold !opacity-75'
                   : 'text-[11px] font-semibold text-[var(--neu-text-muted)] truncate'
               }
+              suppressHydrationWarning
             >
               @{handle}
             </p>
             {isSky && <span className="material-symbols-outlined text-[10px] opacity-70" aria-hidden="true">chevron_right</span>}
           </div>
         ) : (
-          isSky && <span className="material-symbols-outlined text-[10px] opacity-70 mt-0.5" aria-hidden="true">chevron_right</span>
+          isSky && <span className="material-symbols-outlined text-[10px] opacity-70 mt-0.5" aria-hidden="true" suppressHydrationWarning>chevron_right</span>
         )}
       </div>
       {!isSky ? (
