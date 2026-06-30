@@ -7,6 +7,7 @@ import { hasCompletedProductTour } from '@/lib/onboarding';
 /** Routes where post-login prompts (check-in, push) must not appear. */
 export const ONBOARDING_EXCLUDED_ROUTES = [
   '/',
+  '/app-root',
   '/onboarding',
   '/welcome',
   '/login',

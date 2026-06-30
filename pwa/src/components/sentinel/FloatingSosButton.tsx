@@ -21,6 +21,7 @@ export function FloatingSosButton() {
 
   const hidePaths = [
     '/',
+    '/app-root',
     '/login',
     '/signup',
     '/forgot-password',
