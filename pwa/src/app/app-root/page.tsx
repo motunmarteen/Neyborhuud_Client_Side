@@ -43,6 +43,13 @@ export default function AppRootPage() {
         }
       }
 
+      // Check if running inside the desktop simulator iframe to prevent race conditions
+      const inIframe = typeof window !== "undefined" && window.self !== window.top;
+      if (inIframe) {
+        setCheckingAuth(false);
+        return;
+      }
+
       // 2. Check if they have visited the PWA before
       const hasVisited = localStorage.getItem("neyborhuud_has_visited");
       if (hasVisited === "true") {
