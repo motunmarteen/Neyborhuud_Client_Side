@@ -3,7 +3,7 @@
 import { Suspense, useMemo, useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Menu, X, Settings } from 'lucide-react';
+import { Menu, X, Settings, ChevronDown } from 'lucide-react';
 
 import { NeyborHuudLogo, AnimatedNeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { AppNavIcon } from '@/components/navigation/AppNavIcon';
@@ -157,23 +157,21 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
 
 
       {isOnFeed ? (
-        <div className="relative flex items-center min-w-0 pl-3 md:pl-4 gap-1" ref={dropdownContainerRef}>
-          <button
-            type="button"
-            onClick={() => setShowDropdown(!showDropdown)}
-            className={`flex h-10 w-10 items-center justify-center rounded-full cursor-pointer focus:outline-none select-none transition-colors -ml-2 ${skyOverlay ? 'hover:bg-white/10 text-white' : 'hover:bg-black/5 dark:hover:bg-white/10 text-brand-black dark:text-white'}`}
-            aria-expanded={showDropdown}
-            aria-haspopup="true"
-            aria-label="Toggle menu"
-          >
-            <div className="relative w-5 h-4 flex flex-col justify-between items-center">
-              <span className={`absolute left-0 w-5 h-[2px] bg-current rounded-full transition-all duration-300 origin-center ${showDropdown ? 'rotate-45 top-[7px]' : 'top-0'}`} />
-              <span className={`absolute left-0 w-5 h-[2px] bg-current rounded-full transition-all duration-300 ${showDropdown ? 'opacity-0 scale-0' : 'top-[7px]'}`} />
-              <span className={`absolute left-0 w-5 h-[2px] bg-current rounded-full transition-all duration-300 origin-center ${showDropdown ? '-rotate-45 top-[7px]' : 'top-[14px]'}`} />
+        <div className="relative flex items-center min-w-0 pl-3 md:pl-4 gap-1.5" ref={dropdownContainerRef}>
+          <div className="flex items-center gap-1">
+            <div className="flex-shrink-0 cursor-pointer select-none" onClick={() => router.push('/feed')}>
+              <AnimatedNeyborHuudLogo tone={skyOverlay ? 'light' : 'primary'} />
             </div>
-          </button>
-          <div className="flex-shrink-0 cursor-pointer select-none" onClick={() => router.push('/feed')}>
-            <AnimatedNeyborHuudLogo tone={skyOverlay ? 'light' : 'primary'} />
+            <button
+              type="button"
+              onClick={() => setShowDropdown(!showDropdown)}
+              className={`flex items-center justify-center cursor-pointer focus:outline-none select-none transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''} ${skyOverlay ? 'text-white/80 hover:text-white' : 'text-brand-black/60 dark:text-white/60 hover:text-brand-black dark:hover:text-white'}`}
+              aria-expanded={showDropdown}
+              aria-haspopup="true"
+              aria-label="Toggle menu"
+            >
+              <ChevronDown className="w-4 h-4 ml-0.5" />
+            </button>
           </div>
           
           {showDropdown && (
