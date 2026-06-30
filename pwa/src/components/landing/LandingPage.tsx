@@ -50,7 +50,7 @@ export function LandingPage() {
   } as const;
 
   if (!hasMounted) {
-    return <div style={{ minHeight: "100vh", background: "#E9F6E6" }} />;
+    return <div ref={containerRef} style={{ minHeight: "100vh", background: "#E9F6E6" }} />;
   }
 
   return (
