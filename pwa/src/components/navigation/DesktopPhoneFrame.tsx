@@ -1,10 +1,14 @@
 "use client";
 
 import React, { ReactNode, useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export default function DesktopPhoneFrame({ children }: { children: ReactNode }) {
   const [isAppDomain, setIsAppDomain] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isInIframe, setIsInIframe] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
@@ -16,8 +20,11 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
         hostname.startsWith("app.neyborhuud.local");
       setIsAppDomain(isApp);
 
-      // If on PWA desktop mode, apply class to html/body to prevent window scroll bars
-      if (isApp) {
+      const inIframe = window.self !== window.top;
+      setIsInIframe(inIframe);
+
+      // If on PWA desktop mode and NOT inside the iframe, apply overflow lock to parent shell
+      if (isApp && !inIframe) {
         const adjustScroll = () => {
           if (window.innerWidth >= 1024) {
             document.documentElement.style.overflow = "hidden";
@@ -42,23 +49,37 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
     return <>{children}</>;
   }
 
-  // On mobile/tablets, or if we are browsing the landing page marketing domain, render normally
-  if (!isAppDomain) {
+  // If inside the iframe (PWA app child), or NOT on the app subdomain, render normally
+  if (isInIframe || !isAppDomain) {
     return <>{children}</>;
   }
+
+  // Generate the current path to load inside the iframe
+  const searchStr = searchParams?.toString();
+  const iframeSrc = pathname + (searchStr ? `?${searchStr}` : "");
 
   return (
     <div className="app-simulator-layout">
       {/* 1. Dummy left column spacer */}
       <div />
 
-      {/* 2. Interactive Phone Mockup */}
+      {/* 2. Phone Mockup Bezel with same-origin iframe */}
       <div className="phone-mockup-wrapper">
         <div className="phone-mockup-device">
           <div className="phone-mockup-notch" />
           <div className="phone-mockup-speaker" />
-          <div className="phone-mockup-screen">
-            {children}
+          <div className="phone-mockup-screen" style={{ overflow: "hidden" }}>
+            <iframe
+              src={iframeSrc}
+              style={{
+                width: "100%",
+                height: "100%",
+                border: "none",
+                borderRadius: "34px",
+                overflow: "hidden"
+              }}
+              title="NeyborHuud App Simulator"
+            />
           </div>
         </div>
       </div>
@@ -93,19 +114,14 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
           </p>
 
           <div className="qr-code-wrapper" style={{ display: "inline-flex", alignSelf: "flex-start", marginBottom: "1rem" }}>
-            {/* Centered Premium SVG QR Code pointing to https://neyborhuud.com */}
             <svg viewBox="0 0 100 100" style={{ width: "128px", height: "128px" }} fill="#1a1a1a">
-              {/* Corner 1 */}
               <rect x="0" y="0" width="30" height="30" rx="4" fill="none" stroke="#1a1a1a" strokeWidth="6" />
               <rect x="8" y="8" width="14" height="14" rx="2" />
-              {/* Corner 2 */}
               <rect x="70" y="0" width="30" height="30" rx="4" fill="none" stroke="#1a1a1a" strokeWidth="6" />
               <rect x="78" y="8" width="14" height="14" rx="2" />
-              {/* Corner 3 */}
               <rect x="0" y="70" width="30" height="30" rx="4" fill="none" stroke="#1a1a1a" strokeWidth="6" />
               <rect x="8" y="78" width="14" height="14" rx="2" />
               
-              {/* QR Code Matrix Elements */}
               <rect x="40" y="0" width="6" height="6" rx="1" />
               <rect x="50" y="6" width="12" height="6" rx="1" />
               <rect x="40" y="18" width="18" height="6" rx="1" />

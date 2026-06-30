@@ -6,6 +6,7 @@ import "./simulator.css";
 import { Providers } from "@/components/providers";
 import { AppViewport } from "@/components/AppViewport";
 import DesktopPhoneFrame from "@/components/navigation/DesktopPhoneFrame";
+import IframeUrlSync from "@/components/navigation/IframeUrlSync";
 import DailyCheckInModal from "@/components/gamification/DailyCheckInModalLoader";
 import TextSizeApplier from "@/components/TextSizeApplier";
 import { ThemeSync } from "@/components/theme/ThemeSync";
@@ -131,6 +132,7 @@ export default function RootLayout({
             className="sr-only"
           />
           <TextSizeApplier />
+          <IframeUrlSync />
           <DailyCheckInModal />
           <DesktopPhoneFrame>
             <div id="main-content" className="app-shell">
