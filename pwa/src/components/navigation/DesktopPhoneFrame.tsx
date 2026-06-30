@@ -28,7 +28,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
       // Set the initial iframe src ONLY once on mount to prevent reloading the iframe on clicks
       setIframeSrc(window.location.pathname + window.location.search);
 
-      // Generate a fully functioning, scannable QR Code that redirects to app.neyborhuud.com
+      // Generate a fully functioning, scannable QR Code that redirects to neyborhuud.com
       QRCode.toDataURL("https://app.neyborhuud.com", {
         margin: 1,
         width: 256,
