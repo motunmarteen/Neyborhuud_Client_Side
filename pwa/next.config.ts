@@ -4,6 +4,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+// The pnpm monorepo root is one level up from pwa/. Dependencies are hoisted
+// into the root .pnpm store and only symlinked into pwa/node_modules, so the
+// standalone output tracer MUST be rooted here — otherwise it can't follow the
+// symlinks up to the store and Vercel ships a server bundle missing runtime
+// modules, causing "Cannot find module" 500s on dynamic SSR routes.
+const monorepoRoot = path.join(projectRoot, "..");
 
 /**
  * Capacitor build mode.
@@ -73,7 +79,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
-  outputFileTracingRoot: projectRoot,
+  outputFileTracingRoot: monorepoRoot,
   // Native build => static export; web build => standalone Node server.
   output: IS_CAP ? "export" : "standalone",
 };
