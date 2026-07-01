@@ -99,9 +99,7 @@ function LoginPageContent() {
             <AuthFlowPage
                 ariaLabel="Enter your Huud"
                 stageKey="login"
-                stepLabel="Enter your Huud"
-                backHref="/"
-                backLabel="Back to home"
+                showChrome={false}
                 keyboardAware
                 hero={
                     <AuthFlowHero

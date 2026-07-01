@@ -48,6 +48,9 @@ type AuthFlowPageProps = {
     landingBackdrop?: boolean;
     /** Map centre when `landingBackdrop` is false (e.g. street picked on signup). */
     mapLocation?: SignupMapLocation | null;
+    /** Show the top chrome (wordmark + back arrow + step label). Default true.
+     *  Set false on top-level entry screens (e.g. login) that want a clean top. */
+    showChrome?: boolean;
 };
 
 /**
@@ -70,6 +73,7 @@ export function AuthFlowPage({
     keyboardAware = false,
     landingBackdrop = true,
     mapLocation = null,
+    showChrome = true,
 }: AuthFlowPageProps) {
     const chromeRef = useRef<HTMLDivElement>(null);
     const [sheetCollapsed, setSheetCollapsed] = useState(false);
@@ -122,6 +126,7 @@ export function AuthFlowPage({
                 )}
             </div>
 
+            {showChrome ? (
             <div ref={chromeRef} className="auth-signup-chrome">
                 <div className={`auth-signup-top${hasBack ? ' auth-flow-chrome' : ''}`}>
                     {onBackClick ? (
@@ -169,6 +174,7 @@ export function AuthFlowPage({
                     )}
                 </div>
             </div>
+            ) : null}
 
             <div className="auth-signup-map-spacer" aria-hidden />
 
