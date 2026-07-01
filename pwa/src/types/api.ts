@@ -553,6 +553,27 @@ export interface ChatMessageMeta {
   offerAmount?: number;
   counterAmount?: number | null;
   offerId?: string;
+  // ── Social Witness Escrow milestones (posted by the Escrow Bot) ──
+  /** Marks this system message as an Escrow Bot event. */
+  escrowBot?: boolean;
+  /** The deal milestone this message represents. */
+  escrowEvent?:
+    | "committed"
+    | "buyer_paid"
+    | "completed"
+    | "disputed"
+    | "cancelled";
+  /** Order id this deal belongs to (used to drive the action buttons). */
+  orderId?: string;
+  transactionId?: string;
+  escrowId?: string;
+  amount?: number;
+  buyerId?: string;
+  sellerId?: string;
+  /** Buyer's uploaded proof-of-payment image, when present. */
+  proofUrl?: string | null;
+  /** Coins awarded on completion. */
+  reward?: number;
   [key: string]: unknown;
 }
 

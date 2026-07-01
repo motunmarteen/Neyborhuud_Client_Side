@@ -575,4 +575,13 @@ export const marketplaceService = {
       `/marketplace/orders/${orderId}/confirm-receipt`,
     );
   },
+
+  /**
+   * Open a dispute on a deal — routes to a community referee (Neybor Baale).
+   * POST /api/v1/marketplace/dispute/:transactionId
+   * The transactionId is the orderId for marketplace deals.
+   */
+  async disputeOrder(orderId: string, reason: string) {
+    return await apiClient.post(`/marketplace/dispute/${orderId}`, { reason });
+  },
 };
