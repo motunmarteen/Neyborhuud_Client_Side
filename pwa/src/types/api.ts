@@ -562,7 +562,8 @@ export interface ChatMessageMeta {
     | "buyer_paid"
     | "completed"
     | "disputed"
-    | "cancelled";
+    | "cancelled"
+    | "vouch_prompt";
   /** Order id this deal belongs to (used to drive the action buttons). */
   orderId?: string;
   transactionId?: string;

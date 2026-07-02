@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import type { ChatMessage } from '@/types/api';
 import { marketplaceService } from '@/services/marketplace.service';
 import { chatService } from '@/services/chat.service';
+import { trustService } from '@/services/trust.service';
 
 type EscrowEvent = NonNullable<NonNullable<ChatMessage['meta']>['escrowEvent']>;
 
@@ -32,6 +33,7 @@ const EVENT_STYLE: Record<
   completed: { icon: '✅', label: 'Deal Completed', bg: 'bg-emerald-50', text: 'text-emerald-700' },
   disputed: { icon: '⚠️', label: 'Under Review', bg: 'bg-red-50', text: 'text-red-700' },
   cancelled: { icon: '↩️', label: 'Deal Cancelled', bg: 'bg-gray-100', text: 'text-gray-600' },
+  vouch_prompt: { icon: '🤝', label: 'Vouch for Seller', bg: 'bg-emerald-50', text: 'text-emerald-700' },
 };
 
 export function EscrowCard({
@@ -50,7 +52,7 @@ export function EscrowCard({
   const isBuyer = !!currentUserId && currentUserId === buyerId;
   const isSeller = !!currentUserId && currentUserId === sellerId;
 
-  const [busy, setBusy] = useState<null | 'pay' | 'confirm' | 'dispute'>(null);
+  const [busy, setBusy] = useState<null | 'pay' | 'confirm' | 'dispute' | 'vouch'>(null);
   const [done, setDone] = useState(false);
   const proofInputRef = useRef<HTMLInputElement>(null);
 
@@ -142,6 +144,25 @@ export function EscrowCard({
     void run('dispute', () => marketplaceService.disputeOrder(orderId, reason), 'Dispute opened — a Neybor Baale will review it.');
   };
 
+  // Buyer vouches for the seller after a completed deal. The vouch API enforces
+  // the hyperlocal 500m rule + eligibility, surfacing a clear error if not met.
+  const onVouch = async () => {
+    if (!sellerId || busy) return;
+    setBusy('vouch');
+    try {
+      await trustService.vouchForUser(sellerId);
+      toast.success('Vouched! You helped a trusted neighbour grow. 🤝');
+      setDone(true);
+    } catch (e) {
+      toast.error(
+        (e as { message?: string })?.message ||
+          'Could not vouch right now. You may need to be within 500m of the seller.',
+      );
+    } finally {
+      setBusy(null);
+    }
+  };
+
   // Which action (if any) does THIS viewer get at THIS milestone?
   const showPay = event === 'committed' && isBuyer && !done;
   const showConfirm = event === 'buyer_paid' && isSeller && !done;
@@ -150,8 +171,10 @@ export function EscrowCard({
     (event === 'committed' || event === 'buyer_paid') &&
     (isBuyer || isSeller) &&
     !done;
+  // Vouch prompt: only the buyer, only on the vouch_prompt milestone.
+  const showVouch = event === 'vouch_prompt' && isBuyer && !done;
 
-  const hasActions = showPay || showConfirm || showDispute;
+  const hasActions = showPay || showConfirm || showDispute || showVouch;
 
   return (
     <div className={`overflow-hidden rounded-2xl ${style.bg} max-w-[300px] sm:max-w-sm`}>
@@ -230,6 +253,16 @@ export function EscrowCard({
                 className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-4 py-2 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-60"
               >
                 {busy === 'dispute' ? 'Opening…' : 'Dispute'}
+              </button>
+            )}
+            {showVouch && (
+              <button
+                type="button"
+                onClick={onVouch}
+                disabled={busy !== null}
+                className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+              >
+                {busy === 'vouch' ? 'Vouching…' : '🤝 Vouch for seller'}
               </button>
             )}
           </div>
