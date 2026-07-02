@@ -31,19 +31,34 @@ export function AppViewport() {
         syncHeight();
         syncStandalone();
 
-        // Drop stale SW + reload once when brand UI changes (fixes installed PWA showing old CTAs).
+        // Drop stale SW + caches + reload once when brand UI changes (fixes
+        // installed PWA showing old CTAs / running old bundle).
         if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
             const prev = localStorage.getItem(BRAND_UI_VERSION_KEY);
             const next = String(BRAND_UI_VERSION);
             if (prev !== next) {
                 localStorage.setItem(BRAND_UI_VERSION_KEY, next);
-                void navigator.serviceWorker.getRegistrations().then((regs) => {
-                    const hadSw = regs.length > 0;
-                    regs.forEach((reg) => void reg.unregister());
+                // IMPORTANT: unregistering the SW alone is NOT enough — the old
+                // JS chunks live in Cache Storage and would still be served on
+                // the very next load. Delete ALL caches too, THEN reload, so the
+                // device fetches the fresh bundle from the network.
+                void (async () => {
+                    const hadSw = (await navigator.serviceWorker.getRegistrations()).length > 0;
+                    try {
+                        const regs = await navigator.serviceWorker.getRegistrations();
+                        await Promise.all(regs.map((r) => r.unregister()));
+                    } catch { /* best-effort */ }
+                    try {
+                        if ('caches' in window) {
+                            const keys = await caches.keys();
+                            await Promise.all(keys.map((k) => caches.delete(k)));
+                        }
+                    } catch { /* best-effort */ }
                     if (prev != null || hadSw) {
+                        // reload(true)-style: bypass bfcache with a fresh navigation.
                         window.location.reload();
                     }
-                });
+                })();
             } else if (process.env.NODE_ENV === 'development') {
                 void navigator.serviceWorker.getRegistrations().then((regs) => {
                     regs.forEach((reg) => void reg.unregister());
