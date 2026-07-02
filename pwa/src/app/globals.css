@@ -5437,8 +5437,13 @@ button.left-sidebar__link:focus-visible {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
     radial-gradient(circle at 50% 0%, rgba(0, 135, 81, 0.11), transparent 38%);
-  backdrop-filter: blur(18px) saturate(150%);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  /*
+   * NOTE: backdrop-filter blur was REMOVED here. This wash covers the whole
+   * panel (inset: 0), and on Android WebViews / older Safari a backdrop blur on
+   * a full-cover overlay composites incorrectly — it blurred the FORM itself,
+   * making inputs unreadable on some phones while fine on others. The panel
+   * already has a solid background, so the blur added risk with no benefit.
+   */
 }
 
 .dark .feed-comments-panel-wash,
