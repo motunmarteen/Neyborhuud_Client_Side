@@ -38,6 +38,24 @@ export function useProduct(productId: string | null) {
 }
 
 /**
+ * Hook for a seller's public trust status (tier + vouch progress) — powers the
+ * "New Seller / Vouched Seller" badge on listings. Cached longer since a
+ * seller's tier changes slowly.
+ */
+export function useSellerStatus(sellerId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["marketplace", "seller-status", sellerId],
+    queryFn: async () => {
+      if (!sellerId) return null;
+      const res = await marketplaceService.getSellerStatus(sellerId);
+      return (res as any)?.data ?? res ?? null;
+    },
+    enabled: !!sellerId,
+    staleTime: 5 * 60 * 1000, // 5 min
+  });
+}
+
+/**
  * Hook for fetching marketplace products list
  */
 export function useMarketplaceProducts(filter?: {

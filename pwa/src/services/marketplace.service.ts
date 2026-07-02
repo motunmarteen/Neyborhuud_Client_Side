@@ -485,6 +485,23 @@ export const marketplaceService = {
   },
 
   /**
+   * Public seller trust status — tier + vouch count/progress for badges.
+   * GET /api/v1/marketplace/seller/:sellerId/status
+   */
+  async getSellerStatus(sellerId: string) {
+    return await apiClient.get<{
+      sellerId: string;
+      tier: "new" | "vouched";
+      badge: "New Seller" | "Vouched Seller";
+      vouchCount: number;
+      vouchesNeeded: number;
+      maxItemValue: number | null;
+      maxActiveListings: number | null;
+      activeListings: number;
+    }>(`/marketplace/seller/${sellerId}/status`);
+  },
+
+  /**
    * Get all offers on a specific product (seller view)
    * GET /api/v1/marketplace/products/:productId/offers
    */

@@ -11,6 +11,7 @@ import { formatDistance, haversineDistance } from "@/utils/distance";
 import { ProductEngagement } from "./ProductEngagement";
 import { ProductComments } from "./ProductComments";
 import { BuyerIntentActions } from "./BuyerIntentActions";
+import { SellerBadge } from "./SellerBadge";
 
 interface ProductDetailsProps {
   productId: string;
@@ -229,8 +230,17 @@ export function ProductDetails({
                         `${product.seller.firstName || ""} ${product.seller.lastName || ""}`.trim() ||
                         "Seller"}
                     </p>
+                    <SellerBadge
+                      sellerId={
+                        (product.seller as any)?.id ??
+                        (product.seller as any)?._id ??
+                        (typeof product.sellerId === "string" ? product.sellerId : undefined)
+                      }
+                      showProgress
+                      className="mt-1"
+                    />
                     {product.seller.location && (
-                      <p className="text-sm text-[var(--neu-text-muted)]">
+                      <p className="mt-1 text-sm text-[var(--neu-text-muted)]">
                         {(product.seller.location as any).city ||
                           (product.seller.location as any).state ||
                           "Location"}

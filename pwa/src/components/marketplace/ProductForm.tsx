@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useProductMutations } from "@/hooks/useMarketplace";
 import { Product } from "@/services/marketplace.service";
 import { useRegisteredLocation } from "@/hooks/useRegisteredLocation";
+import { useAuth } from "@/hooks/useAuth";
+import { SellerBadge } from "./SellerBadge";
 import { glassField, glassFieldError, glassLabel } from "@/lib/glass-form-styles";
 import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
 
@@ -46,6 +48,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     isLoading: locationLoading,
     areaLabel,
   } = useRegisteredLocation();
+  const { user } = useAuth();
+  const myId = (user as any)?.id ?? (user as any)?._id;
 
   const [title, setTitle] = useState(product?.title || "");
   const [description, setDescription] = useState(product?.description || "");
@@ -186,6 +190,15 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {!isEditing && myId && (
+        <div className="rounded-2xl border border-black/[0.06] bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.03]">
+          <p className="mb-1.5 text-xs font-semibold text-brand-green-dark/70 dark:text-white/60">
+            Your seller status
+          </p>
+          <SellerBadge sellerId={myId} showProgress />
+        </div>
+      )}
+
       {/* Title */}
       <div>
         <label className={glassLabel}>
