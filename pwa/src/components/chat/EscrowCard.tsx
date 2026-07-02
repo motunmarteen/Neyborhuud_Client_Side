@@ -241,6 +241,14 @@ export function EscrowCard({
             >
               Copy account number
             </button>
+            <div className="mt-2 rounded-lg bg-amber-50 border border-amber-100 p-2">
+              <p className="text-[11px] font-semibold text-amber-800 leading-snug">
+                ⚠️ Transfer only to this account, and confirm the account name
+                matches before sending. NeyborHuud never holds your money and
+                cannot recover a payment sent elsewhere. Only tap “I’ve Paid”
+                after the transfer succeeds.
+              </p>
+            </div>
           </div>
         )}
         {buyerNeedsAccount && payout === 'none' && (

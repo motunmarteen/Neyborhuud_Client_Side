@@ -780,7 +780,7 @@ export function useCreateOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { productId: string; offerId?: string }) =>
+    mutationFn: (data: { productId: string; offerId?: string; buyNow?: boolean }) =>
       marketplaceService.createOrder(data),
     onSuccess: () => {
       queryClient.invalidateQueries({

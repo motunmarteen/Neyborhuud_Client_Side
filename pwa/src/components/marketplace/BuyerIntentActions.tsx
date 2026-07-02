@@ -270,25 +270,30 @@ export function BuyerIntentActions({
     );
   }
 
-  const handleRequestToBuy = async () => {
-    if (!product.negotiable) {
-      // Fixed-price product - create order directly
-      try {
-        const response = await createOrder.mutateAsync({ productId: product.id });
-        const order = (response as any)?.data?.order || (response as any)?.order;
-        
-        if (order?.conversationId) {
-          // Redirect to chat
-          router.push(`/chat/${order.conversationId}`);
-        }
-      } catch (error) {
-        // Error toast shown by hook
-      }
-    } else {
-      // Negotiable product - show offer dialog
-      setShowOfferDialog(true);
+  // Buy at the listed price directly — starts the deal + escrow immediately.
+  // Works for negotiable products too (buyer chooses not to haggle).
+  const handleBuyNow = async () => {
+    try {
+      const response = await createOrder.mutateAsync({
+        productId: product.id,
+        buyNow: true,
+      });
+      const order = (response as any)?.data?.order || (response as any)?.order;
+      const convId =
+        order?.conversationId ??
+        (response as any)?.data?.conversationId ??
+        (response as any)?.conversationId;
+      if (convId) router.push(`/chat/${convId}`);
+    } catch {
+      // Error toast shown by hook
     }
   };
+
+  // Open the haggle dialog (negotiable products only).
+  const handleOffer = () => setShowOfferDialog(true);
+
+  // Back-compat alias used by the full (non-compact) layout below.
+  const handleRequestToBuy = product.negotiable ? handleOffer : handleBuyNow;
 
   const handleMakeOffer = async () => {
     const amount = parseFloat(offerAmount);
@@ -333,29 +338,46 @@ export function BuyerIntentActions({
 
   if (layout === "compact") {
     const busy = createOrder.isPending || makeOffer.isPending;
-    const offerLabel = product.negotiable ? "Offer" : "Buy";
     return (
       <Fragment>
-        <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row" onClick={(e) => e.stopPropagation()}>
+        <div className="flex w-full min-w-0 items-stretch gap-2" onClick={(e) => e.stopPropagation()}>
+          {/* BUY — primary, always present (buy at asking price directly). */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              void handleRequestToBuy();
+              void handleBuyNow();
             }}
             disabled={busy}
-            className="relative flex min-h-[44px] w-full min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full border border-primary/35 bg-gradient-to-r from-primary/18 to-[#006F35]/14 px-2.5 py-2.5 text-xs font-bold tracking-tight text-[#006F35] shadow-[0_4px_18px_rgba(0,212,49,0.18)] backdrop-blur-xl transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px] sm:px-3 dark:border-primary/25 dark:from-emerald-500/25 dark:to-teal-500/20 dark:text-emerald-100 dark:shadow-[0_0_28px_rgba(0,212,49,0.18)]"
+            className="relative flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full bg-gradient-to-r from-primary to-[#006F35] px-3 py-2.5 text-xs font-bold tracking-tight text-white shadow-[0_4px_18px_rgba(0,212,49,0.28)] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px]"
           >
-            {createOrder.isPending || makeOffer.isPending ? (
+            {createOrder.isPending ? (
               <span className="material-symbols-outlined animate-spin shrink-0 text-[18px]">progress_activity</span>
             ) : (
-              <span className="material-symbols-outlined shrink-0 text-[16px]" style={{ fontVariationSettings: '"FILL" 0' }}>
-                payments
+              <span className="material-symbols-outlined shrink-0 text-[16px]" style={{ fontVariationSettings: '"FILL" 1' }}>
+                shopping_bag
               </span>
             )}
-            <span className="truncate">{busy ? "…" : offerLabel}</span>
+            <span className="truncate">{createOrder.isPending ? "…" : "Buy now"}</span>
           </button>
 
+          {/* OFFER — secondary, only for negotiable products. */}
+          {product.negotiable && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOffer();
+              }}
+              disabled={busy}
+              className="flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-primary/35 bg-primary/[0.08] px-3 py-2.5 text-xs font-bold tracking-tight text-[#006F35] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px] dark:border-primary/25 dark:bg-emerald-500/15 dark:text-emerald-100"
+            >
+              <span className="material-symbols-outlined shrink-0 text-[16px]">sell</span>
+              <span className="truncate">Offer</span>
+            </button>
+          )}
+
+          {/* CHAT — small icon-only button. */}
           <button
             type="button"
             onClick={(e) => {
@@ -363,10 +385,12 @@ export function BuyerIntentActions({
               void handleContactSeller();
             }}
             disabled={contactingSeller}
-            className="flex min-h-[44px] w-full min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-[var(--border-light)] bg-white/85 px-2.5 py-2.5 text-xs font-bold text-brand-black shadow-[0_2px_12px_rgba(0,111,53,0.06)] backdrop-blur-xl transition-transform active:scale-[0.98] disabled:opacity-50 sm:min-h-[40px] sm:px-3 dark:border-white/15 dark:bg-white/[0.08] dark:text-white/95 dark:shadow-inner"
+            aria-label="Chat with seller"
+            className="flex min-h-[44px] w-11 shrink-0 items-center justify-center rounded-full border border-[var(--border-light)] bg-white/85 text-brand-black shadow-[0_2px_12px_rgba(0,111,53,0.06)] transition-transform active:scale-[0.98] disabled:opacity-50 sm:min-h-[40px] dark:border-white/15 dark:bg-white/[0.08] dark:text-white/95"
           >
-            <span className="material-symbols-outlined shrink-0 text-[16px]">chat</span>
-            <span className="truncate">{contactingSeller ? "…" : "Chat"}</span>
+            <span className="material-symbols-outlined text-[18px]">
+              {contactingSeller ? "progress_activity" : "chat"}
+            </span>
           </button>
         </div>
 
@@ -389,53 +413,49 @@ export function BuyerIntentActions({
 
   return (
     <div className="mt-6 space-y-3">
-      {/* Main Action Button */}
-      <button
-        type="button"
-        onClick={() => void handleRequestToBuy()}
-        disabled={createOrder.isPending || makeOffer.isPending}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-4 font-semibold text-white transition-colors hover:bg-brand-green-dark disabled:bg-brand-surface"
-      >
-        {createOrder.isPending ? (
-          <>
+      {/* Primary actions: Buy now (always) + Offer (negotiable) + Chat icon */}
+      <div className="flex items-stretch gap-2">
+        <button
+          type="button"
+          onClick={() => void handleBuyNow()}
+          disabled={createOrder.isPending || makeOffer.isPending}
+          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary py-4 font-semibold text-white transition-colors hover:bg-brand-green-dark disabled:bg-brand-surface"
+        >
+          {createOrder.isPending ? (
             <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
-            Processing...
-          </>
-        ) : (
-          <>
-            {product.negotiable ? (
-              <>
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Make Offer
-              </>
-            ) : (
-              <>
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Request to Buy
-              </>
-            )}
-          </>
-        )}
-      </button>
+          ) : (
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: '"FILL" 1' }}>shopping_bag</span>
+          )}
+          {createOrder.isPending ? "Processing…" : "Buy now"}
+        </button>
 
-      <button
-        type="button"
-        onClick={() => void handleContactSeller()}
-        disabled={contactingSeller}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-        {contactingSeller ? "Opening chat..." : "Contact Seller"}
-      </button>
+        {product.negotiable && (
+          <button
+            type="button"
+            onClick={() => handleOffer()}
+            disabled={createOrder.isPending || makeOffer.isPending}
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/[0.08] py-4 font-semibold text-[#006F35] transition-colors hover:bg-primary/[0.14] disabled:opacity-50 dark:border-primary/25 dark:bg-emerald-500/15 dark:text-emerald-100"
+          >
+            <span className="material-symbols-outlined text-[20px]">sell</span>
+            Make offer
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => void handleContactSeller()}
+          disabled={contactingSeller}
+          aria-label="Chat with seller"
+          className="flex w-14 shrink-0 items-center justify-center rounded-lg border border-[var(--border-light)] bg-white text-brand-black transition-colors hover:bg-brand-surface disabled:opacity-60 dark:border-white/15 dark:bg-white/[0.08] dark:text-white"
+        >
+          <span className="material-symbols-outlined text-[22px]">
+            {contactingSeller ? "progress_activity" : "chat"}
+          </span>
+        </button>
+      </div>
 
       <div className="flex gap-2">
         <button

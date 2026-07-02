@@ -709,12 +709,23 @@ export default function ConversationPage() {
       );
     };
 
+    // A deal just started (offer accepted → order + escrow created). The Escrow
+    // Bot posts the 🤝 Deal Started card AFTER the offer:updated event, so reload
+    // once more here to surface it (and the seller's payment details) live.
+    const onDeal = (payload: any) => {
+      if (payload?.conversationId && payload.conversationId !== conversationId) return;
+      loadMessages();
+    };
+
     socketService.on('message:new', onNew);
     socketService.on('message:priority', onPriority);
     socketService.on('message:delivered', onDelivered);
     socketService.on('message:read', onRead);
     socketService.on('offer:updated', onOfferUpdated);
     socketService.on('offer:new', onOfferNew);
+    socketService.on('order:new', onDeal);
+    socketService.on('order:payment', onDeal);
+    socketService.on('order:confirmed', onDeal);
 
     return () => {
       socketService.off('message:new', onNew);
@@ -723,6 +734,9 @@ export default function ConversationPage() {
       socketService.off('message:read', onRead);
       socketService.off('offer:updated', onOfferUpdated);
       socketService.off('offer:new', onOfferNew);
+      socketService.off('order:new', onDeal);
+      socketService.off('order:payment', onDeal);
+      socketService.off('order:confirmed', onDeal);
     };
   }, [conversationId, viewerRole, queryClient, user?.id, loadMessages, enrichOutgoing]);
 

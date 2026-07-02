@@ -547,7 +547,12 @@ export const marketplaceService = {
    * Create an order (request to buy)
    * POST /api/v1/marketplace/orders
    */
-  async createOrder(data: { productId: string; offerId?: string }) {
+  async createOrder(data: {
+    productId: string;
+    offerId?: string;
+    /** Buy at the listed price directly (skip haggling, even if negotiable). */
+    buyNow?: boolean;
+  }) {
     return await apiClient.post("/marketplace/orders", data);
   },
 
