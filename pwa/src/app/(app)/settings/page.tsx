@@ -1259,6 +1259,20 @@ export default function SettingsPage() {
                                 </div>
                                 <span className="material-symbols-outlined text-charcoal/20" aria-hidden="true">chevron_right</span>
                             </Link>
+
+                            <Link
+                                href="/settings/payout"
+                                className="flex items-center justify-between py-4 group border-t border-charcoal/5"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-charcoal/40 group-hover:text-brand-blue transition-colors" aria-hidden="true">account_balance</span>
+                                    <div>
+                                        <span className="text-sm font-bold text-charcoal block">Payment details</span>
+                                        <span className="text-[10px] text-charcoal/40">Bank account buyers pay into when you sell</span>
+                                    </div>
+                                </div>
+                                <span className="material-symbols-outlined text-charcoal/20" aria-hidden="true">chevron_right</span>
+                            </Link>
                         </div>
 
                         {/* User Info */}

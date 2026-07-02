@@ -485,6 +485,33 @@ export const marketplaceService = {
   },
 
   /**
+   * Seller saves their payout (bank/account) details.
+   * PUT /api/v1/marketplace/payout-details
+   */
+  async savePayoutDetails(details: {
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+  }) {
+    return await apiClient.put(`/marketplace/payout-details`, details);
+  },
+
+  /**
+   * Buyer/seller on an order reads the seller's payout details for that deal.
+   * GET /api/v1/marketplace/orders/:orderId/payout-details
+   */
+  async getOrderPayoutDetails(orderId: string) {
+    return await apiClient.get<{
+      hasPayoutDetails: boolean;
+      payoutDetails: {
+        bankName: string;
+        accountNumber: string;
+        accountName: string;
+      } | null;
+    }>(`/marketplace/orders/${orderId}/payout-details`);
+  },
+
+  /**
    * Public seller trust status — tier + vouch count/progress for badges.
    * GET /api/v1/marketplace/seller/:sellerId/status
    */

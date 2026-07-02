@@ -15,7 +15,7 @@
  * posts the next milestone message into the chat.
  */
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { ChatMessage } from '@/types/api';
 import { marketplaceService } from '@/services/marketplace.service';
@@ -55,6 +55,33 @@ export function EscrowCard({
   const [busy, setBusy] = useState<null | 'pay' | 'confirm' | 'dispute' | 'vouch'>(null);
   const [done, setDone] = useState(false);
   const proofInputRef = useRef<HTMLInputElement>(null);
+
+  // Buyer needs the seller's account to pay directly. Fetch it once the deal is
+  // live and the viewer is the buyer.
+  const [payout, setPayout] = useState<
+    { bankName: string; accountNumber: string; accountName: string } | null | 'none'
+  >(null);
+  const eventForPayout = meta.escrowEvent ?? 'committed';
+  const buyerNeedsAccount =
+    isBuyer && (eventForPayout === 'committed' || eventForPayout === 'buyer_paid');
+
+  useEffect(() => {
+    if (!buyerNeedsAccount || !orderId || payout !== null) return;
+    let cancelled = false;
+    marketplaceService
+      .getOrderPayoutDetails(orderId)
+      .then((res) => {
+        if (cancelled) return;
+        const data = (res as any)?.data ?? res;
+        setPayout(data?.hasPayoutDetails ? data.payoutDetails : 'none');
+      })
+      .catch(() => {
+        if (!cancelled) setPayout('none');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [buyerNeedsAccount, orderId, payout]);
 
   const style = EVENT_STYLE[event] ?? EVENT_STYLE.committed;
 
@@ -191,6 +218,34 @@ export function EscrowCard({
         {typeof meta.amount === 'number' && (
           <p className={`mt-1 text-xs font-bold ${style.text}`}>
             ₦{meta.amount.toLocaleString()}
+          </p>
+        )}
+
+        {/* Seller's account for the buyer to pay directly (buyer view only). */}
+        {buyerNeedsAccount && payout && payout !== 'none' && (
+          <div className="mt-2 rounded-xl border border-black/[0.06] bg-white/70 p-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+              Pay the seller directly
+            </p>
+            <p className="mt-0.5 text-sm font-bold text-gray-900">
+              {payout.bankName} · {payout.accountNumber}
+            </p>
+            <p className="text-xs text-gray-600">{payout.accountName}</p>
+            <button
+              type="button"
+              onClick={() => {
+                void navigator.clipboard?.writeText(payout.accountNumber);
+                toast.success('Account number copied');
+              }}
+              className="mt-1 text-[11px] font-semibold text-blue-600 hover:underline"
+            >
+              Copy account number
+            </button>
+          </div>
+        )}
+        {buyerNeedsAccount && payout === 'none' && (
+          <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-2.5 text-xs font-medium text-amber-700">
+            The seller hasn't added payment details yet. Ask them to set it in Settings before you pay.
           </p>
         )}
 
