@@ -3,10 +3,11 @@
  * Form for creating and editing marketplace products
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { useProductMutations } from "@/hooks/useMarketplace";
 import { Product } from "@/services/marketplace.service";
-import { useGeolocation } from "@/hooks/useGeolocation";
+import { useRegisteredLocation } from "@/hooks/useRegisteredLocation";
 import { glassField, glassFieldError, glassLabel } from "@/lib/glass-form-styles";
 import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
 
@@ -39,20 +40,12 @@ const CONDITIONS = [
 export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
   const isEditing = !!product;
   const { createProduct, updateProduct } = useProductMutations();
+  // Reuse the location the user declared at sign-up — no live GPS prompt.
   const {
-    location: userLocation,
+    location: registeredLocation,
     isLoading: locationLoading,
-    error: locationError,
-    getCurrentLocation,
-  } = useGeolocation();
-
-  // Auto-request the user's location on mount (required to create a listing).
-  useEffect(() => {
-    if (!isEditing && !userLocation && !locationLoading) {
-      getCurrentLocation();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    areaLabel,
+  } = useRegisteredLocation();
 
   const [title, setTitle] = useState(product?.title || "");
   const [description, setDescription] = useState(product?.description || "");
@@ -128,17 +121,16 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       !(existingLoc.latitude === 0 && existingLoc.longitude === 0);
 
     const hasValidUserLoc =
-      !!userLocation &&
-      typeof userLocation.latitude === "number" &&
-      typeof userLocation.longitude === "number" &&
-      !(userLocation.latitude === 0 && userLocation.longitude === 0);
+      !!registeredLocation &&
+      typeof registeredLocation.latitude === "number" &&
+      typeof registeredLocation.longitude === "number" &&
+      !(registeredLocation.latitude === 0 && registeredLocation.longitude === 0);
 
     if (!hasValidExistingLoc && !hasValidUserLoc) {
       setErrors((prev) => ({
         ...prev,
         location:
-          locationError ||
-          "Location is required. Please allow location access and try again.",
+          "We couldn't find your registered location. Please set your home location in Settings, then try again.",
       }));
       return;
     }
@@ -146,9 +138,13 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     const location = hasValidExistingLoc
       ? existingLoc!
       : {
-          latitude: userLocation!.latitude,
-          longitude: userLocation!.longitude,
-          address: (userLocation as any)!.formattedAddress || (userLocation as any)!.address,
+          latitude: registeredLocation!.latitude,
+          longitude: registeredLocation!.longitude,
+          state: registeredLocation!.state,
+          lga: registeredLocation!.lga,
+          ward: registeredLocation!.ward,
+          neighborhood: registeredLocation!.neighborhood,
+          address: registeredLocation!.formattedAddress,
         };
 
     try {
@@ -350,32 +346,27 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
       {!isEditing && (
         <div>
-          {locationLoading && <p className="text-sm font-medium text-brand-green-dark/70 dark:text-white/55">Detecting your location…</p>}
-          {!locationLoading && userLocation && !(userLocation.latitude === 0 && userLocation.longitude === 0) && (
+          {locationLoading && (
+            <p className="text-sm font-medium text-brand-green-dark/70 dark:text-white/55">Loading your location…</p>
+          )}
+          {!locationLoading && registeredLocation && (
             <p className="rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3 text-sm font-medium text-[#006F35] dark:border-primary/20 dark:bg-primary/10 dark:text-primary">
-              Location set
-              {(userLocation as any).formattedAddress
-                ? `: ${(userLocation as any).formattedAddress}`
-                : (userLocation as any).address
-                  ? `: ${(userLocation as any).address}`
-                  : ""}
+              📍 Listed in your registered area{areaLabel ? `: ${areaLabel}` : ""}
             </p>
           )}
-          {!locationLoading &&
-            (!userLocation || (userLocation.latitude === 0 && userLocation.longitude === 0)) && (
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-red/40 bg-brand-red/[0.08] p-4 dark:bg-brand-red/10">
-                <p className="text-sm font-medium text-status-danger dark:text-brand-red">
-                  {locationError || "Location is required to create a listing."}
-                </p>
-                <button
-                  type="button"
-                  onClick={getCurrentLocation}
-                  className="shrink-0 rounded-full bg-brand-red px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-brand-red/85"
-                >
-                  Enable
-                </button>
-              </div>
-            )}
+          {!locationLoading && !registeredLocation && (
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-red/40 bg-brand-red/[0.08] p-4 dark:bg-brand-red/10">
+              <p className="text-sm font-medium text-status-danger dark:text-brand-red">
+                No registered location found. Set your home location to list items.
+              </p>
+              <Link
+                href="/settings/location"
+                className="shrink-0 rounded-full bg-brand-red px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-brand-red/85"
+              >
+                Set location
+              </Link>
+            </div>
+          )}
           {errors.location && <p className="mt-2 text-sm font-medium text-status-danger dark:text-brand-red">{errors.location}</p>}
         </div>
       )}

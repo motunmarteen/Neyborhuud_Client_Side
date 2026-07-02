@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateEvent } from "@/hooks/useEvents";
-import { useGeolocation } from "@/hooks/useGeolocation";
+import { useRegisteredLocation } from "@/hooks/useRegisteredLocation";
 import { toast } from 'sonner';
 import { CreateEventPayload } from "@/types/api";
 import { glassField, glassLabel, glassMutedLabel } from "@/lib/glass-form-styles";
@@ -24,7 +24,8 @@ const VISIBILITY_OPTIONS = ["public", "neighborhood", "private"] as const;
 
 export default function CreateEventForm() {
   const router = useRouter();
-  const { location } = useGeolocation();
+  // Use the user's registered (signup) location — no live GPS prompt.
+  const { location } = useRegisteredLocation();
   const createEvent = useCreateEvent();
   const [showSuccess, setShowSuccess] = useState(false);
 

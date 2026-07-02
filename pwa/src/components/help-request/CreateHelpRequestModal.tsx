@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { X, ChevronDown, AlertCircle } from "lucide-react";
 import { contentService } from "@/services/content.service";
-import { getCurrentLocation } from "@/lib/geolocation";
+import { getRegisteredLocationSync } from "@/hooks/useRegisteredLocation";
 
 const CATEGORIES = [
   { value: "financial", label: "💰 Financial", desc: "Money, fees, bills" },
@@ -56,7 +56,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const userLocation = await getCurrentLocation().catch(() => null);
+      const userLocation = getRegisteredLocationSync();
 
       const payload: Parameters<typeof contentService.createPost>[0] = {
         type: images.length > 0 ? "image" : "text",
@@ -72,7 +72,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
             ? { accountName, accountNumber, bankName }
             : undefined,
         location: userLocation
-          ? { latitude: userLocation.lat, longitude: userLocation.lng }
+          ? { latitude: userLocation.latitude, longitude: userLocation.longitude }
           : undefined,
         media: images.length > 0 ? images : undefined,
       };

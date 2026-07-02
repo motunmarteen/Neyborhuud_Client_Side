@@ -7,7 +7,7 @@ import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import { QuotedPostEmbed } from '@/components/feed/QuotedPostEmbed';
 import { contentService } from '@/services/content.service';
 import { XRepostIcon } from '@/components/icons/XIcons';
-import { getCurrentLocation } from '@/lib/geolocation';
+import { getRegisteredLocationSync } from '@/hooks/useRegisteredLocation';
 
 type RepostComposerSheetProps = {
   open: boolean;
@@ -31,13 +31,13 @@ export function RepostComposerSheet({
 
     setIsSubmitting(true);
     try {
-      const loc = await getCurrentLocation();
+      const loc = getRegisteredLocationSync();
       if (!loc) {
-        toast.error('Location is required to repost');
+        toast.error('Set your home location in Settings to repost');
         setIsSubmitting(false);
         return;
       }
-      await contentService.repostPost(postId, comment, { lat: loc.lat, lng: loc.lng });
+      await contentService.repostPost(postId, comment, { lat: loc.latitude, lng: loc.longitude });
       toast.success(comment.trim() ? 'Quote reposted to your feed' : 'Reposted to your feed');
       setComment('');
       onReposted?.();

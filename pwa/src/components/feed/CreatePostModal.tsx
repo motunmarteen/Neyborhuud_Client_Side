@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { usePostMutations } from '@/hooks/usePosts';
-import { getCurrentLocation } from '@/lib/geolocation';
+import { getRegisteredLocationSync } from '@/hooks/useRegisteredLocation';
 import { pickNativePhotos, canUseNativeCamera } from '@/lib/nativeCamera';
 import { isUserInNigeria } from '@/lib/nigeriaCheck';
 import { useTranslation } from '@/lib/i18n';
@@ -448,15 +448,15 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                     setUploadProgress(90);
                 }
 
-                const userLocation = await getCurrentLocation();
+                const regLoc = getRegisteredLocationSync();
                 await fyiService.createBulletin({
                     title: content.trim().substring(0, 100),
                     body: content.trim(),
                     fyiType: 'community_announcement',
                     tags: extractedTags,
                     mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
-                    location: userLocation
-                        ? { latitude: userLocation.lat, longitude: userLocation.lng }
+                    location: regLoc
+                        ? { latitude: regLoc.latitude, longitude: regLoc.longitude }
                         : undefined,
                 });
                 awardCoins('fyi_created');
@@ -480,7 +480,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                     if (helpCategory && !extractedTags.includes(helpCategory)) extractedTags.push(helpCategory);
                 }
 
-                const userLocation = await getCurrentLocation();
+                const userLocation = getRegisteredLocationSync();
 
                 const payload: CreatePostPayload = {
                     type: postType === 'image' && selectedFiles.length > 0 ? 'image' : 'text',
@@ -554,8 +554,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                     } as any : {}),
                     location: userLocation
                         ? {
-                              latitude: userLocation.lat,
-                              longitude: userLocation.lng,
+                              latitude: userLocation.latitude,
+                              longitude: userLocation.longitude,
                           }
                         : undefined,
                 };

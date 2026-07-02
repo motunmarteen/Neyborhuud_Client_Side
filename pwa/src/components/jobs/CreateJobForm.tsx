@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateJob } from "@/hooks/useJobs";
-import { useGeolocation } from "@/hooks/useGeolocation";
+import { useRegisteredLocation } from "@/hooks/useRegisteredLocation";
 import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
 import { PostCreationSuccessSheet } from "@/components/shared/PostCreationSuccessSheet";
 
@@ -33,7 +33,8 @@ const neuInputCls = "neu-input rounded-xl";
 
 export default function CreateJobForm() {
   const router = useRouter();
-  const { location } = useGeolocation();
+  // Use the user's registered (signup) location — no live GPS prompt.
+  const { location } = useRegisteredLocation();
   const createJob = useCreateJob();
   const [showSuccess, setShowSuccess] = useState(false);
 
