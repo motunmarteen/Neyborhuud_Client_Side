@@ -278,14 +278,26 @@ export function BuyerIntentActions({
         productId: product.id,
         buyNow: true,
       });
-      const order = (response as any)?.data?.order || (response as any)?.order;
+      const payload = (response as any)?.data ?? response;
+      const order = payload?.order ?? payload;
       const convId =
         order?.conversationId ??
-        (response as any)?.data?.conversationId ??
-        (response as any)?.conversationId;
-      if (convId) router.push(`/chat/${convId}`);
-    } catch {
-      // Error toast shown by hook
+        payload?.conversationId ??
+        order?.conversation?._id;
+
+      if (convId) {
+        router.push(`/chat/${convId}`);
+      } else {
+        // Order created but no conversation id came back — don't strand the
+        // buyer; send them to their orders so they can open the deal chat.
+        toast.success("Order started — opening your deals.");
+        router.push("/marketplace/my-orders");
+      }
+    } catch (err) {
+      toast.error(
+        (err as { message?: string })?.message ||
+          "Couldn't start the purchase. Please try again.",
+      );
     }
   };
 
