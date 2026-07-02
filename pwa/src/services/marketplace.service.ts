@@ -477,6 +477,14 @@ export const marketplaceService = {
   },
 
   /**
+   * Withdraw own offer (buyer)
+   * PATCH /api/v1/marketplace/offers/:offerId/withdraw
+   */
+  async withdrawOffer(offerId: string) {
+    return await apiClient.patch(`/marketplace/offers/${offerId}/withdraw`);
+  },
+
+  /**
    * Get all offers on a specific product (seller view)
    * GET /api/v1/marketplace/products/:productId/offers
    */

@@ -548,7 +548,7 @@ export interface ChatMessageMeta {
   // sos
   severity?: string;
   // offer events
-  offerAction?: "accept" | "reject" | "counter";
+  offerAction?: "new" | "accept" | "reject" | "counter" | "withdrawn";
   actorRole?: "buyer" | "seller";
   offerAmount?: number;
   counterAmount?: number | null;
