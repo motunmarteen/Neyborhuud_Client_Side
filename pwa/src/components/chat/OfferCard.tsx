@@ -43,9 +43,9 @@ export function OfferCard({
   const meta = msg.meta ?? {};
   const action = (meta.offerAction ?? 'new') as OfferAction;
   const offerId = meta.offerId ? String(meta.offerId) : undefined;
-  // actorRole = who performed THIS event. The viewer's role is the counterpart
-  // when they need to respond.
-  const actorRole = meta.actorRole; // 'buyer' | 'seller'
+  const buyerId = meta.buyerId ? String(meta.buyerId) : undefined;
+  const sellerId = meta.sellerId ? String(meta.sellerId) : undefined;
+  const actorRole = meta.actorRole; // 'buyer' | 'seller' — who performed THIS event
   const amount = (meta.counterAmount as number) ?? meta.offerAmount;
 
   const [busy, setBusy] = useState<string | null>(null);
@@ -91,10 +91,16 @@ export function OfferCard({
     run('withdraw', () => marketplaceService.withdrawOffer(offerId!), 'Offer withdrawn.');
 
   // Role of the current viewer relative to this deal.
-  // We don't always get buyerId/sellerId on offer events, so infer from actorRole:
-  // whoever performed the event is NOT the one who needs to respond next.
-  const viewerIsSeller = actorRole === 'buyer'; // buyer acted → seller responds
-  const viewerIsBuyer = actorRole === 'seller'; // seller acted → buyer responds
+  // Prefer an explicit ID match (robust). Fall back to inferring from actorRole
+  // only for older messages that predate buyerId/sellerId in the metadata:
+  // whoever performed the event is NOT the one who responds next.
+  const hasIds = !!(buyerId && sellerId && currentUserId);
+  const viewerIsSeller = hasIds
+    ? currentUserId === sellerId
+    : actorRole === 'buyer';
+  const viewerIsBuyer = hasIds
+    ? currentUserId === buyerId
+    : actorRole === 'seller';
 
   const isLive = (action === 'new' || action === 'counter') && !done;
 
