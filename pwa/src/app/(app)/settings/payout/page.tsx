@@ -31,6 +31,15 @@ export default function PayoutDetailsPage() {
     }
   }, [user]);
 
+  // The registered name the backend will check the account name against.
+  const registeredName = (() => {
+    const u = user as any;
+    const first = (u?.firstName ?? '').trim();
+    const last = (u?.lastName ?? '').trim();
+    if (first || last) return `${first} ${last}`.trim();
+    return (u?.name ?? '').trim();
+  })();
+
   const acctValid = /^\d{10}$/.test(accountNumber.trim());
   const canSubmit =
     bankName.trim().length > 1 &&
@@ -113,6 +122,13 @@ export default function PayoutDetailsPage() {
             value={accountName}
             onChange={(e) => setAccountName(e.target.value)}
           />
+          {registeredName && (
+            <p className="-mt-2 text-xs leading-relaxed text-gray-500">
+              For your safety, this must match your registered name on
+              NeyborHuud: <span className="font-semibold text-gray-700">{registeredName}</span>.
+              Accounts in another name are rejected.
+            </p>
+          )}
 
           <button
             type="submit"

@@ -301,6 +301,11 @@ export function BuyerIntentActions({
         order?.conversation?._id;
 
       if (convId) {
+        // P2P model: one product = one deal = one chat. If a deal already
+        // existed, we're just reopening it — never a dead-end error.
+        if (payload?.reused) {
+          toast.message("Reopening your active deal for this item…");
+        }
         router.push(`/chat/${convId}`);
       } else {
         // Order created but no conversation id came back — don't strand the
@@ -341,10 +346,15 @@ export function BuyerIntentActions({
         payload?.conversationId ??
         payload?.data?.conversation?._id ??
         payload?.conversation?._id;
+      const reused = payload?.data?.reused ?? payload?.reused;
 
       if (conversationId) {
+        // P2P model: one product = one deal = one chat. Reopening an existing
+        // offer is normal, not an error.
         toast.success(
-          `${getOfferToast({ action: 'new', amount, actorRole: 'buyer' }, 'buyer')} You are awaiting the seller's response.`,
+          reused
+            ? "You already have an active offer here — reopening it."
+            : `${getOfferToast({ action: 'new', amount, actorRole: 'buyer' }, 'buyer')} You are awaiting the seller's response.`,
         );
         router.push(`/chat/${conversationId}`);
       } else {
