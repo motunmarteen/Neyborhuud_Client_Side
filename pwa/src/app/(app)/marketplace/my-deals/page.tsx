@@ -12,23 +12,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMyDeals } from "@/hooks/useMarketplace";
-import type { DealStatus, MyDeal } from "@/services/marketplace.service";
+import type { MyDeal } from "@/services/marketplace.service";
+import { DEAL_STATUS_META as STATUS_META } from "@/lib/dealStatus";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
 
 type Filter = "all" | "buying" | "selling";
-
-const STATUS_META: Record<
-  DealStatus,
-  { label: string; pill: string; icon: string }
-> = {
-  offer_pending: { label: "OFFER PENDING", pill: "bg-status-pending", icon: "schedule" },
-  offer_countered: { label: "COUNTERED", pill: "bg-status-pending", icon: "sync_alt" },
-  committed: { label: "DEAL STARTED", pill: "bg-brand-blue", icon: "handshake" },
-  payment_sent: { label: "PAYMENT SENT", pill: "bg-status-warning", icon: "payments" },
-  completed: { label: "COMPLETED", pill: "bg-primary", icon: "task_alt" },
-  disputed: { label: "DISPUTED", pill: "bg-status-danger", icon: "gavel" },
-  expired: { label: "EXPIRED", pill: "bg-status-neutral", icon: "block" },
-};
 
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();

@@ -4,7 +4,8 @@
 
 "use client";
 
-import { Product } from "@/services/marketplace.service";
+import { Product, DealStatus } from "@/services/marketplace.service";
+import { DEAL_STATUS_META } from "@/lib/dealStatus";
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -22,6 +23,9 @@ interface ProductCardProps {
   product: Product;
   userLocation?: { lat: number; lng: number } | null;
   currentUserId?: string;
+  /** If the viewer has a live deal on this product, its lifecycle status + chat. */
+  dealStatus?: DealStatus;
+  dealConversationId?: string | null;
 }
 
 function formatConditionWords(condition?: string) {
@@ -47,7 +51,13 @@ function formatCompactCount(value?: number) {
   return `${value}`;
 }
 
-export function ProductCard({ product, userLocation, currentUserId: currentUserIdProp }: ProductCardProps) {
+export function ProductCard({
+  product,
+  userLocation,
+  currentUserId: currentUserIdProp,
+  dealStatus,
+  dealConversationId,
+}: ProductCardProps) {
   const router = useRouter();
   const { user, isLoading: isAuthLoading } = useAuth();
   const currentUserId = currentUserIdProp ?? getViewerId(user);
@@ -137,6 +147,21 @@ export function ProductCard({ product, userLocation, currentUserId: currentUserI
 
           {/* Top-left badges row */}
           <div className="absolute left-2 top-2 z-10 flex max-w-[calc(100%-3.5rem)] flex-wrap gap-1.5">
+            {dealStatus && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (dealConversationId) router.push(`/chat/${dealConversationId}`);
+                }}
+                className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-white shadow-sm ${DEAL_STATUS_META[dealStatus].pill}`}
+              >
+                <span className="material-symbols-outlined text-[10px]">
+                  {DEAL_STATUS_META[dealStatus].icon}
+                </span>
+                {DEAL_STATUS_META[dealStatus].label}
+              </button>
+            )}
             {conditionBadge && (
               <span className="rounded-full bg-black/50 px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-white/90 backdrop-blur-sm border border-white/10">
                 {conditionBadge}

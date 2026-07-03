@@ -6,13 +6,13 @@
  */
 
 import { useState } from "react";
-import { useMyListings, useProductOffers } from "@/hooks/useMarketplace";
+import { useMyListings, useProductOffers, useMyDeals } from "@/hooks/useMarketplace";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { ProductCard } from "@/components/marketplace";
 import { BoostModal } from "@/components/marketplace/BoostModal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Product } from "@/services/marketplace.service";
+import { DealStatus, Product } from "@/services/marketplace.service";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
 
 // ─── Per-listing pending offer badge ─────────────────────────────────────────
@@ -46,10 +46,14 @@ function ListingWithOffers({
   product,
   userLocation,
   onBoost,
+  dealStatus,
+  dealConversationId,
 }: {
   product: Product;
   userLocation: { lat: number; lng: number } | null;
   onBoost: (id: string, title: string, isBoosted: boolean, boostedUntil?: string) => void;
+  dealStatus?: DealStatus;
+  dealConversationId?: string | null;
 }) {
   const productId = (product as any)._id ?? product.id;
   const productTitle = (product as any).title ?? (product as any).name ?? "Listing";
@@ -59,7 +63,12 @@ function ListingWithOffers({
 
   return (
     <div className="flex flex-col">
-      <ProductCard product={product} userLocation={userLocation} />
+      <ProductCard
+        product={product}
+        userLocation={userLocation}
+        dealStatus={dealStatus}
+        dealConversationId={dealConversationId}
+      />
       <PendingOffersBadge product={product} />
 
       {/* Active boost expiry notice */}
@@ -105,6 +114,15 @@ export default function MyListingsPage() {
     boostProduct,
     setBoostProduct,
   ] = useState<{ id: string; title: string; isBoosted: boolean; boostedUntil?: string } | null>(null);
+
+  // One badge per card instead of a separate page: fetch the seller's live
+  // deals (as seller) once and look them up by product id per card.
+  const { data: myDeals } = useMyDeals("selling");
+  const dealByProductId = new Map(
+    (myDeals ?? [])
+      .filter((d) => d.product?.id || d.product?._id)
+      .map((d) => [String(d.product?.id ?? d.product?._id), d]),
+  );
   const {
     data,
     fetchNextPage,
@@ -173,9 +191,11 @@ export default function MyListingsPage() {
               {products.map((product, index) => {
                 // Unwrap product if it's wrapped in an API response
                 const productData = (product as any).data || product;
+                const productId = String(productData.id || productData._id || "");
+                const deal = dealByProductId.get(productId);
                 return (
                   <ListingWithOffers
-                    key={productData.id || productData._id || `product-${index}`}
+                    key={productId || `product-${index}`}
                     product={productData}
                     userLocation={
                       location
@@ -186,6 +206,8 @@ export default function MyListingsPage() {
                         : null
                     }
                     onBoost={(id, title, isBoosted, boostedUntil) => setBoostProduct({ id, title, isBoosted, boostedUntil })}
+                    dealStatus={deal?.dealStatus}
+                    dealConversationId={deal?.conversationId}
                   />
                 );
               })}

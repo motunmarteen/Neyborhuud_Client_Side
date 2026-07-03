@@ -9,7 +9,7 @@ import {
   LocalHuudHubHeader,
   LocalHuudHubPrimaryAction,
 } from "@/components/local-huud/LocalHuudHubHeader";
-import { useMarketplaceProducts } from "@/hooks/useMarketplace";
+import { useMarketplaceProducts, useMyDeals } from "@/hooks/useMarketplace";
 import { useMarketplaceSocket } from "@/hooks/useMarketplaceSocket";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { ProductCard } from "@/components/marketplace";
@@ -49,6 +49,15 @@ function MarketplacePageInner() {
     useMarketplaceProducts(filter);
 
   const products = data?.pages.flatMap((page) => page.data || []) ?? [];
+
+  // One deal-status badge per card instead of a separate page: fetch the
+  // viewer's live deals once and look them up by product id per card.
+  const { data: myDeals } = useMyDeals();
+  const dealByProductId = new Map(
+    (myDeals ?? [])
+      .filter((d) => d.product?.id || d.product?._id)
+      .map((d) => [String(d.product?.id ?? d.product?._id), d]),
+  );
 
   useEffect(() => {
     if (!focusProductId || isLoading) return;
@@ -133,15 +142,19 @@ function MarketplacePageInner() {
           <div className="grid grid-cols-2 gap-3">
             {products.map((product, index) => {
               const productData = (product as any).data || product;
+              const productId = String(productData.id || productData._id || "");
+              const deal = dealByProductId.get(productId);
               return (
                 <ProductCard
-                  key={productData.id || productData._id || `product-${index}`}
+                  key={productId || `product-${index}`}
                   product={productData}
                   userLocation={
                     location
                       ? { lat: location.latitude, lng: location.longitude }
                       : null
                   }
+                  dealStatus={deal?.dealStatus}
+                  dealConversationId={deal?.conversationId}
                 />
               );
             })}
