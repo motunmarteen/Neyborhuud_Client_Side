@@ -41,9 +41,9 @@ export const LOCAL_HUUD_HUBS: Record<LocalHuudHubId, LocalHuudHubConfig> = {
     sections: [
       { id: 'browse', label: 'Browse', href: '/marketplace', icon: 'storefront' },
       { id: 'listings', label: 'My Listings', href: '/marketplace/my-listings', icon: 'inventory_2', matchPrefix: '/marketplace/my-listings' },
-      { id: 'orders', label: 'Orders', href: '/marketplace/my-orders', icon: 'shopping_cart', matchPrefix: '/marketplace/my-orders' },
-      { id: 'offers', label: 'Offers', href: '/marketplace/my-offers', icon: 'local_offer', matchPrefix: '/marketplace/my-offers' },
-      { id: 'sales', label: 'Sales', href: '/marketplace/my-sales', icon: 'payments', matchPrefix: '/marketplace/my-sales' },
+      // P2P model: one unified deal list (buying + selling, offers + orders)
+      // replaces the old separate Orders / Offers / Sales tabs.
+      { id: 'deals', label: 'My Deals', href: '/marketplace/my-deals', icon: 'handshake', matchPrefix: '/marketplace/my-deals' },
     ],
   },
   services: {

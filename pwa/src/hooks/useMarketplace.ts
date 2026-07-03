@@ -795,40 +795,20 @@ export function useCreateOrder() {
 }
 
 /**
- * Hook for fetching my orders (as buyer)
+ * Hook for the unified P2P deal list — every offer/order the user is buyer OR
+ * seller on. Replaces useMyOrders / useMySales / useMyOffers.
+ * role: omit for all deals, or filter to "buying" | "selling".
  */
-export function useMyOrders() {
-  return useInfiniteQuery({
-    queryKey: ["marketplace", "orders", "my-orders"],
-    queryFn: ({ pageParam = 1 }) =>
-      marketplaceService.getMyOrders(pageParam, 20),
-    getNextPageParam: (lastPage: any) => {
-      const pagination = lastPage?.pagination || lastPage?.data?.pagination;
-      if (!pagination) return undefined;
-      return pagination.page < pagination.pages
-        ? pagination.page + 1
-        : undefined;
+export function useMyDeals(role?: "buying" | "selling") {
+  return useQuery({
+    queryKey: ["marketplace", "my-deals", role ?? "all"],
+    queryFn: async () => {
+      const res = await marketplaceService.getMyDeals(role);
+      const payload: any = (res as any)?.data ?? res;
+      return (payload?.deals ?? []) as import("@/services/marketplace.service").MyDeal[];
     },
-    initialPageParam: 1,
-  });
-}
-
-/**
- * Hook for fetching my sales (as seller)
- */
-export function useMySales() {
-  return useInfiniteQuery({
-    queryKey: ["marketplace", "orders", "my-sales"],
-    queryFn: ({ pageParam = 1 }) =>
-      marketplaceService.getMySales(pageParam, 20),
-    getNextPageParam: (lastPage: any) => {
-      const pagination = lastPage?.pagination || lastPage?.data?.pagination;
-      if (!pagination) return undefined;
-      return pagination.page < pagination.pages
-        ? pagination.page + 1
-        : undefined;
-    },
-    initialPageParam: 1,
+    staleTime: 15_000,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -849,24 +829,6 @@ export function useOrder(orderId: string | null) {
   });
 }
 
-/**
- * Hook for fetching my offers (sent or received)
- */
-export function useMyOffers(type: "sent" | "received") {
-  return useInfiniteQuery({
-    queryKey: ["marketplace", "offers", type],
-    queryFn: ({ pageParam = 1 }) =>
-      marketplaceService.getMyOffers(type, pageParam, 20),
-    getNextPageParam: (lastPage: any) => {
-      const pagination = lastPage?.pagination || lastPage?.data?.pagination;
-      if (!pagination) return undefined;
-      return pagination.page < pagination.pages
-        ? pagination.page + 1
-        : undefined;
-    },
-    initialPageParam: 1,
-  });
-}
 
 /**
  * Hook for fetching a specific offer

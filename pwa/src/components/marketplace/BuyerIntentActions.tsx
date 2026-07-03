@@ -309,9 +309,9 @@ export function BuyerIntentActions({
         router.push(`/chat/${convId}`);
       } else {
         // Order created but no conversation id came back — don't strand the
-        // buyer; send them to their orders so they can open the deal chat.
+        // buyer; send them to My Deals so they can open the deal chat.
         toast.success("Order started — opening your deals.");
-        router.push("/marketplace/my-orders");
+        router.push("/marketplace/my-deals");
       }
     } catch (err) {
       toast.error(
@@ -494,22 +494,13 @@ export function BuyerIntentActions({
         </button>
       </div>
 
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => router.push("/marketplace/my-orders")}
-          className="flex-1 rounded-lg bg-brand-black px-4 py-2 text-sm text-white transition-colors hover:bg-brand-black"
-        >
-          My Orders
-        </button>
-        <button
-          type="button"
-          onClick={() => router.push("/marketplace/my-offers")}
-          className="flex-1 rounded-lg bg-brand-black px-4 py-2 text-sm text-white transition-colors hover:bg-brand-black"
-        >
-          My Offers
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => router.push("/marketplace/my-deals")}
+        className="w-full rounded-lg bg-brand-black px-4 py-2 text-sm text-white transition-colors hover:bg-brand-black"
+      >
+        My Deals
+      </button>
 
       <MakeOfferDialog
         open={showOfferDialog}

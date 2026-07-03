@@ -29,6 +29,42 @@ export interface ProductDetails {
   comments: Comment[];
 }
 
+/** Lifecycle stage of a P2P deal, normalized across offers and orders. */
+export type DealStatus =
+  | "offer_pending"
+  | "offer_countered"
+  | "committed"
+  | "payment_sent"
+  | "completed"
+  | "disputed"
+  | "expired";
+
+/** One row in the unified My Deals list — a live offer or order. */
+export interface MyDeal {
+  id: string;
+  kind: "offer" | "order";
+  role: "buying" | "selling";
+  product: {
+    id?: string;
+    _id?: string;
+    title: string;
+    images?: string[];
+    price?: number;
+  } | null;
+  counterparty: {
+    id?: string;
+    _id?: string;
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+    avatarUrl?: string;
+  } | null;
+  amount: number;
+  dealStatus: DealStatus;
+  conversationId?: string | null;
+  updatedAt: string;
+}
+
 export interface ProductLikeResponse {
   isLiked: boolean;
   likesCount: number;
@@ -557,22 +593,14 @@ export const marketplaceService = {
   },
 
   /**
-   * Get my orders (as buyer)
-   * GET /api/v1/marketplace/my-orders
+   * The unified P2P deal list — every offer/order the user is buyer OR seller
+   * on, merged and normalized to a lifecycle status. Replaces getMyOrders /
+   * getMySales / getMyOffers.
+   * GET /api/v1/marketplace/my-deals?role=buying|selling
    */
-  async getMyOrders(page = 1, limit = 20) {
-    return await apiClient.get("/marketplace/my-orders", {
-      params: { page, limit },
-    });
-  },
-
-  /**
-   * Get my sales (as seller)
-   * GET /api/v1/marketplace/my-sales
-   */
-  async getMySales(page = 1, limit = 20) {
-    return await apiClient.get("/marketplace/my-sales", {
-      params: { page, limit },
+  async getMyDeals(role?: "buying" | "selling") {
+    return await apiClient.get<{ deals: MyDeal[] }>("/marketplace/my-deals", {
+      params: role ? { role } : undefined,
     });
   },
 
@@ -582,16 +610,6 @@ export const marketplaceService = {
    */
   async getOrder(orderId: string) {
     return await apiClient.get(`/marketplace/orders/${orderId}`);
-  },
-
-  /**
-   * Get my offers (sent or received)
-   * GET /api/v1/marketplace/my-offers?type=sent|received
-   */
-  async getMyOffers(type: "sent" | "received", page = 1, limit = 20) {
-    return await apiClient.get("/marketplace/my-offers", {
-      params: { type, page, limit },
-    });
   },
 
   /**
