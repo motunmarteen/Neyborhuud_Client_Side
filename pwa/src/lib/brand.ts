@@ -17,4 +17,4 @@ export const BRAND_SUPPORT_EMAIL = 'support@neyborhuud.com';
 export const BRAND_WEB_ORIGIN = 'https://neyborhuud.com';
 
 /** Bump when brand UI changes so installed PWAs drop stale cached bundles once. */
-export const BRAND_UI_VERSION = 5;
+export const BRAND_UI_VERSION = 6;

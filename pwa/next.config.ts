@@ -34,6 +34,40 @@ const withPWA = withPWAInit({
   skipWaiting: true,
   // Bundle service_worker/index.js into the Workbox-generated sw.js
   customWorkerDir: "service_worker",
+  // Navigations should always try the network first so a fresh deploy is picked
+  // up immediately; fall back to cache only when offline. Without this, next-pwa
+  // serves stale HTML and users keep running an old bundle after every deploy.
+  cacheOnFrontEndNav: false,
+  // NetworkFirst for the HTML document + the app's own JS/CSS chunks, so new
+  // deploys are fetched fresh. Static assets (images/fonts) stay cache-first.
+  runtimeCaching: [
+    {
+      urlPattern: ({ request }: any) => request.mode === "navigate",
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "html-pages",
+        networkTimeoutSeconds: 5,
+        expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 },
+      },
+    },
+    {
+      urlPattern: /\/_next\/static\/.*\.(?:js|css)$/i,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "next-static-js-css",
+        networkTimeoutSeconds: 5,
+        expiration: { maxEntries: 128, maxAgeSeconds: 7 * 24 * 60 * 60 },
+      },
+    },
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico|woff2?|ttf)$/i,
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "static-assets",
+        expiration: { maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60 },
+      },
+    },
+  ],
 });
 
 const nextConfig: NextConfig = {

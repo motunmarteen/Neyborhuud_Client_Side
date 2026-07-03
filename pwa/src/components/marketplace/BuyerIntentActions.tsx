@@ -5,7 +5,8 @@
 
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Product } from "@/services/marketplace.service";
 import { useMakeOffer, useCreateOrder } from "@/hooks/useMarketplace";
@@ -33,9 +34,22 @@ function MakeOfferDialog({
   onSubmit: () => void;
   isSubmitting: boolean;
 }) {
-  if (!open) return null;
+  // Lock body scroll while the sheet is open.
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
 
-  return (
+  if (!open || typeof document === "undefined") return null;
+
+  // Render through a portal to <body> so the fixed overlay escapes the product
+  // card's transform/overflow-hidden (which otherwise clips the bottom sheet and
+  // makes it render inside the card instead of full-screen).
+  return createPortal(
     <div
       className={`fixed inset-0 ${zOverlayClass} flex items-end justify-center sm:items-center`}
       role="presentation"
@@ -132,7 +146,8 @@ function MakeOfferDialog({
         </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -408,7 +423,7 @@ export function BuyerIntentActions({
 
         <MakeOfferDialog
           open={showOfferDialog}
-          zOverlayClass="z-[80]"
+          zOverlayClass="z-[100]"
           listedPriceLabel={formattedPrice}
           offerAmount={offerAmount}
           onOfferAmountChange={setOfferAmount}
@@ -488,7 +503,7 @@ export function BuyerIntentActions({
 
       <MakeOfferDialog
         open={showOfferDialog}
-        zOverlayClass="z-50"
+        zOverlayClass="z-[100]"
         listedPriceLabel={formattedPrice}
         offerAmount={offerAmount}
         onOfferAmountChange={setOfferAmount}
