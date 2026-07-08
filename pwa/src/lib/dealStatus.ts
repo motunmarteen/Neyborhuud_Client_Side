@@ -10,6 +10,5 @@ export const DEAL_STATUS_META: Record<
   committed: { label: "DEAL STARTED", pill: "bg-brand-blue", icon: "handshake" },
   payment_sent: { label: "PAYMENT SENT", pill: "bg-status-warning", icon: "payments" },
   completed: { label: "COMPLETED", pill: "bg-primary", icon: "task_alt" },
-  disputed: { label: "DISPUTED", pill: "bg-status-danger", icon: "gavel" },
   expired: { label: "EXPIRED", pill: "bg-status-neutral", icon: "block" },
 };

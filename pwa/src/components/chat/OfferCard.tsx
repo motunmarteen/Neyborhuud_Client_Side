@@ -8,10 +8,10 @@
  *   Seller (on a new/pending offer): Accept · Reject · Counter
  *   Buyer  (after seller counters):  Accept counter · Counter back · Withdraw
  *
- * Accepting flows the deal into an order + Social Witness Escrow (the backend
- * posts the next milestone as an EscrowCard in the SAME thread). The card
- * disables optimistically after an action; the real state advances when the
- * next system message arrives.
+ * Accepting flows the deal into an order (the backend posts the next status
+ * update as a DealStatusCard in the SAME thread). The card disables
+ * optimistically after an action; the real state advances when the next
+ * system message arrives.
  */
 
 import { useState } from 'react';
@@ -187,7 +187,7 @@ export function OfferCard({
 
         {action === 'accept' && (
           <p className="mt-2 text-xs font-semibold text-emerald-700">
-            Deal agreed — starting the escrow. Watch this chat for the next step.
+            Deal agreed — starting the order. Watch this chat for the next step.
           </p>
         )}
       </div>

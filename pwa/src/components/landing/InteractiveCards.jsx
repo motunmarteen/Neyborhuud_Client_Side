@@ -18,8 +18,8 @@ export function InteractiveCards() {
   // Card 3: Radius Dial state
   const [cardRadius, setCardRadius] = useState(500);
 
-  // Card 4: Escrow state
-  const [escrowStep, setEscrowStep] = useState(1);
+  // Card 4: Deal tracker state
+  const [dealStep, setDealStep] = useState(1);
 
   // Card 5: Tab state
   const [activeBoardTab, setActiveBoardTab] = useState("municipal");
@@ -239,16 +239,16 @@ export function InteractiveCards() {
         </div>
       </div>
 
-      {/* 4. Social Escrow Step-Tracker Card */}
+      {/* 4. Deal Tracker Card */}
       <div className="glass-premium glow-card grid-span-2-md" style={{ padding: "32px", borderRadius: "2rem", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: "320px" }}>
         <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0, 0, 255, 0.1)", border: "1px solid rgba(0, 0, 255, 0.2)", padding: "4px 12px", borderRadius: "99px", marginBottom: "16px" }}>
             <Store size={14} color="var(--brand-blue)" />
-            <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--brand-blue)", letterSpacing: "0.05em", uppercase: "true" }}>ESCROW PROTECTION</span>
+            <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--brand-blue)", letterSpacing: "0.05em", uppercase: "true" }}>DEAL TRACKER</span>
           </div>
-          <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "8px" }}>Zero-Scam Social Escrow</h3>
+          <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "8px" }}>Trade With Verified Neighbors</h3>
           <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: "1.5" }}>
-            Buying a generator or hiring a local plumber? Funds remain safely locked in the TrustOS Vault until you verify receipt. No scams. Period.
+            Buying a generator or hiring a local plumber? Track the deal step by step in-chat with a verified, trust-scored neighbor.
           </p>
         </div>
 
@@ -256,33 +256,33 @@ export function InteractiveCards() {
           {/* Stepper progress bar */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", marginBottom: "16px", padding: "0 10px" }}>
             <div style={{ position: "absolute", left: "10%", right: "10%", height: "2px", background: "rgba(0,0,0,0.1)", zIndex: 1 }}>
-              <div style={{ width: `${(escrowStep - 1) * 50}%`, height: "100%", background: "var(--brand-blue)", transition: "width 0.3s ease" }}></div>
+              <div style={{ width: `${(dealStep - 1) * 50}%`, height: "100%", background: "var(--brand-blue)", transition: "width 0.3s ease" }}></div>
             </div>
 
             {[
-              { s: 1, label: "Deposit" },
-              { s: 2, label: "Dispatch" },
-              { s: 3, label: "Release" }
+              { s: 1, label: "Agreed" },
+              { s: 2, label: "Paid" },
+              { s: 3, label: "Confirmed" }
             ].map((step) => (
-              <div 
-                key={step.s} 
-                onClick={() => setEscrowStep(step.s)}
-                style={{ 
-                  zIndex: 2, 
-                  display: "flex", 
-                  flexDirection: "column", 
-                  alignItems: "center", 
+              <div
+                key={step.s}
+                onClick={() => setDealStep(step.s)}
+                style={{
+                  zIndex: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
                   gap: "6px",
                   cursor: "pointer"
                 }}
               >
-                <div style={{ 
-                  width: "28px", 
-                  height: "28px", 
-                  borderRadius: "50%", 
-                  background: escrowStep >= step.s ? "var(--brand-blue)" : "var(--bg-card)", 
-                  border: `2px solid ${escrowStep >= step.s ? "var(--brand-blue)" : "rgba(0,0,0,0.1)"}`,
-                  color: escrowStep >= step.s ? "white" : "var(--text-muted)",
+                <div style={{
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "50%",
+                  background: dealStep >= step.s ? "var(--brand-blue)" : "var(--bg-card)",
+                  border: `2px solid ${dealStep >= step.s ? "var(--brand-blue)" : "rgba(0,0,0,0.1)"}`,
+                  color: dealStep >= step.s ? "white" : "var(--text-muted)",
                   fontWeight: 800,
                   fontSize: "0.8rem",
                   display: "flex",
@@ -292,16 +292,16 @@ export function InteractiveCards() {
                 }}>
                   {step.s}
                 </div>
-                <span style={{ fontSize: "0.65rem", fontWeight: 700, color: escrowStep >= step.s ? "var(--text-main)" : "var(--text-muted)" }}>{step.label}</span>
+                <span style={{ fontSize: "0.65rem", fontWeight: 700, color: dealStep >= step.s ? "var(--text-main)" : "var(--text-muted)" }}>{step.label}</span>
               </div>
             ))}
           </div>
 
           <div style={{ background: "var(--bg-main)", border: "1px solid var(--border-subtle)", borderRadius: "12px", padding: "12px 16px", minHeight: "68px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", lineHeight: "1.4" }}>
-              {escrowStep === 1 && "Buyer places ₦180,000 in Social Escrow Hold. Funds are locked."}
-              {escrowStep === 2 && "Seller dispatches dispatch rider. Sentinel AI tracks trip status."}
-              {escrowStep === 3 && "Buyer inspects the generator, enters verification PIN, and funds release to seller."}
+              {dealStep === 1 && "Buyer and seller agree on ₦180,000. The deal thread opens in chat."}
+              {dealStep === 2 && "Buyer pays the seller directly and marks it \"I've Paid\" in chat."}
+              {dealStep === 3 && "Seller confirms receipt. Deal complete — both earn HuudCoins and a trust boost."}
             </div>
             <ArrowRight size={18} color="var(--brand-blue)" style={{ flexShrink: 0 }} />
           </div>

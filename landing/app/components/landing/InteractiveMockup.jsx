@@ -9,7 +9,7 @@ export function InteractiveMockup() {
   const [radius, setRadius] = useState(500); // 100, 500, 1000 meters
   const [vouched, setVouched] = useState(false);
   const [vouchCount, setVouchCount] = useState(24);
-  const [escrowStep, setEscrowStep] = useState(0); // 0: Idle, 1: Paid, 2: Dispatched, 3: Completed
+  const [dealStep, setDealStep] = useState(0); // 0: Idle, 1: Paid, 2: Confirmed, 3: Completed
   const [sosActive, setSosActive] = useState(false);
   const [sosCountdown, setSosCountdown] = useState(5);
 
@@ -250,15 +250,15 @@ export function InteractiveMockup() {
                   Seller: Tunde F. (Trust Score: 95) • 350m away
                 </div>
 
-                {/* Interactive Escrow Pipeline */}
+                {/* Interactive Deal Pipeline */}
                 <div style={{ background: "rgba(0,0,0,0.15)", borderRadius: "12px", padding: "14px", marginBottom: "16px" }}>
-                  <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "white", marginBottom: "12px" }}>Social Escrow Process</div>
-                  
+                  <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "white", marginBottom: "12px" }}>Deal Progress</div>
+
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     {[
-                      { step: 1, label: "Deposit funds in TrustOS Hold" },
-                      { step: 2, label: "Seller dispatches dispatch rider" },
-                      { step: 3, label: "Buyer inspects & releases funds" }
+                      { step: 1, label: "Buyer and seller agree on price" },
+                      { step: 2, label: "Buyer pays and marks \"I've Paid\"" },
+                      { step: 3, label: "Seller confirms receipt" }
                     ].map((s) => (
                       <div 
                         key={s.step} 
@@ -267,22 +267,22 @@ export function InteractiveMockup() {
                           alignItems: "center", 
                           gap: "8px", 
                           fontSize: "0.65rem", 
-                          color: escrowStep >= s.step ? "var(--primary)" : "rgba(255,255,255,0.3)" 
+                          color: dealStep >= s.step ? "var(--primary)" : "rgba(255,255,255,0.3)" 
                         }}
                       >
                         <div style={{ 
                           width: "16px", 
                           height: "16px", 
                           borderRadius: "50%", 
-                          background: escrowStep >= s.step ? "rgba(0, 212, 49, 0.15)" : "rgba(255,255,255,0.05)", 
-                          border: `1px solid ${escrowStep >= s.step ? "var(--primary)" : "rgba(255,255,255,0.1)"}`,
+                          background: dealStep >= s.step ? "rgba(0, 212, 49, 0.15)" : "rgba(255,255,255,0.05)", 
+                          border: `1px solid ${dealStep >= s.step ? "var(--primary)" : "rgba(255,255,255,0.1)"}`,
                           display: "flex", 
                           alignItems: "center", 
                           justifyContent: "center", 
                           fontSize: "0.55rem",
                           fontWeight: "bold"
                         }}>
-                          {escrowStep >= s.step ? "✓" : s.step}
+                          {dealStep >= s.step ? "✓" : s.step}
                         </div>
                         <span>{s.label}</span>
                       </div>
@@ -290,17 +290,17 @@ export function InteractiveMockup() {
                   </div>
                 </div>
 
-                <button 
+                <button
                   onClick={() => {
-                    setEscrowStep((prev) => (prev < 3 ? prev + 1 : 0));
+                    setDealStep((prev) => (prev < 3 ? prev + 1 : 0));
                   }}
                   className="btn-glass-primary"
                   style={{ width: "100%", fontSize: "0.75rem", padding: "10px" }}
                 >
-                  {escrowStep === 0 && "INITIATE ESCROW PAY"}
-                  {escrowStep === 1 && "SIMULATE DISPATCH SHIP"}
-                  {escrowStep === 2 && "VERIFY & RELEASE FUNDS"}
-                  {escrowStep === 3 && "TRANSACTION SUCCESS (RESET)"}
+                  {dealStep === 0 && "MARK AS AGREED"}
+                  {dealStep === 1 && "SIMULATE PAYMENT SENT"}
+                  {dealStep === 2 && "CONFIRM RECEIPT"}
+                  {dealStep === 3 && "DEAL COMPLETE (RESET)"}
                 </button>
               </div>
             </>

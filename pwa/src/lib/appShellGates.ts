@@ -8,7 +8,6 @@ import { hasCompletedProductTour } from '@/lib/onboarding';
 export const ONBOARDING_EXCLUDED_ROUTES = [
   '/',
   '/app-root',
-  '/onboarding',
   '/welcome',
   '/login',
   '/signup',

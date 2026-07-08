@@ -30,10 +30,10 @@ const slides: SlideData[] = [
   {
     lines: [
       { text: "Secure.", isGreen: false },
-      { text: "Escrow.", isGreen: false },
+      { text: "Verified.", isGreen: false },
       { text: "Trade.", isGreen: true }
     ],
-    subcopy: "Buy, sell, and hire locally with verified neighbors under digital protection."
+    subcopy: "Buy, sell, and hire locally with verified neighbors."
   },
   {
     lines: [

@@ -57,7 +57,7 @@ export default function Home() {
             </motion.h1>
             
             <motion.p variants={itemVariants} className="text-editorial" style={{ fontSize: "1.25rem", color: "var(--text-muted)", marginBottom: "48px", lineHeight: "1.7", maxWidth: "480px" }}>
-              NeyborHuud is a verified neighborhood ecosystem. Connect with verified residents, buy locally via Social Escrow, and experience zero-lag safety alerts. Built for reality.
+              NeyborHuud is a verified neighborhood ecosystem. Connect with verified residents, buy and sell locally, and experience zero-lag safety alerts. Built for reality.
             </motion.p>
             
             <motion.div variants={itemVariants} style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
@@ -138,7 +138,7 @@ export default function Home() {
               Packed with <span className="text-display-outline">Power.</span>
             </h2>
             <p className="text-editorial" style={{ fontSize: "1.2rem", color: "var(--text-muted)" }}>
-              No generic blocks. Interact with our feature sandbox below to see exactly how TrustOS, social escrow, and reward mechanics work.
+              No generic blocks. Interact with our feature sandbox below to see exactly how TrustOS and reward mechanics work.
             </p>
           </div>
 

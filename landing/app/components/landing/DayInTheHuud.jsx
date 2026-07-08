@@ -8,14 +8,14 @@ const PHASES = [
   {
     id: "morning",
     time: "08:00 AM",
-    title: "Morning Hustle & Social Escrow",
+    title: "Morning Hustle & Local Commerce",
     subtitle: "Secure Local Commerce",
-    desc: "Tunde needs to sell his Honda generator. Instead of risking scams on open marketplaces or paying expensive dispatch riders, he lists it on NeyborHuud. An immediate neighbor, Fatima, deposits the Naira in the TrustOS Escrow hold. Tunde dispatches it, Fatima inspects and releases the funds. Trust established, transaction cleared—all within 300 meters.",
+    desc: "Tunde needs to sell his Honda generator. Instead of risking scams on open marketplaces or paying expensive dispatch riders, he lists it on NeyborHuud. An immediate neighbor, Fatima, agrees the price in chat and pays Tunde directly. Tunde confirms receipt. Trust established, transaction cleared—all within 300 meters.",
     color: "#FFAC1C", // warm morning gold
     icon: <Sun size={24} color="#FFAC1C" />,
     mockup: {
-      header: "NeyborHuud Escrow #912",
-      body: "₦180,000 locked in TrustOS Hold for Generator. Verified dispatch rider dispatched.",
+      header: "NeyborHuud Deal #912",
+      body: "₦180,000 agreed for Generator. Buyer paid, awaiting seller confirmation.",
       type: "commerce",
       bg: "linear-gradient(135deg, rgba(255, 172, 28, 0.15) 0%, rgba(15, 19, 26, 0.8) 100%)"
     }

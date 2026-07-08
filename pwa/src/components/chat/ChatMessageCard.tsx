@@ -16,7 +16,7 @@ import { ChatMessage } from '@/types/api';
 import { ChatExpandableText } from '@/components/chat/ChatExpandableText';
 import { ChatMessageTicks } from '@/components/chat/ChatMessageTicks';
 import { MessageReactions } from '@/components/chat/MessageReactions';
-import { EscrowCard } from '@/components/chat/EscrowCard';
+import { DealStatusCard } from '@/components/chat/DealStatusCard';
 import { OfferCard } from '@/components/chat/OfferCard';
 
 function timeStr(dateStr: string | undefined): string {
@@ -352,14 +352,14 @@ export default function ChatMessageCard({
     case 'file':  return wrap(msg.mediaUrl ? <FileBubble  msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />);
     case 'system':
       // System messages carry structured meta for interactive deal cards:
-      //   - offerAction  → haggle OfferCard (accept/reject/counter/withdraw)
-      //   - escrowEvent  → EscrowCard (I've Paid / Confirm Receipt / Dispute)
+      //   - offerAction → haggle OfferCard (accept/reject/counter/withdraw)
+      //   - dealAction  → DealStatusCard (I've Paid / Confirm Receipt)
       // Everything else falls back to a plain system text bubble.
       if (msg.meta?.offerAction) {
         return wrap(<OfferCard msg={msg} currentUserId={currentUserId} />);
       }
-      if (msg.meta?.escrowBot || msg.meta?.escrowEvent) {
-        return wrap(<EscrowCard msg={msg} currentUserId={currentUserId} />);
+      if (msg.meta?.dealAction) {
+        return wrap(<DealStatusCard msg={msg} currentUserId={currentUserId} />);
       }
       return wrap(<TextBubble msg={msg} mine={mine} isPriority={false} />);
     case 'location':       return wrap(<LocationCard    msg={msg} mine={mine} />);

@@ -709,9 +709,9 @@ export default function ConversationPage() {
       );
     };
 
-    // A deal just started (offer accepted → order + escrow created). The Escrow
-    // Bot posts the 🤝 Deal Started card AFTER the offer:updated event, so reload
-    // once more here to surface it (and the seller's payment details) live.
+    // A deal just started (offer accepted → order created). The server posts
+    // the 🤝 Deal Started card AFTER the offer:updated event, so reload once
+    // more here to surface it (and the seller's payment details) live.
     const onDeal = (payload: any) => {
       if (payload?.conversationId && payload.conversationId !== conversationId) return;
       loadMessages();

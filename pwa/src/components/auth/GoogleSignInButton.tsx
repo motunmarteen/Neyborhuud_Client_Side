@@ -25,11 +25,14 @@ interface GoogleSignInButtonProps {
 /**
  * "Continue with Google" button
  *
- * Calls POST /api/v1/auth/social/google on our backend (social.controller.ts).
- * The backend asks Better Auth for the Google authorization URL and returns it.
- * We then redirect the browser to that URL so Google can authenticate the user.
- * After consent, Google redirects back to the backend callback, which then
- * redirects to `callbackURL` (our /auth-callback page) with the session.
+ * Uses Better Auth's client SDK (authClient.signIn.social) directly — this
+ * does NOT go through our backend's social.controller.ts handlers (those
+ * exist for the mobile id_token exchange and a legacy generic-provider path;
+ * the web flow bypasses them entirely). The SDK asks Better Auth for the
+ * Google authorization URL and redirects the browser there so Google can
+ * authenticate the user. After consent, Google redirects back to the Better
+ * Auth backend callback, which then redirects to `callbackURL` (our
+ * /auth-callback page) with the session.
  */
 import { authClient } from '@/lib/auth-client';
 

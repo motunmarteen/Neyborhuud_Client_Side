@@ -124,21 +124,21 @@ function AuthCallbackContent() {
 
             setStatusMessage('Welcome to NeyborHuud!');
 
-            // Step 4: Determine where to send the user
-            // - New Google user (no username set) → /onboarding or /complete-profile
-            // - Returning user → /feed (main app)
-            const hasUsername =
-                userData &&
-                typeof userData.username === 'string' &&
-                userData.username.trim().length > 0;
-
+            // Step 4: Determine where to send the user.
+            // profileCompletedAt is only ever set once the user explicitly
+            // finishes the Complete Profile form — it is NOT set by Google
+            // signup's auto-generated username, so it's the only reliable
+            // signal here. (hasUsername is not a valid proxy: every Google
+            // signup gets an auto-generated username immediately, so keying
+            // off it would skip /complete-profile — and the community/GPS
+            // steps that follow it — for every brand-new Google user.)
             const hasCompletedProfile =
-                userData &&
-                (userData.profileCompletedAt != null || hasUsername);
+                userData && userData.profileCompletedAt != null;
 
             if (!hasCompletedProfile) {
-                // New user via Google — they still need to pick a location and username
-                router.replace('/onboarding');
+                // New user via Google — they still need to complete their
+                // profile, then pick a location and verify GPS.
+                router.replace('/complete-profile');
             } else {
                 router.replace('/feed');
             }

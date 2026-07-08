@@ -36,7 +36,6 @@ export type DealStatus =
   | "committed"
   | "payment_sent"
   | "completed"
-  | "disputed"
   | "expired";
 
 /** One row in the unified My Deals list — a live offer or order. */
@@ -649,14 +648,5 @@ export const marketplaceService = {
     return await apiClient.post(
       `/marketplace/orders/${orderId}/confirm-receipt`,
     );
-  },
-
-  /**
-   * Open a dispute on a deal — routes to a community referee (Neybor Baale).
-   * POST /api/v1/marketplace/dispute/:transactionId
-   * The transactionId is the orderId for marketplace deals.
-   */
-  async disputeOrder(orderId: string, reason: string) {
-    return await apiClient.post(`/marketplace/dispute/${orderId}`, { reason });
   },
 };

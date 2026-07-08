@@ -285,7 +285,7 @@ export function BuyerIntentActions({
     );
   }
 
-  // Buy at the listed price directly — starts the deal + escrow immediately.
+  // Buy at the listed price directly — starts the deal immediately.
   // Works for negotiable products too (buyer chooses not to haggle).
   const handleBuyNow = async () => {
     try {

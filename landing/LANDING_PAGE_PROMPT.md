@@ -16,7 +16,7 @@ You must build a single-page marketing structure in Next.js/React that walks use
 3. **The 4 Pillars:** 
    - *Zero-Lag Safety* (Sentinel AI)
    - *Hyperlocal Feed* (Cascading Radius)
-   - *Marketplace & Escrow* (Social Escrow)
+   - *Marketplace* (Verified Neighbor Trading)
    - *100% Verified Trust* (TrustOS with NIN/BVN)
 4. **Use Cases (Personas):** Show how it works for Parents (safety), Hustlers (gigs/marketplace), and everyone (staying informed).
 5. **The Fortress (Security):** Highlight NDPR compliance, local data residency, and TrustOS logic to build trust.

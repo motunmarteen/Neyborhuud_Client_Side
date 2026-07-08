@@ -30,7 +30,7 @@ Your existing authentication utilities should handle token storage, retrieval, a
 
 ## Core API Endpoints
 
-The marketplace API exposes several endpoints organized into three categories: product management (CRUD operations), social interactions (likes and comments), and transactional features (orders, offers, escrow). For this implementation, you'll primarily work with product management and social interaction endpoints, as the transactional features are already implemented in your existing marketplace flows.
+The marketplace API exposes several endpoints organized into three categories: product management (CRUD operations), social interactions (likes and comments), and transactional features (orders, offers). For this implementation, you'll primarily work with product management and social interaction endpoints, as the transactional features are already implemented in your existing marketplace flows.
 
 **Product Management Endpoints:**
 

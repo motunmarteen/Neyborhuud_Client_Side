@@ -31,7 +31,6 @@ export function FloatingSosButton() {
     '/complete-profile',
     '/pick-community',
     '/setup-complete',
-    '/onboarding',
     '/welcome'
   ];
 

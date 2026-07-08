@@ -14,7 +14,7 @@ const TERMINAL_LOGS = [
   { text: "sentinel_ai: Auto-escalated to local feed. Radius priority set to 500m.", type: "success" },
   { text: "sentinel_ai: Broadcast successful. 89 neighbors notified.", type: "success" },
   { text: "sentinel_ai: Monitoring chatter bounds for local fraud signatures...", type: "info" },
-  { text: "escrow_patrol: Verified trade #927 (Honda Generator) - Buyer funds locked.", type: "success" },
+  { text: "deal_patrol: Verified trade #927 (Honda Generator) - Payment confirmed.", type: "success" },
   { text: "sentinel_ai: All systems green. Patrol active.", type: "success" }
 ];
 
