@@ -80,6 +80,36 @@
     overflow: hidden;
   }
 
+  /* iOS-style status bar row — time + signal/wifi/battery flanking the notch */
+  .phone-mockup-statusbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    padding: 0 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #ffffff;
+    z-index: 99998;
+    pointer-events: none;
+    font-family: -apple-system, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  .phone-mockup-statusbar__time {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .phone-mockup-statusbar__icons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
   /* Dynamic Island / Camera Notch */
   .phone-mockup-notch {
     position: absolute;

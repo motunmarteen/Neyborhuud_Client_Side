@@ -2761,6 +2761,14 @@ html[data-auth='profile-map'] .neu-base {
   pointer-events: none;
 }
 
+/* Inside the desktop phone-mockup, the notch is drawn by the outer page on
+   top of this iframe's content, and env(safe-area-inset-top) is 0 here (no
+   real notch) — so the normal fallback isn't enough clearance and the
+   wordmark/step-dots render underneath the notch. See DesktopPhoneFrame.tsx. */
+[data-in-phone-mockup="true"] .auth-signup-chrome {
+  padding-top: 3.25rem;
+}
+
 .auth-signup-chrome > * {
   pointer-events: auto;
 }

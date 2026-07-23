@@ -5,6 +5,24 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import QRCode from "qrcode";
 
+/** iOS-style status-bar clock, e.g. "9:41". Ticks on the minute, not every render. */
+function useStatusBarTime(): string {
+  const [time, setTime] = useState("");
+
+  useEffect(() => {
+    const update = () => {
+      setTime(
+        new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+      );
+    };
+    update();
+    const id = setInterval(update, 15_000);
+    return () => clearInterval(id);
+  }, []);
+
+  return time;
+}
+
 export default function DesktopPhoneFrame({ children }: { children: ReactNode }) {
   const [isAppDomain, setIsAppDomain] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -12,6 +30,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
   const [isDesktop, setIsDesktop] = useState(false);
   const [iframeSrc, setIframeSrc] = useState("");
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
+  const statusBarTime = useStatusBarTime();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -26,6 +45,15 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
 
       const inIframe = window.self !== window.top;
       setIsInIframe(inIframe);
+      // The phone-mockup notch is drawn by the OUTER page, on top of this
+      // iframe's own content — env(safe-area-inset-top) is 0 in a desktop
+      // iframe (there's no real notch here), so chrome that relies on it
+      // renders underneath the notch instead of below it. Flag it so the
+      // iframe's own CSS can reserve extra clearance. See globals.css
+      // [data-in-phone-mockup="true"] .auth-signup-chrome.
+      if (inIframe) {
+        document.documentElement.setAttribute("data-in-phone-mockup", "true");
+      }
 
       // Set the initial iframe src ONLY once on mount to prevent reloading the iframe on clicks
       setIframeSrc(window.location.pathname + window.location.search);
@@ -99,6 +127,30 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
       {/* 2. Phone Mockup Bezel with same-origin iframe */}
       <div className="phone-mockup-wrapper">
         <div className="phone-mockup-device">
+          <div className="phone-mockup-statusbar" aria-hidden="true">
+            <span className="phone-mockup-statusbar__time">{statusBarTime}</span>
+            <span className="phone-mockup-statusbar__icons">
+              {/* Cellular signal */}
+              <svg width="17" height="11" viewBox="0 0 17 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="6" width="3" height="5" rx="0.8" fill="currentColor" />
+                <rect x="4.5" y="4" width="3" height="7" rx="0.8" fill="currentColor" />
+                <rect x="9" y="2" width="3" height="9" rx="0.8" fill="currentColor" />
+                <rect x="13.5" y="0" width="3" height="11" rx="0.8" fill="currentColor" />
+              </svg>
+              {/* Wi-Fi */}
+              <svg width="15" height="11" viewBox="0 0 15 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 9.4a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor" />
+                <path d="M4.2 6.7a4.8 4.8 0 0 1 6.6 0 .6.6 0 0 1-.02.86l-.72.68a.6.6 0 0 1-.82-.02 2.9 2.9 0 0 0-3.5 0 .6.6 0 0 1-.82.02l-.72-.68a.6.6 0 0 1 0-.86Z" fill="currentColor" />
+                <path d="M1.6 4.1a8.6 8.6 0 0 1 11.8 0 .6.6 0 0 1 0 .87l-.72.7a.6.6 0 0 1-.82 0 6.7 6.7 0 0 0-8.72 0 .6.6 0 0 1-.82 0l-.72-.7a.6.6 0 0 1 0-.87Z" fill="currentColor" />
+              </svg>
+              {/* Battery */}
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0.75" y="0.75" width="20.5" height="10.5" rx="2.6" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1" />
+                <rect x="2.25" y="2.25" width="17.5" height="7.5" rx="1.4" fill="currentColor" />
+                <path d="M22.5 4v4a1.6 1.6 0 0 0 0-4Z" fill="currentColor" fillOpacity="0.4" />
+              </svg>
+            </span>
+          </div>
           <div className="phone-mockup-notch" />
           <div className="phone-mockup-speaker" />
           <div className="phone-mockup-screen" style={{ overflow: "hidden" }}>
