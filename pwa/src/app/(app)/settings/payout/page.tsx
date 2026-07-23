@@ -21,15 +21,30 @@ export default function PayoutDetailsPage() {
   const [accountName, setAccountName] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Prefill from the current user's saved payout details, if any.
+  // Prefill from the API, fetched fresh on mount — payout details are never
+  // cached in localStorage/sessionStorage (see lib/auth.ts sanitizeUserForStorage),
+  // so this can't come from the persisted user object.
   useEffect(() => {
-    const pd = (user as any)?.payoutDetails;
-    if (pd) {
-      setBankName(pd.bankName ?? '');
-      setAccountNumber(pd.accountNumber ?? '');
-      setAccountName(pd.accountName ?? '');
-    }
-  }, [user]);
+    let cancelled = false;
+    marketplaceService
+      .getMyPayoutDetails()
+      .then((res) => {
+        if (cancelled) return;
+        const data = (res as any)?.data ?? res;
+        const pd = data?.hasPayoutDetails ? data.payoutDetails : null;
+        if (pd) {
+          setBankName(pd.bankName ?? '');
+          setAccountNumber(pd.accountNumber ?? '');
+          setAccountName(pd.accountName ?? '');
+        }
+      })
+      .catch(() => {
+        // No saved details yet, or fetch failed — leave the form blank.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // The registered name the backend will check the account name against.
   const registeredName = (() => {

@@ -532,6 +532,23 @@ export const marketplaceService = {
   },
 
   /**
+   * Fetch the CURRENT user's own saved payout details, to prefill the
+   * settings/payout form. Always fetched fresh — bank details are never
+   * cached in localStorage/sessionStorage (see lib/auth.ts sanitizeUserForStorage).
+   * GET /api/v1/marketplace/payout-details
+   */
+  async getMyPayoutDetails() {
+    return await apiClient.get<{
+      hasPayoutDetails: boolean;
+      payoutDetails: {
+        bankName: string;
+        accountNumber: string;
+        accountName: string;
+      } | null;
+    }>(`/marketplace/payout-details`);
+  },
+
+  /**
    * Buyer/seller on an order reads the seller's payout details for that deal.
    * GET /api/v1/marketplace/orders/:orderId/payout-details
    */

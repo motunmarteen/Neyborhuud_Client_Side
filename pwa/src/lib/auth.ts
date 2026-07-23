@@ -14,6 +14,22 @@ export interface SessionData {
   rememberMe: boolean;
 }
 
+/**
+ * Strip fields that must never sit in localStorage/sessionStorage
+ * indefinitely — bank payout details (account number, account name, bank
+ * name) are the current case. They're fetched fresh from the API wherever
+ * they're actually needed (settings/payout page, deal chat) rather than
+ * cached client-side, so persisting them here was pure exposure with no
+ * benefit: an account number sitting in devtools-readable storage on any
+ * device the user has ever logged into, with no expiry.
+ */
+function sanitizeUserForStorage(user: any): any {
+  if (!user || typeof user !== "object") return user;
+  if (!("payoutDetails" in user)) return user;
+  const { payoutDetails, ...rest } = user;
+  return rest;
+}
+
 export const authStorage = {
   /**
    * Store authentication data based on rememberMe preference
@@ -38,7 +54,7 @@ export const authStorage = {
       storage.setItem(REFRESH_TOKEN_KEY, refreshToken);
     }
     if (user) {
-      storage.setItem(USER_KEY, JSON.stringify(user));
+      storage.setItem(USER_KEY, JSON.stringify(sanitizeUserForStorage(user)));
     }
 
     // Clear from the other storage to avoid conflicts
@@ -199,7 +215,7 @@ export const authStorage = {
     if (typeof window === "undefined") return;
     const session = this.getStoredSession();
     const storage = session?.rememberMe ? localStorage : sessionStorage;
-    storage.setItem(USER_KEY, JSON.stringify(user));
+    storage.setItem(USER_KEY, JSON.stringify(sanitizeUserForStorage(user)));
   },
 };
 
@@ -237,7 +253,7 @@ export const authService = {
    */
   setUser(user: any) {
     if (typeof window === "undefined") return;
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    localStorage.setItem(USER_KEY, JSON.stringify(sanitizeUserForStorage(user)));
   },
 
   /**
