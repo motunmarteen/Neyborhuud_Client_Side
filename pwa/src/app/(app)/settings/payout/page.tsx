@@ -19,6 +19,7 @@ export default function PayoutDetailsPage() {
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Prefill from the API, fetched fresh on mount — payout details are never
@@ -60,6 +61,7 @@ export default function PayoutDetailsPage() {
     bankName.trim().length > 1 &&
     acctValid &&
     accountName.trim().length > 1 &&
+    password.trim().length > 0 &&
     !loading;
 
   async function onSubmit(e: React.FormEvent) {
@@ -71,7 +73,9 @@ export default function PayoutDetailsPage() {
         bankName: bankName.trim(),
         accountNumber: accountNumber.trim(),
         accountName: accountName.trim(),
+        password,
       });
+      setPassword('');
       toast.success('Payout details saved. Buyers will see this during a deal.');
     } catch (err) {
       const ax = err as { message?: string };
@@ -144,6 +148,21 @@ export default function PayoutDetailsPage() {
               Accounts in another name are rejected.
             </p>
           )}
+
+          <PremiumInput
+            label="Confirm your password"
+            icon="lock"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Required to save changes"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <p className="-mt-2 text-xs leading-relaxed text-gray-500">
+            We ask for your password again here since this is where deal
+            payments get sent — a precaution against someone else using your
+            session to redirect your payouts.
+          </p>
 
           <button
             type="submit"

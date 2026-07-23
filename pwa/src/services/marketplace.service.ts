@@ -5,6 +5,7 @@
  */
 
 import apiClient from "@/lib/api-client";
+import { newIdempotencyKey } from "@/lib/idempotency";
 import {
   MarketplaceItem,
   PaginatedResponse,
@@ -527,6 +528,9 @@ export const marketplaceService = {
     bankName: string;
     accountNumber: string;
     accountName: string;
+    /** Current password — required step-up re-auth for this change (omitted
+     * only for social-login-only accounts with no password set). */
+    password?: string;
   }) {
     return await apiClient.put(`/marketplace/payout-details`, details);
   },
@@ -605,7 +609,16 @@ export const marketplaceService = {
     /** Buy at the listed price directly (skip haggling, even if negotiable). */
     buyNow?: boolean;
   }) {
-    return await apiClient.post("/marketplace/orders", data);
+    // Generated once per call and carried through any automatic
+    // network-level retry of THIS request (axios/React Query retry the same
+    // payload, not a fresh one) — a timeout-then-retry returns the original
+    // order instead of racing the atomic product-reservation claim against
+    // itself. Repeat user clicks are a separate concern already handled by
+    // disabling the button while createOrder.isPending (see BuyerIntentActions.tsx).
+    return await apiClient.post("/marketplace/orders", {
+      ...data,
+      idempotencyKey: newIdempotencyKey(),
+    });
   },
 
   /**
