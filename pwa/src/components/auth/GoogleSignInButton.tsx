@@ -55,19 +55,24 @@ export function GoogleSignInButton({
                     ? `${window.location.origin}/auth-callback`
                     : 'http://localhost:3001/auth-callback');
 
-            const { data, error } = await authClient.signIn.social({
+            const { error } = await authClient.signIn.social({
                 provider: 'google',
                 callbackURL: resolvedCallbackURL,
             });
 
+            // Better Auth's client SDK redirects via its own onSuccess hook
+            // (window.location.href = data.url) as soon as this call
+            // resolves successfully — see redirectPlugin in
+            // better-auth/dist/client/fetch-plugins.mjs. Calling
+            // window.location.assign(data.url) again here raced that
+            // navigation: the OAuth `state` cookie set by the initial
+            // /sign-in/social response could get clobbered or the browser
+            // could start navigating to a stale URL from a prior render,
+            // producing an intermittent state_mismatch on Google's
+            // callback. Only handle the error path here; let the SDK own
+            // the redirect exclusively.
             if (error) {
                 throw new Error(error.message || 'Google sign-in failed. Please try again.');
-            }
-
-            // authClient automatically redirects for social sign-ins, 
-            // but just in case it returns a URL instead:
-            if (data?.url) {
-                window.location.assign(data.url);
             }
         } catch (err: unknown) {
             setLoading(false);

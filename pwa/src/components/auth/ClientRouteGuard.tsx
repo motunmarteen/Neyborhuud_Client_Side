@@ -27,9 +27,17 @@ export function ClientRouteGuard({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, mounted, router]);
 
-  // Prevent flicker of private content while redirecting
+  // Prevent flicker of private content while redirecting.
+  // isAuthed must only be read after mount — apiClient.isAuthenticated()
+  // reads localStorage, which is unavailable during SSR and can also read a
+  // DIFFERENT value on the client's first paint than what a naive
+  // `typeof window !== 'undefined'` guard implies (that guard is about
+  // environment, not about whether this is the hydration-matching pass).
+  // Gating on `mounted` instead of the window check keeps the very first
+  // client render byte-for-byte identical to the server's, which is what
+  // hydration actually requires.
   const isPrivate = !isOnboardingOrAuthRoute(pathname);
-  const isAuthed = typeof window !== 'undefined' ? apiClient.isAuthenticated() : false;
+  const isAuthed = mounted && apiClient.isAuthenticated();
 
   if (mounted && isPrivate && !isAuthed) {
     return (
