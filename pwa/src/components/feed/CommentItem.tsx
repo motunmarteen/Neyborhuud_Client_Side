@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCommentMutations } from '@/hooks/useComments';
 import { CommentForm } from './CommentForm';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface CommentItemProps {
     comment: Comment;
@@ -86,12 +87,14 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                 href={`/profile/${username}`}
                 className="flex-shrink-0"
             >
-                <div className={`flex ${isReply ? 'h-8 w-8' : 'h-10 w-10'} items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 dark:border-white/10 bg-white dark:bg-[#1A221C] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] transition-transform active:scale-95`}>
+                <div className={`relative flex ${isReply ? 'h-8 w-8' : 'h-10 w-10'} items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 dark:border-white/10 bg-white dark:bg-[#1A221C] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] transition-transform active:scale-95`}>
                     {avatarUrl ? (
-                        <img
+                        <Image
                             src={avatarUrl}
                             alt={username}
-                            className="h-full w-full object-cover"
+                            fill
+                            sizes={isReply ? '32px' : '40px'}
+                            className="object-cover"
                             onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                                 e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
@@ -136,10 +139,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                             <div className="mt-2 grid w-full grid-cols-2 gap-0.5 overflow-hidden rounded-xl">
                                 {comment.mediaUrls.map((url, idx) => (
                                     <div key={idx} className={`${comment.mediaUrls?.length === 1 ? 'col-span-2' : ''} relative aspect-square`}>
-                                        <img
+                                        <Image
                                             src={url}
                                             alt="Comment media"
-                                            className="h-full w-full cursor-zoom-in object-cover transition-all hover:brightness-90"
+                                            fill
+                                            sizes="50vw"
+                                            className="cursor-zoom-in object-cover transition-all hover:brightness-90"
                                             onError={(e) => {
                                                 e.currentTarget.src = 'https://placehold.co/400x400?text=Image+Unavailable';
                                             }}

@@ -1,4 +1,5 @@
 import React, { useId, useState } from 'react';
+import Image from 'next/image';
 
 type PinSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'marker' | '2xl';
 
@@ -67,12 +68,16 @@ export default function MapPinAvatar({
         <g clipPath={`url(#teardrop-clip-${uid})`}>
           <foreignObject x="0" y="0" width="100" height="115">
             {showImage ? (
-              <img 
-                src={resolvedSrc!} 
-                alt={alt} 
-                className="w-full h-full object-cover object-center" 
-                onError={() => setImgError(true)}
-              />
+              <div className="relative w-full h-full">
+                <Image
+                  src={resolvedSrc!}
+                  alt={alt}
+                  fill
+                  sizes={`${s.w}px`}
+                  className="object-cover object-center"
+                  onError={() => setImgError(true)}
+                />
+              </div>
             ) : (
               <div className="w-full h-full bg-brand-blue flex items-center justify-center pt-2 text-white">
                 {showInitial ? (

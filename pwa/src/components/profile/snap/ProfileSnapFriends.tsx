@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ProfileBrowseEyebrow } from '@/components/profile/browse/ProfileBrowseSectionTitle';
 import { resolveUserAvatarUrl } from '@/lib/userAvatar';
 
@@ -70,11 +71,11 @@ export function ProfileSnapFriends({
                 <Link
                   key={user.id}
                   href={`/profile/${user.username}`}
-                  className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full text-sm font-bold bg-gray-100 hover:bg-gray-200 border border-white hover:border-gray-200/50 shadow-sm transition-all duration-200"
+                  className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full text-sm font-bold bg-gray-100 hover:bg-gray-200 border border-white hover:border-gray-200/50 shadow-sm transition-all duration-200"
                   title={`@${user.username}`}
                 >
                   {avatar ? (
-                    <img src={avatar} alt="" className="h-full w-full object-cover" />
+                    <Image src={avatar} alt="" fill sizes="44px" className="object-cover" />
                   ) : (
                     <span className="text-gray-600">{initial}</span>
                   )}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { LeaderboardEntry } from "@/types/api";
 
 interface Props {
@@ -51,9 +52,11 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
 
       <div className="mod-inset flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-[var(--neu-text)]">
         {(entry.user?.avatarUrl ?? entry.user?.profilePicture) ? (
-          <img
-            src={entry.user.avatarUrl ?? entry.user.profilePicture}
+          <Image
+            src={(entry.user.avatarUrl ?? entry.user.profilePicture)!}
             alt={displayName}
+            width={36}
+            height={36}
             className="h-full w-full object-cover"
           />
         ) : (

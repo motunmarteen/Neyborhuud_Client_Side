@@ -372,8 +372,7 @@ function ExplorePageInner() {
                   className="block relative w-full h-[320px] overflow-hidden bg-black"
                 >
                   {newsArticles[0].image && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={newsArticles[0].image} alt={newsArticles[0].title} className="w-full h-full object-cover opacity-80" />
+                    <Image src={newsArticles[0].image} alt={newsArticles[0].title} fill sizes="100vw" className="object-cover opacity-80" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 pb-5">

@@ -7,6 +7,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { resolveDynamicParam } from '@/lib/staticExportParams';
 import {
   extractVerificationIdentityInput,
@@ -1061,7 +1062,7 @@ export default function ProfilePage() {
                           title={`View @${v.voucherUsername}`}
                         >
                           {v.voucherAvatar ? (
-                            <img src={v.voucherAvatar} alt="" className="h-4 w-4 rounded-full object-cover" />
+                            <Image src={v.voucherAvatar} alt="" width={16} height={16} className="h-4 w-4 rounded-full object-cover" />
                           ) : (
                             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-200/50 text-[10px] font-bold text-emerald-700">
                               {v.voucherUsername[0]?.toUpperCase()}

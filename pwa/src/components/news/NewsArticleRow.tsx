@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import type { RssArticle } from '@/types/incident';
 
 type NewsArticleRowProps = {
@@ -24,11 +25,12 @@ export function NewsArticleRow({ article }: NewsArticleRowProps) {
     >
       {article.imageUrl ? (
         <div className="mod-inset h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-          <img
+          <Image
             src={article.imageUrl}
             alt=""
+            width={56}
+            height={56}
             className="h-full w-full object-cover"
-            loading="lazy"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}

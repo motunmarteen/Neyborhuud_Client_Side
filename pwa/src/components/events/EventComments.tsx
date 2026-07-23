@@ -8,6 +8,7 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { formatTimeAgo } from "@/utils/timeAgo";
 import { useEventComments, useEventCommentMutations } from "@/hooks/useEvents";
 import type { Comment } from "@/types/api";
@@ -171,7 +172,7 @@ function EventCommentItem({
       <Link href={`/profile/${username}`} className="flex-shrink-0">
         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-[#1A221C] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
           {avatar ? (
-            <img src={avatar} alt={username} className="h-full w-full object-cover" />
+            <Image src={avatar} alt={username} width={40} height={40} className="h-full w-full object-cover" />
           ) : (
             <span className="text-[15px] font-bold text-[#65676B] dark:text-[#B0B3B8]">
               {username[0]?.toUpperCase()}
@@ -212,10 +213,12 @@ function EventCommentItem({
                     key={idx}
                     className={`${comment.mediaUrls?.length === 1 ? "col-span-2" : ""} relative aspect-square`}
                   >
-                    <img
+                    <Image
                       src={url}
                       alt={`Attachment ${idx + 1}`}
-                      className="h-full w-full cursor-zoom-in object-cover transition-all hover:brightness-90"
+                      fill
+                      sizes="50vw"
+                      className="cursor-zoom-in object-cover transition-all hover:brightness-90"
                     />
                   </div>
                 ))}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 export type PostCardMediaItem = {
   url: string;
@@ -90,11 +91,13 @@ export function PostCardMediaSlider({
     }
 
     return (
-      <img
+      <Image
         src={item.url}
         alt={alt}
+        fill
+        sizes={compact ? '(max-width: 640px) 100vw, 400px' : '(max-width: 768px) 100vw, 600px'}
+        priority={index === 0}
         className="post-card-media-slider__media"
-        loading={index === 0 ? 'eager' : 'lazy'}
         draggable={false}
         onError={() => {
           setFailedUrls((prev) => {

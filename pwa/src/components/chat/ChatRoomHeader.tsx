@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export type ChatRoomHeaderProps = {
   displayName: string;
@@ -74,9 +75,11 @@ export function ChatRoomHeader({
           aria-label={onCommunityInfo ? 'Community info' : undefined}
         >
           {avatarUrl ? (
-            <img
+            <Image
               src={avatarUrl}
               alt=""
+              width={40}
+              height={40}
               className="h-10 w-10 shrink-0 rounded-full object-cover shadow-sm"
             />
           ) : (

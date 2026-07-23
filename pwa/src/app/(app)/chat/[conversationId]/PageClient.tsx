@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'rea
 import { useParams, useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { navigateBack } from '@/lib/navigateBack';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChatRoomLayout } from '@/components/chat/ChatRoomLayout';
 import { ChatThreadPlaceholder } from '@/components/chat/ChatThreadPlaceholder';
@@ -950,9 +951,11 @@ export default function ConversationPage() {
       {conv?.contextType === 'marketplace' && conv.context ? (
         <div className="flex items-center gap-3 bg-blue-50 px-4 py-3">
           {conv.context.productThumbnail ? (
-            <img
+            <Image
               src={conv.context.productThumbnail}
               alt={conv.context.productTitle ?? 'Product'}
+              width={44}
+              height={44}
               className="h-11 w-11 shrink-0 rounded-xl object-cover shadow-sm"
             />
           ) : (

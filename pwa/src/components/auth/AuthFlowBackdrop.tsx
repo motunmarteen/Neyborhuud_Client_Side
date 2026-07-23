@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 const LANDING_VIDEO = '/video/background-video.mp4';
 const LANDING_POSTER = '/video/landing-poster.jpg';
@@ -49,10 +50,13 @@ export function AuthFlowBackdrop({ sheetCollapsed = false }: { sheetCollapsed?: 
             <div className="absolute inset-0 bg-[#060908]" aria-hidden />
 
             {posterOk ? (
-                <img
+                <Image
                     src={LANDING_POSTER}
                     alt=""
-                    className="landing-video absolute inset-0 h-full w-full object-cover"
+                    fill
+                    priority
+                    sizes="100vw"
+                    className="landing-video object-cover"
                     onError={() => setPosterOk(false)}
                 />
             ) : null}

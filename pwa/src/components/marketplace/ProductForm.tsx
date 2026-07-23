@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useProductMutations } from "@/hooks/useMarketplace";
 import { Product } from "@/services/marketplace.service";
 import { useRegisteredLocation } from "@/hooks/useRegisteredLocation";
@@ -319,7 +320,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
             {imageUrls.map((url, idx) => (
               <div key={`url-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] dark:border-white/10">
-                <img src={url} alt={`Product ${idx + 1}`} className="h-full w-full object-cover" />
+                <Image src={url} alt={`Product ${idx + 1}`} fill sizes="(max-width: 640px) 33vw, 20vw" className="object-cover" />
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(idx, true)}
@@ -332,7 +333,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             ))}
             {images.map((file, idx) => (
               <div key={`file-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] dark:border-white/10">
-                <img src={URL.createObjectURL(file)} alt={`Upload ${idx + 1}`} className="h-full w-full object-cover" />
+                <Image src={URL.createObjectURL(file)} alt={`Upload ${idx + 1}`} fill unoptimized sizes="(max-width: 640px) 33vw, 20vw" className="object-cover" />
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(idx, false)}

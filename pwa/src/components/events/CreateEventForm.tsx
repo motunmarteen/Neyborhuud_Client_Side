@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useCreateEvent } from "@/hooks/useEvents";
 import { useRegisteredLocation } from "@/hooks/useRegisteredLocation";
 import { toast } from 'sonner';
@@ -115,7 +116,7 @@ export default function CreateEventForm() {
           }`}
         >
           {coverPreview ? (
-            <img src={coverPreview} className="h-full w-full object-cover" alt="Cover preview" />
+            <Image src={coverPreview} fill unoptimized sizes="100vw" className="object-cover" alt="Cover preview" />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-brand-green-dark/70 dark:text-white/55">
               <span className="material-symbols-outlined text-4xl text-[#006F35]/60 dark:text-primary/70">add_photo_alternate</span>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { useInView } from 'react-intersection-observer';
 import {
   useAdminUsers,
@@ -112,7 +113,7 @@ function UserRow({ user }: { user: User }) {
         <td className="px-4 py-3">
           <div className="flex items-center gap-3 min-w-0">
             {user.profilePicture ? (
-              <img src={user.profilePicture} alt={user.username} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+              <Image src={user.profilePicture} alt={user.username} width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" />
             ) : (
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-black text-white">
                 {initial}

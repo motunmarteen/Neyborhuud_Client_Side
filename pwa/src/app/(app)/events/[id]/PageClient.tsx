@@ -243,9 +243,11 @@ function AttendeesModal({
                   className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-white/10"
                 >
                   {u.avatar ? (
-                    <img
+                    <Image
                       src={u.avatar}
                       alt={name}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (

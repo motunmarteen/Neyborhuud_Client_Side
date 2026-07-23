@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import { usePostMutations } from '@/hooks/usePosts';
 import { getRegisteredLocationSync } from '@/hooks/useRegisteredLocation';
@@ -879,7 +880,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     }}
                                                 >
                                                     {user.avatarUrl ? (
-                                                        <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                                        <Image src={user.avatarUrl} alt="Avatar" fill sizes="44px" className="object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-sm font-black" style={{ background: 'linear-gradient(135deg, #00c431, #009924)', color: 'white' }}>
                                                             {user.username.slice(0,2).toUpperCase()}
@@ -945,11 +946,14 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         {selectedFiles.length > 0 && (
                                             <div className="grid grid-cols-2 gap-2">
                                                 {selectedFiles.map((file, index) => (
-                                                    <div key={index} className="relative group rounded-xl overflow-hidden">
-                                                        <img
+                                                    <div key={index} className="relative group rounded-xl overflow-hidden h-28">
+                                                        <Image
                                                             src={URL.createObjectURL(file)}
                                                             alt={`Preview ${index + 1}`}
-                                                            className="w-full h-28 object-cover"
+                                                            fill
+                                                            unoptimized
+                                                            sizes="50vw"
+                                                            className="object-cover"
                                                         />
                                                         <button
                                                             type="button"

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface StackedGalleryProps {
     images: string[];
@@ -101,7 +102,7 @@ export const StackedGallery: React.FC<StackedGalleryProps> = ({ images }) => {
                                     />
                                 </div>
                             ) : (
-                                <img src={item.url} alt="Gallery" className="w-full h-full object-cover pointer-events-none" />
+                                <Image src={item.url} alt="Gallery" fill sizes="(max-width: 640px) 100vw, 500px" className="object-cover pointer-events-none" />
                             )}
 
                             {/* Top Card Overlays for Image Only */}
@@ -190,7 +191,7 @@ const Lightbox = ({ images, onClose }: { images: string[]; onClose: () => void }
                                 </div>
                             </>
                         ) : (
-                            <img src={img} alt={`Grid ${idx}`} className="w-full h-full object-cover" />
+                            <Image src={img} alt={`Grid ${idx}`} fill sizes="50vw" className="object-cover" />
                         )}
                         <div className="absolute top-2 left-2 bg-black/20 text-white text-[8px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
                             {idx + 1}

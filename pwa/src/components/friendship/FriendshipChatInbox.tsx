@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { chatService } from '@/services/chat.service';
 import socketService from '@/lib/socket';
@@ -209,9 +210,11 @@ export function FriendshipChatInbox({
                 className="mod-card mod-card-hover flex items-center gap-3 rounded-2xl p-3 no-underline transition-opacity"
               >
                 {url ? (
-                  <img
+                  <Image
                     src={url}
                     alt={displayName}
+                    width={48}
+                    height={48}
                     className="neu-avatar h-12 w-12 shrink-0 rounded-full object-cover"
                   />
                 ) : (

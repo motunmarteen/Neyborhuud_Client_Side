@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
 import StarRating from "@/components/services/StarRating";
 import ReviewCard from "@/components/services/ReviewCard";
@@ -90,10 +91,12 @@ export default function ServiceDetailPage() {
               {service.images?.length > 0 && (
                 <div className="mod-card rounded-2xl overflow-hidden">
                   <div className="relative h-56 sm:h-72">
-                    <img
+                    <Image
                       src={service.images[imgIndex]}
                       alt={service.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 640px) 100vw, 600px"
+                      className="object-cover"
                     />
                     {/* Favorite button overlay */}
                     <button
@@ -134,7 +137,7 @@ export default function ServiceDetailPage() {
                             i === imgIndex ? "ring-2 ring-[color:var(--primary)]" : "opacity-50"
                           }`}
                         >
-                          <img src={service.images[i]} alt="" className="w-full h-full object-cover" />
+                          <Image src={service.images[i]} alt="" width={56} height={56} className="w-full h-full object-cover" />
                         </button>
                       ))}
                     </div>
@@ -261,7 +264,7 @@ export default function ServiceDetailPage() {
                 <p className="text-sm font-bold mb-3" style={{ color: "var(--neu-text)" }}>Service Provider</p>
                 <div className="flex items-center gap-3">
                   {service.provider?.profilePicture ? (
-                    <img src={service.provider.profilePicture} alt={providerName} className="w-12 h-12 rounded-full object-cover shrink-0" />
+                    <Image src={service.provider.profilePicture} alt={providerName} width={48} height={48} className="w-12 h-12 rounded-full object-cover shrink-0" />
                   ) : (
                     <div className="w-12 h-12 rounded-full mod-inset flex items-center justify-center shrink-0">
                       <span className="material-symbols-outlined text-[24px]" style={{ color: "var(--neu-text-muted)" }}>person</span>

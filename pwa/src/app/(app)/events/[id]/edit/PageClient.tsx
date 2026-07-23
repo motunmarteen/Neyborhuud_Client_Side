@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { toast } from 'sonner';
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
 import { useEvent, useUpdateEvent } from "@/hooks/useEvents";
@@ -165,7 +166,7 @@ export default function EditEventPage() {
                 }`}
               >
                 {coverPreview ? (
-                  <img src={coverPreview} className="w-full h-full object-cover" alt="cover" />
+                  <Image src={coverPreview} fill unoptimized sizes="100vw" className="object-cover" alt="cover" />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-[var(--neu-text-muted)] gap-2">
                     <span className="material-symbols-outlined text-3xl">add_photo_alternate</span>

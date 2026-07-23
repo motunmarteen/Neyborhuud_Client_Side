@@ -52,7 +52,7 @@ const Avatar = ({ user, size = 48 }: { user: FollowUser; size?: number }) => {
       style={{ width: size, height: size }}
     >
       {src ? (
-        <img src={src} alt={user.username} className="h-full w-full object-cover" />
+        <Image src={src} alt={user.username} width={size} height={size} className="h-full w-full object-cover" />
       ) : (
         <span className="font-bold text-slate-400" style={{ fontSize: size * 0.35 }}>{initials}</span>
       )}

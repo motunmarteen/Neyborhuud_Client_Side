@@ -3,6 +3,7 @@
 import { Suspense, useMemo, useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, X, Settings, ChevronDown } from 'lucide-react';
 
 import { NeyborHuudLogo, AnimatedNeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
@@ -206,12 +207,14 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                         </defs>
                         
                         <foreignObject x="0" y="0" width="40" height="50" clipPath="url(#pin-clip)">
-                          <div className="h-full w-full bg-gray-100 dark:bg-gray-800">
+                          <div className="relative h-full w-full bg-gray-100 dark:bg-gray-800">
                             {resolvedAvatar ? (
-                              <img
+                              <Image
                                 src={resolvedAvatar}
                                 alt={displayName}
-                                className="h-full w-full object-cover object-center"
+                                fill
+                                sizes="40px"
+                                className="object-cover object-center"
                               />
                             ) : (
                               <div className="flex h-[40px] w-full items-center justify-center text-[18px] font-semibold text-gray-500">

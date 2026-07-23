@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/api-client";
 import { resolvePostAuthRoute, validateStoredSession } from "@/lib/authSession";
@@ -175,13 +176,14 @@ export default function AppRootPage() {
           }
         `}} />
         <div className="splash-container">
-          <img
+          <Image
             src="/brand/neyborhuud-mark-light.png"
             alt="NeyborHuud Logo"
+            width={110}
+            height={110}
+            priority
             className="splash-logo"
             style={{
-              width: "110px",
-              height: "110px",
               objectFit: "contain"
             }}
           />
@@ -208,10 +210,13 @@ export default function AppRootPage() {
         <div className="absolute inset-0 bg-[#060908]" />
 
         {posterOk ? (
-          <img
+          <Image
             src={LANDING_POSTER}
             alt=""
-            className="landing-video absolute inset-0 h-full w-full"
+            fill
+            priority
+            sizes="100vw"
+            className="landing-video object-cover"
             onError={() => setPosterOk(false)}
           />
         ) : null}
@@ -246,9 +251,12 @@ export default function AppRootPage() {
           <div className="landing-page-header-brand flex flex-col items-center justify-center relative">
             <div className="landing-logo-halo pointer-events-none" aria-hidden />
             <div className="landing-page-header-mark-wrap">
-              <img
+              <Image
                 src="/brand/neyborhuud-mark-light.png"
                 alt="NeyborHuud Pin"
+                width={100}
+                height={100}
+                priority
                 className="landing-page-header-mark brand-mark-hero object-contain"
                 style={{ width: "auto", height: "var(--landing-mark-height, 100px)", maxHeight: "15vh" }}
               />

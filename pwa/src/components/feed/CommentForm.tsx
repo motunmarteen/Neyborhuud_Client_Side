@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import Image from 'next/image';
 import { useCommentMutations } from '@/hooks/useComments';
 import { useAuth } from '@/hooks/useAuth';
 import { usePostMutations } from '@/hooks/usePosts';
@@ -102,10 +103,12 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                 <div className="mt-0.5 shrink-0">
                     <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 dark:border-white/10 bg-white dark:bg-[#1A221C] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
                         {user?.avatarUrl || user?.profilePicture ? (
-                            <img 
-                                src={user.avatarUrl || user.profilePicture} 
-                                alt="Current user" 
-                                className="w-full h-full object-cover" 
+                            <Image
+                                src={(user.avatarUrl || user.profilePicture)!}
+                                alt="Current user"
+                                width={40}
+                                height={40}
+                                className="w-full h-full object-cover"
                                 onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                     e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
@@ -172,8 +175,10 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                         <div className="mb-2 flex flex-wrap gap-2">
                             {mediaUrls.map((url, idx) => (
                                 <div key={idx} className="group relative">
-                                    <img
+                                    <Image
                                         src={url}
+                                        width={80}
+                                        height={80}
                                         className="h-20 w-20 rounded-lg object-cover neu-card-sm"
                                         alt="Preview"
                                         onError={(e) => {

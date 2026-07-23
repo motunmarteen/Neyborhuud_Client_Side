@@ -10,6 +10,7 @@
 
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { chatService } from '@/services/chat.service';
 import { useRecentCalls } from '@/hooks/useRecentCalls';
@@ -231,7 +232,7 @@ function Avatar({ src, name, community }: { src: string | null; name: string; co
   return (
     <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-slate-100 shadow-sm">
       {src ? (
-        <img src={src} alt={name} className="h-full w-full object-cover" />
+        <Image src={src} alt={name} width={48} height={48} className="h-full w-full object-cover" />
       ) : community ? (
         <span className="material-symbols-outlined text-[22px] text-slate-400">groups</span>
       ) : (

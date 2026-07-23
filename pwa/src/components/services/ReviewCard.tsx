@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface ReviewItem {
   id: string;
   reviewer?: {
@@ -55,9 +57,11 @@ export default function ReviewCard({ review }: Props) {
     <div className="py-4 last:border-0" style={{ borderBottom: "1px solid var(--neu-shadow-dark)" }}>
       <div className="flex items-start gap-3">
         {review.reviewer?.profilePicture ? (
-          <img
+          <Image
             src={review.reviewer.profilePicture}
             alt={name}
+            width={36}
+            height={36}
             className="w-9 h-9 rounded-full object-cover shrink-0"
           />
         ) : (

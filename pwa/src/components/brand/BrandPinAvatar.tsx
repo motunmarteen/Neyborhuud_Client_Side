@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useId } from 'react';
+import Image from 'next/image';
 import { resolveMediaUrl } from '@/lib/userAvatar';
 
 type BrandPinSize = 'hero' | 'lg' | 'md' | 'marker' | 'sm' | 'xs';
@@ -70,12 +71,17 @@ export function BrandPinAvatar({
       <g clipPath={`url(#brand-clip-${uid})`}>
         <foreignObject x="0" y="0" width="100" height="115">
           {showPhoto ? (
-            <img 
-              src={resolvedSrc!} 
-              alt={alt} 
-              className="w-full h-full object-cover object-center" 
-              onError={() => setImgError(true)}
-            />
+            <div className="relative w-full h-full">
+              <Image
+                src={resolvedSrc!}
+                alt={alt}
+                fill
+                priority={priority}
+                sizes={`${s.w}px`}
+                className="object-cover object-center"
+                onError={() => setImgError(true)}
+              />
+            </div>
           ) : (
             <div className="w-full h-full bg-brand-blue flex items-center justify-center pt-2 text-white">
               {showInitial ? (

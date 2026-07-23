@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useCall } from './CallProvider';
 
 function formatDuration(seconds: number): string {
@@ -108,10 +109,11 @@ export function CallOverlay() {
       {showAvatar && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
           {call.peerAvatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={call.peerAvatar}
               alt=""
+              width={128}
+              height={128}
               className="h-32 w-32 rounded-full object-cover ring-4 ring-primary/40"
             />
           ) : (

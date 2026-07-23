@@ -7,6 +7,7 @@
  */
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRecentCalls } from '@/hooks/useRecentCalls';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import type { CallRecord } from '@/services/call.service';
@@ -119,7 +120,7 @@ export function CallLog({ currentUserId, search }: CallLogProps) {
             {/* Avatar */}
             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-slate-100 shadow-sm">
               {other?.avatarUrl ? (
-                <img src={other.avatarUrl} alt={otherName} className="h-full w-full object-cover" />
+                <Image src={other.avatarUrl} alt={otherName} width={44} height={44} className="h-full w-full object-cover" />
               ) : (
                 <span className="text-[15px] font-bold text-slate-400">{otherName[0]?.toUpperCase()}</span>
               )}

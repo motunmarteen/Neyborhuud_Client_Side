@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { isBadgeImageIcon, resolveBadgeSymbol } from '@/lib/badgeIcon';
 
 type BadgeIconProps = {
@@ -18,7 +19,7 @@ export function BadgeIcon({ icon, earned = true, size = 'md', className = '' }: 
       <div
         className={`mod-inset flex shrink-0 items-center justify-center overflow-hidden ${shell} ${!earned ? 'opacity-40 grayscale' : ''} ${className}`.trim()}
       >
-        <img src={icon} alt="" className="h-7 w-7 object-contain" />
+        <Image src={icon!} alt="" width={28} height={28} className="h-7 w-7 object-contain" />
       </div>
     );
   }

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { LocalHuudSubpageShell } from '@/components/local-huud/LocalHuudSubpageShell';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import { formatTimeAgo } from '@/utils/timeAgo';
@@ -292,8 +293,7 @@ export default function HelpRequestDetailPage() {
                   <div className={`grid gap-1.5 rounded-xl overflow-hidden ${mediaUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                     {mediaUrls.slice(0, 4).map((url, i) => (
                       <div key={i} className={`relative bg-black/10 rounded-xl overflow-hidden ${mediaUrls.length === 1 ? 'aspect-video' : 'aspect-square'}`}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={url} alt={`media ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                        <Image src={url} alt={`media ${i + 1}`} fill sizes="(max-width: 768px) 50vw, 300px" className="object-cover" />
                       </div>
                     ))}
                   </div>

@@ -7,6 +7,7 @@
  */
 
 import { useMemo } from 'react';
+import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { followService } from '@/services/follow.service';
 import { useAuth } from '@/hooks/useAuth';
@@ -69,7 +70,7 @@ export function MentionInvitePicker({ query, excludeIds, onPick }: MentionInvite
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100">
               {p.avatarUrl ? (
-                <img src={p.avatarUrl} alt={p.name} className="h-full w-full object-cover" />
+                <Image src={p.avatarUrl} alt={p.name} width={36} height={36} className="h-full w-full object-cover" />
               ) : (
                 <span className="text-[13px] font-bold text-slate-400">{p.name[0]?.toUpperCase()}</span>
               )}

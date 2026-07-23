@@ -11,6 +11,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useMyDeals } from "@/hooks/useMarketplace";
 import type { MyDeal } from "@/services/marketplace.service";
 import { DEAL_STATUS_META as STATUS_META } from "@/lib/dealStatus";
@@ -49,9 +50,11 @@ function DealCard({ deal, onOpen }: { deal: MyDeal; onOpen: () => void }) {
     >
       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-brand-black/50">
         {deal.product?.images?.[0] ? (
-          <img
+          <Image
             src={deal.product.images[0]}
             alt={deal.product.title}
+            width={64}
+            height={64}
             className="h-full w-full object-cover"
           />
         ) : (

@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   useProductOffers,
   useAcceptOffer,
@@ -93,7 +94,7 @@ function OfferRow({
       {/* Buyer row */}
       <div className="flex items-center gap-3">
         {buyerAvatar ? (
-          <img src={buyerAvatar} alt={buyerName} className="h-10 w-10 rounded-full object-cover" />
+          <Image src={buyerAvatar} alt={buyerName} width={40} height={40} className="h-10 w-10 rounded-full object-cover" />
         ) : (
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/30 text-sm font-bold text-white">
             {buyerName.slice(0, 2).toUpperCase()}
@@ -245,9 +246,11 @@ export default function ProductOffersPage() {
           </button>
           <div className="flex items-center gap-3">
             {product?.thumbnail || product?.images?.[0] ? (
-              <img
+              <Image
                 src={product.thumbnail ?? product.images[0]}
                 alt={product.title}
+                width={40}
+                height={40}
                 className="h-10 w-10 rounded-lg object-cover"
               />
             ) : (

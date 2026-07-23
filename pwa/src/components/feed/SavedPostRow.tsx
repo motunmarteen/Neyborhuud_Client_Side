@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Post } from '@/types/api';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { getPostId } from '@/components/feed/TrendingPostRow';
@@ -69,7 +70,7 @@ export function SavedPostRow({ post, onUnsave, isRemoving }: SavedPostRowProps) 
 
         <div className="mod-inset flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-[var(--neu-text)]">
           {avatar ? (
-            <img src={avatar} alt="" className="h-full w-full object-cover" />
+            <Image src={avatar} alt="" width={40} height={40} className="h-full w-full object-cover" />
           ) : (
             initial
           )}

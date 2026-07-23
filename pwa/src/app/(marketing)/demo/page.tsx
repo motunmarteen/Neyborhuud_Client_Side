@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { NeumorphicCard, NeumorphicInset } from '@/components/ui/PremiumCards';
 
 export default function NeumorphicDemo() {
@@ -143,7 +144,7 @@ export default function NeumorphicDemo() {
                                     <h2 className="text-2xl font-bold text-deep-text">Wesley Lee</h2>
                                 </div>
                                 <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-white shadow-lg">
-                                    <img src="https://i.pravatar.cc/100?u=wesley2" alt="Avatar" className="w-full h-full object-cover" />
+                                    <Image src="https://i.pravatar.cc/100?u=wesley2" alt="Avatar" width={56} height={56} className="w-full h-full object-cover" />
                                 </div>
                             </div>
 

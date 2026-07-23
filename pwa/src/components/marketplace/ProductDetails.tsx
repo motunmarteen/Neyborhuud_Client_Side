@@ -6,6 +6,7 @@
 import { useProduct } from "@/hooks/useMarketplace";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { formatTimeAgo } from "@/utils/timeAgo";
 import { formatDistance, haversineDistance } from "@/utils/distance";
 import { ProductEngagement } from "./ProductEngagement";
@@ -130,11 +131,13 @@ export function ProductDetails({
           {/* Left Column - Images */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="aspect-square bg-brand-black rounded-xl overflow-hidden">
-              <img
+            <div className="relative aspect-square bg-brand-black rounded-xl overflow-hidden">
+              <Image
                 src={product.images?.[selectedImageIndex] || "/placeholder-product.png"}
                 alt={product.title}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
               />
             </div>
 
@@ -145,16 +148,18 @@ export function ProductDetails({
                   <button
                     key={idx}
                     onClick={() => setSelectedImageIndex(idx)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                       selectedImageIndex === idx
                         ? "border-primary scale-95"
                         : "border-transparent hover:border-black/[0.08]"
                     }`}
                   >
-                    <img
+                    <Image
                       src={image}
                       alt={`${product.title} ${idx + 1}`}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="80px"
+                      className="object-cover"
                     />
                   </button>
                 ))}

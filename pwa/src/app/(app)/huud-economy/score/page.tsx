@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppBrowseLayout } from "@/components/layout/AppBrowseLayout";
 import {
@@ -617,8 +618,7 @@ export default function HuudScorePage() {
                           className="group mod-inset flex items-center gap-2 rounded-xl px-2 py-1.5 transition-colors hover:bg-primary/5"
                         >
                           {v.voucherAvatar ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={v.voucherAvatar} alt={v.voucherUsername} className="w-7 h-7 rounded-full object-cover border border-violet-400/30" />
+                            <Image src={v.voucherAvatar} alt={v.voucherUsername} width={28} height={28} className="w-7 h-7 rounded-full object-cover border border-violet-400/30" />
                           ) : (
                             <div className="w-7 h-7 rounded-full bg-brand-blue500/20 flex items-center justify-center">
                               <span className="text-brand-blue300 font-bold text-xs">{v.voucherUsername.charAt(0).toUpperCase()}</span>

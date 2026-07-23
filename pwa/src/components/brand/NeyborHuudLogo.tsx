@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { BRAND_LOGO_WORDMARK, BRAND_NAME } from '@/lib/brand';
 
 type LogoTone = 'light' | 'dark' | 'primary' | 'hero';
@@ -194,9 +195,11 @@ export function AnimatedNeyborHuudLogo({
     if (phase === 'showing_logo') {
         return (
             <div className="flex items-center animate-in fade-in zoom-in-75 duration-500 cursor-pointer select-none">
-                <img
+                <Image
                     src={isLight ? "/brand/neyborhuud-mark-light.png" : "/brand/new-logo.png"}
                     alt="NeyborHuud"
+                    width={isLight ? 326 : 555}
+                    height={isLight ? 402 : 450}
                     className="h-[28px] w-auto"
                     style={{ maxHeight: '28px' }}
                 />

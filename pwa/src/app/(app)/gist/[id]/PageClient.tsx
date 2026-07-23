@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import type { AxiosError } from 'axios';
 import TopNav from '@/components/navigation/TopNav';
@@ -132,7 +133,9 @@ function HuudGistDetailInner() {
             {thread.mediaUrls?.length ? (
               <div className="mt-4 grid gap-2">
                 {thread.mediaUrls.map((url, i) => (
-                  <img key={i} src={url} alt="" className="max-h-80 w-full rounded-xl object-cover" />
+                  <div key={i} className="relative h-80 w-full overflow-hidden rounded-xl">
+                    <Image src={url} alt="" fill sizes="(max-width: 640px) 100vw, 600px" className="object-cover" />
+                  </div>
                 ))}
               </div>
             ) : null}

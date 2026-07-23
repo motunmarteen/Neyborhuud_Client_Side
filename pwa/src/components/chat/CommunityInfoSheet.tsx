@@ -8,6 +8,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { toast } from 'sonner';
 import { useHubCommunityByConversation, useHubCommunityMembers, useUpdateHubCommunity, useChangeMemberRole, useLeaveHubCommunity } from '@/hooks/useHubCommunities';
 import { useAuth } from '@/hooks/useAuth';
@@ -107,7 +108,7 @@ export function CommunityInfoSheet({ open, onClose, conversationId }: CommunityI
             <div className="mb-5 flex items-center gap-4">
               <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100">
                 {hub.imageUrl ? (
-                  <img src={hub.imageUrl} alt={hub.name} className="h-full w-full object-cover" />
+                  <Image src={hub.imageUrl} alt={hub.name} width={64} height={64} className="h-full w-full object-cover" />
                 ) : (
                   <span className="material-symbols-outlined text-[28px] text-slate-400">groups</span>
                 )}
@@ -151,7 +152,7 @@ export function CommunityInfoSheet({ open, onClose, conversationId }: CommunityI
               return (
                 <div key={mid} className="flex items-center gap-3 px-4 py-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100">
-                    {m.avatarUrl ? <img src={m.avatarUrl} alt={mname} className="h-full w-full object-cover" /> : (
+                    {m.avatarUrl ? <Image src={m.avatarUrl} alt={mname} width={36} height={36} className="h-full w-full object-cover" /> : (
                       <span className="text-[13px] font-bold text-slate-400">{mname[0]?.toUpperCase()}</span>
                     )}
                   </div>

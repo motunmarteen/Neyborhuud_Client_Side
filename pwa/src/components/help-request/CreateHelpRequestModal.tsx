@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { X, ChevronDown, AlertCircle } from "lucide-react";
@@ -259,10 +260,13 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                 <div className="flex flex-wrap gap-2">
                   {imagePreviews.map((src, i) => (
                     <div key={i} className="relative w-16 h-16">
-                      <img
+                      <Image
                         src={src}
                         alt=""
-                        className="w-full h-full object-cover rounded-lg border border-white/10"
+                        fill
+                        unoptimized
+                        sizes="64px"
+                        className="object-cover rounded-lg border border-white/10"
                       />
                       <button
                         onClick={() => removeImage(i)}

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useCreateService } from "@/hooks/useServices";
 import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
 import { toKobo } from "@/lib/currency";
@@ -324,8 +325,7 @@ export default function CreateServiceForm() {
           <div className="grid grid-cols-3 gap-2">
             {imagePreviews.map((src, i) => (
               <div key={i} className="relative group aspect-square rounded-xl overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
+                <Image src={src} alt={`Preview ${i + 1}`} fill unoptimized sizes="33vw" className="object-cover" />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}

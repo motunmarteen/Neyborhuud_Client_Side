@@ -2,6 +2,7 @@
 
 import React, { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import QRCode from "qrcode";
 
 export default function DesktopPhoneFrame({ children }: { children: ReactNode }) {
@@ -122,10 +123,12 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
       <div className="desktop-onboarding-panel">
         <div className="desktop-onboarding-card">
           <div className="flex items-center gap-2 mb-4">
-            <img 
-              src="/brand/neyborhuud-mark-light.png" 
-              alt="NeyborHuud Logo" 
-              style={{ width: "32px", height: "32px", objectFit: "contain" }} 
+            <Image
+              src="/brand/neyborhuud-mark-light.png"
+              alt="NeyborHuud Logo"
+              width={32}
+              height={32}
+              style={{ objectFit: "contain" }}
             />
             <span 
               style={{ 
@@ -149,10 +152,13 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
 
           <div className="qr-code-wrapper" style={{ display: "inline-flex", alignSelf: "flex-start", marginBottom: "1rem" }}>
             {qrCodeDataUrl ? (
-              <img
+              <Image
                 src={qrCodeDataUrl}
                 alt="Scan to Install App"
-                style={{ width: "128px", height: "128px", display: "block", borderRadius: "10px" }}
+                width={128}
+                height={128}
+                unoptimized
+                style={{ display: "block", borderRadius: "10px" }}
               />
             ) : (
               <div style={{ width: "128px", height: "128px", backgroundColor: "rgba(255, 255, 255, 0.05)", borderRadius: "10px" }} />

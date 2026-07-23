@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   getNeedsCommunitySelection,
   getNeedsGpsLocationVerification,
@@ -442,7 +443,7 @@ function XFeedInner() {
                                     <div className="w-full">
                                         <div className={`p-4 flex gap-4 items-center border-b border-gray-100 bg-white w-full`}>
                                             <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-black/[0.02] border border-gray-100">
-                                                <img src={banner.imageSrc} alt={banner.title} className="w-full h-full object-cover" />
+                                                <Image src={banner.imageSrc} alt={banner.title} fill sizes="80px" className="object-cover" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-sm font-black text-neu-text dark:text-white leading-tight flex items-center gap-1.5 flex-wrap">
@@ -578,8 +579,8 @@ function XFeedInner() {
                             {!isLoading && !isError && location && mergedFeed.length === 0 && timeline.length === 0 && (
                                 <div className="w-full">
                                     <div className="flex flex-col items-center justify-center py-12 px-6 text-center w-full bg-white border-y border-gray-100">
-                                        <div className="w-full max-w-[280px] h-[140px] rounded-2xl overflow-hidden mb-6 border border-gray-100 bg-black/[0.02]">
-                                            <img src="/illustration_services.png" alt="Welcome" className="w-full h-full object-cover" />
+                                        <div className="relative w-full max-w-[280px] h-[140px] rounded-2xl overflow-hidden mb-6 border border-gray-100 bg-black/[0.02]">
+                                            <Image src="/illustration_services.png" alt="Welcome" fill sizes="280px" className="object-cover" />
                                         </div>
                                         <p className="text-base font-bold text-neu-text dark:text-white">
                                             {t('feed.noPostsTitle')}

@@ -12,6 +12,7 @@
  */
 
 import { type ReactNode, useState, useRef } from 'react';
+import Image from 'next/image';
 import { ChatMessage } from '@/types/api';
 import { ChatExpandableText } from '@/components/chat/ChatExpandableText';
 import { ChatMessageTicks } from '@/components/chat/ChatMessageTicks';
@@ -175,9 +176,8 @@ function SOSCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 function ImageBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
     <div className="max-w-[240px] sm:max-w-xs">
-      <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={msg.mediaUrl} alt={msg.content || 'image'} className="w-full rounded-2xl object-cover" style={{ maxHeight: 240 }} />
+      <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="relative block w-full rounded-2xl overflow-hidden" style={{ height: 240 }}>
+        <Image src={msg.mediaUrl ?? ''} alt={msg.content || 'image'} fill sizes="240px" className="object-cover" />
       </a>
       <Meta msg={msg} mine={mine} />
     </div>
