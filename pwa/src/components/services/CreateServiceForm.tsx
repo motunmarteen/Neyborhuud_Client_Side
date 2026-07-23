@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateService } from "@/hooks/useServices";
 import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
+import { toKobo } from "@/lib/currency";
 
 const CATEGORIES = [
   "Cleaning",
@@ -106,8 +107,9 @@ export default function CreateServiceForm() {
         pricing: {
           type: form.pricingType,
           currency: form.pricingCurrency,
+          // API expects integer kobo — see lib/currency.ts.
           ...(form.pricingType !== "custom" && form.pricingAmount
-            ? { amount: Number(form.pricingAmount) }
+            ? { amount: toKobo(Number(form.pricingAmount)) }
             : {}),
         },
         availability: {

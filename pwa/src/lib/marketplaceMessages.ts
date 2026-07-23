@@ -14,21 +14,22 @@
  * `getOfferPillClass` instead.
  */
 
+import { formatNaira } from "./currency";
+
 export type OfferAction = "new" | "accept" | "reject" | "counter";
 export type OfferRole = "buyer" | "seller";
 
 export interface OfferEvent {
   action: OfferAction;
-  /** Amount associated with the action (offer, counter, or settled amount). */
+  /** Amount associated with the action (offer, counter, or settled amount). Integer kobo — see lib/currency.ts. */
   amount: number;
   /** The party that initiated the action. */
   actorRole: OfferRole;
 }
 
+/** amount is integer kobo (as returned by the API) — see lib/currency.ts. */
 export function formatNGN(amount: number | null | undefined): string {
-  const n = Number(amount);
-  if (!Number.isFinite(n)) return "₦0";
-  return `₦${Math.round(n).toLocaleString("en-NG")}`;
+  return formatNaira(amount);
 }
 
 /**

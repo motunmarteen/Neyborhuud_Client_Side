@@ -11,6 +11,7 @@ import RateServiceModal from "@/components/services/RateServiceModal";
 import { useService, useServiceReviews, useFavoriteService, useBoostService } from "@/hooks/useServices";
 import { useAuth } from "@/hooks/useAuth";
 import { BoostModal } from "@/components/gamification/BoostModal";
+import { fromKobo } from "@/lib/currency";
 
 const DAY_FULL: Record<string, string> = {
   Mon: "Mon", Tue: "Tue", Wed: "Wed", Thu: "Thu",
@@ -75,7 +76,8 @@ export default function ServiceDetailPage() {
   function formatPrice() {
     if (!service.pricing?.amount) return "Price on request";
     const symbol = service.pricing.currency === "NGN" ? "₦" : service.pricing.currency;
-    const amount = `${symbol}${service.pricing.amount.toLocaleString()}`;
+    // pricing.amount from the API is integer kobo.
+    const amount = `${symbol}${fromKobo(service.pricing.amount).toLocaleString()}`;
     if (service.pricing.type === "hourly") return `${amount}/hr`;
     return amount;
   }

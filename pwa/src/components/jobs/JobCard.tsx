@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Job } from "@/types/api";
+import { fromKobo } from "@/lib/currency";
 
 interface JobCardProps {
   job: Job;
@@ -36,12 +37,16 @@ function formatSalary(job: Job) {
   if (!job.salary || (!job.salary.min && !job.salary.max)) return null;
   const { min, max, currency, period } = job.salary;
   const sym = currency === "NGN" ? "₦" : currency;
-  const fmt = (n: number) =>
-    n >= 1_000_000
+  // min/max from the API are integer kobo — convert to naira before applying
+  // the k/M abbreviation thresholds below, which are naira-scale.
+  const fmt = (koboAmount: number) => {
+    const n = fromKobo(koboAmount);
+    return n >= 1_000_000
       ? `${(n / 1_000_000).toFixed(1)}M`
       : n >= 1000
       ? `${(n / 1000).toFixed(0)}k`
       : n.toLocaleString();
+  };
   return `${sym}${fmt(min)} – ${fmt(max)} / ${period}`;
 }
 

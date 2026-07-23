@@ -9,14 +9,16 @@
  */
 
 import type { Post } from '@/types/api';
+import { formatNaira as formatNairaFromKobo } from './currency';
 
 // ── Helpers ──────────────────────────────────────────────────────
 
+/** amount is integer kobo (as returned by the API) — see lib/currency.ts. */
 function formatNaira(amount: number | string | undefined): string | null {
   if (amount == null || amount === '') return null;
   const num = typeof amount === 'string' ? Number(amount) : amount;
   if (isNaN(num)) return null;
-  return `₦${num.toLocaleString('en-NG')}`;
+  return formatNairaFromKobo(num);
 }
 
 function conditionLabel(c?: string): string {

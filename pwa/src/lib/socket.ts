@@ -8,8 +8,8 @@ import apiClient, { getSocketUrl, shouldConnectSocket } from "./api-client";
 
 class SocketService {
   private socket: Socket | null = null;
-  /** The userId last passed to authenticate(); re-sent on every reconnect. */
-  private authenticatedUserId: string | null = null;
+  /** Whether authenticate() has been called; re-sent on every reconnect. */
+  private shouldAuthenticate = false;
 
   /**
    * Initialize socket connection
@@ -56,9 +56,11 @@ class SocketService {
 
     this.socket.on("connect", () => {
       // Re-authenticate automatically after every reconnect so the server-side
-      // userId→socketId map stays accurate for private room routing.
-      if (this.authenticatedUserId) {
-        this.socket!.emit("authenticate", this.authenticatedUserId);
+      // userId→socketId map stays accurate for private room routing. The server
+      // verifies our session token itself — it never trusts a client-claimed id.
+      if (this.shouldAuthenticate) {
+        const token = apiClient.getToken();
+        if (token) this.socket!.emit("authenticate", token);
       }
     });
 
@@ -78,12 +80,16 @@ class SocketService {
   /**
    * Authenticate with the server.
    * Call this once after connecting (e.g. after login).
-   * The userId is cached so it can be re-sent on every subsequent reconnect.
+   * Sends our session token, not a claimed userId — the server verifies the
+   * token itself (same getSession() check the REST API uses) and derives the
+   * real user id from it. The intent to authenticate is cached so it re-sends
+   * a fresh token on every subsequent reconnect.
    */
-  authenticate(userId: string): void {
-    this.authenticatedUserId = userId;
-    if (this.socket?.connected) {
-      this.socket.emit("authenticate", userId);
+  authenticate(_userId?: string): void {
+    this.shouldAuthenticate = true;
+    const token = apiClient.getToken();
+    if (this.socket?.connected && token) {
+      this.socket.emit("authenticate", token);
     }
   }
 
@@ -95,7 +101,7 @@ class SocketService {
       this.socket.disconnect();
       this.socket = null;
     }
-    this.authenticatedUserId = null;
+    this.shouldAuthenticate = false;
   }
 
   /**

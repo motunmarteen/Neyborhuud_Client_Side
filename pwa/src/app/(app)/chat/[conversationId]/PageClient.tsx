@@ -592,7 +592,9 @@ export default function ConversationPage() {
     // Ensure this user is registered in their socket room so `emitToUser` works.
     // The global SocketAuthenticator in providers.tsx also does this, but we
     // re-emit here to guarantee it's registered before we start listening.
-    if (user?.id) socketService.emit('authenticate', user.id);
+    // Uses the wrapper so the server-verified session token is sent, not a
+    // client-claimed id.
+    if (user?.id) socketService.authenticate(user.id);
 
     // Backend emits socket events as { message: { ...chatData } } — unwrap it
     const extractMsg = (data: any): ChatMessage => data?.message ?? data;

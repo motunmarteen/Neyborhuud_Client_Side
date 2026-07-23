@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import type { ChatMessage } from '@/types/api';
 import { marketplaceService } from '@/services/marketplace.service';
 import { chatService } from '@/services/chat.service';
+import { formatNaira } from '@/lib/currency';
 
 type DealAction = NonNullable<NonNullable<ChatMessage['meta']>['dealAction']>;
 
@@ -169,7 +170,7 @@ export function DealStatusCard({
 
         {typeof meta.amount === 'number' && (
           <p className={`mt-1 text-xs font-bold ${style.text}`}>
-            ₦{meta.amount.toLocaleString()}
+            {formatNaira(meta.amount)}
           </p>
         )}
 

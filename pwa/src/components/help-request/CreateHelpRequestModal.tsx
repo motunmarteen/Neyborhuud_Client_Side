@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { X, ChevronDown, AlertCircle } from "lucide-react";
 import { contentService } from "@/services/content.service";
 import { getRegisteredLocationSync } from "@/hooks/useRegisteredLocation";
+import { toKobo } from "@/lib/currency";
 
 const CATEGORIES = [
   { value: "financial", label: "💰 Financial", desc: "Money, fees, bills" },
@@ -66,7 +67,8 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
         priority,
         language: "en",
         helpCategory: category || undefined,
-        targetAmount: targetAmount ? Number(targetAmount) : undefined,
+        // API expects integer kobo — see lib/currency.ts.
+        targetAmount: targetAmount ? toKobo(Number(targetAmount)) : undefined,
         helpRequestPayment:
           accountName || accountNumber || bankName
             ? { accountName, accountNumber, bankName }

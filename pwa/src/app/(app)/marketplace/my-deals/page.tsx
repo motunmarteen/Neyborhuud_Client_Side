@@ -15,6 +15,7 @@ import { useMyDeals } from "@/hooks/useMarketplace";
 import type { MyDeal } from "@/services/marketplace.service";
 import { DEAL_STATUS_META as STATUS_META } from "@/lib/dealStatus";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
+import { formatNaira } from "@/lib/currency";
 
 type Filter = "all" | "buying" | "selling";
 
@@ -75,7 +76,7 @@ function DealCard({ deal, onOpen }: { deal: MyDeal; onOpen: () => void }) {
           </span>
         </div>
         <p className="mt-0.5 truncate text-xs text-white/60">
-          ₦{deal.amount.toLocaleString()} · {roleLabel} @{counterpartyName}
+          {formatNaira(deal.amount)} · {roleLabel} @{counterpartyName}
         </p>
         <p className="mt-1 text-[10px] text-white/40">{timeAgo(deal.updatedAt)}</p>
       </div>

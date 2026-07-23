@@ -13,6 +13,7 @@ import { useMakeOffer, useCreateOrder } from "@/hooks/useMarketplace";
 import { chatService } from "@/services/chat.service";
 import { toast } from "sonner";
 import { formatNGN, getOfferToast } from "@/lib/marketplaceMessages";
+import { toKobo, fromKobo } from "@/lib/currency";
 
 /** Shared light / glass offer modal — matches marketplace doodle + brand greens */
 function MakeOfferDialog({
@@ -328,11 +329,14 @@ export function BuyerIntentActions({
   const handleRequestToBuy = product.negotiable ? handleOffer : handleBuyNow;
 
   const handleMakeOffer = async () => {
-    const amount = parseFloat(offerAmount);
-    
-    if (isNaN(amount) || amount <= 0) {
+    const nairaAmount = parseFloat(offerAmount);
+
+    if (isNaN(nairaAmount) || nairaAmount <= 0) {
       return;
     }
+
+    // API expects integer kobo — see pwa/src/lib/currency.ts.
+    const amount = toKobo(nairaAmount);
 
     try {
       const res = await makeOffer.mutateAsync(amount);
@@ -367,11 +371,12 @@ export function BuyerIntentActions({
     }
   };
 
+  // product.price from the API is integer kobo — convert to naira for display.
   const formattedPrice = new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: product.currency || "NGN",
     minimumFractionDigits: 0,
-  }).format(product.price);
+  }).format(fromKobo(product.price));
 
   if (layout === "compact") {
     const busy = createOrder.isPending || makeOffer.isPending;

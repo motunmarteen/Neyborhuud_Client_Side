@@ -73,10 +73,12 @@ function SocketAuthenticator() {
   const { user } = useAuth();
   useEffect(() => {
     if (!user?.id) return;
-    // Register with backend so emitToUser reaches this socket
-    socketService.emit('authenticate', user.id);
+    // Register with backend so emitToUser reaches this socket. The server
+    // verifies our session token itself (never trusts a client-claimed id),
+    // so socketService.authenticate() sends the token, not the raw user id.
+    socketService.authenticate(user.id);
     // Re-authenticate after any reconnect (e.g. server restart)
-    const onConnect = () => socketService.emit('authenticate', user.id);
+    const onConnect = () => socketService.authenticate(user.id);
     socketService.on('connect', onConnect);
     return () => socketService.off('connect', onConnect);
   }, [user?.id]);

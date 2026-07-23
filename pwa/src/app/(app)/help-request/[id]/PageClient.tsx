@@ -15,6 +15,7 @@ import {
   useRejectHelpOffer,
   useUpdateHelpStatus,
 } from '@/hooks/useHelpRequest';
+import { toKobo, formatNaira } from '@/lib/currency';
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
@@ -35,12 +36,6 @@ const STATUS_CONFIG: Record<HelpStatus, { label: string; color: string; icon: st
   closed:      { label: 'Closed',      color: 'text-[var(--neu-text-muted)] bg-brand-surface/10',       icon: 'cancel' },
 };
 
-function formatNaira(amount: number | string | undefined): string {
-  const num = typeof amount === 'string' ? parseFloat(amount) : (amount ?? 0);
-  if (isNaN(num)) return '';
-  return `₦${num.toLocaleString('en-NG')}`;
-}
-
 // ─── Offer Form ───────────────────────────────────────────────────────────────
 
 function OfferForm({ postId, onDone }: { postId: string; onDone: () => void }) {
@@ -51,8 +46,10 @@ function OfferForm({ postId, onDone }: { postId: string; onDone: () => void }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || message.trim().length < 5) return;
+    // API expects integer kobo — see lib/currency.ts.
+    const koboAmount = offeredAmount ? toKobo(Number(offeredAmount.replace(/,/g, ''))) : undefined;
     submit.mutate(
-      { message: message.trim(), offeredAmount: offeredAmount ? Number(offeredAmount.replace(/,/g, '')) : undefined },
+      { message: message.trim(), offeredAmount: koboAmount },
       { onSuccess: onDone },
     );
   };

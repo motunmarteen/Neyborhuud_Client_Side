@@ -9,6 +9,7 @@ import { CreateEventPayload } from "@/types/api";
 import { glassField, glassLabel, glassMutedLabel } from "@/lib/glass-form-styles";
 import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
 import { PostCreationSuccessSheet } from "@/components/shared/PostCreationSuccessSheet";
+import { toKobo } from "@/lib/currency";
 
 const EVENT_TYPES = [
   "community",
@@ -86,7 +87,8 @@ export default function CreateEventForm() {
       coverImage: coverFile ?? undefined,
       capacity: capacity ? parseInt(capacity, 10) : undefined,
       isFree,
-      ticketPrice: !isFree && ticketPrice ? parseFloat(ticketPrice) : undefined,
+      // API expects integer kobo — see lib/currency.ts.
+      ticketPrice: !isFree && ticketPrice ? toKobo(parseFloat(ticketPrice)) : undefined,
       visibility,
       tags: tags.length > 0 ? tags : undefined,
     };

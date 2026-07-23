@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { SellerBadge } from "./SellerBadge";
 import { glassField, glassFieldError, glassLabel } from "@/lib/glass-form-styles";
 import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
+import { toKobo, fromKobo } from "@/lib/currency";
 
 interface ProductFormProps {
   product?: Product;
@@ -53,7 +54,10 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
   const [title, setTitle] = useState(product?.title || "");
   const [description, setDescription] = useState(product?.description || "");
-  const [price, setPrice] = useState(product?.price?.toString() || "");
+  // product.price from the API is integer kobo — show naira in the input.
+  const [price, setPrice] = useState(
+    product?.price != null ? String(fromKobo(product.price)) : "",
+  );
   const [category, setCategory] = useState(product?.category || "");
   const [condition, setCondition] = useState(product?.condition || "good");
   const [images, setImages] = useState<File[]>([]);
@@ -158,7 +162,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           data: {
             title: title.trim(),
             description: description.trim(),
-            price: parseFloat(price),
+            price: toKobo(parseFloat(price)),
             category,
             condition: condition as any,
             images: imageUrls,
@@ -171,7 +175,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         const result = await createProduct.mutateAsync({
           title: title.trim(),
           description: description.trim(),
-          price: parseFloat(price),
+          price: toKobo(parseFloat(price)),
           category,
           condition: condition as any,
           images: images.length > 0 ? images : imageUrls,

@@ -8,6 +8,7 @@ import ApplyModal from "@/components/jobs/ApplyModal";
 import { useJob, useSaveJob, useCloseJob, useBoostJob } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
 import { BoostModal } from "@/components/gamification/BoostModal";
+import { formatNaira } from "@/lib/currency";
 
 const TYPE_COLORS: Record<string, string> = {
   "full-time": "bg-primary/20 text-primary",
@@ -164,7 +165,7 @@ export default function JobDetailPage() {
                     <div>
                       <p className="text-xs text-[var(--neu-text-muted)]">Salary</p>
                       <p className="text-sm text-white">
-                        ₦{job.salary.min.toLocaleString()} – ₦{job.salary.max.toLocaleString()} / {job.salary.period}
+                        {formatNaira(job.salary.min)} – {formatNaira(job.salary.max)} / {job.salary.period}
                       </p>
                     </div>
                   </div>

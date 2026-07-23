@@ -12,6 +12,7 @@ import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist
 import { useEvents } from '@/hooks/useEvents';
 import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 import { NewsPanel } from '@/components/feed/NewsPanel';
+import { fromKobo } from '@/lib/currency';
 
 export default function RightSidebar() {
     const { data: eventsData, isLoading: eventsLoading } = useEvents();
@@ -103,8 +104,9 @@ export default function RightSidebar() {
                 ) : (
                     <div className="grid grid-cols-2 gap-3">
                         {recentListings.map((item: any) => {
+                            // item.price from the API is integer kobo.
                             const price = item.price != null
-                                ? item.price === 0 ? 'Free' : `₦${Number(item.price).toLocaleString()}`
+                                ? item.price === 0 ? 'Free' : `₦${fromKobo(Number(item.price)).toLocaleString()}`
                                 : item.priceLabel ?? 'Free';
                             const isFree = item.price === 0 || price === 'Free';
                             const image = item.images?.[0] ?? item.image ?? item.thumbnail ?? null;

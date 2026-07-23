@@ -15,6 +15,7 @@ import {
 import EventShareSheet from "@/components/events/EventShareSheet";
 import { EventComments } from "@/components/events/EventComments";
 import { useClientAuthUser } from "@/hooks/useClientAuthUser";
+import { formatNaira } from "@/lib/currency";
 
 const TYPE_COLORS: Record<string, string> = {
   community: "bg-brand-blue/20 text-brand-blue",
@@ -419,7 +420,7 @@ export default function EventDetailPage() {
                       ) : (
                         event.ticketPrice != null && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-white/90 font-bold">
-                            ₦{event.ticketPrice.toLocaleString()}
+                            {formatNaira(event.ticketPrice)}
                           </span>
                         )
                       )}

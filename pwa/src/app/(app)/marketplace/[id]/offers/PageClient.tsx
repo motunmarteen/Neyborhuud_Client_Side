@@ -17,6 +17,7 @@ import {
 } from "@/hooks/useMarketplace";
 import { MarketplaceOffer } from "@/types/api";
 import { formatNGN } from "@/lib/marketplaceMessages";
+import { toKobo } from "@/lib/currency";
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
@@ -79,9 +80,10 @@ function OfferRow({
   const canAct = offer.status === "pending" || offer.status === "countered";
 
   const handleCounter = async () => {
-    const amount = parseFloat(counterAmount);
-    if (isNaN(amount) || amount <= 0) return;
-    await respond.mutateAsync({ action: "counter", counterAmount: amount });
+    const nairaAmount = parseFloat(counterAmount);
+    if (isNaN(nairaAmount) || nairaAmount <= 0) return;
+    // API expects integer kobo — see lib/currency.ts.
+    await respond.mutateAsync({ action: "counter", counterAmount: toKobo(nairaAmount) });
     setShowCounter(false);
     setCounterAmount("");
   };
@@ -259,7 +261,7 @@ export default function ProductOffersPage() {
               </h1>
               {product?.price != null && (
                 <p className="text-sm text-[var(--neu-text-muted)]">
-                  Listed at ₦{product.price.toLocaleString()}
+                  Listed at {formatNGN(product.price)}
                 </p>
               )}
             </div>

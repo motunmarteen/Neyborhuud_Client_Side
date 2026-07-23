@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Service } from "@/types/api";
 import StarRating from "./StarRating";
+import { fromKobo } from "@/lib/currency";
 
 interface Props {
   service: Service;
@@ -15,7 +16,8 @@ interface Props {
 function formatPrice(service: Service) {
   if (!service.pricing?.amount) return "Price on request";
   const symbol = service.pricing.currency === "NGN" ? "₦" : service.pricing.currency;
-  const amount = `${symbol}${service.pricing.amount.toLocaleString()}`;
+  // pricing.amount from the API is integer kobo.
+  const amount = `${symbol}${fromKobo(service.pricing.amount).toLocaleString()}`;
   if (service.pricing.type === "hourly") return `${amount}/hr`;
   if (service.pricing.type === "fixed") return amount;
   return amount;

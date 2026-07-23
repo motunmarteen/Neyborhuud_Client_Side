@@ -18,6 +18,7 @@ import { ChatMessageTicks } from '@/components/chat/ChatMessageTicks';
 import { MessageReactions } from '@/components/chat/MessageReactions';
 import { DealStatusCard } from '@/components/chat/DealStatusCard';
 import { OfferCard } from '@/components/chat/OfferCard';
+import { formatNaira } from '@/lib/currency';
 
 function timeStr(dateStr: string | undefined): string {
   if (!dateStr) return '';
@@ -93,7 +94,7 @@ function MarketplaceCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
     <CardShell icon="🛒" label="Marketplace" bg="bg-blue-50" text="text-blue-700" mine={mine} msg={msg}>
       <p className="font-semibold text-sm text-gray-900">{title ?? msg.content}</p>
-      {price !== undefined && <p className="text-xs text-blue-600 font-bold">₦{price.toLocaleString()}</p>}
+      {price !== undefined && <p className="text-xs text-blue-600 font-bold">{formatNaira(price)}</p>}
       {itemId && <p className="text-[10px] text-gray-400 mt-0.5">Item: {itemId}</p>}
     </CardShell>
   );

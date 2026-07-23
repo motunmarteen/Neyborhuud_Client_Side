@@ -13,6 +13,7 @@ import apiClient from '@/lib/api-client';
 import { useAwardCoins } from '@/hooks/useGamification';
 import { useAuth } from '@/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toKobo } from '@/lib/currency';
 
 interface CreatePostModalProps {
     isOpen: boolean;
@@ -497,7 +498,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                     } as any : {}),
                     ...(contentType === 'help_request' ? {
                         helpCategory: helpCategory || undefined,
-                        targetAmount: targetAmount ? Number(targetAmount) : undefined,
+                        // API expects integer kobo — see lib/currency.ts.
+                        targetAmount: targetAmount ? toKobo(Number(targetAmount)) : undefined,
                         helpRequestPayment: (bankName || accountName || accountNumber) ? {
                             bankName: bankName || undefined,
                             accountName: accountName || undefined,
@@ -509,13 +511,15 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                         eventTime: eventTime || undefined,
                         venue: venueName ? { name: venueName, address: venueAddress || undefined } : undefined,
                         ticketInfo,
-                        ticketPrice: ticketInfo === 'paid' ? Number(ticketPrice) : undefined,
+                        // API expects integer kobo — see lib/currency.ts.
+                        ticketPrice: ticketInfo === 'paid' ? toKobo(Number(ticketPrice)) : undefined,
                         capacity: capacity ? Number(capacity) : undefined,
                         organizer: organizer || undefined,
                         eventCategory,
                     } as any : {}),
                     ...(contentType === 'marketplace' ? {
-                        price: price ? Number(price) : undefined,
+                        // API expects integer kobo — see lib/currency.ts.
+                        price: price ? toKobo(Number(price)) : undefined,
                         currency: 'NGN' as const,
                         itemCondition,
                         isNegotiable,
@@ -526,7 +530,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                     ...(contentType === 'services' ? {
                         serviceName: serviceName || undefined,
                         serviceCategory: serviceCategory || undefined,
-                        rate: serviceRate ? Number(serviceRate) : undefined,
+                        // API expects integer kobo — see lib/currency.ts.
+                        rate: serviceRate ? toKobo(Number(serviceRate)) : undefined,
                         rateType: serviceRateType || undefined,
                         availability: serviceAvailability || undefined,
                         serviceArea: serviceArea || undefined,

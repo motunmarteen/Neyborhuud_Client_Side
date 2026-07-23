@@ -1,5 +1,6 @@
 import type { Conversation } from '@/types/api';
 import { isCommunityChat } from '@/lib/chatPaths';
+import { fromKobo } from '@/lib/currency';
 
 export function convDisplayName(c: Conversation | undefined, currentUserId?: string): string {
   if (!c) return 'Chat';
@@ -33,7 +34,8 @@ export function convSubtitle(c: Conversation | undefined): string {
   if (c.contextType === 'marketplace') {
     if (c.context?.productPrice != null) {
       const cur = c.context.productCurrency ?? 'NGN';
-      return `Marketplace · ${cur} ${c.context.productPrice.toLocaleString()}`;
+      // productPrice is integer kobo — convert to naira for display.
+      return `Marketplace · ${cur} ${fromKobo(c.context.productPrice).toLocaleString()}`;
     }
     return c.contextLabel ?? 'Marketplace chat';
   }

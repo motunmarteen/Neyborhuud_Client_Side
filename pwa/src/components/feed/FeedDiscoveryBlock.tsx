@@ -12,6 +12,7 @@ import { formatDistance, haversineDistance } from "@/utils/distance";
 import { useFollow } from "@/hooks/useFollow";
 import MapPinAvatar from "@/components/ui/MapPinAvatar";
 import { GREEN_ROLE } from "@/lib/green-scale";
+import { fromKobo } from "@/lib/currency";
 
 export type FeedDiscoveryItem = Extract<
   DiscoveryFeedItem,
@@ -420,11 +421,12 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
                     ),
                   )
                 : null;
+            // p.price from the API is integer kobo — convert to naira for display.
             const formattedPrice = new Intl.NumberFormat("en-NG", {
               style: "currency",
               currency: p.currency || "NGN",
               minimumFractionDigits: 0,
-            }).format(p.price);
+            }).format(fromKobo(p.price));
 
             return (
               <StakeCard

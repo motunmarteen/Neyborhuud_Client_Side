@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Event } from "@/types/api";
 import { prefetchEventDetail } from "@/hooks/useEvents";
+import { formatNaira } from "@/lib/currency";
 
 const TYPE_COLORS: Record<Event["type"], string> = {
   community: "bg-brand-blue/20 text-brand-blue",
@@ -104,7 +105,7 @@ export default function EventCard({ event, onAttend, attendPending, variant = "i
             {event.isFree ? (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-primary font-bold">Free</span>
             ) : event.ticketPrice != null ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-white/90 font-bold">₦{event.ticketPrice.toLocaleString()}</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-white/90 font-bold">{formatNaira(event.ticketPrice)}</span>
             ) : null}
             {(event as any).isBoosted && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/90 text-black font-black uppercase tracking-wide">Boosted</span>

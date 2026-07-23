@@ -67,6 +67,7 @@ import { getPrivilegesForTier } from '@/lib/trust-privileges';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
 import { getGeolocation } from '@/lib/nativeGeolocation';
+import { fromKobo } from '@/lib/currency';
 
 type ProfileTab = 'overview' | 'posts' | 'trust' | 'listings' | 'saved' | 'economy' | 'street_radar';
 
@@ -1468,7 +1469,7 @@ export default function ProfilePage() {
                             <p className="truncate text-sm font-extrabold text-gray-800">{service.title ?? 'Service'}</p>
                             <p className="text-xs font-semibold text-gray-400 mt-1 capitalize">
                               {service.category ?? '—'}
-                              {service.pricing?.amount ? ` · ₦${Number(service.pricing.amount).toLocaleString()}` : service.pricing?.type === 'custom' ? ' · Custom price' : ''}
+                              {service.pricing?.amount ? ` · ₦${fromKobo(Number(service.pricing.amount)).toLocaleString()}` : service.pricing?.type === 'custom' ? ' · Custom price' : ''}
                             </p>
                           </div>
                           <div className="flex shrink-0 items-center gap-0.5 text-xs font-bold text-blue-600 mt-1">
@@ -1506,7 +1507,7 @@ export default function ProfilePage() {
                             <p className="truncate text-sm font-extrabold text-gray-800">{item.title ?? 'Listing'}</p>
                             <p className="text-xs font-semibold text-gray-400 mt-1">
                               {item.category ?? 'Item'}
-                              {item.price != null ? ` · ₦${Number(item.price).toLocaleString()}` : ''}
+                              {item.price != null ? ` · ₦${fromKobo(Number(item.price)).toLocaleString()}` : ''}
                             </p>
                           </div>
                           <span className="shrink-0 text-xs font-bold capitalize text-blue-600 mt-1">

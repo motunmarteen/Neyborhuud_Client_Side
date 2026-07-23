@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import type { ChatMessage } from '@/types/api';
 import { marketplaceService } from '@/services/marketplace.service';
+import { toKobo, formatNaira } from '@/lib/currency';
 
 type OfferAction = 'new' | 'accept' | 'reject' | 'counter' | 'withdrawn';
 
@@ -29,8 +30,9 @@ const STYLE: Record<OfferAction, { icon: string; label: string; bg: string; text
   withdrawn: { icon: '🚫', label: 'Offer Withdrawn', bg: 'bg-gray-100', text: 'text-gray-600' },
 };
 
+/** n is integer kobo (as returned by the API) — see lib/currency.ts. */
 function naira(n: number | undefined) {
-  return typeof n === 'number' ? `₦${n.toLocaleString()}` : '';
+  return typeof n === 'number' ? formatNaira(n) : '';
 }
 
 export function OfferCard({
@@ -66,16 +68,19 @@ export function OfferCard({
     }
   };
 
+  /** Returns the counter amount as integer kobo, ready to send to the API. */
   const askCounter = (): number | null => {
     if (typeof window === 'undefined') return null;
-    const raw = window.prompt('Enter your counter amount (₦):', String(amount ?? ''))?.trim();
+    // amount (meta) is kobo — show the prompt default in naira.
+    const defaultNaira = typeof amount === 'number' ? amount / 100 : '';
+    const raw = window.prompt('Enter your counter amount (₦):', String(defaultNaira))?.trim();
     if (!raw) return null;
-    const val = Number(raw.replace(/[^0-9.]/g, ''));
-    if (!val || val <= 0) {
+    const nairaVal = Number(raw.replace(/[^0-9.]/g, ''));
+    if (!nairaVal || nairaVal <= 0) {
       toast.error('Enter a valid amount.');
       return null;
     }
-    return val;
+    return toKobo(nairaVal);
   };
 
   const onAccept = () =>

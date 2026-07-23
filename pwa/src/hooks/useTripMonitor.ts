@@ -20,6 +20,7 @@ import { tripService, type Trip, type StartTripPayload, type TripLocation } from
 import { useAuth } from "@/hooks/useAuth";
 import { useOfflineQueue } from "@/hooks/useOfflineQueue";
 import { getGeolocation } from "@/lib/nativeGeolocation";
+import apiClient from "@/lib/api-client";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -300,7 +301,11 @@ export function useTripMonitor(): UseTripMonitor {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      socket.emit("authenticate", user.id);
+      // Server verifies our session token itself (never trusts a client-claimed
+      // id) — this is the Safe-Trip/SOS socket, so identity spoofing here is
+      // especially high-stakes.
+      const token = apiClient.getToken();
+      if (token) socket.emit("authenticate", token);
     });
 
     // Server broadcast after every location update / escalation tick

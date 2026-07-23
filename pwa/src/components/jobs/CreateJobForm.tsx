@@ -6,6 +6,7 @@ import { useCreateJob } from "@/hooks/useJobs";
 import { useRegisteredLocation } from "@/hooks/useRegisteredLocation";
 import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
 import { PostCreationSuccessSheet } from "@/components/shared/PostCreationSuccessSheet";
+import { toKobo } from "@/lib/currency";
 
 const JOB_TYPES = ["full-time", "part-time", "contract", "freelance", "internship"] as const;
 const WORK_MODES = ["on-site", "remote", "hybrid"] as const;
@@ -91,9 +92,10 @@ export default function CreateJobForm() {
     };
 
     if (form.salaryMin && form.salaryMax) {
+      // API expects integer kobo — see lib/currency.ts.
       payload.salary = {
-        min: Number(form.salaryMin),
-        max: Number(form.salaryMax),
+        min: toKobo(Number(form.salaryMin)),
+        max: toKobo(Number(form.salaryMax)),
         currency: form.salaryCurrency,
         period: form.salaryPeriod,
       };

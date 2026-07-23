@@ -27,6 +27,7 @@ import { PostCardVerificationBadge } from '@/components/feed/PostCardVerificatio
 import { PostCardMediaSlider } from '@/components/feed/PostCardMediaSlider';
 import { getPostAuthorUserId } from '@/lib/postAuthor';
 import { resolveUserAvatarUrl } from '@/lib/userAvatar';
+import { toKobo, fromKobo, formatNaira } from '@/lib/currency';
 
 interface HelpRequestCardProps {
     post: Post;
@@ -36,12 +37,6 @@ interface HelpRequestCardProps {
     onReport?: (postId: string) => void;
     onPin?: (postId: string) => void;
     onFeedPreferenceApplied?: (postId: string, signal: 'not_interested' | 'hide') => void;
-}
-
-function formatNaira(amount: number | string): string {
-    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    if (isNaN(num)) return '';
-    return `₦${num.toLocaleString('en-NG')}`;
 }
 
 const formatCompactCount = (value?: number) => {
@@ -86,7 +81,9 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
 
     const [copied, setCopied] = useState(false);
     const [showUpdateReceived, setShowUpdateReceived] = useState(false);
-    const [receivedInput, setReceivedInput] = useState(String(storedReceived || ''));
+    // storedReceived/localReceived are integer kobo (API); the input field
+    // shows/collects naira for the user.
+    const [receivedInput, setReceivedInput] = useState(String(storedReceived ? fromKobo(storedReceived) : ''));
     const [localReceived, setLocalReceived] = useState<number>(storedReceived);
     const receivedInputRef = useRef<HTMLInputElement>(null);
 
@@ -151,9 +148,10 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
 
     const handleSaveReceived = (e: React.MouseEvent) => {
         e.stopPropagation();
-        const num = parseFloat(receivedInput.replace(/,/g, ''));
-        if (isNaN(num) || num < 0) return;
-        updateReceivedMutation.mutate(num);
+        const nairaNum = parseFloat(receivedInput.replace(/,/g, ''));
+        if (isNaN(nairaNum) || nairaNum < 0) return;
+        // API expects integer kobo — see lib/currency.ts.
+        updateReceivedMutation.mutate(toKobo(nairaNum));
     };
 
     const isLiked = post.isLiked === true;
@@ -275,7 +273,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
             {isOwner && !showUpdateReceived && (
                 <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); setReceivedInput(String(localReceived || '')); setShowUpdateReceived(true); setTimeout(() => receivedInputRef.current?.focus(), 50); }}
+                    onClick={(e) => { e.stopPropagation(); setReceivedInput(String(localReceived ? fromKobo(localReceived) : '')); setShowUpdateReceived(true); setTimeout(() => receivedInputRef.current?.focus(), 50); }}
                     className="self-start flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-xl text-primary bg-primary/10 border border-primary/25 hover:bg-primary/20 transition-all cursor-pointer"
                 >
                     <span className="material-symbols-outlined text-[12px]">edit</span>

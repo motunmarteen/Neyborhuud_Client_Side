@@ -13,6 +13,7 @@ import { formatDistance, haversineDistance } from "@/utils/distance";
 import { useProductLike } from "@/hooks/useMarketplace";
 import { useAuth } from "@/hooks/useAuth";
 import { formatTimeAgo } from "@/utils/timeAgo";
+import { fromKobo } from "@/lib/currency";
 import { BuyerIntentActions } from "@/components/marketplace/BuyerIntentActions";
 import { MarketplaceCommentsSheet } from "@/components/marketplace/MarketplaceCommentsSheet";
 import { MarketplaceShareSheet } from "@/components/marketplace/MarketplaceShareSheet";
@@ -84,11 +85,12 @@ export function ProductCard({
         )
       : null;
 
+  // product.price from the API is integer kobo — convert to naira for display.
   const formattedPrice = new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: product.currency || "NGN",
     minimumFractionDigits: 0,
-  }).format(product.price);
+  }).format(fromKobo(product.price));
 
   const isLiked = product.engagement?.isLiked ?? (product as any).isLiked;
   const likesCount = product.engagement?.likesCount ?? 0;

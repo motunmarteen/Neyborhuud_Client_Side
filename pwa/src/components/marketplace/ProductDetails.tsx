@@ -12,6 +12,7 @@ import { ProductEngagement } from "./ProductEngagement";
 import { ProductComments } from "./ProductComments";
 import { BuyerIntentActions } from "./BuyerIntentActions";
 import { SellerBadge } from "./SellerBadge";
+import { fromKobo } from "@/lib/currency";
 
 interface ProductDetailsProps {
   productId: string;
@@ -85,12 +86,12 @@ export function ProductDetails({
         )
       : null;
 
-  // Format price
+  // Format price — product.price from the API is integer kobo.
   const formattedPrice = new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: product.currency || "NGN",
     minimumFractionDigits: 0,
-  }).format(product.price);
+  }).format(fromKobo(product.price));
 
   return (
     <div className="min-h-screen bg-brand-black text-white">
