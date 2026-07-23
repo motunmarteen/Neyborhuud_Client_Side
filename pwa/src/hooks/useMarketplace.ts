@@ -15,6 +15,7 @@ import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "sonner";
 import { getOfferToast, type OfferRole } from "@/lib/marketplaceMessages";
 import { useAwardCoins } from "@/hooks/useGamification";
+import { useMarketplaceOfflineQueue } from "@/hooks/useMarketplaceOfflineQueue";
 
 /**
  * Hook for fetching a single product with engagement data
@@ -260,6 +261,7 @@ function patchProductLikeInPages(old: any, productId: string, isLiked: boolean, 
 
 export function useProductLike(productId: string) {
   const queryClient = useQueryClient();
+  const { enqueue } = useMarketplaceOfflineQueue();
 
   return useMutation({
     mutationFn: () => marketplaceService.toggleLike(productId),
@@ -349,7 +351,15 @@ export function useProductLike(productId: string) {
         previousSaved,
       };
     },
-    onError: (error, _, context: any) => {
+    onError: (error: any, _, context: any) => {
+      // Offline / network failure: keep the optimistic UI as-is and queue the
+      // action for replay when connectivity returns, instead of rolling back
+      // (which would flip the like state right back in front of the user).
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        enqueue({ type: "like", productId });
+        return;
+      }
+
       // Rollback on error
       if (context?.previousProduct) {
         queryClient.setQueryData(
@@ -588,6 +598,7 @@ export function useProductCommentMutations(productId: string) {
  */
 export function useSaveProduct(productId: string) {
   const queryClient = useQueryClient();
+  const { enqueue } = useMarketplaceOfflineQueue();
 
   const saveProduct = useMutation({
     mutationFn: () => marketplaceService.saveItem(productId),
@@ -599,6 +610,11 @@ export function useSaveProduct(productId: string) {
       toast.success("Product saved!");
     },
     onError: (error) => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        enqueue({ type: "save", productId });
+        toast.success("Saved — will sync once you're back online");
+        return;
+      }
       toast.error(getErrorMessage(error) || "Failed to save product");
     },
   });
@@ -613,6 +629,11 @@ export function useSaveProduct(productId: string) {
       toast.success("Product unsaved!");
     },
     onError: (error) => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        enqueue({ type: "unsave", productId });
+        toast.success("Unsaved — will sync once you're back online");
+        return;
+      }
       toast.error(getErrorMessage(error) || "Failed to unsave product");
     },
   });
