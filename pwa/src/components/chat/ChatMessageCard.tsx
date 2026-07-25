@@ -17,9 +17,32 @@ import { ChatMessage } from '@/types/api';
 import { ChatExpandableText } from '@/components/chat/ChatExpandableText';
 import { ChatMessageTicks } from '@/components/chat/ChatMessageTicks';
 import { MessageReactions } from '@/components/chat/MessageReactions';
+import { MessageActionSheet } from '@/components/chat/MessageActionSheet';
 import { DealStatusCard } from '@/components/chat/DealStatusCard';
 import { OfferCard } from '@/components/chat/OfferCard';
 import { formatNaira } from '@/lib/currency';
+
+// ─── Reply-to quoted preview (audit finding #6) ──────────────────────────────
+// Rendered above the message content when a message has a replyToPreview,
+// mirroring WhatsApp/Telegram's quoted-message snippet on the sent message.
+function ReplyQuote({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
+  const preview = msg.replyToPreview;
+  if (!preview) return null;
+  return (
+    <div
+      className={`mb-1 rounded-lg border-l-[3px] px-2 py-1 text-[12px] leading-snug ${
+        mine ? 'border-white/40 bg-white/10 text-white/80' : 'border-gray-300 bg-black/[0.03] text-gray-600'
+      }`}
+    >
+      <p className={`truncate font-semibold ${mine ? 'text-white/90' : 'text-gray-700'}`}>
+        {preview.senderName || 'Neybor'}
+      </p>
+      <p className="truncate italic opacity-90">
+        {preview.isDeleted ? 'Message deleted' : preview.contentPreview}
+      </p>
+    </div>
+  );
+}
 
 function timeStr(dateStr: string | undefined): string {
   if (!dateStr) return '';
@@ -239,6 +262,7 @@ function TextBubble({
         {isPriority ? (
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-red-600">Priority</p>
         ) : null}
+        {!msg.isDeleted ? <ReplyQuote msg={msg} mine={mine} /> : null}
         <div className="flex flex-wrap items-end gap-x-2 gap-y-1">
           {msg.isDeleted ? (
             <p className="italic opacity-70 text-sm">Message deleted</p>
@@ -261,6 +285,8 @@ function MessageStack({
   senderLabel,
   currentUserId,
   onReactionsUpdate,
+  onReply,
+  onDeleteForMe,
   children,
 }: {
   msg: ChatMessage;
@@ -268,15 +294,21 @@ function MessageStack({
   senderLabel?: string | null;
   currentUserId?: string;
   onReactionsUpdate?: (reactions: ChatMessage['reactions']) => void;
+  onReply?: (msg: ChatMessage) => void;
+  onDeleteForMe?: (msg: ChatMessage) => void;
   children: ReactNode;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Long-press opens the ACTION sheet (reply/report/delete-for-me) — a
+  // right-click / long-context-menu still opens the emoji reaction picker,
+  // matching the pre-existing behavior so nothing regresses there.
   const startPress = () => {
     timerRef.current = setTimeout(() => {
-      setPickerOpen(true);
+      setActionsOpen(true);
     }, 500);
   };
   const cancelPress = () => {
@@ -310,6 +342,15 @@ function MessageStack({
           anchorRef={containerRef}
         />
       ) : null}
+      <MessageActionSheet
+        msg={msg}
+        mine={mine}
+        open={actionsOpen}
+        onClose={() => setActionsOpen(false)}
+        anchorRef={containerRef}
+        onReply={(m) => onReply?.(m)}
+        onDeleteForMe={(m) => onDeleteForMe?.(m)}
+      />
     </div>
   );
 }
@@ -320,23 +361,29 @@ export default function ChatMessageCard({
   currentUserId,
   onReactionsUpdate,
   senderLabel,
+  onReply,
+  onDeleteForMe,
 }: {
   msg: ChatMessage;
   mine: boolean;
   currentUserId?: string;
   onReactionsUpdate?: (reactions: ChatMessage['reactions']) => void;
   senderLabel?: string | null;
+  onReply?: (msg: ChatMessage) => void;
+  onDeleteForMe?: (msg: ChatMessage) => void;
 }) {
   const isPriority = msg.priority === 'emergency';
   const textProps = { currentUserId, onReactionsUpdate };
 
   const wrap = (node: ReactNode) => (
-    <MessageStack 
-      msg={msg} 
-      mine={mine} 
-      senderLabel={senderLabel} 
-      currentUserId={currentUserId} 
+    <MessageStack
+      msg={msg}
+      mine={mine}
+      senderLabel={senderLabel}
+      currentUserId={currentUserId}
       onReactionsUpdate={onReactionsUpdate}
+      onReply={onReply}
+      onDeleteForMe={onDeleteForMe}
     >
       {node}
     </MessageStack>

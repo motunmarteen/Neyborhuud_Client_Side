@@ -85,7 +85,7 @@ export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
 
   const { data: convData, isLoading: loadingConvs } = useQuery({
     queryKey: ['conversations'],
-    queryFn: () => chatService.getConversations(1, 40),
+    queryFn: () => chatService.getConversations({ limit: 40 }),
     staleTime: 30_000,
   });
   const { data: calls, isLoading: loadingCalls } = useRecentCalls(30);

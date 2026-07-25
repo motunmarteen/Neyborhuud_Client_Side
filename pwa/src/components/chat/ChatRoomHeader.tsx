@@ -9,7 +9,6 @@ export type ChatRoomHeaderProps = {
   avatarUrl?: string | null;
   avatarInitials?: string;
   isIncident?: boolean;
-  encrypted?: boolean;
   showKeyPanel?: boolean;
   onToggleKeys?: () => void;
   backHref?: string;
@@ -33,7 +32,6 @@ export function ChatRoomHeader({
   avatarUrl,
   avatarInitials = '💬',
   isIncident = false,
-  encrypted = true,
   showKeyPanel = false,
   onToggleKeys,
   backHref = '/chat',

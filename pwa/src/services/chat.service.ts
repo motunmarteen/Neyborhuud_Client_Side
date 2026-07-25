@@ -15,11 +15,21 @@ import { newIdempotencyKey as newClientMessageId } from "@/lib/idempotency";
 export const chatService = {
   // ─── Conversations ──────────────────────────────────────────────────────
 
-  /** List all conversations the calling user participates in. */
-  async getConversations(page = 1, limit = 20) {
+  /**
+   * List all conversations the calling user participates in.
+   *
+   * Pagination (audit finding #23/#24/#26): the backend reads `before`
+   * (a createdAt cursor on ConversationParticipant, for the primary
+   * infinite-scroll path) and, only as a legacy fallback when `before` is
+   * omitted, a numeric `offset`. It has never read `page` — the frontend
+   * used to send `page` here, which the server silently ignored. `before`
+   * is what real "load more" pagination should use going forward.
+   */
+  async getConversations(opts: { limit?: number; before?: string } = {}) {
+    const { limit = 20, before } = opts;
     return await apiClient.get<{ conversations: Conversation[]; pagination: any }>(
       "/chat/conversations",
-      { params: { page, limit } },
+      { params: { limit, ...(before ? { before } : {}) } },
     );
   },
 
@@ -94,13 +104,20 @@ export const chatService = {
   // ─── Messages ───────────────────────────────────────────────────────────
 
   /**
-   * Fetch messages for a conversation (newest-first; reverse for display).
-   * This call also triggers server-side auto-delivery marking.
+   * Fetch messages for a conversation (newest-first from the server, already
+   * reversed to oldest-first before it responds). This call also triggers
+   * server-side auto-delivery marking.
+   *
+   * Pagination (audit finding #23/#24/#26): the backend's cursor is `before`
+   * (an ISO createdAt cursor on Message) — it never read `page`. Pass
+   * `before` = the createdAt of the OLDEST currently-loaded message to load
+   * older history (used by the chat thread's scroll-to-top "load more").
    */
-  async getMessages(conversationId: string, page = 1, limit = 50) {
-    return await apiClient.get<{ messages: ChatMessage[]; pagination: any }>(
+  async getMessages(conversationId: string, opts: { limit?: number; before?: string } = {}) {
+    const { limit = 50, before } = opts;
+    return await apiClient.get<{ messages: ChatMessage[]; pagination: { limit: number; nextCursor: string | null } }>(
       `/chat/messages/${conversationId}`,
-      { params: { page, limit } },
+      { params: { limit, ...(before ? { before } : {}) } },
     );
   },
 
@@ -133,9 +150,28 @@ export const chatService = {
     return await apiClient.put<ChatMessage>(`/chat/messages/${messageId}`, { content });
   },
 
-  /** Soft-delete a message (sets isDeleted = true). */
-  async deleteMessage(messageId: string) {
-    return await apiClient.delete(`/chat/messages/${messageId}`);
+  /**
+   * Delete a message. `deleteForEveryone: false` (the default) is a
+   * per-viewer "delete for me" — hides the message only for the requester,
+   * everyone else keeps seeing it unchanged (audit finding #18/#26).
+   * `deleteForEveryone: true` replaces the content for all participants;
+   * only the sender or a group admin/moderator may do this.
+   */
+  async deleteMessage(messageId: string, deleteForEveryone = false) {
+    return await apiClient.delete(`/chat/messages/${messageId}`, {
+      data: { deleteForEveryone },
+    });
+  },
+
+  /**
+   * Report a specific message for moderation review (audit finding #9/#16).
+   * Mirrors the reason categories used elsewhere (post/comment reporting).
+   */
+  async reportMessage(messageId: string, reason: string, description?: string) {
+    return await apiClient.post(`/chat/messages/${messageId}/report`, {
+      reason,
+      description,
+    });
   },
 
   // ─── Read / Delivered ───────────────────────────────────────────────────

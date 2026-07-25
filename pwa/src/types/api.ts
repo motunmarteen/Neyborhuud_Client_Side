@@ -591,7 +591,21 @@ export interface ChatMessage {
   /** Rich metadata for non-text message types */
   meta?: ChatMessageMeta;
   media?: MediaItem[];
+  /** ID of the message this one is replying to (WhatsApp/Telegram-style quoted reply). */
   replyTo?: string;
+  /**
+   * Server-computed, decrypted preview of the quoted message — always
+   * reflects the CURRENT state of that message (shows "[Message deleted]"
+   * if it was later deleted, rather than stale content).
+   */
+  replyToPreview?: {
+    id: string;
+    senderId: string;
+    senderName?: string;
+    contentPreview: string;
+    type: string;
+    isDeleted: boolean;
+  } | null;
   readBy?: string[];
   deliveredTo?: string[];
   isEdited: boolean;

@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { chatService } from '@/services/chat.service';
 import socketService from '@/lib/socket';
 import type { Conversation } from '@/types/api';
 import { isCommunityChat } from '@/lib/chatPaths';
+
+const CONVERSATIONS_PAGE_SIZE = 20;
 
 function getDisplayName(c: Conversation): string {
   if (c.type === 'incident') return '🚨 Emergency Chat';
@@ -141,9 +143,26 @@ export function FriendshipChatInbox({
   const [internalSearch, setInternalSearch] = useState('');
   const search = searchQueryProp ?? internalSearch;
 
-  const { data: conversationsData, isLoading } = useQuery({
+  // Infinite-scroll pagination (audit finding #23/#24/#26): the backend has
+  // always had correct `before`-cursor pagination for conversations — the
+  // frontend just never used it, always fetching only the first page. This
+  // wires up real "load more" behavior via IntersectionObserver on a bottom
+  // sentinel, matching the message-thread pagination below.
+  const {
+    data: conversationsData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['conversations'],
-    queryFn: () => chatService.getConversations(),
+    queryFn: ({ pageParam }: { pageParam?: string }) =>
+      chatService.getConversations({ limit: CONVERSATIONS_PAGE_SIZE, before: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => {
+      const payload = (lastPage as { data?: { pagination?: { nextCursor?: string | null } } })?.data;
+      return payload?.pagination?.nextCursor ?? undefined;
+    },
     staleTime: 30_000,
   });
 
@@ -157,7 +176,31 @@ export function FriendshipChatInbox({
     };
   }, [queryClient]);
 
-  const conversations: Conversation[] = (conversationsData as { data?: { conversations?: Conversation[] } })?.data?.conversations ?? [];
+  const conversations: Conversation[] = useMemo(
+    () =>
+      (conversationsData?.pages ?? []).flatMap(
+        (page) => (page as { data?: { conversations?: Conversation[] } })?.data?.conversations ?? [],
+      ),
+    [conversationsData],
+  );
+
+  // Bottom sentinel — loads the next page of conversations as the user
+  // scrolls near the end of the currently-rendered list.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, conversations.length]);
 
   const filtered = useMemo(() => {
     let list = conversations.filter((c) => matchesFilter(c, inboxFilter));
@@ -248,6 +291,17 @@ export function FriendshipChatInbox({
               </Link>
             );
           })}
+
+          {/* Infinite-scroll sentinel — only meaningful when not filtering by
+              a client-side search (search only searches already-loaded pages;
+              matches the pre-existing behavior, unaffected by this change). */}
+          {!search && (
+            <div ref={sentinelRef} className="flex justify-center py-2">
+              {isFetchingNextPage ? (
+                <span className="text-xs text-[var(--neu-text-muted)]">Loading more…</span>
+              ) : null}
+            </div>
+          )}
         </div>
       )}
     </div>

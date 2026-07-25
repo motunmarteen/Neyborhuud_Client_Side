@@ -148,12 +148,19 @@ function KeyBundlePanel({ conversationId, onClose }: KeyBundlePanelProps) {
     <div className="chat-room__keys-panel">
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
-          <span className="material-symbols-outlined mr-1 align-middle text-[18px] text-primary">encrypted</span>
+          <span className="material-symbols-outlined mr-1 align-middle text-[18px] text-[var(--neu-text-muted)]">lock_open</span>
           Encryption keys
         </p>
         <button type="button" onClick={onClose} className="mod-chip rounded-full px-3 py-1 text-xs font-semibold">
           Close
         </button>
+      </div>
+
+      <div className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-[var(--neu-text)]">
+        <strong>Messages are not end-to-end encrypted yet.</strong> They&apos;re encrypted in transit and at rest on
+        our servers, but not with these keys — end-to-end encryption (where only you and the other person can ever
+        read a message) isn&apos;t connected yet. Public keys below are registered in preparation for that, but
+        aren&apos;t currently used to protect your messages.
       </div>
 
       {loading ? (
@@ -164,7 +171,7 @@ function KeyBundlePanel({ conversationId, onClose }: KeyBundlePanelProps) {
         <div className="mt-3 flex flex-col gap-3">
           {bundle.missingKeys.length > 0 && (
             <div className="mod-card rounded-xl p-3 text-xs text-primary">
-              {bundle.missingKeys.length} participant(s) have not registered a key yet. Messages may not be fully encrypted.
+              {bundle.missingKeys.length} participant(s) have not registered a key yet.
             </div>
           )}
           {Object.entries(bundle.bundle).map(([uid, info]) => (
@@ -439,6 +446,9 @@ export default function ConversationPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [communityInfoOpen, setCommunityInfoOpen] = useState(false);
   const [mentionInvitee, setMentionInvitee] = useState<{ id: string; name: string; avatarUrl?: string | null } | null>(null);
+  // Reply-to (audit finding #6) — the message currently being replied to,
+  // shown as a preview above the composer until sent or cancelled.
+  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
 
   // Active "@token" the user is typing (drives the invite mention picker).
   const mentionQuery = useMemo(() => {
@@ -467,9 +477,16 @@ export default function ConversationPage() {
     // Prefer freshly fetched detail
     const detail = (detailData as any)?.data?.conversation;
     if (detail) return detail as Conversation;
-    // Fall back to conversations list cache
+    // Fall back to conversations list cache. FriendshipChatInbox now loads
+    // this via useInfiniteQuery (paginated — audit finding #23/#24/#26), so
+    // the cache shape is { pages: [...] } rather than a single page; support
+    // both shapes so this lookup keeps working regardless of which query
+    // hook last populated the ['conversations'] cache key.
     const cached = queryClient.getQueryData<any>(['conversations']);
-    const list: Conversation[] = cached?.data?.conversations ?? cached?.conversations ?? [];
+    const pages: any[] = cached?.pages ?? [cached];
+    const list: Conversation[] = pages.flatMap(
+      (page) => page?.data?.conversations ?? page?.conversations ?? [],
+    );
     return list.find((c) => ((c as any).conversationId ?? (c as any)._id ?? c.id) === conversationId);
   })();
 
@@ -547,6 +564,18 @@ export default function ConversationPage() {
   );
 
   // ── Load messages ────────────────────────────────────────────────────────
+  // Pagination state (audit finding #23/#24/#26): the backend has always
+  // supported a `before` cursor for loading older history — nothing in the
+  // app ever asked for it, so only the most recent 50 messages were ever
+  // reachable. `nextCursor` is the createdAt of the oldest message currently
+  // loaded; passing it as `before` on the next call fetches the next-older
+  // page. `hasMoreOlder` becomes false once the server returns a page
+  // shorter than the page size (no more history).
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const scrollContainerElRef = useRef<HTMLDivElement | null>(null);
+
   const loadMessages = useCallback(async () => {
     if (!conversationId || isPlaceholder) return;
     try {
@@ -554,12 +583,69 @@ export default function ConversationPage() {
       const raw = res.data?.messages ?? [];
       // Backend already reverses to oldest-first before responding
       setMessages(enrichMessagesReceipts([...raw], user?.id, peerUserId));
+      const pagination = res.data?.pagination;
+      setNextCursor(pagination?.nextCursor ?? null);
+      setHasMoreOlder(!!pagination?.nextCursor);
     } catch {
       setMessages([]);
     } finally {
       setLoading(false);
     }
   }, [conversationId, isPlaceholder, user?.id, peerUserId]);
+
+  /**
+   * Load the next-older page and PREPEND it, preserving the user's scroll
+   * position (otherwise prepending content above the viewport yanks the
+   * visible messages down/up — the classic infinite-scroll-upward bug).
+   */
+  const loadOlderMessages = useCallback(async () => {
+    if (!conversationId || isPlaceholder || !hasMoreOlder || !nextCursor || loadingOlder) return;
+    const container = scrollContainerElRef.current;
+    const prevScrollHeight = container?.scrollHeight ?? 0;
+    const prevScrollTop = container?.scrollTop ?? 0;
+
+    setLoadingOlder(true);
+    try {
+      const res = await chatService.getMessages(conversationId, { before: nextCursor });
+      const older = res.data?.messages ?? [];
+      if (older.length > 0) {
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => msgId(m)));
+          const deduped = older.filter((m) => !existingIds.has(msgId(m)));
+          return [...enrichMessagesReceipts(deduped, user?.id, peerUserId), ...prev];
+        });
+      }
+      const pagination = res.data?.pagination;
+      setNextCursor(pagination?.nextCursor ?? null);
+      setHasMoreOlder(!!pagination?.nextCursor);
+
+      // Restore scroll position on the next paint, after the DOM has grown.
+      requestAnimationFrame(() => {
+        const el = scrollContainerElRef.current;
+        if (!el) return;
+        const newScrollHeight = el.scrollHeight;
+        el.scrollTop = prevScrollTop + (newScrollHeight - prevScrollHeight);
+      });
+    } catch {
+      // Non-fatal — the user can retry by scrolling again.
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [conversationId, isPlaceholder, hasMoreOlder, nextCursor, loadingOlder, user?.id, peerUserId]);
+
+  // Scroll-to-top loads older messages.
+  useEffect(() => {
+    const container = scrollContainerElRef.current;
+    if (!container || isPlaceholder) return;
+    const SCROLL_TOP_THRESHOLD_PX = 120;
+    const onScroll = () => {
+      if (container.scrollTop <= SCROLL_TOP_THRESHOLD_PX) {
+        void loadOlderMessages();
+      }
+    };
+    container.addEventListener('scroll', onScroll, { passive: true });
+    return () => container.removeEventListener('scroll', onScroll);
+  }, [loadOlderMessages, isPlaceholder]);
 
   useEffect(() => {
     if (isPlaceholder) {
@@ -748,6 +834,26 @@ export default function ConversationPage() {
     const content = inputText.trim();
     if (!content || sending) return;
 
+    const replyTo = replyingTo ? (replyingTo.id || (replyingTo as any)._id) : undefined;
+    // Build an optimistic replyToPreview from the in-memory message we're
+    // replying to, so the UI shows the quote instantly rather than waiting
+    // for the server's response.
+    const replyToPreview = replyingTo
+      ? {
+          id: replyTo as string,
+          senderId: replyingTo.senderId,
+          senderName:
+            replyingTo.sender?.firstName || replyingTo.sender?.lastName
+              ? [replyingTo.sender.firstName, replyingTo.sender.lastName].filter(Boolean).join(' ')
+              : replyingTo.sender?.username,
+          contentPreview: replyingTo.isDeleted
+            ? '[Message deleted]'
+            : (replyingTo.content ?? '').slice(0, 120),
+          type: replyingTo.type,
+          isDeleted: !!replyingTo.isDeleted,
+        }
+      : undefined;
+
     const tempId = `temp-${Date.now()}`;
     const optimistic: ChatMessage = {
       id: tempId,
@@ -764,6 +870,8 @@ export default function ConversationPage() {
         : undefined,
       content,
       type: 'text',
+      replyTo,
+      replyToPreview,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       status: 'sent',
@@ -774,10 +882,11 @@ export default function ConversationPage() {
 
     setMessages((prev) => [...prev, optimistic]);
     setInputText('');
+    setReplyingTo(null);
     setSending(true);
 
     try {
-      const res = await chatService.sendMessage({ conversationId, content });
+      const res = await chatService.sendMessage({ conversationId, content, replyTo });
       // Backend wraps the message: { success, message, data: { message: {...} } }
       // So res.data = { message: {...} } — must unwrap one level
       const payload = res.data as any;
@@ -792,6 +901,10 @@ export default function ConversationPage() {
                   ...sent,
                   id: sent.id || (sent as any)._id || tempId,
                   senderId: user?.id ?? sent.senderId,
+                  // Prefer the server's replyToPreview (reflects current
+                  // state) but keep the optimistic one as a fallback so the
+                  // quote doesn't flicker away if the server didn't include it.
+                  replyToPreview: sent.replyToPreview ?? replyToPreview ?? null,
                 })
               : m,
           ),
@@ -807,6 +920,7 @@ export default function ConversationPage() {
       // Remove the optimistic bubble and restore the text so the user doesn't lose their message
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setInputText(content);
+      setReplyingTo(replyingTo);
       // Restore textarea height
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -815,6 +929,22 @@ export default function ConversationPage() {
     } finally {
       setSending(false);
       textareaRef.current?.focus();
+    }
+  };
+
+  /** "Delete for me" (audit finding #18/#26) — per-viewer hide, triggered from MessageActionSheet. */
+  const handleDeleteForMe = async (msg: ChatMessage) => {
+    const targetId = msg.id ?? (msg as any)._id;
+    if (!targetId) return;
+    // Optimistically remove it from view; if the request fails we simply
+    // don't have a good way to "un-hide" without a refetch, so just reload
+    // on failure instead of guessing at a rollback.
+    setMessages((prev) => prev.filter((m) => msgId(m) !== targetId));
+    try {
+      await chatService.deleteMessage(targetId, false);
+    } catch {
+      toast.error('Could not remove the message. Reloading…');
+      loadMessages();
     }
   };
 
@@ -1014,6 +1144,7 @@ export default function ConversationPage() {
 
   return (
     <ChatRoomLayout
+      scrollContainerRef={(el) => { scrollContainerElRef.current = el; }}
       header={
         <ChatRoomHeader
           displayName={displayName}
@@ -1021,7 +1152,6 @@ export default function ConversationPage() {
           avatarUrl={avatar.url}
           avatarInitials={avatar.initials}
           isIncident={isIncident}
-          encrypted={conv?.type === 'direct'}
           showKeyPanel={showKeyPanel}
           onToggleKeys={() => setShowKeyPanel((s) => !s)}
           onBack={() => navigateBack(router, { pathname, fallback: '/friendship?tab=chats' })}
@@ -1042,6 +1172,33 @@ export default function ConversationPage() {
             onPick={handleMentionPick}
           />
         )}
+        {/* Reply preview above the composer (audit finding #6) — mirrors
+            WhatsApp/Telegram's "replying to…" bar shown while composing. */}
+        {replyingTo ? (
+          <div className="mx-auto flex w-full max-w-[600px] items-center gap-2 border-t border-gray-100 bg-gray-50 px-3 py-2">
+            <span className="material-symbols-outlined shrink-0 text-[16px] text-gray-400">reply</span>
+            <div className="min-w-0 flex-1 border-l-2 border-blue-400 pl-2">
+              <p className="truncate text-[12px] font-semibold text-blue-600">
+                {replyingTo.senderId === user?.id
+                  ? 'Yourself'
+                  : (replyingTo.sender?.firstName || replyingTo.sender?.lastName
+                      ? [replyingTo.sender.firstName, replyingTo.sender.lastName].filter(Boolean).join(' ')
+                      : replyingTo.sender?.username) || 'Neybor'}
+              </p>
+              <p className="truncate text-[12px] text-gray-500">
+                {replyingTo.isDeleted ? 'Message deleted' : replyingTo.content || `[${replyingTo.type}]`}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setReplyingTo(null)}
+              aria-label="Cancel reply"
+              className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+            >
+              <span className="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          </div>
+        ) : null}
         <ChatComposer
           inputText={inputText}
           onInputChange={setInputText}
@@ -1057,6 +1214,11 @@ export default function ConversationPage() {
       }
     >
       <div className="mx-auto flex w-full max-w-[600px] px-1 flex-col gap-1 pb-4 pt-4">
+        {!loading && loadingOlder ? (
+          <div className="flex justify-center py-2">
+            <span className="text-xs text-gray-400">Loading earlier messages…</span>
+          </div>
+        ) : null}
         {loading ? (
           <div className="flex flex-col gap-2">
             {[...Array(6)].map((_, i) => (
@@ -1212,6 +1374,11 @@ export default function ConversationPage() {
                                 ),
                               );
                             }}
+                            onReply={(m) => {
+                              setReplyingTo(m);
+                              textareaRef.current?.focus();
+                            }}
+                            onDeleteForMe={handleDeleteForMe}
                           />
                         </div>
                       );
