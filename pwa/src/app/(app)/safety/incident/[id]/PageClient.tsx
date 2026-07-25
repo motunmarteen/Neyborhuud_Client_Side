@@ -74,6 +74,9 @@ export default function IncidentRecapPage() {
   const [summary, setSummary] = useState<IncidentSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [noteSaved, setNoteSaved] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -83,7 +86,10 @@ export default function IncidentRecapPage() {
       setError(null);
       try {
         const res = await safetyService.getSosSummary(id);
-        if (!cancelled) setSummary(res?.data?.summary ?? null);
+        if (!cancelled) {
+          setSummary(res?.data?.summary ?? null);
+          setNoteDraft(res?.data?.summary?.note ?? '');
+        }
       } catch (err) {
         if (!cancelled) {
           const msg = err instanceof Error ? err.message : 'Failed to load incident.';
@@ -97,6 +103,23 @@ export default function IncidentRecapPage() {
       cancelled = true;
     };
   }, [id]);
+
+  const saveNote = async () => {
+    if (!id || !noteDraft.trim()) return;
+    setNoteSaving(true);
+    setNoteSaved(false);
+    try {
+      const res = await safetyService.addSosIncidentNote(id, noteDraft.trim());
+      setNoteSaved(true);
+      const note = res.data?.note ?? noteDraft.trim();
+      const noteUpdatedAt = res.data?.noteUpdatedAt ?? new Date().toISOString();
+      setSummary((prev) => (prev ? { ...prev, note, noteUpdatedAt } : prev));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save note.');
+    } finally {
+      setNoteSaving(false);
+    }
+  };
 
   return (
     <SentinelSubpageLayout
@@ -118,6 +141,12 @@ export default function IncidentRecapPage() {
 
         {summary && (
           <>
+            {summary.isDrill && (
+              <div className="mb-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm font-bold text-amber-600">
+                🧪 This was a drill — a practice run to test guardian alerts. No real emergency occurred.
+              </div>
+            )}
+
             {/* ── Header card ─────────────────────────────────────────── */}
             <div className="rounded-xl neu-card p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
@@ -166,11 +195,24 @@ export default function IncidentRecapPage() {
                   Fastest response: <span className="text-primary font-medium">{formatDuration(summary.guardians.fastestResponseMs)}</span>
                 </div>
               )}
+              {summary.guardians.tiersNotified && summary.guardians.tiersNotified.length > 0 && (
+                <div className="mt-2 text-xs text-white/60">
+                  Escalated through priority tier{summary.guardians.tiersNotified.length === 1 ? '' : 's'}:{' '}
+                  <span className="text-primary font-medium">{summary.guardians.tiersNotified.join(', ')}</span>
+                </div>
+              )}
               {summary.guardians.details.length > 0 && (
                 <ul className="mt-3 divide-y divide-white/5">
                   {summary.guardians.details.map((g) => (
                     <li key={g.guardianId} className="py-2 text-xs flex items-center justify-between">
-                      <span className="text-white/70 font-mono truncate">{g.guardianId}</span>
+                      <span className="text-white/70 font-mono truncate">
+                        {g.guardianId}
+                        {g.priorityLevel !== null && (
+                          <span className="ml-1.5 rounded bg-white/10 px-1 py-0.5 text-[10px] text-white/50">
+                            tier {g.priorityLevel}
+                          </span>
+                        )}
+                      </span>
                       <span className={g.acknowledgedAt ? 'text-primary' : g.notifiedAt ? 'text-primary400' : 'text-white/40'}>
                         {g.acknowledgedAt
                           ? `Acked in ${formatDuration(g.responseMs ?? 0)}`
@@ -245,6 +287,41 @@ export default function IncidentRecapPage() {
                   ))}
                 </ol>
               )}
+            </div>
+
+            {/* ── Personal note ───────────────────────────────────────── */}
+            <div className="rounded-xl neu-card p-4 mt-4">
+              <h2 className="text-sm font-semibold mb-2">Your note</h2>
+              <p className="text-xs text-white/50 mb-2">
+                Add a short note or correction — e.g. &quot;actually I was fine, this was a training exercise.&quot;
+              </p>
+              <textarea
+                value={noteDraft}
+                onChange={(e) => {
+                  setNoteDraft(e.target.value.slice(0, 1000));
+                  setNoteSaved(false);
+                }}
+                maxLength={1000}
+                rows={3}
+                placeholder="Add a note about this incident…"
+                className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white/90 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              />
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-[11px] text-white/40">
+                  {summary.noteUpdatedAt ? `Last saved ${new Date(summary.noteUpdatedAt).toLocaleString()}` : ''}
+                </span>
+                <div className="flex items-center gap-2">
+                  {noteSaved && <span className="text-[11px] text-primary">Saved</span>}
+                  <button
+                    type="button"
+                    onClick={() => void saveNote()}
+                    disabled={noteSaving || !noteDraft.trim() || noteDraft.trim() === (summary.note ?? '')}
+                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white disabled:opacity-40"
+                  >
+                    {noteSaving ? 'Saving…' : 'Save note'}
+                  </button>
+                </div>
+              </div>
             </div>
           </>
         )}

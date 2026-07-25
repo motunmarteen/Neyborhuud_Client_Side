@@ -83,6 +83,11 @@ export function SosRecentHistory() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold capitalize text-gray-800">
+                      {e.isDrill && (
+                        <span className="mr-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700 align-middle">
+                          Drill
+                        </span>
+                      )}
                       {e.status.replace(/_/g, ' ')} · {e.visibilityMode}
                     </p>
                     <p className="text-[11px] text-gray-400 mt-0.5">

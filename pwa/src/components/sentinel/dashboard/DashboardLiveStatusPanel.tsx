@@ -191,6 +191,12 @@ export function DashboardLiveStatusPanel({
             maxLength={280}
           />
         </div>
+        {(myStatus === 'unsafe' || myStatus === 'need_attention') && (
+          <p className="rounded-xl border border-status-warning/30 bg-status-warning/10 px-3 py-2 text-xs font-semibold text-status-warning">
+            ⚠️ This status alerts your Guardians with a push notification, not just a quiet feed update — use it when
+            you actually want them to notice.
+          </p>
+        )}
         <button
           type="button"
           onClick={() => void onUpdateStatus()}

@@ -159,21 +159,31 @@ export default function PanicPinPage() {
 
           {pinSet ? (
             <Link
-              href="/safety/panic-pin/enter"
+              href="/safety/panic-pin/practice"
               className="mod-card flex items-center justify-between rounded-2xl p-4 no-underline"
             >
               <div>
                 <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
-                  Practice entering your PIN
+                  Practice entering your PIN (safe)
                 </p>
                 <p className="mt-0.5 text-xs" style={{ color: 'var(--neu-text-muted)' }}>
-                  Opens the real entry screen — the one that fires a silent SOS. Practice on purpose, or bookmark it for a real duress moment.
+                  Rehearse the same disguised keypad without any risk — this practice screen never contacts the server and never fires an SOS, no matter what you type.
                 </p>
               </div>
               <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>
                 chevron_right
               </span>
             </Link>
+          ) : null}
+
+          {pinSet ? (
+            <div className="rounded-xl border border-brand-red/20 bg-brand-red/5 px-3 py-2 text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
+              The <strong>real</strong> entry screen lives at a separate, unlisted address
+              (<code>/safety/panic-pin/enter</code>) that is not linked from anywhere in this app's
+              normal navigation — reach it only by typing/bookmarking that address directly, under an
+              unremarkable bookmark name. Typing your real PIN into the <strong>Practice</strong> link
+              above is always safe; it never reaches the real entry screen or the server.
+            </div>
           ) : null}
 
           {pinSet ? (

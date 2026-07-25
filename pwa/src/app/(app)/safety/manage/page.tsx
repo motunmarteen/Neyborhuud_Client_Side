@@ -16,6 +16,7 @@ import { DashboardCirclePanel } from '@/components/sentinel/dashboard/DashboardC
 import { DashboardGuardiansPanel } from '@/components/sentinel/dashboard/DashboardGuardiansPanel';
 import { DashboardHowItWorks } from '@/components/sentinel/dashboard/DashboardHowItWorks';
 import { DashboardLiveStatusPanel } from '@/components/sentinel/dashboard/DashboardLiveStatusPanel';
+import { GuardianVsCircleExplainer } from '@/components/sentinel/dashboard/GuardianVsCircleExplainer';
 import { DashboardToolLinks } from '@/components/sentinel/dashboard/DashboardToolLinks';
 import { SentinelDashboardHero } from '@/components/sentinel/dashboard/SentinelDashboardHero';
 import { SosGuardianIncomingAlerts } from '@/components/sentinel/sos/SosGuardianIncomingAlerts';
@@ -149,24 +150,28 @@ function SafetyDashboardInner() {
           )}
 
           {tab === 'guardians' && (
-            <DashboardGuardiansPanel
-              guardians={dash.guardians}
-              incomingRequests={dash.incomingRequests}
-              statusFilter={dash.statusFilter}
-              onStatusFilterChange={dash.setStatusFilter}
-              linkers={dash.linkers}
-              linkersLoading={dash.linkersLoading}
-              linkersLoaded={dash.linkersLoaded}
-              linkersMessage={dash.linkersMessage}
-              onLoadLinkers={() => void dash.loadLinkers()}
-              onRefresh={dash.fetchData}
-              onError={dash.setError}
-              loading={dash.loading}
-            />
+            <div className="space-y-5">
+              <GuardianVsCircleExplainer />
+              <DashboardGuardiansPanel
+                guardians={dash.guardians}
+                incomingRequests={dash.incomingRequests}
+                statusFilter={dash.statusFilter}
+                onStatusFilterChange={dash.setStatusFilter}
+                linkers={dash.linkers}
+                linkersLoading={dash.linkersLoading}
+                linkersLoaded={dash.linkersLoaded}
+                linkersMessage={dash.linkersMessage}
+                onLoadLinkers={() => void dash.loadLinkers()}
+                onRefresh={dash.fetchData}
+                onError={dash.setError}
+                loading={dash.loading}
+              />
+            </div>
           )}
 
           {tab === 'circle' && (
             <div className="space-y-5">
+              <GuardianVsCircleExplainer />
               <DashboardLiveStatusPanel
                 statusFeed={dash.statusFeed}
                 onRefresh={dash.fetchData}

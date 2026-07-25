@@ -90,6 +90,19 @@ export default function EmergencyPage() {
 
   // Escalation
   const [escalating, setEscalating]   = useState<string | null>(null);
+  const [cancelling, setCancelling]   = useState<string | null>(null);
+  const [acknowledging, setAcknowledging] = useState<string | null>(null);
+  const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set());
+
+  // Emergency history stats (GET /safety/emergency/stats)
+  const [stats, setStats] = useState<{
+    totalEmergencies: number;
+    activeEmergencies: number;
+    resolvedEmergencies: number;
+    falseAlarms: number;
+    avgResponseTimeMinutes: number;
+  } | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   // Incident Replay
   const [replayData, setReplayData]       = useState<Record<string, IncidentReplay | null>>({});
@@ -136,7 +149,19 @@ export default function EmergencyPage() {
     }
   }, []);
 
-  useEffect(() => { loadHistory(); loadActive(); }, [loadHistory, loadActive]);
+  const loadStats = useCallback(async () => {
+    setStatsLoading(true);
+    try {
+      const res = await safetyService.getEmergencyStats();
+      setStats(res.data ?? null);
+    } catch {
+      setStats(null);
+    } finally {
+      setStatsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadHistory(); loadActive(); loadStats(); }, [loadHistory, loadActive, loadStats]);
 
   // Dispatch status is decided asynchronously (a queued job may run well
   // after the initial load), so without this the page shows a stale
@@ -239,8 +264,39 @@ export default function EmergencyPage() {
     try {
       await safetyService.resolveEmergency(emergencyId);
       loadHistory();
+      loadActive();
+      loadStats();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to resolve');
+    }
+  };
+
+  /** "Never mind, that was a mistake" — distinct from Resolve. */
+  const handleCancel = async (emergencyId: string) => {
+    setCancelling(emergencyId);
+    try {
+      await safetyService.cancelEmergency(emergencyId, 'Reported by mistake');
+      toast.success('Report cancelled.');
+      loadHistory();
+      loadActive();
+      loadStats();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to cancel report');
+    } finally {
+      setCancelling(null);
+    }
+  };
+
+  const handleAcknowledge = async (emergencyId: string) => {
+    setAcknowledging(emergencyId);
+    try {
+      await safetyService.acknowledgeEmergency(emergencyId);
+      setAcknowledgedIds((prev) => new Set(prev).add(emergencyId));
+      toast.success('Acknowledged.');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to acknowledge');
+    } finally {
+      setAcknowledging(null);
     }
   };
 
@@ -294,6 +350,39 @@ export default function EmergencyPage() {
                     })}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Your emergency history stats */}
+            {(statsLoading || stats) && (
+              <div className="neu-card-sm rounded-2xl p-5">
+                <h2 className="mb-3 font-semibold text-[var(--neu-text)]">Your emergency history stats</h2>
+                {statsLoading && !stats ? (
+                  <p className="text-sm text-[var(--neu-text-muted)]">Loading…</p>
+                ) : stats ? (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                      <p className="text-lg font-bold text-[var(--neu-text)]">{stats.totalEmergencies}</p>
+                      <p className="text-[10px] text-[var(--neu-text-muted)]">Total reports</p>
+                    </div>
+                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                      <p className="text-lg font-bold text-status-danger">{stats.activeEmergencies}</p>
+                      <p className="text-[10px] text-[var(--neu-text-muted)]">Active</p>
+                    </div>
+                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                      <p className="text-lg font-bold text-status-success">{stats.resolvedEmergencies}</p>
+                      <p className="text-[10px] text-[var(--neu-text-muted)]">Resolved</p>
+                    </div>
+                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                      <p className="text-lg font-bold text-status-warning">{stats.falseAlarms}</p>
+                      <p className="text-[10px] text-[var(--neu-text-muted)]">False alarms</p>
+                    </div>
+                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                      <p className="text-lg font-bold text-brand-blue">{stats.avgResponseTimeMinutes}m</p>
+                      <p className="text-[10px] text-[var(--neu-text-muted)]">Avg. resolution time</p>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             )}
 
@@ -496,7 +585,7 @@ export default function EmergencyPage() {
 
                         {/* Actions */}
                         {em.status === 'active' && (
-                          <div className="flex gap-2 mt-1">
+                          <div className="flex flex-wrap gap-2 mt-1">
                             {!em.agencyNotified && (
                               <button
                                 onClick={() => handleEscalate(em._id)}
@@ -507,10 +596,28 @@ export default function EmergencyPage() {
                               </button>
                             )}
                             <button
+                              onClick={() => handleAcknowledge(em._id)}
+                              disabled={acknowledging === em._id || acknowledgedIds.has(em._id)}
+                              className="flex-1 rounded-lg bg-brand-black py-1.5 text-xs font-medium text-brand-blue hover:bg-brand-surface disabled:opacity-50"
+                            >
+                              {acknowledgedIds.has(em._id)
+                                ? '✓ Acknowledged'
+                                : acknowledging === em._id
+                                ? 'Acknowledging…'
+                                : '👁 Acknowledge'}
+                            </button>
+                            <button
                               onClick={() => handleResolve(em._id)}
                               className="flex-1 rounded-lg bg-brand-black py-1.5 text-xs font-medium text-[var(--neu-text-muted)] hover:bg-brand-surface"
                             >
                               ✓ Resolve
+                            </button>
+                            <button
+                              onClick={() => handleCancel(em._id)}
+                              disabled={cancelling === em._id}
+                              className="flex-1 rounded-lg bg-brand-black py-1.5 text-xs font-medium text-status-warning hover:bg-brand-surface disabled:opacity-50"
+                            >
+                              {cancelling === em._id ? 'Cancelling…' : '✕ Cancel (mistake)'}
                             </button>
                           </div>
                         )}

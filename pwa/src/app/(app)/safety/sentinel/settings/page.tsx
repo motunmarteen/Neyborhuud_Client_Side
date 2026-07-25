@@ -5,13 +5,21 @@
  * "Manage Sentinel Settings" button and the Threat Scanning tile's "tune
  * what gets flagged" promise.
  *
- * Deliberately does NOT expose a detection-sensitivity dial. Sentinel's
- * keyword-tier threat scoring and the red-zone trigger threshold are global
- * and identical for every user in an LGA — a real threat shouldn't be
- * visible to some neighbors and hidden from others depending on a personal
- * slider. What's genuinely personal, and what this page controls, is
- * DELIVERY: which severities get pushed to you, and whether that includes
- * your saved work-area LGA in addition to home.
+ * Both the severity filter below and the sensitivity dial are DELIVERY-only
+ * controls — detection itself (the deterministic keyword-tier threat score
+ * and the platform-wide red-zone trigger threshold) stays exactly the same
+ * for every user in an LGA. A real threat is never hidden from some
+ * neighbors and shown to others depending on a personal setting. What these
+ * controls change is only which of those already-triggered, identically-
+ * scored advisories actually get delivered to YOU.
+ *
+ * "High and above" and "Critical only" now genuinely filter delivery
+ * server-side (see sentinel.service.ts's _fanOutToLga) — this used to be a
+ * placeholder with no effect; it has been reversed per explicit product
+ * decision. The sensitivity dial (redZoneMinThreatScore) is new: a personal
+ * numeric floor on the underlying 0-10 threat score, for users who find
+ * Sentinel too noisy or too quiet and want a lever beyond the coarse
+ * severity tiers.
  */
 
 import { useEffect, useState } from 'react';
@@ -30,18 +38,17 @@ const SEVERITY_OPTIONS: Array<{
   {
     value: 'all',
     label: 'All advisories',
-    description:
-      'Every red-zone alert Sentinel triggers for your area. Right now this is the only kind Sentinel sends — advisories are already reserved for the most severe, verified threats, so this and "Critical only" currently behave the same.',
+    description: 'Every red-zone alert Sentinel triggers for your area — warning, high, and critical.',
   },
   {
     value: 'high',
     label: 'High and above',
-    description: 'Reserved for a future, finer-grained advisory tier — no effect yet.',
+    description: 'Only advisories rated "high" or "critical" reach you. Lower-severity warnings are held back.',
   },
   {
     value: 'critical',
     label: 'Critical only',
-    description: 'Reserved for a future, finer-grained advisory tier — no effect yet.',
+    description: 'Only the most severe, verified advisories reach you.',
   },
 ];
 
@@ -51,6 +58,7 @@ export default function SentinelSettingsPage() {
   const [minSeverity, setMinSeverity] = useState<'all' | 'high' | 'critical'>('all');
   const [workAreaEnabled, setWorkAreaEnabled] = useState(true);
   const [emergencyServicesEnabled, setEmergencyServicesEnabled] = useState(false);
+  const [sensitivity, setSensitivity] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,6 +70,7 @@ export default function SentinelSettingsPage() {
           setMinSeverity(s.redZoneMinSeverity ?? 'all');
           setWorkAreaEnabled(s.redZoneWorkAreaEnabled ?? true);
           setEmergencyServicesEnabled(!!s.emergencyServicesEnabled);
+          setSensitivity(s.redZoneMinThreatScore ?? 0);
         }
       } catch (err: any) {
         setError(err?.response?.data?.message || err?.message || 'Could not load settings.');
@@ -71,7 +80,13 @@ export default function SentinelSettingsPage() {
     })();
   }, []);
 
-  const save = async (patch: Partial<{ redZoneMinSeverity: 'all' | 'high' | 'critical'; redZoneWorkAreaEnabled: boolean }>) => {
+  const save = async (
+    patch: Partial<{
+      redZoneMinSeverity: 'all' | 'high' | 'critical';
+      redZoneWorkAreaEnabled: boolean;
+      redZoneMinThreatScore: number;
+    }>,
+  ) => {
     setSaving(true);
     setError(null);
     try {
@@ -133,6 +148,42 @@ export default function SentinelSettingsPage() {
                 </button>
               ))}
             </div>
+          </section>
+
+          <section className="mod-card space-y-3 rounded-2xl p-4">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-blue">
+                Sensitivity
+              </p>
+              <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
+                A personal floor on the underlying 0-10 threat score. Raise it if Sentinel feels too noisy for your
+                area; leave it at 0 to see every advisory that clears the severity filter above. This does not change
+                how anything is scored — it only changes what reaches you.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min={0}
+                max={10}
+                step={1}
+                value={sensitivity}
+                disabled={saving}
+                onChange={(e) => setSensitivity(Number(e.target.value))}
+                onMouseUp={() => void save({ redZoneMinThreatScore: sensitivity })}
+                onTouchEnd={() => void save({ redZoneMinThreatScore: sensitivity })}
+                className="w-full accent-primary"
+                aria-label="Sentinel sensitivity threshold"
+              />
+              <span className="w-10 shrink-0 text-right text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+                {sensitivity === 0 ? 'All' : sensitivity}
+              </span>
+            </div>
+            <p className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>
+              {sensitivity === 0
+                ? 'Every advisory that passes the severity filter reaches you.'
+                : `Only advisories scoring ${sensitivity}/10 or higher reach you.`}
+            </p>
           </section>
 
           <section className="mod-card flex items-center justify-between gap-3 rounded-2xl p-4">

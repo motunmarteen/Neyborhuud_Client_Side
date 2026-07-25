@@ -71,6 +71,10 @@ export interface TripMonitorState {
 export interface UseTripMonitor {
   state: TripMonitorState;
   startTrip: (payload: StartTripPayload) => Promise<Trip | null>;
+  /** Create a trip in "planned" state — not yet monitored. Call activatePlannedTrip() when ready to begin. */
+  planTrip: (payload: StartTripPayload) => Promise<Trip | null>;
+  /** Activate a previously-planned trip — begins guardian notification + check-in monitoring. */
+  activatePlannedTrip: (tripId: string) => Promise<Trip | null>;
   checkIn: () => Promise<void>;
   completeTrip: () => Promise<void>;
   cancelTrip: (reason?: string) => Promise<void>;
@@ -430,6 +434,64 @@ export function useTripMonitor(): UseTripMonitor {
     [setLoading, setError, setTrip, startTracking],
   );
 
+  /**
+   * Create a trip in "planned" state — the server does NOT start check-in
+   * monitoring or notify guardians yet (see trip.controller.ts's createTrip
+   * vs activateTrip). Deliberately does NOT call startTracking(), matching
+   * the exact same guard refreshTrip() uses (only active/escalated trips
+   * start GPS tracking) — a planned trip just sits there until the user
+   * explicitly activates it.
+   */
+  const planTrip = useCallback(
+    async (payload: StartTripPayload): Promise<Trip | null> => {
+      setLoading(true);
+      setError(null);
+      try {
+        if (!payload.originLocation && getGeolocation()) {
+          try {
+            const pos = await getCurrentPosition({ enableHighAccuracy: true, timeout: 8000 });
+            payload = {
+              ...payload,
+              originLocation: { latitude: pos.coords.latitude, longitude: pos.coords.longitude },
+            };
+          } catch {}
+        }
+
+        const res = await tripService.createTrip(payload);
+        const trip = res.data?.trip ?? null;
+        setTrip(trip);
+        return trip;
+      } catch (err: any) {
+        setError(err?.response?.data?.message || err?.message || "Failed to plan trip");
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [setLoading, setError, setTrip],
+  );
+
+  /** Activate a previously-planned trip — begins guardian notification + check-in monitoring. */
+  const activatePlannedTrip = useCallback(
+    async (tripId: string): Promise<Trip | null> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await tripService.activateTrip(tripId);
+        const trip = res.data?.trip ?? null;
+        setTrip(trip);
+        if (trip) startTracking(trip);
+        return trip;
+      } catch (err: any) {
+        setError(err?.response?.data?.message || err?.message || "Failed to activate trip");
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [setLoading, setError, setTrip, startTracking],
+  );
+
   const checkIn = useCallback(async () => {
     const tripId = state.trip?._id;
     if (!tripId) return;
@@ -547,6 +609,8 @@ export function useTripMonitor(): UseTripMonitor {
   return {
     state,
     startTrip,
+    planTrip,
+    activatePlannedTrip,
     checkIn,
     completeTrip,
     cancelTrip,

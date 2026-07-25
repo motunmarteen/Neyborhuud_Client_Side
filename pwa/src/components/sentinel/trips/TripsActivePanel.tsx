@@ -15,6 +15,8 @@ type TripsActivePanelProps = {
   onCancel: (reason?: string) => void;
   onPause: () => void;
   onResume: () => void;
+  /** Activates a trip still in "planned" status — begins guardian notification + monitoring. */
+  onActivate?: () => void;
 };
 
 function escalationDotClass(level: number, active: boolean): string {
@@ -34,10 +36,12 @@ export function TripsActivePanel({
   onCancel,
   onPause,
   onResume,
+  onActivate,
 }: TripsActivePanelProps) {
   const [cancelReason, setCancelReason] = useState('');
   const [showCancel, setShowCancel] = useState(false);
   const isPaused = !!trip.pausedAt;
+  const isPlanned = trip.status === 'planned';
   const isTerminal = trip.status === 'completed' || trip.status === 'cancelled';
   const dueSoon = checkInCountdown !== null && checkInCountdown <= 120;
 
@@ -121,7 +125,53 @@ export function TripsActivePanel({
         ) : null}
       </div>
 
-      {!isTerminal ? (
+      {isPlanned ? (
+        <div className="mod-card rounded-2xl border border-primary/25 bg-primary/5 p-4">
+          <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+            Trip planned — not yet monitored
+          </p>
+          <p className="mt-1 text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+            Guardians have not been notified and check-in monitoring has not started. Activate the trip when you&apos;re
+            ready to actually leave.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={onActivate}
+              className="rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-white"
+            >
+              Activate trip now
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowCancel((p) => !p)}
+              className="mod-chip rounded-full px-4 py-2.5 text-sm font-bold text-brand-red"
+            >
+              Cancel plan
+            </button>
+          </div>
+          {showCancel ? (
+            <div className="mt-3 flex gap-2">
+              <input
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Reason (optional)"
+                className="mod-inset flex-1 rounded-xl px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  onCancel(cancelReason || undefined);
+                  setShowCancel(false);
+                }}
+                className="rounded-full bg-brand-red px-4 py-2 text-sm font-bold text-white"
+              >
+                Confirm
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : !isTerminal ? (
         <div className="mod-card rounded-2xl p-4">
           <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
             Trip controls

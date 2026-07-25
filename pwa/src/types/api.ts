@@ -693,6 +693,8 @@ export interface IncidentSummary {
   sosEventId: string;
   status: "pending" | "triggered" | "active" | "resolved" | "cancelled";
   visibilityMode: "normal" | "silent";
+  /** True when this incident was a "Run a guardian drill" practice run, not a real emergency. */
+  isDrill?: boolean;
   cancelledDuringPending: boolean;
   cancelReason: string | null;
   startedAt: string;
@@ -709,7 +711,11 @@ export interface IncidentSummary {
       notifiedAt: string | null;
       acknowledgedAt: string | null;
       responseMs: number | null;
+      /** Escalation tier (1 = highest priority, notified first) this guardian belongs to. */
+      priorityLevel: number | null;
     }>;
+    /** Distinct escalation tiers that were actually notified during this incident. */
+    tiersNotified?: number[];
   };
   tracking: { pingsLogged: number };
   /** null when no Emergency record is linked to this SOS (most SOS events never escalate to agency dispatch). */
@@ -732,6 +738,9 @@ export interface IncidentSummary {
       | "sos_cancelled";
     meta?: Record<string, unknown>;
   }>;
+  /** Optional short personal note the user attached after the fact (e.g. "this was a training exercise"). */
+  note?: string | null;
+  noteUpdatedAt?: string | null;
 }
 
 export interface IncidentReplay {

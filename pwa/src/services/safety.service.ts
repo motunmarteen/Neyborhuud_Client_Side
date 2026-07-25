@@ -82,6 +82,8 @@ export interface SosEvent {
   userId: string;
   status: "pending" | "triggered" | "active" | "resolved" | "cancelled";
   visibilityMode: "normal" | "silent";
+  /** True when this event was a "Run a guardian drill" practice run, not a real emergency. */
+  isDrill?: boolean;
   escalationLevel: number;
   countdownSeconds?: number;
   pendingUntil?: string | null;
@@ -276,6 +278,35 @@ export const safetyService = {
     return apiClient.get<{ summary: import("@/types/api").IncidentSummary }>(
       `/safety/sos/${sosEventId}/summary`,
     );
+  },
+
+  /**
+   * Attach or replace a short personal note on a resolved SOS incident
+   * (e.g. "this was a training exercise"). Surfaced on the Incident Recap page.
+   */
+  async addSosIncidentNote(sosEventId: string, note: string) {
+    return apiClient.post<{ sosEventId: string; note: string; noteUpdatedAt: string | null }>(
+      `/safety/sos/${sosEventId}/note`,
+      { note },
+    );
+  },
+
+  /**
+   * Fire a real, server-reaching SOS "drill" — notifies the caller's actual
+   * guardians (clearly labeled as a practice run) so they get genuine
+   * practice acknowledging an alert, WITHOUT ever creating a real Emergency
+   * record or reaching agency dispatch, no matter what.
+   */
+  async triggerSosDrill(payload: { latitude: number; longitude: number; address?: string; lga?: string; state?: string }) {
+    return apiClient.post<{ status: "active" | "already_active"; sosEventId: string; isDrill: true; guardiansNotified: number }>(
+      "/safety/sos/drill",
+      payload,
+    );
+  },
+
+  /** Guardian acknowledges a drill SOS (distinct from the real SOS acknowledge). */
+  async acknowledgeSosDrill(sosEventId: string) {
+    return apiClient.post(`/safety/sos/${sosEventId}/drill-acknowledge`);
   },
 
   // ─── Safety Circle (opt-in, view-only status access for mutual followers) ─
@@ -474,6 +505,29 @@ export const safetyService = {
     return apiClient.post(`/safety/emergency/${emergencyId}/resolve`, { status: "resolved" });
   },
 
+  /** Cancel a mistakenly-filed emergency report ("never mind, that was wrong"). */
+  async cancelEmergency(emergencyId: string, reason?: string) {
+    return apiClient.post<{ emergency: Emergency }>(`/safety/emergency/${emergencyId}/cancel`, { reason });
+  },
+
+  /** Acknowledge an emergency report (distinct from acknowledging an SOS). */
+  async acknowledgeEmergency(emergencyId: string) {
+    return apiClient.post<{ emergencyId: string; acknowledged: true; totalAcknowledged: number }>(
+      `/safety/emergency/${emergencyId}/acknowledge`,
+    );
+  },
+
+  /** Summary stats for the user's own emergency-report history. */
+  async getEmergencyStats() {
+    return apiClient.get<{
+      totalEmergencies: number;
+      activeEmergencies: number;
+      resolvedEmergencies: number;
+      falseAlarms: number;
+      avgResponseTimeMinutes: number;
+    }>("/safety/emergency/stats");
+  },
+
   /**
    * Fetch a forensic replay timeline for a single emergency incident.
    * Merges location pings, incident chat messages, and system state events
@@ -501,6 +555,8 @@ export const safetyService = {
         emergencyServicesEnabled: boolean;
         redZoneMinSeverity?: "all" | "high" | "critical";
         redZoneWorkAreaEnabled?: boolean;
+        /** Personal Sentinel sensitivity dial: 0-10 floor on the underlying threat score. */
+        redZoneMinThreatScore?: number;
       };
     }>("/safety/settings");
   },
@@ -509,12 +565,14 @@ export const safetyService = {
     emergencyServicesEnabled?: boolean;
     redZoneMinSeverity?: "all" | "high" | "critical";
     redZoneWorkAreaEnabled?: boolean;
+    redZoneMinThreatScore?: number;
   }) {
     return apiClient.patch<{
       safetySettings: {
         emergencyServicesEnabled: boolean;
         redZoneMinSeverity?: "all" | "high" | "critical";
         redZoneWorkAreaEnabled?: boolean;
+        redZoneMinThreatScore?: number;
       };
     }>("/safety/settings", settings);
   },

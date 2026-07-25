@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { UseSosReturn } from '@/hooks/useSos';
 import { useSosDrill } from '@/components/sentinel/sos/useSosDrill';
+import { useSosGuardianDrill } from '@/components/sentinel/sos/useSosGuardianDrill';
 
 type SosTriggerCardProps = {
   sos: UseSosReturn;
@@ -10,6 +11,7 @@ type SosTriggerCardProps = {
 
 export function SosTriggerCard({ sos }: SosTriggerCardProps) {
   const drill = useSosDrill();
+  const guardianDrill = useSosGuardianDrill();
   const [showSettings, setShowSettings] = useState(false);
   const [silent, setSilent] = useState(false);
   const [countdown, setCountdown] = useState(5);
@@ -151,12 +153,53 @@ export function SosTriggerCard({ sos }: SosTriggerCardProps) {
           >
             <span className="material-symbols-outlined text-blue-600">fitness_center</span>
             <span>
-              <span className="text-sm font-bold text-blue-600">Run a drill</span>
+              <span className="text-sm font-bold text-blue-600">Run a drill (this screen only)</span>
               <span className="mt-0.5 block text-xs text-gray-400">
-                Practice the countdown without alerting anyone.
+                Practice the countdown on your own screen. Never contacts the server — your guardians are not involved.
               </span>
             </span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => void guardianDrill.start()}
+            disabled={guardianDrill.running}
+            className="flex w-full items-start gap-3 py-4 text-left transition-all bg-white hover:bg-gray-50/30 disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-amber-600">groups</span>
+            <span>
+              <span className="text-sm font-bold text-amber-600">Run a guardian drill (real alert to guardians)</span>
+              <span className="mt-0.5 block text-xs text-gray-400">
+                Sends a real, clearly-labeled DRILL notification to your actual guardians so they can practice
+                acknowledging an alert. Never creates a real emergency record and never dispatches to police/medical,
+                even if "Notify emergency services" is on.
+              </span>
+            </span>
+          </button>
+
+          {guardianDrill.running && (
+            <div className="py-3 text-xs font-bold text-amber-600">Starting guardian drill…</div>
+          )}
+          {guardianDrill.result && (
+            <div className="flex items-start justify-between gap-2 py-3 text-xs font-bold text-amber-700">
+              <span>
+                🧪 Guardian drill sent — {guardianDrill.result.guardiansNotified} guardian
+                {guardianDrill.result.guardiansNotified === 1 ? '' : 's'} notified. Ask them to tap
+                &quot;Acknowledge drill&quot; when it arrives.
+              </span>
+              <button type="button" onClick={guardianDrill.clear} className="shrink-0 text-xs font-bold underline">
+                Dismiss
+              </button>
+            </div>
+          )}
+          {guardianDrill.error && (
+            <div className="flex items-start justify-between gap-2 py-3 text-xs font-bold text-red-600">
+              <span>{guardianDrill.error}</span>
+              <button type="button" onClick={guardianDrill.clear} className="shrink-0 text-xs font-bold underline">
+                Dismiss
+              </button>
+            </div>
+          )}
 
           {sos.error && (
             <div className="flex items-start justify-between gap-2 py-4 text-xs font-bold text-red-600">

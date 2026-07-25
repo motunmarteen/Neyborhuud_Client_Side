@@ -257,6 +257,11 @@ export default function GeofencesPage() {
         alert zones warn on unfamiliar areas; restricted zones can notify guardians and trigger SOS.
       </SentinelHowItWorks>
 
+      <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+        {geofences.length} of 20 zones used. Each active zone means one more background location check —
+        fewer, well-placed zones are kinder to your battery.
+      </p>
+
       {error && (
         <div className="mod-card rounded-2xl border border-brand-red/30 bg-brand-red/10 px-4 py-2 text-sm text-brand-red">
           {error}
@@ -396,6 +401,11 @@ export default function GeofencesPage() {
                   <span>50m</span>
                   <span>5km</span>
                 </div>
+                <p className="mt-2 text-[11px] leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
+                  🔋 Geofences work by checking your background location — more zones (up to the 20-zone limit) means
+                  more frequent checks and a bigger battery impact. A smaller number of well-placed zones is usually
+                  enough.
+                </p>
               </div>
 
               {/* Zone Type */}

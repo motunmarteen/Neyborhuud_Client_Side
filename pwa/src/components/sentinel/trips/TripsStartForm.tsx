@@ -7,6 +7,8 @@ import { getGeolocation } from '@/lib/nativeGeolocation';
 
 type TripsStartFormProps = {
   onStart: (payload: StartTripPayload) => Promise<void>;
+  /** Called instead of onStart when the user chooses "Plan for later". */
+  onPlan?: (payload: StartTripPayload) => Promise<void>;
   disabled?: boolean;
 };
 
@@ -16,7 +18,7 @@ function defaultArrivalLocal(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export function TripsStartForm({ onStart, disabled }: TripsStartFormProps) {
+export function TripsStartForm({ onStart, onPlan, disabled }: TripsStartFormProps) {
   const [form, setForm] = useState({
     originText: '',
     destinationText: '',
@@ -31,6 +33,8 @@ export function TripsStartForm({ onStart, disabled }: TripsStartFormProps) {
   const [geocodingDest, setGeocodingDest] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  /** "now" starts monitoring immediately; "later" creates a planned trip you activate when ready. */
+  const [mode, setMode] = useState<'now' | 'later'>('now');
 
   const handleUseMyLocation = useCallback(() => {
     const geo = getGeolocation();
@@ -91,7 +95,7 @@ export function TripsStartForm({ onStart, disabled }: TripsStartFormProps) {
     }
     setSubmitting(true);
     try {
-      await onStart({
+      const payload: StartTripPayload = {
         originText: form.originText.trim(),
         destinationText: form.destinationText.trim(),
         expectedArrival: new Date(form.expectedArrival).toISOString(),
@@ -111,7 +115,13 @@ export function TripsStartForm({ onStart, disabled }: TripsStartFormProps) {
             address: form.destinationText.trim(),
           },
         }),
-      });
+      };
+
+      if (mode === 'later' && onPlan) {
+        await onPlan(payload);
+      } else {
+        await onStart(payload);
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to start trip';
       setErr(msg);
@@ -126,6 +136,35 @@ export function TripsStartForm({ onStart, disabled }: TripsStartFormProps) {
       <p className="mt-1 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
         Guardians are notified and monitoring begins as soon as you start.
       </p>
+
+      {onPlan ? (
+        <div className="mod-inset mt-4 flex gap-1 rounded-xl p-1">
+          <button
+            type="button"
+            onClick={() => setMode('now')}
+            className={`flex-1 rounded-lg py-2 text-sm font-semibold ${
+              mode === 'now' ? 'mod-chip mod-chip-active text-primary' : 'text-[var(--neu-text-muted)]'
+            }`}
+          >
+            Start now
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('later')}
+            className={`flex-1 rounded-lg py-2 text-sm font-semibold ${
+              mode === 'later' ? 'mod-chip mod-chip-active text-primary' : 'text-[var(--neu-text-muted)]'
+            }`}
+          >
+            Plan for later
+          </button>
+        </div>
+      ) : null}
+      {mode === 'later' && onPlan ? (
+        <p className="mt-2 text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+          Saves the trip without notifying guardians or starting monitoring yet. Activate it from the Trip tab
+          whenever you&apos;re ready to actually leave.
+        </p>
+      ) : null}
 
       <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
@@ -213,6 +252,12 @@ export function TripsStartForm({ onStart, disabled }: TripsStartFormProps) {
             <option value={45}>Every 45 min</option>
             <option value={60}>Every 60 min</option>
           </select>
+          <p className="mt-1.5 rounded-lg border border-status-warning/30 bg-status-warning/10 px-2.5 py-2 text-[11px] leading-relaxed text-status-warning">
+            ⚠️ Missing <strong>3 consecutive check-ins</strong> (that&apos;s{' '}
+            {form.checkInIntervalMinutes * 3} minutes of silence at this interval) automatically triggers a{' '}
+            <strong>silent SOS</strong> to your guardians — as if you&apos;d pressed the panic button yourself. Pick an
+            interval you can realistically keep up with.
+          </p>
         </div>
 
         <textarea
@@ -232,7 +277,13 @@ export function TripsStartForm({ onStart, disabled }: TripsStartFormProps) {
           disabled={submitting || disabled}
           className="rounded-full bg-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60"
         >
-          {submitting ? 'Starting…' : 'Start safe trip'}
+          {submitting
+            ? mode === 'later'
+              ? 'Saving…'
+              : 'Starting…'
+            : mode === 'later' && onPlan
+              ? 'Save trip for later'
+              : 'Start safe trip'}
         </button>
       </form>
     </div>

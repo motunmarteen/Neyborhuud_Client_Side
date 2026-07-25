@@ -50,6 +50,8 @@ function SafeTripsInner() {
   const {
     state,
     startTrip,
+    planTrip,
+    activatePlannedTrip,
     checkIn,
     completeTrip,
     cancelTrip,
@@ -137,6 +139,7 @@ function SafeTripsInner() {
                   onCancel={(reason) => void cancelTrip(reason)}
                   onPause={() => void pauseTrip()}
                   onResume={() => void resumeTrip()}
+                  onActivate={() => void activatePlannedTrip(state.trip!._id)}
                 />
               ) : !state.loading ? (
                 <div className="mod-card rounded-2xl p-4 text-center">
@@ -169,6 +172,10 @@ function SafeTripsInner() {
                   disabled={state.loading}
                   onStart={async (payload) => {
                     await startTrip(payload);
+                    setTabWithHash('trip');
+                  }}
+                  onPlan={async (payload) => {
+                    await planTrip(payload);
                     setTabWithHash('trip');
                   }}
                 />

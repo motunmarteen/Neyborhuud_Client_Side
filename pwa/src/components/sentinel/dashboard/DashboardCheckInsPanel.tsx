@@ -97,7 +97,8 @@ export function DashboardCheckInsPanel() {
         <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Wellness check-ins</p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
           Scheduled wellness pings to your guardians — separate from Safe Trips. Miss one and your
-          guardians are notified.
+          guardians are notified. Missing <strong>3 in a row</strong> automatically triggers a silent SOS,
+          the same as a missed Safe Trip check-in.
         </p>
       </div>
 
@@ -128,7 +129,21 @@ export function DashboardCheckInsPanel() {
           <button
             type="button"
             disabled={busy}
-            onClick={() => run(() => safetyService.startWellnessCheckIn(intervalMinutes))}
+            onClick={() => {
+              // Starting a new schedule silently replaces any existing one
+              // server-side (wellnessCheckInService.start() stops any
+              // currently-active schedule before creating the new one) — if
+              // there's a schedule object already on hand (e.g. a stopped
+              // one from before), confirm first rather than silently
+              // discarding whatever state it carried.
+              if (schedule) {
+                const ok = window.confirm(
+                  'You already have a check-in schedule on file. Starting a new one will replace it. Continue?',
+                );
+                if (!ok) return;
+              }
+              void run(() => safetyService.startWellnessCheckIn(intervalMinutes));
+            }}
             className="w-full rounded-2xl bg-primary py-3 text-sm font-bold text-white disabled:opacity-50"
           >
             {busy ? 'Starting…' : 'Start check-ins'}
@@ -148,8 +163,13 @@ export function DashboardCheckInsPanel() {
                   : `${schedule.intervalMinutes}m`}
               </p>
               {schedule.status === 'active' && (
-                <p className="mt-0.5 text-xs" style={{ color: missed ? '#f97316' : 'var(--neu-text-muted)' }}>
-                  {missed
+                <p
+                  className="mt-0.5 text-xs"
+                  style={{ color: schedule.escalationLevel >= 3 ? '#dc2626' : missed ? '#f97316' : 'var(--neu-text-muted)' }}
+                >
+                  {schedule.escalationLevel >= 3
+                    ? `Missed ${schedule.missedCheckIns} in a row — a silent SOS was sent to your guardians. Check in now if you're okay.`
+                    : missed
                     ? `Missed ${schedule.missedCheckIns} — guardians notified`
                     : `Next check-in due in ${minsUntil(schedule.nextCheckInDue)}`}
                 </p>
