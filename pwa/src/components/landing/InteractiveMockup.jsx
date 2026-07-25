@@ -71,7 +71,7 @@ export function InteractiveMockup() {
                 <div>&gt; GPS Coords locked: 6.4281° N, 3.4219° E</div>
                 <div>&gt; Dispatching Guardian broadcast...</div>
                 {sosCountdown === 0 ? (
-                  <div style={{ color: "#00FF66", fontWeight: "bold" }}>&gt; Alerts Sent. First responders notified.</div>
+                  <div style={{ color: "#00FF66", fontWeight: "bold" }}>&gt; Alerts Sent. Guardians notified.</div>
                 ) : (
                   <div>&gt; Sending in {sosCountdown}s...</div>
                 )}

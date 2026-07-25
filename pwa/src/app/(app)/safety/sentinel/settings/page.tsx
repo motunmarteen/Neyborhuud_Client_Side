@@ -217,10 +217,12 @@ export default function SentinelSettingsPage() {
 
           <section className="mod-card space-y-1 rounded-2xl p-4">
             <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
-              Emergency services auto-dispatch
+              Emergency services logging
             </p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
-              {emergencyServicesEnabled ? 'Enabled' : 'Disabled'} — manage this in{' '}
+              {emergencyServicesEnabled ? 'Enabled' : 'Disabled'} — this only records which agency an incident
+              would be assigned to. <strong>It does not actually notify or dispatch anyone</strong> — automatic
+              agency contact isn&apos;t connected yet. Manage this in{' '}
               <a href="/settings" className="font-semibold text-primary">
                 Settings
               </a>

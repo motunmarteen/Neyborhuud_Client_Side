@@ -92,7 +92,7 @@ export function SosGuardianIncomingAlerts() {
                     {alert.locationStr}
                   </p>
                   {alert.assignedAgency ? (
-                    <p className="mt-1">Agency: {alert.assignedAgency}</p>
+                    <p className="mt-1">Agency (not automatically contacted): {alert.assignedAgency}</p>
                   ) : null}
                   <p className="mt-1 tabular-nums">{new Date(alert.timestamp).toLocaleString()}</p>
                 </div>

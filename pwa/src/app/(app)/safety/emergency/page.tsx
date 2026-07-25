@@ -304,13 +304,15 @@ export default function EmergencyPage() {
     <SentinelSubpageLayout
       maxWidth="920"
       pageTitle="Emergency report"
-      pageSubtitle="Report to NPF, NEMA, DSS, or Fire Service with live dispatch tracking."
+      pageSubtitle="Log an emergency and get the right number to call — automatic agency dispatch isn't connected yet."
       icon="local_police"
       iconAccent="red"
     >
       <SentinelHowItWorks>
-        Choose the emergency type and severity. High-severity reports can auto-dispatch the
-        assigned agency. You can replay location history and escalate from this dashboard.
+        Choose the emergency type and severity. We&apos;ll show you the correct number to call
+        for your situation and location. <strong>Automatic notification of NPF, NEMA, DSS, or Fire
+        Service is not yet connected</strong> — call the number shown yourself for anything urgent.
+        You can still replay location history and keep a record here.
       </SentinelHowItWorks>
 
             {/* Active Emergencies panel */}
@@ -338,10 +340,13 @@ export default function EmergencyPage() {
                               </span>
                             )}
                             {em.dispatchStatus && (
-                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DISPATCH_BADGE[em.dispatchStatus]}`}>
-                                {em.dispatchStatus === 'sent' ? '✓ Dispatched' :
-                                 em.dispatchStatus === 'failed' ? '✗ Dispatch Failed' :
-                                 em.dispatchStatus === 'pending' ? '⏳ Pending' : 'Not Required'}
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-xs font-medium ${DISPATCH_BADGE[em.dispatchStatus]}`}
+                                title="Automatic agency dispatch isn't connected yet — this only reflects our internal record, not a real notification sent to any agency."
+                              >
+                                {em.dispatchStatus === 'sent' ? '◐ Logged (not yet sent to any agency)' :
+                                 em.dispatchStatus === 'failed' ? '✗ Not logged' :
+                                 em.dispatchStatus === 'pending' ? '⏳ Pending' : 'Not required'}
                               </span>
                             )}
                           </div>
@@ -389,21 +394,22 @@ export default function EmergencyPage() {
             {/* Success banner */}
             {submitted && (
               <div className="rounded-2xl border border-status-success/40 bg-status-success/8 p-4">
-                <p className="font-semibold text-primary">✅ Emergency reported successfully</p>
+                <p className="font-semibold text-primary">✅ Emergency logged</p>
                 <p className="mt-1 text-sm text-primary">
-                  Assigned agency: <strong>{submitted.assignedAgency || '—'}</strong>
-                  {submitted.agencyNotified && (
-                    <span className="ml-2 text-primary">· Agency notified ✓</span>
-                  )}
+                  Assigned agency (for your records): <strong>{submitted.assignedAgency || '—'}</strong>
                 </p>
-                {submittedContact && (
+                {submittedContact ? (
                   <p className="mt-2 rounded-lg bg-status-success/10 px-3 py-2 text-sm text-primary">
-                    If this is urgent, also call{' '}
+                    <strong>This has not been sent to any agency automatically.</strong> Call{' '}
                     <a href={`tel:${submittedContact.number}`} className="font-bold underline">
                       {submittedContact.number}
                     </a>{' '}
-                    ({submittedContact.agency}) directly.
+                    ({submittedContact.agency}) yourself right now if this is urgent.
                     <span className="mt-0.5 block text-xs opacity-80">{submittedContact.note}</span>
+                  </p>
+                ) : (
+                  <p className="mt-2 rounded-lg bg-status-success/10 px-3 py-2 text-sm text-primary">
+                    <strong>This has not been sent to any agency automatically</strong> — automatic dispatch isn&apos;t connected yet. For anything urgent, call 112 (national emergency line) yourself.
                   </p>
                 )}
                 <p className="mt-1 text-xs text-primary">Emergency ID: {submitted._id}</p>
@@ -447,7 +453,7 @@ export default function EmergencyPage() {
                     ))}
                   </div>
                   <p className="mt-2 text-xs text-[var(--neu-text-muted)]">
-                    Will notify: <strong className="text-brand-blue">{selectedType.agency}</strong>
+                    Assigned to (for your records): <strong className="text-brand-blue">{selectedType.agency}</strong> — not automatically contacted
                   </p>
                 </div>
 
@@ -472,7 +478,7 @@ export default function EmergencyPage() {
                   </div>
                   {(severity === 'high' || severity === 'critical') && (
                     <p className="mt-1 text-xs text-brand-red">
-                      ⚡ Agency will be automatically notified for {severity} severity
+                      ⚡ This is a {severity}-severity report — automatic agency notification isn&apos;t connected yet, so please also call the number shown after submitting.
                     </p>
                   )}
                 </div>
@@ -572,14 +578,14 @@ export default function EmergencyPage() {
                             </span>
                           )}
                           {em.dispatchStatus && em.dispatchStatus !== 'not_required' && (
-                            <span className={`rounded-full px-2 py-0.5 font-medium ${DISPATCH_BADGE[em.dispatchStatus]}`}>
-                              {em.dispatchStatus === 'sent' ? '✓ Dispatched' :
-                               em.dispatchStatus === 'failed' ? '✗ Failed' : '⏳ Pending'}
+                            <span
+                              className={`rounded-full px-2 py-0.5 font-medium ${DISPATCH_BADGE[em.dispatchStatus]}`}
+                              title="Internal record only — not a real agency notification."
+                            >
+                              {em.dispatchStatus === 'sent' ? '◐ Logged' :
+                               em.dispatchStatus === 'failed' ? '✗ Not logged' : '⏳ Pending'}
                             </span>
                           )}
-                          {em.agencyNotified ? (
-                            <span className="text-primary">✓ Agency notified</span>
-                          ) : null}
                           <span className="ml-auto">{new Date(em.createdAt).toLocaleString()}</span>
                         </div>
 
@@ -591,8 +597,9 @@ export default function EmergencyPage() {
                                 onClick={() => handleEscalate(em._id)}
                                 disabled={escalating === em._id}
                                 className="flex-1 rounded-lg bg-brand-red700 py-1.5 text-xs font-medium text-white hover:bg-brand-red600 disabled:opacity-50"
+                                title="Marks this as logged in our system — does not contact any agency. Call directly for real dispatch."
                               >
-                                {escalating === em._id ? 'Escalating…' : '📢 Escalate to Agency'}
+                                {escalating === em._id ? 'Marking…' : '📋 Mark as logged (not a real dispatch)'}
                               </button>
                             )}
                             <button

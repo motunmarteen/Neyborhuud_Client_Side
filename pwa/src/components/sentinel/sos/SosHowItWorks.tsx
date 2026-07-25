@@ -7,7 +7,7 @@ const STEPS = [
   {
     icon: 'groups',
     title: 'Circle responds',
-    body: 'Guardians get your live location and can acknowledge. Emergency services dispatch if you enabled them.',
+    body: 'Guardians get your live location and can acknowledge. (Automatic emergency-services dispatch isn’t connected yet — call them yourself for real help.)',
   },
   {
     icon: 'task_alt',

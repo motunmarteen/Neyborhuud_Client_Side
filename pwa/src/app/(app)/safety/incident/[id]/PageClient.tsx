@@ -33,7 +33,7 @@ const TIMELINE_LABEL: Record<IncidentSummary['timeline'][number]['event'], strin
   guardian_acknowledged_alert: 'Guardian acknowledged',
   guardian_viewed_location: 'Guardian viewed location',
   guardian_ignored_alert: 'Guardian ignored alert',
-  agency_dispatched: 'Agency dispatched',
+  agency_dispatched: 'Agency assigned (not contacted — dispatch not connected)',
   sos_resolved: 'SOS resolved',
   sos_cancelled: 'SOS cancelled',
 };
@@ -232,27 +232,22 @@ export default function IncidentRecapPage() {
               {summary.agencyDispatch ? (
                 <>
                   <div className="text-sm flex items-center justify-between">
-                    <span className="text-white/70">{summary.agencyDispatch.agency || 'No agency'}</span>
-                    <span
-                      className={
-                        summary.agencyDispatch.status === 'sent'
-                          ? 'text-primary'
-                          : summary.agencyDispatch.status === 'failed'
-                          ? 'text-brand-red'
-                          : 'text-white/50'
-                      }
-                    >
-                      {summary.agencyDispatch.status.replace('_', ' ')}
+                    <span className="text-white/70">{summary.agencyDispatch.agency || 'No agency'} (assigned for records only)</span>
+                    <span className="text-white/50">
+                      {summary.agencyDispatch.status === 'sent' ? 'logged' : summary.agencyDispatch.status.replace('_', ' ')}
                     </span>
                   </div>
                   {summary.agencyDispatch.dispatchedAt && (
                     <div className="text-xs text-white/50 mt-1">
-                      Dispatched {new Date(summary.agencyDispatch.dispatchedAt).toLocaleString()}
+                      Logged {new Date(summary.agencyDispatch.dispatchedAt).toLocaleString()}
                     </div>
                   )}
+                  <div className="text-xs text-brand-red mt-1">
+                    Automatic agency notification isn&apos;t connected yet — this agency was never actually contacted.
+                  </div>
                 </>
               ) : (
-                <div className="text-xs text-white/50">No emergency services were dispatched for this incident.</div>
+                <div className="text-xs text-white/50">No emergency services were contacted for this incident.</div>
               )}
             </div>
 

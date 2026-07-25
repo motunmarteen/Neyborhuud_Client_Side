@@ -565,7 +565,7 @@ export default function SettingsPage() {
                 body: JSON.stringify({ emergencyServicesEnabled: newValue }),
             });
             setEmergencyServicesEnabled(newValue);
-            toast.success(newValue ? 'Emergency services contact enabled.' : 'Emergency services contact disabled.');
+            toast.success(newValue ? 'Agency-assignment logging enabled.' : 'Agency-assignment logging disabled.');
         } catch (err: any) {
             toast.error('Could not save safety settings. Please try again.');
         } finally {
@@ -832,13 +832,13 @@ export default function SettingsPage() {
 
               <Section
                 title="Emergency services"
-                description="Allow NeyborHuud to contact emergency services on your behalf when SOS escalates and you do not respond."
+                description="This does not contact any agency automatically — that capability isn't connected yet. When enabled, an unresponsive SOS escalation records which agency would be assigned, for your own reference. For a real emergency, always call the number shown yourself."
               >
                 <ToggleSwitch
                   enabled={emergencyServicesEnabled}
                   onChange={(val) => void handleSaveEmergencyConsent(val)}
-                  label={savingSafety ? 'Saving…' : 'Contact emergency services for me'}
-                  description="Auto-dispatches authorities during an unresponsive SOS escalation"
+                  label={savingSafety ? 'Saving…' : 'Log agency assignment for me'}
+                  description="Records an assigned agency during an unresponsive SOS escalation — does not contact anyone automatically"
                 />
               </Section>
             </div>

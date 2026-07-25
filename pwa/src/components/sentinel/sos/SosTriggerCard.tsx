@@ -137,10 +137,11 @@ export function SosTriggerCard({ sos }: SosTriggerCardProps) {
             <span className="min-w-0">
               <span className="flex items-center gap-1.5 text-sm font-bold text-gray-800">
                 <span className="material-symbols-outlined text-[18px] text-blue-600">local_police</span>
-                Notify emergency services
+                Log for emergency services
               </span>
               <span className="mt-0.5 block text-xs leading-relaxed text-gray-400">
-                Auto-dispatch to police or medical when SOS activates.
+                Records which agency this would be for. <strong>Does not actually contact police or medical</strong> —
+                automatic dispatch isn&apos;t connected yet. Call the shown number yourself for real help.
               </span>
             </span>
           </label>

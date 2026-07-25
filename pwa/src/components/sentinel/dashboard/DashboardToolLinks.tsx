@@ -25,8 +25,8 @@ const TOOLS = [
   {
     icon: 'local_police',
     label: 'Report emergency',
-    tagline: 'Agency dispatch for robbery, fire, medical.',
-    howTo: 'File a report with location; track dispatch status.',
+    tagline: 'Get the right number to call for robbery, fire, medical.',
+    howTo: 'File a report with location — call the number shown for real help, dispatch isn\'t automatic yet.',
     href: '/safety/emergency',
     accent: 'text-brand-red bg-brand-red/10',
   },

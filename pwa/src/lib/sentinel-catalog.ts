@@ -117,8 +117,8 @@ export const SENTINEL_FEATURES: SentinelFeature[] = [
     href: '/safety/emergency',
     tab: 'tools',
     accent: 'red',
-    tagline: 'Report to agencies (NPF, NEMA, fire, medical).',
-    howTo: 'File a report with location — track dispatch status in one place.',
+    tagline: 'Log an emergency and get the right number to call (NPF, NEMA, fire, medical).',
+    howTo: 'File a report with location — automatic agency dispatch isn\'t connected yet, so call directly for anything urgent.',
   },
   {
     id: 'fake-call',
