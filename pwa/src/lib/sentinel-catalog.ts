@@ -87,7 +87,7 @@ export const SENTINEL_FEATURES: SentinelFeature[] = [
     tab: 'network',
     accent: 'blue',
     tagline: 'Mutual followers who can see your safety status.',
-    howTo: 'Connect with neighbours you trust on NeyborHuud.',
+    howTo: 'Invite a mutual follower — once they accept, they can see your status (not your location).',
   },
   {
     id: 'status',

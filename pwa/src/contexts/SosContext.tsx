@@ -20,6 +20,8 @@ import socketService from '@/lib/socket';
 import { safetyService, type SosEvent } from '@/services/safety.service';
 import type { IncidentSummary } from '@/types/api';
 import { getGeolocation } from '@/lib/nativeGeolocation';
+import { useSosOfflineQueue, type SosQueueStatus } from '@/hooks/useSosOfflineQueue';
+import { newIdempotencyKey } from '@/lib/idempotency';
 
 export type SosPhase = 'idle' | 'pending' | 'active' | 'resolved' | 'cancelled';
 
@@ -45,6 +47,13 @@ export interface UseSosReturn {
   lastSummary: IncidentSummary | null;
   loading: boolean;
   error: string | null;
+  /**
+   * 'queued' means the trigger couldn't reach the server (no signal) and is
+   * saved locally, retrying automatically as soon as connectivity returns —
+   * the UI should show this as "help is on the way once you're back online",
+   * not as a failure.
+   */
+  offlineQueueStatus: SosQueueStatus;
   triggerSos: (opts?: SosTriggerOptions) => Promise<void>;
   cancelSos: (reason?: string) => Promise<void>;
   resolveSos: () => Promise<void>;
@@ -67,6 +76,13 @@ function useSosState(): UseSosReturn {
 
   const tickerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const refreshRef = useRef<() => Promise<void>>(async () => undefined);
+
+  // When a queued SOS trigger finally sends (connectivity restored), pull
+  // the real server state so the UI reflects it instead of staying on
+  // whatever locally-optimistic state was shown while offline.
+  const { status: offlineQueueStatus, enqueue: enqueueOfflineSos } = useSosOfflineQueue(() => {
+    void refreshRef.current();
+  });
 
   const phase: SosPhase = useMemo(() => {
     if (!activeSos) return 'idle';
@@ -227,7 +243,17 @@ function useSosState(): UseSosReturn {
       setError(null);
       setLoading(true);
       try {
-        const coords = await getCoords();
+        // Try to get a real GPS fix, but a panic button must still work
+        // with zero signal — fall back to the last coordinates the app
+        // knows about rather than blocking the whole trigger on a
+        // geolocation call that has nothing to talk to.
+        const coords: { latitude: number; longitude: number; accuracy?: number } =
+          await getCoords().catch(() => {
+            const last = activeSos?.location;
+            if (last) return { latitude: last.lat, longitude: last.lng };
+            throw new Error('Unable to get your location. Move to an open area and try again.');
+          });
+        const clientId = newIdempotencyKey();
         const payload = {
           latitude: coords.latitude,
           longitude: coords.longitude,
@@ -241,8 +267,40 @@ function useSosState(): UseSosReturn {
             triggeredAt: new Date().toISOString(),
             ...(opts.deviceInfo ?? {}),
           },
+          clientId,
         };
-        const res = await safetyService.triggerSos(payload);
+
+        let res;
+        try {
+          res = await safetyService.triggerSos(payload);
+        } catch (err: unknown) {
+          const httpStatus = (err as { response?: { status?: number } })?.response?.status;
+          // No response at all reached us — genuine no-signal/offline
+          // failure, not the server rejecting the request. Queue it for
+          // automatic retry instead of surfacing a dead-end error: the
+          // person pressing this button may have no time to try again.
+          if (httpStatus === undefined) {
+            void enqueueOfflineSos(payload).catch((queueErr) => {
+              console.error('[SosContext] Failed to queue offline SOS:', queueErr);
+            });
+            setActiveSos({
+              _id: clientId,
+              userId: user?.id ?? '',
+              status: 'triggered',
+              visibilityMode: payload.visibilityMode,
+              escalationLevel: 0,
+              countdownSeconds: 0,
+              pendingUntil: null,
+              emergencyServicesEnabled: payload.emergencyServicesEnabled,
+              location: { lat: payload.latitude, lng: payload.longitude },
+              createdAt: new Date().toISOString(),
+            });
+            setNotifyMeta(null);
+            return;
+          }
+          throw err;
+        }
+
         const data = res.data;
         if (!data) return;
 
@@ -279,7 +337,7 @@ function useSosState(): UseSosReturn {
         setLoading(false);
       }
     },
-    [getCoords, user?.id, refresh],
+    [getCoords, user?.id, refresh, enqueueOfflineSos, activeSos?.location],
   );
 
   const cancelSos = useCallback(
@@ -334,6 +392,7 @@ function useSosState(): UseSosReturn {
     lastSummary,
     loading,
     error,
+    offlineQueueStatus,
     triggerSos,
     cancelSos,
     resolveSos,

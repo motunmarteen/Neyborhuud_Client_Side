@@ -64,9 +64,13 @@ export function DashboardActiveSosPanel({ sos }: DashboardActiveSosPanelProps) {
       )}
 
       {sos.phase === 'active' && sos.activeSos && (
-        <section className="mod-card space-y-3 rounded-2xl border border-brand-red/25 p-4">
+        <section
+          className={`mod-card space-y-3 rounded-2xl border p-4 ${
+            sos.activeSos.visibilityMode === 'silent' ? 'border-black/[0.08]' : 'border-brand-red/25'
+          }`}
+        >
           <SentinelSectionHeader
-            title="Active SOS — guardian activity"
+            title={sos.activeSos.visibilityMode === 'silent' ? 'Status' : 'Active SOS — guardian activity'}
             subtitle="See who was notified and who responded"
             action={
               <Link

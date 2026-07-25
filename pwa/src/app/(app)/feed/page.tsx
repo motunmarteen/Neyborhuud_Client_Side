@@ -43,6 +43,7 @@ import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
 import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
 import { FeedNewsTicker } from '@/components/feed/FeedNewsTicker';
 import { FeedSentinelRow } from '@/components/feed/FeedSentinelRow';
+import { RedZoneBanner } from '@/components/feed/RedZoneBanner';
 
 const getFilterBannerData = (type: string) => {
     switch (type) {
@@ -488,6 +489,8 @@ function XFeedInner() {
                                     </div>
                                 </div>
                             )}
+
+                            <RedZoneBanner />
 
                             {missedAlerts && missedAlerts.count > 0 && (
                                 <div className="w-full">

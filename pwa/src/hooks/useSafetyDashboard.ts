@@ -19,6 +19,16 @@ export function useSafetyDashboard() {
   const [statusFeed, setStatusFeed] = useState<UserStatus[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * True once a fetch has succeeded at least once AND the most recent fetch
+   * failed — distinguishes "still loading for the first time" from "showing
+   * a stale snapshot because a refresh just failed." Without this, a failed
+   * background refresh (e.g. after adding a guardian) left the panels
+   * rendering old data with only a dismissible top banner as the only cue
+   * anything was wrong — easy to miss, and the guardian list/status feed
+   * gave no visual indication of their own staleness.
+   */
+  const [dataStale, setDataStale] = useState(false);
   const [statusFilter, setStatusFilter] = useState<GuardianStatus | 'all'>('all');
   const [activeEmergencyCount, setActiveEmergencyCount] = useState(0);
 
@@ -41,12 +51,14 @@ export function useSafetyDashboard() {
       setIncomingRequests(incomingRes.data?.requests ?? []);
       setStatusFeed(feedRes.data?.feed ?? []);
       setActiveEmergencyCount((activeEmRes?.data?.emergencies ?? []).length);
+      setDataStale(false);
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
         (err as Error)?.message ||
         'Failed to load dashboard';
       setError(msg);
+      setDataStale(true);
     } finally {
       setLoading(false);
     }
@@ -168,6 +180,7 @@ export function useSafetyDashboard() {
     loading,
     error,
     setError,
+    dataStale,
     statusFilter,
     setStatusFilter,
     activeEmergencyCount,

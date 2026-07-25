@@ -25,6 +25,7 @@ import { PwaInstallTracker } from '@/components/PwaInstallTracker';
 import { PageTransition } from '@/components/ui/PageTransition';
 import { SwipeBackProvider } from '@/contexts/SwipeBackContext';
 import { GuardianAlertsProvider } from '@/contexts/GuardianAlertsContext';
+import { RedZoneAlertsProvider } from '@/contexts/RedZoneAlertsContext';
 import { SosProvider } from '@/contexts/SosContext';
 import { CallProvider } from '@/components/calls/CallProvider';
 import { IncognitoInviteListener } from '@/components/chat/IncognitoInviteListener';
@@ -323,6 +324,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <SwipeBackProvider>
       <SosProvider>
       <GuardianAlertsProvider>
+      <RedZoneAlertsProvider>
       <CallProvider>
       <SentinelBottomSheetProvider>
       <SocketAuthenticator />
@@ -339,6 +341,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <CallOverlay />
       </SentinelBottomSheetProvider>
       </CallProvider>
+      </RedZoneAlertsProvider>
       </GuardianAlertsProvider>
       </SosProvider>
       </SwipeBackProvider>

@@ -148,7 +148,7 @@ export function DashboardLiveStatusPanel({
       <section className="mod-card relative z-10 min-w-0 max-w-full space-y-3 overflow-visible rounded-2xl p-4">
         <SentinelSectionHeader
           title="Your live status"
-          subtitle="Guardians-only — share how you are and where you are"
+          subtitle="Visible to your guardians (with location) and your Safety Circle (status only)"
         />
 
         {loadingStatus ? (
@@ -207,12 +207,13 @@ export function DashboardLiveStatusPanel({
 
       <section className="mod-card relative z-0 space-y-3 rounded-2xl p-4">
         <SentinelSectionHeader
-          title="People you protect"
-          subtitle="Live status from users who added you as guardian"
+          title="Status from people you're connected to"
+          subtitle="From users who made you a guardian, or added you to their Safety Circle"
         />
         {statusFeed.length === 0 ? (
           <p className="text-sm" style={{ color: 'var(--neu-text-muted)' }}>
-            No circle updates yet. When someone trusts you as a guardian, their status appears here.
+            No status updates yet. When someone makes you a guardian or adds you to their Safety
+            Circle, their status appears here.
           </p>
         ) : (
           <ul className="space-y-2">

@@ -15,6 +15,7 @@ import {
 import type { IncidentReplay } from '@/types/api';
 import { toast } from 'sonner';
 import { getGeolocation } from '@/lib/nativeGeolocation';
+import socketService from '@/lib/socket';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -28,7 +29,7 @@ const EMERGENCY_TYPES: Array<{ value: EmergencyType; label: string; icon: string
   { value: 'fire_emergency',    label: 'Fire Emergency',      icon: '🧯', agency: 'Fire Service' },
   { value: 'medical',           label: 'Medical',             icon: '🏥', agency: 'NEMA' },
   { value: 'medical_emergency', label: 'Medical Emergency',   icon: '🚑', agency: 'NEMA' },
-  { value: 'accident',          label: 'Accident',            icon: '🚗', agency: 'NPF' },
+  { value: 'accident',          label: 'Accident',            icon: '🚗', agency: 'FRSC' },
   { value: 'crime',             label: 'Crime',               icon: '🚔', agency: 'NPF' },
   { value: 'natural_disaster',  label: 'Natural Disaster',    icon: '🌊', agency: 'NEMA' },
   { value: 'security',          label: 'Security Threat',     icon: '🛡️', agency: 'NPF' },
@@ -77,6 +78,7 @@ export default function EmergencyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted]   = useState<Emergency | null>(null);
+  const [submittedContact, setSubmittedContact] = useState<{ agency: string; number: string; note: string } | null>(null);
 
   // History
   const [history, setHistory]         = useState<Emergency[]>([]);
@@ -136,6 +138,43 @@ export default function EmergencyPage() {
 
   useEffect(() => { loadHistory(); loadActive(); }, [loadHistory, loadActive]);
 
+  // Dispatch status is decided asynchronously (a queued job may run well
+  // after the initial load), so without this the page shows a stale
+  // snapshot until the user happens to trigger a reload some other way.
+  useEffect(() => {
+    const onDispatchUpdate = (payload: {
+      emergencyId: string;
+      dispatchStatus: DispatchStatus;
+      assignedAgency: AgencyName | null;
+      dispatchedAt: string | null;
+    }) => {
+      const patch = (e: Emergency): Emergency =>
+        e._id === payload.emergencyId
+          ? {
+              ...e,
+              dispatchStatus: payload.dispatchStatus,
+              assignedAgency: payload.assignedAgency ?? e.assignedAgency,
+              ...(payload.dispatchStatus === 'sent' ? { status: 'responding' as const } : {}),
+            }
+          : e;
+
+      setActive((prev) => prev.map(patch));
+      setHistory((prev) => prev.map(patch));
+      setSubmitted((prev) => (prev ? patch(prev) : prev));
+    };
+
+    const bind = () => socketService.getSocket()?.on('safety:emergency_dispatch_update', onDispatchUpdate);
+    const unbind = () => socketService.getSocket()?.off('safety:emergency_dispatch_update', onDispatchUpdate);
+
+    bind();
+    // Socket may connect slightly after this effect runs — re-bind once it's ready.
+    const t = setTimeout(bind, 1000);
+    return () => {
+      unbind();
+      clearTimeout(t);
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
@@ -165,6 +204,7 @@ export default function EmergencyPage() {
             },
           });
           setSubmitted(res.data?.report ?? null);
+          setSubmittedContact(res.data?.agencyContact ?? null);
           setDesc('');
           setContact('');
           loadHistory();
@@ -267,10 +307,23 @@ export default function EmergencyPage() {
                     <span className="ml-2 text-primary">· Agency notified ✓</span>
                   )}
                 </p>
+                {submittedContact && (
+                  <p className="mt-2 rounded-lg bg-status-success/10 px-3 py-2 text-sm text-primary">
+                    If this is urgent, also call{' '}
+                    <a href={`tel:${submittedContact.number}`} className="font-bold underline">
+                      {submittedContact.number}
+                    </a>{' '}
+                    ({submittedContact.agency}) directly.
+                    <span className="mt-0.5 block text-xs opacity-80">{submittedContact.note}</span>
+                  </p>
+                )}
                 <p className="mt-1 text-xs text-primary">Emergency ID: {submitted._id}</p>
                 <button
                   className="mt-2 text-xs text-primary underline"
-                  onClick={() => setSubmitted(null)}
+                  onClick={() => {
+                    setSubmitted(null);
+                    setSubmittedContact(null);
+                  }}
                 >
                   Dismiss
                 </button>

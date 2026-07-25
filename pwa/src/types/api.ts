@@ -553,6 +553,8 @@ export interface ChatMessageMeta {
   offerAmount?: number;
   counterAmount?: number | null;
   offerId?: string;
+  /** Optional note the buyer attached when placing the offer. */
+  message?: string;
   // ── Plain marketplace deal-status updates ──
   /** The deal stage this message represents. */
   dealAction?: "started" | "paid" | "completed" | "cancelled";
@@ -710,11 +712,12 @@ export interface IncidentSummary {
     }>;
   };
   tracking: { pingsLogged: number };
+  /** null when no Emergency record is linked to this SOS (most SOS events never escalate to agency dispatch). */
   agencyDispatch: {
     agency: string | null;
     status: "pending" | "sent" | "failed" | "not_required";
     dispatchedAt: string | null;
-  };
+  } | null;
   timeline: Array<{
     at: string;
     event:
@@ -917,6 +920,10 @@ export interface ServiceBooking {
 export interface Notification {
   id: string;
   userId: string;
+  // Kept loose — the backend writes many more values than are worth
+  // enumerating (offer_received, order_received, job_status, security, …).
+  // Known values get a dedicated icon in typeIcon (notifications/page.tsx);
+  // anything else falls back to a generic bell.
   type:
     | "like"
     | "comment"
@@ -925,7 +932,9 @@ export interface Notification {
     | "message"
     | "event"
     | "job"
-    | "system";
+    | "system"
+    | "red_zone"
+    | (string & {});
   title: string;
   message: string;
   data?: Record<string, any>;

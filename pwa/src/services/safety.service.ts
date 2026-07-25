@@ -67,6 +67,16 @@ export interface GuardianRelationship {
   createdAt: string;
 }
 
+export type CircleStatus = "pending" | "accepted" | "rejected" | "removed";
+
+export interface CircleMember {
+  _id: string;
+  userId: string | { _id: string; firstName?: string; lastName?: string; username?: string; avatarUrl?: string };
+  memberId: string | { _id: string; firstName?: string; lastName?: string; username?: string; avatarUrl?: string };
+  status: CircleStatus;
+  createdAt: string;
+}
+
 export interface SosEvent {
   _id: string;
   userId: string;
@@ -140,7 +150,7 @@ export type EmergencyType =
 export type EmergencySource = "manual_report" | "manual_sos" | "trip_monitoring" | "geofence";
 export type DispatchStatus = "pending" | "sent" | "failed" | "not_required";
 
-export type AgencyName = "NPF" | "NEMA" | "DSS" | "NSCDC" | "Fire Service" | "Medical Services";
+export type AgencyName = "NPF" | "NEMA" | "DSS" | "NSCDC" | "Fire Service" | "Medical Services" | "FRSC";
 
 export interface Emergency {
   _id: string;
@@ -225,6 +235,13 @@ export const safetyService = {
     /** 0..30. Defaults to 5 server-side. Forced to 0 when visibilityMode='silent'. */
     countdownSeconds?: number;
     deviceInfo?: Record<string, any>;
+    /**
+     * Client-generated idempotency key. Set this when a trigger might be
+     * retried (e.g. queued offline and resent after reconnecting) so the
+     * server can recognize a retry of an attempt that already succeeded
+     * instead of creating a duplicate SOS.
+     */
+    clientId?: string;
   }) {
     return apiClient.post<{
       status: "pending" | "active" | "already_active";
@@ -261,6 +278,61 @@ export const safetyService = {
     );
   },
 
+  // ─── Safety Circle (opt-in, view-only status access for mutual followers) ─
+
+  async inviteToCircle(memberId: string) {
+    return apiClient.post<{ invite: CircleMember }>("/safety/circle/invite", { memberId });
+  },
+
+  async respondToCircleInvite(inviteId: string, action: "accepted" | "rejected") {
+    return apiClient.post<{ invite: CircleMember }>(`/safety/circle/invites/${inviteId}/respond`, { action });
+  },
+
+  async removeCircleMember(memberId: string) {
+    return apiClient.delete<{ removed: CircleMember }>(`/safety/circle/${memberId}`);
+  },
+
+  /** People I've invited into my own circle. */
+  async getMyCircle() {
+    return apiClient.get<{ members: CircleMember[] }>("/safety/circle/mine");
+  },
+
+  /** Circle invites sent to me, awaiting my response. */
+  async getIncomingCircleInvites() {
+    return apiClient.get<{ invites: CircleMember[] }>("/safety/circle/incoming");
+  },
+
+  /** Circles I belong to (i.e. whose status I can view). */
+  async getCirclesIBelongTo() {
+    return apiClient.get<{ circles: CircleMember[] }>("/safety/circle/belong-to");
+  },
+
+  // ─── Wellness Check-Ins (standalone, trip-independent) ───────────────────
+
+  async startWellnessCheckIn(intervalMinutes?: number) {
+    return apiClient.post<{ schedule: WellnessCheckIn }>("/safety/checkins/start", { intervalMinutes });
+  },
+
+  async getActiveWellnessCheckIn() {
+    return apiClient.get<{ schedule: WellnessCheckIn | null }>("/safety/checkins/active");
+  },
+
+  async submitWellnessCheckIn() {
+    return apiClient.post<{ schedule: WellnessCheckIn }>("/safety/checkins/checkin");
+  },
+
+  async pauseWellnessCheckIn() {
+    return apiClient.post<{ schedule: WellnessCheckIn }>("/safety/checkins/pause");
+  },
+
+  async resumeWellnessCheckIn() {
+    return apiClient.post<{ schedule: WellnessCheckIn }>("/safety/checkins/resume");
+  },
+
+  async stopWellnessCheckIn() {
+    return apiClient.post<{ schedule: WellnessCheckIn | null }>("/safety/checkins/stop");
+  },
+
   // ─── Panic PIN (duress code) ─────────────────────────────────────────────
 
   async getPanicPinStatus() {
@@ -285,7 +357,7 @@ export const safetyService = {
     longitude?: number;
     address?: string;
   }) {
-    return apiClient.post<{ matched: boolean }>("/safety/panic-pin/verify", payload);
+    return apiClient.post<{ verified: true }>("/safety/panic-pin/verify", payload);
   },
 
   async getActiveSos() {
@@ -365,6 +437,8 @@ export const safetyService = {
     return apiClient.post<{
       report: Emergency;
       conversationId: string | null;
+      /** A verified contact number to show alongside the dispatch — see agencyContact.ts for sourcing. */
+      agencyContact: { agency: string; number: string; note: string } | null;
     }>("/safety/emergency/report", {
       type: payload.type,
       severity: payload.severity,
@@ -414,27 +488,35 @@ export const safetyService = {
   },
 
   // ─── Safety Settings ─────────────────────────────────────────────────────
+  // Matches exactly what the backend persists (UserPreference.safetySettings)
+  // and returns — earlier versions of this type listed several fields
+  // (defaultVisibilityMode, checkInIntervalMinutes, autoSosOnMissedCheckIns,
+  // shareLocationWithGuardians) that the backend never actually implemented
+  // or read; only emergencyServicesEnabled and the two redZone* fields below
+  // are real.
 
   async getSafetySettings() {
     return apiClient.get<{
-      settings: {
+      safetySettings: {
         emergencyServicesEnabled: boolean;
-        defaultVisibilityMode: "normal" | "silent";
-        checkInIntervalMinutes: number;
-        autoSosOnMissedCheckIns: number;
-        shareLocationWithGuardians: boolean;
+        redZoneMinSeverity?: "all" | "high" | "critical";
+        redZoneWorkAreaEnabled?: boolean;
       };
     }>("/safety/settings");
   },
 
   async updateSafetySettings(settings: {
     emergencyServicesEnabled?: boolean;
-    defaultVisibilityMode?: "normal" | "silent";
-    checkInIntervalMinutes?: number;
-    autoSosOnMissedCheckIns?: number;
-    shareLocationWithGuardians?: boolean;
+    redZoneMinSeverity?: "all" | "high" | "critical";
+    redZoneWorkAreaEnabled?: boolean;
   }) {
-    return apiClient.patch<{ settings: Record<string, any> }>("/safety/settings", settings);
+    return apiClient.patch<{
+      safetySettings: {
+        emergencyServicesEnabled: boolean;
+        redZoneMinSeverity?: "all" | "high" | "critical";
+        redZoneWorkAreaEnabled?: boolean;
+      };
+    }>("/safety/settings", settings);
   },
 };
 
@@ -443,6 +525,19 @@ export const safetyService = {
 export type KidnappingEmergencyType = "kidnapping" | "armed_robbery" | "other_critical";
 export type TrackingSessionStatus = "active" | "ended" | "lost_signal";
 export type LocationSource = "gps" | "network_estimate" | "network" | "carrier" | "triangulation";
+
+export interface WellnessCheckIn {
+  _id: string;
+  userId: string;
+  intervalMinutes: number;
+  status: "active" | "paused" | "stopped";
+  lastCheckIn: string;
+  nextCheckInDue: string;
+  missedCheckIns: number;
+  escalationLevel: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface KidnappingTrackingSession {
   _id: string;
@@ -476,6 +571,11 @@ export interface KidnappingTrackingSession {
   endedAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+/** A session as returned to a guardian browsing what they can currently watch. */
+export interface GuardianWatchableSession extends Omit<KidnappingTrackingSession, 'userId'> {
+  userId: string | { _id: string; firstName?: string; lastName?: string };
 }
 
 export interface TrackingLocationPoint {
@@ -589,6 +689,13 @@ export const kidnappingTrackingService = {
   async getSession(sessionId: string) {
     return apiClient.get<{ session: KidnappingTrackingSession }>(
       `/safety/kidnapping/sessions/${sessionId}`,
+    );
+  },
+
+  /** All live sessions the caller can currently watch as an accepted guardian. */
+  async getActiveSessionsForGuardian() {
+    return apiClient.get<{ sessions: GuardianWatchableSession[] }>(
+      "/safety/kidnapping/sessions/guardian-active",
     );
   },
 

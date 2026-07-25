@@ -15,8 +15,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
 import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
+import {
+  canScheduleLocalNotifications,
+  cancelLocalNotification,
+  onLocalNotificationTapped,
+  scheduleLocalNotification,
+} from '@/lib/capNotifications';
 
 export const dynamic = 'force-dynamic';
+
+const FAKE_CALL_NOTIFICATION_ID = 87301; // arbitrary fixed id — only one fake call is ever scheduled at a time
 
 type Phase = 'setup' | 'waiting' | 'ringing' | 'in-call';
 
@@ -95,6 +103,11 @@ export default function FakeCallPage() {
   const ringtoneStopRef = useRef<(() => void) | null>(null);
   const waitTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const nativeScheduled = useRef(false);
+  const callerNameRef = useRef(callerName);
+  const callerSubtitleRef = useRef(callerSubtitle);
+  callerNameRef.current = callerName;
+  callerSubtitleRef.current = callerSubtitle;
 
   useEffect(() => {
     return () => {
@@ -102,6 +115,22 @@ export default function FakeCallPage() {
       if (waitTimerRef.current) clearInterval(waitTimerRef.current);
       if (callTimerRef.current) clearInterval(callTimerRef.current);
     };
+  }, []);
+
+  // A tapped native notification means the app was backgrounded/locked when
+  // the scheduled ring time hit — this brings the user straight to the
+  // ringing screen instead of leaving them to notice a missed notification.
+  useEffect(() => {
+    let unsub: (() => void) | undefined;
+    void onLocalNotificationTapped('fakeCall', (extra) => {
+      setCallerName((extra.callerName as string) || callerNameRef.current);
+      setCallerSubtitle((extra.callerSubtitle as string) || callerSubtitleRef.current);
+      beginRinging();
+    }).then((fn) => {
+      unsub = fn;
+    });
+    return () => unsub?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startScheduled = () => {
@@ -114,6 +143,23 @@ export default function FakeCallPage() {
     }
     setPhase('waiting');
     setSecondsLeft(Math.ceil(delayMs / 1000));
+
+    // Real, OS-scheduled trigger — fires even if this tab/app is
+    // backgrounded or the screen locks before the in-page timer below
+    // would have. On web (or if scheduling fails/is denied) this silently
+    // returns null and the in-page timer remains the only mechanism,
+    // exactly as before.
+    nativeScheduled.current = false;
+    void scheduleLocalNotification({
+      id: FAKE_CALL_NOTIFICATION_ID,
+      title: finalName,
+      body: 'Incoming call',
+      fireAt: new Date(Date.now() + delayMs),
+      extra: { fakeCall: true, callerName: finalName, callerSubtitle },
+    }).then((id) => {
+      nativeScheduled.current = id !== null;
+    });
+
     waitTimerRef.current = setInterval(() => {
       setSecondsLeft((s) => {
         if (s <= 1) {
@@ -131,6 +177,13 @@ export default function FakeCallPage() {
     ringtoneStopRef.current = startRingtone();
     // Try to vibrate (mobile only)
     try { navigator.vibrate?.([800, 400, 800, 400, 800]); } catch { /* noop */ }
+    // The in-page timer (or a tapped native notification) got us here —
+    // either way the ring has started, so the scheduled OS notification is
+    // no longer needed and must not also fire and interrupt the call UI.
+    if (nativeScheduled.current) {
+      void cancelLocalNotification(FAKE_CALL_NOTIFICATION_ID);
+      nativeScheduled.current = false;
+    }
   };
 
   const acceptCall = () => {
@@ -148,6 +201,10 @@ export default function FakeCallPage() {
     ringtoneStopRef.current = null;
     if (callTimerRef.current) clearInterval(callTimerRef.current);
     if (waitTimerRef.current) clearInterval(waitTimerRef.current);
+    if (nativeScheduled.current) {
+      void cancelLocalNotification(FAKE_CALL_NOTIFICATION_ID);
+      nativeScheduled.current = false;
+    }
     setPhase('setup');
     setSecondsLeft(0);
     setCallDurationSec(0);
@@ -155,6 +212,10 @@ export default function FakeCallPage() {
 
   const cancelWait = () => {
     if (waitTimerRef.current) clearInterval(waitTimerRef.current);
+    if (nativeScheduled.current) {
+      void cancelLocalNotification(FAKE_CALL_NOTIFICATION_ID);
+      nativeScheduled.current = false;
+    }
     setPhase('setup');
     setSecondsLeft(0);
   };
@@ -228,7 +289,8 @@ export default function FakeCallPage() {
       <SentinelHowItWorks>
         Pick who is calling and when the phone should ring. After the delay, a full-screen incoming
         call appears — accept to keep the conversation going, or decline to return here. Nothing
-        leaves your device.
+        leaves your device. Tip: next time, long-press the Sentinel tab from anywhere in the app to
+        jump straight here.
       </SentinelHowItWorks>
 
       {phase === 'waiting' && (
@@ -310,6 +372,13 @@ export default function FakeCallPage() {
 
       <p className="text-center text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
         Runs only on this device. On silent mode you still get the full-screen call UI.
+        {delayMs > 0 && !canScheduleLocalNotifications() && (
+          <>
+            {' '}
+            Keep this tab open and your screen unlocked until it rings — this browser can&apos;t
+            reliably wake it up if the screen locks first.
+          </>
+        )}
       </p>
     </SentinelSubpageLayout>
   );

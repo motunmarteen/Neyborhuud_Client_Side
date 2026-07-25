@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useState, type FormEvent } from 'react';
+import Link from 'next/link';
 import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
 import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
 import { safetyService } from '@/services/safety.service';
@@ -125,10 +126,12 @@ export default function PanicPinPage() {
       iconAccent="red"
     >
       <SentinelHowItWorks>
-        When you (or someone forcing you) enter this PIN where a PIN is required, the app
-        behaves normally — but a <strong>silent SOS</strong> fires and your guardians are
-        notified. Use a PIN you will remember under stress, but{' '}
-        <strong>different from your everyday unlock PIN</strong>.
+        When you (or someone forcing you) enter this PIN at <code>/safety/panic-pin/enter</code>,
+        that screen behaves like an ordinary PIN gate — but a <strong>silent SOS</strong> fires in
+        the background and your guardians are notified. Use a PIN you will remember under stress,
+        but <strong>different from your everyday unlock PIN</strong>. Bookmark that page under an
+        unremarkable name (not "Panic PIN") — the safety of this feature depends on that URL not
+        being obviously labeled anywhere an attacker could browse to it.
       </SentinelHowItWorks>
 
       {loading ? (
@@ -153,6 +156,25 @@ export default function PanicPinPage() {
               ) : null}
             </div>
           </div>
+
+          {pinSet ? (
+            <Link
+              href="/safety/panic-pin/enter"
+              className="mod-card flex items-center justify-between rounded-2xl p-4 no-underline"
+            >
+              <div>
+                <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
+                  Practice entering your PIN
+                </p>
+                <p className="mt-0.5 text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+                  Opens the real entry screen — the one that fires a silent SOS. Practice on purpose, or bookmark it for a real duress moment.
+                </p>
+              </div>
+              <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>
+                chevron_right
+              </span>
+            </Link>
+          ) : null}
 
           {pinSet ? (
             <div className="mod-inset flex gap-1 rounded-xl p-1">

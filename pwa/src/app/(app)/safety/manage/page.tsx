@@ -11,6 +11,8 @@ import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { SentinelBackLink } from '@/components/sentinel/SentinelBackLink';
 import SosCountdownOverlay from '@/components/safety/SosCountdownOverlay';
 import { DashboardActiveSosPanel } from '@/components/sentinel/dashboard/DashboardActiveSosPanel';
+import { DashboardCheckInsPanel } from '@/components/sentinel/dashboard/DashboardCheckInsPanel';
+import { DashboardCirclePanel } from '@/components/sentinel/dashboard/DashboardCirclePanel';
 import { DashboardGuardiansPanel } from '@/components/sentinel/dashboard/DashboardGuardiansPanel';
 import { DashboardHowItWorks } from '@/components/sentinel/dashboard/DashboardHowItWorks';
 import { DashboardLiveStatusPanel } from '@/components/sentinel/dashboard/DashboardLiveStatusPanel';
@@ -24,21 +26,22 @@ import { useSos } from '@/hooks/useSos';
 
 export const dynamic = 'force-dynamic';
 
-type DashboardTab = 'overview' | 'guardians' | 'circle' | 'alerts' | 'tools';
+type DashboardTab = 'overview' | 'guardians' | 'circle' | 'checkins' | 'alerts' | 'tools';
 
 const TABS: { id: DashboardTab; label: string; icon: string }[] = [
   { id: 'overview', label: 'Overview', icon: 'dashboard' },
   { id: 'guardians', label: 'Guardians', icon: 'group' },
   { id: 'circle', label: 'Circle', icon: 'share_location' },
+  { id: 'checkins', label: 'Check-ins', icon: 'check_circle' },
   { id: 'alerts', label: 'Alerts', icon: 'notifications' },
   { id: 'tools', label: 'Tools', icon: 'handyman' },
 ];
 
 const HASH_TO_TAB: Record<string, DashboardTab> = {
   guardians: 'guardians',
-  linkers: 'guardians',
+  linkers: 'circle',
   status: 'circle',
-  checkins: 'overview',
+  checkins: 'checkins',
   alerts: 'alerts',
   history: 'alerts',
 };
@@ -69,9 +72,11 @@ function SafetyDashboardInner() {
         ? '#guardians'
         : id === 'circle'
           ? '#status'
-          : id === 'alerts'
-            ? '#alerts'
-            : '';
+          : id === 'checkins'
+            ? '#checkins'
+            : id === 'alerts'
+              ? '#alerts'
+              : '';
     window.history.replaceState(null, '', `/safety/manage${hash}`);
   };
 
@@ -106,6 +111,11 @@ function SafetyDashboardInner() {
           {dash.error && (
             <div className="mod-card rounded-2xl border border-brand-red/30 px-4 py-3 text-sm text-brand-red">
               {dash.error}
+              {dash.dataStale && (
+                <span className="block mt-1 text-xs font-normal opacity-80">
+                  Showing the last data we loaded successfully — it may be out of date.
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => dash.setError(null)}
@@ -156,12 +166,17 @@ function SafetyDashboardInner() {
           )}
 
           {tab === 'circle' && (
-            <DashboardLiveStatusPanel
-              statusFeed={dash.statusFeed}
-              onRefresh={dash.fetchData}
-              onError={dash.setError}
-            />
+            <div className="space-y-5">
+              <DashboardLiveStatusPanel
+                statusFeed={dash.statusFeed}
+                onRefresh={dash.fetchData}
+                onError={dash.setError}
+              />
+              <DashboardCirclePanel />
+            </div>
           )}
+
+          {tab === 'checkins' && <DashboardCheckInsPanel />}
 
           {tab === 'alerts' && (
             <>

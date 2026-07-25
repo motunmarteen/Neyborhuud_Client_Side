@@ -133,6 +133,8 @@ export default function SosPage() {
               secondsRemaining={sos.secondsRemaining}
               escalationLevel={sos.activeSos?.escalationLevel ?? 0}
               incidentHref={incidentHref}
+              offlineQueueStatus={sos.offlineQueueStatus}
+              visibilityMode={sos.activeSos?.visibilityMode}
               onCancel={() => void sos.cancelSos('Cancelled from /sos page')}
               onResolve={() => void sos.resolveSos()}
             />

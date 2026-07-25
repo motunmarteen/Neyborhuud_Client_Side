@@ -202,7 +202,7 @@ export function SentinelBottomSheet() {
           className="w-full flex items-center justify-center gap-2 py-3 rounded-sm bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-neu-text dark:text-white font-bold text-[13px] transition-colors active:scale-[0.98]"
           onClick={() => {
             closeSheet();
-            router.push('/safety/manage');
+            router.push('/safety/sentinel/settings');
           }}
         >
           <span className="material-symbols-outlined text-[16px]">tune</span>

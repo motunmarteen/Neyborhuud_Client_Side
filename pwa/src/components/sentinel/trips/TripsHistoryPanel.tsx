@@ -72,6 +72,14 @@ function TripHistoryCard({ trip }: { trip: Trip }) {
             </p>
             <p className="mt-0.5 text-sm font-semibold">Level {trip.escalationLevel}</p>
           </div>
+          {trip.status === 'cancelled' && trip.cancellationReason ? (
+            <div className="col-span-2 mod-inset rounded-xl p-2">
+              <p className="text-[10px] font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>
+                Cancellation reason
+              </p>
+              <p className="mt-0.5 text-sm">{trip.cancellationReason}</p>
+            </div>
+          ) : null}
           {trip.linkedSosEventId ? (
             <div className="col-span-2 rounded-xl border border-brand-red/30 bg-brand-red/10 p-2 text-xs font-semibold text-brand-red">
               SOS auto-triggered during this trip

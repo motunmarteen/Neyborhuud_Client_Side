@@ -20,6 +20,16 @@ export const notificationsService = {
   },
 
   /**
+   * Get recent Sentinel red-zone safety alerts (home LGA or saved work area).
+   */
+  async getRedZoneAlerts(limit = 10) {
+    return await apiClient.get<PaginatedResponse<Notification>>(
+      "/notifications",
+      { params: { page: 1, limit, type: "red_zone" } },
+    );
+  },
+
+  /**
    * Get unread notifications count
    */
   async getUnreadCount(type?: string, excludeType?: string) {

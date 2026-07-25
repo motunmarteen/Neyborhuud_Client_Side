@@ -41,7 +41,15 @@ export function FloatingSosButton() {
     return null;
   }
 
-  const sosActive = pathname.startsWith('/sos') || pathname.startsWith('/safety') || sos.phase !== 'idle';
+  // A silent SOS must not visibly announce itself anywhere in the UI —
+  // that's the entire point of "silent". Treat it as idle for every visual
+  // signal (ring, active state) even though sos.phase is genuinely 'active'
+  // underneath, so guardians are still notified but the screen gives
+  // nothing away to anyone watching it.
+  const isSilentActive = sos.activeSos?.visibilityMode === 'silent';
+  const visiblyActive = sos.phase !== 'idle' && !isSilentActive;
+
+  const sosActive = pathname.startsWith('/sos') || pathname.startsWith('/safety') || visiblyActive;
 
   const startSosPress = () => {
     longPressFired.current = false;
@@ -77,7 +85,7 @@ export function FloatingSosButton() {
     >
       <div className="relative app-bottomnav__sos-glass app-bottomnav__glass app-bottomnav__glass--disc">
         <span
-          className={`app-bottomnav__sos-ring ${(sos.phase !== 'idle' || hasNeighborhoodEmergency) ? 'app-bottomnav__sos-ring--live' : 'app-bottomnav__sos-ring--idle'}`}
+          className={`app-bottomnav__sos-ring ${(visiblyActive || hasNeighborhoodEmergency) ? 'app-bottomnav__sos-ring--live' : 'app-bottomnav__sos-ring--idle'}`}
           aria-hidden
         />
         <button

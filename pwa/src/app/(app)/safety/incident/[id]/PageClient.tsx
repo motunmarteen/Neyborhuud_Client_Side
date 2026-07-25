@@ -187,24 +187,30 @@ export default function IncidentRecapPage() {
             {/* ── Agency dispatch ─────────────────────────────────────── */}
             <div className="rounded-xl neu-card p-4 mb-4">
               <h2 className="text-sm font-semibold mb-2">Emergency services</h2>
-              <div className="text-sm flex items-center justify-between">
-                <span className="text-white/70">{summary.agencyDispatch.agency || 'No agency'}</span>
-                <span
-                  className={
-                    summary.agencyDispatch.status === 'sent'
-                      ? 'text-primary'
-                      : summary.agencyDispatch.status === 'failed'
-                      ? 'text-brand-red'
-                      : 'text-white/50'
-                  }
-                >
-                  {summary.agencyDispatch.status.replace('_', ' ')}
-                </span>
-              </div>
-              {summary.agencyDispatch.dispatchedAt && (
-                <div className="text-xs text-white/50 mt-1">
-                  Dispatched {new Date(summary.agencyDispatch.dispatchedAt).toLocaleString()}
-                </div>
+              {summary.agencyDispatch ? (
+                <>
+                  <div className="text-sm flex items-center justify-between">
+                    <span className="text-white/70">{summary.agencyDispatch.agency || 'No agency'}</span>
+                    <span
+                      className={
+                        summary.agencyDispatch.status === 'sent'
+                          ? 'text-primary'
+                          : summary.agencyDispatch.status === 'failed'
+                          ? 'text-brand-red'
+                          : 'text-white/50'
+                      }
+                    >
+                      {summary.agencyDispatch.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                  {summary.agencyDispatch.dispatchedAt && (
+                    <div className="text-xs text-white/50 mt-1">
+                      Dispatched {new Date(summary.agencyDispatch.dispatchedAt).toLocaleString()}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-xs text-white/50">No emergency services were dispatched for this incident.</div>
               )}
             </div>
 

@@ -48,6 +48,30 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const isClient = useIsClient();
   const { data: messageUnreadCount = 0 } = useUnreadCount('message');
 
+  // Long-press on the Sentinel tab jumps straight to Fake Call — the
+  // toolkit sheet + tile route needs 3+ taps, which undermines a feature
+  // whose entire value is being fast and unremarkable to reach.
+  const sentinelLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sentinelLongPressFired = useRef(false);
+
+  const clearSentinelLongPressTimer = () => {
+    if (sentinelLongPressTimer.current) {
+      clearTimeout(sentinelLongPressTimer.current);
+      sentinelLongPressTimer.current = null;
+    }
+  };
+  const startSentinelLongPress = () => {
+    sentinelLongPressFired.current = false;
+    clearSentinelLongPressTimer();
+    sentinelLongPressTimer.current = setTimeout(() => {
+      sentinelLongPressFired.current = true;
+      router.push('/safety/fake-call');
+    }, 600);
+  };
+  const cancelSentinelLongPress = () => {
+    clearSentinelLongPressTimer();
+  };
+
 
   const profileHref =
     isClient && user?.username ? `/profile/${user.username}` : '/settings';
@@ -67,17 +91,26 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const renderLinkTab = (tab: NavLinkTab) => {
     const active = tab.match(pathname);
     const badgeCount = tab.label === 'Connect' ? messageUnreadCount : 0;
-    
+    const isSentinelTab = tab.label === 'Sentinel';
+
     return (
       <Link
         key={tab.href}
         href={tab.href}
         className={`app-bottomnav__item ${active ? 'app-bottomnav__item--active' : ''} relative`}
-        aria-label={tab.label}
+        aria-label={isSentinelTab ? 'Sentinel — tap to open, long-press for Fake Call' : tab.label}
         aria-current={active ? 'page' : undefined}
+        onPointerDown={isSentinelTab ? startSentinelLongPress : undefined}
+        onPointerUp={isSentinelTab ? cancelSentinelLongPress : undefined}
+        onPointerLeave={isSentinelTab ? () => clearSentinelLongPressTimer() : undefined}
+        onContextMenu={isSentinelTab ? (e) => e.preventDefault() : undefined}
         onClick={(e) => {
-          if (tab.label === 'Sentinel') {
+          if (isSentinelTab) {
             e.preventDefault();
+            if (sentinelLongPressFired.current) {
+              sentinelLongPressFired.current = false;
+              return;
+            }
             openSheet();
             return;
           }
