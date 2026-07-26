@@ -98,10 +98,26 @@ export function CallOverlay() {
   useEffect(() => {
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
     if (remoteAudioRef.current) remoteAudioRef.current.srcObject = remoteStream;
-    // Autoplay can be blocked until a user gesture; nudge play() and ignore the
-    // rejection (the accept/answer tap already counts as a gesture).
-    remoteVideoRef.current?.play?.().catch(() => {});
-    remoteAudioRef.current?.play?.().catch(() => {});
+    if (!remoteStream) return;
+
+    // Autoplay can be blocked until a user gesture. For the callee this is
+    // covered by the accept tap, but for the CALLER remoteStream arrives
+    // asynchronously off a socket event (onAccepted), not inside a click
+    // handler — play() can be silently rejected there with no visible
+    // symptom other than "the call looks connected but nothing is heard."
+    // If it's rejected, retry once on the next real tap on the call screen.
+    const tryPlay = () => {
+      remoteVideoRef.current?.play?.().catch(() => {});
+      remoteAudioRef.current?.play?.().catch(() => {});
+    };
+    tryPlay();
+
+    const retryOnGesture = () => {
+      tryPlay();
+      window.removeEventListener('pointerdown', retryOnGesture);
+    };
+    window.addEventListener('pointerdown', retryOnGesture, { once: true });
+    return () => window.removeEventListener('pointerdown', retryOnGesture);
   }, [remoteStream]);
 
   // Route audio to speaker vs. earpiece where the platform allows it
@@ -142,12 +158,12 @@ export function CallOverlay() {
       ? `Incoming ${activeSubject.type} call`
       : phase === 'outgoing'
         ? 'Calling…'
-        : phase === 'connecting'
-          ? 'Connecting…'
-          : phase === 'active'
-            ? formatDuration(elapsed)
-            : showEndedRedial
-              ? 'Call ended'
+        : phase === 'ringing'
+          ? 'Ringing…'
+          : phase === 'connecting'
+            ? 'Connecting…'
+            : phase === 'active'
+              ? formatDuration(elapsed)
               : 'Call ended';
 
   const initials = activeSubject.peerName
@@ -229,7 +245,7 @@ export function CallOverlay() {
       <div className="relative z-10 flex flex-col items-center gap-1.5 px-6 pt-14 text-center">
         <h2 className="text-[1.7rem] font-black tracking-tight drop-shadow-lg">{activeSubject.peerName}</h2>
         <p className="flex items-center gap-2 text-sm font-semibold text-white/85 drop-shadow">
-          {(phase === 'outgoing' || phase === 'connecting') && (
+          {(phase === 'outgoing' || phase === 'ringing' || phase === 'connecting') && (
             <span className="material-symbols-outlined animate-pulse text-[1.1rem]" aria-hidden="true">
               {phase === 'connecting' ? 'sync' : 'call'}
             </span>

@@ -126,6 +126,29 @@ function isMetaMaskExtensionNoise(reason: unknown): boolean {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  // Warm the shared ringtone AudioContext on the very first real tap/click
+  // anywhere in the app. An incoming call's ring() fires from a socket
+  // event with no user gesture behind it, so a context started cold at that
+  // moment can be born (and stay) suspended under autoplay policy — the
+  // callee's phone would then silently never actually ring. Unlocking here,
+  // the first time we *do* have gesture privilege, sidesteps that.
+  useEffect(() => {
+    let unlocked = false;
+    const onFirstGesture = () => {
+      if (unlocked) return;
+      unlocked = true;
+      void import('@/lib/callRingtone').then((m) => m.unlockAudio());
+      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('keydown', onFirstGesture);
+    };
+    window.addEventListener('pointerdown', onFirstGesture);
+    window.addEventListener('keydown', onFirstGesture);
+    return () => {
+      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('keydown', onFirstGesture);
+    };
+  }, []);
+
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return;
 

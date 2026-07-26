@@ -17,6 +17,13 @@
  *   out: call:reject { callId }   in: call:rejected { callId }
  *   out: call:hangup { callId }    in: call:ended { callId, status }
  *   in:  call:ringing { callId }   in: call:error { message }
+ *
+ * Caller-side phase progression: idle → outgoing (invite sent, waiting on
+ * our own server) → ringing (call:ringing confirms the callee's device was
+ * actually notified) → connecting (call:accepted, negotiating media) →
+ * active. call:error is surfaced to the user via toast — it used to fail
+ * silently, which looked identical to "the call never rang" for things like
+ * the mutual-follow gate rejecting an invite server-side.
  */
 
 import {
@@ -33,14 +40,23 @@ import { callService, type CallType } from '@/services/call.service';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import * as ringtone from '@/lib/callRingtone';
 import { getGuestDisplayName } from '@/lib/profileSnapHelpers';
+import { toast } from 'sonner';
 
 // Slightly longer than the server's 45s auto-miss window so the server's
 // authoritative call:ended normally arrives first; this only fires if it doesn't.
 const CLIENT_RING_TIMEOUT_MS = 50_000;
 
+// pc.connectionState's 'connected' transition is unreliable on some browsers
+// (notably older Safari/iOS WebViews never fire it despite media genuinely
+// flowing) — this is a backstop so the UI doesn't get stuck on "Connecting…"
+// forever when that happens. iceConnectionState is the other, independently-
+// unreliable signal; if EITHER fires we treat the call as active.
+const CONNECTING_FALLBACK_MS = 12_000;
+
 export type CallPhase =
   | 'idle'
-  | 'outgoing' // we called, waiting for accept
+  | 'outgoing' // we called, waiting for the server to confirm the callee was rung
+  | 'ringing' // callee's device has been notified — waiting for them to answer
   | 'incoming' // someone is calling us
   | 'connecting' // accepted, negotiating media
   | 'active' // media flowing
@@ -122,6 +138,11 @@ export function CallProvider({ children }: { children: ReactNode }) {
   // is only a safety net in case that message is lost (e.g. brief network
   // blip), so the caller's UI is never stuck on "Calling…" indefinitely.
   const ringTimeoutRef = useRef<number | null>(null);
+  // Backstop for the post-accept "Connecting…" window: if neither
+  // connectionState nor iceConnectionState ever reaches 'connected' (a real
+  // browser quirk, not hypothetical — see CONNECTING_FALLBACK_MS), don't
+  // strand the UI — end the call with a clear error instead of a silent hang.
+  const connectingFallbackRef = useRef<number | null>(null);
 
   // Send (or buffer) one of our local ICE candidates.
   const sendLocalCandidate = useCallback((candidate: RTCIceCandidateInit) => {
@@ -172,6 +193,29 @@ export function CallProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(ringTimeoutRef.current);
       ringTimeoutRef.current = null;
     }
+    if (connectingFallbackRef.current !== null) {
+      window.clearTimeout(connectingFallbackRef.current);
+      connectingFallbackRef.current = null;
+    }
+  }, []);
+
+  // endCall is defined below (after this function, which needs to call it
+  // from a timeout closure) — this ref is populated right after endCall's
+  // own declaration so startConnectingFallback always calls the latest
+  // version without needing endCall in its own dependency array.
+  const endCallRef = useRef<(nextPhase?: CallPhase) => void>(() => {});
+
+  const startConnectingFallback = useCallback(() => {
+    if (connectingFallbackRef.current !== null) window.clearTimeout(connectingFallbackRef.current);
+    connectingFallbackRef.current = window.setTimeout(() => {
+      connectingFallbackRef.current = null;
+      if (phaseRef.current !== 'connecting') return;
+      console.warn('[Call] Never reached "connected" within fallback window — ending call');
+      toast.error('Call could not connect. Please try again.');
+      const id = liveCallIdRef.current;
+      if (id) socketService.emit('call:hangup', { callId: id });
+      endCallRef.current('ended');
+    }, CONNECTING_FALLBACK_MS);
   }, []);
 
   const endCall = useCallback(
@@ -190,6 +234,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     },
     [cleanup, setCallState],
   );
+  useEffect(() => { endCallRef.current = endCall; }, [endCall]);
 
   // ── Build the peer connection ───────────────────────────────────────────────
   const createPeerConnection = useCallback(
@@ -221,8 +266,34 @@ export function CallProvider({ children }: { children: ReactNode }) {
         }
       };
 
+      // pc.connectionState is the primary "are we actually connected" signal,
+      // but it's unreliable on some browsers (older Safari/iOS in particular
+      // has shipped versions that never fire 'connected' even once media is
+      // genuinely flowing both ways). iceConnectionState reaching
+      // 'connected'/'completed' is a second, independent signal for the same
+      // underlying fact — if EITHER fires, treat the call as active, so a
+      // browser quirk in one API doesn't strand the UI on "Connecting…"
+      // forever while audio/video actually works.
+      let markedActive = false;
+      const markActiveOnce = () => {
+        if (markedActive) return;
+        markedActive = true;
+        if (connectingFallbackRef.current !== null) {
+          window.clearTimeout(connectingFallbackRef.current);
+          connectingFallbackRef.current = null;
+        }
+        setPhase('active');
+      };
+
       pc.oniceconnectionstatechange = () => {
-        console.log('[Call] ICE connection state:', pc.iceConnectionState);
+        const st = pc.iceConnectionState;
+        console.log('[Call] ICE connection state:', st);
+        if (st === 'connected' || st === 'completed') markActiveOnce();
+        if (st === 'failed') {
+          const id = liveCallIdRef.current;
+          if (id) socketService.emit('call:hangup', { callId: id });
+          endCall('ended');
+        }
       };
 
       pc.ontrack = (e) => {
@@ -239,7 +310,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       pc.onconnectionstatechange = () => {
         const st = pc.connectionState;
         console.log('[Call] connection state:', st);
-        if (st === 'connected') setPhase('active');
+        if (st === 'connected') markActiveOnce();
         if (st === 'failed') {
           const id = liveCallIdRef.current;
           if (id) socketService.emit('call:hangup', { callId: id });
@@ -338,7 +409,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
         if (ringTimeoutRef.current !== null) window.clearTimeout(ringTimeoutRef.current);
         ringTimeoutRef.current = window.setTimeout(() => {
           ringTimeoutRef.current = null;
-          if (callRef.current?.isCaller && phaseRef.current === 'outgoing') {
+          if (
+            callRef.current?.isCaller &&
+            (phaseRef.current === 'outgoing' || phaseRef.current === 'ringing')
+          ) {
             const id = liveCallIdRef.current;
             if (id) socketService.emit('call:hangup', { callId: id });
             endCall('ended');
@@ -357,6 +431,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     const offer = pendingOfferRef.current;
     if (!current || !offer) return;
     setPhase('connecting');
+    startConnectingFallback();
 
     try {
       // Callee knows the real callId up front, so ICE can be sent immediately.
@@ -373,10 +448,11 @@ export function CallProvider({ children }: { children: ReactNode }) {
       socketService.emit('call:accept', { callId: current.callId, sdp: answer });
     } catch (err) {
       console.error('[Call] acceptCall failed', err);
+      toast.error('Could not join the call. Please check your camera/microphone permissions and try again.');
       socketService.emit('call:hangup', { callId: current.callId });
       endCall('ended');
     }
-  }, [createPeerConnection, attachLocalMedia, flushPendingCandidates, flushOutgoingCandidates, endCall]);
+  }, [createPeerConnection, attachLocalMedia, flushPendingCandidates, flushOutgoingCandidates, endCall, startConnectingFallback]);
 
   const rejectCall = useCallback(() => {
     const current = callRef.current;
@@ -408,11 +484,13 @@ export function CallProvider({ children }: { children: ReactNode }) {
     setCameraEnabled(enabled);
   }, [cameraEnabled]);
 
-  // Ringtone: ring while a call is incoming, ringback while outgoing, silence
-  // otherwise. Stops on unmount too.
+  // Ringtone: ring while a call is incoming, ringback while outgoing/ringing
+  // (the callee's device has been notified but hasn't answered yet — still a
+  // "ringing" state from the caller's side), silence otherwise. Stops on
+  // unmount too.
   useEffect(() => {
     if (phase === 'incoming') ringtone.ring();
-    else if (phase === 'outgoing') ringtone.ringback();
+    else if (phase === 'outgoing' || phase === 'ringing') ringtone.ringback();
     else ringtone.stop();
     return () => ringtone.stop();
   }, [phase]);
@@ -421,10 +499,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
   // call fresh versions without depending on them (the effect must run once per
   // user session, not re-subscribe whenever a callback identity changes — that
   // was causing a changing-dependency-array warning under Fast Refresh).
-  const handlersRef = useRef({ endCall, hangup });
+  const handlersRef = useRef({ endCall, hangup, startConnectingFallback });
   useEffect(() => {
-    handlersRef.current = { endCall, hangup };
-  }, [endCall, hangup]);
+    handlersRef.current = { endCall, hangup, startConnectingFallback };
+  }, [endCall, hangup, startConnectingFallback]);
 
   // ── Socket signaling listeners ──────────────────────────────────────────────
   useEffect(() => {
@@ -434,14 +512,18 @@ export function CallProvider({ children }: { children: ReactNode }) {
     socketService.authenticate(myId);
 
     const onRinging = (data: { callId: string }) => {
-      // Backend assigned the real callId. Record it and flush any ICE
-      // candidates the caller's PC produced before this arrived — otherwise
-      // those early candidates are lost and media may not connect both ways.
+      // Backend assigned the real callId AND confirms the callee's device
+      // was actually notified — this is the true "ringing" moment, distinct
+      // from "outgoing" (still talking to our own server). Record the id and
+      // flush any ICE candidates the caller's PC produced before this
+      // arrived — otherwise those early candidates are lost and media may
+      // not connect both ways.
       const current = callRef.current;
       if (current && current.isCaller) {
         setCallState({ ...current, callId: data.callId });
         liveCallIdRef.current = data.callId;
         flushOutgoingCandidates();
+        if (phaseRef.current === 'outgoing') setPhase('ringing');
       }
     };
 
@@ -476,11 +558,13 @@ export function CallProvider({ children }: { children: ReactNode }) {
       const pc = pcRef.current;
       if (!pc) return;
       setPhase('connecting');
+      handlersRef.current.startConnectingFallback();
       try {
         await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
         await flushPendingCandidates();
       } catch (err) {
         console.error('[Call] failed to apply answer', err);
+        toast.error('Call could not connect. Please try again.');
         handlersRef.current.hangup();
       }
     };
@@ -502,10 +586,21 @@ export function CallProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const onRejected = () => handlersRef.current.endCall('ended');
+    const onRejected = () => {
+      // Only the caller sees this (the callee is the one who rejected); if
+      // WE were the one calling, it's worth a clear "declined" toast rather
+      // than the call just silently vanishing back to idle.
+      if (callRef.current?.isCaller) toast(`${callRef.current.peerName.replace(/^@/, '')} declined the call`);
+      handlersRef.current.endCall('ended');
+    };
     const onEnded = () => handlersRef.current.endCall('ended');
     const onError = (data: { message?: string }) => {
+      // Previously this only logged to the console and silently ended the
+      // call — from the user's side that looked exactly like "the call
+      // never rang" (e.g. the mutual-follow gate rejecting the invite
+      // server-side gives zero visible feedback otherwise). Surface it.
       console.warn('[Call] error:', data?.message);
+      toast.error(data?.message || 'Call could not be started.');
       handlersRef.current.endCall('ended');
     };
 

@@ -156,7 +156,7 @@ export default function NotificationPermissionPrompt() {
             </div>
             <div>
               <p className="font-bold text-[var(--neu-text-muted)]">Notifications are blocked</p>
-              <p className="text-sm text-[var(--neu-text-muted)]">You won&apos;t receive SOS and safety alerts</p>
+              <p className="text-sm text-[var(--neu-text-muted)]">You won&apos;t receive SOS alerts or incoming calls</p>
             </div>
           </div>
           <p className="text-sm text-[var(--neu-text-secondary)] mb-5 leading-relaxed">
@@ -209,6 +209,7 @@ export default function NotificationPermissionPrompt() {
             { icon: 'sos', label: 'Instant SOS alerts from neighbours', color: 'text-brand-red' },
             { icon: 'location_on', label: 'Geofence & safety zone alerts', color: 'text-brand-red' },
             { icon: 'route', label: 'Trip monitoring & overdue alerts', color: 'text-primary600' },
+            { icon: 'call', label: 'Incoming voice & video calls', color: 'text-primary' },
             { icon: 'chat', label: 'Messages & community updates', color: 'text-brand-blue' },
           ].map(({ icon, label, color }) => (
             <li key={icon} className="flex items-center gap-3">
