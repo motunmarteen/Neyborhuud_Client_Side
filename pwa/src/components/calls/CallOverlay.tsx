@@ -14,9 +14,17 @@
  * lets either side send a quick text message without leaving the call, and
  * "Call again" appears for a few seconds after hangup so redialing a dropped
  * or missed call is one tap, not a trip back into the conversation.
+ *
+ * Minimizing: swiping the full-screen call down (or tapping the minimize
+ * button) shrinks it to a small draggable bubble that floats over the rest
+ * of the app — the call and its media keep running unchanged in
+ * CallProvider throughout, only this component's local "how is it
+ * displayed" state changes. This is what lets someone keep messaging (or
+ * browsing anything else) while a call stays connected in the background,
+ * the same way a native phone call doesn't force you to stare at it.
  */
 
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import Image from 'next/image';
 import { useCall } from './CallProvider';
 import { chatService } from '@/services/chat.service';
@@ -26,6 +34,121 @@ function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+const BUBBLE_SIZE = 64;
+const BUBBLE_MARGIN = 12;
+
+/** Small floating draggable bubble shown while the call is minimized. */
+function CallBubble({
+  avatarUrl,
+  initials,
+  elapsedLabel,
+  isVideo,
+  localStream,
+  onExpand,
+  onHangup,
+}: {
+  avatarUrl: string | null;
+  initials: string;
+  elapsedLabel: string;
+  isVideo: boolean;
+  localStream: MediaStream | null;
+  onExpand: () => void;
+  onHangup: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const dragRef = useRef<{ startX: number; startY: number; originX: number; originY: number; moved: boolean } | null>(null);
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.srcObject = localStream;
+  }, [localStream]);
+
+  // Default position: bottom-right, above the frosted-glass bar zone.
+  useEffect(() => {
+    if (pos || typeof window === 'undefined') return;
+    setPos({
+      x: window.innerWidth - BUBBLE_SIZE - BUBBLE_MARGIN,
+      y: window.innerHeight - BUBBLE_SIZE - 140,
+    });
+  }, [pos]);
+
+  const clampToViewport = (x: number, y: number) => {
+    const maxX = window.innerWidth - BUBBLE_SIZE - BUBBLE_MARGIN;
+    const maxY = window.innerHeight - BUBBLE_SIZE - BUBBLE_MARGIN;
+    return {
+      x: Math.min(Math.max(x, BUBBLE_MARGIN), Math.max(maxX, BUBBLE_MARGIN)),
+      y: Math.min(Math.max(y, BUBBLE_MARGIN), Math.max(maxY, BUBBLE_MARGIN)),
+    };
+  };
+
+  const onPointerDown = (e: ReactPointerEvent) => {
+    if (!pos) return;
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    dragRef.current = { startX: e.clientX, startY: e.clientY, originX: pos.x, originY: pos.y, moved: false };
+  };
+
+  const onPointerMove = (e: ReactPointerEvent) => {
+    const d = dragRef.current;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) d.moved = true;
+    setPos(clampToViewport(d.originX + dx, d.originY + dy));
+  };
+
+  const onPointerUp = () => {
+    const d = dragRef.current;
+    dragRef.current = null;
+    // A drag that barely moved is treated as a tap — re-expand to full screen.
+    if (d && !d.moved) onExpand();
+    // Snap to whichever edge (left/right) the bubble ended up closer to,
+    // like WhatsApp/Messenger's chat heads.
+    if (pos && typeof window !== 'undefined') {
+      const goRight = pos.x + BUBBLE_SIZE / 2 > window.innerWidth / 2;
+      setPos((p) => (p ? { ...p, x: goRight ? window.innerWidth - BUBBLE_SIZE - BUBBLE_MARGIN : BUBBLE_MARGIN } : p));
+    }
+  };
+
+  if (!pos) return null;
+
+  return (
+    <div
+      className="fixed z-[310] flex h-16 w-16 touch-none items-center justify-center rounded-full shadow-2xl ring-2 ring-white/30 transition-[left,top] duration-200 ease-out"
+      style={{ left: pos.x, top: pos.y }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      role="button"
+      tabIndex={0}
+      aria-label="Return to call"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onExpand(); }}
+    >
+      <div className="relative h-full w-full overflow-hidden rounded-full bg-[#0a1a0f]">
+        {isVideo && localStream ? (
+          <video ref={videoRef} autoPlay playsInline muted className="local-call-preview h-full w-full object-cover" />
+        ) : avatarUrl ? (
+          <Image src={avatarUrl} alt="" fill sizes="64px" className="object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/70 via-primary/40 to-[#0a1a0f] text-lg font-black text-white/90">
+            {initials || '👤'}
+          </div>
+        )}
+      </div>
+      <span className="pointer-events-none absolute -bottom-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/80 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+        {elapsedLabel}
+      </span>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onHangup(); }}
+        aria-label="End call"
+        className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-brand-red text-white shadow-md"
+      >
+        <span className="material-symbols-outlined text-[0.85rem]" aria-hidden="true">call_end</span>
+      </button>
+    </div>
+  );
 }
 
 /** Full-bleed portrait or a generated initials tile — used both as the crisp foreground and (blurred) as the ambient backdrop. */
@@ -86,6 +209,36 @@ export function CallOverlay() {
   const [chatSending, setChatSending] = useState(false);
   const [chatSentFlash, setChatSentFlash] = useState<string | null>(null);
   const chatInputRef = useRef<HTMLInputElement | null>(null);
+  const [minimized, setMinimized] = useState(false);
+
+  // Swipe-down-to-minimize tracking on the full-screen call surface.
+  const swipeRef = useRef<{ startY: number; dy: number } | null>(null);
+  const [swipeDy, setSwipeDy] = useState(0);
+  const SWIPE_DISMISS_PX = 120;
+
+  const onSwipeDown = (e: ReactPointerEvent) => {
+    // Ignore drags that start on an interactive control (buttons, the chat
+    // input, etc.) so tapping "End call" doesn't get misread as a swipe.
+    const target = e.target as HTMLElement;
+    if (target.closest('button, input, form')) return;
+    swipeRef.current = { startY: e.clientY, dy: 0 };
+  };
+  const onSwipeMove = (e: ReactPointerEvent) => {
+    const s = swipeRef.current;
+    if (!s) return;
+    const dy = e.clientY - s.startY;
+    if (dy < 0) return; // only allow downward drag
+    s.dy = dy;
+    setSwipeDy(dy);
+  };
+  const onSwipeEnd = () => {
+    const s = swipeRef.current;
+    swipeRef.current = null;
+    if (s && s.dy > SWIPE_DISMISS_PX) {
+      setMinimized(true);
+    }
+    setSwipeDy(0);
+  };
 
   // Bind streams to media elements. Because the media elements are ALWAYS
   // mounted (toggled with CSS, never conditionally rendered), the refs are
@@ -145,7 +298,15 @@ export function CallOverlay() {
       setChatOpen(false);
       setChatDraft('');
       setChatSentFlash(null);
+      setMinimized(false);
     }
+  }, [phase]);
+
+  // A freshly incoming call should always show full-screen, even if a
+  // previous call had been minimized — you shouldn't have to go hunt for a
+  // new incoming call inside a tiny bubble.
+  useEffect(() => {
+    if (phase === 'incoming') setMinimized(false);
   }, [phase]);
 
   const showEndedRedial = phase === 'idle' && !!lastCall;
@@ -153,6 +314,24 @@ export function CallOverlay() {
 
   const activeSubject = call ?? lastCall!;
   const isVideo = activeSubject.type === 'video';
+
+  // Minimizing only makes sense once a call is actually under way — an
+  // incoming ring or the post-hangup "ended"/redial screen always show
+  // full-screen regardless of the minimized flag.
+  const canMinimize = phase === 'outgoing' || phase === 'ringing' || phase === 'connecting' || phase === 'active';
+  if (minimized && canMinimize && call) {
+    return (
+      <CallBubble
+        avatarUrl={activeSubject.peerAvatar}
+        initials={activeSubject.peerName.replace(/^@/, '').slice(0, 2).toUpperCase()}
+        elapsedLabel={phase === 'active' ? formatDuration(elapsed) : phase === 'ringing' ? 'Ringing…' : phase === 'connecting' ? 'Connecting…' : 'Calling…'}
+        isVideo={isVideo}
+        localStream={localStream}
+        onExpand={() => setMinimized(false)}
+        onHangup={hangup}
+      />
+    );
+  }
   const statusText =
     phase === 'incoming'
       ? `Incoming ${activeSubject.type} call`
@@ -193,7 +372,32 @@ export function CallOverlay() {
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex flex-col overflow-hidden bg-black text-white">
+    <div
+      className="fixed inset-0 z-[300] flex flex-col overflow-hidden bg-black text-white"
+      style={{
+        transform: swipeDy ? `translateY(${swipeDy}px)` : undefined,
+        opacity: swipeDy ? Math.max(1 - swipeDy / (SWIPE_DISMISS_PX * 2.5), 0.4) : undefined,
+        transition: swipeDy ? 'none' : 'transform 0.2s ease, opacity 0.2s ease',
+      }}
+      onPointerDown={canMinimize ? onSwipeDown : undefined}
+      onPointerMove={canMinimize ? onSwipeMove : undefined}
+      onPointerUp={canMinimize ? onSwipeEnd : undefined}
+      onPointerCancel={canMinimize ? onSwipeEnd : undefined}
+    >
+      {/* Minimize handle — a pull-bar affordance plus an explicit button,
+          since a hidden swipe gesture alone is easy to miss; tapping either
+          shrinks the call to a draggable bubble without ending it. */}
+      {canMinimize && (
+        <button
+          type="button"
+          onClick={() => setMinimized(true)}
+          aria-label="Minimize call"
+          className="absolute left-1/2 top-3 z-20 flex -translate-x-1/2 flex-col items-center gap-1.5 px-6 py-2"
+        >
+          <span className="h-1 w-10 rounded-full bg-white/40" />
+        </button>
+      )}
+
       {/* Ambient backdrop: the peer's own photo, blurred and darkened, so the
           screen is never a flat void while media negotiates or for audio calls. */}
       <div className="absolute inset-0 scale-110">
