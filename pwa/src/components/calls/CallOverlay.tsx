@@ -141,6 +141,15 @@ function CallBubble({
       </span>
       <button
         type="button"
+        // The bubble's own tap-to-expand logic runs off onPointerDown/onPointerUp
+        // on the PARENT div, which still fire for pointer events that land on
+        // this child button (pointer events bubble same as any DOM event) —
+        // stopping propagation only in onClick is too late, since onPointerUp
+        // already ran and called onExpand() by the time onClick fires. Must
+        // stop it at the pointer-event stage too, or "End call" re-expands
+        // the bubble back to full-screen instead of actually hanging up.
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); onHangup(); }}
         aria-label="End call"
         className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-brand-red text-white shadow-md"
