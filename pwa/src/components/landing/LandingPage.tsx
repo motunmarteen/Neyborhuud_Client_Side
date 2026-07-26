@@ -219,7 +219,7 @@ export function LandingPage() {
                 {[
                   { title: "NIN / BVN Verification", desc: "Co-signed validation ensures absolute accountability." },
                   { title: "Local Data Residency", desc: "Hyperlocal traffic stays local, protecting community sovereignty." },
-                  { title: "End-to-End Encryption", desc: "Private emergency broadcasts are invisible to outside trackers." },
+                  { title: "Encrypted in Transit & at Rest", desc: "Private emergency broadcasts are protected from outside trackers." },
                   { title: "Zero Scammer Sovereignty", desc: "Trust scores dynamically decay on flagged activities." }
                 ].map((item, i) => (
                   <motion.li key={i} whileHover={{ x: 8 }} style={{ display: "flex", gap: "16px", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "20px" }}>
