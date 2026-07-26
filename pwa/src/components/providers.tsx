@@ -30,6 +30,8 @@ import { SosProvider } from '@/contexts/SosContext';
 import { CallProvider } from '@/components/calls/CallProvider';
 import { IncognitoInviteListener } from '@/components/chat/IncognitoInviteListener';
 import { CallOverlay } from '@/components/calls/CallOverlay';
+import { GroupCallProvider } from '@/components/calls/GroupCallProvider';
+import { GroupCallOverlay } from '@/components/calls/GroupCallOverlay';
 import { SentinelBottomSheetProvider } from '@/contexts/SentinelBottomSheetContext';
 import { SentinelBottomSheet } from '@/components/safety/SentinelBottomSheet';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -326,6 +328,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <GuardianAlertsProvider>
       <RedZoneAlertsProvider>
       <CallProvider>
+      <GroupCallProvider>
       <SentinelBottomSheetProvider>
       <SocketAuthenticator />
       <IncognitoInviteListener />
@@ -339,7 +342,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </ClientRouteGuard>
       <SentinelBottomSheet />
       <CallOverlay />
+      <GroupCallOverlay />
       </SentinelBottomSheetProvider>
+      </GroupCallProvider>
       </CallProvider>
       </RedZoneAlertsProvider>
       </GuardianAlertsProvider>

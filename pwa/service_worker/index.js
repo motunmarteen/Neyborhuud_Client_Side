@@ -56,6 +56,7 @@ function resolveUrl(data) {
       return data.sessionId ? "/safety/kidnapping-tracking/watch/" + data.sessionId : "/safety";
     case "message":
     case "message_new":
+    case "group_call_started":
       return data.conversationId
         ? "/chat/" + data.conversationId
         : "/chat";

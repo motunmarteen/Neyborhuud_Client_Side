@@ -34,6 +34,10 @@ import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import * as ringtone from '@/lib/callRingtone';
 import { getGuestDisplayName } from '@/lib/profileSnapHelpers';
 
+// Slightly longer than the server's 45s auto-miss window so the server's
+// authoritative call:ended normally arrives first; this only fires if it doesn't.
+const CLIENT_RING_TIMEOUT_MS = 50_000;
+
 export type CallPhase =
   | 'idle'
   | 'outgoing' // we called, waiting for accept
@@ -86,6 +90,8 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const myId = user?.id ?? null;
 
   const [phase, setPhase] = useState<CallPhase>('idle');
+  const phaseRef = useRef<CallPhase>('idle');
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
   const [call, setCall] = useState<ActiveCall | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
@@ -106,6 +112,11 @@ export function CallProvider({ children }: { children: ReactNode }) {
   // here and flushed once the id is known (otherwise they'd be lost → no media).
   const liveCallIdRef = useRef<string | null>(null);
   const outgoingIceBufferRef = useRef<RTCIceCandidateInit[]>([]);
+  // Client-side backstop for an unanswered outgoing call. The server already
+  // auto-misses a call after ~45s and tells both sides via call:ended — this
+  // is only a safety net in case that message is lost (e.g. brief network
+  // blip), so the caller's UI is never stuck on "Calling…" indefinitely.
+  const ringTimeoutRef = useRef<number | null>(null);
 
   // Send (or buffer) one of our local ICE candidates.
   const sendLocalCandidate = useCallback((candidate: RTCIceCandidateInit) => {
@@ -152,6 +163,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
     outgoingIceBufferRef.current = [];
     setMicEnabled(true);
     setCameraEnabled(true);
+    if (ringTimeoutRef.current !== null) {
+      window.clearTimeout(ringTimeoutRef.current);
+      ringTimeoutRef.current = null;
+    }
   }, []);
 
   const endCall = useCallback(
@@ -307,6 +322,18 @@ export function CallProvider({ children }: { children: ReactNode }) {
           fromName: user?.username ? `@${user.username}` : (user?.firstName ?? getGuestDisplayName()),
           fromAvatar: user?.avatarUrl ?? null,
         });
+
+        // Backstop: if the server's own auto-miss call:ended never arrives,
+        // don't leave the caller stuck on "Calling…" forever.
+        if (ringTimeoutRef.current !== null) window.clearTimeout(ringTimeoutRef.current);
+        ringTimeoutRef.current = window.setTimeout(() => {
+          ringTimeoutRef.current = null;
+          if (callRef.current?.isCaller && phaseRef.current === 'outgoing') {
+            const id = liveCallIdRef.current;
+            if (id) socketService.emit('call:hangup', { callId: id });
+            endCall('ended');
+          }
+        }, CLIENT_RING_TIMEOUT_MS);
       } catch (err) {
         console.error('[Call] startCall failed', err);
         endCall('ended');

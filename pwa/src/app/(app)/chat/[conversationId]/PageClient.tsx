@@ -36,6 +36,7 @@ import { GuestCountdownBanner } from '@/components/chat/GuestCountdownBanner';
 import { CommunityInfoSheet } from '@/components/chat/CommunityInfoSheet';
 import { ChatComposer } from '@/components/chat/ChatComposer';
 import { useCall } from '@/components/calls/CallProvider';
+import { useGroupCall } from '@/components/calls/GroupCallProvider';
 import { convAvatarMeta, convDisplayName, convSubtitle } from '@/lib/chatDisplay';
 import type { ActionResult } from '@/components/chat/ChatActionMenu';
 import { getGeolocation } from '@/lib/nativeGeolocation';
@@ -557,6 +558,52 @@ export default function ConversationPage() {
       });
     },
     [peerUserId, startCall, conv, user?.id, isPlaceholder, conversationId],
+  );
+
+  // Group calling for group/community conversations. 'community' ALSO gets a
+  // dedicated banner entry point (CommunityChatBanner, hub-community-aware) —
+  // both funnel into the same joinCall()/socket signaling below, so having
+  // two UI entry points for community chats is intentional, not duplicated
+  // logic. Being a participant of the conversation is the bar here (no
+  // mutual-follow requirement, unlike 1:1 — see socket.service.ts's
+  // group-call:join gating comment for the documented reasoning).
+  const { phase: groupCallPhase, joinCall: joinGroupCall } = useGroupCall();
+  // Usable from anywhere a group_call system message might render (group OR community).
+  const canGroupCall = isCommunityChat(conv ?? ({} as Conversation)) && !isPlaceholder;
+  // Header call buttons only for plain 'group' — 'community' already has a
+  // dedicated, more informative call entry point (CommunityChatBanner, which
+  // also shows "call in progress"), so skip duplicating buttons in the header there.
+  const canGroupCallFromHeader = conv?.type === 'group' && !isPlaceholder;
+  const groupCallBusy = groupCallPhase === 'joining' || groupCallPhase === 'active';
+  const beginGroupCall = useCallback(
+    async (callType: 'voice' | 'video') => {
+      if (!canGroupCall || groupCallBusy) return;
+      try {
+        let sessionId: string | undefined;
+        let resolvedType = callType;
+        try {
+          const active = await chatService.getActiveCall(conversationId);
+          if (active.data?.session) {
+            sessionId = active.data.session.id;
+            resolvedType = (active.data.session.callType as 'voice' | 'video') ?? callType;
+          }
+        } catch {
+          /* fall through to starting a new one */
+        }
+        if (!sessionId) {
+          const res = await chatService.startCall(conversationId, callType);
+          sessionId = res.data?.session?.id;
+        }
+        if (!sessionId) {
+          toast.error('Could not start call');
+          return;
+        }
+        await joinGroupCall({ sessionId, conversationId, callType: resolvedType });
+      } catch {
+        toast.error('Could not start call');
+      }
+    },
+    [canGroupCall, groupCallBusy, conversationId, joinGroupCall],
   );
 
   const enrichOutgoing = useCallback(
@@ -1205,9 +1252,13 @@ export default function ConversationPage() {
           onBack={() => navigateBack(router, { pathname, fallback: '/friendship?tab=chats' })}
           onInviteGuest={conv?.type === 'direct' && !isPlaceholder ? () => setInviteOpen(true) : undefined}
           onCommunityInfo={isCommunityChat(conv ?? ({} as any)) && !isPlaceholder ? () => setCommunityInfoOpen(true) : undefined}
-          onAudioCall={canCall ? () => beginCall('audio') : undefined}
-          onVideoCall={canCall ? () => beginCall('video') : undefined}
-          callDisabled={callPhase !== 'idle'}
+          onAudioCall={
+            canCall ? () => beginCall('audio') : canGroupCallFromHeader ? () => void beginGroupCall('voice') : undefined
+          }
+          onVideoCall={
+            canCall ? () => beginCall('video') : canGroupCallFromHeader ? () => void beginGroupCall('video') : undefined
+          }
+          callDisabled={canCall ? callPhase !== 'idle' : groupCallBusy}
         />
       }
       banners={banners}
@@ -1351,6 +1402,31 @@ export default function ConversationPage() {
                                 {callTime && (
                                   <span className="ml-0.5 text-[11px] opacity-60">{callTime}</span>
                                 )}
+                              </button>
+                            </div>
+                          );
+                        }
+
+                        // ── Group call summary entry (started / ended) ──
+                        if (msgMeta?.kind === 'group_call') {
+                          const gCallType = msgMeta.callType === 'video' ? 'video' : 'voice';
+                          const gStatus = String(msgMeta.callStatus ?? '');
+                          const icon = gCallType === 'video' ? 'videocam' : 'call';
+                          const canJoinThis = canGroupCall && gStatus === 'started';
+                          const gCallTime = timeStr(msg.createdAt);
+                          return (
+                            <div key={id} ref={isLastOverall ? lastMsgRef : undefined} className="my-3 flex justify-center px-2">
+                              <button
+                                type="button"
+                                disabled={!canJoinThis}
+                                onClick={() => canJoinThis && void beginGroupCall(gCallType)}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-[12px] font-semibold text-primary disabled:opacity-70"
+                              >
+                                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                                  {icon}
+                                </span>
+                                {c}
+                                {gCallTime && <span className="ml-0.5 text-[11px] opacity-60">{gCallTime}</span>}
                               </button>
                             </div>
                           );
