@@ -503,13 +503,22 @@ export interface MarketplaceOffer {
 
 // ==================== Chat Types ====================
 
-/** All possible chat message content types */
+/**
+ * All possible chat message content types.
+ *
+ * MUST stay in sync with the Mongoose enum in NeyborHuud-ServerSide's
+ * src/models/Chat.ts (IMessage.type), the Joi enum in
+ * src/modules/chat/chat.validation.ts, and the plain DTO in
+ * src/modules/chat/chat.model.ts — all four were grepped and updated
+ * together when the Phase 2 attachment types were added.
+ */
 export type ChatMessageType =
   | "text"
   | "image"
   | "video"
   | "audio"
   | "file"
+  | "document"
   | "location"
   | "system"
   | "event"
@@ -518,7 +527,14 @@ export type ChatMessageType =
   | "poll"
   | "kidnapping_info"
   | "tracking"
-  | "sos";
+  | "sos"
+  | "contact_share"
+  | "product_share"
+  | "event_share"
+  | "job_share"
+  | "post_share"
+  | "trip_share"
+  | "emergency_share";
 
 /** Rich metadata carried by non-text message types */
 export interface ChatMessageMeta {
@@ -526,20 +542,26 @@ export interface ChatMessageMeta {
   latitude?: number;
   longitude?: number;
   address?: string;
-  // event
+  /** Live location share duration, in minutes (15/60/480 presets, WhatsApp-style). Send-time only. */
+  durationMinutes?: number;
+  // event (legacy ad-hoc "event" type)
   eventId?: string;
   title?: string;
   time?: string;
-  // marketplace
+  // marketplace (legacy ad-hoc "marketplace" type)
   itemId?: string;
   price?: number;
-  // contact
+  // contact (legacy manual-entry "contact" type)
   name?: string;
   phone?: string;
-  // poll
+  // poll — real backing model (PollVote collection on the server)
   question?: string;
   options?: string[];
-  votes?: Record<string, string[]>; // optionIndex → userIds
+  /** Single-choice (default) vs multiple-choice poll. */
+  allowMultiple?: boolean;
+  /** Whether individual voters are hidden from other participants (default true). */
+  isAnonymous?: boolean;
+  votes?: Record<string, { count: number; userIds: string[] }>; // optionIndex → aggregate
   // kidnapping_info
   lastKnownLocation?: { latitude: number; longitude: number; address?: string };
   status?: string;
@@ -567,6 +589,39 @@ export interface ChatMessageMeta {
   proofUrl?: string | null;
   /** Coins awarded on completion. */
   reward?: number;
+
+  // ── Phase 2 rich-card shares — server snapshots these at send time ──
+  // contact_share: a real NeyborHuud user's profile shared as a card.
+  userId?: string;
+  username?: string;
+  avatarUrl?: string | null;
+  // product_share
+  productId?: string;
+  currency?: string;
+  thumbnail?: string | null;
+  // event_share
+  startDate?: string;
+  // job_share
+  jobId?: string;
+  type?: string;
+  workMode?: string;
+  salary?: { min?: number; max?: number; currency?: string; period?: string };
+  // post_share
+  postId?: string;
+  snippet?: string;
+  authorName?: string;
+  authorId?: string;
+  // trip_share
+  tripId?: string;
+  origin?: string;
+  destination?: string;
+  currentLocation?: { lat?: number; lng?: number; address?: string };
+  expectedArrival?: string;
+  // emergency_share
+  emergencyId?: string;
+  location?: { lat?: number; lng?: number; address?: string };
+  reportedAt?: string;
+
   [key: string]: unknown;
 }
 
@@ -587,7 +642,18 @@ export interface ChatMessage {
   type: ChatMessageType;
   mediaUrl?: string;
   thumbnailUrl?: string;
-  locationSnapshot?: { latitude: number; longitude: number; address?: string };
+  /** Document metadata (Phase 2 `type: "document"` shares). */
+  fileName?: string;
+  fileSize?: number;
+  locationSnapshot?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    isLive?: boolean;
+    expiresAt?: string;
+    stoppedAt?: string;
+    lastUpdatedAt?: string;
+  };
   /** Rich metadata for non-text message types */
   meta?: ChatMessageMeta;
   media?: MediaItem[];

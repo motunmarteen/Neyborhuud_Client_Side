@@ -110,3 +110,64 @@ describe('chatService.sendMessage replyTo (audit finding #6)', () => {
     );
   });
 });
+
+// ── Phase 2 attachment/sharing suite ──────────────────────────────────────
+
+describe('chatService.sendMessage — Phase 2 live location', () => {
+  beforeEach(() => {
+    postMock.mockClear();
+  });
+
+  it('passes isLive + durationMinutes through in locationSnapshot/meta', async () => {
+    await chatService.sendMessage({
+      conversationId: 'conv-1',
+      content: '📍 live',
+      type: 'location',
+      locationSnapshot: { latitude: 6.5, longitude: 3.3, isLive: true, durationMinutes: 60 },
+      meta: { durationMinutes: 60 },
+    });
+    expect(postMock).toHaveBeenCalledWith(
+      '/chat/send',
+      expect.objectContaining({
+        type: 'location',
+        locationSnapshot: expect.objectContaining({ isLive: true, durationMinutes: 60 }),
+      }),
+    );
+  });
+});
+
+describe('chatService.votePoll', () => {
+  beforeEach(() => {
+    postMock.mockClear();
+  });
+
+  it('posts a single optionIndex to the vote endpoint', async () => {
+    await chatService.votePoll('msg-1', { optionIndex: 2 });
+    expect(postMock).toHaveBeenCalledWith('/chat/messages/msg-1/vote', { optionIndex: 2 });
+  });
+
+  it('posts optionIndexes for multiple-choice polls', async () => {
+    await chatService.votePoll('msg-1', { optionIndexes: [0, 2] });
+    expect(postMock).toHaveBeenCalledWith('/chat/messages/msg-1/vote', { optionIndexes: [0, 2] });
+  });
+});
+
+describe('chatService live location updates', () => {
+  beforeEach(() => {
+    postMock.mockClear();
+  });
+
+  it('updateLiveLocation posts to the per-message location endpoint', async () => {
+    await chatService.updateLiveLocation('msg-1', { latitude: 6.5, longitude: 3.3, address: 'Ikeja' });
+    expect(postMock).toHaveBeenCalledWith('/chat/messages/msg-1/location', {
+      latitude: 6.5,
+      longitude: 3.3,
+      address: 'Ikeja',
+    });
+  });
+
+  it('stopLiveLocation posts to the stop endpoint with no body', async () => {
+    await chatService.stopLiveLocation('msg-1');
+    expect(postMock).toHaveBeenCalledWith('/chat/messages/msg-1/location/stop');
+  });
+});

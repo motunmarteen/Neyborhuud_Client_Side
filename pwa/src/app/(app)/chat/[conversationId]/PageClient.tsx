@@ -38,6 +38,7 @@ import { ChatComposer } from '@/components/chat/ChatComposer';
 import { useCall } from '@/components/calls/CallProvider';
 import { convAvatarMeta, convDisplayName, convSubtitle } from '@/lib/chatDisplay';
 import type { ActionResult } from '@/components/chat/ChatActionMenu';
+import { getGeolocation } from '@/lib/nativeGeolocation';
 import { unwrapApiData } from '@/lib/apiPayload';
 import { CommunityChatBanner } from '@/components/communities/CommunityChatBanner';
 import { isCommunityChat } from '@/lib/chatPaths';
@@ -1049,6 +1050,53 @@ export default function ConversationPage() {
       textareaRef.current?.focus();
     }
   };
+
+  // ── Live location sharing (casual, distinct from emergency Live Tracking) ──
+  // While the current user has an active, unexpired live-location message of
+  // their own in this conversation, watch their position and push periodic
+  // updates so the message updates in place for everyone else — mirroring
+  // how Safe Trips/Live Tracking already stream location, but scoped to a
+  // single chat message rather than a dedicated tracked session.
+  useEffect(() => {
+    const myLiveMessage = messages.find(
+      (m) =>
+        m.type === 'location' &&
+        m.senderId === user?.id &&
+        m.locationSnapshot?.isLive &&
+        !m.locationSnapshot?.stoppedAt &&
+        (!m.locationSnapshot?.expiresAt || new Date(m.locationSnapshot.expiresAt).getTime() > Date.now()),
+    );
+    if (!myLiveMessage) return;
+    const messageId = myLiveMessage.id || (myLiveMessage as any)._id;
+    if (!messageId) return;
+
+    const geo = getGeolocation();
+    if (!geo) return;
+
+    let cancelled = false;
+    const watchId = geo.watchPosition(
+      (pos) => {
+        if (cancelled) return;
+        chatService
+          .updateLiveLocation(messageId, {
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          })
+          .catch(() => {
+            // Silent — the share may have expired/stopped server-side
+            // between ticks; the socket event will reconcile the UI.
+          });
+      },
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 15000, timeout: 10000 },
+    );
+
+    return () => {
+      cancelled = true;
+      geo.clearWatch(watchId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, user?.id]);
 
   // ── Groups ────────────────────────────────────────────────────────────────
   const groups = groupByDate(messages, clientReady);

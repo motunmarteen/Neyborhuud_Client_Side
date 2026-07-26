@@ -22,19 +22,37 @@ import { toast } from 'sonner';
 import { ChatMessage, ChatMessageMeta, ChatMessageType } from '@/types/api';
 import VoiceRecorder from './VoiceRecorder';
 import { getGeolocation } from '@/lib/nativeGeolocation';
+import { useAuth } from '@/hooks/useAuth';
+import { useSearch } from '@/hooks/useSearch';
+import { useUserMarketplace, useMarketplaceProducts } from '@/hooks/useMarketplace';
+import { useUserJobs, useJobs } from '@/hooks/useJobs';
+import { useUserEvents, useEvents } from '@/hooks/useEvents';
+import { useUserPosts, usePosts } from '@/hooks/usePosts';
+import { useTripMonitor } from '@/hooks/useTripMonitor';
+import { safetyService } from '@/services/safety.service';
+import { formatNaira } from '@/lib/currency';
+import { SharePickerSheet, SharePickerSearchInput, type SharePickerItem } from './SharePickerSheet';
 
 // ─── MIME Whitelist (single source of truth for frontend validation) ──────────
+// "document" mirrors the backend's DOCUMENT_MIME_PREFIXES (chat.constants.ts)
+// — arbitrary files (PDF/Word/Excel/PowerPoint/zip/etc.) up to 50MB, a larger
+// cap than image/video/audio's 20MB (see the backend comment for the full
+// size-cap reasoning). Sent as `type: "document"`, rendered as a
+// filename+size+icon bubble with a tap-to-open/download link.
 export const ALLOWED_MIME: Record<string, string[]> = {
   image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
   video: ['video/mp4', 'video/webm'],
   audio: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4'],
-  file: [
+  document: [
     'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'application/zip',
+    'application/x-zip-compressed',
     'text/plain',
     'text/csv',
   ],
@@ -51,7 +69,13 @@ export interface ActionResult {
   mediaUrl?: string;
   mediaFile?: File; // raw file, caller uploads it
   meta?: ChatMessageMeta;
-  locationSnapshot?: { latitude: number; longitude: number; address?: string };
+  locationSnapshot?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    isLive?: boolean;
+    durationMinutes?: number;
+  };
   emergencyRef?: string;
   trackingSessionRef?: string;
 }
@@ -84,10 +108,23 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 }
 
 // ─── Location Modal ───────────────────────────────────────────────────────────
+// Supports both a one-shot static pin ("Send Location") and a WhatsApp-style
+// live location share for a chosen duration (15 min / 1 hour / 8 hours) —
+// the message then gets updated in place as the sender's position changes
+// (see PageClient.tsx's live-location watcher and the
+// updateLiveLocation/stopLiveLocation endpoints).
+const LIVE_DURATION_PRESETS = [
+  { label: '15 minutes', minutes: 15 },
+  { label: '1 hour', minutes: 60 },
+  { label: '8 hours', minutes: 8 * 60 },
+] as const;
+
 function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [loc, setLoc] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  const [mode, setMode] = useState<'static' | 'live'>('static');
+  const [duration, setDuration] = useState<number>(15);
 
   const detect = () => {
     setLoading(true);
@@ -109,10 +146,26 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
     );
   };
 
-  useEffect(() => { detect(); }, []);  
+  useEffect(() => { detect(); }, []);
 
   return (
     <Modal title="📍 Send Location" onClose={onClose}>
+      <div className="mb-3 flex gap-2 rounded-xl bg-black/20 p-1">
+        <button
+          type="button"
+          onClick={() => setMode('static')}
+          className={`flex-1 rounded-lg py-1.5 text-xs font-medium ${mode === 'static' ? 'bg-brand-blue text-white' : 'text-[var(--neu-text-muted)]'}`}
+        >
+          Current location
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('live')}
+          className={`flex-1 rounded-lg py-1.5 text-xs font-medium ${mode === 'live' ? 'bg-brand-blue text-white' : 'text-[var(--neu-text-muted)]'}`}
+        >
+          Share live location
+        </button>
+      </div>
       {loading && <p className="text-sm text-[var(--neu-text-muted)]">Detecting location…</p>}
       {error && <p className="text-sm text-brand-red">{error}</p>}
       {loc && (
@@ -126,17 +179,46 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
           />
         </div>
       )}
+      {mode === 'live' && (
+        <div className="mb-4">
+          <p className="mb-2 text-xs text-[var(--neu-text-muted)] opacity-70">Share for</p>
+          <div className="flex gap-2">
+            {LIVE_DURATION_PRESETS.map((p) => (
+              <button
+                key={p.minutes}
+                type="button"
+                onClick={() => setDuration(p.minutes)}
+                className={`flex-1 rounded-lg py-1.5 text-xs font-medium ${duration === p.minutes ? 'bg-brand-blue text-white' : 'bg-black/20 text-[var(--neu-text-muted)]'}`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-[10px] text-[var(--neu-text-muted)] opacity-60">
+            Your location updates in this chat until it expires or you stop sharing.
+          </p>
+        </div>
+      )}
       <button
         disabled={!loc || loading}
-        onClick={() => loc && onDone({
-          type: 'location',
-          content: `📍 ${loc.address}`,
-          locationSnapshot: { latitude: loc.lat, longitude: loc.lng, address: loc.address },
-          meta: { latitude: loc.lat, longitude: loc.lng, address: loc.address },
-        })}
+        onClick={() => loc && onDone(
+          mode === 'live'
+            ? {
+                type: 'location',
+                content: `📍 Live location · ${LIVE_DURATION_PRESETS.find((p) => p.minutes === duration)?.label ?? ''}`,
+                locationSnapshot: { latitude: loc.lat, longitude: loc.lng, address: loc.address, isLive: true, durationMinutes: duration },
+                meta: { latitude: loc.lat, longitude: loc.lng, address: loc.address, durationMinutes: duration },
+              }
+            : {
+                type: 'location',
+                content: `📍 ${loc.address}`,
+                locationSnapshot: { latitude: loc.lat, longitude: loc.lng, address: loc.address },
+                meta: { latitude: loc.lat, longitude: loc.lng, address: loc.address },
+              },
+        )}
         className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
       >
-        Send Location
+        {mode === 'live' ? 'Start Sharing Live Location' : 'Send Location'}
       </button>
       {error && <button onClick={detect} className="mt-2 w-full text-center text-xs text-brand-blue hover:underline">Retry</button>}
     </Modal>
@@ -144,9 +226,18 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
 }
 
 // ─── Poll Modal ───────────────────────────────────────────────────────────────
+// Real polls: single- or multiple-choice, with an anonymous-voting toggle.
+// Voting/results are backed by a real PollVote collection server-side (not
+// crammed into the immutable message content) — see chat.poll.controller.ts.
+// Default is anonymous:true (individual voters hidden from other
+// participants, only aggregate counts shown) since that's the lower-friction
+// default for casual group polls; a poll creator can opt into showing who
+// voted for what, mirroring Telegram's "Anonymous Voting" toggle (default on).
 function PollModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
+  const [allowMultiple, setAllowMultiple] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(true);
 
   const submit = () => {
     const q = question.trim();
@@ -155,7 +246,7 @@ function PollModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onC
     onDone({
       type: 'poll',
       content: `📊 Poll: ${q}`,
-      meta: { question: q, options: opts },
+      meta: { question: q, options: opts, allowMultiple, isAnonymous },
     });
   };
 
@@ -184,9 +275,17 @@ function PollModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onC
           </div>
         ))}
       </div>
-      {options.length < 6 && (
+      {options.length < 10 && (
         <button onClick={() => setOptions((prev) => [...prev, ''])} className="mb-3 text-xs text-brand-blue hover:underline">+ Add option</button>
       )}
+      <label className="mb-2 flex items-center gap-2 text-sm text-[var(--neu-text-muted)]">
+        <input type="checkbox" checked={allowMultiple} onChange={(e) => setAllowMultiple(e.target.checked)} className="accent-brand-blue" />
+        Allow multiple answers
+      </label>
+      <label className="mb-4 flex items-center gap-2 text-sm text-[var(--neu-text-muted)]">
+        <input type="checkbox" checked={isAnonymous} onChange={(e) => setIsAnonymous(e.target.checked)} className="accent-brand-blue" />
+        Anonymous voting
+      </label>
       <button
         disabled={!question.trim() || options.filter(Boolean).length < 2}
         onClick={submit}
@@ -198,23 +297,41 @@ function PollModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onC
   );
 }
 
-// ─── Contact Modal ────────────────────────────────────────────────────────────
-function ContactModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+// ─── Contact Card Modal ───────────────────────────────────────────────────────
+// Shares a REAL NeyborHuud user's profile as a contact card (type:
+// "contact_share") — distinct from the legacy manual name/phone-entry
+// "contact" type kept above for backward compatibility with old messages.
+// Backed by the real global user-search endpoint (useSearch(..., "users")),
+// not just the current user's follow list, so any NeyborHuud user can be
+// shared, not only people you already follow.
+function ContactShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
+  const { query, setQuery, results, loading } = useSearch('', 'users');
+  const users = results?.users?.data ?? [];
 
   return (
-    <Modal title="👤 Share Contact" onClose={onClose}>
-      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
-      <input className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Phone number" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} />
-      <button
-        disabled={!name.trim() || !phone.trim()}
-        onClick={() => onDone({ type: 'contact', content: `👤 ${name} · ${phone}`, meta: { name: name.trim(), phone: phone.trim() } })}
-        className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
-      >
-        Share Contact
-      </button>
-    </Modal>
+    <SharePickerSheet
+      title="👤 Share Contact"
+      emptyLabel={query ? 'No users found' : 'Search for a Neybor to share their profile'}
+      loading={loading}
+      items={users.map((u): SharePickerItem => ({
+        id: u._id,
+        title: [u.firstName, u.lastName].filter(Boolean).join(' ') || u.name || u.username,
+        subtitle: u.username ? `@${u.username}` : undefined,
+        thumbnail: u.avatarUrl ?? null,
+        icon: '👤',
+      }))}
+      onPick={(item) => {
+        const u = users.find((x) => x._id === item.id);
+        onDone({
+          type: 'contact_share',
+          content: `👤 ${item.title}`,
+          meta: { userId: item.id, name: item.title, username: u?.username, avatarUrl: item.thumbnail },
+        });
+      }}
+      onClose={onClose}
+    >
+      <SharePickerSearchInput value={query} onChange={setQuery} placeholder="Search by name or username…" />
+    </SharePickerSheet>
   );
 }
 
@@ -332,69 +449,300 @@ function KidnappingModal({ onDone, onClose }: { onDone: (r: ActionResult) => voi
   );
 }
 
-// ─── Event Modal ──────────────────────────────────────────────────────────────
-function EventModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
-  const [title, setTitle] = useState('');
-  const [time, setTime] = useState('');
-  const [eventId, setEventId] = useState('');
+// ─── Event Share Picker ───────────────────────────────────────────────────────
+// Real event picker (type: "event_share"): lists the user's own organized
+// events first (useUserEvents), falling back to a general browse list
+// (useEvents) if they haven't organized any. This is a first-class,
+// server-validated share (the backend re-fetches and snapshots the real
+// event by ID) rather than the old manual title/ID text-entry "event" type,
+// which is kept only for backward compatibility with already-sent messages.
+function EventShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
+  const { user } = useAuth();
+  const mine = useUserEvents(user?.id ?? null, 20);
+  const browse = useEvents();
+  const mineItems = (mine.data ?? []) as any[];
+  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => p?.data ?? p?.events ?? p ?? []) ?? []) as any[];
+  const items = mineItems.length > 0 ? mineItems : browseItems;
+  const loading = mine.isLoading || (mineItems.length === 0 && browse.isLoading);
 
   return (
-    <Modal title="📅 Share Event" onClose={onClose}>
-      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Event title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
-      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Event ID (optional)" value={eventId} onChange={(e) => setEventId(e.target.value)} maxLength={24} />
-      <input type="datetime-local" className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] focus:outline-none" value={time} onChange={(e) => setTime(e.target.value)} />
-      <button
-        disabled={!title.trim()}
-        onClick={() => onDone({ type: 'event', content: `📅 ${title}`, meta: { eventId: eventId.trim() || undefined, title: title.trim(), time: time || undefined } })}
-        className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
-      >
-        Share Event
-      </button>
+    <SharePickerSheet
+      title="📅 Share Event"
+      emptyLabel="No events to share yet"
+      loading={loading}
+      items={items.map((e): SharePickerItem => ({
+        id: e.id ?? e._id,
+        title: e.title,
+        subtitle: e.startDate ? new Date(e.startDate).toLocaleDateString('en-NG', { dateStyle: 'medium' }) : undefined,
+        thumbnail: e.coverImage ?? null,
+        icon: '📅',
+      }))}
+      onPick={(item) => {
+        const e = items.find((x) => (x.id ?? x._id) === item.id);
+        onDone({
+          type: 'event_share',
+          content: `📅 ${item.title}`,
+          meta: { eventId: item.id, title: item.title, startDate: e?.startDate, thumbnail: item.thumbnail },
+        });
+      }}
+      onClose={onClose}
+    />
+  );
+}
+
+// ─── Product Share Picker ─────────────────────────────────────────────────────
+// Real product picker (type: "product_share") — casually sharing/forwarding
+// a marketplace listing INTO an existing, unrelated conversation. Distinct
+// from "Message Seller" (which creates its own dedicated marketplace
+// conversation) — this is "hey look what I found", shared into any chat.
+function ProductShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
+  const { user } = useAuth();
+  const mine = useUserMarketplace(user?.id ?? null, 20);
+  const browse = useMarketplaceProducts();
+  const mineItems = (mine.data ?? []) as any[];
+  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => p?.data?.products ?? p?.products ?? p?.data ?? p ?? []) ?? []) as any[];
+  const items = mineItems.length > 0 ? mineItems : browseItems;
+  const loading = mine.isLoading || (mineItems.length === 0 && browse.isLoading);
+
+  return (
+    <SharePickerSheet
+      title="🛍️ Share Listing"
+      emptyLabel="No listings to share yet"
+      loading={loading}
+      items={items.map((p): SharePickerItem => ({
+        id: p.id ?? p._id,
+        title: p.title,
+        subtitle: typeof p.price === 'number' ? formatNaira(p.price) : undefined,
+        thumbnail: p.images?.[0] ?? null,
+        icon: '🛍️',
+      }))}
+      onPick={(item) => {
+        const p = items.find((x) => (x.id ?? x._id) === item.id);
+        onDone({
+          type: 'product_share',
+          content: `🛍️ ${item.title}`,
+          meta: { productId: item.id, title: item.title, price: p?.price, currency: p?.currency ?? 'NGN', thumbnail: item.thumbnail },
+        });
+      }}
+      onClose={onClose}
+    />
+  );
+}
+
+// ─── Job Share Picker ─────────────────────────────────────────────────────────
+function JobShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
+  const { user } = useAuth();
+  const mine = useUserJobs(user?.id ?? null, 20);
+  const browse = useJobs();
+  const mineItems = (mine.data ?? []) as any[];
+  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => p?.data ?? p?.jobs ?? p ?? []) ?? []) as any[];
+  const items = mineItems.length > 0 ? mineItems : browseItems;
+  const loading = mine.isLoading || (mineItems.length === 0 && browse.isLoading);
+
+  return (
+    <SharePickerSheet
+      title="💼 Share Job"
+      emptyLabel="No jobs to share yet"
+      loading={loading}
+      items={items.map((j): SharePickerItem => ({
+        id: j.id ?? j._id,
+        title: j.title,
+        subtitle: j.workMode ? j.workMode.replace('-', ' ') : undefined,
+        icon: '💼',
+      }))}
+      onPick={(item) => {
+        const j = items.find((x) => (x.id ?? x._id) === item.id);
+        onDone({
+          type: 'job_share',
+          content: `💼 ${item.title}`,
+          meta: { jobId: item.id, title: item.title, type: j?.type, workMode: j?.workMode, salary: j?.salary },
+        });
+      }}
+      onClose={onClose}
+    />
+  );
+}
+
+// ─── Post Share Picker ────────────────────────────────────────────────────────
+function PostShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
+  const { user } = useAuth();
+  const mine = useUserPosts(user?.id ?? null);
+  const browse = usePosts();
+  const mineItems = ((mine.data as any)?.pages?.flatMap((p: any) => p?.data ?? p?.posts ?? p ?? []) ?? []) as any[];
+  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => p?.data ?? p?.posts ?? p ?? []) ?? []) as any[];
+  const items = mineItems.length > 0 ? mineItems : browseItems;
+  const loading = mine.isLoading || (mineItems.length === 0 && browse.isLoading);
+
+  return (
+    <SharePickerSheet
+      title="📝 Share Post"
+      emptyLabel="No posts to share yet"
+      loading={loading}
+      items={items.map((p): SharePickerItem => ({
+        id: p.id ?? p._id,
+        title: (p.title || p.content || p.body || 'Post').slice(0, 80),
+        subtitle: p.author?.name ?? p.author?.username,
+        thumbnail: p.media?.[0]?.url ?? (typeof p.media?.[0] === 'string' ? p.media[0] : null),
+        icon: '📝',
+      }))}
+      onPick={(item) => {
+        const p = items.find((x) => (x.id ?? x._id) === item.id);
+        onDone({
+          type: 'post_share',
+          content: `📝 ${item.title}`,
+          meta: {
+            postId: item.id,
+            snippet: item.title,
+            thumbnail: item.thumbnail,
+            authorName: p?.author?.name ?? p?.author?.username,
+            authorId: p?.author?.id ?? p?.authorId,
+          },
+        });
+      }}
+      onClose={onClose}
+    />
+  );
+}
+
+// ─── Trip Share Modal (Safe Trips → casual "follow along" share) ─────────────
+// Shares the sender's CURRENTLY ACTIVE Safe Trip into this chat so a friend
+// can follow along without becoming a full Guardian. Deliberately only
+// offered when a real active trip exists (useTripMonitor) — there's nothing
+// to pick from otherwise.
+function TripShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
+  const { state } = useTripMonitor();
+  const trip = state.trip;
+  const hasActiveTrip = !!trip && (trip.status === 'active' || trip.status === 'escalated') && !(trip as any).pausedAt;
+
+  return (
+    <Modal title="🧭 Share Trip Status" onClose={onClose}>
+      {!hasActiveTrip ? (
+        <p className="text-sm text-[var(--neu-text-muted)]">You don&apos;t have an active Safe Trip right now. Start one from the Sentinel tab to share it here.</p>
+      ) : (
+        <>
+          <p className="mb-3 text-xs text-[var(--neu-text-muted)] opacity-70">
+            Shares your live trip status so this chat can follow along — they won&apos;t become a Guardian.
+          </p>
+          <div className="mb-4 rounded-xl bg-brand-black p-3 text-sm text-[var(--neu-text-muted)]">
+            <p className="font-medium">{(trip as any).originLocation?.address ?? 'Origin'} → {(trip as any).destinationLocation?.address ?? 'Destination'}</p>
+            <p className="mt-1 text-xs opacity-70">Status: {trip!.status}</p>
+          </div>
+          <button
+            onClick={() => onDone({
+              type: 'trip_share',
+              content: '🧭 Following my trip',
+              meta: { tripId: (trip as any)._id },
+            })}
+            className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85"
+          >
+            Share Trip Status
+          </button>
+        </>
+      )}
     </Modal>
   );
 }
 
-// ─── Marketplace Modal ────────────────────────────────────────────────────────
-function MarketplaceModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
-  const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
-  const [itemId, setItemId] = useState('');
+// ─── Emergency Report Share Modal ─────────────────────────────────────────────
+// Shares a summary of one of the sender's OWN past emergency reports —
+// distinct from the automatic incident-conversation mechanism (an active SOS
+// already creates its own protected conversation with Guardians; this is
+// purely a retrospective "here's what happened" summary share, e.g. telling
+// a friend about a report you filed earlier). Deliberately does NOT expose
+// an in-progress/active-SOS share path here, to avoid competing with or
+// diluting the real emergency flow.
+function EmergencyShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onClose: () => void }) {
+  const [loading, setLoading] = useState(true);
+  const [reports, setReports] = useState<any[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    safetyService.getRecentEmergencies(10).then((res: any) => {
+      if (!active) return;
+      setReports(res?.data?.emergencies ?? []);
+      setLoading(false);
+    }).catch(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   return (
-    <Modal title="🛒 Share Item" onClose={onClose}>
-      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Item title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
-      <input className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Item ID (optional)" value={itemId} onChange={(e) => setItemId(e.target.value)} maxLength={24} />
-      <input type="number" min="0" className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none" placeholder="Price (₦)" value={price} onChange={(e) => setPrice(e.target.value)} />
-      <button
-        disabled={!title.trim()}
-        onClick={() => onDone({ type: 'marketplace', content: `🛒 ${title}${price ? ` — ₦${price}` : ''}`, meta: { itemId: itemId.trim() || undefined, title: title.trim(), price: price ? Number(price) : undefined } })}
-        className="w-full rounded-xl bg-brand-blue py-2.5 text-sm font-medium text-white hover:bg-brand-blue/85 disabled:opacity-40"
-      >
-        Share Item
-      </button>
-    </Modal>
+    <SharePickerSheet
+      title="🚨 Share Emergency Report"
+      emptyLabel="You have no past emergency reports to share"
+      loading={loading}
+      items={reports.map((r): SharePickerItem => ({
+        id: r._id ?? r.id,
+        title: `${r.type ?? 'Emergency'} · ${r.severity ?? ''}`.trim(),
+        subtitle: r.createdAt ? new Date(r.createdAt).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' }) : undefined,
+        icon: '🚨',
+      }))}
+      onPick={(item) => {
+        onDone({
+          type: 'emergency_share',
+          content: '🚨 Shared an emergency report',
+          meta: { emergencyId: item.id },
+        });
+      }}
+      onClose={onClose}
+    />
   );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-type ActiveModal = 'location' | 'poll' | 'contact' | 'sos' | 'tracking' | 'kidnapping_info' | 'event' | 'marketplace' | 'voice' | null;
+type ActiveModal =
+  | 'location' | 'poll' | 'contact' | 'contact_share' | 'sos' | 'tracking' | 'kidnapping_info'
+  | 'event' | 'marketplace' | 'product_share' | 'event_share' | 'job_share' | 'post_share'
+  | 'trip_share' | 'emergency_share' | 'voice' | null;
 
-const MEDIA_ACTIONS = [
-  { key: 'image',  label: 'Image',    icon: '🖼️',  accept: acceptAttr('image') },
-  { key: 'video',  label: 'Video',    icon: '🎥',  accept: acceptAttr('video') },
-  { key: 'audio',  label: 'Audio',    icon: '🎵',  accept: acceptAttr('audio') },
-  { key: 'file',   label: 'Document', icon: '📄',  accept: acceptAttr('file') },
-] as const;
+// Media row: gallery picks (image/video/audio/document) plus a distinct
+// Camera tile. Camera and Image/Video both go through the SAME hidden file
+// input/upload pipeline — a PWA can't launch a genuinely separate native
+// camera surface without risky non-standard APIs, so "Camera" sets the
+// input's `capture` attribute (see openFilePicker) to hint the OS to open
+// the camera app directly instead of the gallery, which is what
+// `<input type="file" capture>` already does on every mobile browser that
+// supports it. This was verified: no existing camera-access code existed
+// before Phase 2 (grepped for `capture=` — zero matches), so this is new,
+// but intentionally reuses the existing upload pipeline rather than adding
+// getUserMedia()-based in-app camera capture, which would be redundant and
+// riskier in a PWA context for zero real UX gain over the native capture hint.
+const MEDIA_ACTIONS: {
+  key: 'camera' | 'image' | 'video' | 'audio' | 'document';
+  label: string;
+  icon: string;
+  accept: string;
+  capture?: 'environment';
+}[] = [
+  { key: 'camera',   label: 'Camera',   icon: '📷',  accept: acceptAttr('image'), capture: 'environment' },
+  { key: 'image',    label: 'Gallery',  icon: '🖼️',  accept: acceptAttr('image') },
+  { key: 'video',    label: 'Video',    icon: '🎥',  accept: acceptAttr('video') },
+  { key: 'audio',    label: 'Audio',    icon: '🎵',  accept: acceptAttr('audio') },
+  { key: 'document', label: 'Document', icon: '📄',  accept: acceptAttr('document') },
+];
 
+// "Share" row — forwarding real NeyborHuud content into this chat (contact
+// cards, listings, events, jobs, posts) — grouped separately from "Huud
+// context" safety/location tiles below, mirroring how Telegram/WhatsApp
+// separate "people & content" shares from location/safety-flavored actions.
+const SHARE_ACTIONS: { key: ActiveModal & string; label: string; icon: string; color: string }[] = [
+  { key: 'contact_share', label: 'Contact',     icon: '👤', color: 'bg-brand-blue' },
+  { key: 'product_share', label: 'Listing',     icon: '🛍️', color: 'bg-primary' },
+  { key: 'event_share',   label: 'Event',       icon: '📅', color: 'bg-brand-blue' },
+  { key: 'job_share',     label: 'Job',         icon: '💼', color: 'bg-brand-blue' },
+  { key: 'post_share',    label: 'Post',        icon: '📝', color: 'bg-brand-blue' },
+  { key: 'poll',          label: 'Poll',        icon: '📊', color: 'bg-brand-blue' },
+];
+
+// "Huud context" row — location + the safety-toolkit shares that genuinely
+// belong in chat (see the module doc comment at the bottom of this file for
+// the full reasoning on what safety features were and weren't added here).
 const CONTEXT_ACTIONS: { key: ActiveModal & string; label: string; icon: string; color: string }[] = [
-  { key: 'location',       label: 'Location',     icon: '📍', color: 'bg-brand-green-dark' },
-  { key: 'event',          label: 'Event',        icon: '📅', color: 'bg-brand-blue' },
-  { key: 'marketplace',    label: 'Marketplace',  icon: '🛒', color: 'bg-primary' },
-  { key: 'contact',        label: 'Contact',      icon: '👤', color: 'bg-brand-blue' },
-  { key: 'poll',           label: 'Poll',         icon: '📊', color: 'bg-brand-blue' },
-  { key: 'tracking',       label: 'Tracking',     icon: '📡', color: 'bg-brand-blue' },
-  { key: 'kidnapping_info',label: 'Kidnapping',   icon: '🚨', color: 'bg-brand-red' },
-  { key: 'sos',            label: 'Safety Alert',          icon: '🆘', color: 'bg-brand-red' },
+  { key: 'location',        label: 'Location',      icon: '📍', color: 'bg-brand-green-dark' },
+  { key: 'trip_share',       label: 'Trip Status',   icon: '🧭', color: 'bg-brand-green-dark' },
+  { key: 'emergency_share',  label: 'Emergency Report', icon: '🚨', color: 'bg-brand-red' },
+  { key: 'tracking',         label: 'Tracking',      icon: '📡', color: 'bg-brand-blue' },
+  { key: 'kidnapping_info',  label: 'Kidnapping',    icon: '🚨', color: 'bg-brand-red' },
+  { key: 'sos',              label: 'Safety Alert',  icon: '🆘', color: 'bg-brand-red' },
 ];
 
 export default function ChatActionMenu({ disabled, onAction }: Props) {
@@ -405,6 +753,7 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [pendingAccept, setPendingAccept] = useState('image/jpeg,image/png,image/webp,image/gif');
   const [pendingMediaKey, setPendingMediaKey] = useState<keyof typeof ALLOWED_MIME>('image');
+  const [pendingCapture, setPendingCapture] = useState<'environment' | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -433,9 +782,10 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  const openFilePicker = (key: keyof typeof ALLOWED_MIME, accept: string) => {
+  const openFilePicker = (key: keyof typeof ALLOWED_MIME, accept: string, capture?: 'environment') => {
     setPendingAccept(accept);
     setPendingMediaKey(key);
+    setPendingCapture(capture);
     setOpen(false);
     setTimeout(() => fileInputRef.current?.click(), 50);
   };
@@ -452,6 +802,10 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
       return;
     }
 
+    // "document" is sent as type: "document" (Phase 2, 50MB cap, distinct
+    // filename/size/icon rendering) — every other picked file keeps its
+    // existing type (image/video/audio), including the Camera tile, which
+    // uses the same "image" pipeline with a capture hint (see MEDIA_ACTIONS).
     onAction({
       type: pendingMediaKey as ChatMessageType,
       content: file.name,
@@ -466,25 +820,32 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
 
   return (
     <>
-      {/* Hidden file input */}
+      {/* Hidden file input. `capture` is only set when the Camera tile was
+          tapped — every mobile browser that supports the attribute opens the
+          native camera app directly instead of the gallery/file picker. */}
       <input
         ref={fileInputRef}
         type="file"
         accept={pendingAccept}
+        capture={pendingCapture}
         className="hidden"
         onChange={handleFileChange}
       />
 
       {/* Context action modals */}
-      {activeModal === 'location'        && <LocationModal    onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
-      {activeModal === 'poll'            && <PollModal        onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
-      {activeModal === 'contact'         && <ContactModal     onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
-      {activeModal === 'sos'             && <SOSModal         onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
-      {activeModal === 'tracking'        && <TrackingModal    onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
-      {activeModal === 'kidnapping_info' && <KidnappingModal  onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
-      {activeModal === 'event'           && <EventModal       onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
-      {activeModal === 'marketplace'     && <MarketplaceModal onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
-      {activeModal === 'voice'            && <VoiceRecorder    onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'location'        && <LocationModal      onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'poll'            && <PollModal          onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'contact_share'   && <ContactShareModal  onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'product_share'   && <ProductShareModal  onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'event_share'     && <EventShareModal    onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'job_share'       && <JobShareModal      onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'post_share'      && <PostShareModal     onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'trip_share'      && <TripShareModal     onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'emergency_share' && <EmergencyShareModal onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'sos'             && <SOSModal           onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'tracking'        && <TrackingModal      onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'kidnapping_info' && <KidnappingModal    onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'voice'           && <VoiceRecorder      onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
 
       <div className="relative" ref={menuRef}>
         <button
@@ -511,7 +872,7 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
                   className="chat-attach-sheet"
                   role="dialog"
                   aria-label="Attach or share"
-                  style={getPanelStyle(true, 360)}
+                  style={getPanelStyle(true, 480)}
                 >
                   <BottomSheetDragHandle handleProps={handleProps} className="pb-0 pt-1" />
                   <section className="chat-attach-section">
@@ -521,7 +882,11 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
                         <button
                           key={a.key}
                           type="button"
-                          onClick={() => openFilePicker(a.key as keyof typeof ALLOWED_MIME, a.accept)}
+                          onClick={() => openFilePicker(
+                            a.key === 'camera' ? 'image' : a.key,
+                            a.accept,
+                            a.capture,
+                          )}
                           className="chat-attach-tile mod-inset"
                         >
                           <span className="text-2xl" aria-hidden>{a.icon}</span>
@@ -539,6 +904,26 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
                         <span className="text-2xl" aria-hidden>🎤</span>
                         <span className="chat-attach-tile__label">Voice</span>
                       </button>
+                    </div>
+                  </section>
+                  <div className="mod-divider mx-4" />
+                  <section className="chat-attach-section">
+                    <p className="chat-attach-section__title">Share</p>
+                    <div className="chat-attach-grid">
+                      {SHARE_ACTIONS.map((a) => (
+                        <button
+                          key={a.key}
+                          type="button"
+                          onClick={() => {
+                            setOpen(false);
+                            setActiveModal(a.key as ActiveModal);
+                          }}
+                          className="chat-attach-tile mod-inset"
+                        >
+                          <span className="text-2xl" aria-hidden>{a.icon}</span>
+                          <span className="chat-attach-tile__label">{a.label}</span>
+                        </button>
+                      ))}
                     </div>
                   </section>
                   <div className="mod-divider mx-4" />
@@ -570,3 +955,44 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
     </>
   );
 }
+
+/**
+ * ── Safety-toolkit shares: what was built here, and what was deliberately
+ * skipped (item 10 of the Phase 2 spec) ──
+ *
+ * Built:
+ *  - Trip Status share ("trip_share") — a lightweight, casual "follow my
+ *    Safe Trip" share into ANY chat, letting a friend see status without
+ *    becoming a full Guardian. Only offered when the sender has a real
+ *    active trip (useTripMonitor) — nothing to fake if there isn't one.
+ *  - Emergency Report share ("emergency_share") — a retrospective summary
+ *    of one of the sender's OWN past emergency reports (type/severity/
+ *    status/location/timestamp), for telling a friend "here's what
+ *    happened" after the fact. Explicitly reuses the existing
+ *    GET /safety/emergency/history endpoint — no new backend list endpoint
+ *    needed.
+ *
+ * Deliberately skipped:
+ *  - "Share SOS" — NOT built. An active SOS already automatically creates
+ *    its own protected, priority incident conversation with all accepted
+ *    Guardians added and every message flagged emergency-priority (see
+ *    ChatService.createIncidentConversation). Adding a second, manual
+ *    "share my SOS into this other chat" action would create a redundant,
+ *    unprotected, un-prioritized copy of emergency context sitting in an
+ *    ordinary conversation — a genuine safety regression risk (someone
+ *    could see a stale/faked "SOS" card with none of the real incident
+ *    conversation's guarantees). The existing dedicated mechanism is
+ *    correct and should not be duplicated or competed with.
+ *  - Guardians / Safety Circle / Panic PIN / Fake Call / Wellness
+ *    Check-ins / Geofences / Sentinel red-zone alerts — none of these map
+ *    naturally onto "attach this into an arbitrary chat message". Guardian
+ *    and Circle relationships are already 1:1 invite flows with their own
+ *    UI; Panic PIN and Fake Call are deliberately private/disguised
+ *    features where being "shareable" would defeat their purpose; Wellness
+ *    Check-ins and Geofences are personal, ongoing configurations rather
+ *    than a one-off thing to forward into a conversation; a Sentinel
+ *    red-zone alert is a neighbourhood-wide advisory already broadcast to
+ *    everyone it's relevant to — forwarding it manually into a chat adds
+ *    nothing a screenshot/link wouldn't already do, and risks looking like
+ *    a personalized alert when it isn't.
+ */

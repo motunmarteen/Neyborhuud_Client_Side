@@ -132,7 +132,13 @@ export const chatService = {
     mediaUrl?: string;
     thumbnailUrl?: string;
     replyTo?: string;
-    locationSnapshot?: { latitude: number; longitude: number; address?: string };
+    locationSnapshot?: {
+      latitude: number;
+      longitude: number;
+      address?: string;
+      isLive?: boolean;
+      durationMinutes?: number;
+    };
     emergencyRef?: string;
     trackingSessionRef?: string;
     meta?: Record<string, any>;
@@ -190,14 +196,46 @@ export const chatService = {
 
   // ─── Media ──────────────────────────────────────────────────────────────
 
-  /** Upload a media file for use in a chat message. Returns mediaUrl + thumbnailUrl. */
+  /**
+   * Upload a media file for use in a chat message. Returns mediaUrl +
+   * thumbnailUrl. Also accepts documents (PDF/Word/Excel/zip/etc, up to
+   * 50MB — see the backend's CHAT_DOCUMENT_MAX_BYTES reasoning) — the
+   * response's `resourceType` comes back as "document" for those, along
+   * with `fileName`/`fileSize` so the composer can render a
+   * WhatsApp/Telegram-style file bubble without a second round-trip.
+   */
   async uploadChatMedia(file: File, onProgress?: (percent: number) => void) {
     return await apiClient.uploadFile<{
       url: string;
       mediaUrl?: string; // alias, may also be present
       thumbnailUrl?: string;
       mediaType: string;
+      resourceType?: string;
+      fileName?: string;
+      fileSize?: number;
     }>("/chat/upload", file, undefined, onProgress);
+  },
+
+  // ─── Poll voting (real backing model, live results) ────────────────────
+
+  /** Cast (or replace) a vote on a poll message. Single-choice: pass optionIndex. Multiple-choice: pass optionIndexes. */
+  async votePoll(messageId: string, vote: { optionIndex?: number; optionIndexes?: number[] }) {
+    return await apiClient.post<{ messageId: string; results: Record<string, { count: number; userIds: string[] }> }>(
+      `/chat/messages/${messageId}/vote`,
+      vote,
+    );
+  },
+
+  // ─── Live location sharing (casual, not the emergency Live Tracking feature) ──
+
+  /** Push a periodic location update for an in-progress live location share. */
+  async updateLiveLocation(messageId: string, location: { latitude: number; longitude: number; address?: string }) {
+    return await apiClient.post(`/chat/messages/${messageId}/location`, location);
+  },
+
+  /** Stop an in-progress live location share before its natural expiry. */
+  async stopLiveLocation(messageId: string) {
+    return await apiClient.post(`/chat/messages/${messageId}/location/stop`);
   },
 
   // ─── E2EE Key Bundle ────────────────────────────────────────────────────
