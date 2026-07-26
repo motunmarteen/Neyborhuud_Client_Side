@@ -63,6 +63,8 @@ interface CallContextValue {
   remoteStream: MediaStream | null;
   micEnabled: boolean;
   cameraEnabled: boolean;
+  /** Snapshot of the most recently ended call, kept around purely so the UI can offer "Call again" after hangup — cleared the moment a new call starts. */
+  lastCall: ActiveCall | null;
   startCall: (args: {
     peerId: string;
     peerName: string;
@@ -75,6 +77,8 @@ interface CallContextValue {
   hangup: () => void;
   toggleMic: () => void;
   toggleCamera: () => void;
+  /** Re-place a call to the same peer/type as the last one — convenience wrapper around startCall(). */
+  redial: () => Promise<void>;
 }
 
 const CallContext = createContext<CallContextValue | null>(null);
@@ -93,6 +97,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const phaseRef = useRef<CallPhase>('idle');
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   const [call, setCall] = useState<ActiveCall | null>(null);
+  const [lastCall, setLastCall] = useState<ActiveCall | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [micEnabled, setMicEnabled] = useState(true);
@@ -173,6 +178,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
     (nextPhase: CallPhase = 'ended') => {
       cleanup();
       setPhase(nextPhase);
+      // Remember who we just called/were called by so the UI can offer
+      // "Call again" — snapshotted here (not read later from `call`, which
+      // is about to be nulled) so it survives the idle reset below.
+      if (callRef.current) setLastCall(callRef.current);
       // Briefly show "ended", then reset to idle.
       window.setTimeout(() => {
         setPhase('idle');
@@ -287,6 +296,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       type: CallType;
     }) => {
       if (phase !== 'idle' || !myId) return;
+      setLastCall(null); // a fresh call is starting — stale "call again" info no longer applies
       // Provisional call object; real callId comes back on call:ringing.
       const provisional: ActiveCall = {
         callId: '',
@@ -541,11 +551,24 @@ export function CallProvider({ children }: { children: ReactNode }) {
     return () => navigator.serviceWorker.removeEventListener('message', onMessage);
   }, [acceptCall, rejectCall]);
 
+  const redial = useCallback(async () => {
+    const target = lastCall;
+    if (!target) return;
+    await startCall({
+      peerId: target.peerId,
+      peerName: target.peerName,
+      peerAvatar: target.peerAvatar,
+      conversationId: target.conversationId,
+      type: target.type,
+    });
+  }, [lastCall, startCall]);
+
   return (
     <CallContext.Provider
       value={{
         phase,
         call,
+        lastCall,
         localStream,
         remoteStream,
         micEnabled,
@@ -556,6 +579,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         hangup,
         toggleMic,
         toggleCamera,
+        redial,
       }}
     >
       {children}

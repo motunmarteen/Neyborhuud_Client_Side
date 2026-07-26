@@ -3,11 +3,24 @@
 /**
  * CallOverlay — full-screen UI for the active/incoming/outgoing call.
  * Reads everything from CallProvider via useCall(); renders nothing when idle.
+ *
+ * Design intent: rather than a small centered avatar on a flat background
+ * (the common pattern), the caller's photo fills the entire screen — shown
+ * crisp and full-bleed for audio calls, with a softly blurred, darkened copy
+ * of the same photo as an ambient backdrop behind the live video feed for
+ * video calls, so the screen never goes "empty" the way a plain black
+ * background does before the remote video starts flowing. Controls sit on a
+ * frosted-glass bar so they stay legible over any photo. A slide-up panel
+ * lets either side send a quick text message without leaving the call, and
+ * "Call again" appears for a few seconds after hangup so redialing a dropped
+ * or missed call is one tap, not a trip back into the conversation.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import Image from 'next/image';
 import { useCall } from './CallProvider';
+import { chatService } from '@/services/chat.service';
+import { toast } from 'sonner';
 
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -15,10 +28,42 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+/** Full-bleed portrait or a generated initials tile — used both as the crisp foreground and (blurred) as the ambient backdrop. */
+function PeerPortrait({
+  avatarUrl,
+  initials,
+  className,
+}: {
+  avatarUrl: string | null;
+  initials: string;
+  className?: string;
+}) {
+  if (avatarUrl) {
+    return (
+      <Image
+        src={avatarUrl}
+        alt=""
+        fill
+        sizes="100vw"
+        priority
+        className={`object-cover ${className ?? ''}`}
+      />
+    );
+  }
+  return (
+    <div
+      className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/70 via-primary/40 to-[#0a1a0f] text-[min(28vw,10rem)] font-black text-white/90 ${className ?? ''}`}
+    >
+      {initials || '👤'}
+    </div>
+  );
+}
+
 export function CallOverlay() {
   const {
     phase,
     call,
+    lastCall,
     localStream,
     remoteStream,
     micEnabled,
@@ -28,12 +73,19 @@ export function CallOverlay() {
     hangup,
     toggleMic,
     toggleCamera,
+    redial,
   } = useCall();
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [speakerOn, setSpeakerOn] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatDraft, setChatDraft] = useState('');
+  const [chatSending, setChatSending] = useState(false);
+  const [chatSentFlash, setChatSentFlash] = useState<string | null>(null);
+  const chatInputRef = useRef<HTMLInputElement | null>(null);
 
   // Bind streams to media elements. Because the media elements are ALWAYS
   // mounted (toggled with CSS, never conditionally rendered), the refs are
@@ -52,6 +104,15 @@ export function CallOverlay() {
     remoteAudioRef.current?.play?.().catch(() => {});
   }, [remoteStream]);
 
+  // Route audio to speaker vs. earpiece where the platform allows it
+  // (setSinkId is Chromium/Android-only — Safari/iOS silently no-ops, which
+  // is fine, it just means the toggle has no effect there rather than erroring).
+  useEffect(() => {
+    const el = remoteAudioRef.current as (HTMLAudioElement & { setSinkId?: (id: string) => Promise<void> }) | null;
+    if (!el?.setSinkId) return;
+    el.setSinkId(speakerOn ? 'default' : 'communications').catch(() => {});
+  }, [speakerOn]);
+
   // Call timer — runs while active.
   useEffect(() => {
     if (phase !== 'active') {
@@ -62,33 +123,68 @@ export function CallOverlay() {
     return () => window.clearInterval(t);
   }, [phase]);
 
-  if (phase === 'idle' || !call) return null;
+  // Reset transient UI state whenever we leave the "ended" screen.
+  useEffect(() => {
+    if (phase === 'idle') {
+      setChatOpen(false);
+      setChatDraft('');
+      setChatSentFlash(null);
+    }
+  }, [phase]);
 
-  const isVideo = call.type === 'video';
+  const showEndedRedial = phase === 'idle' && !!lastCall;
+  if ((phase === 'idle' || !call) && !showEndedRedial) return null;
+
+  const activeSubject = call ?? lastCall!;
+  const isVideo = activeSubject.type === 'video';
   const statusText =
     phase === 'incoming'
-      ? `Incoming ${call.type} call`
+      ? `Incoming ${activeSubject.type} call`
       : phase === 'outgoing'
         ? 'Calling…'
         : phase === 'connecting'
           ? 'Connecting…'
           : phase === 'active'
             ? formatDuration(elapsed)
-            : 'Call ended';
+            : showEndedRedial
+              ? 'Call ended'
+              : 'Call ended';
 
-  const initials = call.peerName
+  const initials = activeSubject.peerName
     .replace(/^@/, '')
     .slice(0, 2)
     .toUpperCase();
 
   // Show remote video only once it's flowing AND this is a video call.
   const showRemoteVideo = isVideo && phase === 'active' && !!remoteStream;
-  // The big avatar/initials placeholder shows for audio calls always, and for
-  // video calls until the remote video is actually flowing.
-  const showAvatar = !showRemoteVideo;
+
+  const handleSendChat = async (e: FormEvent) => {
+    e.preventDefault();
+    const text = chatDraft.trim();
+    if (!text || !activeSubject.conversationId || chatSending) return;
+    setChatSending(true);
+    try {
+      await chatService.sendMessage({ conversationId: activeSubject.conversationId, content: text });
+      setChatDraft('');
+      setChatSentFlash(text);
+      window.setTimeout(() => setChatSentFlash(null), 2200);
+      chatInputRef.current?.focus();
+    } catch {
+      toast.error('Message not sent — you’re still connected on the call.');
+    } finally {
+      setChatSending(false);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-[300] flex flex-col bg-[#0a1a0f] text-white">
+    <div className="fixed inset-0 z-[300] flex flex-col overflow-hidden bg-black text-white">
+      {/* Ambient backdrop: the peer's own photo, blurred and darkened, so the
+          screen is never a flat void while media negotiates or for audio calls. */}
+      <div className="absolute inset-0 scale-110">
+        <PeerPortrait avatarUrl={activeSubject.peerAvatar} initials={initials} className="blur-2xl brightness-[0.35] saturate-150" />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/80" />
+
       {/* Remote audio — ALWAYS mounted so audio (and audio of video calls)
           plays regardless of UI phase. */}
       <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
@@ -105,22 +201,15 @@ export function CallOverlay() {
         }`}
       />
 
-      {/* Avatar / initials placeholder (audio calls, and pre-connect video). */}
-      {showAvatar && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
-          {call.peerAvatar ? (
-            <Image
-              src={call.peerAvatar}
-              alt=""
-              width={128}
-              height={128}
-              className="h-32 w-32 rounded-full object-cover ring-4 ring-primary/40"
-            />
-          ) : (
-            <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/30 text-5xl font-black ring-4 ring-primary/40">
-              {initials || '👤'}
-            </div>
-          )}
+      {/* Crisp foreground portrait — audio calls always, video calls until the
+          remote feed is actually flowing. Deliberately large and full-bleed
+          rather than a small centered circle, so the person you're calling
+          is the whole screen, not a detail on it. */}
+      {!showRemoteVideo && (
+        <div className="absolute inset-0">
+          <PeerPortrait avatarUrl={activeSubject.peerAvatar} initials={initials} />
+          {/* Soften the top/bottom edges so header text and controls stay legible over any photo. */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/70" />
         </div>
       )}
 
@@ -131,15 +220,15 @@ export function CallOverlay() {
         autoPlay
         playsInline
         muted
-        className={`local-call-preview absolute right-4 top-4 z-10 h-40 w-28 rounded-2xl border-2 border-white/20 bg-black object-cover shadow-xl ${
+        className={`local-call-preview absolute right-4 top-16 z-10 h-40 w-28 rounded-2xl border-2 border-white/25 bg-black object-cover shadow-2xl ${
           isVideo && localStream ? '' : 'hidden'
         }`}
       />
 
       {/* Header: name + status */}
-      <div className="relative z-10 flex flex-col items-center gap-1 px-6 pt-12 text-center">
-        <h2 className="text-2xl font-black tracking-tight drop-shadow">{call.peerName}</h2>
-        <p className="flex items-center gap-2 text-sm font-medium text-white/80 drop-shadow">
+      <div className="relative z-10 flex flex-col items-center gap-1.5 px-6 pt-14 text-center">
+        <h2 className="text-[1.7rem] font-black tracking-tight drop-shadow-lg">{activeSubject.peerName}</h2>
+        <p className="flex items-center gap-2 text-sm font-semibold text-white/85 drop-shadow">
           {(phase === 'outgoing' || phase === 'connecting') && (
             <span className="material-symbols-outlined animate-pulse text-[1.1rem]" aria-hidden="true">
               {phase === 'connecting' ? 'sync' : 'call'}
@@ -151,6 +240,43 @@ export function CallOverlay() {
 
       <div className="flex-1" />
 
+      {/* In-call chat: a slide-up panel over the frosted control bar, not a
+          separate screen — sending a quick "2 mins away" shouldn't mean
+          leaving the call. */}
+      {chatOpen && phase !== 'incoming' && (
+        <div className="relative z-20 mx-4 mb-3 rounded-2xl border border-white/15 bg-black/55 p-3 backdrop-blur-xl">
+          {chatSentFlash ? (
+            <p className="px-1 py-1.5 text-sm text-white/80">
+              <span className="material-symbols-outlined mr-1 align-middle text-[1rem] text-primary" aria-hidden="true">
+                check_circle
+              </span>
+              Sent: “{chatSentFlash}”
+            </p>
+          ) : (
+            <form onSubmit={handleSendChat} className="flex items-center gap-2">
+              <input
+                ref={chatInputRef}
+                value={chatDraft}
+                onChange={(e) => setChatDraft(e.target.value)}
+                placeholder="Send a message without hanging up…"
+                maxLength={500}
+                className="min-w-0 flex-1 rounded-full bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 outline-none focus:bg-white/15"
+              />
+              <button
+                type="submit"
+                disabled={!chatDraft.trim() || chatSending}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-md transition-transform active:scale-95 disabled:opacity-40"
+                aria-label="Send message"
+              >
+                <span className="material-symbols-outlined text-[1.15rem]" aria-hidden="true">
+                  {chatSending ? 'hourglass_top' : 'send'}
+                </span>
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+
       {/* Controls */}
       <div className="relative z-10 flex flex-col items-center gap-6 px-6 pb-12">
         {phase === 'incoming' ? (
@@ -161,7 +287,7 @@ export function CallOverlay() {
               className="flex flex-col items-center gap-2"
               aria-label="Decline call"
             >
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-red text-white shadow-lg transition-transform active:scale-95">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-red text-white shadow-xl ring-4 ring-brand-red/20 transition-transform active:scale-95">
                 <span className="material-symbols-outlined text-[1.75rem]" aria-hidden="true">call_end</span>
               </span>
               <span className="text-xs font-semibold">Decline</span>
@@ -172,7 +298,7 @@ export function CallOverlay() {
               className="flex flex-col items-center gap-2"
               aria-label="Accept call"
             >
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform active:scale-95">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-xl ring-4 ring-primary/25 transition-transform active:scale-95">
                 <span className="material-symbols-outlined text-[1.75rem]" aria-hidden="true">
                   {isVideo ? 'videocam' : 'call'}
                 </span>
@@ -180,61 +306,114 @@ export function CallOverlay() {
               <span className="text-xs font-semibold">Accept</span>
             </button>
           </div>
-        ) : (
-          <div className="flex items-center justify-center gap-5">
-            {/* Mute */}
+        ) : showEndedRedial ? (
+          <div className="flex flex-col items-center gap-4">
             <button
-              onClick={toggleMic}
-              className="flex flex-col items-center gap-1.5"
-              aria-label={micEnabled ? 'Mute microphone' : 'Unmute microphone'}
+              onClick={() => void redial()}
+              className="flex items-center gap-2.5 rounded-full bg-primary px-7 py-3.5 text-sm font-bold text-white shadow-xl transition-transform active:scale-95"
             >
-              <span
-                className={`flex h-14 w-14 items-center justify-center rounded-full shadow-md transition-transform active:scale-95 ${
-                  micEnabled ? 'bg-white/15 text-white' : 'bg-white text-[#0a1a0f]'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[1.5rem]" aria-hidden="true">
-                  {micEnabled ? 'mic' : 'mic_off'}
-                </span>
+              <span className="material-symbols-outlined text-[1.2rem]" aria-hidden="true">
+                {isVideo ? 'videocam' : 'call'}
               </span>
-              <span className="text-[10px] font-medium text-white/70">
-                {micEnabled ? 'Mute' : 'Unmute'}
-              </span>
+              Call {activeSubject.peerName.replace(/^@/, '')} again
             </button>
-
-            {/* Camera toggle (video calls only) */}
-            {isVideo && (
+          </div>
+        ) : (
+          <div className="w-full max-w-sm rounded-[2rem] border border-white/10 bg-black/40 px-5 py-4 backdrop-blur-xl">
+            <div className="flex items-center justify-center gap-4">
+              {/* Mute */}
               <button
-                onClick={toggleCamera}
+                onClick={toggleMic}
                 className="flex flex-col items-center gap-1.5"
-                aria-label={cameraEnabled ? 'Turn camera off' : 'Turn camera on'}
+                aria-label={micEnabled ? 'Mute microphone' : 'Unmute microphone'}
               >
                 <span
                   className={`flex h-14 w-14 items-center justify-center rounded-full shadow-md transition-transform active:scale-95 ${
-                    cameraEnabled ? 'bg-white/15 text-white' : 'bg-white text-[#0a1a0f]'
+                    micEnabled ? 'bg-white/12 text-white' : 'bg-white text-[#0a1a0f]'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[1.5rem]" aria-hidden="true">
-                    {cameraEnabled ? 'videocam' : 'videocam_off'}
+                  <span className="material-symbols-outlined text-[1.4rem]" aria-hidden="true">
+                    {micEnabled ? 'mic' : 'mic_off'}
                   </span>
                 </span>
                 <span className="text-[10px] font-medium text-white/70">
-                  {cameraEnabled ? 'Camera' : 'Camera off'}
+                  {micEnabled ? 'Mute' : 'Unmute'}
                 </span>
               </button>
-            )}
 
-            {/* Hang up */}
-            <button
-              onClick={hangup}
-              className="flex flex-col items-center gap-1.5"
-              aria-label="End call"
-            >
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-red text-white shadow-lg transition-transform active:scale-95">
-                <span className="material-symbols-outlined text-[1.75rem]" aria-hidden="true">call_end</span>
-              </span>
-              <span className="text-[10px] font-medium text-white/70">End</span>
-            </button>
+              {/* Speaker toggle */}
+              <button
+                onClick={() => setSpeakerOn((s) => !s)}
+                className="flex flex-col items-center gap-1.5"
+                aria-label={speakerOn ? 'Switch to earpiece' : 'Switch to speaker'}
+              >
+                <span
+                  className={`flex h-14 w-14 items-center justify-center rounded-full shadow-md transition-transform active:scale-95 ${
+                    speakerOn ? 'bg-white text-[#0a1a0f]' : 'bg-white/12 text-white'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[1.4rem]" aria-hidden="true">
+                    {speakerOn ? 'volume_up' : 'hearing'}
+                  </span>
+                </span>
+                <span className="text-[10px] font-medium text-white/70">Speaker</span>
+              </button>
+
+              {/* Camera toggle (video calls only) */}
+              {isVideo && (
+                <button
+                  onClick={toggleCamera}
+                  className="flex flex-col items-center gap-1.5"
+                  aria-label={cameraEnabled ? 'Turn camera off' : 'Turn camera on'}
+                >
+                  <span
+                    className={`flex h-14 w-14 items-center justify-center rounded-full shadow-md transition-transform active:scale-95 ${
+                      cameraEnabled ? 'bg-white/12 text-white' : 'bg-white text-[#0a1a0f]'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[1.4rem]" aria-hidden="true">
+                      {cameraEnabled ? 'videocam' : 'videocam_off'}
+                    </span>
+                  </span>
+                  <span className="text-[10px] font-medium text-white/70">
+                    {cameraEnabled ? 'Camera' : 'Off'}
+                  </span>
+                </button>
+              )}
+
+              {/* In-call message */}
+              {activeSubject.conversationId && (
+                <button
+                  onClick={() => {
+                    setChatOpen((v) => !v);
+                    setChatSentFlash(null);
+                  }}
+                  className="flex flex-col items-center gap-1.5"
+                  aria-label={chatOpen ? 'Close message panel' : 'Send a message'}
+                >
+                  <span
+                    className={`flex h-14 w-14 items-center justify-center rounded-full shadow-md transition-transform active:scale-95 ${
+                      chatOpen ? 'bg-white text-[#0a1a0f]' : 'bg-white/12 text-white'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[1.4rem]" aria-hidden="true">chat</span>
+                  </span>
+                  <span className="text-[10px] font-medium text-white/70">Message</span>
+                </button>
+              )}
+
+              {/* Hang up */}
+              <button
+                onClick={hangup}
+                className="flex flex-col items-center gap-1.5"
+                aria-label="End call"
+              >
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-red text-white shadow-lg transition-transform active:scale-95">
+                  <span className="material-symbols-outlined text-[1.4rem]" aria-hidden="true">call_end</span>
+                </span>
+                <span className="text-[10px] font-medium text-white/70">End</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
