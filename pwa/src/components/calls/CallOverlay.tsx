@@ -230,6 +230,14 @@ export function CallOverlay() {
     // input, etc.) so tapping "End call" doesn't get misread as a swipe.
     const target = e.target as HTMLElement;
     if (target.closest('button, input, form')) return;
+    // Pin subsequent pointer events to this element regardless of where the
+    // finger physically moves — without this, a fast downward swipe on iOS
+    // Safari can have its pointermove events hijacked by native
+    // scroll/rubber-band behavior or delivered to whatever element the
+    // finger passes over instead of this one, making the swipe silently
+    // fail to register. The bubble's own drag handler already does this;
+    // the full-screen swipe surface previously didn't.
+    (e.target as Element).setPointerCapture?.(e.pointerId);
     swipeRef.current = { startY: e.clientY, dy: 0 };
   };
   const onSwipeMove = (e: ReactPointerEvent) => {
@@ -384,6 +392,13 @@ export function CallOverlay() {
     <div
       className="fixed inset-0 z-[300] flex flex-col overflow-hidden bg-black text-white"
       style={{
+        // touch-action: pan-x (not none) — the swipe surface is a large area
+        // with real interactive children (buttons, the chat input) that
+        // still need native tap/scroll handling; only downward pan gestures
+        // need to be claimed away from the browser's own scroll/rubber-band
+        // behavior, which is what actually caused the iOS Safari gesture
+        // reliability gap the bubble's drag handler didn't have.
+        touchAction: canMinimize ? 'pan-x' : undefined,
         transform: swipeDy ? `translateY(${swipeDy}px)` : undefined,
         opacity: swipeDy ? Math.max(1 - swipeDy / (SWIPE_DISMISS_PX * 2.5), 0.4) : undefined,
         transition: swipeDy ? 'none' : 'transform 0.2s ease, opacity 0.2s ease',

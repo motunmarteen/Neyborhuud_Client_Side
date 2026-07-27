@@ -13,7 +13,7 @@
  *  5. Tapping outside or pressing Escape closes everything
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { BottomSheetDragHandle } from '@/components/ui/BottomSheetDragHandle';
 import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
@@ -83,6 +83,12 @@ export interface ActionResult {
 interface Props {
   disabled?: boolean;
   onAction: (result: ActionResult) => void;
+}
+
+/** Imperative handle so the composer's own mic button can open the voice
+ * recorder directly, without needing the "+" attach menu open first. */
+export interface ChatActionMenuHandle {
+  openVoiceRecorder: () => void;
 }
 
 // ─── Small modal wrapper ──────────────────────────────────────────────────────
@@ -745,7 +751,7 @@ const CONTEXT_ACTIONS: { key: ActiveModal & string; label: string; icon: string;
   { key: 'sos',              label: 'Safety Alert',  icon: '🆘', color: 'bg-brand-red' },
 ];
 
-export default function ChatActionMenu({ disabled, onAction }: Props) {
+const ChatActionMenu = forwardRef<ChatActionMenuHandle, Props>(function ChatActionMenu({ disabled, onAction }, ref) {
   const [open, setOpen] = useState(false);
   const { handleProps, getPanelStyle, reset: resetSheetDrag } = useBottomSheetDrag({
     onDismiss: () => setOpen(false),
@@ -756,6 +762,13 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
   const [pendingCapture, setPendingCapture] = useState<'environment' | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    openVoiceRecorder: () => {
+      setOpen(false);
+      setActiveModal('voice');
+    },
+  }));
 
   useEffect(() => {
     if (open) resetSheetDrag();
@@ -954,7 +967,9 @@ export default function ChatActionMenu({ disabled, onAction }: Props) {
       </div>
     </>
   );
-}
+});
+
+export default ChatActionMenu;
 
 /**
  * ── Safety-toolkit shares: what was built here, and what was deliberately

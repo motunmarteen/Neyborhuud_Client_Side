@@ -266,6 +266,12 @@ class ApiClient {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      // The default 30s client timeout matched the backend's old global
+      // timeout 1:1 — both would give up around the same moment on a real
+      // multi-MB upload over a slow mobile connection, before Cloudinary's
+      // round-trip had a real chance to finish. The backend now allows 120s
+      // for upload routes specifically; match it here.
+      timeout: 120000,
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const progress = (progressEvent.loaded / progressEvent.total) * 100;
@@ -350,6 +356,7 @@ class ApiClient {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      timeout: 120000,
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const progress = (progressEvent.loaded / progressEvent.total) * 100;

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, type RefObject, KeyboardEvent } from 'react';
-import ChatActionMenu, { type ActionResult } from '@/components/chat/ChatActionMenu';
+import { useEffect, useRef, type RefObject, KeyboardEvent } from 'react';
+import ChatActionMenu, { type ActionResult, type ChatActionMenuHandle } from '@/components/chat/ChatActionMenu';
 
 export type ChatComposerProps = {
   inputText: string;
@@ -27,6 +27,7 @@ export function ChatComposer({
   recipientName,
 }: ChatComposerProps) {
   const canSend = Boolean(inputText.trim()) && !sending;
+  const actionMenuRef = useRef<ChatActionMenuHandle>(null);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -48,7 +49,7 @@ export function ChatComposer({
       ) : null}
 
       <div className="mx-auto flex w-full max-w-[600px] px-1 items-end gap-2">
-        <ChatActionMenu disabled={sending} onAction={onAction} />
+        <ChatActionMenu ref={actionMenuRef} disabled={sending} onAction={onAction} />
 
         <div className="relative flex flex-1 items-end bg-gray-100 rounded-[20px] rounded-br-[2px]">
           <textarea
@@ -90,8 +91,14 @@ export function ChatComposer({
 
         <button
           type="button"
-          onClick={canSend ? onSend : undefined}
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors mb-0.5 bg-slate-800 text-white hover:bg-slate-900 active:bg-black`}
+          // Previously did nothing at all when empty — the button rendered a
+          // mic icon labeled "Record voice message" but had no handler for
+          // that state, so tapping the obvious, WhatsApp-style mic button
+          // was a dead end. Now opens the same VoiceRecorder the "+" attach
+          // menu's "Voice" tile uses, via ChatActionMenu's imperative handle.
+          onClick={canSend ? onSend : () => actionMenuRef.current?.openVoiceRecorder()}
+          disabled={sending && !canSend}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors mb-0.5 bg-slate-800 text-white hover:bg-slate-900 active:bg-black disabled:opacity-50`}
           aria-label={canSend ? "Send message" : "Record voice message"}
         >
           {sending ? (
