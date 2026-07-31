@@ -17,20 +17,30 @@ import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageS
 
 // ─── Per-listing pending offer badge ─────────────────────────────────────────
 
+// Offers are acted on in the deal chat, never in a separate list — this badge
+// only counts them and routes into the thread (the newest one when there are
+// several, since each offer is its own conversation).
 function PendingOffersBadge({ product }: { product: Product }) {
   const router = useRouter();
   const productId = (product as any)._id ?? product.id;
   const { data } = useProductOffers(productId, "pending");
-  const count = data?.offers?.length ?? 0;
+  const offers = data?.offers ?? [];
+  const count = offers.length;
 
   if (count === 0) return null;
+
+  const targetConversation = offers.find((o) => o.conversationId)?.conversationId;
 
   return (
     <button
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        router.push(`/marketplace/${productId}/offers`);
+        if (targetConversation) {
+          router.push(`/chat/${targetConversation}`);
+        } else {
+          router.push("/marketplace/my-deals");
+        }
       }}
       className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-status-warning hover:bg-primary/30 transition-colors"
     >

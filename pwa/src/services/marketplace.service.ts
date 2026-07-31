@@ -650,10 +650,12 @@ export const marketplaceService = {
   },
 
   /**
-   * Update order status
+   * Cancel or reject an order BEFORE any payment is attested. The server
+   * rejects every other transition here — payment and delivery steps go
+   * through the deal chain below.
    * PATCH /api/v1/marketplace/orders/:orderId/status
    */
-  async updateOrderStatus(orderId: string, status: string) {
+  async cancelOrder(orderId: string, status: "cancelled" | "rejected" = "cancelled") {
     return await apiClient.patch(`/marketplace/orders/${orderId}/status`, {
       status,
     });
@@ -671,12 +673,41 @@ export const marketplaceService = {
   },
 
   /**
-   * Confirm receipt (seller confirms payment received)
+   * Confirm receipt of payment (seller). Advances the order to "paid" — the
+   * deal is NOT complete until the buyer confirms delivery.
    * POST /api/v1/marketplace/orders/:orderId/confirm-receipt
    */
   async confirmReceipt(orderId: string) {
     return await apiClient.post(
       `/marketplace/orders/${orderId}/confirm-receipt`,
+    );
+  },
+
+  /**
+   * Seller marks the item shipped / handed over ("paid" → "in_transit").
+   * POST /api/v1/marketplace/orders/:orderId/mark-shipped
+   */
+  async markShipped(
+    orderId: string,
+    details?: {
+      trackingNumber?: string;
+      deliveryMethod?: "pickup" | "delivery" | "shipping";
+      estimatedDeliveryDate?: string;
+    },
+  ) {
+    return await apiClient.post(
+      `/marketplace/orders/${orderId}/mark-shipped`,
+      details ?? {},
+    );
+  },
+
+  /**
+   * Buyer confirms they physically received the item — completes the deal.
+   * POST /api/v1/marketplace/orders/:orderId/confirm-delivery
+   */
+  async confirmDelivery(orderId: string) {
+    return await apiClient.post(
+      `/marketplace/orders/${orderId}/confirm-delivery`,
     );
   },
 };

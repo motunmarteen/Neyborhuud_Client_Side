@@ -13,7 +13,6 @@ import { useRef } from "react";
 import { marketplaceService, Product } from "@/services/marketplace.service";
 import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "sonner";
-import { getOfferToast, type OfferRole } from "@/lib/marketplaceMessages";
 import { useAwardCoins } from "@/hooks/useGamification";
 import { useMarketplaceOfflineQueue } from "@/hooks/useMarketplaceOfflineQueue";
 
@@ -653,8 +652,8 @@ export function useMakeOffer(productId: string) {
   const awardCoins = useAwardCoins();
 
   return useMutation({
-    mutationFn: (amount: number) =>
-      marketplaceService.makeOffer(productId, amount),
+    mutationFn: ({ amount, message }: { amount: number; message?: string }) =>
+      marketplaceService.makeOffer(productId, amount, message),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["marketplace", "product", productId],
@@ -672,106 +671,17 @@ export function useMakeOffer(productId: string) {
   });
 }
 
-/**
- * Hook for responding to an offer.
- * In the current product, only the seller invokes this hook (the seller
- * accepts, rejects, or counters a buyer's offer). `viewerRole` defaults to
- * `'seller'` for that reason — pass `'buyer'` explicitly if a future flow
- * lets buyers respond directly.
- */
-export function useRespondToOffer(
-  offerId: string,
-  viewerRole: OfferRole = "seller",
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      action,
-      counterAmount,
-    }: {
-      action: "accept" | "reject" | "counter";
-      counterAmount?: number;
-    }) => marketplaceService.respondToOffer(offerId, action, counterAmount),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["marketplace", "offers"] });
-      queryClient.invalidateQueries({
-        queryKey: ["marketplace", "offer", offerId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["marketplace", "product-offers"],
-      });
-
-      const amount = variables.counterAmount ?? 0;
-      toast.success(
-        getOfferToast(
-          { action: variables.action, amount, actorRole: viewerRole },
-          viewerRole,
-        ),
-      );
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error) || "Failed to respond to offer");
-    },
-  });
-}
-
-/**
- * Hook for accepting an offer via the shorthand endpoint (no body needed).
- * Always invoked by the seller in the current product.
- */
-export function useAcceptOffer(viewerRole: OfferRole = "seller") {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (offerId: string) => marketplaceService.acceptOffer(offerId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["marketplace", "offers"] });
-      queryClient.invalidateQueries({
-        queryKey: ["marketplace", "product-offers"],
-      });
-      toast.success(
-        getOfferToast(
-          { action: "accept", amount: 0, actorRole: viewerRole },
-          viewerRole,
-        ),
-      );
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error) || "Failed to accept offer");
-    },
-  });
-}
-
-/**
- * Hook for rejecting an offer via the shorthand endpoint (no body needed).
- * Always invoked by the seller in the current product.
- */
-export function useRejectOffer(viewerRole: OfferRole = "seller") {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (offerId: string) => marketplaceService.rejectOffer(offerId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["marketplace", "offers"] });
-      queryClient.invalidateQueries({
-        queryKey: ["marketplace", "product-offers"],
-      });
-      toast.success(
-        getOfferToast(
-          { action: "reject", amount: 0, actorRole: viewerRole },
-          viewerRole,
-        ),
-      );
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error) || "Failed to reject offer");
-    },
-  });
-}
+// NOTE: useAcceptOffer / useRejectOffer / useRespondToOffer used to live here,
+// backing a separate "Product Offers" page and an inline chat action bar. Both
+// were a second code path for acting on offers alongside the in-chat OfferCard
+// — a real source of desync. Offers are now actioned ONLY from the chat card,
+// which calls marketplaceService directly, so these hooks were removed rather
+// than left as a tempting second door.
 
 /**
  * Hook for fetching all offers on a specific product (seller view).
+ * Read-only: powers pending-offer COUNTS/badges. Acting on an offer happens in
+ * the deal chat.
  * GET /api/v1/marketplace/products/:productId/offers
  */
 export function useProductOffers(productId: string | null, status?: string) {
@@ -869,69 +779,34 @@ export function useOffer(offerId: string | null) {
 }
 
 /**
- * Hook for updating order status
+ * Hook for cancelling/rejecting an order before any payment is attested. The
+ * server refuses every other transition on this endpoint — the payment and
+ * delivery steps run through the deal chain in chat.
  */
-export function useUpdateOrderStatus(orderId: string) {
+export function useCancelOrder(orderId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (status: string) =>
-      marketplaceService.updateOrderStatus(orderId, status),
+    mutationFn: (status: "cancelled" | "rejected" = "cancelled") =>
+      marketplaceService.cancelOrder(orderId, status),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["marketplace", "order", orderId],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["marketplace", "orders"],
-      });
-      toast.success("Order status updated!");
+      queryClient.invalidateQueries({ queryKey: ["marketplace", "my-deals"] });
+      toast.success("Order cancelled.");
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error) || "Failed to update order status");
+      toast.error(getErrorMessage(error) || "Failed to cancel order");
     },
   });
 }
 
-/**
- * Hook for confirming payment (buyer)
- */
-export function useConfirmPayment(orderId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (proofUrl: string) =>
-      marketplaceService.confirmPayment(orderId, proofUrl),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["marketplace", "order", orderId],
-      });
-      toast.success("Payment proof uploaded!");
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error) || "Failed to upload payment proof");
-    },
-  });
-}
-
-/**
- * Hook for confirming receipt (seller)
- */
-export function useConfirmReceipt(orderId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => marketplaceService.confirmReceipt(orderId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["marketplace", "order", orderId],
-      });
-      toast.success("Payment confirmed!");
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error) || "Failed to confirm payment");
-    },
-  });
-}
+// NOTE: the deal-chain actions (confirm payment / receipt / shipped /
+// delivery) are driven from DealStatusCard, which calls marketplaceService
+// directly through useChatCardAction — see the note above on the removed offer
+// mutation hooks. Duplicating them as React Query mutations here would
+// recreate exactly the two-code-paths problem this rebuild removed.
 
 /**
  * Hook for boosting a marketplace listing with HuudCoins.

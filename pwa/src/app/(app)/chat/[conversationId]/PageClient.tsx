@@ -21,7 +21,7 @@ import { normalizeChatId } from '@/lib/chatMessage';
 import { useAuth } from '@/hooks/useAuth';
 import { chatService } from '@/services/chat.service';
 import { e2eeService } from '@/services/e2ee.service';
-import { ChatMessage, ChatMessageType, Conversation, MarketplaceOffer } from '@/types/api';
+import { ChatMessage, ChatMessageType, Conversation } from '@/types/api';
 import socketService from '@/lib/socket';
 import { toast } from 'sonner';
 import ChatMessageCard from '@/components/chat/ChatMessageCard';
@@ -43,9 +43,8 @@ import { getGeolocation } from '@/lib/nativeGeolocation';
 import { unwrapApiData } from '@/lib/apiPayload';
 import { CommunityChatBanner } from '@/components/communities/CommunityChatBanner';
 import { isCommunityChat } from '@/lib/chatPaths';
-import { useProductOffers, useAcceptOffer, useRejectOffer, useRespondToOffer, useProduct } from '@/hooks/useMarketplace';
+import { useProduct } from '@/hooks/useMarketplace';
 import {
-  formatNGN,
   getOfferPillClass,
   getOfferSystemMessage,
   getOfferToast,
@@ -205,190 +204,6 @@ function KeyBundlePanel({ conversationId, onClose }: KeyBundlePanelProps) {
               </div>
             </div>
           ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Inline Offer Action Bar (seller view) ───────────────────────────────────
-//
-// Shown inside a marketplace chat thread when the current user is the seller
-// and there is at least one pending offer. Fetching product offers with a
-// 403 response means the viewer is the buyer — the bar is simply not rendered.
-
-interface InlineOfferBarProps {
-  productId: string;
-  currentUserId?: string;
-  onActionComplete?: () => void;
-}
-
-function InlineOfferBar({ productId, currentUserId, onActionComplete }: InlineOfferBarProps) {
-  const router = useRouter();
-  const [showCounter, setShowCounter] = useState(false);
-  const [counterAmount, setCounterAmount] = useState('');
-
-  // This component only renders when viewerRole === 'seller' (guarded by parent),
-  // so we always fetch pending offers — no isMaybeSeller heuristic needed.
-  const { data } = useProductOffers(productId, 'pending');
-  const pendingOffers: MarketplaceOffer[] = data?.offers ?? [];
-
-  // Nothing to show if no pending offers or if fetch returned nothing (buyer / no access)
-  if (pendingOffers.length === 0) return null;
-
-  // Show action bar for the most-recent pending offer
-  const latestOffer = pendingOffers[pendingOffers.length - 1];
-  const offerId = latestOffer._id ?? latestOffer.id;
-
-  return (
-    <OfferActionBar
-      offer={latestOffer}
-      offerId={offerId}
-      pendingCount={pendingOffers.length}
-      productId={productId}
-      showCounter={showCounter}
-      setShowCounter={setShowCounter}
-      counterAmount={counterAmount}
-      setCounterAmount={setCounterAmount}
-      router={router}
-      onActionComplete={onActionComplete}
-    />
-  );
-}
-
-interface OfferActionBarProps {
-  offer: MarketplaceOffer;
-  offerId: string;
-  pendingCount: number;
-  productId: string;
-  showCounter: boolean;
-  setShowCounter: (v: boolean) => void;
-  counterAmount: string;
-  setCounterAmount: (v: string) => void;
-  router: ReturnType<typeof useRouter>;
-  onActionComplete?: () => void;
-}
-
-function OfferActionBar({
-  offer,
-  offerId,
-  pendingCount,
-  productId,
-  showCounter,
-  setShowCounter,
-  counterAmount,
-  setCounterAmount,
-  router,
-  onActionComplete,
-}: OfferActionBarProps) {
-  const accept  = useAcceptOffer();
-  const reject  = useRejectOffer();
-  const respond = useRespondToOffer(offerId);
-
-  const handleAccept = async () => {
-    try {
-      await accept.mutateAsync(offerId);
-    } finally {
-      onActionComplete?.();
-    }
-  };
-  const handleReject = async () => {
-    try {
-      await reject.mutateAsync(offerId);
-    } finally {
-      onActionComplete?.();
-    }
-  };
-
-  const handleCounter = async () => {
-    const amount = parseFloat(counterAmount);
-    if (isNaN(amount) || amount <= 0) return;
-    try {
-      await respond.mutateAsync({ action: 'counter', counterAmount: amount });
-    } finally {
-      setShowCounter(false);
-      setCounterAmount('');
-      onActionComplete?.();
-    }
-  };
-
-  const buyer = offer.buyer as any;
-  const buyerName =
-    buyer?.firstName && buyer?.lastName
-      ? `${buyer.firstName} ${buyer.lastName}`
-      : buyer?.username ?? 'Buyer';
-
-  return (
-    <div className="shrink-0 border-b border-status-warning/20 bg-status-warning/10 px-4 py-3">
-      <div className="flex items-center justify-between gap-3 mb-2">
-        <p className="text-xs font-semibold text-white/90">
-          You received an offer of {formatNGN(offer.offerAmount)} from {buyerName}.
-          {offer.counterOfferAmount != null && (
-            <span className="ml-2 text-status-info">
-              You countered with {formatNGN(offer.counterOfferAmount)}.
-            </span>
-          )}
-        </p>
-        {pendingCount > 1 && (
-          <button
-            onClick={() => router.push(`/marketplace/${productId}/offers`)}
-            className="shrink-0 rounded-full bg-status-warning/30 px-2 py-0.5 text-[10px] font-semibold text-white/90 hover:bg-status-warning/45 transition-colors"
-          >
-            +{pendingCount - 1} more
-          </button>
-        )}
-      </div>
-
-      {!showCounter ? (
-        <div className="flex gap-2">
-          <button
-            onClick={handleAccept}
-            disabled={accept.isPending || reject.isPending}
-            className="flex-1 rounded-full bg-brand-green-dark py-1.5 text-xs font-semibold text-white hover:bg-brand-green-dark disabled:opacity-50 transition-colors"
-          >
-            {accept.isPending ? '…' : 'Accept'}
-          </button>
-          <button
-            onClick={() => setShowCounter(true)}
-            className="flex-1 rounded-full bg-brand-blue py-1.5 text-xs font-semibold text-white hover:bg-brand-blue transition-colors"
-          >
-            Counter
-          </button>
-          <button
-            onClick={handleReject}
-            disabled={reject.isPending || accept.isPending}
-            className="flex-1 rounded-full bg-brand-red py-1.5 text-xs font-semibold text-white hover:bg-brand-red/85 disabled:opacity-50 transition-colors"
-          >
-            {reject.isPending ? '…' : 'Decline'}
-          </button>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[var(--neu-text-muted)]">₦</span>
-            <input
-              type="number"
-              value={counterAmount}
-              onChange={(e) => setCounterAmount(e.target.value)}
-              placeholder="Counter amount"
-              min="0"
-              step="1000"
-              className="w-full rounded-lg border border-black/[0.08] bg-brand-black py-1.5 pl-5 pr-2 text-xs text-white focus:border-brand-blue focus:outline-none"
-            />
-          </div>
-          <button
-            onClick={() => { setShowCounter(false); setCounterAmount(''); }}
-            className="rounded-full bg-brand-black px-3 py-1.5 text-xs font-semibold hover:bg-brand-surface transition-colors"
-          >
-            ✕
-          </button>
-          <button
-            onClick={handleCounter}
-            disabled={respond.isPending || !counterAmount}
-            className="rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/85 disabled:opacity-50 transition-colors"
-          >
-            {respond.isPending ? '…' : 'Send'}
-          </button>
         </div>
       )}
     </div>
@@ -803,8 +618,9 @@ export default function ConversationPage() {
 
     const onOfferUpdated = (payload: any) => {
       if (payload?.conversationId && payload.conversationId !== conversationId) return;
-      // Refresh any offer-related queries so InlineOfferBar / OfferActionBar
-      // reflect the new status (accepted / rejected / countered) instantly.
+      // Refresh the offer-count queries (my-listings badge) so they reflect
+      // the new status instantly. The in-chat cards advance off the system
+      // message the server posts alongside this event.
       queryClient.invalidateQueries({ queryKey: ['marketplace', 'offers'] });
       queryClient.invalidateQueries({ queryKey: ['marketplace', 'product-offers'] });
       if (payload?.offerId) {
@@ -1227,13 +1043,6 @@ export default function ConversationPage() {
         conversationId={conversationId}
       />
 
-      {conv?.contextType === 'marketplace' && conv.context?.productId && viewerRole === 'seller' ? (
-        <InlineOfferBar
-          productId={conv.context.productId}
-          currentUserId={user?.id}
-          onActionComplete={loadMessages}
-        />
-      ) : null}
     </>
   );
 

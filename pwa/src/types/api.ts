@@ -544,6 +544,8 @@ export interface ChatMessageMeta {
   address?: string;
   /** Live location share duration, in minutes (15/60/480 presets, WhatsApp-style). Send-time only. */
   durationMinutes?: number;
+  /** Set by the server when the live location card was auto-created by an active SOS. */
+  incidentLive?: boolean;
   // event (legacy ad-hoc "event" type)
   eventId?: string;
   title?: string;
@@ -570,7 +572,7 @@ export interface ChatMessageMeta {
   // sos
   severity?: string;
   // offer events
-  offerAction?: "new" | "accept" | "reject" | "counter" | "withdrawn";
+  offerAction?: "new" | "accept" | "reject" | "counter" | "withdrawn" | "expired";
   actorRole?: "buyer" | "seller";
   offerAmount?: number;
   counterAmount?: number | null;
@@ -578,8 +580,20 @@ export interface ChatMessageMeta {
   /** Optional note the buyer attached when placing the offer. */
   message?: string;
   // ── Plain marketplace deal-status updates ──
-  /** The deal stage this message represents. */
-  dealAction?: "started" | "paid" | "completed" | "cancelled";
+  /**
+   * The deal stage this message represents. Mirrors the Order status chain in
+   * NeyborHuud-ServerSide's marketplace.controller.ts:
+   *   accepted → paid → paid_confirmed → shipped → completed
+   * "started" is the legacy pre-countdown card, kept so old threads still render.
+   */
+  dealAction?:
+    | "started"
+    | "accepted"
+    | "paid"
+    | "paid_confirmed"
+    | "shipped"
+    | "completed"
+    | "cancelled";
   /** Order id this deal belongs to (used to drive the action buttons). */
   orderId?: string;
   amount?: number;
@@ -589,6 +603,21 @@ export interface ChatMessageMeta {
   proofUrl?: string | null;
   /** Coins awarded on completion. */
   reward?: number;
+  /** ISO deadline for the buyer to attest payment (dealAction: "accepted"). */
+  paymentWindowExpiresAt?: string;
+  paymentWindowMinutes?: number;
+  /** Seller's bank details, inlined on the "accepted" card so the buyer sees
+   * where to pay in the same chat turn the deal is agreed. */
+  payoutDetails?: {
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+  } | null;
+  /** Set on the "shipped" card when the seller supplied one. */
+  trackingNumber?: string;
+  deliveryMethod?: "pickup" | "delivery" | "shipping";
+  /** Why an order was cancelled, e.g. "payment_window_expired". */
+  cancelReason?: string;
 
   // ── Phase 2 rich-card shares — server snapshots these at send time ──
   // contact_share: a real NeyborHuud user's profile shared as a card.
