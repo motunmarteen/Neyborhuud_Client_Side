@@ -573,7 +573,8 @@ export interface ChatMessageMeta {
   severity?: string;
   // offer events
   offerAction?: "new" | "accept" | "reject" | "counter" | "withdrawn" | "expired";
-  actorRole?: "buyer" | "seller";
+  /** Widened for the service-booking negotiation card, which uses client/provider. */
+  actorRole?: "buyer" | "seller" | "client" | "provider";
   offerAmount?: number;
   counterAmount?: number | null;
   offerId?: string;
@@ -618,6 +619,30 @@ export interface ChatMessageMeta {
   deliveryMethod?: "pickup" | "delivery" | "shipping";
   /** Why an order was cancelled, e.g. "payment_window_expired". */
   cancelReason?: string;
+  /** "service" on a booking-sourced deal card — DealStatusCard reads this to
+   * show serviceTitle/scheduledAt instead of assuming a marketplace product. */
+  dealKind?: "marketplace" | "service";
+  serviceTitle?: string;
+  /** ISO appointment time, set once a booking is accepted into an Order. */
+  scheduledAt?: string;
+
+  // ── Service booking negotiation card (date/time haggle, mirrors offerAction) ──
+  bookingAction?: "new" | "accept" | "reject" | "propose" | "withdrawn" | "expired" | "closed";
+  bookingOfferId?: string;
+  serviceId?: string;
+  /** The time on the table right now — null once rejected. */
+  pendingDateTime?: string | null;
+  /** The client's original ask, kept for context alongside a counter-proposal. */
+  proposedDateTime?: string;
+  /** Set only on a "propose" card — the new time being put forward. */
+  counterProposedDateTime?: string | null;
+  priceAtBooking?: number;
+  negotiationRounds?: number;
+  clientId?: string;
+  providerId?: string;
+  nextActorRole?: "client" | "provider";
+  canClose?: boolean;
+  note?: string;
 
   // ── Event RSVP card (auto-created event thread) ──
   /**
@@ -1040,6 +1065,7 @@ export interface Service {
   updatedAt: string;
 }
 
+/** @deprecated LEGACY — pre-negotiation booking rows. bookService no longer creates these; see ServiceBookingOffer. */
 export interface ServiceBooking {
   id: string;
   serviceId: string;
@@ -1049,6 +1075,32 @@ export interface ServiceBooking {
   date: string;
   notes?: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A service booking negotiation (date/time haggle) — what bookService now
+ * creates. Once accepted it converts into an Order (source: "service") and
+ * the rest of the deal is tracked there, same as marketplace.
+ */
+export interface ServiceBookingOffer {
+  id: string;
+  _id?: string;
+  serviceId: string | { _id: string; title: string; images?: string[]; category?: string; pricing?: Service["pricing"] };
+  providerId: string;
+  clientId: string;
+  proposedDateTime: string;
+  counterProposedDateTime?: string | null;
+  priceAtBooking: number;
+  currency?: string;
+  status: "pending" | "accepted" | "rejected" | "countered" | "expired" | "cancelled";
+  lastActionBy: "client" | "provider";
+  negotiationRounds?: number;
+  expiresAt?: string;
+  orderId?: string;
+  conversationId?: string;
+  note?: string;
   createdAt: string;
   updatedAt: string;
 }

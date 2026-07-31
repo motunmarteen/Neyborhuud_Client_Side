@@ -4,22 +4,28 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
-import { useMyBookings, useCancelBooking } from "@/hooks/useServices";
+import { useMyBookings, useWithdrawBooking } from "@/hooks/useServices";
 import { useAuth } from "@/hooks/useAuth";
-import { ServiceBooking } from "@/types/api";
+import { chatThreadPath } from "@/lib/chatPaths";
+import { ServiceBookingOffer } from "@/types/api";
+import { formatNaira } from "@/lib/currency";
 
-const STATUS_COLORS: Record<ServiceBooking["status"], string> = {
+const STATUS_COLORS: Record<ServiceBookingOffer["status"], string> = {
   pending: "var(--neu-text-muted)",
-  confirmed: "var(--primary)",
-  completed: "var(--primary)",
+  countered: "var(--primary)",
+  accepted: "var(--primary)",
+  rejected: "var(--brand-red)",
+  expired: "var(--brand-red)",
   cancelled: "var(--brand-red)",
 };
 
-const STATUS_LABELS: Record<ServiceBooking["status"], string> = {
-  pending: "Pending",
-  confirmed: "Confirmed",
-  completed: "Completed",
-  cancelled: "Cancelled",
+const STATUS_LABELS: Record<ServiceBookingOffer["status"], string> = {
+  pending: "Awaiting response",
+  countered: "New time proposed",
+  accepted: "Confirmed",
+  rejected: "Declined",
+  expired: "Expired",
+  cancelled: "Withdrawn",
 };
 
 function formatDateTime(d: string) {
@@ -42,9 +48,9 @@ export default function MyBookingsPage() {
   }, [user, authLoading, router]);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useMyBookings();
-  const cancelBooking = useCancelBooking();
+  const withdrawBooking = useWithdrawBooking();
 
-  const bookings: ServiceBooking[] =
+  const bookings: ServiceBookingOffer[] =
     data?.pages.flatMap((page) => {
       const inner = (page as any)?.data;
       return Array.isArray(inner) ? inner : (inner?.data ?? []);
@@ -68,47 +74,73 @@ export default function MyBookingsPage() {
             )}
 
             {/* List */}
-            {!isLoading && bookings.map((booking) => (
-              <div key={booking.id} className="mod-card rounded-xl p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/services/${booking.serviceId}`}
-                      className="text-base font-semibold line-clamp-1 hover:underline transition-colors"
-                      style={{ color: "var(--neu-text)" }}
+            {!isLoading && bookings.map((booking) => {
+              const id = booking.id ?? (booking as any)._id;
+              const service =
+                typeof booking.serviceId === "object" ? booking.serviceId : null;
+              const serviceId =
+                typeof booking.serviceId === "object" ? booking.serviceId._id : booking.serviceId;
+              const isClient = user.id === booking.clientId;
+              const displayDateTime = booking.counterProposedDateTime || booking.proposedDateTime;
+              const canWithdraw =
+                isClient && (booking.status === "pending" || booking.status === "countered");
+
+              return (
+                <div key={id} className="mod-card rounded-xl p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        href={`/services/${serviceId}`}
+                        className="text-base font-semibold line-clamp-1 hover:underline transition-colors"
+                        style={{ color: "var(--neu-text)" }}
+                      >
+                        {service?.title ?? "Service"}
+                      </Link>
+                      <p className="text-sm mt-0.5" style={{ color: "var(--neu-text-muted)" }}>
+                        {formatDateTime(displayDateTime)}
+                      </p>
+                      <p className="text-sm font-semibold mt-0.5" style={{ color: "var(--neu-text)" }}>
+                        {formatNaira(booking.priceAtBooking)}
+                      </p>
+                    </div>
+                    <span
+                      className="text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 mod-inset"
+                      style={{ color: STATUS_COLORS[booking.status] }}
                     >
-                      {booking.service?.title ?? "Service"}
-                    </Link>
-                    <p className="text-sm mt-0.5" style={{ color: "var(--neu-text-muted)" }}>
-                      {formatDateTime(booking.date)}
-                    </p>
+                      {STATUS_LABELS[booking.status]}
+                    </span>
                   </div>
-                  <span
-                    className="text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 mod-inset"
-                    style={{ color: STATUS_COLORS[booking.status] }}
-                  >
-                    {STATUS_LABELS[booking.status]}
-                  </span>
+
+                  {booking.note && (
+                    <p className="text-sm mt-3 line-clamp-2" style={{ color: "var(--neu-text-muted)" }}>{booking.note}</p>
+                  )}
+
+                  <div className="mt-3 pt-3 flex items-center gap-4" style={{ borderTop: "1px solid var(--neu-shadow-dark)" }}>
+                    {booking.conversationId && (
+                      <Link
+                        href={chatThreadPath(booking.conversationId)}
+                        className="text-sm font-semibold transition-all"
+                        style={{ color: "var(--primary)" }}
+                      >
+                        {booking.status === "pending" || booking.status === "countered"
+                          ? "Respond in chat"
+                          : "Open chat"}
+                      </Link>
+                    )}
+                    {canWithdraw && (
+                      <button
+                        onClick={() => withdrawBooking.mutate({ bookingOfferId: id })}
+                        disabled={withdrawBooking.isPending}
+                        className="text-sm font-semibold transition-all disabled:opacity-50"
+                        style={{ color: "var(--brand-red)" }}
+                      >
+                        Withdraw
+                      </button>
+                    )}
+                  </div>
                 </div>
-
-                {booking.notes && (
-                  <p className="text-sm mt-3 line-clamp-2" style={{ color: "var(--neu-text-muted)" }}>{booking.notes}</p>
-                )}
-
-                {(booking.status === "pending" || booking.status === "confirmed") && (
-                  <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--neu-shadow-dark)" }}>
-                    <button
-                      onClick={() => cancelBooking.mutate({ bookingId: booking.id })}
-                      disabled={cancelBooking.isPending}
-                      className="text-sm font-semibold transition-all disabled:opacity-50"
-                      style={{ color: "var(--brand-red)" }}
-                    >
-                      Cancel Booking
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
 
             {/* Load more */}
             {hasNextPage && (

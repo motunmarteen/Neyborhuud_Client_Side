@@ -64,12 +64,16 @@ export function useServiceReviews(serviceId: string | null) {
   });
 }
 
-/** Current user's bookings */
+/**
+ * Current user's service bookings — negotiation requests they're a party to,
+ * as client OR provider. Actions (accept/reject/propose/withdraw) happen in
+ * the linked chat thread, not here; this list is for visibility + deep-links.
+ */
 export function useMyBookings() {
   return useInfiniteQuery({
     queryKey: ["services", "my-bookings"],
     queryFn: ({ pageParam = 1 }) =>
-      servicesService.getMyBookings(pageParam as number, 20),
+      servicesService.getMyBookingRequests(pageParam as number, 20),
     getNextPageParam: (lastPage) => {
       const pagination =
         (lastPage as any).pagination || (lastPage as any)?.data?.pagination;
@@ -122,19 +126,19 @@ export function useBookService() {
   });
 }
 
-/** Cancel a booking */
-export function useCancelBooking() {
+/** Withdraw a live booking request (client only, before it's accepted). */
+export function useWithdrawBooking() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ bookingId }: { bookingId: string }) =>
-      servicesService.cancelBooking(bookingId),
+    mutationFn: ({ bookingOfferId }: { bookingOfferId: string }) =>
+      servicesService.withdrawBooking(bookingOfferId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services", "my-bookings"] });
-      toast.success("Booking cancelled.");
+      toast.success("Booking request withdrawn.");
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error) || "Failed to cancel booking");
+      toast.error(getErrorMessage(error) || "Failed to withdraw booking");
     },
   });
 }

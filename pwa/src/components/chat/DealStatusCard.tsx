@@ -55,6 +55,7 @@ export function DealStatusCard({
   const orderId = meta.orderId;
   const buyerId = meta.buyerId ? String(meta.buyerId) : undefined;
   const sellerId = meta.sellerId ? String(meta.sellerId) : undefined;
+  const isService = meta.dealKind === 'service';
 
   const isBuyer = !!currentUserId && currentUserId === buyerId;
   const isSeller = !!currentUserId && currentUserId === sellerId;
@@ -92,7 +93,11 @@ export function DealStatusCard({
   }, [needsFetch, orderId, fetched]);
 
   const payout: Payout | null | 'none' = inlinePayout ?? fetched;
-  const style = ACTION_STYLE[action] ?? ACTION_STYLE.started;
+  const baseStyle = ACTION_STYLE[action] ?? ACTION_STYLE.started;
+  // Service bookings don't ship anything — same stage, different words.
+  const style = isService && action === 'shipped'
+    ? { ...baseStyle, label: 'Job Started' }
+    : baseStyle;
 
   // "I've Paid" opens the proof picker. If the buyer skips a file, we still
   // let them attest without proof (proof is encouraged, not mandatory).
@@ -177,12 +182,27 @@ export function DealStatusCard({
       <div className={`flex items-center gap-2 px-3 py-2 ${style.text}`}>
         <span className="text-base">{style.icon}</span>
         <span className="text-[11px] font-bold uppercase tracking-wide opacity-70">
-          NeyborHuud Deal · {style.label}
+          {isService ? 'Service Booking' : 'NeyborHuud Deal'} · {style.label}
         </span>
       </div>
 
       <div className="px-3 pb-3 pt-1">
         <p className="text-sm text-gray-700 leading-snug">{msg.content}</p>
+
+        {isService && typeof meta.serviceTitle === 'string' && (
+          <p className="mt-1 text-sm font-bold text-gray-900">{meta.serviceTitle}</p>
+        )}
+        {isService && typeof meta.scheduledAt === 'string' && (
+          <p className="text-xs font-medium text-gray-500">
+            {new Date(meta.scheduledAt).toLocaleString('en-NG', {
+              weekday: 'short',
+              day: 'numeric',
+              month: 'short',
+              hour: 'numeric',
+              minute: '2-digit',
+            })}
+          </p>
+        )}
 
         {typeof meta.amount === 'number' && (
           <p className={`mt-1 text-xs font-bold ${style.text}`}>
@@ -199,7 +219,7 @@ export function DealStatusCard({
         {buyerNeedsAccount && payout && payout !== 'none' && (
           <div className="mt-2 rounded-xl border border-black/[0.06] bg-white/70 p-2.5">
             <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
-              Pay the seller directly
+              Pay the {isService ? 'provider' : 'seller'} directly
             </p>
             <p className="mt-0.5 text-sm font-bold text-gray-900">
               {payout.bankName} · {payout.accountNumber}
@@ -242,7 +262,7 @@ export function DealStatusCard({
           </a>
         )}
 
-        {action === 'shipped' && meta.trackingNumber && (
+        {!isService && action === 'shipped' && meta.trackingNumber && (
           <p className="mt-2 rounded-xl border border-black/[0.06] bg-white/70 p-2.5">
             <span className="block text-[10px] font-bold uppercase tracking-wide text-gray-400">
               Tracking
@@ -301,7 +321,17 @@ export function DealStatusCard({
               </button>
             )}
 
-            {showShip && !showShipForm && (
+            {showShip && !showShipForm && isService && (
+              <button
+                type="button"
+                onClick={onMarkShipped}
+                disabled={disabled}
+                className="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+              >
+                {busy === 'ship' ? 'Starting…' : 'Mark Job Started'}
+              </button>
+            )}
+            {showShip && !showShipForm && !isService && (
               <button
                 type="button"
                 onClick={() => setShowShipForm(true)}
@@ -311,7 +341,7 @@ export function DealStatusCard({
                 Mark as Sent
               </button>
             )}
-            {showShip && showShipForm && (
+            {showShip && showShipForm && !isService && (
               <div className="w-full space-y-2">
                 <input
                   type="text"
@@ -352,7 +382,11 @@ export function DealStatusCard({
                 disabled={disabled}
                 className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
               >
-                {busy === 'delivered' ? 'Confirming…' : 'Confirm Delivery Received'}
+                {busy === 'delivered'
+                  ? 'Confirming…'
+                  : isService
+                    ? 'Confirm Job Completed'
+                    : 'Confirm Delivery Received'}
               </button>
             )}
           </div>

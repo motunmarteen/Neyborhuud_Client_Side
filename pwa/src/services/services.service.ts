@@ -58,14 +58,63 @@ export const servicesService = {
   },
 
   /**
-   * Cancel a booking (DELETE)
+   * @deprecated LEGACY — only ever touches pre-negotiation ServiceBooking
+   * rows. bookService no longer creates these; use withdrawBooking instead.
    */
   async cancelBooking(bookingId: string) {
     return await apiClient.delete(`/services/bookings/${bookingId}`);
   },
 
+  // ─── Booking negotiation (date/time haggle) ──────────────────────────────
+  // Mirrors marketplaceService's offer endpoints — bookService (above) already
+  // posts the initial request; these drive the turn-based response.
+
+  /** Provider or client responds: accept / reject / propose a different time. */
+  async respondToBooking(
+    bookingOfferId: string,
+    action: "accept" | "reject" | "propose",
+    proposedDateTime?: string,
+  ) {
+    return await apiClient.patch(`/services/bookings/requests/${bookingOfferId}/respond`, {
+      action,
+      proposedDateTime,
+    });
+  },
+
+  /** Shorthand — no body needed. */
+  async acceptBooking(bookingOfferId: string) {
+    return await apiClient.patch(`/services/bookings/requests/${bookingOfferId}/accept`);
+  },
+
+  /** Shorthand — no body needed. */
+  async rejectBooking(bookingOfferId: string) {
+    return await apiClient.patch(`/services/bookings/requests/${bookingOfferId}/reject`);
+  },
+
+  /** Client withdraws their own live request. */
+  async withdrawBooking(bookingOfferId: string) {
+    return await apiClient.patch(`/services/bookings/requests/${bookingOfferId}/withdraw`);
+  },
+
+  /** Either party closes a declined negotiation nobody revived. */
+  async closeBooking(bookingOfferId: string) {
+    return await apiClient.patch(`/services/bookings/requests/${bookingOfferId}/close`);
+  },
+
+  async getBookingRequest(bookingOfferId: string) {
+    return await apiClient.get(`/services/bookings/requests/${bookingOfferId}`);
+  },
+
+  /** Every booking negotiation the user is on, as client OR provider — the live "My Bookings" source. */
+  async getMyBookingRequests(page = 1, limit = 20, status?: string) {
+    return await apiClient.get("/services/my/booking-requests", {
+      params: { page, limit, status },
+    });
+  },
+
   /**
-   * Get my bookings
+   * @deprecated LEGACY — only ever returns pre-negotiation ServiceBooking
+   * rows. Use getMyBookingRequests instead.
    */
   async getMyBookings(page = 1, limit = 20) {
     return await apiClient.get<PaginatedResponse<ServiceBooking>>(
@@ -89,7 +138,8 @@ export const servicesService = {
   },
 
   /**
-   * Update booking status (provider only: confirmed | completed | cancelled)
+   * @deprecated LEGACY — provider-only status update on pre-negotiation
+   * ServiceBooking rows. New bookings go through respondToBooking instead.
    */
   async updateBookingStatus(bookingId: string, status: "confirmed" | "completed" | "cancelled") {
     return await apiClient.patch(`/services/bookings/${bookingId}/status`, { status });

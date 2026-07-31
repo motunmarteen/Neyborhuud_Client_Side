@@ -23,6 +23,7 @@ import { MessageActionSheet } from '@/components/chat/MessageActionSheet';
 import { DealStatusCard } from '@/components/chat/DealStatusCard';
 import { OfferCard } from '@/components/chat/OfferCard';
 import { EventRsvpCard } from '@/components/chat/EventRsvpCard';
+import { ServiceOfferCard } from '@/components/chat/ServiceOfferCard';
 import { formatNaira } from '@/lib/currency';
 import { chatService } from '@/services/chat.service';
 import { InteractiveMap } from '@/components/ui/InteractiveMap';
@@ -794,12 +795,16 @@ export default function ChatMessageCard({
     case 'document': return wrap(msg.mediaUrl ? <DocumentBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />);
     case 'system':
       // System messages carry structured meta for interactive deal cards:
-      //   - offerAction → haggle OfferCard (accept/reject/counter/withdraw)
-      //   - dealAction  → DealStatusCard (I've Paid / Confirm Receipt)
-      //   - rsvpAction  → EventRsvpCard (Going / Maybe / Can't Go)
+      //   - offerAction   → haggle OfferCard (accept/reject/counter/withdraw)
+      //   - dealAction    → DealStatusCard (I've Paid / Confirm Receipt) — marketplace AND service orders
+      //   - rsvpAction    → EventRsvpCard (Going / Maybe / Can't Go)
+      //   - bookingAction → ServiceOfferCard (accept/reject/propose a time)
       // Everything else falls back to a plain system text bubble.
       if (msg.meta?.offerAction) {
         return wrap(<OfferCard msg={msg} currentUserId={currentUserId} />);
+      }
+      if (msg.meta?.bookingAction) {
+        return wrap(<ServiceOfferCard msg={msg} currentUserId={currentUserId} />);
       }
       if (msg.meta?.dealAction) {
         return wrap(<DealStatusCard msg={msg} currentUserId={currentUserId} />);
