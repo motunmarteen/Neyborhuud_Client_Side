@@ -28,7 +28,7 @@ export function AppBrowseLayout({
 
   return (
     <div className="relative flex h-app w-full max-w-[100vw] overflow-hidden neu-base">
-      <Suspense fallback={<div className="hidden w-64 shrink-0 lg:block" />}>
+      <Suspense fallback={<div className="hidden w-80 shrink-0 md:block" />}>
         <LeftSidebar mode="both" />
       </Suspense>
 

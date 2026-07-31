@@ -1,7 +1,8 @@
 /**
  * Right Sidebar Component - Stitch Design
  * Shows upcoming events, marketplace picks, trending topics
- * Only visible on xl breakpoint and above
+ * Visible from md (768px) and up — same breakpoint as LeftSidebar, so
+ * tablet-width windows get the full desktop layout, not an in-between state.
  */
 
 'use client';
@@ -24,7 +25,7 @@ export default function RightSidebar() {
     const recentListings = Array.isArray(listingsRaw) ? listingsRaw.slice(0, 2) : [];
 
     return (
-        <aside className="hidden lg:flex w-[320px] xl:w-[400px] flex-col gap-6 p-5 xl:p-6 neu-base overflow-y-auto shrink-0" style={{ boxShadow: '-4px 0 12px var(--neu-shadow-dark)' }}>
+        <aside className="hidden md:flex w-[280px] lg:w-[320px] xl:w-[400px] flex-col gap-6 p-5 xl:p-6 neu-base overflow-y-auto shrink-0" style={{ boxShadow: '-4px 0 12px var(--neu-shadow-dark)' }}>
             {/* Onboarding checklist — hidden once complete */}
             <OnboardingChecklist />
 

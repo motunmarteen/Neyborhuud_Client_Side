@@ -411,7 +411,7 @@ function XFeedInner() {
     return (
         <div className="relative flex h-app w-full max-w-[100vw] overflow-hidden neu-base">
             {/* Left Sidebar */}
-            <Suspense fallback={<div className="hidden lg:block lg:w-80 shrink-0" />}>
+            <Suspense fallback={<div className="hidden md:block w-80 shrink-0" />}>
                 <LeftSidebar mode="both" />
             </Suspense>
 
