@@ -70,9 +70,15 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
         .then((url) => setQrCodeDataUrl(url))
         .catch((err) => console.error("Failed to generate QR Code", err));
 
-      // Manage desktop viewport checks and scroll locks
+      // Manage desktop viewport checks and scroll locks.
+      // Below this, the raw native layout (sidebar rail etc.) takes over —
+      // that layout is only actually assembled for phone widths, so the
+      // threshold here must match where the native mobile chrome kicks in
+      // (768px, see LeftSidebar's own breakpoint in globals.css), not some
+      // higher "desktop" width. Anything narrower than true desktop gets the
+      // phone-frame simulator instead of a half-built sidebar layout.
       const adjustLayout = () => {
-        const desktop = window.innerWidth >= 1024;
+        const desktop = window.innerWidth >= 768;
         setIsDesktop(desktop);
         
         if (isApp && !inIframe) {
