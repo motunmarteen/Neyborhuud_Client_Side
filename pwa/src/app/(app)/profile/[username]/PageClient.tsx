@@ -187,6 +187,7 @@ export default function ProfilePage() {
     data: profileData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ['userProfile', username],
     queryFn: async () => {
@@ -472,25 +473,56 @@ export default function ProfilePage() {
     );
   }
 
-  // Error state
+  // Error state.
+  // Only a real 404 means "no such user" — a 429/5xx/network drop must not be
+  // reported as a missing account, or an outage looks like a deleted profile.
   if (error || !profile) {
+    const err = error as
+      | { status?: number; statusCode?: number; response?: { status?: number } }
+      | null;
+    const status = err?.response?.status ?? err?.status ?? err?.statusCode;
+    const isMissing = !error || status === 404;
+    const isRateLimited = status === 429;
+
     return (
       <div className="flex h-[100dvh] w-full flex-col bg-white overflow-hidden">
         <TopNav />
         <div className="app-chrome-below-topnav mx-auto w-full max-w-[600px] !bg-white flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto no-scrollbar pb-24 !mt-0 !pt-0 flex items-center justify-center">
             <BrowseEmptyState
-              icon="person_off"
-              title="User not found"
-              description={`The user @${username} doesn't exist or their profile is unavailable.`}
+              icon={isMissing ? 'person_off' : 'cloud_off'}
+              title={
+                isMissing
+                  ? 'User not found'
+                  : isRateLimited
+                    ? 'Too many requests'
+                    : "Couldn't load this profile"
+              }
+              description={
+                isMissing
+                  ? `The user @${username} doesn't exist or their profile is unavailable.`
+                  : isRateLimited
+                    ? 'You have made a lot of requests in a short time. Wait a moment and try again.'
+                    : 'Something went wrong reaching NeyborHuud. Check your connection and try again.'
+              }
               className="!border-0 !shadow-none !bg-white"
               action={
-                <Link
-                  href="/explore"
-                  className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800 px-6 py-2 text-xs font-bold shadow-sm transition"
-                >
-                  Explore NeyborHuud
-                </Link>
+                isMissing ? (
+                  <Link
+                    href="/explore"
+                    className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800 px-6 py-2 text-xs font-bold shadow-sm transition"
+                  >
+                    Explore NeyborHuud
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => refetch()}
+                    className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800 px-6 py-2 text-xs font-bold shadow-sm transition"
+                  >
+                    Try again
+                  </button>
+                )
               }
             />
           </div>
