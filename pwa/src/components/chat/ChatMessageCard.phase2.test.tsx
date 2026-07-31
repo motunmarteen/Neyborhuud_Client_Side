@@ -279,4 +279,62 @@ describe('ChatMessageCard — Phase 2 rich cards', () => {
     expect(screen.getByTestId('mock-map')).toBeInTheDocument();
     expect(screen.getByText('Open in Maps →')).toBeInTheDocument();
   });
+
+  // The server auto-creates this card during an SOS (ChatService.postLocationUpdate).
+  // It must render as a real live card, visually distinct from a casual share so a
+  // guardian scanning the thread can't confuse the two.
+  it('renders an SOS-auto-shared location as an urgent "Emergency Live Location" card', () => {
+    const futureExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const msg = baseMessage({
+      type: 'location',
+      senderId: 'victim',
+      priority: 'emergency',
+      locationSnapshot: { latitude: 6.5, longitude: 3.3, isLive: true, expiresAt: futureExpiry },
+      meta: { incidentLive: true, emergencyId: 'emg-1' },
+    });
+    render(<ChatMessageCard msg={msg} mine={false} currentUserId="guardian" />);
+    expect(screen.getByText('Emergency Live Location')).toBeInTheDocument();
+    expect(screen.getByText('LIVE')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-map')).toBeInTheDocument();
+  });
+
+  it('updates the incident card in place from a message:location_update socket event', async () => {
+    const futureExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const msg = baseMessage({
+      type: 'location',
+      senderId: 'victim',
+      locationSnapshot: { latitude: 6.5, longitude: 3.3, isLive: true, expiresAt: futureExpiry },
+      meta: { incidentLive: true, emergencyId: 'emg-1' },
+    });
+    render(<ChatMessageCard msg={msg} mine={false} currentUserId="guardian" />);
+    expect(screen.getByText('6.50000, 3.30000')).toBeInTheDocument();
+
+    emit('message:location_update', {
+      messageId: 'msg-1',
+      locationSnapshot: { latitude: 7.1, longitude: 3.9, isLive: true, expiresAt: futureExpiry },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('7.10000, 3.90000')).toBeInTheDocument();
+    });
+  });
+
+  it('shows "Sharing stopped" on the incident card when the SOS resolves', async () => {
+    const futureExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const msg = baseMessage({
+      type: 'location',
+      senderId: 'victim',
+      locationSnapshot: { latitude: 6.5, longitude: 3.3, isLive: true, expiresAt: futureExpiry },
+      meta: { incidentLive: true, emergencyId: 'emg-1' },
+    });
+    render(<ChatMessageCard msg={msg} mine={false} currentUserId="guardian" />);
+    expect(screen.getByText('LIVE')).toBeInTheDocument();
+
+    emit('message:location_stopped', { messageId: 'msg-1' });
+
+    await waitFor(() => {
+      expect(screen.getByText('Sharing stopped')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('LIVE')).not.toBeInTheDocument();
+  });
 });

@@ -106,6 +106,9 @@ function LocationCard({ msg, mine, currentUserId }: { msg: ChatMessage; mine: bo
   const expiresAt = snapshot?.expiresAt ? new Date(snapshot.expiresAt).getTime() : null;
   const isExpired = !!expiresAt && Date.now() > expiresAt;
   const messageId = msg.id ?? (msg as any)._id;
+  // Auto-shared during an SOS rather than manually shared — styled red so a
+  // guardian scanning the thread can't mistake it for a casual location drop.
+  const isIncident = !!meta?.incidentLive;
 
   useEffect(() => {
     if (!isLive || !messageId) return;
@@ -138,7 +141,14 @@ function LocationCard({ msg, mine, currentUserId }: { msg: ChatMessage; mine: bo
   };
 
   return (
-    <CardShell icon="📍" label={isLive ? 'Live Location' : 'Location'} bg="bg-emerald-50" text="text-emerald-700" mine={mine} msg={msg}>
+    <CardShell
+      icon={isIncident ? '🚨' : '📍'}
+      label={isIncident ? 'Emergency Live Location' : isLive ? 'Live Location' : 'Location'}
+      bg={isIncident ? 'bg-red-50' : 'bg-emerald-50'}
+      text={isIncident ? 'text-red-700' : 'text-emerald-700'}
+      mine={mine}
+      msg={msg}
+    >
       {lat && lng && (
         <div className="mb-2 overflow-hidden rounded-xl">
           <InteractiveMap
@@ -164,11 +174,11 @@ function LocationCard({ msg, mine, currentUserId }: { msg: ChatMessage; mine: bo
         </span>
       )}
       {lat && lng && (
-        <p className="font-mono text-[10px] text-emerald-600">{Number(lat).toFixed(5)}, {Number(lng).toFixed(5)}</p>
+        <p className={`font-mono text-[10px] ${isIncident ? 'text-red-600' : 'text-emerald-600'}`}>{Number(lat).toFixed(5)}, {Number(lng).toFixed(5)}</p>
       )}
       <p className="text-sm text-gray-700">{address}</p>
       {mapsUrl && (
-        <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block text-xs font-semibold text-emerald-600 hover:underline">
+        <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className={`mt-1 block text-xs font-semibold hover:underline ${isIncident ? 'text-red-600' : 'text-emerald-600'}`}>
           Open in Maps →
         </a>
       )}

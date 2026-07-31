@@ -22,6 +22,7 @@ import type { IncidentSummary } from '@/types/api';
 import { getGeolocation } from '@/lib/nativeGeolocation';
 import { useSosOfflineQueue, type SosQueueStatus } from '@/hooks/useSosOfflineQueue';
 import { newIdempotencyKey } from '@/lib/idempotency';
+import { toast } from 'sonner';
 
 export type SosPhase = 'idle' | 'pending' | 'active' | 'resolved' | 'cancelled';
 
@@ -220,6 +221,64 @@ function useSosState(): UseSosReturn {
       socket?.off('connect', onConnect);
     };
   }, [user?.id]);
+
+  // ── Live location heartbeat during an active SOS ───────────────────────
+  //
+  // The server's whole emergency-tracking pipeline (encrypted
+  // EmergencyTrackingLog forensic trail, sos:location_update fanout to
+  // guardians, and the live location card in the incident chat) is driven by
+  // this one socket event. Nothing else in the app emits it, so without this
+  // effect a real SOS produces no live location at all.
+  //
+  // watchPosition rather than a setInterval+getCurrentPosition loop: the OS
+  // decides when the fix is meaningfully new, which is both more accurate and
+  // far cheaper on battery — and battery matters a lot mid-emergency. The
+  // server throttles what it persists, so a chatty watch is fine.
+  const heartbeatDeniedRef = useRef(false);
+
+  useEffect(() => {
+    if (phase !== 'active' || !user?.id) return;
+
+    const geo = getGeolocation();
+    if (!geo) {
+      toast.error('Location sharing unavailable on this device. Your guardians cannot see your position.');
+      return;
+    }
+
+    let lastEmitAt = 0;
+    // Floor between emitted pings. watchPosition can fire several times a
+    // second; the server only persists one per 30s anyway.
+    const MIN_EMIT_INTERVAL_MS = 5_000;
+
+    const watchId = geo.watchPosition(
+      (pos) => {
+        const now = Date.now();
+        if (now - lastEmitAt < MIN_EMIT_INTERVAL_MS) return;
+        lastEmitAt = now;
+        socketService.emit('location_heartbeat', {
+          userId: user.id,
+          location: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+        });
+      },
+      (err) => {
+        // Only warn once per SOS — watchPosition can re-fire the same error
+        // repeatedly and we must not spam a toast at someone in an emergency.
+        if (heartbeatDeniedRef.current) return;
+        heartbeatDeniedRef.current = true;
+        toast.error(
+          err.code === err.PERMISSION_DENIED
+            ? 'Location access is blocked. Your guardians cannot see where you are — enable location to share it.'
+            : 'Could not get your location. Your guardians cannot see where you are.',
+        );
+      },
+      { enableHighAccuracy: true, timeout: 20_000, maximumAge: 10_000 },
+    );
+
+    return () => {
+      geo.clearWatch(watchId);
+      heartbeatDeniedRef.current = false;
+    };
+  }, [phase, user?.id]);
 
   const getCoords = useCallback(
     () =>
