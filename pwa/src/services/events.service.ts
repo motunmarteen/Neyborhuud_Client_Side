@@ -12,6 +12,15 @@ import {
   Comment,
 } from "@/types/api";
 
+/** Tri-state RSVP. Only "going" counts toward the event's attendee count. */
+export type RsvpStatus = "going" | "maybe" | "not_going";
+
+export interface RsvpCounts {
+  goingCount: number;
+  maybeCount: number;
+  notGoingCount: number;
+}
+
 export interface EventCommentInput {
   body: string;
   mediaUrls?: string[];
@@ -229,6 +238,39 @@ export const eventsService = {
    */
   async unattendEvent(eventId: string) {
     return await apiClient.delete(`/events/${eventId}/attend`);
+  },
+
+  /**
+   * Set a tri-state RSVP. The first RSVP on an event lazily creates its chat
+   * thread and posts the interactive RSVP card into it.
+   */
+  async setRsvp(eventId: string, status: RsvpStatus) {
+    return await apiClient.post<{
+      event: Event;
+      status: RsvpStatus;
+      counts: RsvpCounts;
+      conversationId?: string;
+    }>(`/events/${eventId}/rsvp`, { status });
+  },
+
+  /** The caller's own RSVP for an event, plus the current tallies. */
+  async getMyRsvp(eventId: string) {
+    return await apiClient.get<{ status: RsvpStatus | null; counts: RsvpCounts }>(
+      `/events/${eventId}/rsvp`,
+    );
+  },
+
+  /**
+   * Organizer-only: post an update into the event thread and notify everyone
+   * who RSVP'd going or maybe.
+   */
+  async postEventUpdate(eventId: string, body: string) {
+    return await apiClient.post<{
+      posted: boolean;
+      notified: number;
+      conversationId?: string;
+      reason?: string;
+    }>(`/events/${eventId}/update`, { body });
   },
 
   /**

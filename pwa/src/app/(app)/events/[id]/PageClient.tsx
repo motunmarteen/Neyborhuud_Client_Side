@@ -16,6 +16,8 @@ import EventShareSheet from "@/components/events/EventShareSheet";
 import { EventComments } from "@/components/events/EventComments";
 import { useClientAuthUser } from "@/hooks/useClientAuthUser";
 import { formatNaira } from "@/lib/currency";
+import { eventsService } from "@/services/events.service";
+import { toast } from "sonner";
 
 const TYPE_COLORS: Record<string, string> = {
   community: "bg-brand-blue/20 text-brand-blue",
@@ -191,6 +193,78 @@ function ReportModal({
   );
 }
 
+// ─── Organizer Update Modal ───────────────────────────────────────
+// Posts into the event's chat thread and notifies everyone who RSVP'd
+// going or maybe. Does nothing if nobody has RSVP'd yet — the server
+// reports that back rather than erroring.
+function PostUpdateModal({
+  eventId,
+  onClose,
+}: {
+  eventId: string;
+  onClose: () => void;
+}) {
+  const [body, setBody] = useState("");
+  const [isPending, setIsPending] = useState(false);
+
+  const submit = async () => {
+    const text = body.trim();
+    if (text.length < 1 || isPending) return;
+    setIsPending(true);
+    try {
+      const res = await eventsService.postEventUpdate(eventId, text);
+      const data = (res as { data?: { posted?: boolean; notified?: number } })?.data;
+      if (data?.posted) {
+        toast.success(`Update sent to ${data.notified ?? 0} attendee(s).`);
+      } else {
+        toast.info("No one has RSVP'd yet, so there's no one to update.");
+      }
+      onClose();
+    } catch (e) {
+      toast.error(
+        (e as { message?: string })?.message || "Could not post the update. Try again.",
+      );
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 px-4 backdrop-blur-md sm:items-center">
+      <div className="mod-modal w-full max-w-md space-y-4 rounded-t-[28px] border border-white/10 p-6 sm:rounded-[28px]">
+        <h3 className="text-lg font-bold text-white">Post an Update</h3>
+        <p className="text-sm text-white/65">
+          This goes to the event chat and notifies everyone who said they&apos;re
+          going or might be.
+        </p>
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          rows={3}
+          maxLength={1000}
+          placeholder="e.g. Doors open 30 minutes earlier than planned…"
+          className="w-full resize-none rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:border-brand-blue/50 focus:outline-none"
+        />
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 rounded-xl border border-white/10 bg-white/10 py-2.5 text-sm text-white/75 transition-colors hover:bg-white/15 hover:text-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={submit}
+            disabled={isPending || body.trim().length < 1}
+            className="flex-1 rounded-xl border border-brand-blue/30 bg-brand-blue/15 py-2.5 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-blue/25 disabled:opacity-50"
+          >
+            {isPending ? "Posting…" : "Post Update"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Attendees Modal ──────────────────────────────────────────────
 function AttendeesModal({
   eventId,
@@ -285,6 +359,7 @@ export default function EventDetailPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showAttendees, setShowAttendees] = useState(false);
+  const [showPostUpdate, setShowPostUpdate] = useState(false);
 
   const event = extractEventFromApiPayload(data) as Record<string, any> | null;
 
@@ -540,7 +615,15 @@ export default function EventDetailPage() {
                     </div>
 
                     {isOrganizer && (
-                      <div className="grid gap-3 sm:grid-cols-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {!isCancelled && (
+                          <button
+                            onClick={() => setShowPostUpdate(true)}
+                            className="rounded-2xl border border-primary/30 bg-primary/15 py-3 text-sm font-bold text-primary backdrop-blur-md transition-all hover:bg-primary/25 sm:col-span-2"
+                          >
+                            Post an Update
+                          </button>
+                        )}
                         <Link
                           href={`/events/${eventId}/edit`}
                           className="rounded-2xl border border-brand-blue/30 bg-brand-blue/15 py-3 text-center text-sm font-bold text-brand-blue backdrop-blur-md transition-all hover:bg-brand-blue/25"
@@ -638,6 +721,10 @@ export default function EventDetailPage() {
 
       {showAttendees && (
         <AttendeesModal eventId={eventId} onClose={() => setShowAttendees(false)} />
+      )}
+
+      {showPostUpdate && (
+        <PostUpdateModal eventId={eventId} onClose={() => setShowPostUpdate(false)} />
       )}
 
       <EventShareSheet

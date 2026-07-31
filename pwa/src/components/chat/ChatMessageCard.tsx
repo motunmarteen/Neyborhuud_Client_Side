@@ -22,6 +22,7 @@ import { MessageReactions } from '@/components/chat/MessageReactions';
 import { MessageActionSheet } from '@/components/chat/MessageActionSheet';
 import { DealStatusCard } from '@/components/chat/DealStatusCard';
 import { OfferCard } from '@/components/chat/OfferCard';
+import { EventRsvpCard } from '@/components/chat/EventRsvpCard';
 import { formatNaira } from '@/lib/currency';
 import { chatService } from '@/services/chat.service';
 import { InteractiveMap } from '@/components/ui/InteractiveMap';
@@ -795,12 +796,16 @@ export default function ChatMessageCard({
       // System messages carry structured meta for interactive deal cards:
       //   - offerAction → haggle OfferCard (accept/reject/counter/withdraw)
       //   - dealAction  → DealStatusCard (I've Paid / Confirm Receipt)
+      //   - rsvpAction  → EventRsvpCard (Going / Maybe / Can't Go)
       // Everything else falls back to a plain system text bubble.
       if (msg.meta?.offerAction) {
         return wrap(<OfferCard msg={msg} currentUserId={currentUserId} />);
       }
       if (msg.meta?.dealAction) {
         return wrap(<DealStatusCard msg={msg} currentUserId={currentUserId} />);
+      }
+      if (msg.meta?.rsvpAction) {
+        return wrap(<EventRsvpCard msg={msg} currentUserId={currentUserId} />);
       }
       return wrap(<TextBubble msg={msg} mine={mine} isPriority={false} />);
     case 'location':       return wrap(<LocationCard    msg={msg} mine={mine} currentUserId={currentUserId} />);

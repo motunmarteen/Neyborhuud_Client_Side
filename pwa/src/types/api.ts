@@ -619,6 +619,26 @@ export interface ChatMessageMeta {
   /** Why an order was cancelled, e.g. "payment_window_expired". */
   cancelReason?: string;
 
+  // ── Event RSVP card (auto-created event thread) ──
+  /**
+   * Present on the interactive RSVP card posted into an event's chat thread.
+   * The event details alongside it are snapshotted at post time so the card
+   * renders without a live fetch.
+   */
+  rsvpAction?: "going" | "maybe" | "not_going";
+  eventTitle?: string;
+  eventStartDate?: string;
+  eventVenue?: string;
+  organizerId?: string;
+  /** Who this particular RSVP announcement is about. */
+  actorId?: string;
+  actorName?: string;
+  /** Live tallies at post time; refreshed in place via the socket update. */
+  goingCount?: number;
+  maybeCount?: number;
+  /** Set on an organizer's broadcast update message. */
+  eventUpdate?: boolean;
+
   // ── Phase 2 rich-card shares — server snapshots these at send time ──
   // contact_share: a real NeyborHuud user's profile shared as a card.
   userId?: string;
