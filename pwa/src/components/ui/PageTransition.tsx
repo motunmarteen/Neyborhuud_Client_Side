@@ -21,15 +21,15 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
 
     // NOTE: deliberately NOT `initial={{ opacity: 0 }}`.
     //
-    // An entry animation that starts at opacity:0 makes page content invisible
-    // until JS finishes animating it in. If that animation never runs — the
-    // animation frame is throttled, framer-motion fails to hydrate, reduced-motion
-    // is honoured oddly, whatever — the page renders perfectly and then stays
-    // permanently blank, with no console error to explain it. That shipped, and
-    // every route except the SKIP_PATHS ones was invisible in production.
+    // Server-rendered markup carried `opacity:0` inline, so page content stayed
+    // invisible until framer-motion hydrated and animated it in. On a slow
+    // connection (or a slow device) that's a visible blank-page window on every
+    // route except the SKIP_PATHS ones — the DOM is fully rendered underneath
+    // the whole time, with no error to explain the blankness.
     //
-    // Content is now visible by default and the fade is a pure enhancement:
-    // worst case the animation is skipped and the page simply appears.
+    // `initial={false}` makes content visible immediately and leaves the fade as
+    // a pure enhancement, so however long hydration takes, the page is never
+    // hidden waiting for JS.
     return (
         <motion.div
             key={pathname}
