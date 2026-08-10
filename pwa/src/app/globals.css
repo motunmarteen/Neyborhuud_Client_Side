@@ -2794,6 +2794,15 @@ html[data-auth='profile-map'] .neu-base {
   padding-top: 3.25rem;
 }
 
+/* Sky-overlay routes (feed/home) hide the status-bar backdrop so the sky hero
+   shows through — correct on a real device, where the OS draws the clock over
+   the app's own background. In the mockup the clock is painted by the OUTER
+   page on top of this iframe, so with no backdrop the sky gradient runs behind
+   it and the two compete. Restore the strip here only. */
+[data-in-phone-mockup="true"] .app-topnav-host--sky-overlay::before {
+  opacity: 1;
+}
+
 .auth-signup-chrome > * {
   pointer-events: auto;
 }

@@ -162,15 +162,25 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
     };
   }, [isInIframe]);
 
-  // Pre-mount we don't yet know the hostname or viewport, so we can't tell
-  // whether this render belongs in the phone frame or not. Rendering children
-  // here paints the full-width app for a beat and then swaps it into the
-  // frame — the "flashes on the desktop before normalizing" effect.
+  // Pre-mount we don't know the hostname or viewport from state yet, so we
+  // can't tell whether this render belongs in the phone frame. Rendering
+  // children here paints the full-width app for a beat before it swaps into
+  // the frame — the "flashes on the desktop before normalizing" effect.
   //
-  // Hold the frame's own background instead until the mode is known. This is a
-  // few frames on the app subdomain only; the marketing site (not an app
-  // domain) and the iframe child both still render immediately below.
+  // Holding a blank placeholder is only acceptable where the simulator could
+  // actually appear. Blanking unconditionally means a real phone (and the
+  // marketing site) renders nothing until the effect runs — a blank screen for
+  // as long as hydration takes, which is far worse than the flash this avoids.
+  // So check the real conditions synchronously here rather than waiting for
+  // state, and only hold back when the simulator is genuinely a possibility.
   if (!mounted) {
+    if (typeof window === "undefined") return <>{children}</>;
+    const h = window.location.hostname;
+    const couldSimulate =
+      (h.startsWith("app.") || h.startsWith("app.neyborhuud.local")) &&
+      window.self === window.top &&
+      window.innerWidth >= 768;
+    if (!couldSimulate) return <>{children}</>;
     return <div className="app-simulator-preboot" aria-hidden />;
   }
 
