@@ -208,17 +208,40 @@
   }
 }
 
-/* Held for the few frames before DesktopPhoneFrame knows whether it should
-   render the simulator. Painting the simulator's own backdrop here (rather
-   than the un-framed app) is what stops the full-width flash on first load.
-   Only at widths where the simulator can actually appear — below 768px the
-   app renders natively, so holding a black screen there would be a
-   regression, not a fix. */
-@media (min-width: 768px) {
-  .app-simulator-preboot {
-    min-height: 100vh;
-    width: 100%;
-    background-color: #050706;
+/* Hides the app shell for the moment before DesktopPhoneFrame knows whether to
+   render the simulator, so the full-width app doesn't flash and then snap into
+   the phone. The flag is set pre-paint by SIMULATOR_BOOT_SCRIPT and removed by
+   the component's mount effect.
+
+   This is done in CSS rather than by rendering a placeholder in React: the
+   first client render must match the server's HTML, and branching on `window`
+   there is a hydration mismatch (it was, and this replaces that approach).
+
+   The animation is the safety net. If the script sets the flag but React never
+   mounts to clear it, opacity returns to 1 after 1.5s rather than leaving the
+   app permanently invisible — the failure mode is a brief flash, not a blank
+   screen. The boot script only sets the flag at >=768px on an app hostname, so
+   real phones never enter this state at all. */
+:root[data-simulator-booting] body {
+  background-color: #050706;
+}
+
+:root[data-simulator-booting] #main-content {
+  animation: simulator-boot-reveal 1.5s step-end forwards;
+}
+
+@keyframes simulator-boot-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-simulator-booting] #main-content {
+    animation-duration: 0.3s;
   }
 }
 

@@ -36,6 +36,10 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
 
   useEffect(() => {
     setMounted(true);
+    // The boot script hides the shell to avoid a full-width flash before we
+    // know whether the simulator applies. Now that we're mounted, the correct
+    // branch renders on the very next paint, so release it.
+    document.documentElement.removeAttribute("data-simulator-booting");
     if (typeof window !== "undefined") {
       const hostname = window.location.hostname;
       const isApp =
@@ -162,26 +166,18 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
     };
   }, [isInIframe]);
 
-  // Pre-mount we don't know the hostname or viewport from state yet, so we
-  // can't tell whether this render belongs in the phone frame. Rendering
-  // children here paints the full-width app for a beat before it swaps into
-  // the frame — the "flashes on the desktop before normalizing" effect.
+  // The first client render MUST produce the same tree the server produced, so
+  // this cannot branch on `window` — doing so renders children on the server
+  // and a placeholder on the client, which is a hydration mismatch.
   //
-  // Holding a blank placeholder is only acceptable where the simulator could
-  // actually appear. Blanking unconditionally means a real phone (and the
-  // marketing site) renders nothing until the effect runs — a blank screen for
-  // as long as hydration takes, which is far worse than the flash this avoids.
-  // So check the real conditions synchronously here rather than waiting for
-  // state, and only hold back when the simulator is genuinely a possibility.
+  // The pre-frame flash is handled in CSS instead: an inline script in the
+  // document head (see SIMULATOR_BOOT_SCRIPT in layout.tsx) sets
+  // data-simulator-booting on <html> before first paint when the simulator is
+  // a possibility, and simulator.css hides the app shell while it is set. This
+  // effect clears it once the real mode is known. No React branch, so the
+  // server and client trees stay identical.
   if (!mounted) {
-    if (typeof window === "undefined") return <>{children}</>;
-    const h = window.location.hostname;
-    const couldSimulate =
-      (h.startsWith("app.") || h.startsWith("app.neyborhuud.local")) &&
-      window.self === window.top &&
-      window.innerWidth >= 768;
-    if (!couldSimulate) return <>{children}</>;
-    return <div className="app-simulator-preboot" aria-hidden />;
+    return <>{children}</>;
   }
 
   // If inside the iframe (PWA app child), or NOT on the app subdomain, or on a mobile screen, render natively

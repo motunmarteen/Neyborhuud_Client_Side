@@ -12,7 +12,7 @@ import TextSizeApplier from "@/components/TextSizeApplier";
 import { ThemeSync } from "@/components/theme/ThemeSync";
 import CapacitorInit from "@/components/capacitor/CapacitorInit";
 import SpaRouteRescue from "@/components/capacitor/SpaRouteRescue";
-import { SYSTEM_THEME_BOOT_SCRIPT } from "@/lib/systemTheme";
+import { SYSTEM_THEME_BOOT_SCRIPT, SIMULATOR_BOOT_SCRIPT } from "@/lib/systemTheme";
 import { BRAND_NAME } from "@/lib/brand";
 import AutoTopNav from "@/components/navigation/AutoTopNav";
 import AutoLeftSidebar from "@/components/navigation/AutoLeftSidebar";
@@ -95,6 +95,11 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: SYSTEM_THEME_BOOT_SCRIPT,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: SIMULATOR_BOOT_SCRIPT,
           }}
         />
         <script

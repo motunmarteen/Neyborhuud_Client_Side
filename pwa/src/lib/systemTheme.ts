@@ -99,6 +99,29 @@ export function subscribeSystemTheme(onChange: (isDark: boolean, theme: AppTheme
   return () => mq.removeEventListener('change', handler);
 }
 
+/**
+ * Inline boot script (in layout `<head>`) — hides the app shell for the brief
+ * moment before DesktopPhoneFrame knows whether it should render the phone
+ * simulator, so the full-width app doesn't flash and then snap into the frame.
+ *
+ * This lives in a pre-paint script rather than in React because the first
+ * client render has to match the server's HTML exactly; branching on `window`
+ * inside the component is a hydration mismatch. CSS keyed off an attribute set
+ * before paint sidesteps that entirely.
+ *
+ * Only sets the flag where the simulator can actually appear (app hostname,
+ * top-level window, >=768px), so real phones and the marketing site are never
+ * hidden. DesktopPhoneFrame's mount effect removes it; the CSS also self-clears
+ * after a short delay so a JS failure can't leave the app permanently blank.
+ */
+export const SIMULATOR_BOOT_SCRIPT = `(function(){try{
+  var h=location.hostname;
+  var isApp=h.indexOf('app.')===0||h.indexOf('app.neyborhuud.local')===0;
+  if(isApp&&window.self===window.top&&window.innerWidth>=768){
+    document.documentElement.setAttribute('data-simulator-booting','');
+  }
+}catch(e){}}());`;
+
 /** Inline boot script (in layout `<head>`) — prevents FOUC before React hydrates. */
 export const SYSTEM_THEME_BOOT_SCRIPT = `(function(){try{
   var s=localStorage.getItem('neyborhuud:theme');
