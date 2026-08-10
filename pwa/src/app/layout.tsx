@@ -133,12 +133,19 @@ export default function RootLayout({
           />
           <TextSizeApplier />
           <IframeUrlSync />
-          <DailyCheckInModal />
           <DesktopPhoneFrame>
             <div id="main-content" className="app-shell">
               <AutoTopNav />
               <AutoLeftSidebar />
               <FloatingSosButton />
+              {/*
+                Global overlays MUST live inside DesktopPhoneFrame. In simulator
+                mode the frame renders the app in an iframe, so anything mounted
+                as a sibling paints over the whole desktop page instead of being
+                confined to the simulated phone — and the iframe renders its own
+                copy too, so the modal appears twice.
+              */}
+              <DailyCheckInModal />
               {children}
             </div>
           </DesktopPhoneFrame>

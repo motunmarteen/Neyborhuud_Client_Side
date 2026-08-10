@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import QRCode from "qrcode";
@@ -32,6 +32,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const statusBarTime = useStatusBarTime();
   const pathname = usePathname();
+  const deviceRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -102,6 +103,51 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
     }
   }, []); // Run only on mount
 
+  // ── Confine global overlays to the simulated phone ──────────────────────
+  //
+  // Providers (Toaster, NotificationPermissionPrompt, CallOverlay, the daily
+  // check-in modal, …) render OUTSIDE this component in the tree, so their
+  // `position: fixed` resolves against the desktop viewport and they paint
+  // across the whole page instead of inside the phone. They can't simply be
+  // moved — they depend on context this component sits below.
+  //
+  // Instead, flag simulator mode on <html> and publish the device's measured
+  // rect as CSS variables. simulator.css uses them to re-anchor fixed overlays
+  // to the phone. Measured rather than hardcoded because the device is sized
+  // with clamp() inside a grid, so it moves with the viewport.
+  const simulatorActive = mounted && isAppDomain && !isInIframe && isDesktop;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!simulatorActive) {
+      root.removeAttribute("data-simulator");
+      return;
+    }
+
+    root.setAttribute("data-simulator", "true");
+
+    const syncRect = () => {
+      const el = deviceRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      root.style.setProperty("--sim-left", `${Math.round(r.left)}px`);
+      root.style.setProperty("--sim-top", `${Math.round(r.top)}px`);
+      root.style.setProperty("--sim-width", `${Math.round(r.width)}px`);
+      root.style.setProperty("--sim-height", `${Math.round(r.height)}px`);
+    };
+
+    syncRect();
+    const ro = new ResizeObserver(syncRect);
+    if (deviceRef.current) ro.observe(deviceRef.current);
+    window.addEventListener("resize", syncRect);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", syncRect);
+      root.removeAttribute("data-simulator");
+    };
+  }, [simulatorActive]);
+
   // Sync browser Back/Forward navigation back to the iframe
   useEffect(() => {
     if (typeof window === "undefined" || isInIframe) return;
@@ -116,8 +162,16 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
     };
   }, [isInIframe]);
 
+  // Pre-mount we don't yet know the hostname or viewport, so we can't tell
+  // whether this render belongs in the phone frame or not. Rendering children
+  // here paints the full-width app for a beat and then swaps it into the
+  // frame — the "flashes on the desktop before normalizing" effect.
+  //
+  // Hold the frame's own background instead until the mode is known. This is a
+  // few frames on the app subdomain only; the marketing site (not an app
+  // domain) and the iframe child both still render immediately below.
   if (!mounted) {
-    return <>{children}</>;
+    return <div className="app-simulator-preboot" aria-hidden />;
   }
 
   // If inside the iframe (PWA app child), or NOT on the app subdomain, or on a mobile screen, render natively
@@ -132,7 +186,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
 
       {/* 2. Phone Mockup Bezel with same-origin iframe */}
       <div className="phone-mockup-wrapper">
-        <div className="phone-mockup-device">
+        <div className="phone-mockup-device" ref={deviceRef}>
           <div className="phone-mockup-statusbar" aria-hidden="true">
             <span className="phone-mockup-statusbar__time">{statusBarTime}</span>
             <span className="phone-mockup-statusbar__icons">

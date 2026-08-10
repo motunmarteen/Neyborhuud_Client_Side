@@ -204,6 +204,32 @@
   }
 }
 
+/* Held for the few frames before DesktopPhoneFrame knows whether it should
+   render the simulator. Painting the simulator's own backdrop here (rather
+   than the un-framed app) is what stops the full-width flash on first load.
+   Only at widths where the simulator can actually appear — below 768px the
+   app renders natively, so holding a black screen there would be a
+   regression, not a fix. */
+@media (min-width: 768px) {
+  .app-simulator-preboot {
+    min-height: 100vh;
+    width: 100%;
+    background-color: #050706;
+  }
+}
+
+/* NOTE on overlay containment: overlays owned by Providers (Toaster, call
+   overlays, notification/PWA prompts, bottom sheets) render INSIDE the
+   iframe, where the app runs natively and is already bounded by the phone
+   screen — so they need no special handling here. The one exception was
+   DailyCheckInModal, which was mounted as a sibling of DesktopPhoneFrame in
+   layout.tsx and therefore painted over the whole desktop page; that was
+   fixed by moving it inside the frame rather than with CSS.
+
+   --sim-left/top/width/height are still published on <html data-simulator>
+   by DesktopPhoneFrame for any future outer-page overlay that genuinely does
+   need to be anchored to the device rect. */
+
 @media (max-width: 767px) {
   /* Fallback: render full screen — true phone widths only */
   .app-simulator-layout {
