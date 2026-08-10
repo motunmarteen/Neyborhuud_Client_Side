@@ -68,9 +68,13 @@
 
   .phone-mockup-device {
     position: relative;
-    width: clamp(300px, 32vw, 420px);
-    height: 870px;
-    max-height: 88vh;
+    /* Width is capped by BOTH the viewport width and the available height —
+       88vh / 19.5 * 9 is the widest a 9:19.5 phone can be and still fit
+       vertically. Without the height term, a short window clips the device via
+       max-height while the width stays put, squashing it into a tablet shape
+       instead of scaling it down as a phone. */
+    width: min(clamp(300px, 32vw, 420px), calc(88vh * 9 / 19.5));
+    height: auto;
     aspect-ratio: 9 / 19.5;
     background-color: #000000;
     border: 12px solid #1c1f1e;

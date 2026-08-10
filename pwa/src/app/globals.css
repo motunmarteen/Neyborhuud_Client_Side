@@ -2769,6 +2769,31 @@ html[data-auth='profile-map'] .neu-base {
   padding-top: 3.25rem;
 }
 
+/* ── Notch clearance inside the desktop phone simulator ──────────────────────
+   The mockup's status bar (50px) and notch are drawn by the OUTER page, on top
+   of this iframe's content. Inside a desktop iframe there is no real notch, so
+   env(safe-area-inset-top) is 0 and every header that relies on it sits flush
+   at the very top — underneath the simulated notch and clock.
+
+   Redefining --safe-top is enough for everything built on it — .app-topnav
+   already pads by calc(var(--safe-top) + 0.75rem), and .app-topnav-host::before
+   sizes its status-bar backdrop from it — so the whole top chrome shifts below
+   the notch from this one declaration. Rules that call env(safe-area-inset-top)
+   directly can't read this and are handled case by case below.
+
+   Only applies inside the mockup; on a real device the genuine safe-area inset
+   is used exactly as before. */
+[data-in-phone-mockup="true"] {
+  --safe-top: 3.25rem;
+}
+
+/* The sidebar drawer's own header sets padding from env() directly, so it needs
+   the clearance spelled out rather than inherited from --safe-top. */
+[data-in-phone-mockup="true"] .left-sidebar__mobile-bar,
+[data-in-phone-mockup="true"] .left-sidebar__header-panel {
+  padding-top: 3.25rem;
+}
+
 .auth-signup-chrome > * {
   pointer-events: auto;
 }
