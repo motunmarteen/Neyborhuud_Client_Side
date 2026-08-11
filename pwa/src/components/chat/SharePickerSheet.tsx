@@ -68,9 +68,13 @@ export function SharePickerSheet({
           <p className="py-8 text-center text-sm text-[var(--neu-text-muted)]">{emptyLabel}</p>
         ) : (
           <div className="flex flex-col gap-1.5">
-            {items.map((item) => (
+            {/* Index-suffixed key: a caller passing records without an id would
+                otherwise collide on key={undefined} for every row. The real fix
+                belongs upstream (see extractPageItems in ChatActionMenu), but a
+                picker should never be able to break the list on bad input. */}
+            {items.filter((item) => item && item.title).map((item, i) => (
               <button
-                key={item.id}
+                key={item.id ?? `item-${i}`}
                 type="button"
                 onClick={() => onPick(item)}
                 className="flex items-center gap-3 rounded-xl bg-brand-black px-2.5 py-2 text-left hover:bg-white/5 mod-inset"

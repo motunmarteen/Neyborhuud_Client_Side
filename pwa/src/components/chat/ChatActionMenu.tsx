@@ -62,6 +62,28 @@ function acceptAttr(key: keyof typeof ALLOWED_MIME) {
   return ALLOWED_MIME[key].join(',');
 }
 
+/**
+ * Pulls the array of records out of one page of a paginated API response.
+ *
+ * The endpoints are not consistent: /marketplace returns `data` as a plain
+ * array, while /jobs and /events return `data` as `{ jobs: [...], pagination }`
+ * / `{ events: [...], pagination }`. Reaching for `page.data` first therefore
+ * yielded the WRAPPER OBJECT for jobs and events, and flatMap on a non-array
+ * spreads it as a single item — so the pickers rendered one bogus entry with no
+ * _id, which is what produced React's "unique key" warning.
+ *
+ * Checking the named array first, then a bare array, then giving up, keeps all
+ * three shapes working without guessing.
+ */
+function extractPageItems(page: any, key: string): any[] {
+  if (!page) return [];
+  const named = page?.data?.[key] ?? page?.[key];
+  if (Array.isArray(named)) return named;
+  if (Array.isArray(page?.data)) return page.data;
+  if (Array.isArray(page)) return page;
+  return [];
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface ActionResult {
   type: ChatMessageType;
@@ -467,7 +489,7 @@ function EventShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => voi
   const mine = useUserEvents(user?.id ?? null, 20);
   const browse = useEvents();
   const mineItems = (mine.data ?? []) as any[];
-  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => p?.data ?? p?.events ?? p ?? []) ?? []) as any[];
+  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => extractPageItems(p, 'events')) ?? []) as any[];
   const items = mineItems.length > 0 ? mineItems : browseItems;
   const loading = mine.isLoading || (mineItems.length === 0 && browse.isLoading);
 
@@ -506,7 +528,7 @@ function ProductShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => v
   const mine = useUserMarketplace(user?.id ?? null, 20);
   const browse = useMarketplaceProducts();
   const mineItems = (mine.data ?? []) as any[];
-  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => p?.data?.products ?? p?.products ?? p?.data ?? p ?? []) ?? []) as any[];
+  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => extractPageItems(p, 'products')) ?? []) as any[];
   const items = mineItems.length > 0 ? mineItems : browseItems;
   const loading = mine.isLoading || (mineItems.length === 0 && browse.isLoading);
 
@@ -541,7 +563,7 @@ function JobShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
   const mine = useUserJobs(user?.id ?? null, 20);
   const browse = useJobs();
   const mineItems = (mine.data ?? []) as any[];
-  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => p?.data ?? p?.jobs ?? p ?? []) ?? []) as any[];
+  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => extractPageItems(p, 'jobs')) ?? []) as any[];
   const items = mineItems.length > 0 ? mineItems : browseItems;
   const loading = mine.isLoading || (mineItems.length === 0 && browse.isLoading);
 
@@ -574,8 +596,8 @@ function PostShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void
   const { user } = useAuth();
   const mine = useUserPosts(user?.id ?? null);
   const browse = usePosts();
-  const mineItems = ((mine.data as any)?.pages?.flatMap((p: any) => p?.data ?? p?.posts ?? p ?? []) ?? []) as any[];
-  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => p?.data ?? p?.posts ?? p ?? []) ?? []) as any[];
+  const mineItems = ((mine.data as any)?.pages?.flatMap((p: any) => extractPageItems(p, 'posts')) ?? []) as any[];
+  const browseItems = ((browse.data as any)?.pages?.flatMap((p: any) => extractPageItems(p, 'posts')) ?? []) as any[];
   const items = mineItems.length > 0 ? mineItems : browseItems;
   const loading = mine.isLoading || (mineItems.length === 0 && browse.isLoading);
 
