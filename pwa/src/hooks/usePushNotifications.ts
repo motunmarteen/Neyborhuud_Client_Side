@@ -169,15 +169,19 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       if (!sub) {
         const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (!vapidPublicKey) {
-          console.warn('[Push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set');
-          setError('Push notifications are not configured.');
-          try {
-            localStorage.setItem(PERMISSION_ACK_KEY, '1');
-          } catch {
-            // ignore
-          }
-          setIsSubscribed(true);
-          return true;
+          // This used to setIsSubscribed(true) and return true — reporting
+          // SUCCESS while registering nothing. The prompt then stopped asking,
+          // the UI claimed notifications were on, and push silently never
+          // worked: incoming calls could not ring a closed app, and the caller
+          // just saw "missed call". Failing loudly is the only honest
+          // behaviour — a misconfigured deploy must not look like a working one.
+          console.error(
+            '[Push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set — push cannot be registered. ' +
+              'Incoming calls and alerts will NOT reach this device while the app is closed.',
+          );
+          setError('Push notifications are not configured on this deployment.');
+          setIsSubscribed(false);
+          return false;
         }
 
         sub = await withTimeout(

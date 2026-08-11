@@ -64,6 +64,29 @@ export function AppViewport() {
                     regs.forEach((reg) => void reg.unregister());
                 });
             }
+
+            // Register the service worker ourselves, in production, on EVERY
+            // load — not as an `else` of the version check above.
+            //
+            // Why explicitly: next-pwa is configured with `register: true`, but
+            // on this Next 16 / App Router build it does not inject the
+            // registration script. /sw.js is served (200) while the HTML has no
+            // reference to serviceWorker at all, so nothing ever registered it.
+            // No registration means no push subscription, and without that an
+            // incoming call cannot ring a closed app — every call became a
+            // "missed call" after the ring timeout, with nothing to explain why.
+            //
+            // Why unconditionally: on a first-ever visit the brand-version
+            // branch above runs (prev === null), which unregisters and reloads.
+            // Putting registration in its `else` meant a fresh browser never
+            // registered at all. register() is idempotent — calling it when a
+            // registration already exists is a no-op — so running it every load
+            // is both safe and the only version that survives a cold start.
+            if (process.env.NODE_ENV === 'production') {
+                void navigator.serviceWorker.register('/sw.js').catch((err) => {
+                    console.error('[SW] Registration failed — push notifications will not work:', err);
+                });
+            }
         }
 
         window.addEventListener('resize', syncHeight);
