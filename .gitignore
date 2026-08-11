@@ -61,3 +61,7 @@ nul
 *.log
 **/dev-server.log
 **/backend.log
+
+# Local AI/editor tooling — not part of the project
+.claude/
+.cursor/
