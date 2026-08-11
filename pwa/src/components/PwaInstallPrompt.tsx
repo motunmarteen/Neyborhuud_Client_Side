@@ -25,7 +25,8 @@ import {
 /** Wait until user has scanned the feed after login/onboarding. */
 const SHOW_DELAY_MS = 6000;
 const ANDROID_MANUAL_DELAY_MS = 9000;
-const SESSION_KEY = 'neyborhuud_pwa_install_session';
+/** Set the first time the sheet is shown, and never cleared — one offer per device. */
+const SHOWN_ONCE_KEY = 'neyborhuud_pwa_install_shown_once';
 
 function useLightInstallSheet(): boolean {
     const [light, setLight] = useState(false);
@@ -123,8 +124,12 @@ export default function PwaInstallPrompt() {
         if (!setupReady) return;
         if (!canShowPwaInstallPrompt(pathname, isAuthenticated)) return;
 
+        // Shown-once, permanently. This used to be sessionStorage, which clears
+        // when the browser closes — so the sheet came back on every new session
+        // and read as nagging. localStorage means a user sees this at most once
+        // per device, whatever they do with it.
         try {
-            if (sessionStorage.getItem(SESSION_KEY) === '1') return;
+            if (localStorage.getItem(SHOWN_ONCE_KEY) === '1') return;
         } catch {
             /* ignore */
         }
@@ -140,7 +145,7 @@ export default function PwaInstallPrompt() {
             if (!canShowPwaInstallPrompt(pathname, isAuthenticated)) return;
             if (isPwaInstalled()) return;
             try {
-                sessionStorage.setItem(SESSION_KEY, '1');
+                localStorage.setItem(SHOWN_ONCE_KEY, '1');
             } catch {
                 /* ignore */
             }

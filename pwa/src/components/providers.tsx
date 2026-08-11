@@ -373,20 +373,29 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </GuardianAlertsProvider>
       </SosProvider>
       </SwipeBackProvider>
+      {/*
+        X/Twitter-style toast: a compact dark pill centred near the top, rather
+        than a bordered card in the corner. No close button — it self-dismisses,
+        so it never asks the user to dismiss it. richColors is off deliberately:
+        every toast uses the same neutral pill, and meaning comes from the text
+        and icon, which is what keeps it unobtrusive.
+      */}
       <Toaster
-        position="top-right"
-        richColors
-        closeButton
-        duration={4000}
+        position="top-center"
+        duration={3000}
         toastOptions={{
-          style: {
-            background: 'var(--background)',
-            color: 'var(--foreground)',
-            border: '1px solid var(--border)',
+          unstyled: true,
+          classNames: {
+            toast: 'nh-toast',
+            title: 'nh-toast__title',
+            description: 'nh-toast__description',
+            icon: 'nh-toast__icon',
+            actionButton: 'nh-toast__action',
           },
         }}
-        visibleToasts={4}
+        visibleToasts={3}
         expand={false}
+        offset={12}
       />
       {/* Announcer: Sonner toasts are visual-only; this mirrors them into the
           aria-live region so screen readers hear every notification. */}
