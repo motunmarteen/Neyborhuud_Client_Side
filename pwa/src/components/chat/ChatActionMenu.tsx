@@ -761,7 +761,6 @@ const ChatActionMenu = forwardRef<ChatActionMenuHandle, Props>(function ChatActi
   const [pendingMediaKey, setPendingMediaKey] = useState<keyof typeof ALLOWED_MIME>('image');
   const [pendingCapture, setPendingCapture] = useState<'environment' | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   useImperativeHandle(ref, () => ({
     openVoiceRecorder: () => {
@@ -774,17 +773,19 @@ const ChatActionMenu = forwardRef<ChatActionMenuHandle, Props>(function ChatActi
     if (open) resetSheetDrag();
   }, [open, resetSheetDrag]);
 
-  // Close on outside click
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
+  // NOTE: there is deliberately no document-level "click outside to close"
+  // handler here.
+  //
+  // There used to be one, and it made every tile in the sheet dead. The sheet
+  // is rendered with createPortal into document.body, but menuRef wraps only
+  // the "+" trigger — so menuRef.contains(tile) was always false. Tapping a
+  // tile fired mousedown → setOpen(false) → the sheet unmounted before the
+  // click event could reach the tile's own onClick. No error, nothing
+  // happened, every icon looked broken.
+  //
+  // Dismissal is already handled properly by the sheet's own backdrop button
+  // and the Escape handler below, so the extra listener was redundant as well
+  // as harmful.
 
   // Close on Escape
   useEffect(() => {
@@ -860,7 +861,7 @@ const ChatActionMenu = forwardRef<ChatActionMenuHandle, Props>(function ChatActi
       {activeModal === 'kidnapping_info' && <KidnappingModal    onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
       {activeModal === 'voice'           && <VoiceRecorder      onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
 
-      <div className="relative" ref={menuRef}>
+      <div className="relative">
         <button
           type="button"
           onClick={() => setOpen((s) => !s)}

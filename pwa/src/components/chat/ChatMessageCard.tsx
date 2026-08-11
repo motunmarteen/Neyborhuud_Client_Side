@@ -543,10 +543,32 @@ function ContactCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 // ─── Media renderers ─────────────────────────────────────────────────────────
 
 function ImageBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
+  // The bubble sits in a `flex flex-col items-start/items-end` stack, so it
+  // shrinks to its content's width. This previously used a `fill` Image inside
+  // a fixed 240px-tall box: `fill` is absolutely positioned and therefore has
+  // no intrinsic width, so the container collapsed to a sliver while keeping
+  // its height — tall, thin, unreadable images.
+  //
+  // Using width/height with `h-auto` gives the element real intrinsic size, so
+  // the bubble takes its natural width (capped at 240px) and the image keeps
+  // its own aspect ratio instead of being cropped into a square.
   return (
-    <div className="max-w-[240px] sm:max-w-xs">
-      <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="relative block w-full rounded-2xl overflow-hidden" style={{ height: 240 }}>
-        <Image src={msg.mediaUrl ?? ''} alt={msg.content || 'image'} fill sizes="240px" className="object-cover" />
+    <div className="w-[240px] max-w-[75vw]">
+      <a
+        href={msg.mediaUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block overflow-hidden rounded-2xl bg-black/5"
+      >
+        <Image
+          src={msg.mediaUrl ?? ''}
+          alt={msg.content || 'image'}
+          width={240}
+          height={240}
+          sizes="240px"
+          className="h-auto w-full object-contain"
+          style={{ maxHeight: 320 }}
+        />
       </a>
       <Meta msg={msg} mine={mine} />
     </div>
@@ -554,9 +576,19 @@ function ImageBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 }
 
 function VideoBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
+  // Explicit width for the same reason as ImageBubble — `max-w-` alone lets the
+  // flex item collapse before the video's metadata (and therefore its intrinsic
+  // size) has loaded.
   return (
-    <div className="max-w-[280px]">
-      <video src={msg.mediaUrl} controls className="w-full rounded-2xl" style={{ maxHeight: 240 }} />
+    <div className="w-[280px] max-w-[80vw]">
+      <video
+        src={msg.mediaUrl}
+        controls
+        preload="metadata"
+        playsInline
+        className="w-full rounded-2xl bg-black"
+        style={{ maxHeight: 320 }}
+      />
       <Meta msg={msg} mine={mine} />
     </div>
   );
