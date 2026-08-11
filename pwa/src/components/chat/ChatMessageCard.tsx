@@ -544,30 +544,29 @@ function ContactCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 
 function ImageBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   // The bubble sits in a `flex flex-col items-start/items-end` stack, so it
-  // shrinks to its content's width. This previously used a `fill` Image inside
-  // a fixed 240px-tall box: `fill` is absolutely positioned and therefore has
-  // no intrinsic width, so the container collapsed to a sliver while keeping
-  // its height — tall, thin, unreadable images.
-  //
-  // Using width/height with `h-auto` gives the element real intrinsic size, so
-  // the bubble takes its natural width (capped at 240px) and the image keeps
-  // its own aspect ratio instead of being cropped into a square.
+  // shrinks to its content. This must NOT use a `fill` Image: `fill` is
+  // absolutely positioned and has no intrinsic width, so the container
+  // collapsed to a zero-width sliver while keeping its height.
+  // No background, no fixed width: the bubble hugs the image exactly, so a
+  // portrait photo shows as a portrait and a landscape one as a landscape,
+  // with no letterboxing around it. `width`/`height` are only the intrinsic
+  // hint next/image needs — the real size comes from the max-w/max-h caps,
+  // and `w-auto h-auto` lets the picture keep its own aspect ratio.
   return (
-    <div className="w-[240px] max-w-[75vw]">
+    <div className="flex flex-col">
       <a
         href={msg.mediaUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="block overflow-hidden rounded-2xl bg-black/5"
+        className="block overflow-hidden rounded-2xl"
       >
         <Image
           src={msg.mediaUrl ?? ''}
           alt={msg.content || 'image'}
-          width={240}
-          height={240}
-          sizes="240px"
-          className="h-auto w-full object-contain"
-          style={{ maxHeight: 320 }}
+          width={480}
+          height={480}
+          sizes="(max-width: 640px) 70vw, 280px"
+          className="h-auto w-auto max-h-[320px] max-w-[70vw] rounded-2xl object-contain sm:max-w-[280px]"
         />
       </a>
       <Meta msg={msg} mine={mine} />
@@ -586,7 +585,7 @@ function VideoBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
         controls
         preload="metadata"
         playsInline
-        className="w-full rounded-2xl bg-black"
+        className="w-full rounded-2xl"
         style={{ maxHeight: 320 }}
       />
       <Meta msg={msg} mine={mine} />
