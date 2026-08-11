@@ -75,6 +75,13 @@ export function AddFrequentPlaceSheet({ onClose, onSaved, initialCoords, initial
           Work, chill spots, gym, and more help NeyborHuud show what matters around you — without changing your home address.
         </p>
 
+        {kind === "work" && (
+          <p className="mb-4 flex items-start gap-2 rounded-xl border border-brand-blue/20 bg-brand-blue/5 p-3 text-xs" style={{ color: "var(--neu-text)" }}>
+            <span className="material-symbols-outlined text-[16px] text-brand-blue" aria-hidden="true">shield</span>
+            <span>Sentinel safety alerts near your work area will reach you here too — not just at home.</span>
+          </p>
+        )}
+
         <div className="mb-4 grid grid-cols-2 gap-2">
           {FREQUENT_PLACE_KINDS.map((k) => (
             <button

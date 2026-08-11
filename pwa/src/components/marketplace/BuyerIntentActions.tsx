@@ -16,12 +16,16 @@ import { formatNGN, getOfferToast } from "@/lib/marketplaceMessages";
 import { toKobo, fromKobo } from "@/lib/currency";
 
 /** Shared light / glass offer modal — matches marketplace doodle + brand greens */
+const OFFER_MESSAGE_MAX = 500;
+
 function MakeOfferDialog({
   open,
   zOverlayClass,
   listedPriceLabel,
   offerAmount,
   onOfferAmountChange,
+  offerMessage,
+  onOfferMessageChange,
   onClose,
   onSubmit,
   isSubmitting,
@@ -31,6 +35,8 @@ function MakeOfferDialog({
   listedPriceLabel: string;
   offerAmount: string;
   onOfferAmountChange: (v: string) => void;
+  offerMessage: string;
+  onOfferMessageChange: (v: string) => void;
   onClose: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
@@ -126,6 +132,22 @@ function MakeOfferDialog({
           <p className="mt-2 text-xs leading-relaxed text-brand-green-dark/70 dark:text-white/50">
             The seller will be notified and can accept, reject, or counter your offer.
           </p>
+
+          <label htmlFor="offer-message-input" className="mb-2 mt-4 block text-sm font-semibold" style={{ color: "var(--neu-text)" }}>
+            Add a message <span className="font-normal text-brand-green-dark/60 dark:text-white/40">(optional)</span>
+          </label>
+          <textarea
+            id="offer-message-input"
+            value={offerMessage}
+            onChange={(e) => onOfferMessageChange(e.target.value.slice(0, OFFER_MESSAGE_MAX))}
+            placeholder="e.g. Can you deliver this week?"
+            rows={3}
+            maxLength={OFFER_MESSAGE_MAX}
+            className="w-full resize-none rounded-2xl border-2 border-[var(--border-light)] bg-[var(--surface-light)] p-3 text-sm text-brand-black shadow-inner placeholder:text-brand-green-dark/40 transition-shadow focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 dark:border-white/15 dark:bg-white/5 dark:text-white dark:placeholder:text-white/30 dark:focus:border-primary dark:focus:ring-emerald-400/15"
+          />
+          <p className="mt-1 text-right text-[11px] text-brand-green-dark/50 dark:text-white/35">
+            {offerMessage.length}/{OFFER_MESSAGE_MAX}
+          </p>
         </div>
 
         <div className="flex shrink-0 flex-col gap-3 border-t border-[var(--border-light)] bg-[var(--neu-bg)]/88 p-4 backdrop-blur-xl safe-area-bottom dark:border-white/10 sm:flex-row sm:justify-end sm:px-6 sm:py-4">
@@ -172,6 +194,7 @@ export function BuyerIntentActions({
   const router = useRouter();
   const [showOfferDialog, setShowOfferDialog] = useState(false);
   const [offerAmount, setOfferAmount] = useState("");
+  const [offerMessage, setOfferMessage] = useState("");
   const [contactingSeller, setContactingSeller] = useState(false);
   
   const makeOffer = useMakeOffer(product.id);
@@ -337,11 +360,13 @@ export function BuyerIntentActions({
 
     // API expects integer kobo — see pwa/src/lib/currency.ts.
     const amount = toKobo(nairaAmount);
+    const trimmedMessage = offerMessage.trim();
 
     try {
-      const res = await makeOffer.mutateAsync(amount);
+      const res = await makeOffer.mutateAsync({ amount, message: trimmedMessage || undefined });
       setShowOfferDialog(false);
       setOfferAmount("");
+      setOfferMessage("");
 
       // Navigate to the unified chat thread if the backend returned a conversationId
       const payload = (res as any)?.data ?? (res as any);
@@ -442,9 +467,12 @@ export function BuyerIntentActions({
           listedPriceLabel={formattedPrice}
           offerAmount={offerAmount}
           onOfferAmountChange={setOfferAmount}
+          offerMessage={offerMessage}
+          onOfferMessageChange={setOfferMessage}
           onClose={() => {
             setShowOfferDialog(false);
             setOfferAmount("");
+            setOfferMessage("");
           }}
           onSubmit={() => void handleMakeOffer()}
           isSubmitting={makeOffer.isPending}
@@ -513,9 +541,12 @@ export function BuyerIntentActions({
         listedPriceLabel={formattedPrice}
         offerAmount={offerAmount}
         onOfferAmountChange={setOfferAmount}
+        offerMessage={offerMessage}
+        onOfferMessageChange={setOfferMessage}
         onClose={() => {
           setShowOfferDialog(false);
           setOfferAmount("");
+          setOfferMessage("");
         }}
         onSubmit={() => void handleMakeOffer()}
         isSubmitting={makeOffer.isPending}
