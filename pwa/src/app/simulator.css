@@ -245,13 +245,19 @@
   }
 }
 
-/* NOTE on overlay containment: overlays owned by Providers (Toaster, call
-   overlays, notification/PWA prompts, bottom sheets) render INSIDE the
-   iframe, where the app runs natively and is already bounded by the phone
-   screen — so they need no special handling here. The one exception was
-   DailyCheckInModal, which was mounted as a sibling of DesktopPhoneFrame in
-   layout.tsx and therefore painted over the whole desktop page; that was
-   fixed by moving it inside the frame rather than with CSS.
+/* NOTE on overlay containment: overlays (Toaster, notification/PWA prompts,
+   the Sentinel bottom sheet, DailyCheckInModal) all render INSIDE
+   DesktopPhoneFrame in layout.tsx — i.e. inside `children`, not as a sibling
+   of the frame — so in simulator mode they're confined to the iframe, where
+   the app runs natively and is already bounded by the phone screen. No
+   special CSS handling is needed here as long as that placement holds.
+   Toaster/NotificationPermissionPrompt/PwaInstallPrompt/SentinelBottomSheet
+   used to be mounted one level too far out (as children of Providers,
+   rendered before DesktopPhoneFrame's `children` slot) — that painted them
+   over the whole desktop marketing page instead of the simulated phone
+   screen, and ran the underlying logic twice (once uselessly outside, once
+   correctly inside the iframe). Fixed by moving their JSX into layout.tsx
+   alongside DailyCheckInModal, which had already hit and fixed this once.
 
    --sim-left/top/width/height are still published on <html data-simulator>
    by DesktopPhoneFrame for any future outer-page overlay that genuinely does

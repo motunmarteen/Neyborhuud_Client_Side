@@ -3,11 +3,15 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import "./simulator.css";
-import { Providers } from "@/components/providers";
+import { Providers, SrToastAnnouncer } from "@/components/providers";
+import { Toaster } from "sonner";
 import { AppViewport } from "@/components/AppViewport";
 import DesktopPhoneFrame from "@/components/navigation/DesktopPhoneFrame";
 import IframeUrlSync from "@/components/navigation/IframeUrlSync";
 import DailyCheckInModal from "@/components/gamification/DailyCheckInModalLoader";
+import NotificationPermissionPrompt from "@/components/NotificationPermissionPrompt";
+import PwaInstallPrompt from "@/components/PwaInstallPrompt";
+import { SentinelBottomSheet } from "@/components/safety/SentinelBottomSheet";
 import TextSizeApplier from "@/components/TextSizeApplier";
 import { ThemeSync } from "@/components/theme/ThemeSync";
 import CapacitorInit from "@/components/capacitor/CapacitorInit";
@@ -151,6 +155,27 @@ export default function RootLayout({
                 copy too, so the modal appears twice.
               */}
               <DailyCheckInModal />
+              <Toaster
+                position="top-center"
+                duration={3000}
+                toastOptions={{
+                  unstyled: true,
+                  classNames: {
+                    toast: 'nh-toast',
+                    title: 'nh-toast__title',
+                    description: 'nh-toast__description',
+                    icon: 'nh-toast__icon',
+                    actionButton: 'nh-toast__action',
+                  },
+                }}
+                visibleToasts={3}
+                expand={false}
+                offset={12}
+              />
+              <SrToastAnnouncer />
+              <NotificationPermissionPrompt />
+              <PwaInstallPrompt />
+              <SentinelBottomSheet />
               {children}
             </div>
           </DesktopPhoneFrame>

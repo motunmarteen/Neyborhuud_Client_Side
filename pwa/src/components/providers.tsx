@@ -7,7 +7,7 @@
 
 import { QueryClientProvider } from '@tanstack/react-query';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Toaster, toast } from 'sonner';
+import { toast } from 'sonner';
 import { queryClient } from '@/lib/query-client';
 import { useEffect, useRef } from 'react';
 import socketService from '@/lib/socket';
@@ -19,8 +19,6 @@ import { I18nProvider } from '@/lib/i18n';
 import { useAuth } from '@/hooks/useAuth';
 import { SmartLocationSync } from '@/hooks/useSmartLocationSync';
 import { LocationSyncOrchestrator } from '@/components/location/LocationSyncOrchestrator';
-import NotificationPermissionPrompt from '@/components/NotificationPermissionPrompt';
-import PwaInstallPrompt from '@/components/PwaInstallPrompt';
 import { PwaInstallTracker } from '@/components/PwaInstallTracker';
 import { PageTransition } from '@/components/ui/PageTransition';
 import { SwipeBackProvider } from '@/contexts/SwipeBackContext';
@@ -29,13 +27,12 @@ import { RedZoneAlertsProvider } from '@/contexts/RedZoneAlertsContext';
 import { SosProvider } from '@/contexts/SosContext';
 import { IncognitoInviteListener } from '@/components/chat/IncognitoInviteListener';
 import { SentinelBottomSheetProvider } from '@/contexts/SentinelBottomSheetContext';
-import { SentinelBottomSheet } from '@/components/safety/SentinelBottomSheet';
 import { ClientRouteGuard } from '@/components/auth/ClientRouteGuard';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
 
 /** Pipes sr:announce (polite) and sr:alert (assertive) events into the aria-live regions in layout.tsx */
-function SrToastAnnouncer() {
+export function SrToastAnnouncer() {
   useEffect(() => {
     const writeToRegion = (id: string, msg: string) => {
       const el = document.getElementById(id);
@@ -326,45 +323,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <IncognitoInviteListener />
       <SmartLocationSync />
       <LocationSyncOrchestrator />
-      <NotificationPermissionPrompt />
       <PwaInstallTracker />
-      <PwaInstallPrompt />
       <ClientRouteGuard>
         <PageTransition>{children}</PageTransition>
       </ClientRouteGuard>
-      <SentinelBottomSheet />
       </SentinelBottomSheetProvider>
       </RedZoneAlertsProvider>
       </GuardianAlertsProvider>
       </SosProvider>
       </SwipeBackProvider>
-      {/*
-        X/Twitter-style toast: a compact dark pill centred near the top, rather
-        than a bordered card in the corner. No close button — it self-dismisses,
-        so it never asks the user to dismiss it. richColors is off deliberately:
-        every toast uses the same neutral pill, and meaning comes from the text
-        and icon, which is what keeps it unobtrusive.
-      */}
-      <Toaster
-        position="top-center"
-        duration={3000}
-        toastOptions={{
-          unstyled: true,
-          classNames: {
-            toast: 'nh-toast',
-            title: 'nh-toast__title',
-            description: 'nh-toast__description',
-            icon: 'nh-toast__icon',
-            actionButton: 'nh-toast__action',
-          },
-        }}
-        visibleToasts={3}
-        expand={false}
-        offset={12}
-      />
-      {/* Announcer: Sonner toasts are visual-only; this mirrors them into the
-          aria-live region so screen readers hear every notification. */}
-      <SrToastAnnouncer />
       {/* process.env.NODE_ENV === 'development' && (
         <ReactQueryDevtools initialIsOpen={false} />
       ) */}
