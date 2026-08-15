@@ -105,6 +105,7 @@ export default function NotificationPermissionPrompt() {
         id: TOAST_ID,
         description: 'Allow them in your browser settings to get SOS alerts.',
         duration: 7000,
+        icon: <span className="material-symbols-outlined" aria-hidden="true">notifications_off</span>,
         onDismiss: () => snoozePrompt(DENIED_SNOOZE_DAYS),
         onAutoClose: () => snoozePrompt(DENIED_SNOOZE_DAYS),
       });
@@ -118,6 +119,7 @@ export default function NotificationPermissionPrompt() {
       id: TOAST_ID,
       description: 'SOS alerts, trip check-ins, calls and messages.',
       duration: Infinity,
+      icon: <span className="material-symbols-outlined" aria-hidden="true">notifications_active</span>,
       action: {
         label: 'Turn on',
         onClick: handleEnable,

@@ -162,6 +162,7 @@ export default function RootLayout({
                   unstyled: true,
                   classNames: {
                     toast: 'nh-toast',
+                    content: 'nh-toast__text',
                     title: 'nh-toast__title',
                     description: 'nh-toast__description',
                     icon: 'nh-toast__icon',
