@@ -9518,23 +9518,29 @@ article.feed-card--emergency {
    Sonner runs unstyled (see providers.tsx), so these classes are the whole
    appearance. */
 /* [data-sonner-toast] itself IS .nh-toast (via toastOptions.classNames.toast).
-   Sonner absolutely-positions this element and sizes it via width:var(--width)
-   (600px by default), wider than the phone screen in simulator mode.
-   `margin-inline: auto` only centers an absolutely-positioned box once both
-   `left` and `right` are given a real (non-auto) value — that's what actually
-   creates the space for the margins to split evenly. Without pinning both
-   sides here, the element keeps Sonner's internal left/right (tied to
-   data-x-position on the toaster) and can end up flush to one edge instead
-   of centered on screen. */
+   Sonner absolutely-positions this element, sizing it via width:var(--width)
+   (600px by default, wider than the phone screen in simulator mode) and,
+   critically, animates it with an inline `transform` (the --y custom
+   property, driven by Sonner's own JS for the enter/exit animation). Because
+   that inline transform is what actually moves the toast on-screen, trying
+   to center via `left/right + margin-inline: auto` fought that translateY
+   and lost — the box kept sizing/positioning itself off Sonner's own
+   left/right (tied to data-x-position on the toaster), not this rule.
+   Centering with left: 50% + a horizontal translateX sidesteps all of that:
+   it doesn't care what width the box resolves to, and stacks safely with
+   Sonner's own translateY inside the same `transform` — this is the exact
+   pattern Sonner uses to center the toaster itself, just applied one level
+   down to the individual toast. */
 .nh-toast {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  left: 0 !important;
-  right: 0 !important;
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) var(--y, translateY(0)) !important;
   width: max-content;
   max-width: min(88vw, 21rem);
-  margin-inline: auto;
   padding: 0.625rem 0.875rem;
   border-radius: 1rem;
   background: rgba(24, 24, 27, 0.88);

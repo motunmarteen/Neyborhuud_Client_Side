@@ -91,11 +91,11 @@ export default function MapPinAvatar({
         </g>
         
         {/* Crisp White Outer Border Ring */}
-        <path 
-          d="M50 6 C25.6 6 6 25.6 6 50 C6 81.5 50 109 50 109 C50 109 94 81.5 94 50 C94 25.6 74.4 6 50 6 Z" 
-          fill="none" 
+        <path
+          d="M50 6 C25.6 6 6 25.6 6 50 C6 81.5 50 109 50 109 C50 109 94 81.5 94 50 C94 25.6 74.4 6 50 6 Z"
+          fill="none"
           stroke="#ffffff"
-          strokeWidth="8" 
+          strokeWidth="3"
         />
       </svg>
     </div>
