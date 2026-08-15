@@ -22,6 +22,14 @@ export function middleware(request: NextRequest) {
   } else {
     // 3. Routing for the landing page subdomain (neyborhuud.com / neyborhuud.local)
     // If they attempt to access PWA routes, redirect them to the app subdomain
+    //
+    // Includes both the authenticated app routes AND every auth/onboarding
+    // route (login, signup, complete-profile, ...). The whole account is
+    // scoped to the app.* origin (its own localStorage/session), so running
+    // any part of signup on the bare landing host leaves a session that
+    // /feed (etc.) can never see once the user does cross to app.* — they'd
+    // land there looking logged out. Redirecting the auth pages too keeps
+    // the entire flow on one origin from the first request.
     const pwaPaths = [
       "/feed",
       "/chat",
@@ -36,6 +44,16 @@ export function middleware(request: NextRequest) {
       "/incident-reports",
       "/friendship",
       "/settings",
+      "/login",
+      "/signup",
+      "/forgot-password",
+      "/reset-password",
+      "/verify-email",
+      "/auth-callback",
+      "/setup-complete",
+      "/pick-community",
+      "/verify-location",
+      "/complete-profile",
     ];
 
     const isPwaPath = pwaPaths.some(

@@ -884,49 +884,6 @@ export const authService = {
   },
 
   /**
-   * Google Sign-In — exchanges a Google id_token for a NeyborHuud session token.
-   * Returns the full response so the caller can read `isNewUser` for routing.
-   */
-  async googleSignIn(idToken: string): Promise<{
-    success: boolean;
-    message?: string;
-    data?: {
-      user: User;
-      token: string;
-      isNewUser: boolean;
-    };
-  }> {
-    try {
-      const response = await apiClient.post<{ user: User; token: string; isNewUser: boolean }>(
-        '/auth/social/google/token',
-        { id_token: idToken },
-      );
-
-      if (response.success && response.data) {
-        apiClient.setToken(response.data.token);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('neyborhuud_user', JSON.stringify(response.data.user));
-        }
-        persistAuthSessionPayload({
-          user: response.data.user,
-          community: undefined,
-          assignedCommunityId: undefined,
-          needsCommunitySelection: false,
-          needsGpsLocationVerification: false,
-          pickerContext: null,
-        });
-      }
-
-      return response;
-    } catch (error) {
-      return {
-        success: false,
-        message: getAuthErrorMessage(error),
-      };
-    }
-  },
-
-  /**
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {

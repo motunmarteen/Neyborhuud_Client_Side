@@ -113,7 +113,10 @@ export default function CompleteProfilePage() {
             if (!response.success) {
                 throw new Error(response.message || 'Profile update failed.');
             }
-            await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['currentUser'] }),
+                queryClient.invalidateQueries({ queryKey: ['gamification', 'stats'] }),
+            ]);
             setStep('success');
         } catch (error: unknown) {
             const msg = getApiErrorMessage(error, 'Profile update failed.');

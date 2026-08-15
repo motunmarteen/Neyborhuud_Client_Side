@@ -8,7 +8,6 @@ import apiClient from "@/lib/api-client";
 import { resolvePostAuthRoute, validateStoredSession } from "@/lib/authSession";
 import { SocialProofBadge } from "@/components/landing/SocialProofBadge";
 import { BRAND_NAME } from "@/lib/brand";
-import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { NeyborHuudLogo } from "@/components/brand/NeyborHuudLogo";
 
 const LANDING_VIDEO = "/video/background-video.mp4";
@@ -313,7 +312,6 @@ export default function AppRootPage() {
             >
               Enter your Huud
             </Link>
-            <GoogleSignInButton variant="landing" />
             <p className="landing-legal-text">
               By continuing, you agree to our{" "}
               <Link href="/terms" className="landing-legal-link">

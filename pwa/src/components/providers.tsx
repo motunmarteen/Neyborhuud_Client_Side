@@ -27,14 +27,9 @@ import { SwipeBackProvider } from '@/contexts/SwipeBackContext';
 import { GuardianAlertsProvider } from '@/contexts/GuardianAlertsContext';
 import { RedZoneAlertsProvider } from '@/contexts/RedZoneAlertsContext';
 import { SosProvider } from '@/contexts/SosContext';
-import { CallProvider } from '@/components/calls/CallProvider';
 import { IncognitoInviteListener } from '@/components/chat/IncognitoInviteListener';
-import { CallOverlay } from '@/components/calls/CallOverlay';
-import { GroupCallProvider } from '@/components/calls/GroupCallProvider';
-import { GroupCallOverlay } from '@/components/calls/GroupCallOverlay';
 import { SentinelBottomSheetProvider } from '@/contexts/SentinelBottomSheetContext';
 import { SentinelBottomSheet } from '@/components/safety/SentinelBottomSheet';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ClientRouteGuard } from '@/components/auth/ClientRouteGuard';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
@@ -126,29 +121,6 @@ function isMetaMaskExtensionNoise(reason: unknown): boolean {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  // Warm the shared ringtone AudioContext on the very first real tap/click
-  // anywhere in the app. An incoming call's ring() fires from a socket
-  // event with no user gesture behind it, so a context started cold at that
-  // moment can be born (and stay) suspended under autoplay policy — the
-  // callee's phone would then silently never actually ring. Unlocking here,
-  // the first time we *do* have gesture privilege, sidesteps that.
-  useEffect(() => {
-    let unlocked = false;
-    const onFirstGesture = () => {
-      if (unlocked) return;
-      unlocked = true;
-      void import('@/lib/callRingtone').then((m) => m.unlockAudio());
-      window.removeEventListener('pointerdown', onFirstGesture);
-      window.removeEventListener('keydown', onFirstGesture);
-    };
-    window.addEventListener('pointerdown', onFirstGesture);
-    window.addEventListener('keydown', onFirstGesture);
-    return () => {
-      window.removeEventListener('pointerdown', onFirstGesture);
-      window.removeEventListener('keydown', onFirstGesture);
-    };
-  }, []);
-
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return;
 
@@ -343,15 +315,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ''}>
     <I18nProvider>
     <QueryClientProvider client={queryClient}>
       <SwipeBackProvider>
       <SosProvider>
       <GuardianAlertsProvider>
       <RedZoneAlertsProvider>
-      <CallProvider>
-      <GroupCallProvider>
       <SentinelBottomSheetProvider>
       <SocketAuthenticator />
       <IncognitoInviteListener />
@@ -364,11 +333,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <PageTransition>{children}</PageTransition>
       </ClientRouteGuard>
       <SentinelBottomSheet />
-      <CallOverlay />
-      <GroupCallOverlay />
       </SentinelBottomSheetProvider>
-      </GroupCallProvider>
-      </CallProvider>
       </RedZoneAlertsProvider>
       </GuardianAlertsProvider>
       </SosProvider>
@@ -405,6 +370,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
       ) */}
     </QueryClientProvider>
     </I18nProvider>
-    </GoogleOAuthProvider>
   );
 }

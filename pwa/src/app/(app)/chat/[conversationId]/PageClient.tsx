@@ -35,8 +35,6 @@ import { MentionInvitePicker } from '@/components/chat/MentionInvitePicker';
 import { GuestCountdownBanner } from '@/components/chat/GuestCountdownBanner';
 import { CommunityInfoSheet } from '@/components/chat/CommunityInfoSheet';
 import { ChatComposer } from '@/components/chat/ChatComposer';
-import { useCall } from '@/components/calls/CallProvider';
-import { useGroupCall } from '@/components/calls/GroupCallProvider';
 import { convAvatarMeta, convDisplayName, convSubtitle } from '@/lib/chatDisplay';
 import type { ActionResult } from '@/components/chat/ChatActionMenu';
 import { getGeolocation } from '@/lib/nativeGeolocation';
@@ -353,72 +351,6 @@ export default function ConversationPage() {
       setInviteOpen(true);
     },
     [],
-  );
-
-  // ── Audio/Video calling ───────────────────────────────────────────────────
-  // Only offered on direct 1-on-1 conversations where we know the peer.
-  const { startCall, phase: callPhase } = useCall();
-  // 'direct' type already excludes incident threads, so no separate check needed.
-  const canCall =
-    conv?.type === 'direct' && !!peerUserId && !isPlaceholder;
-  const beginCall = useCallback(
-    (type: 'audio' | 'video') => {
-      if (!peerUserId) return;
-      void startCall({
-        peerId: peerUserId,
-        peerName: convDisplayName(conv, user?.id),
-        peerAvatar: convAvatarMeta(conv)?.url ?? null,
-        conversationId: isPlaceholder ? null : conversationId,
-        type,
-      });
-    },
-    [peerUserId, startCall, conv, user?.id, isPlaceholder, conversationId],
-  );
-
-  // Group calling for group/community conversations. 'community' ALSO gets a
-  // dedicated banner entry point (CommunityChatBanner, hub-community-aware) —
-  // both funnel into the same joinCall()/socket signaling below, so having
-  // two UI entry points for community chats is intentional, not duplicated
-  // logic. Being a participant of the conversation is the bar here (no
-  // mutual-follow requirement, unlike 1:1 — see socket.service.ts's
-  // group-call:join gating comment for the documented reasoning).
-  const { phase: groupCallPhase, joinCall: joinGroupCall } = useGroupCall();
-  // Usable from anywhere a group_call system message might render (group OR community).
-  const canGroupCall = isCommunityChat(conv ?? ({} as Conversation)) && !isPlaceholder;
-  // Header call buttons only for plain 'group' — 'community' already has a
-  // dedicated, more informative call entry point (CommunityChatBanner, which
-  // also shows "call in progress"), so skip duplicating buttons in the header there.
-  const canGroupCallFromHeader = conv?.type === 'group' && !isPlaceholder;
-  const groupCallBusy = groupCallPhase === 'joining' || groupCallPhase === 'active';
-  const beginGroupCall = useCallback(
-    async (callType: 'voice' | 'video') => {
-      if (!canGroupCall || groupCallBusy) return;
-      try {
-        let sessionId: string | undefined;
-        let resolvedType = callType;
-        try {
-          const active = await chatService.getActiveCall(conversationId);
-          if (active.data?.session) {
-            sessionId = active.data.session.id;
-            resolvedType = (active.data.session.callType as 'voice' | 'video') ?? callType;
-          }
-        } catch {
-          /* fall through to starting a new one */
-        }
-        if (!sessionId) {
-          const res = await chatService.startCall(conversationId, callType);
-          sessionId = res.data?.session?.id;
-        }
-        if (!sessionId) {
-          toast.error('Could not start call');
-          return;
-        }
-        await joinGroupCall({ sessionId, conversationId, callType: resolvedType });
-      } catch {
-        toast.error('Could not start call');
-      }
-    },
-    [canGroupCall, groupCallBusy, conversationId, joinGroupCall],
   );
 
   const enrichOutgoing = useCallback(
@@ -1061,13 +993,6 @@ export default function ConversationPage() {
           onBack={() => navigateBack(router, { pathname, fallback: '/friendship?tab=chats' })}
           onInviteGuest={conv?.type === 'direct' && !isPlaceholder ? () => setInviteOpen(true) : undefined}
           onCommunityInfo={isCommunityChat(conv ?? ({} as any)) && !isPlaceholder ? () => setCommunityInfoOpen(true) : undefined}
-          onAudioCall={
-            canCall ? () => beginCall('audio') : canGroupCallFromHeader ? () => void beginGroupCall('voice') : undefined
-          }
-          onVideoCall={
-            canCall ? () => beginCall('video') : canGroupCallFromHeader ? () => void beginGroupCall('video') : undefined
-          }
-          callDisabled={canCall ? callPhase !== 'idle' : groupCallBusy}
         />
       }
       banners={banners}
@@ -1171,75 +1096,6 @@ export default function ConversationPage() {
                       if (isSystem) {
                         const c = msg.content ?? '';
                         const msgMeta = (msg as { meta?: Record<string, unknown> }).meta;
-
-                        // ── Call summary entry (missed / ended / declined) ──
-                        if (msgMeta?.kind === 'call') {
-                          const callType = msgMeta.callType === 'video' ? 'video' : 'audio';
-                          const callStatus = String(msgMeta.callStatus ?? '');
-                          const negative =
-                            callStatus === 'missed' ||
-                            callStatus === 'cancelled' ||
-                            callStatus === 'rejected' ||
-                            callStatus === 'failed';
-                          // "missed" is shown from the receiver's side; the caller
-                          // sees it as "cancelled" but we display the same neutral label.
-                          const callerId = String(msgMeta.caller ?? '');
-                          const iAmCaller = callerId === user?.id;
-                          const icon = callType === 'video' ? 'videocam' : 'call';
-                          const callTime = timeStr(msg.createdAt);
-                          return (
-                            <div
-                              key={id}
-                              ref={isLastOverall ? lastMsgRef : undefined}
-                              className={`my-1.5 flex px-2 ${iAmCaller ? 'justify-end' : 'justify-start'}`}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => canCall && beginCall(callType)}
-                                disabled={!canCall}
-                                aria-label={`Call back (${callType === 'video' ? 'video' : 'voice'})`}
-                                className={`inline-flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-[13px] font-medium transition-transform active:scale-95 disabled:active:scale-100 ${
-                                  iAmCaller
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'bg-gray-100 text-gray-700'
-                                } ${negative ? '!bg-red-50 !text-red-700' : ''}`}
-                              >
-                                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
-                                  {icon}
-                                </span>
-                                {c}
-                                {callTime && (
-                                  <span className="ml-0.5 text-[11px] opacity-60">{callTime}</span>
-                                )}
-                              </button>
-                            </div>
-                          );
-                        }
-
-                        // ── Group call summary entry (started / ended) ──
-                        if (msgMeta?.kind === 'group_call') {
-                          const gCallType = msgMeta.callType === 'video' ? 'video' : 'voice';
-                          const gStatus = String(msgMeta.callStatus ?? '');
-                          const icon = gCallType === 'video' ? 'videocam' : 'call';
-                          const canJoinThis = canGroupCall && gStatus === 'started';
-                          const gCallTime = timeStr(msg.createdAt);
-                          return (
-                            <div key={id} ref={isLastOverall ? lastMsgRef : undefined} className="my-3 flex justify-center px-2">
-                              <button
-                                type="button"
-                                disabled={!canJoinThis}
-                                onClick={() => canJoinThis && void beginGroupCall(gCallType)}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-[12px] font-semibold text-primary disabled:opacity-70"
-                              >
-                                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
-                                  {icon}
-                                </span>
-                                {c}
-                                {gCallTime && <span className="ml-0.5 text-[11px] opacity-60">{gCallTime}</span>}
-                              </button>
-                            </div>
-                          );
-                        }
 
                         // ── Incognito Invite join/left notices ──
                         if (msgMeta?.kind === 'incognito') {

@@ -140,17 +140,6 @@ export function useAuth() {
     onError: handleApiError,
   });
 
-  // Google Sign-In mutation
-  const googleSignInMutation = useMutation({
-    mutationFn: (idToken: string) => authService.googleSignIn(idToken),
-    onSuccess: async (data) => {
-      if (data.success && data.data) {
-        queryClient.setQueryData(['currentUser'], data.data.user);
-        await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      }
-    },
-  });
-
   return {
     // State
     user,
@@ -167,14 +156,12 @@ export function useAuth() {
     uploadProfilePicture: uploadProfilePictureMutation.mutateAsync,
     uploadCoverPhoto: uploadCoverPhotoMutation.mutateAsync,
     changePassword: changePasswordMutation.mutateAsync,
-    googleSignIn: googleSignInMutation.mutateAsync,
 
     // Mutation states
     isLoggingIn: loginMutation.isPending,
     isRegistering: registerMutation.isPending,
     isLoggingOut: logoutMutation.isPending,
     isUpdatingProfile: updateProfileMutation.isPending,
-    isGoogleSigningIn: googleSignInMutation.isPending,
   };
 }
 

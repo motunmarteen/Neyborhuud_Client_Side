@@ -14,6 +14,7 @@ export const ONBOARDING_EXCLUDED_ROUTES = [
   '/forgot-password',
   '/reset-password',
   '/verify-email',
+  '/auth-callback',
   '/setup-complete',
   '/pick-community',
   '/verify-location',

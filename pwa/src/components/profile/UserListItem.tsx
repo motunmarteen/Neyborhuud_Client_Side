@@ -6,46 +6,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
 import { useFollow } from '@/hooks/useFollow';
 import type { FollowerUser } from '@/types/follow';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
-import { useCall } from '@/components/calls/CallProvider';
 
 interface UserListItemProps {
   user: FollowerUser;
 }
 
 export function UserListItem({ user }: UserListItemProps) {
-  const { user: currentUser } = useAuth();
-  const isOwnProfile = currentUser?.id === user._id;
-
-  const { startCall } = useCall();
-
-  const handleAudioCall = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    startCall({
-      peerId: user._id,
-      peerName: displayName,
-      peerAvatar: user.profilePicture || user.avatarUrl || undefined,
-      type: 'audio',
-      conversationId: null,
-    });
-  };
-
-  const handleVideoCall = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    startCall({
-      peerId: user._id,
-      peerName: displayName,
-      peerAvatar: user.profilePicture || user.avatarUrl || undefined,
-      type: 'video',
-      conversationId: null,
-    });
-  };
-
   // Get display name
   const displayName =
     user.firstName && user.lastName
@@ -89,28 +58,6 @@ export function UserListItem({ user }: UserListItemProps) {
           )}
         </div>
       </Link>
-
-      {/* Call Icons */}
-      {!isOwnProfile && currentUser && (
-        <div className="flex shrink-0 items-center gap-1 ml-3">
-          <button
-            type="button"
-            onClick={handleAudioCall}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A555] transition-colors hover:bg-[#00D431]/10 active:scale-90"
-            aria-label="Audio call"
-          >
-            <span className="material-symbols-outlined text-[20px]">call</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleVideoCall}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A555] transition-colors hover:bg-[#00D431]/10 active:scale-90"
-            aria-label="Video call"
-          >
-            <span className="material-symbols-outlined text-[20px]">videocam</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }

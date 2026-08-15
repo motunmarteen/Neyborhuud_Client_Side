@@ -13,7 +13,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
-import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 function LoginPageContent() {
     const router = useRouter();
@@ -130,7 +129,6 @@ function LoginPageContent() {
                                 <span>Join NeyborHuud</span>
                             </Link>
                         </div>
-                        <GoogleSignInButton />
                     </div>
                 }
             >

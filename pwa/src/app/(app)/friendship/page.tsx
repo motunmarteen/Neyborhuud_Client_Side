@@ -14,7 +14,6 @@ import { ChatsStream } from '@/components/friendship/ChatsStream';
 import { ConnectMap } from '@/components/friendship/ConnectMap';
 import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
 import { BottomNav } from '@/components/feed/BottomNav';
-import { useCall } from '@/components/calls/CallProvider';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -80,34 +79,7 @@ interface UserCardProps {
 }
 
 function UserCard({ user, currentUserId, onFollowToggle, onMessage, pendingIds, messagingIds, isFollowing }: UserCardProps) {
-  const userId = user._id || user.id;
-  const isMe = !!userId && userId === currentUserId;
-  const { startCall } = useCall();
   const router = useRouter();
-
-  const handleAudioCall = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!userId) return;
-    startCall({
-      peerId: userId,
-      peerName: `${user.firstName} ${user.lastName}`,
-      peerAvatar: user.avatarUrl || user.profilePicture || undefined,
-      type: 'audio',
-      conversationId: null,
-    });
-  };
-
-  const handleVideoCall = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!userId) return;
-    startCall({
-      peerId: userId,
-      peerName: `${user.firstName} ${user.lastName}`,
-      peerAvatar: user.avatarUrl || user.profilePicture || undefined,
-      type: 'video',
-      conversationId: null,
-    });
-  };
 
   const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || `@${user.username}`;
 
@@ -142,27 +114,6 @@ function UserCard({ user, currentUserId, onFollowToggle, onMessage, pendingIds, 
           {user.bio && <p className="text-slate-400 text-xs truncate mt-1 italic">"{user.bio}"</p>}
         </div>
       </div>
-
-      {!isMe && user.isMutual && (
-        <div className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            onClick={handleAudioCall}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A555] transition-colors hover:bg-[#00D431]/10 active:scale-90"
-            aria-label="Audio call"
-          >
-            <span className="material-symbols-outlined text-[20px]">call</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleVideoCall}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A555] transition-colors hover:bg-[#00D431]/10 active:scale-90"
-            aria-label="Video call"
-          >
-            <span className="material-symbols-outlined text-[20px]">videocam</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }
@@ -251,8 +202,8 @@ function FriendshipPageContent() {
   const queryClient = useQueryClient();
   const initialTab = ((): MainTab => {
     const t = searchParams.get('tab');
-    // Legacy comms tabs (calls/dms/communities) now fold into one "Chats" stream.
-    if (t === 'calls' || t === 'dms' || t === 'direct' || t === 'communities' || t === 'groups' || t === 'chats') return 'chats';
+    // Legacy comms tabs (dms/communities) now fold into one "Chats" stream.
+    if (t === 'dms' || t === 'direct' || t === 'communities' || t === 'groups' || t === 'chats') return 'chats';
     if (t === 'map') return 'near_me'; // legacy Map tab → Near me (map now a header)
     if (t === 'following' || t === 'followers' || t === 'near_me') return t as MainTab;
     return 'chats'; // Chats is the default landing tab
@@ -397,7 +348,7 @@ function FriendshipPageContent() {
   // Persistent, context-aware search placeholder per tab.
   const searchPlaceholder = (() => {
     switch (mainTab) {
-      case 'chats': return 'Search chats, calls & communities…';
+      case 'chats': return 'Search chats & communities…';
       case 'following': return 'Search people you follow…';
       case 'followers': return 'Search your followers…';
       default: return 'Search neighbours…';
@@ -523,7 +474,7 @@ function FriendshipPageContent() {
           'When other neighbours connect with you on NeyborHuud, they will appear here.',
         )}
 
-        {/* Unified WhatsApp-style Chats: DMs + communities + call log, chronological */}
+        {/* Unified WhatsApp-style Chats: DMs + communities, chronological */}
         {mainTab === 'chats' && <ChatsStream currentUserId={user?.id} search={search} />}
 
       </main>

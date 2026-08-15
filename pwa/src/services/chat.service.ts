@@ -265,29 +265,6 @@ export const chatService = {
     );
   },
 
-  async startCall(conversationId: string, callType: 'voice' | 'video' = 'voice') {
-    return await apiClient.post<{
-      session: { id: string; callType: string; status: string; maxParticipants: number };
-      message: unknown;
-    }>(`/chat/conversations/${conversationId}/calls`, { callType });
-  },
-
-  async endCall(conversationId: string, sessionId: string) {
-    return await apiClient.post(`/chat/conversations/${conversationId}/calls/${sessionId}/end`);
-  },
-
-  async getActiveCall(conversationId: string) {
-    return await apiClient.get<{
-      session: { id: string; callType: string; status: string } | null;
-    }>(`/chat/conversations/${conversationId}/calls/active`);
-  },
-
-  async getGroupCallHistory(conversationId: string, page = 1, limit = 20) {
-    return await apiClient.get<{ calls: unknown[]; pagination: unknown }>(
-      `/chat/conversations/${conversationId}/calls/history?page=${page}&limit=${limit}`,
-    );
-  },
-
   // ── Incognito Invite (time-boxed "witness" participants) ──
 
   /** Propose inviting a user into this chat for `durationSeconds`. */

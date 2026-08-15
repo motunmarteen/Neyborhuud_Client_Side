@@ -18,12 +18,6 @@ export type ChatRoomHeaderProps = {
   onInviteGuest?: () => void;
   /** When provided, tapping the community name/avatar opens the info sheet. */
   onCommunityInfo?: () => void;
-  /** When provided, shows an audio-call button (direct 1-on-1 chats). */
-  onAudioCall?: () => void;
-  /** When provided, shows a video-call button (direct 1-on-1 chats). */
-  onVideoCall?: () => void;
-  /** Disables call buttons (e.g. while a call is already in progress). */
-  callDisabled?: boolean;
 };
 
 export function ChatRoomHeader({
@@ -38,9 +32,6 @@ export function ChatRoomHeader({
   onBack,
   onInviteGuest,
   onCommunityInfo,
-  onAudioCall,
-  onVideoCall,
-  callDisabled = false,
 }: ChatRoomHeaderProps) {
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-gray-100">
@@ -110,30 +101,6 @@ export function ChatRoomHeader({
               aria-label="Invite a guest for a limited time"
             >
               <span className="material-symbols-outlined text-[22px]">person_add</span>
-            </button>
-          ) : null}
-          {onAudioCall ? (
-            <button
-              type="button"
-              onClick={onAudioCall}
-              disabled={callDisabled}
-              className="flex text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-40"
-              title="Audio call"
-              aria-label="Start audio call"
-            >
-              <span className="material-symbols-outlined text-[22px]">call</span>
-            </button>
-          ) : null}
-          {onVideoCall ? (
-            <button
-              type="button"
-              onClick={onVideoCall}
-              disabled={callDisabled}
-              className="flex text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-40"
-              title="Video call"
-              aria-label="Start video call"
-            >
-              <span className="material-symbols-outlined text-[22px]">videocam</span>
             </button>
           ) : null}
         </div>

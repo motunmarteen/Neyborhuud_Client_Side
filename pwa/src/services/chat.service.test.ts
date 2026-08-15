@@ -152,43 +152,6 @@ describe('chatService.votePoll', () => {
   });
 });
 
-describe('chatService group calling (Phase 3)', () => {
-  beforeEach(() => {
-    postMock.mockClear();
-    getMock.mockClear();
-  });
-
-  it('startCall posts callType to the community-call start endpoint', async () => {
-    await chatService.startCall('conv-1', 'video');
-    expect(postMock).toHaveBeenCalledWith('/chat/conversations/conv-1/calls', { callType: 'video' });
-  });
-
-  it('startCall defaults callType to voice', async () => {
-    await chatService.startCall('conv-1');
-    expect(postMock).toHaveBeenCalledWith('/chat/conversations/conv-1/calls', { callType: 'voice' });
-  });
-
-  it('endCall posts to the per-session end endpoint', async () => {
-    await chatService.endCall('conv-1', 'session-1');
-    expect(postMock).toHaveBeenCalledWith('/chat/conversations/conv-1/calls/session-1/end');
-  });
-
-  it('getActiveCall reads the active-session endpoint', async () => {
-    await chatService.getActiveCall('conv-1');
-    expect(getMock).toHaveBeenCalledWith('/chat/conversations/conv-1/calls/active');
-  });
-
-  it('getGroupCallHistory reads the paginated history endpoint with page/limit query params', async () => {
-    await chatService.getGroupCallHistory('conv-1', 2, 10);
-    expect(getMock).toHaveBeenCalledWith('/chat/conversations/conv-1/calls/history?page=2&limit=10');
-  });
-
-  it('getGroupCallHistory defaults to page 1, limit 20', async () => {
-    await chatService.getGroupCallHistory('conv-1');
-    expect(getMock).toHaveBeenCalledWith('/chat/conversations/conv-1/calls/history?page=1&limit=20');
-  });
-});
-
 describe('chatService live location updates', () => {
   beforeEach(() => {
     postMock.mockClear();

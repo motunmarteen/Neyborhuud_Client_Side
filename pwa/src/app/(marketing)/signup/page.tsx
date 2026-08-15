@@ -27,7 +27,6 @@ import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { LEGAL_LINKS } from '@/components/legal/LegalDocumentPage';
 import { useMyGamificationStats } from '@/hooks/useGamification';
-import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 import { SIGNUP_MAP_DEFAULT } from '@/lib/signupMap';
 
@@ -790,7 +789,6 @@ function SignupPageContent() {
                                 Already on the Huud?{' '}
                                 <Link href="/login">Enter your Huud</Link>
                             </p>
-                            <GoogleSignInButton label="Sign up with Google" />
                         </div>
                     }
                 >
@@ -871,7 +869,6 @@ function SignupPageContent() {
                                     {identityContinueHint.text}
                                 </p>
                             ) : null}
-                            <GoogleSignInButton label="Sign up with Google" />
                         </div>
                     }
                 >
@@ -995,7 +992,6 @@ function SignupPageContent() {
                                 Already on the Huud?{' '}
                                 <Link href="/login">Enter your Huud</Link>
                             </p>
-                            <GoogleSignInButton label="Sign up with Google" />
                         </div>
                     }
                 >

@@ -109,7 +109,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
 
   // ── Confine global overlays to the simulated phone ──────────────────────
   //
-  // Providers (Toaster, NotificationPermissionPrompt, CallOverlay, the daily
+  // Providers (Toaster, NotificationPermissionPrompt, the daily
   // check-in modal, …) render OUTSIDE this component in the tree, so their
   // `position: fixed` resolves against the desktop viewport and they paint
   // across the whole page instead of inside the phone. They can't simply be

@@ -1714,7 +1714,6 @@ html[data-landing='true'] .app-shell {
   text-align: center;
   line-height: 1.45;
   margin-top: 1rem;
-  white-space: nowrap;
 }
 
 .landing-legal-link {
@@ -1743,16 +1742,6 @@ html[data-landing='true'] .app-shell {
   white-space: nowrap;
   text-transform: none;
   letter-spacing: -0.01em;
-}
-
-.google-signin-wrapper.landing .google-signin-btn {
-  height: var(--landing-btn-height) !important;
-  min-height: var(--landing-btn-height) !important;
-  border-radius: 9999px !important;
-  font-size: 1rem !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.01em !important;
-  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.22) !important;
 }
 
 /** CTAs must show official product casing (NeyborHuud), not logotype lowercase */
@@ -1813,99 +1802,6 @@ html[data-landing='true'] .app-shell {
   letter-spacing: 0.08em;
   white-space: nowrap;
 }
-
-/* Visually hidden wrapper for the real GoogleLogin component — keeps it in the DOM
-   so its iframe is ready, but it's invisible and non-interactive. The custom button
-   above simulates the click to trigger the Google account picker. */
-.landing-google-login-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.google-signin-wrapper {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.google-signin-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-block: 0.75rem;
-  width: 100%;
-}
-
-.google-signin-divider__line {
-  flex: 1;
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.8);
-  display: block;
-}
-
-html[data-auth='true'] .google-signin-divider__line {
-  background-color: rgba(0, 0, 0, 0.18);
-}
-
-
-.google-signin-divider__text {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-html[data-auth='true'] .google-signin-divider__text {
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.google-signin-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.625rem;
-  width: 100%;
-  height: var(--landing-btn-height, 50px);
-  min-height: var(--landing-btn-height, 50px);
-  padding-inline: 1.25rem;
-  border-radius: 9999px;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.2;
-  text-align: center;
-  white-space: nowrap;
-  border: none;
-  background-color: #ffffff;
-  color: #1f1f1f;
-  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.22);
-  cursor: pointer;
-  transition: transform 0.15s, background-color 0.15s;
-}
-
-.google-signin-btn:active {
-  transform: scale(0.98);
-  background-color: #f5f5f5;
-}
-
-.google-signin-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.google-signin-btn__icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
 
 /** Auth flows (signup / login) — landing-aligned CTAs on light surfaces */
 html[data-auth='true'],
@@ -2063,86 +1959,6 @@ html[data-auth='true'] .neu-base {
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--neu-text-secondary, #3d5a3e);
-}
-
-/* ── Google Sign-In Button ──────────────────────────────────────────── */
-.google-signin-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0;
-  width: 100%;
-  margin-top: 0.5rem;
-}
-
-.google-signin-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding-block: 0.75rem;
-}
-
-.google-signin-divider__line {
-  flex: 1;
-  height: 1px;
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 1px;
-}
-
-.google-signin-divider__text {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--neu-text-muted, #8a9e8a);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  flex-shrink: 0;
-}
-
-.google-signin-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.625rem;
-  width: 100%;
-  min-height: 50px;
-  padding-inline: 1.125rem;
-  border-radius: 9999px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  line-height: 1.2;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
-  /* White background — matches standard Google brand guidelines */
-  background-color: #ffffff;
-  color: #3c4043;
-  border: 1px solid rgba(0, 0, 0, 0.16);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.google-signin-btn:hover:not(:disabled) {
-  background-color: #f8f9fa;
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.12),
-    0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.google-signin-btn:active:not(:disabled) {
-  transform: scale(0.98);
-  background-color: #f1f3f4;
-}
-
-.google-signin-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.google-signin-btn__icon {
-  width: 1.125rem;
-  height: 1.125rem;
-  flex-shrink: 0;
 }
 
 .auth-signin-link a {
