@@ -54,7 +54,9 @@ export function useSosOfflineQueue(onSent?: (clientId: string) => void) {
   const [status, setStatus] = useState<SosQueueStatus>('idle');
   const flushingRef = useRef(false);
   const onSentRef = useRef(onSent);
-  onSentRef.current = onSent;
+  useEffect(() => {
+    onSentRef.current = onSent;
+  }, [onSent]);
 
   // IndexedDB reads are async, so the initial "is anything already queued
   // from a previous session" check happens on mount rather than in useState's

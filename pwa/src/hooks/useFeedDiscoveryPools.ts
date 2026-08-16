@@ -2,7 +2,7 @@
  * Lightweight discovery pools for mixed feed — single page per domain, long stale time.
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { marketplaceService, type Product } from "@/services/marketplace.service";
 import { eventsService } from "@/services/events.service";
@@ -216,13 +216,18 @@ export function useFeedDiscoveryPools(enabled: boolean, geo: { lat: number | nul
   });
 
   // --- MOCK FALLBACK DATA ---
+  // `now` is computed once on mount (not on every render) so the mock
+  // timestamps below stay stable for the component's lifetime instead of
+  // calling the impure Date.now() directly during render.
+  const [now] = useState(() => Date.now());
+
   const MOCK_EVENTS = useMemo(() => [
-    { id: 'evt-1', title: 'Community Cleanup Drive', description: 'Join us to clean the neighborhood park!', startDate: new Date(Date.now() + 86400000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1618477461853-cf6ed80fbfc9?w=500&q=80', type: 'Community', attendeesCount: 45, venue: 'Central Park' },
-    { id: 'evt-2', title: 'Weekend Farmers Market', description: 'Fresh organic produce', startDate: new Date(Date.now() + 172800000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=500&q=80', type: 'Market', attendeesCount: 120, venue: 'Town Square' },
-    { id: 'evt-3', title: 'Local Tech Meetup', description: 'Networking for devs', startDate: new Date(Date.now() + 345600000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=80', type: 'Tech', attendeesCount: 60, venue: 'Co-working Hub' },
-    { id: 'evt-4', title: 'Neighborhood Barbecue', description: 'Free food and drinks', startDate: new Date(Date.now() + 604800000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&q=80', type: 'Social', attendeesCount: 85, venue: 'Community Center' },
-    { id: 'evt-5', title: 'Yoga in the Park', description: 'Morning yoga session', startDate: new Date(Date.now() + 43200000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&q=80', type: 'Health', attendeesCount: 25, venue: 'Greenwood Park' }
-  ] as unknown as Event[], []);
+    { id: 'evt-1', title: 'Community Cleanup Drive', description: 'Join us to clean the neighborhood park!', startDate: new Date(now + 86400000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1618477461853-cf6ed80fbfc9?w=500&q=80', type: 'Community', attendeesCount: 45, venue: 'Central Park' },
+    { id: 'evt-2', title: 'Weekend Farmers Market', description: 'Fresh organic produce', startDate: new Date(now + 172800000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=500&q=80', type: 'Market', attendeesCount: 120, venue: 'Town Square' },
+    { id: 'evt-3', title: 'Local Tech Meetup', description: 'Networking for devs', startDate: new Date(now + 345600000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=80', type: 'Tech', attendeesCount: 60, venue: 'Co-working Hub' },
+    { id: 'evt-4', title: 'Neighborhood Barbecue', description: 'Free food and drinks', startDate: new Date(now + 604800000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&q=80', type: 'Social', attendeesCount: 85, venue: 'Community Center' },
+    { id: 'evt-5', title: 'Yoga in the Park', description: 'Morning yoga session', startDate: new Date(now + 43200000).toISOString(), coverImage: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&q=80', type: 'Health', attendeesCount: 25, venue: 'Greenwood Park' }
+  ] as unknown as Event[], [now]);
 
   const MOCK_JOBS = useMemo(() => [
     { id: 'job-1', title: 'Barista (Part-time)', employerName: 'Daily Grind Coffee', location: { state: 'Lagos', lga: 'Ikeja' }, salary: '₦80,000/mo' },
@@ -233,12 +238,12 @@ export function useFeedDiscoveryPools(enabled: boolean, geo: { lat: number | nul
   ] as unknown as Job[], []);
 
   const MOCK_HELP = useMemo(() => [
-    { id: 'help-1', content: 'Does anyone have a jump starter? Car battery is dead near the mall.', createdAt: new Date(Date.now() - 3600000).toISOString(), author: { name: 'Sarah O.', avatarUrl: 'https://i.pravatar.cc/150?u=sarah' } },
-    { id: 'help-2', content: 'Looking for recommendations for a reliable plumber urgently!', createdAt: new Date(Date.now() - 7200000).toISOString(), author: { name: 'Michael K.', avatarUrl: 'https://i.pravatar.cc/150?u=michael' } },
-    { id: 'help-3', content: 'Found a lost golden retriever with a blue collar around Elm St.', createdAt: new Date(Date.now() - 14400000).toISOString(), author: { name: 'Jessica T.', avatarUrl: 'https://i.pravatar.cc/150?u=jessica' } },
-    { id: 'help-4', content: 'Need someone to help lift a heavy couch up one flight of stairs today.', createdAt: new Date(Date.now() - 86400000).toISOString(), author: { name: 'David B.', avatarUrl: 'https://i.pravatar.cc/150?u=david' } },
-    { id: 'help-5', content: 'Can anyone recommend a good tutor for JSS3 Math?', createdAt: new Date(Date.now() - 172800000).toISOString(), author: { name: 'Amina S.', avatarUrl: 'https://i.pravatar.cc/150?u=amina' } }
-  ] as unknown as Post[], []);
+    { id: 'help-1', content: 'Does anyone have a jump starter? Car battery is dead near the mall.', createdAt: new Date(now - 3600000).toISOString(), author: { name: 'Sarah O.', avatarUrl: 'https://i.pravatar.cc/150?u=sarah' } },
+    { id: 'help-2', content: 'Looking for recommendations for a reliable plumber urgently!', createdAt: new Date(now - 7200000).toISOString(), author: { name: 'Michael K.', avatarUrl: 'https://i.pravatar.cc/150?u=michael' } },
+    { id: 'help-3', content: 'Found a lost golden retriever with a blue collar around Elm St.', createdAt: new Date(now - 14400000).toISOString(), author: { name: 'Jessica T.', avatarUrl: 'https://i.pravatar.cc/150?u=jessica' } },
+    { id: 'help-4', content: 'Need someone to help lift a heavy couch up one flight of stairs today.', createdAt: new Date(now - 86400000).toISOString(), author: { name: 'David B.', avatarUrl: 'https://i.pravatar.cc/150?u=david' } },
+    { id: 'help-5', content: 'Can anyone recommend a good tutor for JSS3 Math?', createdAt: new Date(now - 172800000).toISOString(), author: { name: 'Amina S.', avatarUrl: 'https://i.pravatar.cc/150?u=amina' } }
+  ] as unknown as Post[], [now]);
 
   const MOCK_SERVICES = useMemo(() => [
     { id: 'srv-1', title: 'Professional House Cleaning', providerName: 'CleanSweep Co.', rating: 4.8, images: ['https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&q=80'] },

@@ -52,7 +52,9 @@ export function useLiveTrackingPage() {
 
   const tracking = useKidnappingTracking(initialSession);
   const refreshSummaryRef = useRef(tracking.refreshSummary);
-  refreshSummaryRef.current = tracking.refreshSummary;
+  useEffect(() => {
+    refreshSummaryRef.current = tracking.refreshSummary;
+  }, [tracking.refreshSummary]);
 
   const session = tracking.session;
   const sessionId = session?._id;

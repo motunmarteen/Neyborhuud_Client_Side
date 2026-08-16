@@ -94,7 +94,7 @@ export function useSafetyDashboard() {
     } finally {
       setLinkersLoading(false);
     }
-  }, [user?.id, guardians]);
+  }, [user, guardians]);
 
   useEffect(() => {
     void fetchData();

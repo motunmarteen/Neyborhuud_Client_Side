@@ -242,7 +242,7 @@ export function FeedSkyHero({ below }: { below?: ReactNode }) {
       'Spotted something to report?',
       'Share a local FYI with the Huud',
     ];
-  }, [authUser?.firstName, huudName]);
+  }, [authUser, huudName]);
 
   const [displayText, setDisplayText] = useState('');
   const [promptIndex, setPromptIndex] = useState(0);

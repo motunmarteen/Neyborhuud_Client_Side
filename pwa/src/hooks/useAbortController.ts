@@ -19,28 +19,40 @@
 
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function useAbortController(deps: unknown[] = []) {
-  const controllerRef = useRef<AbortController | null>(null);
-
-  // Create a fresh controller on mount and whenever deps change
-  if (!controllerRef.current) {
-    controllerRef.current = new AbortController();
-  }
+  // Lazy initializer avoids creating a controller during every render pass —
+  // it only runs once, on first mount — so the very first controller
+  // returned is already stable without waiting for an effect to run.
+  const [controller, setController] = useState<AbortController>(
+    () => new AbortController(),
+  );
+  const isFirstRun = useRef(true);
 
   useEffect(() => {
-    // If deps changed and a controller already exists, abort the previous one
-    controllerRef.current?.abort();
-    controllerRef.current = new AbortController();
+    // Skip the first effect run: the lazy initializer above already created
+    // the controller for this mount, so recreating it here too would abort
+    // it before any caller had a chance to use its signal.
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
 
-    return () => {
-      // Abort on unmount
-      controllerRef.current?.abort();
-      controllerRef.current = null;
-    };
+    const next = new AbortController();
+    setController((prev) => {
+      prev.abort();
+      return next;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
-  return controllerRef.current!;
+  useEffect(() => {
+    // Abort on unmount.
+    return () => {
+      controller.abort();
+    };
+  }, [controller]);
+
+  return controller;
 }
