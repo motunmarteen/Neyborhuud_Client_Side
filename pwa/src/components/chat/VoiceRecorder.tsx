@@ -56,6 +56,15 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  const stopTimer = () => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+  };
+
+  const stopStream = () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+  };
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -66,14 +75,12 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const stopTimer = () => {
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-  };
-
-  const stopStream = () => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-  };
+  const stopRecording = useCallback(() => {
+    stopTimer();
+    if (mediaRecorder.current?.state === 'recording') {
+      mediaRecorder.current.stop();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const startRecording = useCallback(async () => {
     try {
@@ -117,13 +124,6 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
       toast.error(msg.includes('Permission') || msg.includes('denied')
         ? 'Microphone permission denied. Please allow access in your browser settings.'
         : `Could not start recording: ${msg}`);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const stopRecording = useCallback(() => {
-    stopTimer();
-    if (mediaRecorder.current?.state === 'recording') {
-      mediaRecorder.current.stop();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -340,7 +340,7 @@ export default function ConversationPage() {
       if (pid) ids.add(pid);
     }
     return Array.from(ids);
-  }, [conv, user?.id, peerUserId]);
+  }, [conv, user, peerUserId]);
 
   // When a name is picked from the @mention dropdown: clear the @token and
   // open the invite sheet pre-filled with that person.
@@ -386,7 +386,7 @@ export default function ConversationPage() {
     } finally {
       setLoading(false);
     }
-  }, [conversationId, isPlaceholder, user?.id, peerUserId]);
+  }, [conversationId, isPlaceholder, user, peerUserId]);
 
   /**
    * Load the next-older page and PREPEND it, preserving the user's scroll

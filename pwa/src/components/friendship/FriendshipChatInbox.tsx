@@ -203,7 +203,7 @@ export function FriendshipChatInbox({
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, conversations.length]);
 
   const filtered = useMemo(() => {
-    let list = conversations.filter((c) => matchesFilter(c, inboxFilter));
+    const list = conversations.filter((c) => matchesFilter(c, inboxFilter));
     if (!search) return list;
     const q = search.toLowerCase();
     return list.filter(

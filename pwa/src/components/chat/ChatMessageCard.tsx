@@ -106,7 +106,15 @@ function LocationCard({ msg, mine, currentUserId }: { msg: ChatMessage; mine: bo
   const isLive = !!snapshot?.isLive;
   const isStopped = !!snapshot?.stoppedAt;
   const expiresAt = snapshot?.expiresAt ? new Date(snapshot.expiresAt).getTime() : null;
-  const isExpired = !!expiresAt && Date.now() > expiresAt;
+  // Read "now" from state rather than calling Date.now() during render (impure).
+  // Recomputed whenever expiresAt changes (e.g. a fresh snapshot arrives via
+  // socket), matching the previous behaviour of re-evaluating on each render
+  // triggered by a snapshot update.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    setNow(Date.now());
+  }, [expiresAt]);
+  const isExpired = !!expiresAt && now > expiresAt;
   const messageId = msg.id ?? (msg as any)._id;
   // Auto-shared during an SOS rather than manually shared — styled red so a
   // guardian scanning the thread can't mistake it for a casual location drop.
