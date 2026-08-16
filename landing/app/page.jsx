@@ -68,7 +68,7 @@ export default function Home() {
           </motion.div>
 
           {/* Hero Interactive Device Mockup (Right) */}
-          <motion.div style={{ y: heroMockupY }} initial={{ opacity: 0, x: 50, rotateY: -10, rotateX: 5 }} animate={{ opacity: 1, x: 0, rotateY: -10, rotateX: 5 }} transition={{ delay: 0.5, type: "spring", stiffness: 50 }} style={{ perspective: "1200px", width: "100%", maxWidth: "100%" }}>
+          <motion.div style={{ y: heroMockupY, perspective: "1200px", width: "100%", maxWidth: "100%" }} initial={{ opacity: 0, x: 50, rotateY: -10, rotateX: 5 }} animate={{ opacity: 1, x: 0, rotateY: -10, rotateX: 5 }} transition={{ delay: 0.5, type: "spring", stiffness: 50 }}>
             <InteractiveMockup />
           </motion.div>
         </div>
