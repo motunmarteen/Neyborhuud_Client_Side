@@ -4,7 +4,7 @@
  * won't touch VS Code, Claude, or other unrelated Node tools.
  *
  * Ports cleaned:
- *   3000-3003  Next.js frontend (per-port dist dirs from start-dev.js)
+ *   3000-3003  Next.js frontend (per-port dist dirs from start-dev.cjs)
  *   5000       Express backend
  *
  * Usage:

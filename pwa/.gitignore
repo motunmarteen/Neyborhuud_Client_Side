@@ -61,3 +61,7 @@ rates.json
 *.log
 dev-server.log
 backend.log
+build_error*.txt
+build_output.txt
+lint_*.txt
+debug.png

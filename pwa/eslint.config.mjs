@@ -74,6 +74,16 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": "warn",
     },
   },
+  {
+    // CommonJS entry points (start-dev.cjs, scripts/kill-dev.cjs) use
+    // require() deliberately — no "type": "module" in package.json, and
+    // .cjs is excluded from the react-hooks/jsx-a11y block above, so this
+    // rule is the only thing left flagging their intentional require()s.
+    files: ["**/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
