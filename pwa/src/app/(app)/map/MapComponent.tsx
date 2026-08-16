@@ -62,6 +62,23 @@ function ensureLeafletCss() {
   document.head.appendChild(link);
 }
 
+// One-time fixup of Leaflet's default marker icon URLs (Next.js/webpack
+// break the relative asset paths Leaflet's bundle assumes). Patches the
+// Leaflet module itself, not component state, since this is global library
+// setup rather than something that should re-run per render or be tracked
+// by React Compiler's purity/immutability checks.
+let leafletIconsFixed = false;
+function fixLeafletDefaultIcons(lib: typeof L) {
+  if (leafletIconsFixed) return;
+  leafletIconsFixed = true;
+  delete (lib.Icon.Default.prototype as any)['_getIconUrl'];
+  lib.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  });
+}
+
 export default function MapComponent({ embedded = false }: { embedded?: boolean }) {
   const { user: authUser } = useAuth();
   const router = useRouter();
@@ -90,6 +107,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
   // Load Leaflet library dynamically
   useEffect(() => {
     import('leaflet').then((lib) => {
+      fixLeafletDefaultIcons(lib);
       setLeafletLib(lib);
     });
   }, []);
@@ -187,14 +205,6 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
     }
 
     ensureLeafletCss();
-
-    // Fix Next.js default marker asset paths
-    delete (leafletLib.Icon.Default.prototype as any)['_getIconUrl'];
-    leafletLib.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    });
 
     const map = leafletLib.map(mapContainerRef.current, {
       zoomControl: false,
