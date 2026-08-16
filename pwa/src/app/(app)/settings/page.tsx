@@ -87,6 +87,49 @@ function Section({
   );
 }
 
+function ToggleSwitch({
+  enabled,
+  onChange,
+  label,
+  description,
+  disabled,
+}: {
+  enabled: boolean;
+  onChange: (val: boolean) => void;
+  label: string;
+  description?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-gray-100 py-3.5 last:border-0">
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-bold text-gray-800">
+          {label}
+        </p>
+        {description ? (
+          <p className="mt-0.5 text-xs text-gray-400">{description}</p>
+        ) : null}
+      </div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && onChange(!enabled)}
+        className={`relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none ${
+          disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+        } ${enabled ? 'bg-blue-600' : 'bg-gray-200'}`}
+        aria-label={`${label}: ${enabled ? 'On' : 'Off'}`}
+      >
+        <span
+          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            enabled ? 'translate-x-5' : 'translate-x-0'
+          }`}
+          aria-hidden
+        />
+      </button>
+    </div>
+  );
+}
+
 function latestForType(
     rows: UserConsentRecord[],
     type: ConsentType,
@@ -98,6 +141,11 @@ function latestForType(
         const tb = new Date(b.updatedAt || b.createdAt || 0).getTime();
         return tb >= ta ? b : a;
     });
+}
+
+function formatConsentGrantedAt(record: UserConsentRecord | undefined): string {
+    if (!record || !record.grantedAt) return '';
+    return new Date(record.grantedAt).toLocaleString();
 }
 
 interface NotificationSettings {
@@ -595,52 +643,14 @@ export default function SettingsPage() {
         }
     };
 
-    const ToggleSwitch = ({
-      enabled,
-      onChange,
-      label,
-      description,
-      disabled,
-    }: {
-      enabled: boolean;
-      onChange: (val: boolean) => void;
-      label: string;
-      description?: string;
-      disabled?: boolean;
-    }) => (
-      <div className="flex items-center justify-between gap-4 border-b border-gray-100 py-3.5 last:border-0">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-gray-800">
-            {label}
-          </p>
-          {description ? (
-            <p className="mt-0.5 text-xs text-gray-400">{description}</p>
-          ) : null}
-        </div>
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => !disabled && onChange(!enabled)}
-          className={`relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none ${
-            disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
-          } ${enabled ? 'bg-blue-600' : 'bg-gray-200'}`}
-          aria-label={`${label}: ${enabled ? 'On' : 'Off'}`}
-        >
-          <span
-            className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-              enabled ? 'translate-x-5' : 'translate-x-0'
-            }`}
-            aria-hidden
-          />
-        </button>
-      </div>
-    );
-
     const birthday = formatProfileBirthday(user?.dateOfBirth);
     const zodiac = getZodiacFromBirthday(user?.dateOfBirth);
     const isProfileCompleted =
       Boolean((user as any)?.profileCompletedAt) ||
       Boolean(user?.firstName && user?.lastName && user?.dateOfBirth);
+    const nextUsernameChangeLabel = usernameChangePolicy?.nextUsernameChangeAt
+        ? new Date(usernameChangePolicy.nextUsernameChangeAt).toLocaleString()
+        : '';
 
     return (
       <AppBrowseLayout
@@ -945,6 +955,7 @@ export default function SettingsPage() {
                                     {(() => {
                                         const dp = latestForType(consentRows, 'data_processing');
                                         const dpActive = dp?.granted === true;
+                                        const dpGrantedAtLabel = formatConsentGrantedAt(dp);
                                         return (
                                             <div className="py-3 border-b border-charcoal/5 mb-2">
                                                 <p className="text-sm font-bold text-charcoal">
@@ -952,7 +963,7 @@ export default function SettingsPage() {
                                                 </p>
                                                 <p className="text-[10px] text-charcoal/45 mt-1">
                                                     {dpActive
-                                                        ? `Active — last recorded ${dp?.grantedAt ? new Date(dp?.grantedAt ?? Date.now()).toLocaleString() : ''}`
+                                                        ? `Active — last recorded ${dpGrantedAtLabel}`
                                                         : 'Not on file (e.g. older account). Confirm to align with our Privacy Policy.'}
                                                 </p>
                                                 {!dpActive && (
@@ -1100,10 +1111,10 @@ export default function SettingsPage() {
                                 <strong>first</strong> rename. Your current username (and past ones) can work
                                 as referral codes — see Invite NeyburHs below.
                             </p>
-                            {usernameChangePolicy?.canChangeUsername === false && usernameChangePolicy?.nextUsernameChangeAt ? (
+                            {usernameChangePolicy?.canChangeUsername === false && nextUsernameChangeLabel ? (
                                 <p className="text-xs text-status-warning dark:text-primary mb-3">
                                     Next change allowed:{' '}
-                                    {new Date(usernameChangePolicy?.nextUsernameChangeAt ?? Date.now()).toLocaleString()}
+                                    {nextUsernameChangeLabel}
                                 </p>
                             ) : null}
                             <input
