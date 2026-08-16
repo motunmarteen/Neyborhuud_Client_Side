@@ -61,13 +61,6 @@ export function LocationPicker({
         }
     }, [initialLocation?.lat, initialLocation?.lng]);
 
-    // Resolve address when location changes
-    useEffect(() => {
-        if (currentLocation) {
-            resolveAddress(currentLocation);
-        }
-    }, [currentLocation?.lat, currentLocation?.lng]);
-
     const resolveAddress = async (location: MapLocation) => {
         setIsResolvingAddress(true);
         try {
@@ -80,6 +73,13 @@ export function LocationPicker({
             setIsResolvingAddress(false);
         }
     };
+
+    // Resolve address when location changes
+    useEffect(() => {
+        if (currentLocation) {
+            resolveAddress(currentLocation);
+        }
+    }, [currentLocation?.lat, currentLocation?.lng]);
 
     const handleLocationChange = useCallback((newLocation: MapLocation) => {
         setCurrentLocation(newLocation);

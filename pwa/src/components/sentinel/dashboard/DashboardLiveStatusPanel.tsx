@@ -47,6 +47,14 @@ export function DashboardLiveStatusPanel({
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
   const [locationHint, setLocationHint] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  // Read "now" from state rather than calling Date.now() during render
+  // (impure) — recomputed whenever the status feed changes (e.g. a refresh
+  // brings in updated statuses), matching the previous behaviour of
+  // re-evaluating "is this still live" on each render triggered by new data.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    setNow(Date.now());
+  }, [statusFeed]);
 
   const profileCoords =
     user?.location?.latitude != null && user?.location?.longitude != null
@@ -77,7 +85,7 @@ export function DashboardLiveStatusPanel({
     } finally {
       setLoadingStatus(false);
     }
-  }, [user?.id]);
+  }, [user]);
 
   useEffect(() => {
     void loadMyStatus();
@@ -225,7 +233,7 @@ export function DashboardLiveStatusPanel({
           <ul className="space-y-2">
             {statusFeed.map((s, index) => {
               const coords = s.location?.coordinates;
-              const isLive = Date.now() - new Date(s.lastUpdatedAt).getTime() < 2 * 60 * 1000;
+              const isLive = now - new Date(s.lastUpdatedAt).getTime() < 2 * 60 * 1000;
               return (
                 <li
                   key={`${String(s.userId)}-${index}`}

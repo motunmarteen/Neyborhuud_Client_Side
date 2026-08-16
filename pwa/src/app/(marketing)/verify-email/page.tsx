@@ -49,10 +49,6 @@ function VerifyEmailContent() {
             : null;
 
     useEffect(() => {
-        if (token) void verifyWithToken(token);
-    }, [token]);
-
-    useEffect(() => {
         if (resendCooldown <= 0) return;
         const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
         return () => clearTimeout(timer);
@@ -87,6 +83,10 @@ function VerifyEmailContent() {
             }
         }
     };
+
+    useEffect(() => {
+        if (token) void verifyWithToken(token);
+    }, [token]);
 
     const verifyWithCode = async () => {
         const codeToVerify = verificationCode.trim();

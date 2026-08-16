@@ -106,8 +106,11 @@ export default function FakeCallPage() {
   const nativeScheduled = useRef(false);
   const callerNameRef = useRef(callerName);
   const callerSubtitleRef = useRef(callerSubtitle);
-  callerNameRef.current = callerName;
-  callerSubtitleRef.current = callerSubtitle;
+
+  useEffect(() => {
+    callerNameRef.current = callerName;
+    callerSubtitleRef.current = callerSubtitle;
+  }, [callerName, callerSubtitle]);
 
   useEffect(() => {
     return () => {
@@ -116,6 +119,20 @@ export default function FakeCallPage() {
       if (callTimerRef.current) clearInterval(callTimerRef.current);
     };
   }, []);
+
+  const beginRinging = () => {
+    setPhase('ringing');
+    ringtoneStopRef.current = startRingtone();
+    // Try to vibrate (mobile only)
+    try { navigator.vibrate?.([800, 400, 800, 400, 800]); } catch { /* noop */ }
+    // The in-page timer (or a tapped native notification) got us here —
+    // either way the ring has started, so the scheduled OS notification is
+    // no longer needed and must not also fire and interrupt the call UI.
+    if (nativeScheduled.current) {
+      void cancelLocalNotification(FAKE_CALL_NOTIFICATION_ID);
+      nativeScheduled.current = false;
+    }
+  };
 
   // A tapped native notification means the app was backgrounded/locked when
   // the scheduled ring time hit — this brings the user straight to the
@@ -170,20 +187,6 @@ export default function FakeCallPage() {
         return s - 1;
       });
     }, 1000);
-  };
-
-  const beginRinging = () => {
-    setPhase('ringing');
-    ringtoneStopRef.current = startRingtone();
-    // Try to vibrate (mobile only)
-    try { navigator.vibrate?.([800, 400, 800, 400, 800]); } catch { /* noop */ }
-    // The in-page timer (or a tapped native notification) got us here —
-    // either way the ring has started, so the scheduled OS notification is
-    // no longer needed and must not also fire and interrupt the call UI.
-    if (nativeScheduled.current) {
-      void cancelLocalNotification(FAKE_CALL_NOTIFICATION_ID);
-      nativeScheduled.current = false;
-    }
   };
 
   const acceptCall = () => {

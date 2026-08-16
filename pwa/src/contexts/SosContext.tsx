@@ -120,7 +120,9 @@ function useSosState(): UseSosReturn {
     }
   }, []);
 
-  refreshRef.current = refresh;
+  useEffect(() => {
+    refreshRef.current = refresh;
+  }, [refresh]);
 
   useEffect(() => {
     if (!user?.id) {
@@ -396,7 +398,7 @@ function useSosState(): UseSosReturn {
         setLoading(false);
       }
     },
-    [getCoords, user?.id, refresh, enqueueOfflineSos, activeSos?.location],
+    [getCoords, user, refresh, enqueueOfflineSos, activeSos],
   );
 
   const cancelSos = useCallback(
@@ -418,7 +420,7 @@ function useSosState(): UseSosReturn {
         setError(msg);
       }
     },
-    [activeSos?._id],
+    [activeSos],
   );
 
   const resolveSos = useCallback(async () => {
@@ -439,7 +441,7 @@ function useSosState(): UseSosReturn {
         'Failed to resolve SOS';
       setError(msg);
     }
-  }, [activeSos?._id]);
+  }, [activeSos]);
 
   const clearError = useCallback(() => setError(null), []);
 

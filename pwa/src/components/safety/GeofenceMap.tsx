@@ -66,7 +66,10 @@ export default function GeofenceMap({
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<maplibregl.Map | null>(null);
     const onMapClickRef = useRef(onMapClick);
-    onMapClickRef.current = onMapClick;
+
+    useEffect(() => {
+        onMapClickRef.current = onMapClick;
+    }, [onMapClick]);
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;

@@ -95,8 +95,10 @@ export function InteractiveMap({
     const [markerEl, setMarkerEl] = useState<HTMLDivElement | null>(null);
     const [markerPosition, setMarkerPosition] = useState(center);
 
-    onLocationChangeRef.current = onLocationChange;
-    onLongPressRef.current = onLongPressMap;
+    useEffect(() => {
+        onLocationChangeRef.current = onLocationChange;
+        onLongPressRef.current = onLongPressMap;
+    }, [onLocationChange, onLongPressMap]);
 
     useEffect(() => {
         setMarkerPosition(center);
