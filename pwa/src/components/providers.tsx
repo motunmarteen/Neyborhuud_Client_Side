@@ -26,6 +26,7 @@ import { GuardianAlertsProvider } from '@/contexts/GuardianAlertsContext';
 import { RedZoneAlertsProvider } from '@/contexts/RedZoneAlertsContext';
 import { SosProvider } from '@/contexts/SosContext';
 import { IncognitoInviteListener } from '@/components/chat/IncognitoInviteListener';
+import EmergencyContactOverlay from '@/components/safety/EmergencyContactOverlay';
 import { SentinelBottomSheetProvider } from '@/contexts/SentinelBottomSheetContext';
 import { ClientRouteGuard } from '@/components/auth/ClientRouteGuard';
 
@@ -324,6 +325,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <SmartLocationSync />
       <LocationSyncOrchestrator />
       <PwaInstallTracker />
+      <EmergencyContactOverlay />
       <ClientRouteGuard>
         <PageTransition>{children}</PageTransition>
       </ClientRouteGuard>

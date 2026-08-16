@@ -39,6 +39,26 @@ export type SosNotifyMeta = {
   sosEventId: string;
 };
 
+export interface EmergencyContactOption {
+  label: string;
+  number: string;
+  method: 'call' | 'sms';
+}
+
+/**
+ * Fired when the automatic guardian-no-response escalation has no
+ * server-side dispatch to attempt (see backend ADR-0003) — the app hands
+ * the user real numbers to call/text themselves instead. This is
+ * distinct from a real dispatch: nothing has been contacted yet, the
+ * user still has to tap a button.
+ */
+export interface EmergencyContactNeeded {
+  sosEventId: string;
+  options: EmergencyContactOption[];
+  smsMessage: string;
+  timestamp: string;
+}
+
 export interface UseSosReturn {
   phase: SosPhase;
   activeSos: SosEvent | null;
@@ -55,6 +75,15 @@ export interface UseSosReturn {
    * not as a failure.
    */
   offlineQueueStatus: SosQueueStatus;
+  /**
+   * Non-null when guardians didn't respond and there's no automated
+   * dispatch — the user needs to call/text emergency services themselves.
+   * Stays set until dismissed (the user has acted, or chosen to close it);
+   * it does not auto-clear on its own since this is the last line of
+   * defense and shouldn't disappear on a stray re-render.
+   */
+  emergencyContactNeeded: EmergencyContactNeeded | null;
+  dismissEmergencyContactNeeded: () => void;
   triggerSos: (opts?: SosTriggerOptions) => Promise<void>;
   cancelSos: (reason?: string) => Promise<void>;
   resolveSos: () => Promise<void>;
@@ -74,6 +103,8 @@ function useSosState(): UseSosReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notifyMeta, setNotifyMeta] = useState<SosNotifyMeta | null>(null);
+  const [emergencyContactNeeded, setEmergencyContactNeeded] =
+    useState<EmergencyContactNeeded | null>(null);
 
   const tickerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const refreshRef = useRef<() => Promise<void>>(async () => undefined);
@@ -188,6 +219,10 @@ function useSosState(): UseSosReturn {
       void refreshRef.current();
     };
 
+    const onEmergencyContactNeeded = (payload: EmergencyContactNeeded) => {
+      setEmergencyContactNeeded(payload);
+    };
+
     const bind = () => {
       const socket = socketService.getSocket();
       if (!socket) return;
@@ -196,6 +231,7 @@ function useSosState(): UseSosReturn {
       socket.on('safety:sos_cancelled_pending', onCancelledPending);
       socket.on('safety:sos_alert', onAlert);
       socket.on('safety:emergency_services_dispatched', onEmergencyDispatched);
+      socket.on('safety:emergency_contact_needed', onEmergencyContactNeeded);
     };
 
     const unbind = () => {
@@ -206,6 +242,7 @@ function useSosState(): UseSosReturn {
       socket.off('safety:sos_cancelled_pending', onCancelledPending);
       socket.off('safety:sos_alert', onAlert);
       socket.off('safety:emergency_services_dispatched', onEmergencyDispatched);
+      socket.off('safety:emergency_contact_needed', onEmergencyContactNeeded);
     };
 
     if (shouldConnectSocket() && apiClient.isAuthenticated()) {
@@ -408,6 +445,7 @@ function useSosState(): UseSosReturn {
       try {
         const res = await safetyService.cancelSos(activeSos._id, reason);
         setActiveSos(res.data?.sosEvent ?? null);
+        setEmergencyContactNeeded(null);
         setTimeout(() => {
           setActiveSos((prev) => (prev?.status === 'cancelled' ? null : prev));
           setNotifyMeta(null);
@@ -430,6 +468,7 @@ function useSosState(): UseSosReturn {
       const res = await safetyService.resolveSos(activeSos._id);
       setActiveSos(res.data?.sosEvent ?? null);
       if (res.data?.summary) setLastSummary(res.data.summary);
+      setEmergencyContactNeeded(null);
       setTimeout(() => {
         setActiveSos((prev) => (prev?.status === 'resolved' ? null : prev));
         setNotifyMeta(null);
@@ -444,6 +483,7 @@ function useSosState(): UseSosReturn {
   }, [activeSos]);
 
   const clearError = useCallback(() => setError(null), []);
+  const dismissEmergencyContactNeeded = useCallback(() => setEmergencyContactNeeded(null), []);
 
   return {
     phase,
@@ -454,6 +494,8 @@ function useSosState(): UseSosReturn {
     loading,
     error,
     offlineQueueStatus,
+    emergencyContactNeeded,
+    dismissEmergencyContactNeeded,
     triggerSos,
     cancelSos,
     resolveSos,
