@@ -23,14 +23,12 @@ function emit(event: string, payload: unknown) {
   handlers.get(event)?.(payload);
 }
 
-// vi.mock factories for a given module path are shared across ALL test
-// files in this worker (vitest.config.ts runs maxWorkers: 1 / pool:
-// vmForks) — three other files already mock '@/lib/socket' with
-// incompatible shapes (no getSocket, or getSocket() => null), and
-// whichever file's factory registers first for that module path wins for
-// the rest of the run. Declaring a minimal, always-mockable shape here and
-// overriding behavior per-test via vi.mocked(...).mockReturnValue in
-// beforeEach avoids depending on load order against those sibling files.
+// Declaring a minimal, always-mockable shape here and overriding behavior
+// per-test via vi.mocked(...).mockReturnValue in beforeEach keeps this file
+// self-contained rather than depending on the exact return values baked
+// into the factory below — see vitest.config.ts's pool comment for the
+// (now-fixed) history of why sibling files' differing '@/lib/socket' mocks
+// used to matter here.
 vi.mock('@/lib/socket', () => ({
   default: {
     emit: vi.fn(),
@@ -105,16 +103,10 @@ describe('SosContext — safety:emergency_contact_needed', () => {
     mockUser = { id: 'victim-1' };
     mockActiveSos = { _id: 'sos-1', userId: 'victim-1', status: 'active', pendingUntil: null };
 
-    // Re-establish this test's socket behavior every run, regardless of
-    // what a sibling file's vi.mock factory left the module cache in —
-    // see the vi.mock('@/lib/socket', ...) comment above for why this is
-    // necessary rather than relying on the factory alone.
     const mockedSocket = {
       on: vi.fn((event: string, cb: Handler) => handlers.set(event, cb)),
       off: vi.fn((event: string) => handlers.delete(event)),
     };
-    // eslint-disable-next-line no-console
-    console.log('DIAG typeof getSocket:', typeof mockedSocketService.getSocket, Object.keys(mockedSocketService));
     vi.mocked(mockedSocketService.getSocket).mockReturnValue(mockedSocket as never);
   });
 
