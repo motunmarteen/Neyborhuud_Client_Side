@@ -5,11 +5,19 @@
 
 ## What was found
 
-`NeyborHuud-ServerSide/src/middlewares/auth.middleware.ts` exports two different auth gates:
+`NeyborHuud-ServerSide/src/middlewares/auth.middleware.ts` exports **three** different auth gates
+(a second one, `protectWithBetterAuth`, was found later while building the `gossip` registry entry
+— see the ⚠️ update below; the original pass only knew about the first two):
 
 - **`protect`** (line 451) — accepts **only** an `Authorization: Bearer <token>` header. Rejects
   immediately with 401 if that header is missing, with no fallback.
 - **`protectAny`** — accepts *either* a Bearer token *or* a Better Auth session (cookie-based).
+- **`protectWithBetterAuth`** (line 77) — accepts **only** a Better Auth session cookie
+  (`betterAuth.api.getSession()`). Rejects with 401 if there's no session, with **no Bearer-token
+  fallback at all** — the inverse of `protect`. Used in exactly one file: `content/gossip.routes.ts`
+  (mounted at both `/gossip` and `/huud-gist`). See `gossip.md` for the full writeup — **this one is
+  a confirmed live production bug**, not just a latent inconsistency, because the frontend never
+  sends a session cookie.
 
 Grepping every `.routes.ts` file in `src/modules/` for which one each module actually uses:
 
@@ -23,7 +31,10 @@ Grepping every `.routes.ts` file in `src/modules/` for which one each module act
 `moderation`, `notifications`, `payments`, `ratings`, `recommendations`, `services`, `trust` —
 **27 route files.**
 
-## Why this isn't (currently) breaking anything
+**Uses `protectWithBetterAuth` (session cookie ONLY, no Bearer fallback):** `content/gossip` —
+**1 route file, 11 of its 13 routes affected.** See ⚠️ below.
+
+## Why the `protect`/`protectAny` split isn't (currently) breaking anything
 
 Checked the frontend's `ApiClient` (`pwa/src/lib/api-client.ts`) directly: it's Axios-based with
 no `withCredentials`/`credentials` setting anywhere, meaning it does not send cookies cross-origin
@@ -33,6 +44,18 @@ architecture is a hand-rolled Bearer-token system (`auth.service.ts`, token read
 token on authenticated requests today**, so the `protectAny` modules' cookie-fallback capability is
 effectively unused, and the `protect`-only modules' lack of that fallback doesn't currently produce
 any user-visible failure.
+
+## ⚠️ Why `protectWithBetterAuth` IS currently breaking something
+
+The exact same fact used above to say "not currently breaking anything" flips to the opposite
+conclusion for `protectWithBetterAuth`: since the frontend **never** sends a Better Auth session
+cookie (Bearer-token-only architecture, confirmed above), the one file that requires a session
+cookie and accepts nothing else — `content/gossip.routes.ts` — is unreachable on 11 of its 13
+routes for every real user. Confirmed as live, wired frontend code via
+`pwa/src/hooks/useHuudGist.ts` → `pwa/src/services/huudGist.service.ts` → `apiClient` (Bearer-only).
+Full detail and the exact broken route list is in `gossip.md`. This is not hypothetical or
+forward-looking risk like the `protect`/`protectAny` split below — it is very likely an active
+production bug today.
 
 ## Why it still matters for the rebuild
 
