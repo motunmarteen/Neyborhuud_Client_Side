@@ -12,66 +12,53 @@
 >
 > **Total: 13 routes** (counted once; identical set reachable at both mount paths).
 
-## 🔴 CRITICAL — confirmed live bug, not a latent inconsistency
+## ✅ FIXED — was a confirmed live bug, resolved 2026-08-27
 
-This module is the **first case found where the auth mismatch is not theoretical**. Unlike
-`_auth-middleware-split.md`'s `protect`-only modules (which still accept Bearer tokens fine), this
-module uses a **third, previously uncatalogued middleware: `protectWithBetterAuth`**
-(`auth.middleware.ts:77-126`). Read directly from source:
+This module was the **first case found where the auth mismatch was not theoretical**. It used a
+**third, previously uncatalogued middleware: `protectWithBetterAuth`** (`auth.middleware.ts:77-126`),
+which checks a Better Auth session cookie ONLY, with no Bearer-token fallback — the inverse of
+`protect`. Since the frontend's `ApiClient` is Bearer-only with no cookie handling
+(`pwa/src/lib/api-client.ts:26-53`), every route gated by it 401'd for every real user, every time.
 
-```ts
-const session = await betterAuth.api.getSession({ headers: fromNodeHeaders(req.headers) });
-if (!session || !session.user) {
-  return errorResponse(res, "Not authorized to access this route", 401);
-}
-```
+Confirmed at the time as live, wired frontend code via `pwa/src/hooks/useHuudGist.ts`'s
+`useHuudGistMutations` (like, comment, create, update, delete) → `huudGistService` → `apiClient`.
 
-**This checks a Better Auth session cookie ONLY. There is no Bearer-token fallback path at all** —
-the inverse of `protect` (which is Bearer-only with no cookie fallback). Verified the frontend's
-`ApiClient` (`pwa/src/lib/api-client.ts:26-53`) sends `Authorization: Bearer <token>` on every
-request and has no `withCredentials`/cookie handling anywhere in the file — the same fact already
-used in `_auth-middleware-split.md` to conclude the `protect`-only split "isn't currently breaking
-anything." Here it's the opposite conclusion: **a Bearer-token-only frontend can never satisfy
-`protectWithBetterAuth`, so every route gated by it in this file will 401 for every real user,
-every time.**
-
-Confirmed this is live, wired frontend code, not dead/unused: `pwa/src/hooks/useHuudGist.ts`'s
-`useHuudGistMutations` (like, comment, create, update, delete) calls straight into
-`huudGistService`, which calls `apiClient` (Bearer-only) against these exact routes. The `/gist`
-and `/gossip` pages (`pwa/src/app/(app)/gist/`, `pwa/src/app/(app)/gossip/`) are real, mounted
-routes per the directory scan in Step 1.
-
-**Net effect**: browsing/listing Huud Gist threads works (those two routes use `optionalAuth`, see
-table), but **creating a thread, editing, deleting, liking, and all commenting are broken for every
-user on the current frontend.** This is very likely an active, user-visible production bug today,
-not something introduced by the rebuild's discovery process — flagging for the user to decide
-whether to fix immediately (backend-only, low-risk: change `protectWithBetterAuth` → `protectAny`
-on this file, mirroring the already-working pattern in `content`/`safety`/`profile`/`search`/`auth`)
-or intentionally defer to a later phase.
+**Fix applied**: swapped `protectWithBetterAuth` → `protectAny` on all 8 affected routes in
+`NeyborHuud-ServerSide/src/modules/content/gossip.routes.ts` (import + every usage), matching the
+already-proven pattern used in `auth`/`content`/`profile`/`safety`/`search`. Verified safe before
+applying: `protectAny` sets a strict superset of what `protectWithBetterAuth` set (`req.user`,
+`req.session`, `req.userRoles`, `req.permissions` — all four, vs. the old middleware's four), and
+`gossip.controller.ts` has zero references to `req.session` that could behave differently. Ran
+`tsc --noEmit` (clean) and the full `tests/gossip.test.ts` suite (79/79 passing) after the change —
+that suite tests the controller directly via mock req/res so it doesn't exercise the router/
+middleware layer itself, but confirms nothing downstream broke.
 
 ## Routes
 
 | Method | Path | Auth | Handler | Notes |
 |---|---|---|---|---|
-| GET | `/me` | `protectWithBetterAuth` ⚠️ | `getUserGossips` | Broken — see above |
-| GET | `/sections` | public | `listHuudGistSections` | Works |
-| POST | `/` | `protectWithBetterAuth` ⚠️, `requireVerified`, `requireNigeriaLocation`, validated | `createGossip` | Broken — see above |
-| GET | `/` | `optionalAuth` | `listGossip` | Works |
-| GET | `/:id` | `optionalAuth` | `getGossip` | Works |
-| PUT | `/:id` | `protectWithBetterAuth` ⚠️, validated | `updateGossip` | Broken |
-| DELETE | `/:id` | `protectWithBetterAuth` ⚠️ | `deleteGossip` | Broken |
-| POST | `/:id/like` | `protectWithBetterAuth` ⚠️ | `likeGossip` | Broken |
-| POST | `/:gossipId/comments` | `protectWithBetterAuth` ⚠️, validated | `addGossipComment` | Broken |
-| GET | `/:gossipId/comments` | `protectWithBetterAuth` ⚠️ | `listComments` | Broken — even reading comments requires this |
-| POST | `/:gossipId/comments/:commentId/like` | `protectWithBetterAuth` ⚠️ | `likeComment` | Broken |
-| DELETE | `/:gossipId/comments/:commentId` | `protectWithBetterAuth` ⚠️ | `deleteComment` | Broken |
+| GET | `/me` | `protectAny` | `getUserGossips` | Fixed — was `protectWithBetterAuth` |
+| GET | `/sections` | public | `listHuudGistSections` | |
+| POST | `/` | `protectAny`, `requireVerified`, `requireNigeriaLocation`, validated | `createGossip` | Fixed — was `protectWithBetterAuth` |
+| GET | `/` | `optionalAuth` | `listGossip` | |
+| GET | `/:id` | `optionalAuth` | `getGossip` | |
+| PUT | `/:id` | `protectAny`, validated | `updateGossip` | Fixed — was `protectWithBetterAuth` |
+| DELETE | `/:id` | `protectAny` | `deleteGossip` | Fixed — was `protectWithBetterAuth` |
+| POST | `/:id/like` | `protectAny` | `likeGossip` | Fixed — was `protectWithBetterAuth` |
+| POST | `/:gossipId/comments` | `protectAny`, validated | `addGossipComment` | Fixed — was `protectWithBetterAuth` |
+| GET | `/:gossipId/comments` | `protectAny` | `listComments` | Fixed — was `protectWithBetterAuth` |
+| POST | `/:gossipId/comments/:commentId/like` | `protectAny` | `likeComment` | Fixed — was `protectWithBetterAuth` |
+| DELETE | `/:gossipId/comments/:commentId` | `protectAny` | `deleteComment` | Fixed — was `protectWithBetterAuth` |
 
 ## Known issues found while building this registry
 
-- **See critical finding above — this is the top-priority backend issue found in the entire API
-  registry so far**, more severe than the fake-KYC finding in `identity.md` because it's a
-  currently-broken user-facing feature (posting/commenting/liking) rather than a feature that
-  silently under-delivers.
+- **See fixed finding above** — this was the top-priority backend issue found in the entire API
+  registry, more severe than the fake-KYC finding in `identity.md` because it was a currently-broken
+  user-facing feature (posting/commenting/liking), not one that silently under-delivered. Now
+  resolved; no longer a blocker for the rebuild.
+- `protectWithBetterAuth` itself is still exported from `auth.middleware.ts` but as of this fix has
+  no remaining callers anywhere in `src/` — a candidate for removal in a future backend cleanup, not
+  done here since it's out of scope for this specific bug fix.
 - `createGossip` also requires `requireNigeriaLocation` — a middleware not seen in any other module
   registered so far; worth noting for the geo/location-gating pattern used elsewhere in the app.
 - The dual-mount (`/gossip` and `/huud-gist` serving the same router, disambiguated only by a

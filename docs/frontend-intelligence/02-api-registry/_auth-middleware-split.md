@@ -14,10 +14,12 @@
 - **`protectAny`** — accepts *either* a Bearer token *or* a Better Auth session (cookie-based).
 - **`protectWithBetterAuth`** (line 77) — accepts **only** a Better Auth session cookie
   (`betterAuth.api.getSession()`). Rejects with 401 if there's no session, with **no Bearer-token
-  fallback at all** — the inverse of `protect`. Used in exactly one file: `content/gossip.routes.ts`
-  (mounted at both `/gossip` and `/huud-gist`). See `gossip.md` for the full writeup — **this one is
-  a confirmed live production bug**, not just a latent inconsistency, because the frontend never
-  sends a session cookie.
+  fallback at all** — the inverse of `protect`. Was used in exactly one file:
+  `content/gossip.routes.ts` (mounted at both `/gossip` and `/huud-gist`). See `gossip.md` for the
+  full writeup — **this was a confirmed live production bug**, not just a latent inconsistency,
+  because the frontend never sends a session cookie. **Fixed 2026-08-27**: swapped to `protectAny`
+  on all 8 affected routes. `protectWithBetterAuth` remains exported but as of the fix has no
+  remaining callers anywhere in `src/`.
 
 Grepping every `.routes.ts` file in `src/modules/` for which one each module actually uses:
 
@@ -31,8 +33,8 @@ Grepping every `.routes.ts` file in `src/modules/` for which one each module act
 `moderation`, `notifications`, `payments`, `ratings`, `recommendations`, `services`, `trust` —
 **27 route files.**
 
-**Uses `protectWithBetterAuth` (session cookie ONLY, no Bearer fallback):** `content/gossip` —
-**1 route file, 11 of its 13 routes affected.** See ⚠️ below.
+**Used `protectWithBetterAuth` (session cookie ONLY, no Bearer fallback):** `content/gossip` —
+**1 route file, 11 of its 13 routes affected. Fixed 2026-08-27 — see ✅ below.**
 
 ## Why the `protect`/`protectAny` split isn't (currently) breaking anything
 
@@ -45,17 +47,18 @@ token on authenticated requests today**, so the `protectAny` modules' cookie-fal
 effectively unused, and the `protect`-only modules' lack of that fallback doesn't currently produce
 any user-visible failure.
 
-## ⚠️ Why `protectWithBetterAuth` IS currently breaking something
+## ✅ `protectWithBetterAuth` was breaking something — now fixed
 
-The exact same fact used above to say "not currently breaking anything" flips to the opposite
+The exact same fact used above to say "not currently breaking anything" flipped to the opposite
 conclusion for `protectWithBetterAuth`: since the frontend **never** sends a Better Auth session
-cookie (Bearer-token-only architecture, confirmed above), the one file that requires a session
-cookie and accepts nothing else — `content/gossip.routes.ts` — is unreachable on 11 of its 13
+cookie (Bearer-token-only architecture, confirmed above), the one file that required a session
+cookie and accepted nothing else — `content/gossip.routes.ts` — was unreachable on 11 of its 13
 routes for every real user. Confirmed as live, wired frontend code via
 `pwa/src/hooks/useHuudGist.ts` → `pwa/src/services/huudGist.service.ts` → `apiClient` (Bearer-only).
-Full detail and the exact broken route list is in `gossip.md`. This is not hypothetical or
-forward-looking risk like the `protect`/`protectAny` split below — it is very likely an active
-production bug today.
+
+**Fixed 2026-08-27**: `content/gossip.routes.ts` swapped `protectWithBetterAuth` → `protectAny` on
+all 8 affected routes. Verified safe (superset of fields set on `req`), `tsc --noEmit` clean,
+`tests/gossip.test.ts` 79/79 passing. Full detail in `gossip.md`.
 
 ## Why it still matters for the rebuild
 
