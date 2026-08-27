@@ -177,26 +177,41 @@ Unmatched calls: N/A - confirmed no service/apiClient usage anywhere in the file
 ---
 
 ## Page: /settings
-File(s): pwa/src/app/(app)/settings/page.tsx (very large - 1871 lines, contains substantial dead code, see below)
+File(s): pwa/src/app/(app)/settings/page.tsx (1477 lines as of the fix below; was 1871 lines with dead code)
 Purpose: Tabbed settings hub - Notifications, Privacy, Posts (defaults), Account, Language.
 
 | API Called | Method | Via Service/Hook | Registry Match | Notes |
 |---|---|---|---|---|
 | /profile/settings | PATCH | direct fetchAPI() calls (accessibility text-size, lite-mode, debounced notification toggles) | Not literally in profile.md table (which lists PATCH /settings relative to the /profile mount) - resolves to the same route once the mount prefix is applied; treated as a RESOLVED MATCH, not a gap | Called from 3 separate places in this file |
-| /auth/settings/privacy | PUT | direct fetchAPI() in handleSavePrivacy (dead code path, see below) and the live privacy tab panel | auth.md: PUT /settings/privacy | Real, documented route |
+| /auth/settings/privacy | PUT | direct fetchAPI() in handleSavePrivacy and the live privacy tab panel | auth.md: PUT /settings/privacy | Real, documented route |
 | /safety/settings | GET, PATCH | direct fetchAPI() | out of this cluster (safety.md) | Loads/saves emergencyServicesEnabled toggle |
-| /auth/consents | GET, POST | authService.getConsents(), authService.updateConsent() | auth.md: GET /consents, POST /consents | Only reachable via a DEAD code block described below |
-| /auth/data-access-history | GET | authService.getDataAccessHistory() | auth.md: GET /data-access-history | Same - only reachable via dead code block |
-| /auth/export-data | GET | authService.exportUserData() | auth.md: GET /export-data | Only reachable via dead code block |
-| /auth/delete-account | DELETE | authService.deleteAccount() | auth.md: DELETE /delete-account | Same as above |
-| /profile/username | PATCH | authService.changeUsername() | profile.md: PATCH /username | Only reachable via dead code block |
+| /auth/consents | GET, POST | authService.getConsents(), authService.updateConsent() | auth.md: GET /consents, POST /consents | **Fixed 2026-08-27** — now live in the Privacy tab's "Data & consent (NDPR)" section |
+| /auth/data-access-history | GET | authService.getDataAccessHistory() | auth.md: GET /data-access-history | **Fixed** — now live in the Privacy tab |
+| /auth/export-data | GET | authService.exportUserData() | auth.md: GET /export-data | **Fixed** — now live in the Account tab's "Data & danger zone" section |
+| /auth/delete-account | DELETE | authService.deleteAccount() | auth.md: DELETE /delete-account | **Fixed** — now live in the Account tab |
+| /profile/username | PATCH | authService.changeUsername() | profile.md: PATCH /username | **Fixed** — now live in the Account tab's "Username" section |
 | /profile/me | GET | authService.getMyProfileFull() | profile.md: GET /me | Live - called on mount and after email verification |
 
 Components used: EmailVerificationCard, AppBrowseLayout, BrowseTabStrip, ToggleSwitch (local), Section (local).
 Observed states: email-unverified banner with Add email in profile CTA if no email on file, 5 tabs (notifications/privacy/posts/account/language), notifications save state, dark/light mode toggle, per-item debounced auto-save on activity/topic toggles.
 Unmatched calls: none truly unmatched once the /profile mount prefix is applied to /profile/settings.
 
-IMPORTANT FINDING - dead code: This file contains two entire tab implementations wrapped in a literal JS false-and-and guard around lines 858 to 1529, roughly 750 lines, that can never render since the literal false short circuits the boolean check unconditionally. This dead block is the only place in this page that calls the consent, data-access-history, export-data, delete-account, and change-username service functions. The live account tab further down is a much simpler rewrite that does not include NDPR consent management, data export, account deletion, or username-change UI at all, meaning those six real working registry-documented backend features currently have no reachable UI entry point on the live settings page. This is a significant regression worth flagging to a human reviewer.
+**FIXED 2026-08-27** (was: IMPORTANT FINDING - dead code): This file contained two entire tab
+implementations wrapped in a literal JS `false &&` guard spanning roughly 673 lines (original lines
+858-1529), unreachable since the literal `false` short-circuits the check unconditionally. That dead
+block was the only place calling the consent, data-access-history, export-data, delete-account, and
+change-username service functions — plus, discovered during the fix, the only place with font-size
+and lite-mode toggles and the `/settings/blocked` link, neither reachable from anywhere else either.
+
+Fix applied: moved all the recovered functionality into the live Account tab (Username section with
+handle timeline, Invite NeyburHs, Accessibility with font-size/lite-mode, Data & danger zone with
+export/delete) and the live Privacy tab (Blocked NeyburHs link, Data & consent (NDPR) with the four
+consent toggles and expandable access-history log), rewritten in the live tabs' own Section/
+ToggleSwitch style rather than copy-pasted verbatim. Then deleted the three dead `{false && (...)}`
+blocks entirely. Verified: `tsc --noEmit` clean; `eslint` diff shows zero new warnings, and confirmed
+`consentsLoading`/`handleExportMyData`/etc. are no longer flagged as unused — proof they're now
+genuinely referenced from live JSX, not just present in the file. No dedicated test suite exists for
+this page to run.
 
 ---
 
@@ -488,7 +503,7 @@ This matches the API registry's own gamification.md correction that no huud-econ
 
 Anything surprising or worth flagging for the human reviewer:
 
-1. The /settings page has roughly 750 lines of unreachable dead code, a literal JS false-guarded block, that is the only place six real, registry-documented backend features are wired up on the frontend: NDPR consent management, data-access history, data export, account deletion, username change, and the referral-link-copy UI. The live privacy and account tabs are simplified rewrites missing all of this. This looks like an in-progress refactor that shipped incomplete - worth confirming with whoever owns this page whether the new tabs are meant to eventually re-add these, or whether this was an intentional feature removal.
+1. **FIXED 2026-08-27.** The /settings page had roughly 673 lines of unreachable dead code (a literal JS `false &&` guarded block) that was the only place six real, registry-documented backend features were wired up: NDPR consent management, data-access history, data export, account deletion, username change, and font-size/lite-mode accessibility toggles. Moved into the live Privacy/Account tabs; dead blocks deleted. One caveat carried over unchanged: the "Invite NeyburHs" referral-link-copy UI is (and always was) purely client-side — it builds a signup URL from the user's own username but never calls a real referral-tracking endpoint, even now that it's reachable. gamification.md's cross-cluster notes confirm all 4 real referral routes (`/gamification/referral*`) have no caller anywhere in this cluster — worth a product decision on whether the referral UI should be wired to those real endpoints, separately from this reachability fix.
 2. admin.service.ts defines 6 functions calling paths that do not appear anywhere in admin.md's 30-route registry (moderation queue and approve and remove, system logs, get and update system settings, and broadcast), and none of them are called by any page in this cluster. Could be dead frontend code targeting routes that do not exist server-side, or the registry step may have missed them - worth a targeted backend grep in a follow-up pass rather than assuming either side is correct.
 3. The /admin/reports page collapses 4 distinct UI actions (dismiss, warn, remove, suspend) into only 2 backend statuses, dismissed and actioned - an admin resolving a report as Warn User versus Suspend User versus Remove Content produces identical backend state, with only an optional free-text note field to distinguish intent after the fact. Worth flagging as a possible audit-trail gap.
 4. The TrustOS score-inflation UX bug is independently reachable and confirmed from this cluster's pages, the huud-economy score page and the profile page: the frontend displays a synthetic, streak and badge boosted trust score that can show a user as vouch-eligible while the backend's actual canVouch check, which uses the raw score only, would reject the vouch attempt with a confusing 403. This was flagged in trust.md from source-reading alone; this pass confirms both of the pages that surface the inflated score to users.
@@ -498,4 +513,4 @@ Anything surprising or worth flagging for the human reviewer:
 
 ## Summary
 
-Traced 24 real pages across Auth, Settings, Profile, Admin, and Gamification/Huud-Economy. Nearly all API calls matched documented registry routes. Two findings stand out: the /settings page has roughly 750 lines of dead code (a literal false-guarded block) that is the only reachable path to six live backend features - NDPR consent, data export, account deletion, username change, and the access-history log are currently unreachable in the live UI; and admin.service.ts calls six admin paths absent from admin.md's registry, suggesting either dead frontend code or a registry gap. Confirmed the gamification routes are legacy redirects to three genuinely distinct huud-economy pages, not a duplication bug. submitKYC is unreachable from this cluster; real verification happens via admin override or community vouching, both confirmed live. The TrustOS synthetic-score-versus-backend-enforcement mismatch flagged in trust.md is confirmed reachable from two pages in this cluster.
+Traced 24 real pages across Auth, Settings, Profile, Admin, and Gamification/Huud-Economy. Nearly all API calls matched documented registry routes. The /settings page's ~673-line dead-code block (NDPR consent, data export, account deletion, username change, accessibility toggles) has been fixed — moved into the live tabs and verified with a clean `tsc`/`eslint` pass. Remaining open finding: admin.service.ts calls six admin paths absent from admin.md's registry, suggesting either dead frontend code or a registry gap — not yet resolved. Confirmed the gamification routes are legacy redirects to three genuinely distinct huud-economy pages, not a duplication bug. submitKYC is unreachable from this cluster; real verification happens via admin override or community vouching, both confirmed live. The TrustOS synthetic-score-versus-backend-enforcement mismatch flagged in trust.md is confirmed reachable from two pages in this cluster.
