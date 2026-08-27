@@ -303,10 +303,10 @@ be invented when a real, partially-adopted canonical system already exists.
 
 ## 6. Modals / Sheets — canonicalize on `BottomSheet.tsx`
 
-**⚠️ Revised 2026-08-28 after DESIGN.md reconciliation — this REVERSES the original decision below,
-and also REVERSES confirmed sign-off decision #1 in §15 (original: "delete `BottomSheet.tsx`"). This
-specific reversal must be flagged back to the user before implementation — see the note at the end of
-this section.**
+**✅ CONFIRMED 2026-08-28 — user re-confirmed this reversal explicitly ("Keep BottomSheet.tsx, delete
+BottomSheetOverlay").** This REVERSES the original decision (kept below for record) and REVERSES
+originally-confirmed sign-off decision #1 in §15, which is now updated to reflect this fresh
+confirmation. No longer pending — approved for the implementation phase.
 
 DESIGN.md §14 specifies bottom sheets as "a core interaction pattern for the platform — not a
 fallback," with a 4-point snap system (Peek 25vh / Half 50vh / Expanded 90vh / Full 100vh),
@@ -323,8 +323,8 @@ Sentinel AI, map point details, profile previews, contextual actions, notificati
 - `BottomSheetOverlay.tsx` (+ `useBottomSheetDrag` hook) has **no snap-point concept at all** — it's
   a single-position dismiss-on-drag sheet, not a multi-stop one.
 
-**Revised decision: `BottomSheet.tsx` is canonical, extended to implement the full 4-point snap
-system from DESIGN.md §14. `BottomSheetOverlay.tsx`/`AppBottomSheet.tsx` should be deleted instead —
+**Decision: `BottomSheet.tsx` is canonical, extended to implement the full 4-point snap
+system from DESIGN.md §14. `BottomSheetOverlay.tsx`/`AppBottomSheet.tsx` are deleted instead —
 the reverse of the original call — with their genuinely good parts (portal rendering, focus-trap,
 Escape handling, scroll lock from `component-patterns.md` §4) ported into `BottomSheet.tsx` rather
 than lost.** This is a "most-adopted" exception: `BottomSheetOverlay` was originally preferred for
@@ -333,13 +333,8 @@ is a real product behavior that only `BottomSheet.tsx`'s architecture already su
 on one axis (a11y) doesn't outrank correctness on the axis that actually matters here (the sheet must
 snap to 4 heights, which only one of the two candidates is built to do).
 
-**⚠️ Flag back to user:** this reopens confirmed sign-off decision #1 (§15), which said the opposite
-(delete `BottomSheet.tsx`, keep `BottomSheetOverlay`). Do not treat this reversal as approved for
-implementation the way the original 5 decisions were — surface it explicitly and get a fresh
-confirmation before any deletion happens.
-
-**Every bespoke bottom-sheet reimplementation found must migrate to `BottomSheetOverlay`/
-`AppBottomSheet` during the rebuild:**
+**Every bespoke bottom-sheet reimplementation found must migrate to the extended `BottomSheet.tsx`
+during the rebuild:**
 - `CreatePostModal`'s manual `createPortal` + `AnimatePresence` sheet
 - `SentinelBottomSheet`'s `setTimeout`-based mount/unmount
 - `PostCreationSuccessSheet`'s Tailwind `animate-in` sheet
@@ -462,10 +457,10 @@ a rebuild of the icon system.
 
 ---
 
-## 11. Navigation Chrome — no changes needed, but ⚠️ one safety-relevant conflict flagged
+## 11. Navigation Chrome — Top/Left/Right unchanged; Bottom dock gets a dedicated SOS tab
 
-**Decision: `TopNav`/`BottomNav`/`LeftSidebar`/`RightSidebar` are already correct — the one category
-in the entire audit needing zero canonicalization.**
+**Decision: `TopNav`/`LeftSidebar`/`RightSidebar` are already correct — no canonicalization needed.
+`BottomNav` needs one confirmed structural change: adding DESIGN.md's dedicated SOS tab.**
 
 `component-patterns.md` §5 calls this "the most consistent category in the whole audit": single
 source of truth per component, a working `Auto*` global-mount pattern (`AutoTopNav`,
@@ -474,27 +469,37 @@ breakpoint adaptation. The only note carried forward is cosmetic: `BottomNav.tsx
 `components/feed/` rather than `components/navigation/` — a location inconsistency worth fixing
 during the rebuild's file-move pass, not a design decision.
 
-**⚠️ Real conflict found during DESIGN.md reconciliation (2026-08-28), NOT auto-resolved —
-needs user input:** DESIGN.md §13a specifies a 5-tab dock (Home / Sentinel AI / **SOS — centered,
+**✅ CONFIRMED 2026-08-28 — build DESIGN.md's dedicated SOS tab.** A real conflict was found during
+reconciliation: DESIGN.md §13a specifies a 5-tab dock (Home / Sentinel AI / **SOS — centered,
 elevated, always red, always accessible** / Messages / Profile), with SOS getting its own dedicated,
 permanently-visible tab and a long-press-for-silent-SOS gesture on that tab specifically. Checked
 directly against `components/feed/BottomNav.tsx`: the real, shipped tab list is **6 tabs — Home /
 Search / Sentinel / Connect / Gist / Profile** (`BottomNav.tsx:83-88`) — there is no SOS tab at all
 (confirmed via grep, zero matches for "sos" in the file), no Messages tab, and the 600ms long-press
 gesture DESIGN.md assigns to SOS is actually wired to the **Sentinel** tab, triggering Fake Call
-(`BottomNav.tsx:63-69`), not SOS.
+(`BottomNav.tsx:63-69`), not SOS. **The user explicitly confirmed DESIGN.md's intent should win**
+here — this is safety-critical, and the missing dedicated SOS entry point is treated as a real gap
+to close in the rebuild, not evidence the current 6-tab structure is the deliberate design.
 
-This is different in kind from the Button/Modal conflicts above — those were "which existing
-component is more complete," resolvable from source alone. This one is safety-critical (SOS
-reachability) and the two documents describe materially different navigation structures, not just
-different implementations of the same idea. **Not resolving this unilaterally.** Two real
-possibilities: (a) DESIGN.md's 5-tab/dedicated-SOS-button spec is the intended direction and the
-current 6-tab dock is the thing that needs to change in the rebuild, or (b) the current 6-tab
-structure (with SOS reachable via the existing `SosContext`/global SOS entry points documented in
-`architecture-spec.md`, not the bottom dock) is the real, deliberate design and DESIGN.md's §13a is
-stale/aspirational like several of its other roadmap claims. Needs explicit user direction before
-this section can be finalized — everything else in this section (no changes needed to Top/Left/Right
-nav) stands regardless of how this is resolved.
+**Rebuild requirement, decided:**
+- Bottom dock becomes a **5-slot layout**: Home / Sentinel AI / **SOS (centered, elevated, always
+  `text-brand-red` with glow ring, per DESIGN.md §13a "never change this")** / a slot for
+  Messages-or-Connect (see note below) / Profile.
+- **SOS gets its own dedicated tap target and its own long-press-for-silent-SOS gesture**
+  (600ms, matching the existing timer pattern already proven in `BottomNav.tsx:66-69`, just
+  retargeted). Short tap navigates to `/sos`; long-press triggers silent SOS per DESIGN.md §13a.
+- **The Sentinel tab's existing long-press-for-Fake-Call gesture must be relocated**, not dropped —
+  Fake Call is a real, valuable safety feature (per the safety journeys documented in Step 6) that
+  currently has no other entry point. During implementation, find it a new trigger (e.g. within the
+  Sentinel AI surface itself, or the SOS tab's own contextual menu) rather than removing it — this
+  is an implementation-detail decision to make when building the tab, not a design-system-spec call.
+- **Search, Connect, and Gist** (3 of the current 6 tabs) don't map cleanly into DESIGN.md's 5-slot
+  layout, which only names Home/Sentinel/SOS/Messages/Profile. Resolve during implementation by
+  checking actual usage/traffic to decide which of Search/Connect/Gist earns the one remaining
+  "Messages-or-X" slot and which move to the side drawer (DESIGN.md §13c already lists Communities,
+  Saved Posts, Wallet, etc. as drawer-appropriate secondary navigation — Search/Connect/Gist are
+  reasonable candidates for that treatment if they don't win the 5th slot). This is a scope note for
+  Step 9/implementation, not resolved here.
 
 ---
 
@@ -693,16 +698,18 @@ Everything above defaults to "most-adopted pattern wins," per the user's instruc
 following specific calls involved deleting/replacing something rather than just formalizing an
 existing winner, and were reviewed individually rather than accepted as a batch.
 
-**⚠️ Decision #1 REOPENED 2026-08-28** after the `pwa/DESIGN.md` reconciliation pass found that
+**Decision #1 REVERSED 2026-08-28** after the `pwa/DESIGN.md` reconciliation pass found that
 `BottomSheet.tsx` (not `BottomSheetOverlay.tsx`) is the component actually capable of DESIGN.md's
-required 4-point snap system — see §6 for the full verified reasoning. This decision needs a fresh
-user confirmation before implementation; it is NOT currently approved. Decisions #2-5 are unaffected
-by the DESIGN.md reconciliation and remain approved as originally confirmed 2026-08-28:
+required 4-point snap system — see §6 for the full verified reasoning. **The user explicitly
+re-confirmed this reversal** ("Keep BottomSheet.tsx, delete BottomSheetOverlay") — it is now approved
+for implementation, superseding the original 2026-08-28 confirmation of the opposite call. Decisions
+#2-5 are unaffected by the DESIGN.md reconciliation and remain approved as originally confirmed:
 
-1. **⚠️ REOPENED, NOT CURRENTLY APPROVED — originally "delete `BottomSheet.tsx`, keep only
-   `BottomSheetOverlay`/`AppBottomSheet`"; §6 now recommends the reverse** (keep/extend
-   `BottomSheet.tsx`, delete `BottomSheetOverlay`/`AppBottomSheet`) to satisfy DESIGN.md's 4-point
-   snap requirement. Needs explicit user re-confirmation before implementation.
+1. **REVERSED & RE-CONFIRMED — originally "delete `BottomSheet.tsx`, keep only
+   `BottomSheetOverlay`/`AppBottomSheet`"; now the reverse per §6's verified reasoning and the
+   user's fresh confirmation**: keep and extend `BottomSheet.tsx` to the full 4-point snap system,
+   delete `BottomSheetOverlay`/`AppBottomSheet` (porting their focus-trap/portal/scroll-lock code
+   into `BottomSheet.tsx` first).
 2. **CONFIRMED — Delete `CreatePostModal`'s local `PostFormSelect`**, migrate to `BrowseSelect` (§7).
 3. **CONFIRMED — Migrate `DealStatusCard`/`OfferCard`/`EventRsvpCard` off raw Tailwind colors**
    onto `mod-card` + design tokens (§4, §1) — these are high-traffic, high-value components per
@@ -717,9 +724,8 @@ by the DESIGN.md reconciliation and remain approved as originally confirmed 2026
    new primitives (in-app confirm dialog, counter-offer form) as their own small implementation
    tasks, not bundled silently into unrelated feature work.
 
-Decisions #2, #3, #5 (and #4 in its narrowed form) are approved for the implementation phase
-(Steps 10+) — no further confirmation needed before acting on them. **Decision #1 is the one
-exception and must be re-confirmed with the user before any `BottomSheet*` deletion happens.**
+All five decisions (#1 in its reversed form, #2, #3, #4 in its narrowed form, #5) are now approved
+for the implementation phase (Steps 10+) — no further confirmation needed before acting on them.
 
 ---
 
