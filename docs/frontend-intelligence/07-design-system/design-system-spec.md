@@ -356,21 +356,25 @@ would be process for its own sake, not a fix for a real problem found in the aud
 
 ---
 
-## 14. Summary — decisions requiring your sign-off before implementation
+## 14. Summary — sign-off decisions (all confirmed 2026-08-28)
 
-Everything above defaults to "most-adopted pattern wins," per your instruction. The following
-specific calls are flagged because they involve deleting/replacing something rather than just
-formalizing an existing winner, and are worth a deliberate yes before any code changes:
+Everything above defaults to "most-adopted pattern wins," per the user's instruction. The
+following specific calls involved deleting/replacing something rather than just formalizing an
+existing winner, and were reviewed individually rather than accepted as a batch. **All five
+confirmed as specified, no changes requested:**
 
-1. **Delete `BottomSheet.tsx`**, keep only `BottomSheetOverlay`/`AppBottomSheet` (§6).
-2. **Delete `CreatePostModal`'s local `PostFormSelect`**, migrate to `BrowseSelect` (§7).
-3. **Migrate `DealStatusCard`/`OfferCard`/`EventRsvpCard` off raw Tailwind colors** onto
-   `mod-card` + design tokens (§4, §1) — these are high-traffic, high-value components per Step 6's
-   commerce journeys, so this migration carries real regression risk and should be tested carefully.
-4. **Rebuild `Button.tsx`'s variant set** from a fuller usage sweep before finalizing (§5) — the 4
-   examples in this document are illustrative, not exhaustive; a dedicated pass across all 37
-   `components/<domain>/` folders should happen before the variant API is locked.
-5. **Replace all 8 `window.prompt()`/`window.confirm()` call sites** with real in-app UI (§7) —
-   agreed as necessary, but the two new primitives this requires (in-app confirm dialog, and
-   wiring the counter-offer prompt into a proper form) should be scoped as their own small
-   implementation tasks, not bundled silently into unrelated feature work.
+1. **CONFIRMED — Delete `BottomSheet.tsx`**, keep only `BottomSheetOverlay`/`AppBottomSheet` (§6).
+2. **CONFIRMED — Delete `CreatePostModal`'s local `PostFormSelect`**, migrate to `BrowseSelect` (§7).
+3. **CONFIRMED — Migrate `DealStatusCard`/`OfferCard`/`EventRsvpCard` off raw Tailwind colors**
+   onto `mod-card` + design tokens (§4, §1) — these are high-traffic, high-value components per
+   Step 6's commerce journeys; proceed, but test carefully given the regression risk noted.
+4. **CONFIRMED — Rebuild `Button.tsx`'s variant set** from a fuller usage sweep before finalizing
+   (§5) — do the broader research pass across all 37 `components/<domain>/` folders before locking
+   the variant API; the 4 examples in this document are illustrative, not exhaustive.
+5. **CONFIRMED — Replace all 8 `window.prompt()`/`window.confirm()` call sites** with real in-app
+   UI (§7), all 8 in one pass rather than prioritizing only the 3 highest-stakes ones. Scope the two
+   new primitives (in-app confirm dialog, counter-offer form) as their own small implementation
+   tasks, not bundled silently into unrelated feature work.
+
+These five items are now approved for the implementation phase (Steps 10+) — no further
+confirmation needed before acting on them when that work begins.
