@@ -501,6 +501,73 @@ to close in the rebuild, not evidence the current 6-tab structure is the deliber
   reasonable candidates for that treatment if they don't win the 5th slot). This is a scope note for
   Step 9/implementation, not resolved here.
 
+**⚠️ Addendum 2026-08-28 — corrections and additions from an exhaustive 21-file source audit of the
+whole shell (`components/navigation/*`, `components/feed/BottomNav.tsx`, `lib/shellRoutes.ts`,
+`lib/appShellGates.ts`, `app/layout.tsx`), run while preparing the Step 10 Stitch shell prompt. This
+audit read every shell-related file in full (not sampled) and found real facts this section's
+original "no changes needed" framing missed:**
+
+- **Desktop is not a responsive web layout — it renders the mobile app inside a phone-simulator
+  device frame.** Verified in `DesktopPhoneFrame.tsx`: on desktop-width browsers at the app
+  subdomain (and only when not already embedded in an iframe), the entire product renders inside a
+  same-origin `<iframe>` styled as an iPhone bezel (rounded frame, fake status bar, notch), centered
+  on a dark marketing backdrop next to a "Designed for Mobile" panel with a live QR code linking to
+  the real app URL. The inner iframe's route and the outer browser URL are kept in sync in both
+  directions (`IframeUrlSync.tsx` + `DesktopPhoneFrame.tsx`'s own `popstate` handling). **This means
+  there effectively is no separate "desktop-optimized" layout to canonicalize** — `LeftSidebar`'s
+  `min-width:768px` desktop-rail CSS and `RightSidebar`'s `lg`/`xl` breakpoints only ever actually
+  paint *inside* that phone-shaped iframe at native mobile widths, never as a genuine wide desktop
+  page. Any future design/implementation work describing "the desktop shell" must account for this —
+  it's a phone presentation, not a desktop information architecture.
+- **`LeftSidebar` is far richer than "a vertical list with icon + label."** It embeds, in fixed
+  order: a live time-of-day/weather-driven ambient sky header (`SidebarSkyHeaderPanel`, 2-second
+  gradient crossfade on theme change) with the wordmark + Sentinel shield link + user identity chip
+  inside it; a rotating "Local Huud" menu row that cycles through 7 destinations every 2.8s
+  (pausing/locking to the current page when the user is already on one of them); ordinary nav rows
+  (My Huud, Communities, Saved); a live scrolling local-news headline marquee row; a Huud Economy
+  row; a live 3-second-polling currency exchange-rate ticker row; a footer (Settings, Help Center);
+  and a decorative city-skyline silhouette strip at the very bottom. On rain/snow weather days, a
+  full-height particle column (`SidebarAtmosphereColumn`) falls continuously through the entire
+  panel, not just behind the header. None of this was captured in this section's original text.
+- **`RightSidebar`'s own file comment claims "trending topics," but that's not actually built.** Real
+  content, verified: an Onboarding Checklist → an ambient weather card (a second, independently-coded
+  sky/weather visual, distinct from the sidebar header's) → Upcoming Events (max 3) → a 2-column
+  Marketplace preview grid (max 2 items) → a News panel. Width is 320px at the `lg` breakpoint,
+  widening to 400px at `xl` — a two-step responsive width, not a single fixed value.
+- **`BottomNav.tsx`'s real current shape is 6 tabs — Home, Search, Sentinel, Connect, Gist,
+  Profile — with no SOS tab at all**, confirming the gap already described above in this section.
+  Additionally: it renders as a floating, fully-rounded capsule/pill (not an edge-to-edge bar),
+  inset from both screen edges and capped at a max-width, floating above the bottom edge with a
+  shadow. The Sentinel tab's tap opens a bottom-sheet menu rather than navigating directly; only its
+  long-press (600ms) is a direct shortcut to Fake Call. Connect carries an unread-message badge;
+  none of the other tabs do.
+- **`TopNav`'s only right-side action is a single notifications bell** — no search icon, no
+  create-post icon, no messages icon (a `TopNavChatAction.tsx` component exists in the codebase but
+  is never imported/rendered anywhere — confirmed dead). Behavior is route-dependent: transparent
+  and showing an animated logo + dropdown mega-menu (6 color-coded quick-launch tiles: Marketplace,
+  Work, Events, FYI Bulletin, Help Request, Safety Alert) on the feed route specifically; solid with
+  a plain page title everywhere else.
+- **Two components are confirmed dead code with zero usages anywhere in the app**, useful to flag so
+  future work doesn't mistake them for real shell UI: `components/navigation/Sidebar.tsx` (a
+  completely separate, X.com-style collapsible sidebar implementation — different file from the real
+  `LeftSidebar.tsx`, never imported by anything) and `components/navigation/LocalHuudBottomSheet.tsx`
+  (a bottom-sheet version of the Local Huud menu, built but never wired up). `AmbientProfileCard.tsx`
+  is a special case: its default-exported card component (map background + hero stats) is also
+  unused, but the same file's `getTimePeriod`/`getSkyTheme`/`getGreeting` utility functions ARE real
+  and shared by the sky-hero, sidebar header, and weather widget — so the file matters as a shared
+  theme-engine module even though its own component isn't mounted anywhere.
+- **Route-gating for the global nav is centrally controlled**, not per-page ad hoc: `lib/
+  shellRoutes.ts` and `lib/appShellGates.ts` define which of 16+ major feature routes (feed,
+  friendship, explore, marketplace, jobs, events, services, settings, notifications,
+  incident-reports, help-request, community-emergency, premium, fyi, info, chat) own their own
+  page-level `TopNav`/`LeftSidebar` instance versus relying on the globally auto-mounted one, and
+  which routes (onboarding, auth, `/login`, `/signup`, etc.) get neither.
+
+None of these findings change the §11 decision itself (no canonicalization needed for
+Top/Left/Right, confirmed SOS-tab addition to BottomNav) — they fill in real detail the original
+text was missing, load-bearing for anyone (Stitch, an implementation agent) working from this spec
+without also reading the source directly.
+
 ---
 
 ## 12. Dark Mode Policy
