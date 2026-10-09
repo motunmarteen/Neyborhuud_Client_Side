@@ -98,6 +98,13 @@ const DEMO_CONVERSATIONS: Row[] = [
   },
 ];
 
+type InboxFilter = 'all' | 'chats' | 'groups';
+const INBOX_FILTERS: Array<{ id: InboxFilter; label: string }> = [
+  { id: 'all', label: 'All' },
+  { id: 'chats', label: 'Chats' },
+  { id: 'groups', label: 'Groups' },
+];
+
 interface ChatsStreamProps {
   currentUserId?: string;
   search?: string;
@@ -106,6 +113,7 @@ interface ChatsStreamProps {
 export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
   const router = useRouter();
   const { simulateIncomingCall, simulateActiveCall } = useCall();
+  const [filter, setFilter] = useState<InboxFilter>('all');
 
   const { data: convData, isLoading: loadingConvs } = useQuery({
     queryKey: ['conversations'],
@@ -150,6 +158,16 @@ export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q));
     return list;
   }, [rawConversations, search]);
+
+  const unreadIn = (pick: (r: Row) => boolean) =>
+    rows.filter(pick).reduce((n, r) => n + (r.unreadCount ?? 0), 0);
+  const unreadByFilter: Record<InboxFilter, number> = {
+    all: unreadIn(() => true),
+    chats: unreadIn((r) => !r.isCommunity),
+    groups: unreadIn((r) => !!r.isCommunity),
+  };
+  const visibleRows =
+    filter === 'all' ? rows : rows.filter((r) => (filter === 'groups' ? r.isCommunity : !r.isCommunity));
 
   if (loadingConvs) {
     return (
@@ -208,9 +226,41 @@ export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
         </div>
       </div>
 
+      {/* ── Chats / Groups tabs ── */}
+      <div role="tablist" aria-label="Filter conversations" className="flex gap-2 border-b border-black/[0.04] bg-white px-4 py-2.5">
+        {INBOX_FILTERS.map((t) => {
+          const active = filter === t.id;
+          const unread = unreadByFilter[t.id];
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setFilter(t.id)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-bold transition-colors ${
+                active ? 'bg-[#00C830] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {t.label}
+              {unread > 0 && (
+                <span className={`min-w-[18px] rounded-full px-1 text-[10px] leading-[18px] ${active ? 'bg-white/25 text-white' : 'bg-[#00C830] text-white'}`}>
+                  {unread > 99 ? '99+' : unread}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
       {/* ── Conversation Stream ── */}
       <div className="divide-y divide-black/[0.04] bg-white">
-        {rows.map((row) => (
+        {visibleRows.length === 0 && (
+          <p className="px-4 py-10 text-center text-[13px] font-medium text-slate-400">
+            {filter === 'groups' ? 'No group chats yet' : filter === 'chats' ? 'No direct chats yet' : 'No conversations yet'}
+          </p>
+        )}
+        {visibleRows.map((row) => (
           <div
             key={row.key}
             onClick={() => row.conversationId && router.push(chatThreadPath(row.conversationId))}

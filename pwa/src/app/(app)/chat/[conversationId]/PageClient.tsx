@@ -25,6 +25,8 @@ import { ChatMessage, ChatMessageType, Conversation } from '@/types/api';
 import socketService from '@/lib/socket';
 import { toast } from '@/lib/toast';
 import ChatMessageCard from '@/components/chat/ChatMessageCard';
+import { EditMessageSheet } from '@/components/chat/EditMessageSheet';
+import { ForwardMessageSheet } from '@/components/chat/ForwardMessageSheet';
 import {
   resolveChatSenderLabel,
   shouldShowSenderLabel,
@@ -53,6 +55,11 @@ import {
 } from '@/lib/marketplaceMessages';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Local tombstone matching what the server stores for delete-for-everyone. */
+function asDeleted(m: ChatMessage): ChatMessage {
+  return { ...m, isDeleted: true, content: '[Message deleted]', mediaUrl: undefined, thumbnailUrl: undefined, reactions: {} };
+}
 
 function msgId(m: ChatMessage): string {
   return (m as any)._id ?? m.id ?? m.clientMessageId ?? '';
@@ -468,6 +475,9 @@ export default function ConversationPage() {
     enabled: !!conversationId && !isPlaceholder && !isDemo,
   });
 
+  const [editingMsg, setEditingMsg] = useState<ChatMessage | null>(null);
+  const [forwardingMsg, setForwardingMsg] = useState<ChatMessage | null>(null);
+
   const conv: Conversation | undefined = (() => {
     if (isDemo && conversationId) {
       return DEMO_CONV_DETAILS[conversationId] || DEMO_CONV_DETAILS['demo-neighbor'];
@@ -791,7 +801,27 @@ export default function ConversationPage() {
       loadMessages();
     };
 
+    const onEdited = (payload: any) => {
+      if (payload?.conversationId && payload.conversationId !== conversationId) return;
+      const id = String(payload?.messageId ?? '');
+      if (!id) return;
+      setMessages((prev) =>
+        prev.map((m) =>
+          msgId(m) === id ? { ...m, content: payload.content ?? m.content, isEdited: true } : m,
+        ),
+      );
+    };
+    const onDeleted = (payload: any) => {
+      if (payload?.conversationId && payload.conversationId !== conversationId) return;
+      if (!payload?.deleteForEveryone) return;
+      const id = String(payload?.messageId ?? '');
+      if (!id) return;
+      setMessages((prev) => prev.map((m) => (msgId(m) === id ? asDeleted(m) : m)));
+    };
+
     socketService.on('message:new', onNew);
+    socketService.on('message:edited', onEdited);
+    socketService.on('message:deleted', onDeleted);
     socketService.on('message:priority', onPriority);
     socketService.on('message:delivered', onDelivered);
     socketService.on('message:read', onRead);
@@ -803,6 +833,8 @@ export default function ConversationPage() {
 
     return () => {
       socketService.off('message:new', onNew);
+      socketService.off('message:edited', onEdited);
+      socketService.off('message:deleted', onDeleted);
       socketService.off('message:priority', onPriority);
       socketService.off('message:delivered', onDelivered);
       socketService.off('message:read', onRead);
@@ -956,6 +988,34 @@ export default function ConversationPage() {
     } catch {
       toast.error('Could not remove the message. Reloading…');
       loadMessages();
+    }
+  };
+
+  /** Save an edit (server re-checks sender, type and the 15-minute window). */
+  const handleEditSave = async (msg: ChatMessage, content: string) => {
+    const targetId = msg.id ?? (msg as any)._id;
+    if (!targetId) return;
+    try {
+      await chatService.editMessage(targetId, content);
+      setMessages((prev) =>
+        prev.map((m) => (msgId(m) === targetId ? { ...m, content, isEdited: true } : m)),
+      );
+      setEditingMsg(null);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? 'Could not edit the message');
+    }
+  };
+
+  /** "Delete for everyone" — sender within 48h, or a group admin/moderator. */
+  const handleDeleteForEveryone = async (msg: ChatMessage) => {
+    const targetId = msg.id ?? (msg as any)._id;
+    if (!targetId) return;
+    if (typeof window !== 'undefined' && !window.confirm('Delete this message for everyone in the chat?')) return;
+    try {
+      await chatService.deleteMessage(targetId, true);
+      setMessages((prev) => prev.map((m) => (msgId(m) === targetId ? asDeleted(m) : m)));
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? 'Could not delete the message');
     }
   };
 
@@ -1263,7 +1323,23 @@ export default function ConversationPage() {
     return <ChatThreadPlaceholder />;
   }
 
+  // Best effort: only offers the button. The server decides who may delete.
+  const canModerate = (() => {
+    const me = user?.id;
+    if (!me) return false;
+    const parts = (conv?.participants ?? []) as Array<{ userId?: string; id?: string; _id?: string; role?: string }>;
+    const mine = parts.find((p) => String(p.userId ?? p.id ?? p._id ?? '') === String(me));
+    return mine?.role === 'admin' || mine?.role === 'moderator';
+  })();
+
   return (
+    <>
+    <EditMessageSheet msg={editingMsg} onCancel={() => setEditingMsg(null)} onSave={handleEditSave} />
+    <ForwardMessageSheet
+      msg={forwardingMsg}
+      currentConversationId={conversationId}
+      onClose={() => setForwardingMsg(null)}
+    />
     <ChatRoomLayout
       scrollContainerRef={(el) => { scrollContainerElRef.current = el; }}
       header={
@@ -1455,6 +1531,10 @@ export default function ConversationPage() {
                               textareaRef.current?.focus();
                             }}
                             onDeleteForMe={handleDeleteForMe}
+                            onEdit={setEditingMsg}
+                            onDeleteForEveryone={handleDeleteForEveryone}
+                            onForward={setForwardingMsg}
+                            canModerate={canModerate}
                           />
                         </div>
                       );
@@ -1465,5 +1545,6 @@ export default function ConversationPage() {
         )}
       </div>
     </ChatRoomLayout>
+    </>
   );
 }

@@ -751,6 +751,12 @@ export interface ChatMessage {
   deliveredTo?: string[];
   isEdited: boolean;
   isDeleted: boolean;
+  /** Set by the server when this message was forwarded from another chat. */
+  isForwarded?: boolean;
+  /** Forward hops; >= 5 shows "Forwarded many times". */
+  forwardCount?: number;
+  /** True for end-to-end encrypted messages (they can't be edited or forwarded). */
+  e2ee?: boolean;
   /** Server-set from conversation type. "emergency" for incident conversations. */
   priority: "normal" | "emergency";
   status: "sent" | "delivered" | "read";

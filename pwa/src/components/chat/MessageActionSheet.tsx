@@ -14,6 +14,7 @@ import { createPortal } from 'react-dom';
 import { toast } from '@/lib/toast';
 import { chatService } from '@/services/chat.service';
 import type { ChatMessage } from '@/types/api';
+import { canDeleteForEveryone, canEditMessage, canForwardMessage } from '@/lib/chatMessageRules';
 
 const REPORT_REASONS: { value: string; label: string }[] = [
   { value: 'spam', label: 'Spam' },
@@ -34,9 +35,26 @@ export type MessageActionSheetProps = {
   anchorRef?: React.RefObject<HTMLDivElement | null>;
   onReply: (msg: ChatMessage) => void;
   onDeleteForMe?: (msg: ChatMessage) => void;
+  onEdit?: (msg: ChatMessage) => void;
+  onDeleteForEveryone?: (msg: ChatMessage) => void;
+  onForward?: (msg: ChatMessage) => void;
+  /** Group/community admin or moderator: may remove others' messages. */
+  canModerate?: boolean;
 };
 
-export function MessageActionSheet({ msg, mine, open, onClose, anchorRef, onReply, onDeleteForMe }: MessageActionSheetProps) {
+export function MessageActionSheet({
+  msg,
+  mine,
+  open,
+  onClose,
+  anchorRef,
+  onReply,
+  onDeleteForMe,
+  onEdit,
+  onDeleteForEveryone,
+  onForward,
+  canModerate = false,
+}: MessageActionSheetProps) {
   const messageId = msg.id ?? msg._id;
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({ visibility: 'hidden' });
   const [reportOpen, setReportOpen] = useState(false);
@@ -116,6 +134,26 @@ export function MessageActionSheet({ msg, mine, open, onClose, anchorRef, onRepl
     onClose();
   };
 
+  const handle = (fn?: (m: ChatMessage) => void) => () => {
+    fn?.(msg);
+    onClose();
+  };
+
+  const showEdit = !!onEdit && canEditMessage(msg, mine);
+  const showDeleteForEveryone = !!onDeleteForEveryone && canDeleteForEveryone(msg, mine, canModerate);
+  const showForward = !!onForward && canForwardMessage(msg);
+  const showCopy = msg.type === 'text' && !msg.isDeleted && !!msg.content;
+
+  const copyText = async () => {
+    try {
+      await navigator.clipboard.writeText(msg.content);
+      toast.success('Copied');
+    } catch {
+      toast.error('Could not copy');
+    }
+    onClose();
+  };
+
   const submitReport = async (reason: string) => {
     setReporting(true);
     try {
@@ -146,6 +184,24 @@ export function MessageActionSheet({ msg, mine, open, onClose, anchorRef, onRepl
               Reply
             </button>
           )}
+          {showForward && (
+            <button type="button" role="menuitem" onClick={handle(onForward)} className="flex items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold text-gray-800 hover:bg-gray-50">
+              <span className="material-symbols-outlined text-[18px]">forward</span>
+              Forward
+            </button>
+          )}
+          {showCopy && (
+            <button type="button" role="menuitem" onClick={() => void copyText()} className="flex items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold text-gray-800 hover:bg-gray-50">
+              <span className="material-symbols-outlined text-[18px]">content_copy</span>
+              Copy
+            </button>
+          )}
+          {showEdit && (
+            <button type="button" role="menuitem" onClick={handle(onEdit)} className="flex items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold text-gray-800 hover:bg-gray-50">
+              <span className="material-symbols-outlined text-[18px]">edit</span>
+              Edit
+            </button>
+          )}
           <button
             type="button"
             role="menuitem"
@@ -155,6 +211,17 @@ export function MessageActionSheet({ msg, mine, open, onClose, anchorRef, onRepl
             <span className="material-symbols-outlined text-[18px]">visibility_off</span>
             Delete for me
           </button>
+          {showDeleteForEveryone && (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={handle(onDeleteForEveryone)}
+              className="flex items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold text-red-600 hover:bg-red-50"
+            >
+              <span className="material-symbols-outlined text-[18px]">delete</span>
+              Delete for everyone
+            </button>
+          )}
           {!mine && !msg.isDeleted && (
             <button
               type="button"
