@@ -151,6 +151,18 @@ export const chatService = {
     });
   },
 
+  /**
+   * Forward an existing message into another conversation. Only the IDs are
+   * sent; the server copies the original content and media itself.
+   */
+  async forwardMessage(sourceMessageId: string, conversationId: string) {
+    return await apiClient.post<ChatMessage | { duplicate: boolean }>("/chat/send", {
+      conversationId,
+      forwardedFromMessageId: sourceMessageId,
+      clientMessageId: newClientMessageId(),
+    });
+  },
+
   /** Edit the content of a sent message. */
   async editMessage(messageId: string, content: string) {
     return await apiClient.put<ChatMessage>(`/chat/messages/${messageId}`, { content });

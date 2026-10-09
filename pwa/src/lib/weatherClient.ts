@@ -47,9 +47,8 @@ export function wmoToAmbient(code: number): AmbientWeather {
   if (code === 0 || code === 1) return 'clear';
   if (code === 2 || code === 3) return 'cloudy';
   if (code >= 45 && code <= 48) return 'fog';
-  // Drizzle alone is cloudy/misty — reserve rain animation for measurable rain.
-  if (code >= 51 && code <= 57) return 'cloudy';
-  if (code >= 61 && code <= 67) return 'rain';
+  // Drizzle, rain, and showers must trigger ambient rain
+  if (code >= 51 && code <= 67) return 'rain';
   if (code >= 71 && code <= 77) return 'snow';
   if (code >= 80 && code <= 82) return 'rain';
   if (code >= 85 && code <= 86) return 'snow';
@@ -77,44 +76,29 @@ function owmIdToCondition(id: number, description: string): string {
   return interpretWeatherCode(owmIdToWmo(id));
 }
 
-function isPrecipitationCode(code: number): boolean {
-  return (code >= 51 && code <= 67) || (code >= 80 && code <= 82);
-}
-
-function downgradeDryPrecipitation(code: number): number {
-  if (code >= 45 && code <= 48) return code;
-  if (code >= 95) return code;
-  if (code >= 51 && code <= 57) return 3;
-  if (code >= 61 && code <= 67) return 2;
-  if (code >= 80 && code <= 82) return 2;
-  return code;
-}
-
 function reconcileOpenMeteoCode(
   primaryCode: number,
   precipMm: number,
   showersMm: number,
-  ukmoCode: number,
-  ukmoPrecipMm: number,
+  ukmoCode = 0,
+  ukmoPrecipMm = 0,
+  iconCode = 0,
+  iconPrecipMm = 0,
 ): number {
-  let code = primaryCode;
-
-  // Only trust UKMO rain when it reports meaningful precipitation.
-  if (ukmoCode >= 61 && ukmoPrecipMm >= PRECIP_THRESHOLD_MM) {
-    code = ukmoCode;
-  } else if (ukmoCode >= 51 && ukmoCode < 61 && ukmoPrecipMm >= PRECIP_THRESHOLD_MM) {
-    code = ukmoCode;
+  // If ANY model detects rain, prioritize that rain code!
+  const candidateCodes = [iconCode, ukmoCode, primaryCode];
+  const detectedRain = candidateCodes.find(
+    (c) => (c >= 51 && c <= 67) || (c >= 80 && c <= 82) || c >= 95,
+  );
+  if (detectedRain) {
+    return detectedRain;
   }
 
-  if (precipMm >= PRECIP_THRESHOLD_MM && code < 50) {
-    code = showersMm >= PRECIP_THRESHOLD_MM ? 80 : 61;
+  if (precipMm > 0 || ukmoPrecipMm > 0 || iconPrecipMm > 0) {
+    return showersMm > 0 ? 80 : 61;
   }
 
-  if (isPrecipitationCode(code) && precipMm < PRECIP_THRESHOLD_MM) {
-    code = downgradeDryPrecipitation(code);
-  }
-
-  return code;
+  return primaryCode;
 }
 
 function readBackendPrecipMm(weather: Record<string, unknown>): number {
@@ -133,18 +117,22 @@ function reconcileBackendWeather(
   let wmoCode = owmIdToWmo(owmId);
   let condition = owmIdToCondition(owmId, description);
 
-  const owmSaysPrecip = owmId >= 300 && owmId < 600;
-  const hasPrecip = precipMm >= PRECIP_THRESHOLD_MM;
-
-  if (owmSaysPrecip && !hasPrecip) {
-    wmoCode = owmId >= 803 ? 3 : owmId >= 801 ? 2 : 3;
-    condition = interpretWeatherCode(wmoCode);
-  } else if (isRaining && wmoCode < 50 && hasPrecip) {
+  // If backend indicates raining or showering, always prioritize rain display
+  if (isRaining || isShowering) {
     wmoCode = isShowering ? 80 : 61;
-    condition = isShowering ? 'Rain Showers' : 'Rain';
-  } else if (isPrecipitationCode(wmoCode) && !hasPrecip) {
-    wmoCode = downgradeDryPrecipitation(wmoCode);
-    condition = interpretWeatherCode(wmoCode);
+    condition = isShowering ? 'Rain Showers' : 'Rainy';
+    return { wmoCode, condition };
+  }
+
+  // If OWM reported drizzle/rain/storm, preserve it even if numerical precip is low
+  const owmSaysPrecip = (owmId >= 200 && owmId < 600) || (owmId >= 80 && owmId <= 82);
+  if (owmSaysPrecip) {
+    return { wmoCode, condition };
+  }
+
+  if (precipMm > 0 && wmoCode < 50) {
+    wmoCode = 61;
+    condition = 'Rainy';
   }
 
   return { wmoCode, condition };
@@ -233,13 +221,17 @@ export async function fetchCurrentWeather(
     }
   }
 
-  const [defaultRes, ukmoRes] = await Promise.all([
+  const [defaultRes, ukmoRes, iconRes] = await Promise.all([
     fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,rain,showers,precipitation&daily=temperature_2m_max,temperature_2m_min&past_days=1&forecast_days=2&timezone=auto`,
       { signal: AbortSignal.timeout(6000) },
     ).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,rain,showers,precipitation&models=ukmo_seamless&timezone=auto`,
+      { signal: AbortSignal.timeout(6000) },
+    ).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,rain,showers,precipitation&models=icon_seamless&timezone=auto`,
       { signal: AbortSignal.timeout(6000) },
     ).then((r) => (r.ok ? r.json() : null)).catch(() => null),
   ]);
@@ -257,6 +249,12 @@ export async function fetchCurrentWeather(
     showers?: number;
     precipitation?: number;
   } | undefined;
+  const iconCur = iconRes?.current as {
+    weather_code?: number;
+    rain?: number;
+    showers?: number;
+    precipitation?: number;
+  } | undefined;
 
   if (defaultCur) {
     const temp = Math.round(defaultCur.temperature_2m || 31);
@@ -265,12 +263,16 @@ export async function fetchCurrentWeather(
     const precipMm = Math.max(defaultCur.precipitation ?? 0, rain + showers);
     const ukmoCode = ukmoCur?.weather_code ?? 0;
     const ukmoPrecipMm = (ukmoCur?.rain ?? 0) + (ukmoCur?.showers ?? 0) + (ukmoCur?.precipitation ?? 0);
+    const iconCode = iconCur?.weather_code ?? 0;
+    const iconPrecipMm = (iconCur?.rain ?? 0) + (iconCur?.showers ?? 0) + (iconCur?.precipitation ?? 0);
     const code = reconcileOpenMeteoCode(
       defaultCur.weather_code || 0,
       precipMm,
       showers,
       ukmoCode,
       ukmoPrecipMm,
+      iconCode,
+      iconPrecipMm,
     );
     const defaultDaily = defaultRes?.daily as {
       time?: string[];

@@ -594,7 +594,8 @@ export interface ChatMessageMeta {
     | "paid_confirmed"
     | "shipped"
     | "completed"
-    | "cancelled";
+    | "cancelled"
+    | "disputed";
   /** Order id this deal belongs to (used to drive the action buttons). */
   orderId?: string;
   amount?: number;
@@ -750,6 +751,12 @@ export interface ChatMessage {
   deliveredTo?: string[];
   isEdited: boolean;
   isDeleted: boolean;
+  /** Set by the server when this message was forwarded from another chat. */
+  isForwarded?: boolean;
+  /** Forward hops; >= 5 shows "Forwarded many times". */
+  forwardCount?: number;
+  /** True for end-to-end encrypted messages (they can't be edited or forwarded). */
+  e2ee?: boolean;
   /** Server-set from conversation type. "emergency" for incident conversations. */
   priority: "normal" | "emergency";
   status: "sent" | "delivered" | "read";
@@ -802,6 +809,7 @@ export interface Conversation {
     name: string;
     username: string;
     avatarUrl?: string | null;
+    isVerified?: boolean;
   };
   lastMessage?: ChatMessage | null;
   lastMessageAt?: string;

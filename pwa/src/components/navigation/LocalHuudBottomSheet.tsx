@@ -42,22 +42,23 @@ export function LocalHuudBottomSheet({ open, onClose }: LocalHuudBottomSheetProp
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
         <ul className="m-0 grid list-none grid-cols-2 gap-2 p-0">
-          {SHEET_LINKS.map((item) => (
-            <li key={item.type} className="min-w-0">
-              <Link
-                href={item.href}
-                onClick={onClose}
-                className="flex min-h-[4.5rem] flex-col items-center justify-center gap-1.5 rounded-2xl border border-primary/15 bg-primary/[0.06] px-2 py-2.5 text-center no-underline transition-colors hover:border-primary/25 hover:bg-primary/10 active:scale-[0.98]"
-              >
-                <span className="material-symbols-outlined text-2xl text-primary" aria-hidden>
-                  {item.icon}
-                </span>
-                <span className="text-[11px] font-bold leading-tight tracking-tight text-[#1A1A1A] dark:text-[var(--neu-text)]">
-                  {item.label}
-                </span>
-              </Link>
-            </li>
-          ))}
+          {SHEET_LINKS.map((item) => {
+            const ItemIcon = item.Icon;
+            return (
+              <li key={item.type} className="min-w-0">
+                <Link
+                  href={item.href}
+                  onClick={onClose}
+                  className="flex min-h-[4.5rem] flex-col items-center justify-center gap-1.5 rounded-2xl border border-primary/20 bg-primary/[0.06] dark:bg-white/[0.04] px-2 py-2.5 text-center no-underline transition-colors hover:border-primary/40 hover:bg-primary/10 active:scale-[0.98]"
+                >
+                  <ItemIcon className="w-6 h-6 text-primary" aria-hidden="true" />
+                  <span className="text-[11px] font-bold leading-tight tracking-tight text-[#1A1A1A] dark:text-white">
+                    {item.label}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </AppBottomSheet>

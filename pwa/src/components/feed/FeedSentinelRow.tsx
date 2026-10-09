@@ -3,6 +3,20 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import {
+  ChevronDown,
+  SlidersHorizontal,
+  Navigation,
+  Crosshair,
+  MapPin,
+  CheckCircle2,
+  Shield,
+  PhoneCall,
+  KeyRound,
+  Radio,
+  FileText,
+  AlertTriangle,
+} from 'lucide-react';
 import { SENTINEL_FEATURES } from '@/lib/sentinel-catalog';
 import { SentinelIcon } from '@/components/navigation/AppNavIcon';
 
@@ -51,9 +65,10 @@ export function FeedSentinelRow() {
         </span>
 
         {/* Chevron */}
-        <span className={`material-symbols-outlined sentinel-bar__chevron${open ? ' sentinel-bar__chevron--open' : ''}`}>
-          expand_more
-        </span>
+        <ChevronDown
+          size={18}
+          className={`sentinel-bar__chevron${open ? ' sentinel-bar__chevron--open' : ''}`}
+        />
       </button>
 
       {/* Expandable feature grid */}
@@ -73,7 +88,7 @@ export function FeedSentinelRow() {
                 className="sentinel-grid__icon"
                 style={{ color: ACCENT[feature.accent] ?? ACCENT.muted }}
               >
-                <span className="material-symbols-outlined">{feature.icon}</span>
+                <Shield size={20} />
                 {feature.badge && (
                   <span className="sentinel-grid__badge">{feature.badge}</span>
                 )}
@@ -85,11 +100,11 @@ export function FeedSentinelRow() {
 
         <button
           type="button"
-          className="sentinel-grid__manage"
+          className="sentinel-grid__manage flex items-center justify-center gap-1.5"
           onClick={() => router.push('/safety/manage')}
         >
-          <span className="material-symbols-outlined">tune</span>
-          Manage Sentinel
+          <SlidersHorizontal size={14} />
+          <span>Manage Sentinel</span>
         </button>
       </div>
     </div>

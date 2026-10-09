@@ -8,7 +8,7 @@ import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 import { hubCommunityService } from '@/services/hubCommunity.service';
 import { useJoinHubCommunity } from '@/hooks/useHubCommunities';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export default function JoinByInvitePage() {
   const params = useParams();

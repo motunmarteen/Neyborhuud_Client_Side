@@ -6,6 +6,7 @@ import { useCommentMutations } from '@/hooks/useComments';
 import { CommentForm } from './CommentForm';
 import Link from 'next/link';
 import Image from 'next/image';
+import { User, Heart, Bell, MapPin, ShieldCheck, CheckCircle2, XCircle } from 'lucide-react';
 
 interface CommentItemProps {
     comment: Comment;
@@ -69,11 +70,11 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
 
     const statusMeta = (() => {
         switch (statusType) {
-            case 'AWARE': return { icon: 'notifications_active', label: 'Aware of situation', colors: 'bg-brand-blue/10 text-brand-blue border-brand-blue/20' };
-            case 'NEARBY': return { icon: 'location_on', label: 'Nearby and monitoring', colors: 'bg-brand-red/10 text-brand-red border-brand-red/20' };
-            case 'SAFE': return { icon: 'shield', label: 'Marked as safe', colors: 'bg-brand-green/10 text-brand-green border-brand-green/20' };
-            case 'CONFIRM': return { icon: 'check_circle', label: 'Confirmed alert', colors: 'bg-primary/10 text-primary border-primary/20' };
-            case 'DISPUTE': return { icon: 'cancel', label: 'Disputed alert', colors: 'bg-brand-red/10 text-brand-red border-brand-red/20' };
+            case 'AWARE': return { Icon: Bell, label: 'Aware of situation', colors: 'bg-brand-blue/10 text-brand-blue border-brand-blue/20' };
+            case 'NEARBY': return { Icon: MapPin, label: 'Nearby and monitoring', colors: 'bg-brand-red/10 text-brand-red border-brand-red/20' };
+            case 'SAFE': return { Icon: ShieldCheck, label: 'Marked as safe', colors: 'bg-brand-green/10 text-brand-green border-brand-green/20' };
+            case 'CONFIRM': return { Icon: CheckCircle2, label: 'Confirmed alert', colors: 'bg-primary/10 text-primary border-primary/20' };
+            case 'DISPUTE': return { Icon: XCircle, label: 'Disputed alert', colors: 'bg-brand-red/10 text-brand-red border-brand-red/20' };
             default: return null;
         }
     })();
@@ -98,11 +99,10 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                             onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                                 e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
-                                e.currentTarget.parentElement!.innerHTML = '<span class="material-symbols-outlined text-[16px] opacity-50">person</span>';
                             }}
                         />
                     ) : (
-                        <span className="material-symbols-outlined text-[16px] opacity-50">person</span>
+                        <User size={16} className="opacity-50" />
                     )}
                 </div>
             </Link>
@@ -114,7 +114,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                     <div className="min-w-0 flex-1">
                         {isStatusUpdate && statusMeta && (
                             <div className={`mb-1 inline-flex w-fit items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold ${statusMeta.colors}`}>
-                                <span className="material-symbols-outlined text-[16px]">{statusMeta.icon}</span>
+                                <statusMeta.Icon size={14} />
                                 {statusMeta.label}
                             </div>
                         )}
@@ -190,12 +190,13 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                     <button
                         type="button"
                         onClick={handleLike}
-                        className="mt-1 flex flex-shrink-0 flex-col items-center gap-0.5 pr-0.5 text-[var(--neu-text-muted)] transition-colors"
+                        className="mt-1 flex flex-shrink-0 flex-col items-center gap-0.5 pr-0.5 text-[var(--neu-text-muted)] hover:text-brand-red transition-colors"
                         aria-label={comment.isLiked ? 'Unlike comment' : 'Like comment'}
                     >
-                        <span className={`material-symbols-outlined text-[17px] ${comment.isLiked ? 'fill-1 text-brand-red' : ''}`}>
-                            favorite
-                        </span>
+                        <Heart
+                            size={16}
+                            className={comment.isLiked ? 'fill-brand-red text-brand-red' : ''}
+                        />
                         {comment.likes > 0 && (
                             <span className="text-[11px] font-semibold leading-none tabular-nums">{comment.likes}</span>
                         )}

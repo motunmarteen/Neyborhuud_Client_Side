@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Geofence, GeofenceType } from '@/services/safety.service';
 import { OSM_MAP_STYLE, GEOFENCE_COLORS } from '@/lib/map-style';

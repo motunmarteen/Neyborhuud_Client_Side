@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { UserPlus, X, CheckCircle2, Circle } from 'lucide-react';
 import apiClient from '@/lib/api-client';
 
 interface OnboardingStep {
@@ -24,14 +25,6 @@ const STEP_ROUTES: Record<string, string> = {
   bio: '/settings',
   location_set: '/verify-location',
   earn_huudcoins: '/huud-economy',
-};
-
-const STEP_ICONS: Record<string, string> = {
-  email_verified: 'mark_email_read',
-  profile_picture: 'add_a_photo',
-  bio: 'edit_note',
-  location_set: 'location_on',
-  earn_huudcoins: 'toll',
 };
 
 export function FeedProfilePrompt() {
@@ -59,11 +52,11 @@ export function FeedProfilePrompt() {
   }
 
   return (
-    <div className="lg:hidden mod-card rounded-2xl p-4 flex flex-col gap-3">
+    <div className="lg:hidden mod-card rounded-2xl p-4 flex flex-col gap-3 border border-black/5 dark:border-white/5 mx-3.5 sm:mx-4">
       {/* Header row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="material-symbols-outlined text-primary text-[1.1rem] shrink-0" aria-hidden="true">person_add</span>
+          <UserPlus size={18} className="text-primary shrink-0" aria-hidden="true" />
           <span className="text-sm font-bold neu-text truncate">Complete your profile</span>
           <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
             {data.completedCount}/{data.totalSteps}
@@ -75,12 +68,11 @@ export function FeedProfilePrompt() {
           aria-label="Dismiss profile prompt"
           className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center neu-text-muted hover:text-brand-red transition-colors"
         >
-          <span className="material-symbols-outlined text-[14px]" aria-hidden="true">close</span>
+          <X size={14} aria-hidden="true" />
         </button>
       </div>
 
-      {/* Progress bar — inline style required; width is a runtime value, not a static Tailwind class */}
-      {/* eslint-disable-next-line react/forbid-component-props */}
+      {/* Progress bar */}
       <div className="h-1 rounded-full bg-primary/10 overflow-hidden">
         <div
           className="h-full rounded-full bg-primary transition-all duration-500"
@@ -102,9 +94,11 @@ export function FeedProfilePrompt() {
                   : 'mod-chip neu-text-muted'
             }`}
           >
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              {step.completed ? 'check_circle' : (STEP_ICONS[step.id] ?? 'radio_button_unchecked')}
-            </span>
+            {step.completed ? (
+              <CheckCircle2 size={13} className="text-primary shrink-0" aria-hidden="true" />
+            ) : (
+              <Circle size={13} className="opacity-50 shrink-0" aria-hidden="true" />
+            )}
             <span className={step.completed ? 'line-through opacity-60' : ''}>{step.label}</span>
           </Link>
         ))}

@@ -138,11 +138,23 @@ function restoreEnv() {
   }
 }
 
-const ROUTE_FILES = [
-  path.join(apiBase, 'geocode', 'reverse', 'route.ts'),
-  path.join(apiBase, 'geocode', 'search', 'route.ts'),
-  path.join(apiBase, 'health', 'route.ts'),
-];
+/**
+ * Every Route Handler (route.ts/js) anywhere under src/app — they are all
+ * server-only and incompatible with `output: 'export'`. Discovered at
+ * build time so moving a handler (e.g. (app)/api → app/api) can never break
+ * the native build again.
+ */
+function findRouteHandlers(dir) {
+  const out = [];
+  if (!existsSync(dir)) return out;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...findRouteHandlers(p));
+    else if (/^route.(ts|js|tsx|jsx)$/.test(entry.name)) out.push(p);
+  }
+  return out;
+}
+const ROUTE_FILES = findRouteHandlers(path.join(root, 'src', 'app'));
 
 /** filepath -> original contents (kept in memory for guaranteed restore) */
 const saved = new Map();

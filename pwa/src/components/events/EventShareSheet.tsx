@@ -5,7 +5,7 @@ import { BottomSheetOverlay } from "@/components/ui/BottomSheetOverlay";
 import { useEventSharePayload, useRecordEventShare } from "@/hooks/useEvents";
 import { getErrorMessage } from "@/lib/error-handler";
 import type { EventShareFallbackInput, EventSharePayload, EventSharePlatforms } from "@/services/events.service";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 function openExternalUrl(url: string) {
   if (typeof window === "undefined") return;
@@ -101,7 +101,7 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
   useEffect(() => {
     if (!open || !isError) return;
     const msg = getErrorMessage(error) || "Could not load share options.";
-    toast.error(msg, { id: "event-share-fetch" });
+    toast.error(msg, undefined, { id: "event-share-fetch" });
   }, [open, isError, error]);
 
   const record = (payload: EventSharePayload) => {

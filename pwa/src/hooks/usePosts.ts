@@ -13,7 +13,7 @@ import { contentService } from "@/services/content.service";
 import { CreatePostPayload, FeedTab, ContentType } from "@/types/api";
 import { handleApiError } from "@/lib/error-handler";
 import { useAwardCoins } from "@/hooks/useGamification";
-import { getMockFeedPage } from "@/lib/mockFeedPosts";
+import { DEMO_MODE } from "@/lib/demoMode";
 
 /**
  * Hook for location-based feed (primary feed endpoint)
@@ -48,6 +48,20 @@ export function useLocationFeed(
     ],
     queryFn: async ({ pageParam = 1 }) => {
       const page = pageParam as number;
+
+      // Production: real posts only. Errors surface to the UI (retry state)
+      // instead of being papered over with fabricated community content.
+      if (!DEMO_MODE) {
+        return contentService.getLocationFeed(latitude, longitude, {
+          ...options,
+          page,
+          limit: 20,
+        });
+      }
+
+      // Loaded on demand so the ~55KB of mock posts never ships in the
+      // production feed bundle.
+      const { getMockFeedPage } = await import("@/lib/mockFeedPosts");
       const mock = getMockFeedPage(page, 20);
 
       let realPosts: any[] = [];
@@ -85,7 +99,7 @@ export function useLocationFeed(
       return pagination?.hasMore ? (pagination.page ?? 0) + 1 : undefined;
     },
     initialPageParam: 1,
-    // Always enabled — mock data is returned even without location
+    // Always enabled — the server falls back to the user's stored location
     enabled: true,
   });
 }

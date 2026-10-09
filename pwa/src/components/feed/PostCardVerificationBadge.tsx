@@ -1,4 +1,5 @@
 import type { PostAuthor } from '@/types/api';
+import { CheckCircle2 } from 'lucide-react';
 import {
   extractVerificationIdentityInput,
   getVerificationProgress,
@@ -36,13 +37,12 @@ export function PostCardVerificationBadge({
   const meta = getVerificationTierMeta(tier);
 
   const badge = (
-    <span
-      className={`material-symbols-outlined text-[18px] post-card-verification-badge ${meta.colorClass}`}
-      style={{ color: meta.color }}
-      aria-label={tooltip}
-      title={tooltip}
-    >
-      verified
+    <span title={tooltip} aria-label={tooltip} className="inline-flex">
+      <CheckCircle2
+        size={16}
+        className={`post-card-verification-badge fill-[#00D431] text-black ${meta.colorClass}`}
+        style={{ color: meta.color || '#00D431' }}
+      />
     </span>
   );
 

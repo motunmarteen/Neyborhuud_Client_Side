@@ -211,4 +211,90 @@ export const geoService = {
       params: { ...(state ? { state } : {}) },
     });
   },
+
+  /**
+   * NIPOST NDAPS: Resolve GPS coordinates to 11-char Digital Postcode building
+   */
+  async resolveNipostBuilding(lat: number, lng: number) {
+    return await apiClient.get<{
+      building: {
+        digitalPostcode: string;
+        formattedPostcode: string;
+        state: string;
+        lga: string;
+        district: string;
+        area: string;
+        buildingNumber?: string;
+        streetAddress?: string;
+        verificationStatus: string;
+      };
+    }>('/geo/nipost/reverse', {
+      params: { lat, lng },
+    });
+  },
+
+  /**
+   * NIPOST NDAPS: Lookup building by 11-char digital postcode
+   */
+  async lookupNipostPostcode(postcode: string) {
+    return await apiClient.get<{
+      building: {
+        digitalPostcode: string;
+        formattedPostcode: string;
+        state: string;
+        lga: string;
+        district: string;
+        area: string;
+        streetAddress?: string;
+      };
+    }>(`/geo/nipost/lookup/${encodeURIComponent(postcode)}`);
+  },
+
+  /**
+   * Verify the user's building. The server computes the proof level from
+   * the evidence (live GPS, optionally matched to a NIPOST postcode).
+   */
+  async verifyUserBuilding(payload: {
+    postcode?: string;
+    latitude?: number;
+    longitude?: number;
+  }) {
+    return await apiClient.post<{
+      message: string;
+      building: {
+        id: string;
+        maskedPostcode: string;
+        streetAddress: string;
+        state: string;
+        lga: string;
+        district: string;
+        residentCount: number;
+      };
+      addressProofLevel: number;
+    }>('/geo/building/verify-user', payload);
+  },
+
+  /**
+   * Get authenticated user's digital Huud Passport
+   */
+  async getHuudPassport() {
+    return await apiClient.get<{
+      passport: {
+        userId: string;
+        userName: string;
+        avatarUrl?: string;
+        communityName: string;
+        lga: string;
+        state: string;
+        maskedPostcode: string;
+        addressProofLevel: number;
+        addressProofLevelName: string;
+        residenceTenureMonths: number;
+        trustScore: number;
+        verificationDate: string;
+        qrPayload: string;
+        qrHash: string;
+      };
+    }>('/geo/building/passport');
+  },
 };

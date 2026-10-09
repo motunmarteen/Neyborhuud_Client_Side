@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { Zap } from 'lucide-react';
 import { newsService } from '@/services/news.service';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import type { RssArticle } from '@/types/incident';
@@ -99,7 +100,7 @@ export function FeedNewsTicker() {
       aria-label="Local news and exchange rates"
     >
       <div className="feed-news-ticker__label" aria-hidden>
-        <span className="material-symbols-outlined feed-news-ticker__label-icon">bolt</span>
+        <Zap size={13} className="feed-news-ticker__label-icon text-primary fill-primary" />
         <span>PULSE</span>
       </div>
 

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { Volume2, VolumeX, ImageOff } from 'lucide-react';
+import { cdnImage, cdnVideo, cdnVideoPoster } from '@/lib/media';
 
 export type PostCardMediaItem = {
   url: string;
@@ -84,8 +86,8 @@ export function PostCardMediaSlider({
   const renderImage = (item: PostCardMediaItem, index: number, alt: string) => {
     if (failedUrls.has(item.url)) {
       return (
-        <div className="post-card-media-slider__fallback" aria-hidden>
-          <span className="material-symbols-outlined text-[28px] text-white/50">broken_image</span>
+        <div className="post-card-media-slider__fallback flex items-center justify-center" aria-hidden>
+          <ImageOff size={28} className="text-white/50" />
         </div>
       );
     }
@@ -120,8 +122,8 @@ export function PostCardMediaSlider({
             if (el) videoRefs.current.set(index, el);
             else videoRefs.current.delete(index);
           }}
-          src={item.url}
-          poster={item.thumbnailUrl}
+          src={cdnVideo(item.url)}
+          poster={item.thumbnailUrl ? cdnImage(item.thumbnailUrl, 828) : cdnVideoPoster(item.url, 828)}
           className="post-card-media-slider__media post-card-media-slider__media--video"
           muted={muted}
           loop
@@ -140,9 +142,7 @@ export function PostCardMediaSlider({
             }}
             aria-label={muted ? 'Unmute video' : 'Mute video'}
           >
-            <span className="material-symbols-outlined text-[16px]">
-              {muted ? 'volume_off' : 'volume_up'}
-            </span>
+            {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
           </button>
         )}
       </>

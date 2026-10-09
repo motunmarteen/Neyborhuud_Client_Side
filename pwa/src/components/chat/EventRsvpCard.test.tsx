@@ -25,7 +25,7 @@ vi.mock('@/lib/socket', () => ({
 }));
 
 vi.mock('sonner', () => ({
-  toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
+  toast: { success: vi.fn(), error: vi.fn(), info: vi.fn(), custom: vi.fn(), dismiss: vi.fn() },
 }));
 
 import { EventRsvpCard } from './EventRsvpCard';

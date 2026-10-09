@@ -7,6 +7,8 @@ import { useProduct } from "@/hooks/useMarketplace";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { toast } from "sonner";
+import { marketplaceService } from "@/services/marketplace.service";
 import { formatTimeAgo } from "@/utils/timeAgo";
 import { formatDistance, haversineDistance } from "@/utils/distance";
 import { ProductEngagement } from "./ProductEngagement";
@@ -37,6 +39,25 @@ export function ProductDetails({
   const { data: product, isLoading, error } = useProduct(productId);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showComments, setShowComments] = useState(false);
+  const [showGuidelines, setShowGuidelines] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("Suspected counterfeit or fake");
+  const [reportDetails, setReportDetails] = useState("");
+  const [isReporting, setIsReporting] = useState(false);
+
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsReporting(true);
+    try {
+      await marketplaceService.reportProduct(productId, reportReason, reportDetails);
+      toast.success("Listing reported. Safety moderators and community watch alerted.");
+      setShowReportModal(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || "Failed to submit report");
+    } finally {
+      setIsReporting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -109,22 +130,34 @@ export function ProductDetails({
             Back
           </button>
 
-          {isOwner && (
-            <div className="flex gap-2">
+          <div className="flex gap-2">
+            {!isOwner && (
               <button
-                onClick={() => onEdit?.(productId)}
-                className="px-4 py-2 bg-brand-blue hover:bg-brand-blue rounded-lg transition-colors"
+                type="button"
+                onClick={() => setShowReportModal(true)}
+                className="px-3 py-1.5 border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
               >
-                Edit
+                <span>🚩</span> Report Listing
               </button>
-              <button
-                onClick={() => onDelete?.(productId)}
-                className="px-4 py-2 bg-brand-red hover:bg-brand-red/85 rounded-lg transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          )}
+            )}
+
+            {isOwner && (
+              <>
+                <button
+                  onClick={() => onEdit?.(productId)}
+                  className="px-4 py-2 bg-brand-blue hover:bg-brand-blue rounded-lg transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => onDelete?.(productId)}
+                  className="px-4 py-2 bg-brand-red hover:bg-brand-red/85 rounded-lg transition-colors"
+                >
+                  Delete
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -200,6 +233,33 @@ export function ProductDetails({
                 <span className="px-3 py-1 bg-brand-black rounded-lg text-sm">
                   {product.category}
                 </span>
+              )}
+            </div>
+
+            {/* Zero-Escrow Transparency & NIPOST NDAPS Sovereign Badge */}
+            <div className="space-y-2">
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold flex items-center gap-1.5 text-amber-300">
+                    🛡️ Zero-Escrow Peer-to-Peer Deal
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowGuidelines(true)}
+                    className="text-[11px] font-semibold text-amber-400 hover:text-amber-200 underline"
+                  >
+                    Safety Rules →
+                  </button>
+                </div>
+                <p className="mt-1 text-[11px] text-amber-200/80 leading-relaxed">
+                  NeyborHuud holds no funds (₦0.00). Transactions and deliveries are handled directly between neighbors. Stalled deals route to the Huud Watch roster for local mediation.
+                </p>
+              </div>
+
+              {Boolean((product.location as any)?.maskedPostcode || (product.seller as any)?.maskedPostcode) && (
+                <div className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-300">
+                  <span>📍</span> NIPOST NDAPS: {(product.location as any)?.maskedPostcode || (product.seller as any)?.maskedPostcode}
+                </div>
               )}
             </div>
 
@@ -280,6 +340,139 @@ export function ProductDetails({
         {showComments && (
           <div className="mt-12 border-t border-black/[0.08] pt-8">
             <ProductComments productId={productId} currentUserId={currentUserId} />
+          </div>
+        )}
+
+        {/* Safe Meetup Guidelines Modal */}
+        {showGuidelines && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+            <div className="w-full max-w-md rounded-2xl bg-[#0f172a] border border-slate-800 p-6 text-white shadow-2xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold flex items-center gap-2 text-amber-400">
+                  <span>🛡️</span> Zero-Escrow Safe Meetup Rules
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowGuidelines(false)}
+                  className="text-slate-400 hover:text-white text-lg font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs text-slate-300">
+                <div className="rounded-xl bg-slate-900 p-3 border border-slate-800">
+                  <p className="font-bold text-white mb-1">1. Zero Platform Escrow (₦0.00)</p>
+                  <p className="text-slate-400">
+                    NeyborHuud is NOT a payment intermediary and never holds your funds. All payments occur directly between participants (cash or direct bank transfer) at your own discretion.
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-slate-900 p-3 border border-slate-800">
+                  <p className="font-bold text-white mb-1">2. Meet in Public Spaces</p>
+                  <p className="text-slate-400">
+                    Always arrange pickups at estate gates, security posts, verified building lobbies, or busy commercial centers during daylight hours.
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-slate-900 p-3 border border-slate-800">
+                  <p className="font-bold text-white mb-1">3. Inspect Before Payment</p>
+                  <p className="text-slate-400">
+                    Physically test or examine the product before completing direct bank transfers or handing over cash.
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-slate-900 p-3 border border-slate-800">
+                  <p className="font-bold text-white mb-1">4. Community Mediation Layer</p>
+                  <p className="text-slate-400">
+                    In case of a contested deal or non-delivery, tap "Dispute" in the deal chat to escalate to the local Huud Watch / Elders roster for community reputation arbitration.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowGuidelines(false)}
+                className="w-full rounded-xl bg-amber-500 py-2.5 text-xs font-bold text-black hover:bg-amber-400 transition"
+              >
+                I Understand & Agree
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Report Listing / Scam Modal */}
+        {showReportModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+            <div className="w-full max-w-md rounded-2xl bg-[#0f172a] border border-slate-800 p-6 text-white shadow-2xl">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-bold flex items-center gap-2 text-rose-400">
+                  <span>🚩</span> Report Suspicious Listing
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(false)}
+                  className="text-slate-400 hover:text-white text-lg font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-300 mb-4">
+                Help protect our neighborhood. Reports are immediately flagged to community safety moderators and the Huud Watch roster.
+              </p>
+
+              <form onSubmit={handleReportSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+                    Reason
+                  </label>
+                  <select
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                  >
+                    <option value="Suspected counterfeit or fake">Suspected counterfeit or fake</option>
+                    <option value="Prohibited or dangerous item">Prohibited or dangerous item</option>
+                    <option value="Scam / Advance-fee fraud">Scam / Advance-fee fraud</option>
+                    <option value="Misleading price or condition">Misleading price or condition</option>
+                    <option value="Harassment or inappropriate content">Harassment or inappropriate content</option>
+                    <option value="Other security concern">Other security concern</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+                    Additional Details
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={reportDetails}
+                    onChange={(e) => setReportDetails(e.target.value)}
+                    placeholder="Describe what looks suspicious or unsafe..."
+                    className="w-full rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs text-white focus:outline-none focus:border-rose-500"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowReportModal(false)}
+                    disabled={isReporting}
+                    className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isReporting}
+                    className="rounded-xl bg-rose-600 px-5 py-2 text-xs font-bold text-white hover:bg-rose-500 disabled:opacity-50"
+                  >
+                    {isReporting ? "Reporting…" : "Submit Report"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>

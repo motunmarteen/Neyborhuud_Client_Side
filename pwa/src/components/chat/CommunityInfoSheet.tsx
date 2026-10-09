@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useHubCommunityByConversation, useHubCommunityMembers, useUpdateHubCommunity, useChangeMemberRole, useLeaveHubCommunity } from '@/hooks/useHubCommunities';
 import { useAuth } from '@/hooks/useAuth';
 import { BottomSheetDragHandle } from '@/components/ui/BottomSheetDragHandle';

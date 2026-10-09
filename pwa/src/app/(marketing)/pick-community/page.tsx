@@ -15,9 +15,24 @@ import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthSheetStageHeader } from '@/components/auth/AuthSheetStageHeader';
 import { PremiumInput } from '@/components/ui/PremiumInput';
+import { Eli5Tooltip } from '@/components/ui/Eli5Tooltip';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { reverseGeocode } from '@/lib/reverseGeocode';
 import { toast } from 'sonner';
+import {
+  Home,
+  ChevronUp,
+  ChevronDown,
+  ArrowRight,
+  X,
+  SkipForward,
+  AlertCircle,
+  MapPin,
+  Search,
+  Check,
+  AlertTriangle,
+  Compass,
+} from 'lucide-react';
 
 type PickerOption = {
   id: string;
@@ -282,7 +297,7 @@ function PickCommunityContent() {
       peek={
         <div className="auth-signup-location-peek">
           <span className="auth-signup-location-peek__icon" aria-hidden>
-            <span className="material-symbols-outlined" aria-hidden="true">home</span>
+            <Home size={18} strokeWidth={2} />
           </span>
           <div className="min-w-0 flex-1">
             <p className="auth-signup-location-peek__label">
@@ -293,7 +308,7 @@ function PickCommunityContent() {
             </p>
           </div>
           <span className="auth-signup-location-peek__chevron" aria-hidden>
-            <span className="material-symbols-outlined"  aria-hidden="true">expand_less</span>
+            <ChevronUp size={16} strokeWidth={2} />
           </span>
         </div>
       }
@@ -303,25 +318,29 @@ function PickCommunityContent() {
             type="button"
             disabled={!selectedId || submitting || loading || detectingLoc}
             onClick={() => void handleConfirm()}
-            className="auth-btn auth-btn-primary"
+            className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
           >
             {submitting ? (
               <>
-                <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                <span className="h-4 w-4 shrink-0 rounded-full border-2 border-black/30 border-t-black animate-spin" aria-hidden />
                 <span>Saving…</span>
               </>
             ) : (
               <>
                 <span>{isChangingCommunity ? 'Update area' : 'Confirm area'}</span>
-                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
               </>
             )}
           </button>
           <Link
             href={isChangingCommunity ? '/settings' : '/feed'}
-            className="auth-btn auth-btn-secondary no-underline"
+            className="auth-btn auth-btn-secondary no-underline flex items-center justify-center gap-1.5"
           >
-            <span className="material-symbols-outlined shrink-0 text-[1.125rem]" aria-hidden="true">{isChangingCommunity ? 'close' : 'skip_next'}</span>
+            {isChangingCommunity ? (
+              <X size={16} strokeWidth={2} className="shrink-0" />
+            ) : (
+              <SkipForward size={16} strokeWidth={2} className="shrink-0" />
+            )}
             <span>{isChangingCommunity ? 'Cancel' : 'Skip for now'}</span>
           </Link>
         </div>
@@ -377,7 +396,7 @@ function PickCommunityContent() {
           <div className="flex flex-col gap-3">
             {error && (
               <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500" aria-hidden="true" />
                 <span>{error}</span>
               </div>
             )}
@@ -387,14 +406,14 @@ function PickCommunityContent() {
               onClick={handleDetectLocation}
               className="auth-btn auth-btn-secondary w-full py-3 flex items-center justify-center gap-2"
             >
-              <span className="material-symbols-outlined shrink-0" aria-hidden="true">my_location</span>
+              <Compass className="w-4 h-4 shrink-0 text-primary" aria-hidden="true" />
               <span>Detect My Location (GPS)</span>
             </button>
 
-            <div className="flex items-center gap-3 my-2 text-charcoal/50" aria-hidden="true">
-              <span className="flex-1 h-[1px] bg-charcoal/10" />
+            <div className="flex items-center gap-3 my-2 text-charcoal/50 dark:text-white/40" aria-hidden="true">
+              <span className="flex-1 h-[1px] bg-charcoal/10 dark:bg-white/10" />
               <span className="text-[10px] font-bold tracking-widest uppercase">or enter manually</span>
-              <span className="flex-1 h-[1px] bg-charcoal/10" />
+              <span className="flex-1 h-[1px] bg-charcoal/10 dark:bg-white/10" />
             </div>
 
             <PremiumInput
@@ -415,14 +434,21 @@ function PickCommunityContent() {
               type="button"
               disabled={!manualState.trim() || !manualLga.trim()}
               onClick={handleManualSubmit}
-              className="auth-btn auth-btn-primary w-full py-3 mt-2"
+              className="auth-btn auth-btn-primary w-full py-3 mt-2 flex items-center justify-center gap-2"
             >
               <span>Find Communities</span>
-              <span className="material-symbols-outlined shrink-0" aria-hidden="true">search</span>
+              <Search className="w-4 h-4 shrink-0" aria-hidden="true" />
             </button>
           </div>
         ) : (
           <>
+            <div className="flex items-center justify-between pb-1">
+              <span className="text-xs font-semibold text-charcoal/70 dark:text-white/70">Assigned Ward / Huud</span>
+              <Eli5Tooltip 
+                term="Community Ward" 
+                explanation="Your Huud is your hyper-local ward or neighborhood. Posts, SOS alerts, and trade items are shared with residents inside this verified boundary." 
+              />
+            </div>
             <div ref={comboRef} className="relative">
               <button
                 type="button"
@@ -430,16 +456,16 @@ function PickCommunityContent() {
                 aria-label={selectedOption ? `Selected area: ${selectedOption.name}` : 'Select your area'}
                 className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 transition-all outline-none focus:outline-none ${
                   selectedId
-                    ? 'border-primary/30 bg-primary/5 shadow-[0_0_0_1px_rgba(0,111,53,0.12)]'
-                    : 'border-charcoal/5 bg-white shadow-[0_4px_16px_rgba(26,26,46,0.06)]'
+                    ? 'border-primary/40 bg-primary/10 shadow-[0_0_0_1px_rgba(0,212,49,0.2)]'
+                    : 'border-charcoal/10 dark:border-white/10 bg-white dark:bg-[#1A212A] shadow-[0_4px_16px_rgba(0,0,0,0.06)]'
                 }`}
               >
                 <div
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all ${
-                    selectedId ? 'bg-primary text-white' : 'bg-[#F1F5F9] text-[var(--neu-text-muted)]'
+                    selectedId ? 'bg-primary text-black font-bold' : 'bg-charcoal/5 dark:bg-white/5 text-[var(--neu-text-muted)]'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">{selectedId ? 'check' : 'location_on'}</span>
+                  {selectedId ? <Check className="w-4 h-4" aria-hidden="true" /> : <MapPin className="w-4 h-4" aria-hidden="true" />}
                 </div>
                 {selectedId ? (
                   <span className="flex-1 truncate text-left text-sm font-semibold text-primary">
@@ -450,41 +476,41 @@ function PickCommunityContent() {
                     Select your area
                   </span>
                 )}
-                <i
-                  className={`material-symbols-outlined shrink-0 text-xs text-[var(--neu-text-muted)] transition-transform duration-200 ${
+                <ChevronDown
+                  className={`w-4 h-4 shrink-0 text-[var(--neu-text-muted)] transition-transform duration-200 ${
                     dropdownOpen ? 'rotate-180' : ''
                   }`}
-                  aria-hidden
+                  aria-hidden="true"
                 />
               </button>
 
               {dropdownOpen ? (
-                <div className="mt-2 overflow-hidden rounded-2xl border border-charcoal/5 bg-white shadow-[0_8px_24px_rgba(26,26,46,0.12)]">
-                  <div className="border-b border-charcoal/5 px-3 pb-2 pt-3">
-                    <div className="flex items-center gap-2 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2">
-                      <span className="material-symbols-outlined text-xs text-[var(--neu-text-muted)]" aria-hidden="true">search</span>
+                <div className="mt-2 overflow-hidden rounded-2xl border border-charcoal/10 dark:border-white/10 bg-white dark:bg-[#161B22] shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+                  <div className="border-b border-charcoal/10 dark:border-white/10 px-3 pb-2 pt-3">
+                    <div className="flex items-center gap-2 rounded-xl border border-charcoal/10 dark:border-white/10 bg-brand-surface dark:bg-[#0B0E11] px-3 py-2">
+                      <Search className="w-4 h-4 text-[var(--neu-text-muted)] shrink-0" aria-hidden="true" />
                       <input
                         type="text"
                         placeholder="Search areas…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         autoFocus
-                        className="w-full border-0 bg-transparent text-sm text-brand-black outline-none placeholder:text-[var(--neu-text-muted)] focus:outline-none"
+                        className="w-full border-0 bg-transparent text-sm text-brand-black dark:text-white outline-none placeholder:text-[var(--neu-text-muted)] focus:outline-none"
                       />
                       {search ? (
                         <button
                           type="button"
                           onClick={() => setSearch('')}
-                          className="text-[var(--neu-text-muted)] transition-colors hover:text-brand-black"
+                          className="text-[var(--neu-text-muted)] hover:text-brand-black dark:hover:text-white transition-colors"
                           aria-label="Clear search"
                         >
-                          <span className="material-symbols-outlined text-xs"  aria-hidden="true">close</span>
+                          <X className="w-4 h-4" aria-hidden="true" />
                         </button>
                       ) : null}
                     </div>
                   </div>
 
-                  <ul className="max-h-48 overflow-y-auto py-1 sm:max-h-56">
+                  <ul className="max-h-48 overflow-y-auto py-1 sm:max-h-56 divide-y divide-charcoal/5 dark:divide-white/5">
                     {filtered.length === 0 ? (
                       <li className="px-4 py-5 text-center text-sm text-[var(--neu-text-muted)]">
                         No areas match &ldquo;{search}&rdquo;
@@ -503,21 +529,21 @@ function PickCommunityContent() {
                               }}
                               className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                                 isSelected
-                                  ? 'bg-primary/10 text-primary'
-                                  : 'text-brand-black hover:bg-brand-surface'
+                                  ? 'bg-primary/10 text-primary font-semibold'
+                                  : 'text-brand-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5'
                               }`}
                             >
                               <div
                                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all ${
-                                  isSelected ? 'bg-primary' : 'border border-charcoal/15'
+                                  isSelected ? 'bg-primary text-black' : 'border border-charcoal/20 dark:border-white/20'
                                 }`}
                               >
                                 {isSelected ? (
-                                  <span className="material-symbols-outlined text-[10px] text-white" aria-hidden="true">check</span>
+                                  <Check className="w-3 h-3 stroke-[3]" aria-hidden="true" />
                                 ) : null}
                               </div>
-                              <span className="flex-1 truncate text-sm font-medium">{o.name}</span>
-                              <span className="shrink-0 text-[10px] uppercase tracking-wide text-[var(--neu-text-muted)]">
+                              <span className="flex-1 truncate text-sm">{o.name}</span>
+                              <span className="shrink-0 text-[10px] uppercase font-bold tracking-wide px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 text-[var(--neu-text-muted)]">
                                 {o.kind === 'ward' ? 'Ward' : o.kind === 'lcda' ? 'LCDA' : 'LGA'}
                               </span>
                             </button>
@@ -532,21 +558,21 @@ function PickCommunityContent() {
 
             {seedRequired ? (
               <div className="auth-flow-notice auth-flow-notice--info">
-                <span className="material-symbols-outlined shrink-0" aria-hidden="true">warning</span>
+                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500" aria-hidden="true" />
                 <span>
                   Areas not seeded yet. Ask your backend admin to run{' '}
-                  <code className="rounded bg-black/5 px-1 text-[10px]">pnpm run seed:communities</code>, then retry.
+                  <code className="rounded bg-black/10 dark:bg-white/10 px-1 text-[10px]">pnpm run seed:communities</code>, then retry.
                 </span>
               </div>
             ) : null}
 
             {error && selectedId ? (
               <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500" aria-hidden="true" />
                 <span>{error}</span>
               </div>
             ) : (
-              <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
+              <p className="text-center text-[11px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
                 {isChangingCommunity
                   ? 'Select a different ward or area after moving.'
                   : 'Your Huud is tied to the area you choose'}

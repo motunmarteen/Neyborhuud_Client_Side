@@ -33,6 +33,7 @@ import { FeedTab, Post, ContentType } from '@/types/api';
 import { useInView } from 'react-intersection-observer';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePinPost } from '@/hooks/useGamification';
+import { Shield, AlertTriangle, MapPinOff, X } from 'lucide-react';
 import { BoostModal } from '@/components/gamification/BoostModal';
 import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
 import { FeedDiscoveryBlock } from '@/components/feed/FeedDiscoveryBlock';
@@ -44,6 +45,12 @@ import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
 import { FeedNewsTicker } from '@/components/feed/FeedNewsTicker';
 import { FeedSentinelRow } from '@/components/feed/FeedSentinelRow';
 import { RedZoneBanner } from '@/components/feed/RedZoneBanner';
+import { StreetRadarView } from '@/components/feed/StreetRadarView';
+import { FeedBcActionRibbon } from '@/components/feed/FeedBcActionRibbon';
+import { WhoIsInMyHuudDrawer } from '@/components/neighborhood/WhoIsInMyHuudDrawer';
+import { AskMyHuudDrawer } from '@/components/assistant/AskMyHuudDrawer';
+import { FeedEmailVerificationBanner } from '@/components/feed/FeedEmailVerificationBanner';
+import { QuickSignalBar } from '@/components/feed/QuickSignalBar';
 
 const getFilterBannerData = (type: string) => {
     switch (type) {
@@ -116,8 +123,11 @@ function XFeedInner() {
     const [locationError, setLocationError] = useState<string | null>(null);
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [createPostFocusMedia, setCreatePostFocusMedia] = useState(false);
+    const [createPostDefaultContentType, setCreatePostDefaultContentType] = useState<ContentType | undefined>(undefined);
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
+    const [isWhoIsInMyHuudOpen, setIsWhoIsInMyHuudOpen] = useState(false);
+    const [isAskSentinelOpen, setIsAskSentinelOpen] = useState(false);
     const [feedTab, setFeedTab] = useState<FeedTab>('your_huud');
     const [departmentFilter, setDepartmentFilter] = useState<string | undefined>(undefined);
     const [fyiSubtypeFilter, setFyiSubtypeFilter] = useState<string>('');
@@ -147,8 +157,9 @@ function XFeedInner() {
     // Listen for create-post event from TopNav / sky hero
     useEffect(() => {
         const handler = (event: Event) => {
-            const detail = (event as CustomEvent<{ focusMedia?: boolean }>).detail;
+            const detail = (event as CustomEvent<{ focusMedia?: boolean; contentType?: ContentType }>).detail;
             setCreatePostFocusMedia(!!detail?.focusMedia);
+            setCreatePostDefaultContentType(detail?.contentType);
             setIsCreatePostOpen(true);
         };
         window.addEventListener('open-create-post', handler);
@@ -161,16 +172,8 @@ function XFeedInner() {
     useEffect(() => {
         const token = typeof window !== 'undefined' ? localStorage.getItem('neyborhuud_access_token') : null;
         if (!token) return;
-        void authService.syncCommunityFromProfile().finally(() => {
-            if (getNeedsCommunitySelection()) {
-                router.replace('/pick-community');
-                return;
-            }
-            if (getNeedsGpsLocationVerification()) {
-                router.replace('/verify-location');
-            }
-        });
-    }, [router]);
+        void authService.syncCommunityFromProfile();
+    }, []);
 
     // ── Location logic removed: Feed defaults to the user's saved community ──
     // The feed relies on the user's saved location from registration unless they explicitly request otherwise.
@@ -409,33 +412,38 @@ function XFeedInner() {
 
 
     return (
-        <div className="relative flex h-app w-full max-w-[100vw] overflow-hidden neu-base">
+        <div className="relative flex h-app w-full max-w-[100vw] overflow-hidden bg-white">
             {/* Left Sidebar */}
-            <Suspense fallback={<div className="hidden lg:block lg:w-80 shrink-0" />}>
+            <Suspense fallback={<div className="hidden lg:block lg:w-[270px] shrink-0" />}>
                 <LeftSidebar mode="both" />
             </Suspense>
 
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                {/* TopNav moved inside main to scroll with page */}
-
-            {/* Main scroll area */}
-            <main
-              ref={mainRef}
-              data-app-scroll-root
-              className="feed-scroll-main feed-scroll-main--sky-feed min-h-0 flex-1 overflow-y-auto scroll-smooth"
-            >
-                <div className="feed-page-scroll flex flex-col pb-[var(--app-scroll-bottom)] relative">
-                    <TopNav />
-                    <div className="feed-hero-stack shrink-0">
-                      <FeedSkyHero
-                        below={
-                          <>
-                            <FeedNewsTicker />
-                          </>
-                        }
-                      />
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-white relative">
+                {/* Main scroll area — FeedSkyHero takes the whole top of the screen */}
+                <main
+                  ref={mainRef}
+                  className="feed-scroll-main feed-scroll-main--sky-feed min-h-0 flex-1 overflow-y-auto scroll-smooth bg-white !pt-0 relative"
+                  style={{ paddingTop: 0 }}
+                >
+                    {/* Floating Island Capsule Nav — Floats directly on top of the Sky Hero */}
+                    <div className="sticky top-2 sm:top-3 z-40 w-full pointer-events-none mb-[-56px] sm:mb-[-62px]">
+                      <TopNav />
                     </div>
-                        <div className="feed-sky-feed-body flex flex-col gap-0 pt-0">
+
+                    <div className="feed-page-scroll flex flex-col pb-[var(--app-scroll-bottom)] relative bg-white">
+                        <div className="feed-hero-stack shrink-0">
+                          <FeedSkyHero
+                            below={
+                              <>
+                                <FeedNewsTicker />
+                              </>
+                            }
+                            onOpenWhoIsInMyHuud={() => setIsWhoIsInMyHuudOpen(true)}
+                            onOpenAskSentinel={() => setIsAskSentinelOpen(true)}
+                          />
+                        </div>
+                        <div className="feed-sky-feed-body flex flex-col gap-3 sm:gap-3.5 pt-3 sm:pt-3.5">
+
                             {/* Active content-type filter chip */}
                             {contentTypeFilter && (() => {
                                 const banner = getFilterBannerData(contentTypeFilter);
@@ -454,7 +462,7 @@ function XFeedInner() {
                                                         className="ml-auto flex items-center justify-center h-6 w-6 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 text-neu-text-secondary dark:text-white/60 cursor-pointer text-xs"
                                                         aria-label="Clear filter"
                                                     >
-                                                        <span className="material-symbols-outlined text-[14px]">close</span>
+                                                        <X size={14} />
                                                     </button>
                                                 </h3>
                                                 <p className="text-[11px] font-medium text-neu-text-secondary dark:text-white/60 mt-1.5 leading-snug">{banner.desc}</p>
@@ -464,11 +472,9 @@ function XFeedInner() {
                                 );
                             })()}
 
-                            {feedTab === 'your_huud' && (
-                                <div className="w-full">
-                                    <FeedProfilePrompt />
-                                </div>
-                            )}
+                            <FeedEmailVerificationBanner />
+
+                            {feedTab === 'your_huud' && <FeedProfilePrompt />}
 
                             {feedTab === 'your_huud' && placeContext && (
                                 <div className="w-full">
@@ -490,7 +496,16 @@ function XFeedInner() {
                                 </div>
                             )}
 
+                            {/* 1-Tap Waze-Style Street Signal Bar (Power, Traffic, Safety) */}
+                            <QuickSignalBar />
+
+                            {/* BC.Game Luxury Spotlight Cards, Categories & Live Pulse */}
+                            <FeedBcActionRibbon />
+
+                            <FeedSentinelRow />
                             <RedZoneBanner />
+
+
 
                             {missedAlerts && missedAlerts.count > 0 && (
                                 <div className="w-full">
@@ -507,7 +522,7 @@ function XFeedInner() {
                                                 className="rounded-xl size-10 shrink-0 flex items-center justify-center text-brand-red"
                                                 style={{ background: 'rgba(255,0,0,0.1)' }}
                                             >
-                                                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: '"FILL" 1' }}>shield</span>
+                                                <Shield className="w-5 h-5 text-brand-red" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
@@ -534,9 +549,9 @@ function XFeedInner() {
                             {/* Error State */}
                             {isError && (
                                 <div className="w-full">
-                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white border-y border-gray-100 w-full">
-                                        <div className="w-16 h-16 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
-                                            <span className="material-symbols-outlined text-[32px] text-brand-red">warning</span>
+                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white dark:bg-[#1A2128] border-y border-gray-100 dark:border-white/5 w-full">
+                                        <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center mb-4">
+                                            <AlertTriangle className="w-8 h-8 text-brand-red" />
                                         </div>
                                         <p className="text-sm text-center mb-2" style={{ color: 'var(--neu-text)' }}>
                                             {locationError || t('feed.failedToLoad')}
@@ -568,9 +583,9 @@ function XFeedInner() {
                             {/* Empty State: No Location and No Posts */}
                             {!isLoading && !isError && !location && locationError && timeline.length === 0 && mergedFeed.length === 0 && (
                                 <div className="w-full">
-                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white border-y border-gray-100 w-full">
-                                        <div className="w-16 h-16 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
-                                            <span className="material-symbols-outlined text-[32px] text-brand-red">location_off</span>
+                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white dark:bg-[#1A2128] border-y border-gray-100 dark:border-white/5 w-full">
+                                        <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center mb-4">
+                                            <MapPinOff className="w-8 h-8 text-brand-red" />
                                         </div>
                                         <p className="text-sm text-center" style={{ color: 'var(--neu-text)' }}>
                                             {locationError}
@@ -580,21 +595,21 @@ function XFeedInner() {
                             )}
 
                             {!isLoading && !isError && location && mergedFeed.length === 0 && timeline.length === 0 && (
-                                <div className="w-full">
-                                    <div className="flex flex-col items-center justify-center py-12 px-6 text-center w-full bg-white border-y border-gray-100">
-                                        <div className="relative w-full max-w-[280px] h-[140px] rounded-2xl overflow-hidden mb-6 border border-gray-100 bg-black/[0.02]">
-                                            <Image src="/illustration_services.png" alt="Welcome" fill sizes="280px" className="object-cover" />
+                                <div className="w-full px-3 sm:px-4 py-3">
+                                    <div className="flex flex-col items-center justify-center py-8 px-6 text-center w-full bg-white rounded-2xl border border-black/[0.08] shadow-xs">
+                                        <div className="relative w-full max-w-[240px] h-[120px] rounded-xl overflow-hidden mb-4 border border-black/[0.06] bg-black/[0.02]">
+                                            <Image src="/illustration_services.png" alt="Welcome" fill sizes="240px" className="object-cover" />
                                         </div>
-                                        <p className="text-base font-bold text-neu-text dark:text-white">
+                                        <p className="text-sm font-black text-[#111827]">
                                             {t('feed.noPostsTitle')}
                                         </p>
-                                        <p className="text-sm mt-2 max-w-xs text-neu-text-secondary dark:text-white/60">
+                                        <p className="text-xs font-semibold mt-1 max-w-xs text-[#6B7280]">
                                             {t('feed.noPostsSubtitle')}
                                         </p>
                                         <button
                                             type="button"
                                             onClick={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
-                                            className="mt-6 px-6 py-3 text-xs bg-primary hover:bg-brand-green-dark text-black hover:text-white font-black rounded-xl transition-all shadow-sm cursor-pointer"
+                                            className="mt-4 px-5 py-2.5 text-xs bg-[#00D431] hover:bg-[#00FF3E] text-black font-extrabold rounded-xl transition-all shadow-xs cursor-pointer"
                                         >
                                             Start a conversation
                                         </button>
@@ -604,7 +619,9 @@ function XFeedInner() {
 
                         {/* Posts stream */}
                         {timeline.length > 0 && (
-                        <div className="feed-posts-stream flex flex-col gap-0 pb-0">
+                        <div className="feed-posts-stream flex flex-col gap-3 px-3 sm:px-4 py-2 pb-6">
+
+
                             {timeline.map((item, index) => {
                                 const renderItem = () => {
                                     if (
@@ -716,8 +733,11 @@ function XFeedInner() {
                 onClose={() => {
                     setIsCreatePostOpen(false);
                     setCreatePostFocusMedia(false);
+                    setCreatePostDefaultContentType(undefined);
                 }}
                 focusMediaOnOpen={createPostFocusMedia}
+                defaultContentType={createPostDefaultContentType}
+                lockContentType={!!createPostDefaultContentType}
                 onSuccess={() => {
                     queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
                     queryClient.invalidateQueries({ queryKey: ['fyi'] });
@@ -795,6 +815,16 @@ function XFeedInner() {
                     onClose={() => setPinningPostId(null)}
                 />
             )}
+
+            {/* Phase 3 Sentinel Drawers */}
+            <WhoIsInMyHuudDrawer
+                isOpen={isWhoIsInMyHuudOpen}
+                onClose={() => setIsWhoIsInMyHuudOpen(false)}
+            />
+            <AskMyHuudDrawer
+                isOpen={isAskSentinelOpen}
+                onClose={() => setIsAskSentinelOpen(false)}
+            />
 
             <FeedWelcomeSheet />
         </div>

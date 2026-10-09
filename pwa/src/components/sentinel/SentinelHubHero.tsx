@@ -32,12 +32,12 @@ export function SentinelHubHero({
       }`}
     >
       <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${
+        className={`pointer-events-none absolute inset-0 ${
           isActive
-            ? 'from-brand-red/20 via-transparent to-brand-red/5'
+            ? 'bg-red-500/10'
             : isPending
-              ? 'from-primary/18 via-transparent to-amber-100/30 dark:to-amber-950/20'
-              : 'from-brand-blue/14 via-primary/6 to-transparent'
+              ? 'bg-[#00D431]/10'
+              : 'bg-white/[0.03]'
         }`}
         aria-hidden
       />

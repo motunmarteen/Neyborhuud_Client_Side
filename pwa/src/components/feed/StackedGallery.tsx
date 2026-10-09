@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { cdnVideo, cdnVideoPoster } from '@/lib/media';
 
 interface StackedGalleryProps {
     images: string[];
@@ -94,7 +95,9 @@ export const StackedGallery: React.FC<StackedGalleryProps> = ({ images }) => {
                                     onClick={(e) => e.stopPropagation()} // STOP shuffle when clicking video container
                                 >
                                     <video
-                                        src={item.url}
+                                        src={cdnVideo(item.url)}
+                                        poster={cdnVideoPoster(item.url, 828)}
+                                        preload="metadata"
                                         className="w-full h-full object-contain"
                                         controls // Native controls
                                         playsInline
@@ -185,7 +188,7 @@ const Lightbox = ({ images, onClose }: { images: string[]; onClose: () => void }
                     <div key={idx} className="relative w-full aspect-square bg-charcoal/5 dark:bg-surface-dark overflow-hidden group">
                         {isVideo(img) ? (
                             <>
-                                <video src={img} className="w-full h-full object-cover" muted />
+                                <video src={cdnVideo(img)} poster={cdnVideoPoster(img, 384)} preload="none" className="w-full h-full object-cover" muted />
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/10">
                                     <span className="material-symbols-outlined text-white text-3xl" aria-hidden="true">play_circle</span>
                                 </div>

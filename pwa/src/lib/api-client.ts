@@ -5,6 +5,7 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { ApiResponse } from "@/types/api";
+import { compressImageForUpload, compressImagesForUpload } from "./media";
 
 /** Auth routes that must not send a stored Bearer token (e.g. stale session on login). */
 const PUBLIC_AUTH_PATHS = [
@@ -118,7 +119,22 @@ class ApiClient {
         }
         
         // 403 = Forbidden (authorized but not allowed) - don't logout, just reject
-        // This handles cases like "not verified" where user is logged in but can't perform action
+        // This handles cases like "not verified" where user is logged in but can't perform action.
+        // Exception: the server says the ACCOUNT itself is banned / suspended /
+        // deleted. That decision is the server's; the session is dead.
+        if (
+          status === 403 &&
+          ['ACCOUNT_BANNED', 'ACCOUNT_SUSPENDED', 'ACCOUNT_DELETED'].includes(errorData?.code) &&
+          this.getToken()
+        ) {
+          this.clearToken();
+          if (typeof window !== "undefined") {
+            const reason = encodeURIComponent(String(errorData.code).toLowerCase());
+            setTimeout(() => {
+              window.location.href = `/login?reason=${reason}`;
+            }, 1500);
+          }
+        }
         return Promise.reject(error);
       },
     );
@@ -254,7 +270,9 @@ class ApiClient {
     fieldName: string = "file",
   ): Promise<ApiResponse<T>> {
     const formData = new FormData();
-    formData.append(fieldName, file);
+    // Photos are downscaled/re-encoded on the device first (less mobile
+    // data, faster upload, EXIF/GPS stripped). Videos pass through.
+    formData.append(fieldName, await compressImageForUpload(file));
 
     if (additionalData) {
       Object.keys(additionalData).forEach((key) => {
@@ -341,7 +359,8 @@ class ApiClient {
     onProgress?: (progress: number) => void,
   ): Promise<ApiResponse<T>> {
     const formData = new FormData();
-    files.forEach((file) => {
+    const prepared = await compressImagesForUpload(files);
+    prepared.forEach((file) => {
       formData.append("files", file);
     });
 

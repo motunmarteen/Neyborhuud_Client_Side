@@ -1,56 +1,157 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
+import {
+  Search,
+  X,
+  Radar,
+  ShieldCheck,
+  ShoppingBag,
+  Wrench,
+  Calendar,
+  Users,
+  Megaphone,
+  Map as MapIcon,
+  MessageSquare,
+  TrendingUp,
+  Clock,
+  Sparkles,
+  HelpCircle,
+  ArrowRight,
+  Loader2,
+  ExternalLink,
+} from 'lucide-react';
 import { useSearch } from '@/hooks/useSearch';
 import { UserSearchResult } from '@/components/search/UserSearchResult';
 import { PostSearchResult } from '@/components/search/PostSearchResult';
 import { LocationSearchResult } from '@/components/search/LocationSearchResult';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { searchService } from '@/services/search.service';
+import { DEMO_MODE } from '@/lib/demoMode';
+
+const DEMO_TRENDING = [
+  '#LekkiLight', '#AdmiraltyTraffic', '#PlumberNearMe', '#GeneratorForSale',
+  '#SecurityPatrol', '#CleanUpSaturday',
+];
 import { newsService } from '@/services/news.service';
+import { WhoIsInMyHuudDrawer } from '@/components/neighborhood/WhoIsInMyHuudDrawer';
+import { AskMyHuudDrawer } from '@/components/assistant/AskMyHuudDrawer';
 import type { RssArticle } from '@/types/incident';
 
-// ── Sentinel Design Standard Shortcuts ─────────────────────────
-const EXPLORE_CATEGORIES = [
-  { id: 'emergency', label: 'Safety Watch', icon: 'shield', color: 'bg-brand-red', text: 'text-brand-red', bgSoft: 'bg-brand-red/10' },
-  { id: 'marketplace', label: 'Marketplace', icon: 'storefront', color: 'bg-green-600', text: 'text-green-600', bgSoft: 'bg-green-600/10' },
-  { id: 'services', label: 'Local Services', icon: 'handyman', color: 'bg-blue-600', text: 'text-blue-600', bgSoft: 'bg-blue-600/10' },
-  { id: 'event', label: 'Events', icon: 'event', color: 'bg-purple-600', text: 'text-purple-600', bgSoft: 'bg-purple-600/10' },
-  { id: 'job', label: 'Jobs', icon: 'work', color: 'bg-orange-600', text: 'text-orange-600', bgSoft: 'bg-orange-600/10' },
-  { id: 'fyi', label: 'FYI', icon: 'campaign', color: 'bg-slate-700', text: 'text-slate-700', bgSoft: 'bg-slate-700/10' },
-  { id: 'help_request', label: 'Requests', icon: 'volunteer_activism', color: 'bg-teal-600', text: 'text-teal-600', bgSoft: 'bg-teal-600/10' },
+// ── BC.Game 3-Column / 2-Column Discovery Game Cards ────────────────────────
+const DISCOVERY_HUBS = [
+  {
+    id: 'radar',
+    title: 'Street Radar',
+    badge: 'Live 2km',
+    badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200/80',
+    description: 'Real-time power, transit slowdowns & street patrol signals.',
+    icon: Radar,
+    iconColor: 'text-[#00C830]',
+    bgColor: 'bg-emerald-50/70',
+    borderColor: 'border-emerald-200/70',
+    href: '/feed',
+  },
+  {
+    id: 'map',
+    title: 'Discovery Map',
+    badge: 'Vector Radar',
+    badgeColor: 'bg-blue-100 text-blue-800 border-blue-200/80',
+    description: 'Pulsing neighborhood pins, safety zones & verified places.',
+    icon: MapIcon,
+    iconColor: 'text-blue-600',
+    bgColor: 'bg-blue-50/70',
+    borderColor: 'border-blue-200/70',
+    href: '/map',
+  },
+  {
+    id: 'marketplace',
+    title: 'Huud Market',
+    badge: 'Zero-Escrow',
+    badgeColor: 'bg-amber-100 text-amber-800 border-amber-200/80',
+    description: 'Face-to-face handshake deals & nearby resident bargains.',
+    icon: ShoppingBag,
+    iconColor: 'text-amber-600',
+    bgColor: 'bg-amber-50/70',
+    borderColor: 'border-amber-200/70',
+    href: '/marketplace',
+  },
+  {
+    id: 'services',
+    title: 'Verified Artisans',
+    badge: 'TrustOS Vouched',
+    badgeColor: 'bg-teal-100 text-teal-800 border-teal-200/80',
+    description: 'Background-checked estate plumbers, electricians & auto technicians.',
+    icon: Wrench,
+    iconColor: 'text-teal-600',
+    bgColor: 'bg-teal-50/70',
+    borderColor: 'border-teal-200/70',
+    href: '/services',
+  },
+  {
+    id: 'events',
+    title: 'Events & Watch',
+    badge: 'Local Hub',
+    badgeColor: 'bg-purple-100 text-purple-800 border-purple-200/80',
+    description: 'Community clean-ups, HOA meetings & sports watch-parties.',
+    icon: Calendar,
+    iconColor: 'text-purple-600',
+    bgColor: 'bg-purple-50/70',
+    borderColor: 'border-purple-200/70',
+    href: '/events',
+  },
+  {
+    id: 'communities',
+    title: 'Estate Hubs',
+    badge: 'Wards & Gates',
+    badgeColor: 'bg-indigo-100 text-indigo-800 border-indigo-200/80',
+    description: 'Official estate gates, HOA guidelines & verified resident rosters.',
+    icon: Users,
+    iconColor: 'text-indigo-600',
+    bgColor: 'bg-indigo-50/70',
+    borderColor: 'border-indigo-200/70',
+    href: '/communities',
+  },
+  {
+    id: 'fyi',
+    title: 'Official Bulletins',
+    badge: 'High Priority',
+    badgeColor: 'bg-rose-100 text-rose-800 border-rose-200/80',
+    description: 'DisCo power schedules, fumigation notices & road repairs.',
+    icon: Megaphone,
+    iconColor: 'text-rose-600',
+    bgColor: 'bg-rose-50/70',
+    borderColor: 'border-rose-200/70',
+    href: '/fyi',
+  },
+  {
+    id: 'gist',
+    title: 'Huud Gist',
+    badge: 'Watercooler',
+    badgeColor: 'bg-cyan-100 text-cyan-800 border-cyan-200/80',
+    description: 'Casual neighborhood conversations, polls & local buzz.',
+    icon: MessageSquare,
+    iconColor: 'text-cyan-600',
+    bgColor: 'bg-cyan-50/70',
+    borderColor: 'border-cyan-200/70',
+    href: '/gist',
+  },
 ];
 
-// ── Search result tabs ────────────────────────────────────────
+// ── Search Result Tabs ────────────────────────────────────────────────────────
 const SEARCH_TABS = [
   { id: 'all', label: 'All' },
-  { id: 'users', label: 'Users' },
-  { id: 'posts', label: 'Posts' },
+  { id: 'users', label: 'Neighbors' },
+  { id: 'posts', label: 'Feed' },
   { id: 'locations', label: 'Places' },
   { id: 'marketplace', label: 'Marketplace' },
   { id: 'event', label: 'Events' },
-  { id: 'job', label: 'Jobs' },
-  { id: 'fyi', label: 'FYI' },
-  { id: 'help_request', label: 'Requests' },
-  { id: 'services', label: 'Services' },
-  { id: 'emergency', label: 'Safety Watch' },
+  { id: 'services', label: 'Artisans' },
+  { id: 'fyi', label: 'Bulletins' },
 ] as const;
-
-const SEARCH_TAB_ACCENTS: Record<string, string> = {
-  all: 'bg-slate-900 shadow-[0_1px_6px_rgba(15,23,42,0.25)]',
-  users: 'bg-blue-600 shadow-[0_1px_6px_rgba(37,99,235,0.25)]',
-  posts: 'bg-slate-900 shadow-[0_1px_6px_rgba(15,23,42,0.25)]',
-  locations: 'bg-emerald-600 shadow-[0_1px_6px_rgba(5,150,105,0.25)]',
-  marketplace: 'bg-emerald-600 shadow-[0_1px_6px_rgba(5,150,105,0.25)]',
-  event: 'bg-purple-600 shadow-[0_1px_6px_rgba(147,51,234,0.25)]',
-  job: 'bg-orange-600 shadow-[0_1px_6px_rgba(249,115,22,0.25)]',
-  fyi: 'bg-slate-700 shadow-[0_1px_6px_rgba(71,85,105,0.25)]',
-  help_request: 'bg-teal-650 shadow-[0_1px_6px_rgba(13,148,136,0.25)]',
-  services: 'bg-blue-600 shadow-[0_1px_6px_rgba(37,99,235,0.25)]',
-  emergency: 'bg-brand-red shadow-[0_1px_6px_rgba(220,38,38,0.25)]',
-};
 
 interface NewsArticle {
   title: string;
@@ -75,18 +176,21 @@ function ExplorePageInner() {
   const initialQuery = searchParams.get('q') || '';
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Search state - we keep useSearch type as 'all' and filter locally
   const {
-    query, setQuery,
-    results, loading: searchLoading, error: searchError, totalResults,
+    query,
+    setQuery,
+    results,
+    loading: searchLoading,
+    error: searchError,
+    totalResults,
   } = useSearch(initialQuery);
 
   const [activeTab, setActiveTab] = useState<string>('all');
-  
-  // Explore state
   const [trendingTopics, setTrendingTopics] = useState<string[]>([]);
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [isWhoIsInMyHuudOpen, setIsWhoIsInMyHuudOpen] = useState(false);
+  const [isAskSentinelOpen, setIsAskSentinelOpen] = useState(false);
 
   const isSearching = query.length > 0;
 
@@ -94,33 +198,28 @@ function ExplorePageInner() {
   useEffect(() => {
     const loadTrending = async () => {
       try {
-        const res = await searchService.getTrendingSearches(10);
-        const data = (res as any)?.data || res;
-        if (Array.isArray(data)) {
-          setTrendingTopics(data);
-        }
+        const topics = await searchService.getTrendingSearches(8);
+        // Only real trends — invented hashtags are shown in demo mode only.
+        setTrendingTopics(topics.length > 0 ? topics : DEMO_MODE ? DEMO_TRENDING : []);
       } catch {
-        setTrendingTopics([
-          '#SafetyFirst', '#LocalJobs', '#MarketDay', '#CommunityAlert',
-          '#HelpNeeded', '#NaijaHuud',
-        ]);
+        setTrendingTopics(DEMO_MODE ? DEMO_TRENDING : []);
       }
     };
     loadTrending();
   }, []);
 
-  // Load Nigeria news
+  // Load verified local news
   useEffect(() => {
     const loadNews = async () => {
       try {
-        const articles = await newsService.getArticles({ region: 'nigeria', limit: 5 });
+        const articles = await newsService.getArticles({ region: 'nigeria', limit: 4 });
         setNewsArticles(
           articles.map((a: RssArticle) => ({
             title: a.title || '',
             description: a.description?.replace(/<[^>]*>/g, '').slice(0, 150) || '',
             url: a.link || '#',
             image: a.imageUrl || null,
-            source: a.sourceName || a.source || 'News',
+            source: a.sourceName || a.source || 'Lagos Huud Desk',
             publishedAt: a.pubDate || new Date().toISOString(),
           }))
         );
@@ -131,7 +230,7 @@ function ExplorePageInner() {
     loadNews();
   }, []);
 
-  // Load search history
+  // Search history
   useEffect(() => {
     try {
       const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
@@ -158,123 +257,100 @@ function ExplorePageInner() {
     }
   };
 
-  const handleHistoryClick = (q: string) => {
-    setQuery(q);
-    saveSearchHistory(q);
-  };
-
-  const handleTrendingClick = (topic: string) => {
-    const clean = topic.startsWith('#') ? topic.slice(1) : topic;
-    setQuery(clean);
-    saveSearchHistory(clean);
-  };
-
-  const handleCategoryClick = (categoryId: string) => {
-    router.push(`/feed?type=${categoryId}`);
-  };
-
-  const clearHistory = () => {
-    localStorage.removeItem('searchHistory');
-    setSearchHistory([]);
-  };
-
   return (
     <AppBrowseLayout
-      className="!bg-white !px-0 !pt-0 !min-h-[100dvh]"
+      className="!bg-slate-50 !px-0 !pt-0 !min-h-[100dvh]"
       header={
-        <div className="sticky top-0 z-50 bg-white">
-          <div className="relative bg-white py-3 flex flex-col gap-3">
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center mx-auto w-[calc(100%-1.5rem)] max-w-[600px] h-[3.2rem]">
-              <span className="material-symbols-outlined absolute left-5 text-gray-400 text-[22px]" style={{ fontVariationSettings: "'wght' 300" }}>search</span>
+        <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-black/[0.06] shadow-2xs select-none">
+          <div className="mx-auto max-w-2xl px-4 py-3 space-y-2.5">
+            {/* Search Input Bar */}
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full">
+              <Search
+                size={18}
+                className="absolute left-4 text-slate-400 pointer-events-none"
+              />
               <input
                 ref={inputRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search NeyborHuud..."
-                className="w-full h-full pl-[52px] pr-12 bg-[#F4F5F6] rounded-full text-[15px] font-medium text-gray-900 outline-none transition-all focus:bg-[#EDEDEE] placeholder:text-gray-500 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                placeholder="Search neighbors, artisans, radar, items..."
+                className="w-full h-11 pl-11 pr-11 bg-slate-100 rounded-full text-[14px] font-medium text-slate-900 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-[#00C830]/40 placeholder:text-slate-400 border border-black/[0.05]"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery('')}
-                  className="absolute right-3 w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-3.5 h-6 w-6 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-xl">cancel</span>
+                  <X size={15} strokeWidth={2.4} />
                 </button>
               )}
             </form>
 
-            {/* Search Tabs when actively searching */}
+            {/* Search Result Tabs */}
             {isSearching && (
-              <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px]">
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-3">
-                  {SEARCH_TABS.map((t) => {
-                    let count = 0;
-                    if (t.id === 'all') count = totalResults;
-                    else if (t.id === 'users') count = results?.users?.total || 0;
-                    else if (t.id === 'locations') count = results?.locations?.total || 0;
-                    else if (t.id === 'posts') {
-                      count = results?.posts?.data?.filter((p: any) => !p.contentType || p.contentType === 'post' || p.contentType === 'gossip').length || 0;
-                    } else {
-                      count = results?.posts?.data?.filter((p: any) => p.contentType === t.id).length || 0;
-                    }
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 pb-1">
+                {SEARCH_TABS.map((t) => {
+                  let count = 0;
+                  if (t.id === 'all') count = totalResults;
+                  else if (t.id === 'users') count = results?.users?.total || 0;
+                  else if (t.id === 'locations') count = results?.locations?.total || 0;
+                  else if (t.id === 'posts') {
+                    count = results?.posts?.data?.filter((p: any) => !p.contentType || p.contentType === 'post').length || 0;
+                  } else {
+                    count = results?.posts?.data?.filter((p: any) => p.contentType === t.id).length || 0;
+                  }
 
-                    const isActive = activeTab === t.id;
-                    return (
-                      <button
-                        key={t.id}
-                        onClick={() => setActiveTab(t.id)}
-                        className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold transition-all ${
-                          isActive ? 'bg-slate-900 text-white shadow-[0_2px_8px_rgba(15,23,42,0.15)]' : 'bg-[#F4F5F6] text-gray-500 hover:bg-[#EDEDEE]'
-                        }`}
-                      >
-                        {t.label} {count > 0 && <span className="opacity-70 font-medium ml-1">({count})</span>}
-                      </button>
-                    );
-                  })}
-                </div>
+                  const isActive = activeTab === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setActiveTab(t.id)}
+                      className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-slate-900 text-white shadow-xs'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {t.label} {count > 0 && <span className="opacity-70 ml-0.5">({count})</span>}
+                    </button>
+                  );
+                })}
               </div>
             )}
-            {/* Dynamic Accent Line */}
-            <div className={`absolute bottom-0 left-0 right-0 h-[2.5px] transition-all duration-300 ${isSearching ? (SEARCH_TAB_ACCENTS[activeTab] ?? 'bg-slate-900') : 'bg-gray-100'}`} />
           </div>
         </div>
       }
     >
-      <div className="flex-1 bg-white pb-24">
+      <div className="flex-1 bg-slate-50 pb-24">
         {isSearching ? (
-          /* ═══ Search Results ═══ */
-          <div className="w-full">
+          /* ═══ Active Search Results ═══ */
+          <div className="mx-auto max-w-2xl px-4 py-4 space-y-4">
             {searchLoading ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
-                <span className="text-sm font-medium text-gray-500">Searching...</span>
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 size={24} className="animate-spin text-[#00C830]" />
+                <span className="text-xs font-bold text-slate-500">Scanning neighborhood records...</span>
               </div>
             ) : searchError ? (
-              <div className="px-4 py-8 text-center">
-                <span className="material-symbols-outlined text-4xl text-brand-red mb-2">error</span>
-                <p className="text-sm font-medium text-brand-red">{searchError}</p>
+              <div className="p-6 text-center rounded-2xl bg-rose-50 text-rose-700 border border-rose-200">
+                <p className="text-xs font-bold">{searchError}</p>
               </div>
             ) : totalResults === 0 ? (
-              <div className="px-4 py-12 text-center">
-                <p className="text-[15px] text-gray-800">Your search - <span className="font-bold">{query}</span> - did not match any documents.</p>
-                <p className="text-[14px] text-gray-500 mt-3">Suggestions:</p>
-                <ul className="text-[14px] text-gray-500 mt-1 list-disc list-inside">
-                  <li>Make sure all words are spelled correctly.</li>
-                  <li>Try different keywords.</li>
-                  <li>Try more general keywords.</li>
-                </ul>
+              <div className="py-16 text-center rounded-2xl bg-white border border-black/[0.06] p-6">
+                <Search size={32} className="mx-auto text-slate-300 mb-2" />
+                <p className="text-sm font-bold text-slate-800">No matching signals found</p>
+                <p className="text-xs text-slate-500 mt-1">Try another keyword or browse the discovery hubs below.</p>
               </div>
             ) : (
-              <div className="flex flex-col">
+              <div className="space-y-4">
                 {/* Users Section */}
                 {(activeTab === 'all' || activeTab === 'users') && results?.users?.data && results.users.data.length > 0 && (
-                  <div className="px-4 py-5 border-b border-gray-100 bg-white">
-                    <h3 className="text-[16px] font-bold text-gray-900 mb-3 ml-1">People</h3>
-                    <div className="space-y-4">
-                      {results.users.data.map((u) => (
-                        <UserSearchResult key={(u as any).id || (u as any)._id} user={u} onClose={() => saveSearchHistory(query)} />
+                  <div className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-2xs">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">Neighbors</h3>
+                    <div className="space-y-3">
+                      {results.users.data.map((u: any) => (
+                        <UserSearchResult key={u.id} user={u} onClose={() => saveSearchHistory(query)} />
                       ))}
                     </div>
                   </div>
@@ -282,10 +358,10 @@ function ExplorePageInner() {
 
                 {/* Locations Section */}
                 {(activeTab === 'all' || activeTab === 'locations') && results?.locations?.data && results.locations.data.length > 0 && (
-                  <div className="px-4 py-5 border-b border-gray-100 bg-white">
-                    <h3 className="text-[16px] font-bold text-gray-900 mb-3 ml-1">Places</h3>
-                    <div className="space-y-4">
-                      {results.locations.data.map((l, i) => (
+                  <div className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-2xs">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">Places</h3>
+                    <div className="space-y-3">
+                      {results.locations.data.map((l: any, i: number) => (
                         <LocationSearchResult key={`${l.city}-${l.state}-${i}`} location={l} onClose={() => saveSearchHistory(query)} />
                       ))}
                     </div>
@@ -294,18 +370,10 @@ function ExplorePageInner() {
 
                 {/* Posts Section */}
                 {(activeTab !== 'users' && activeTab !== 'locations') && results?.posts?.data && results.posts.data.length > 0 && (
-                  <div className="px-4 py-5">
-                    <h3 className="text-[16px] font-bold text-gray-900 mb-4 ml-1">
-                      {activeTab === 'all' ? 'Content & Updates' : SEARCH_TABS.find(t => t.id === activeTab)?.label || 'Content'}
-                    </h3>
-                    <div className="space-y-6">
-                      {results.posts.data
-                        .filter((p: any) => {
-                          if (activeTab === 'all') return true;
-                          if (activeTab === 'posts') return !p.contentType || p.contentType === 'post' || p.contentType === 'gossip';
-                          return p.contentType === activeTab;
-                        })
-                        .map((p) => (
+                  <div className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-2xs">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">Posts & Signals</h3>
+                    <div className="space-y-4">
+                      {results.posts.data.map((p: any) => (
                         <PostSearchResult key={p.id} post={p} onClose={() => saveSearchHistory(query)} />
                       ))}
                     </div>
@@ -315,77 +383,166 @@ function ExplorePageInner() {
             )}
           </div>
         ) : (
-          /* ═══ Explore Dashboard (Clean state) ═══ */
-          <div className="w-full pt-4 space-y-6">
+          /* ═══ BC.Game Hyperlocal Discovery Dashboard ═══ */
+          <div className="mx-auto max-w-2xl px-4 py-5 space-y-6 select-none">
+            {/* Quick Hero Banner: Spatial Sentinel Drawer Triggers */}
+            <div className="rounded-3xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-teal-50/60 to-white p-4 sm:p-5 shadow-xs">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#00C830] text-white shadow-xs">
+                    <Sparkles size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-extrabold text-slate-900">Sentinel Spatial Radar</h2>
+                    <p className="text-[11px] font-medium text-slate-500">Live street conditions & verified density</p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-800">
+                  Active Mesh
+                </span>
+              </div>
 
-            {/* Trending Topics - Google Mobile Style */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsWhoIsInMyHuudOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-800 shadow-2xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Users size={14} className="text-[#00C830]" />
+                  Who is in my Huud?
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsAskSentinelOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#00C830] px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-[#00B52B] active:scale-95 transition-all cursor-pointer"
+                >
+                  <Sparkles size={14} />
+                  Ask Sentinel AI
+                </button>
+              </div>
+            </div>
+
+            {/* ── BC.Game 3-Column / 2-Column Discovery Game Cards Grid ── */}
+            <section>
+              <div className="flex items-center justify-between mb-3 px-1">
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900">Hyperlocal Discovery</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Browse what is happening within your 2km radius</p>
+                </div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">8 Hubs</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {DISCOVERY_HUBS.map((hub) => {
+                  const Icon = hub.icon;
+                  return (
+                    <Link
+                      key={hub.id}
+                      href={hub.href}
+                      className={`group relative flex flex-col justify-between rounded-2xl border ${hub.borderColor} ${hub.bgColor} p-3.5 shadow-2xs hover:shadow-xs active:scale-[0.98] transition-all no-underline text-slate-900`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-2.5">
+                          <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-2xs ${hub.iconColor}`}>
+                            <Icon size={18} strokeWidth={2.4} />
+                          </div>
+                          <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase border ${hub.badgeColor}`}>
+                            {hub.badge}
+                          </span>
+                        </div>
+                        <h4 className="text-[13px] font-extrabold text-slate-900 tracking-tight leading-snug group-hover:text-emerald-700 transition-colors">
+                          {hub.title}
+                        </h4>
+                        <p className="text-[11px] text-slate-600 line-clamp-2 mt-1 leading-snug">
+                          {hub.description}
+                        </p>
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-end text-slate-400 group-hover:text-slate-700 transition-colors">
+                        <ArrowRight size={13} strokeWidth={2.5} />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* ── Trending Local Topics ── */}
             {trendingTopics.length > 0 && (
-              <section className="px-4 border-b border-gray-100 pb-4">
-                <h3 className="text-[16px] font-normal text-gray-800 mb-2 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[20px] text-gray-600" style={{ fontVariationSettings: "'wght' 300" }}>trending_up</span>
-                  Trending searches
-                </h3>
-                <div className="flex flex-col">
+              <section className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-2xs">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <TrendingUp size={16} className="text-[#00C830]" />
+                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Trending in your Huud</h3>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
                   {trendingTopics.map((topic, idx) => (
                     <button
                       key={idx}
-                      onClick={() => handleTrendingClick(topic)}
-                      className="w-full py-3 flex items-center gap-4 bg-transparent hover:bg-gray-50 transition-colors"
+                      onClick={() => {
+                        const clean = topic.startsWith('#') ? topic.slice(1) : topic;
+                        setQuery(clean);
+                        saveSearchHistory(clean);
+                      }}
+                      className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200/80 text-[11px] font-bold text-slate-700 transition-colors active:scale-95 cursor-pointer border border-black/[0.04]"
                     >
-                      <span className="material-symbols-outlined text-[18px] text-gray-400" style={{ fontVariationSettings: "'wght' 300" }}>search</span>
-                      <span className="text-[15px] font-normal text-gray-700">{topic}</span>
+                      {topic}
                     </button>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Recent History - Google Mobile Style */}
-            {searchHistory.length > 0 && (
-              <section className="px-4 pb-4">
-                <div className="flex flex-col">
-                  {searchHistory.map((h, i) => (
-                    <div key={i} className="flex items-center w-full hover:bg-gray-50 transition-colors">
-                      <button
-                        onClick={() => handleHistoryClick(h)}
-                        className="flex-1 py-3 flex items-center gap-4 bg-transparent"
-                      >
-                        <span className="material-symbols-outlined text-[18px] text-gray-400" style={{ fontVariationSettings: "'wght' 300" }}>history</span>
-                        <span className="text-[15px] font-normal text-[#1a0dab]">{h}</span>
-                      </button>
-                    </div>
+            {/* ── Verified Local News Edge Cards ── */}
+            {newsArticles.length > 0 && (
+              <section className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h3 className="text-sm font-extrabold text-slate-900">Verified Local News</h3>
+                  <Link href="/local-news" className="text-xs font-bold text-emerald-700 hover:text-emerald-900">
+                    All News →
+                  </Link>
+                </div>
+
+                <div className="space-y-2.5">
+                  {newsArticles.slice(0, 3).map((article, idx) => (
+                    <a
+                      key={idx}
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3.5 rounded-2xl border border-black/[0.06] bg-white p-3 shadow-2xs hover:shadow-xs active:scale-[0.99] transition-all no-underline text-slate-900"
+                    >
+                      {article.image && (
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                          <Image src={article.image} alt={article.title} fill className="object-cover" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[10px] font-bold uppercase text-emerald-700 tracking-wider">
+                          {article.source}
+                        </span>
+                        <h4 className="text-[13px] font-bold text-slate-900 line-clamp-2 leading-snug mt-0.5">
+                          {article.title}
+                        </h4>
+                      </div>
+                      <ExternalLink size={14} className="text-slate-400 shrink-0" />
+                    </a>
                   ))}
                 </div>
               </section>
             )}
-
-            {/* News Hero - Edge to Edge */}
-            {newsArticles.length > 0 && (
-              <section className="border-t border-gray-100">
-                <div className="px-4 pt-4 pb-2">
-                  <h3 className="text-[18px] font-normal text-gray-800">Discover</h3>
-                </div>
-                <a
-                  href={newsArticles[0].url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block relative w-full h-[320px] overflow-hidden bg-black"
-                >
-                  {newsArticles[0].image && (
-                    <Image src={newsArticles[0].image} alt={newsArticles[0].title} fill sizes="100vw" className="object-cover opacity-80" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 pb-5">
-                    <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium text-white bg-white/20 backdrop-blur-md mb-2">{newsArticles[0].source}</span>
-                    <h3 className="text-[22px] font-normal text-white leading-tight drop-shadow-md">{newsArticles[0].title}</h3>
-                  </div>
-                </a>
-              </section>
-            )}
-
           </div>
         )}
       </div>
+
+      {/* ── Mounted Sentinel Spatial Drawers ── */}
+      <WhoIsInMyHuudDrawer
+        isOpen={isWhoIsInMyHuudOpen}
+        onClose={() => setIsWhoIsInMyHuudOpen(false)}
+      />
+      <AskMyHuudDrawer
+        isOpen={isAskSentinelOpen}
+        onClose={() => setIsAskSentinelOpen(false)}
+      />
     </AppBrowseLayout>
   );
 }

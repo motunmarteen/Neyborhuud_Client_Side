@@ -2,47 +2,138 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  CheckCircle2,
+  ArrowRight,
+  HelpCircle,
+  Share2,
+  Trophy,
+  Sparkles,
+  Palette,
+  GraduationCap,
+  Briefcase,
+  Layers,
+  AlertTriangle,
+  Zap,
+} from "lucide-react";
 import { Event } from "@/types/api";
 import { prefetchEventDetail } from "@/hooks/useEvents";
 import { formatNaira } from "@/lib/currency";
 
-const TYPE_COLORS: Record<Event["type"], string> = {
-  community: "bg-brand-blue/20 text-brand-blue",
-  social: "bg-brand-blue/20 text-pink-400",
-  sports: "bg-brand-red/20 text-brand-red",
-  cultural: "bg-brand-blue/20 text-brand-blue",
-  educational: "bg-brand-green-dark/20 text-brand-green-dark",
-  business: "bg-primary/20 text-primary",
-  other: "bg-brand-surface/20 text-[var(--neu-text-muted)]",
+interface EventTypeConfig {
+  label: string;
+  badgeBg: string;
+  badgeText: string;
+  borderColor: string;
+  icon: React.ComponentType<{ className?: string; size?: number; strokeWidth?: number }>;
+  gradient: string;
+}
+
+const TYPE_CONFIG: Record<Event["type"], EventTypeConfig> = {
+  community: {
+    label: "Community",
+    badgeBg: "bg-emerald-50 dark:bg-emerald-950/40",
+    badgeText: "text-emerald-700 dark:text-emerald-400",
+    borderColor: "border-emerald-200/80 dark:border-emerald-800/40",
+    icon: Users,
+    gradient: "from-emerald-500/15 via-teal-500/10 to-transparent",
+  },
+  social: {
+    label: "Social",
+    badgeBg: "bg-pink-50 dark:bg-pink-950/40",
+    badgeText: "text-pink-700 dark:text-pink-400",
+    borderColor: "border-pink-200/80 dark:border-pink-800/40",
+    icon: Sparkles,
+    gradient: "from-pink-500/15 via-purple-500/10 to-transparent",
+  },
+  sports: {
+    label: "Sports",
+    badgeBg: "bg-blue-50 dark:bg-blue-950/40",
+    badgeText: "text-blue-700 dark:text-blue-400",
+    borderColor: "border-blue-200/80 dark:border-blue-800/40",
+    icon: Trophy,
+    gradient: "from-blue-500/15 via-cyan-500/10 to-transparent",
+  },
+  cultural: {
+    label: "Cultural",
+    badgeBg: "bg-purple-50 dark:bg-purple-950/40",
+    badgeText: "text-purple-700 dark:text-purple-400",
+    borderColor: "border-purple-200/80 dark:border-purple-800/40",
+    icon: Palette,
+    gradient: "from-purple-500/15 via-amber-500/10 to-transparent",
+  },
+  educational: {
+    label: "Educational",
+    badgeBg: "bg-teal-50 dark:bg-teal-950/40",
+    badgeText: "text-teal-700 dark:text-teal-400",
+    borderColor: "border-teal-200/80 dark:border-teal-800/40",
+    icon: GraduationCap,
+    gradient: "from-teal-500/15 via-emerald-500/10 to-transparent",
+  },
+  business: {
+    label: "Business",
+    badgeBg: "bg-amber-50 dark:bg-amber-950/40",
+    badgeText: "text-amber-700 dark:text-amber-400",
+    borderColor: "border-amber-200/80 dark:border-amber-800/40",
+    icon: Briefcase,
+    gradient: "from-amber-500/15 via-orange-500/10 to-transparent",
+  },
+  other: {
+    label: "General",
+    badgeBg: "bg-slate-50 dark:bg-slate-800/50",
+    badgeText: "text-slate-700 dark:text-slate-300",
+    borderColor: "border-slate-200 dark:border-slate-700",
+    icon: Layers,
+    gradient: "from-slate-500/15 via-slate-600/10 to-transparent",
+  },
 };
 
 function formatEventDate(d: string) {
-  return new Date(d).toLocaleDateString("en-NG", {
-    weekday: "short",
-    day: "numeric",
-    month: "long",
-  });
+  try {
+    return new Date(d).toLocaleDateString("en-NG", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    });
+  } catch {
+    return "TBD";
+  }
 }
 
 function formatTime(d: string) {
-  return new Date(d).toLocaleTimeString("en-NG", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  try {
+    return new Date(d).toLocaleTimeString("en-NG", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
 }
 
 interface Props {
   event: Event;
   onAttend: (eventId: string) => void;
   attendPending?: boolean;
-  /** Immersive 90vh card (events index) vs shorter card for mixed main feed */
+  /** Immersive full card vs compact feed card */
   variant?: "immersive" | "feed";
 }
 
-export default function EventCard({ event, onAttend, attendPending, variant = "immersive" }: Props) {
+export default function EventCard({
+  event,
+  onAttend,
+  attendPending,
+  variant = "immersive",
+}: Props) {
   const queryClient = useQueryClient();
+  const [showEli5, setShowEli5] = useState(false);
+
   const isCancelled = event.status === "cancelled";
   const isCompleted = event.status === "completed";
   const attendeeCount = event.attendeesCount ?? event.attendees;
@@ -53,155 +144,196 @@ export default function EventCard({ event, onAttend, attendPending, variant = "i
     if (eventId) void prefetchEventDetail(queryClient, String(eventId));
   }, [eventId, queryClient]);
 
-  const moodGlow = event.type === "sports"
-    ? "radial-gradient(circle at 20% 22%, rgba(56,189,248,0.25), transparent 36%), radial-gradient(circle at 82% 82%, rgba(14,165,233,0.20), transparent 40%)"
-    : event.type === "social"
-      ? "radial-gradient(circle at 20% 22%, rgba(236,72,153,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(168,85,247,0.20), transparent 40%)"
-      : event.type === "cultural"
-        ? "radial-gradient(circle at 20% 22%, rgba(245,158,11,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(217,70,239,0.20), transparent 40%)"
-        : "radial-gradient(circle at 20% 22%, rgba(0,212,49,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(59,130,246,0.20), transparent 40%)";
-
-  const isFeedVariant = variant === "feed";
+  const typeConfig = TYPE_CONFIG[event.type] || TYPE_CONFIG.other;
+  const TypeIcon = typeConfig.icon;
 
   return (
     <article
-      className={`feed-post-card group relative mx-auto w-full overflow-hidden rounded-none border-y border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.50)] ${
-        isCancelled ? "ring-2 ring-brand-red/40" : ""
-      } ${isFeedVariant ? "min-h-[260px] h-[min(52vh,420px)] max-h-[420px] sm:max-h-[440px]" : ""}`}
-      style={isFeedVariant ? undefined : { height: "90vh", minHeight: "90vh" }}
+      className={`group relative mx-auto w-full overflow-hidden rounded-3xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-[#12161A] shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex flex-col ${
+        isCancelled ? "ring-2 ring-rose-500/50" : ""
+      }`}
     >
-      {event.coverImage ? (
-        <div className="absolute inset-0">
-          <Image src={event.coverImage} alt={event.title} fill sizes="(max-width: 480px) 100vw, 480px" className="object-cover" />
+      {/* ── Top Media Banner ── */}
+      <div className="relative w-full h-48 sm:h-56 bg-slate-900 overflow-hidden">
+        {event.coverImage ? (
+          <>
+            <Image
+              src={event.coverImage}
+              alt={event.title}
+              fill
+              sizes="(max-width: 640px) 100vw, 640px"
+              className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/40" />
+          </>
+        ) : (
           <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.10) 28%, rgba(0,0,0,0.12) 52%, rgba(0,0,0,0.92) 100%)",
-            }}
-          />
-          <div aria-hidden className="absolute inset-0 opacity-75" style={{ background: moodGlow }} />
+            className={`absolute inset-0 bg-gradient-to-br ${typeConfig.gradient} bg-slate-900 flex items-center justify-center`}
+          >
+            <div className="h-24 w-24 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center">
+              <TypeIcon size={40} className="text-white/60" />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+          </div>
+        )}
+
+        {/* Top Badges Floating Bar */}
+        <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2 z-10">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Category Pill */}
+            <span
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border backdrop-blur-md shadow-sm ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.borderColor}`}
+            >
+              <TypeIcon size={12} strokeWidth={2.5} />
+              <span>{typeConfig.label}</span>
+            </span>
+
+            {/* Price Pill */}
+            {event.isFree ? (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500 text-white shadow-sm shadow-emerald-500/20">
+                Free
+              </span>
+            ) : event.ticketPrice != null ? (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-emerald-600 text-white shadow-sm">
+                {formatNaira(event.ticketPrice)}
+              </span>
+            ) : null}
+
+            {/* Boosted Chip */}
+            {(event as any).isBoosted && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-900 shadow-sm uppercase tracking-wider">
+                <Zap size={10} className="fill-current" /> Boosted
+              </span>
+            )}
+
+            {/* Cancelled Chip */}
+            {isCancelled && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
+                <AlertTriangle size={12} /> Cancelled
+              </span>
+            )}
+          </div>
+
+          {/* ELI5 Info Button */}
+          <button
+            type="button"
+            onClick={() => setShowEli5(!showEli5)}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/20 text-white transition-transform active:scale-90"
+            title="Explain Like I'm 5"
+            aria-label="Explain this event"
+          >
+            <HelpCircle size={15} />
+          </button>
         </div>
-      ) : (
-        <div className="absolute inset-0 bg-[#050911]">
-          <div aria-hidden className="absolute inset-0" style={{ background: moodGlow }} />
-          <div
-            aria-hidden
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse at 50% 38%, transparent 26%, rgba(0,0,0,0.62) 100%), linear-gradient(180deg, rgba(0,0,0,0.60), transparent 30%, rgba(0,0,0,0.86))",
-            }}
-          />
+
+        {/* Floating Date Badge on Cover Bottom */}
+        <div className="absolute bottom-3 left-4 right-4 z-10 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-white/90 text-xs font-bold bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
+            <Calendar size={13} className="text-[#00C830]" />
+            <span>{formatEventDate(startDate)}</span>
+            <span className="text-white/40">·</span>
+            <Clock size={13} className="text-white/70" />
+            <span>{formatTime(startDate)}</span>
+          </div>
+
+          {typeof attendeeCount === "number" && (
+            <div className="flex items-center gap-1.5 text-white/90 text-xs font-bold bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
+              <Users size={13} className="text-[#00C830]" />
+              <span>
+                {attendeeCount}
+                {event.capacity ? `/${event.capacity}` : ""} going
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── ELI5 Explanation Banner (Collapsible) ── */}
+      {showEli5 && (
+        <div className="bg-emerald-50 dark:bg-emerald-950/40 border-b border-emerald-100 dark:border-emerald-900/50 p-3.5 flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
+          <HelpCircle size={16} className="text-[#00C830] shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-bold">What is this? </span>
+            This is an organized neighborhood event. Tapping{" "}
+            <strong>"Attend"</strong> informs the host you are coming so they
+            can reserve seating, refreshments, or materials for you.
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowEli5(false)}
+            className="text-xs font-bold text-emerald-700 hover:underline shrink-0"
+          >
+            Got it
+          </button>
         </div>
       )}
 
-      <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 px-4 pt-4 pb-16 bg-gradient-to-b from-black/60 via-black/18 to-transparent">
-        <div className="pointer-events-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className={`text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider ${TYPE_COLORS[event.type]}`}>
-              {event.type}
-            </span>
-            {event.isFree ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-primary font-bold">Free</span>
-            ) : event.ticketPrice != null ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/25 text-white/90 font-bold">{formatNaira(event.ticketPrice)}</span>
-            ) : null}
-            {(event as any).isBoosted && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/90 text-black font-black uppercase tracking-wide">Boosted</span>
-            )}
-            {isCancelled && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-danger/25 text-status-danger font-bold uppercase tracking-wide">Cancelled</span>
-            )}
-          </div>
-          <button
-            className="flex h-9 w-9 items-center justify-center rounded-full text-white/75 transition-all hover:scale-105 hover:text-white active:scale-95"
-            style={{
-              background: "rgba(255,255,255,0.11)",
-              backdropFilter: "blur(16px) saturate(170%)",
-              border: "1px solid rgba(255,255,255,0.16)",
-            }}
-            aria-label="Event options"
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[19px]">more_horiz</span>
-          </button>
-        </div>
-      </div>
-
-      <div
-        className={`absolute right-3 z-30 flex flex-col items-center gap-3 sm:right-4 ${isFeedVariant ? "bottom-4 sm:bottom-5" : "bottom-5 sm:bottom-6"}`}
-      >
-        <Link
-          href={`/events/${eventId}`}
-          onMouseEnter={prefetchDetail}
-          onFocus={prefetchDetail}
-          className="group flex flex-col items-center gap-1 rounded-full p-1 transition-transform duration-200 ease-out hover:scale-110 active:scale-90"
-          aria-label="Open event"
-        >
-          <span className="material-symbols-outlined text-[22px] text-white" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.85))" }}>
-            open_in_new
-          </span>
-        </Link>
-        {!isCancelled && !isCompleted && (
-          <button
-            onClick={() => onAttend(eventId)}
-            disabled={attendPending}
-            className={`rounded-full px-3.5 py-1.5 text-xs font-bold border backdrop-blur-md transition-all disabled:opacity-50 ${
-              event.isAttending
-                ? "bg-primary/30 border-brand-green-dark/40 text-status-success"
-                : "bg-white/10 border-white/20 text-white/85 hover:bg-white/15"
-            }`}
-          >
-            {event.isAttending ? "Going" : "Attend"}
-          </button>
-        )}
-        {typeof attendeeCount === "number" && (
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="material-symbols-outlined text-[18px] text-white/35">group</span>
-            <span className="text-[10px] font-medium text-white/60">
-              {attendeeCount}
-              {event.capacity ? `/${event.capacity}` : ""}
-            </span>
-          </div>
-        )}
-      </div>
-
-      <div
-        className={`absolute left-4 right-[76px] z-20 sm:left-5 sm:right-24 ${isFeedVariant ? "bottom-4 sm:bottom-5" : "bottom-5 sm:bottom-6"}`}
-      >
-        <div className={`flex max-w-[560px] flex-col ${isFeedVariant ? "gap-2" : "gap-3"}`}>
+      {/* ── Card Body & Details ── */}
+      <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between gap-4">
+        <div className="space-y-2">
           <Link
             href={`/events/${eventId}`}
             onMouseEnter={prefetchDetail}
             onFocus={prefetchDetail}
-            className={`leading-tight font-black text-white hover:underline ${isFeedVariant ? "text-[17px] sm:text-lg" : "text-[22px]"}`}
-            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.92)" }}
+            className="block text-slate-900 dark:text-white font-black text-lg sm:text-xl leading-snug line-clamp-2 hover:text-[#00C830] dark:hover:text-[#00C830] transition-colors"
           >
             {event.title}
           </Link>
-          <div
-            className={`flex flex-wrap items-center gap-2 rounded-2xl ${isFeedVariant ? "p-2.5" : "p-3"}`}
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              backdropFilter: "blur(12px)",
-            }}
+
+          {/* Venue Location Chip */}
+          {event.venue && (
+            <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 text-xs font-semibold">
+              <MapPin size={14} className="text-rose-500 shrink-0" />
+              <span className="truncate">{event.venue}</span>
+            </div>
+          )}
+
+          {event.description && (
+            <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed line-clamp-2">
+              {event.description}
+            </p>
+          )}
+        </div>
+
+        {/* ── BC.Game Tactile Action Footer ── */}
+        <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between gap-3">
+          {/* Details Link */}
+          <Link
+            href={`/events/${eventId}`}
+            onMouseEnter={prefetchDetail}
+            onFocus={prefetchDetail}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00C830] transition-colors px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.05]"
           >
-            <span className="text-[12px] font-bold text-white/95">
-              {formatEventDate(startDate)} · {formatTime(startDate)}
-            </span>
-            {event.venue && <span className="text-[11px] text-white/75">📍 {event.venue}</span>}
-            {typeof attendeeCount === "number" && (
-              <span className="text-[11px] text-white/75">
-                👥 {attendeeCount}
-                {event.capacity ? `/${event.capacity}` : ""} going
-              </span>
-            )}
-          </div>
+            <span>View Details</span>
+            <ArrowRight size={14} />
+          </Link>
+
+          {/* RSVP Tactile Button */}
+          {!isCancelled && !isCompleted && (
+            <button
+              type="button"
+              onClick={() => onAttend(eventId)}
+              disabled={attendPending}
+              className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all active:scale-95 disabled:opacity-50 ${
+                event.isAttending
+                  ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200"
+                  : "bg-[#00C830] hover:bg-[#00B52B] text-white shadow-md shadow-[#00C830]/20 font-black"
+              }`}
+            >
+              {event.isAttending ? (
+                <>
+                  <CheckCircle2 size={14} className="text-[#00C830]" />
+                  <span>Going</span>
+                </>
+              ) : (
+                <>
+                  <span>Attend</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </article>
   );
 }
-

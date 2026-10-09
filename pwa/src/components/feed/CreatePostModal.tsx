@@ -15,6 +15,19 @@ import { useAwardCoins } from '@/hooks/useGamification';
 import { useAuth } from '@/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toKobo } from '@/lib/currency';
+import {
+  ChevronDown,
+  Check,
+  Globe,
+  CheckCircle2,
+  X,
+  ArrowRight,
+  ArrowLeft,
+  MapPin,
+  ImageIcon,
+  Video,
+  Send,
+} from 'lucide-react';
 
 interface CreatePostModalProps {
     isOpen: boolean;
@@ -128,18 +141,15 @@ function PostFormSelect({ value, onChange, options, disabled }: PostFormSelectPr
                 <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {selected?.label ?? ''}
                 </span>
-                <span
-                    className="material-symbols-outlined"
+                <ChevronDown
+                    size={18}
                     style={{
-                        fontSize: '1.15rem',
                         flexShrink: 0,
                         color: open ? 'rgba(0,140,30,0.8)' : 'rgba(0,0,0,0.35)',
                         transform: open ? 'rotate(180deg)' : 'none',
                         transition: 'transform 200ms ease, color 160ms ease',
                     }}
-                >
-                    expand_more
-                </span>
+                />
             </button>
 
             {mounted && open && createPortal(
@@ -188,7 +198,7 @@ function PostFormSelect({ value, onChange, options, disabled }: PostFormSelectPr
                                 onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                             >
                                 {isSelected && (
-                                    <span className="material-symbols-outlined" style={{ fontSize: '0.9rem', color: 'rgb(0,140,28)', flexShrink: 0 }}>check</span>
+                                    <Check size={14} style={{ color: 'rgb(0,140,28)', flexShrink: 0 }} />
                                 )}
                                 <span style={{ flex: 1 }}>{opt.label}</span>
                             </button>
@@ -345,7 +355,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                 <div className="bg-white dark:bg-[#121b14] rounded-t-[32px] w-full max-w-md p-8 flex flex-col items-center text-center shadow-2xl">
                     <div className="w-12 h-1 bg-black/10 dark:bg-white/20 rounded-full mx-auto mb-6 shrink-0" />
                     <div className="w-16 h-16 rounded-full bg-brand-red/10 flex items-center justify-center mb-4">
-                        <span className="material-symbols-outlined text-4xl text-brand-red">public_off</span>
+                        <Globe className="w-8 h-8 text-brand-red" />
                     </div>
                     <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--neu-text)' }}>
                         {t('createPost.nigeriaOnly')}
@@ -693,28 +703,20 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                     animate={{ y: 0 }}
                     exit={{ y: '100%' }}
                     transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-                    className="relative z-10 w-full max-w-[580px] flex flex-col max-h-[92vh] overflow-hidden rounded-t-[36px]"
-                    style={{
-                        background: 'rgba(248, 251, 248, 0.99)',
-                        backdropFilter: 'blur(50px) saturate(2)',
-                        WebkitBackdropFilter: 'blur(50px) saturate(2)',
-                        boxShadow: '0 -12px 80px rgba(0,0,0,0.20), 0 -3px 20px rgba(0,0,0,0.08)',
-                        borderTop: '1px solid rgba(255,255,255,0.95)',
-                    }}
+                    className="relative z-10 w-full max-w-[560px] flex flex-col max-h-[92vh] overflow-hidden rounded-t-[28px] sm:rounded-2xl bg-white border border-black/[0.08] shadow-2xl"
                 >
-                    {/* Premium gradient handle pill */}
+                    {/* Handle pill */}
                     <div
-                        className="mx-auto mt-3.5 mb-1 shrink-0 w-16 h-[5px] rounded-full"
-                        style={{ background: 'linear-gradient(90deg, rgba(0,212,49,0.15), rgba(0,196,49,0.55) 50%, rgba(0,212,49,0.15))' }}
+                        className="mx-auto mt-3 mb-1 shrink-0 w-12 h-1 rounded-full bg-black/15"
                     />
 
                     {showSuccess ? (
                         <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                                <span className="material-symbols-outlined text-4xl text-primary">check_circle</span>
+                            <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center mb-3">
+                                <CheckCircle2 className="w-8 h-8 text-[#008A20]" />
                             </div>
-                            <h3 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>{t('createPost.postShared')}</h3>
-                            <p className="text-sm mt-1" style={{ color: 'var(--neu-text-muted)' }}>{t('createPost.willAppear')}</p>
+                            <h3 className="text-base font-black text-[#111827]">{t('createPost.postShared')}</h3>
+                            <p className="text-xs text-[#6B7280] mt-1 font-medium">{t('createPost.willAppear')}</p>
                         </div>
                     ) : (
                         <>
@@ -722,92 +724,45 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                             {formStep === 'type_select' && (
                                 <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
                                     {/* Header */}
-                                    <div className="px-5 pt-3 pb-4">
+                                    <div className="px-5 pt-3 pb-3">
                                         <div className="flex items-start justify-between gap-3">
                                             <div>
-                                                <h2 className="text-[22px] font-black tracking-tight leading-tight" style={{ color: 'var(--neu-text)' }}>
-                                                    What's on your<br />mind today?
-                                                </h2>
-                                                <p className="text-[11px] font-semibold text-[var(--neu-text-muted)] mt-1.5 tracking-widest uppercase">
-                                                    Choose how to share
+                                                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
+                                                    Create post
                                                 </p>
+                                                <h2 className="text-base font-black tracking-tight text-[#111827] mt-0.5">
+                                                    What's on your mind today?
+                                                </h2>
                                             </div>
                                             <button
                                                 onClick={handleClose}
-                                                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/[0.07] transition-all cursor-pointer shrink-0 mt-0.5"
-                                                style={{ background: 'rgba(0,0,0,0.05)', color: 'var(--neu-text-muted)' }}
+                                                className="w-8 h-8 rounded-xl flex items-center justify-center bg-black/[0.04] hover:bg-black/[0.08] text-[#6B7280] hover:text-[#111827] transition-all cursor-pointer shrink-0 mt-0.5"
                                             >
-                                                <span className="material-symbols-outlined text-[20px]">close</span>
+                                                <X size={18} />
                                             </button>
                                         </div>
                                     </div>
 
                                     {/* Premium 2-column card grid */}
-                                    <div className="px-4 pb-7 grid grid-cols-2 gap-3">
+                                    <div className="px-4 pb-6 grid grid-cols-2 gap-2.5">
                                         {POST_TYPES.map((pt) => {
-                                            let iconGradient = 'linear-gradient(145deg, #e8f0ff 0%, #c8d8ff 100%)';
-                                            let cardBg = 'rgba(26,86,255,0.04)';
-                                            let cardBorder = 'rgba(26,86,255,0.1)';
-                                            let arrowColor = '#1A56FF';
-                                            if (pt.value === 'fyi') {
-                                                iconGradient = 'linear-gradient(145deg, #eef2f8 0%, #ccd8ec 100%)';
-                                                cardBg = 'rgba(58,106,154,0.04)'; cardBorder = 'rgba(58,106,154,0.1)'; arrowColor = '#3a6a9a';
-                                            }
-                                            if (pt.value === 'help_request') {
-                                                iconGradient = 'linear-gradient(145deg, #fff2f2 0%, #ffd0d0 100%)';
-                                                cardBg = 'rgba(220,38,38,0.04)'; cardBorder = 'rgba(220,38,38,0.12)'; arrowColor = '#dc2626';
-                                            }
-                                            if (pt.value === 'marketplace') {
-                                                iconGradient = 'linear-gradient(145deg, #e8fff2 0%, #c0ffd8 100%)';
-                                                cardBg = 'rgba(0,180,60,0.04)'; cardBorder = 'rgba(0,180,60,0.12)'; arrowColor = '#00a040';
-                                            }
-                                            if (pt.value === 'event') {
-                                                iconGradient = 'linear-gradient(145deg, #e8f5ff 0%, #bce4ff 100%)';
-                                                cardBg = 'rgba(0,119,204,0.04)'; cardBorder = 'rgba(0,119,204,0.1)'; arrowColor = '#0077cc';
-                                            }
-                                            if (pt.value === 'job') {
-                                                iconGradient = 'linear-gradient(145deg, #f4eeff 0%, #e0c8ff 100%)';
-                                                cardBg = 'rgba(124,58,237,0.04)'; cardBorder = 'rgba(124,58,237,0.1)'; arrowColor = '#7c3aed';
-                                            }
-                                            if (pt.value === 'emergency') {
-                                                iconGradient = 'linear-gradient(145deg, #fff0f0 0%, #ffc4c4 100%)';
-                                                cardBg = 'rgba(220,0,0,0.04)'; cardBorder = 'rgba(220,0,0,0.1)'; arrowColor = '#dc0000';
-                                            }
-                                            if (pt.value === 'alert') {
-                                                iconGradient = 'linear-gradient(145deg, #fffbea 0%, #ffe57a 100%)';
-                                                cardBg = 'rgba(217,119,6,0.04)'; cardBorder = 'rgba(217,119,6,0.12)'; arrowColor = '#d97706';
-                                            }
-
                                             return (
                                                 <button
                                                     key={pt.value}
                                                     type="button"
                                                     onClick={() => handleSelectPostType(pt.value)}
-                                                    className="group relative flex flex-col items-start gap-3 p-4 rounded-[24px] cursor-pointer transition-all duration-200 hover:scale-[1.025] active:scale-[0.975] text-left"
-                                                    style={{
-                                                        background: cardBg,
-                                                        border: `1.5px solid ${cardBorder}`,
-                                                        boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-                                                    }}
+                                                    className="group relative flex flex-col items-start gap-2.5 p-3.5 rounded-2xl cursor-pointer transition-all duration-150 hover:border-black/[0.14] active:scale-[0.98] text-left bg-white border border-black/[0.08] shadow-xs"
                                                 >
-                                                    {/* Icon container with gradient bg */}
+                                                    {/* Icon container */}
                                                     <div
-                                                        className="w-14 h-14 rounded-[18px] flex items-center justify-center text-2xl transition-transform duration-200 group-hover:scale-110 group-active:scale-95 shadow-sm"
-                                                        style={{ background: iconGradient }}
+                                                        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg bg-emerald-50 border border-emerald-200/50"
                                                     >
                                                         {pt.icon}
                                                     </div>
                                                     {/* Label & description */}
                                                     <div className="flex-1 min-w-0">
-                                                        <h4 className="text-[13px] font-black tracking-tight leading-tight" style={{ color: 'var(--neu-text)' }}>{pt.label}</h4>
-                                                        <p className="text-[10.5px] text-[var(--neu-text-muted)] mt-1 leading-snug font-medium">{pt.desc}</p>
-                                                    </div>
-                                                    {/* Hover arrow chip */}
-                                                    <div
-                                                        className="absolute bottom-3 right-3 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 scale-50 group-hover:scale-100"
-                                                        style={{ background: cardBorder }}
-                                                    >
-                                                        <span className="material-symbols-outlined text-[13px]" style={{ color: arrowColor }}>arrow_forward</span>
+                                                        <h4 className="text-xs font-black text-[#111827] tracking-tight">{pt.label}</h4>
+                                                        <p className="text-[11px] text-[#6B7280] mt-0.5 leading-snug font-medium line-clamp-2">{pt.desc}</p>
                                                     </div>
                                                 </button>
                                             );
@@ -832,7 +787,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/[0.07] transition-all cursor-pointer shrink-0"
                                                     style={{ background: 'rgba(0,0,0,0.05)', color: 'var(--neu-text-muted)' }}
                                                 >
-                                                    <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+                                                    <ArrowLeft size={18} />
                                                 </button>
                                             )}
                                             <div className="flex flex-col">
@@ -864,7 +819,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/[0.07] transition-all cursor-pointer shrink-0"
                                             style={{ background: 'rgba(0,0,0,0.05)', color: 'var(--neu-text-muted)' }}
                                         >
-                                            <span className="material-symbols-outlined text-[20px]">close</span>
+                                            <X size={18} />
                                         </button>
                                     </div>
 
@@ -882,7 +837,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     {user.avatarUrl ? (
                                                         <Image src={user.avatarUrl} alt="Avatar" fill sizes="44px" className="object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-sm font-black" style={{ background: 'linear-gradient(135deg, #00c431, #009924)', color: 'white' }}>
+                                                        <div className="w-full h-full flex items-center justify-center text-sm font-black" style={{ background: '#00D431', color: '#0B0E11' }}>
                                                             {user.username.slice(0,2).toUpperCase()}
                                                         </div>
                                                     )}
@@ -895,7 +850,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         className="text-[10px] font-semibold mt-0.5 px-2 py-0.5 rounded-full inline-flex items-center gap-1 w-fit"
                                                         style={{ background: 'rgba(0,196,49,0.08)', color: 'rgba(0,150,36,0.9)' }}
                                                     >
-                                                        <span className="material-symbols-outlined text-[11px]">location_on</span>
+                                                        <MapPin size={11} />
                                                         {userLga || 'General Area'}
                                                     </span>
                                                 </div>
@@ -961,7 +916,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             disabled={isSubmitting}
                                                             className="absolute top-2 right-2 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80 disabled:opacity-50"
                                                         >
-                                                            <span className="material-symbols-outlined text-sm">close</span>
+                                                            <X size={14} />
                                                         </button>
                                                     </div>
                                                 ))}
@@ -1721,7 +1676,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 className="flex items-center justify-center w-9.5 h-9.5 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 transition-all text-primary disabled:opacity-50 cursor-pointer"
                                                 title="Add Photo"
                                             >
-                                                <span className="material-symbols-outlined text-[19px]">image</span>
+                                                <ImageIcon size={19} />
                                             </button>
                                             <button
                                                 type="button"
@@ -1730,7 +1685,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 className="flex items-center justify-center w-9.5 h-9.5 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 transition-all text-primary disabled:opacity-50 cursor-pointer"
                                                 title="Add Video"
                                             >
-                                                <span className="material-symbols-outlined text-[19px]">videocam</span>
+                                                <Video size={19} />
                                             </button>
                                         </div>
                                         <input
@@ -1747,7 +1702,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         <button
                                             type="submit"
                                             disabled={isSubmitting || (!content.trim() && selectedFiles.length === 0)}
-                                            className="px-6 py-3 rounded-xl disabled:opacity-40 flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg text-xs font-black bg-gradient-to-r from-primary to-[#00b33b] hover:from-primary/95 hover:to-[#00a034] text-black active:scale-[0.97] transition-all"
+                                            className="px-6 py-3 rounded-xl disabled:opacity-40 flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg text-xs font-black bg-[#00D431] hover:bg-[#00F53B] text-black active:scale-[0.97] transition-all"
                                         >
                                             {isSubmitting ? (
                                                 <>
@@ -1756,7 +1711,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 </>
                                             ) : (
                                                 <>
-                                                    <span className="material-symbols-outlined text-[16px]">send</span>
+                                                    <Send size={16} />
                                                     <span>Share Update</span>
                                                 </>
                                             )}

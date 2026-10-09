@@ -162,7 +162,7 @@ function MakeOfferDialog({
             type="button"
             onClick={() => void onSubmit()}
             disabled={isSubmitting || !offerAmount.trim()}
-            className="min-h-[48px] w-full shrink-0 rounded-full bg-gradient-to-r from-primary to-[#006F35] px-4 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,212,49,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none dark:from-emerald-500 dark:to-teal-600 sm:min-w-0 sm:flex-1"
+            className="min-h-[48px] w-full shrink-0 rounded-full bg-[#00D431] hover:bg-[#00F53B] px-4 text-sm font-extrabold text-black shadow-[0_8px_24px_rgba(0,212,49,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-0 sm:flex-1"
           >
             {isSubmitting ? "Sending…" : "Send offer"}
           </button>
@@ -416,7 +416,7 @@ export function BuyerIntentActions({
               void handleBuyNow();
             }}
             disabled={busy}
-            className="relative flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full bg-gradient-to-r from-primary to-[#006F35] px-3 py-2.5 text-xs font-bold tracking-tight text-white shadow-[0_4px_18px_rgba(0,212,49,0.28)] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px]"
+            className="relative flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full bg-[#00D431] hover:bg-[#00F53B] px-3 py-2.5 text-xs font-black tracking-tight text-black shadow-[0_4px_18px_rgba(0,212,49,0.28)] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px]"
           >
             {createOrder.isPending ? (
               <span className="material-symbols-outlined animate-spin shrink-0 text-[18px]">progress_activity</span>

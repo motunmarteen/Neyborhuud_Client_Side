@@ -318,6 +318,31 @@ export default function ProfilePage() {
   // Trust activity log for this user's profile (public view)
   const { data: trustProfileData } = useUserTrustProfile(profileId, { enabled: !!profileId });
 
+  const handleVouchClick = () => {
+    if (vouchStatus?.hasVouched) {
+      revokeMutation.mutate();
+      return;
+    }
+    if (vouchStatus?.canVouch === false) {
+      toast.error('You need Tree 🌳 tier (300+ NeyburH Score) to vouch for others', {
+        description: 'Keep contributing, completing jobs, and getting verified to level up.',
+      });
+      return;
+    }
+    if (vouchStatus?.locationRequired) {
+      toast.error('Verified address required to vouch', {
+        description: 'Both you and this NeyborH need a verified home address. Verify yours in Settings → Location.',
+      });
+      return;
+    }
+    if (vouchStatus?.withinRange === false) {
+      toast.error('You live too far apart — vouching requires homes within 500m', {
+        description: 'NeyborHuud is hyperlocal. You can only vouch for genuine neighbours nearby.',
+      });
+      return;
+    }
+    vouchMutation.mutate();
+  };
 
   const [startingChat, setStartingChat] = useState(false);
   const [showTipModal, setShowTipModal] = useState(false);
@@ -712,6 +737,8 @@ export default function ProfilePage() {
             messaging={startingChat}
             onChangePhoto={isOwnProfile ? handleAvatarClick : undefined}
             identityVerified={profileCommunityVerified}
+            isBuildingVerified={Boolean((profile as any).isBuildingVerified)}
+            maskedPostcode={(profile as any).maskedPostcode}
             verificationInProgress={['bronze', 'silver'].includes(verificationProgress.tier)}
             verificationTierLabel={
               verificationProgress.tier !== 'none'
@@ -720,6 +747,8 @@ export default function ProfilePage() {
             }
             vouchReceived={vouchMetrics?.received ?? vouchStatus?.vouchCount ?? 0}
             vouchGiven={isOwnProfile ? (vouchMetrics?.given ?? 0) : 0}
+            onVouch={!isOwnProfile ? handleVouchClick : undefined}
+            hasVouched={Boolean(vouchStatus?.hasVouched)}
           />
 
           {!isOwnProfile && (
@@ -854,17 +883,17 @@ export default function ProfilePage() {
                     vouchStatus?.locationRequired ? (
                       <span className="inline-flex items-center gap-0.5 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[9px] font-bold text-gray-400">
                         <span className="material-symbols-outlined text-[11px]">location_off</span>
-                        Location needed
+                        Verified address needed
                       </span>
                     ) : vouchStatus?.withinRange === true ? (
                       <span className="inline-flex items-center gap-0.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600">
                         <span className="material-symbols-outlined text-[11px]">my_location</span>
-                        {vouchStatus.distanceMeters}m away ✓
+                        {vouchStatus.distanceMeters != null ? `~${vouchStatus.distanceMeters}m away ✓` : 'Nearby ✓'}
                       </span>
                     ) : vouchStatus?.withinRange === false ? (
                       <span className="inline-flex items-center gap-0.5 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[9px] font-bold text-red-600">
                         <span className="material-symbols-outlined text-[11px]">location_off</span>
-                        {vouchStatus.distanceMeters != null ? `${vouchStatus.distanceMeters}m away` : 'Too far'} — 500m limit
+                        Too far — 500m limit
                       </span>
                     ) : null
                   )}
@@ -880,9 +909,9 @@ export default function ProfilePage() {
                     : vouchStatus?.canVouch === false
                       ? 'Reach Tree 🌳 tier to unlock vouching.'
                       : vouchStatus?.locationRequired
-                        ? 'Both you and this NeyborH need location enabled to vouch.'
+                        ? 'Both you and this NeyborH need a verified home address to vouch.'
                         : vouchStatus?.withinRange === false
-                          ? 'You must be within 500m to vouch — NeyborHuud is hyperlocal.'
+                          ? 'Your homes must be within 500m to vouch — NeyborHuud is hyperlocal.'
                           : 'Vouching puts your own NeyburH Score at stake.'}
                 </p>
               </div>

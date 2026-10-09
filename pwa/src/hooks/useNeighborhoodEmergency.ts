@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { contentService } from '@/services/content.service';
+import apiClient from '@/lib/api-client';
 
 /**
  * Polls the neighborhood emergency feed every 60 seconds.
@@ -15,9 +16,14 @@ export function useNeighborhoodEmergency(): boolean {
     let cancelled = false;
 
     const check = async () => {
+      // The feed endpoint needs a session — don't poll while signed out.
+      if (!apiClient.isAuthenticated()) return;
       try {
         const res = await contentService.getEmergencyFeed({ limit: 5 });
+        // The feed returns { content: [...] }; older shapes kept as fallbacks.
+        // Reading only .posts meant the SOS ring never lit up.
         const posts: Array<{ status?: string; contentType?: string }> =
+          (res.data as any)?.content ??
           (res.data as any)?.posts ??
           (res.data as any)?.data?.posts ??
           (res.data as any)?.data ??

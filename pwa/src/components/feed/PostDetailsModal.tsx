@@ -2,6 +2,24 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  ArrowLeft,
+  AlertCircle,
+  Globe,
+  Users,
+  Info,
+  Edit3,
+  CheckCircle2,
+  HelpCircle,
+  XCircle,
+  CheckSquare,
+  Pin,
+  History,
+  MessageSquare,
+  X,
+  ArrowLeftRight,
+  ArrowRight,
+} from 'lucide-react';
 import { usePost } from '@/hooks/usePosts';
 import { CommentItem } from './CommentItem';
 import { CommentForm } from './CommentForm';
@@ -103,7 +121,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                             onClick={onClose}
                             className="mod-chip w-9 h-9 flex items-center justify-center rounded-xl transition-colors"
                         >
-                            <span className="material-symbols-outlined text-xl" style={{ color: 'var(--neu-text-secondary)' }}>arrow_back</span>
+                            <ArrowLeft size={18} style={{ color: 'var(--neu-text-secondary)' }} />
                         </button>
                         <h2 className="font-bold text-lg" style={{ color: 'var(--neu-text)' }}>Post</h2>
                     </div>
@@ -119,7 +137,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                     ) : isError || !details ? (
                         <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
                             <div className="w-16 h-16 neu-socket rounded-full flex items-center justify-center mb-4">
-                                <span className="material-symbols-outlined text-3xl text-brand-red">error</span>
+                                <AlertCircle className="w-8 h-8 text-brand-red" />
                             </div>
                             <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--neu-text)' }}>Failed to load post</h3>
                             <p className="text-sm max-w-xs" style={{ color: 'var(--neu-text-muted)' }}>
@@ -165,7 +183,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                     <div className="flex flex-wrap gap-1.5 mb-3">
                                         {details.content.culturalContext.map((ctx: string, i: number) => (
                                             <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-brand-blue/10 text-brand-blue">
-                                                <span className="material-symbols-outlined text-[12px]">language</span>
+                                                <Globe size={12} />
                                                 {ctx}
                                             </span>
                                         ))}
@@ -175,7 +193,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                 {/* Target Audience */}
                                 {details.content.targetAudience && (details.content.targetAudience.ageRange || details.content.targetAudience.gender || (details.content.targetAudience.interests && details.content.targetAudience.interests.length > 0)) && (
                                     <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                                        <span className="material-symbols-outlined text-[14px]" style={{ color: 'var(--neu-text-muted)' }}>group</span>
+                                        <Users size={14} style={{ color: 'var(--neu-text-muted)' }} />
                                         <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--neu-text-muted)' }}>Audience:</span>
                                         {details.content.targetAudience.ageRange && (details.content.targetAudience.ageRange.min || details.content.targetAudience.ageRange.max) && (
                                             <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-green-dark/10 text-brand-green-dark font-medium">
@@ -201,7 +219,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
                                             details.content.fyiStatus === 'found' || details.content.fyiStatus === 'resolved' ? 'bg-primary/15 text-primary' : 'bg-brand-surface/15 text-[var(--neu-text-muted)]'
                                         }`}>
-                                            <span className="material-symbols-outlined text-[14px]">info</span>
+                                            <Info size={14} />
                                             Status: {details.content.fyiStatus.charAt(0).toUpperCase() + details.content.fyiStatus.slice(1)}
                                         </span>
                                     </div>
@@ -211,7 +229,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                 {details.content.contentType === 'fyi' && currentUserId && details.content.author?.id === currentUserId && (
                                     <div className="mb-3 p-3 rounded-xl bg-brand-blue/5 border border-brand-blue/10">
                                         <label className="flex items-center gap-1.5 mb-2">
-                                            <span className="material-symbols-outlined text-brand-blue text-[16px]">edit</span>
+                                            <Edit3 size={16} className="text-brand-blue" />
                                             <span className="text-xs font-bold text-brand-blue uppercase">Update Status</span>
                                         </label>
                                         <select
@@ -258,7 +276,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                 {details.content.endorsements && details.content.endorsements.length > 0 && (
                                     <div className="mb-3 p-3 rounded-xl bg-primary/5 border border-emerald-500/10">
                                         <div className="flex items-center gap-1.5 mb-2">
-                                            <span className="material-symbols-outlined text-primary text-[16px]">verified</span>
+                                            <CheckCircle2 size={16} className="text-primary" />
                                             <span className="text-xs font-bold text-primary uppercase">Authority Endorsed</span>
                                         </div>
                                         {details.content.endorsements.map((e: any, i: number) => (
@@ -290,7 +308,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                 }
                                             }}
                                         >
-                                            <span className="material-symbols-outlined text-[16px]">verified</span>
+                                            <CheckCircle2 size={16} />
                                             Request Endorsement
                                         </button>
                                     </div>
@@ -323,9 +341,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                             }
                                                         }}
                                                     >
-                                                        <span className="material-symbols-outlined text-[14px]">
-                                                            {rsvpStatus === 'going' ? 'check_circle' : rsvpStatus === 'maybe' ? 'help' : 'cancel'}
-                                                        </span>
+                                                        {rsvpStatus === 'going' ? <CheckCircle2 size={14} /> : rsvpStatus === 'maybe' ? <HelpCircle size={14} /> : <XCircle size={14} />}
                                                         {rsvpStatus.charAt(0).toUpperCase() + rsvpStatus.slice(1)}
                                                     </button>
                                                 ))}
@@ -350,7 +366,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                     }
                                                 }}
                                             >
-                                                <span className="material-symbols-outlined text-[14px]">task_alt</span>
+                                                <CheckSquare size={14} />
                                                 {receiptLoading ? 'Confirming…' : 'I Acknowledge This'}
                                             </button>
                                         )}
@@ -381,9 +397,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                     }
                                                 }}
                                             >
-                                                <span className="material-symbols-outlined text-[14px]">
-                                                    {details.content.isPinned || details.content.metadata?.isPinned ? 'push_pin' : 'push_pin'}
-                                                </span>
+                                                <Pin size={14} />
                                                 {pinLoading ? 'Updating…' : (details.content.isPinned || details.content.metadata?.isPinned ? 'Unpin' : 'Pin to Feed')}
                                             </button>
                                         )}
@@ -406,7 +420,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                     }
                                                 }}
                                             >
-                                                <span className="material-symbols-outlined text-[14px]">history</span>
+                                                <History size={14} />
                                                 Status History
                                             </button>
                                         )}
@@ -436,7 +450,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                     </div>
                                 ) : (
                                     <div className="py-12 text-center" style={{ color: 'var(--neu-text-muted)' }}>
-                                        <span className="material-symbols-outlined text-3xl mb-3 block opacity-30">chat_bubble_outline</span>
+                                        <MessageSquare className="w-8 h-8 mb-3 block opacity-30 text-primary mx-auto" />
                                         <p className="text-sm">Be the first to reply to this post</p>
                                     </div>
                                 )}
@@ -453,7 +467,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                         <div className="flex items-center justify-between px-4 py-3 neu-base" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
                             <h3 className="font-bold text-base" style={{ color: 'var(--neu-text)' }}>Edit History</h3>
                             <button onClick={() => setShowEditHistory(false)} className="btn-ghost w-8 h-8 flex items-center justify-center rounded-xl">
-                                <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>close</span>
+                                <X size={18} style={{ color: 'var(--neu-text-muted)' }} />
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -500,7 +514,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                         <div className="flex items-center justify-between px-4 py-3 neu-base" style={{ boxShadow: '0 2px 8px var(--neu-shadow-dark)' }}>
                             <h3 className="font-bold text-base" style={{ color: 'var(--neu-text)' }}>Status History</h3>
                             <button onClick={() => setShowStatusHistory(false)} className="btn-ghost w-8 h-8 flex items-center justify-center rounded-xl">
-                                <span className="material-symbols-outlined text-lg" style={{ color: 'var(--neu-text-muted)' }}>close</span>
+                                <X size={18} style={{ color: 'var(--neu-text-muted)' }} />
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -514,14 +528,14 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                 statusHistory.map((entry, idx) => (
                                     <div key={idx} className="neu-card-sm rounded-xl p-3 flex items-center gap-3">
                                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-brand-blue text-[16px]">swap_horiz</span>
+                                            <ArrowLeftRight size={16} className="text-brand-blue" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-1.5 text-xs">
                                                 <span className="px-1.5 py-0.5 rounded bg-brand-surface/15 font-medium" style={{ color: 'var(--neu-text-muted)' }}>
                                                     {entry.previousStatus}
                                                 </span>
-                                                <span className="material-symbols-outlined text-[12px]" style={{ color: 'var(--neu-text-muted)' }}>arrow_forward</span>
+                                                <ArrowRight size={12} style={{ color: 'var(--neu-text-muted)' }} />
                                                 <span className="px-1.5 py-0.5 rounded bg-primary/15 text-primary font-medium">
                                                     {entry.newStatus}
                                                 </span>

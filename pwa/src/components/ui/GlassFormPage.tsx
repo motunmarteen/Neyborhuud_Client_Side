@@ -22,23 +22,6 @@ type GlassFormPageProps = {
 export function GlassFormPage({ title, subtitle, titleId = "glass-form-title", onClose, wide, children }: GlassFormPageProps) {
   return (
     <div className="doodle-surface relative flex h-screen w-full flex-col overflow-hidden text-brand-black">
-      <div
-        className="pointer-events-none fixed inset-0 motion-safe:animate-soft-float opacity-70"
-        aria-hidden
-        style={{
-          background:
-            "radial-gradient(ellipse 85% 55% at 50% -15%, rgba(0, 212, 49, 0.14), transparent 55%), radial-gradient(ellipse 50% 40% at 100% 40%, rgba(0, 111, 53, 0.06), transparent 50%)",
-        }}
-      />
-      <div
-        className="pointer-events-none fixed inset-0 opacity-50 motion-safe:animate-soft-float"
-        aria-hidden
-        style={{
-          animationDelay: "-2s",
-          background: "radial-gradient(ellipse 60% 50% at 0% 80%, rgba(0, 212, 49, 0.08), transparent 45%)",
-        }}
-      />
-
       <TopNav />
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         <LeftSidebar />

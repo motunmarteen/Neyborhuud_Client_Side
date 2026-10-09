@@ -1,17 +1,29 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  X,
+  CheckCircle2,
+  Ban,
+  UserX,
+  MessageSquareOff,
+  AlertTriangle,
+  Flame,
+  EyeOff,
+  ShieldAlert,
+  MoreHorizontal,
+} from 'lucide-react';
 import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 
 const REPORT_REASONS = [
-  { value: 'spam', label: 'Spam', icon: 'block' },
-  { value: 'harassment', label: 'Harassment or bullying', icon: 'person_off' },
-  { value: 'hate_speech', label: 'Hate speech', icon: 'do_not_disturb' },
-  { value: 'misinformation', label: 'False information', icon: 'report' },
-  { value: 'violence', label: 'Violence or threats', icon: 'warning' },
-  { value: 'inappropriate', label: 'Inappropriate content', icon: 'visibility_off' },
-  { value: 'scam', label: 'Scam or fraud', icon: 'gpp_bad' },
-  { value: 'other', label: 'Other', icon: 'more_horiz' },
+  { value: 'spam', label: 'Spam', Icon: Ban },
+  { value: 'harassment', label: 'Harassment or bullying', Icon: UserX },
+  { value: 'hate_speech', label: 'Hate speech', Icon: MessageSquareOff },
+  { value: 'misinformation', label: 'False information', Icon: AlertTriangle },
+  { value: 'violence', label: 'Violence or threats', Icon: Flame },
+  { value: 'inappropriate', label: 'Inappropriate content', Icon: EyeOff },
+  { value: 'scam', label: 'Scam or fraud', Icon: ShieldAlert },
+  { value: 'other', label: 'Other', Icon: MoreHorizontal },
 ];
 
 interface ReportModalProps {
@@ -50,18 +62,18 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
       handleClassName="pt-2 pb-0"
     >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 dark:border-white/10">
           <h3 className="text-base font-semibold" style={{ color: 'var(--neu-text)' }}>
             Report Post
           </h3>
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-white/10 transition-colors">
-            <span className="material-symbols-outlined text-xl" style={{ color: 'var(--neu-text-muted)' }}>close</span>
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+            <X size={18} style={{ color: 'var(--neu-text-muted)' }} />
           </button>
         </div>
 
         {submitted ? (
           <div className="flex flex-col items-center gap-3 py-10 px-4">
-            <span className="material-symbols-outlined text-4xl text-primary">check_circle</span>
+            <CheckCircle2 size={36} className="text-primary" />
             <p className="text-sm font-medium" style={{ color: 'var(--neu-text)' }}>Thanks for reporting</p>
             <p className="text-xs text-center" style={{ color: 'var(--neu-text-muted)' }}>
               We&apos;ll review this post and take action if it violates our community guidelines.
@@ -75,21 +87,23 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
                 Why are you reporting this post?
               </p>
               <div className="space-y-1.5">
-                {REPORT_REASONS.map((r) => (
-                  <button
-                    key={r.value}
-                    onClick={() => setSelectedReason(r.value)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                      selectedReason === r.value
-                        ? 'bg-brand-green-dark/20 ring-1 ring-primary/40'
-                        : 'hover:bg-white/5'
-                    }`}
-                    style={{ color: selectedReason === r.value ? 'var(--neu-accent, #006F35)' : 'var(--neu-text)' }}
-                  >
-                    <span className="material-symbols-outlined text-[18px]">{r.icon}</span>
-                    {r.label}
-                  </button>
-                ))}
+                {REPORT_REASONS.map((r) => {
+                  const Icon = r.Icon;
+                  return (
+                    <button
+                      key={r.value}
+                      onClick={() => setSelectedReason(r.value)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                        selectedReason === r.value
+                          ? 'bg-brand-green-dark/20 ring-1 ring-primary/40 text-primary font-bold'
+                          : 'hover:bg-black/5 dark:hover:bg-white/5 text-charcoal dark:text-white'
+                      }`}
+                    >
+                      <Icon size={16} />
+                      {r.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -115,8 +129,8 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
                 disabled={!selectedReason || submitting}
                 className="w-full py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-40"
                 style={{
-                  backgroundColor: selectedReason ? 'var(--neu-accent, #006F35)' : undefined,
-                  color: selectedReason ? '#fff' : 'var(--neu-text-muted)',
+                  backgroundColor: selectedReason ? 'var(--neu-accent, #00D431)' : undefined,
+                  color: selectedReason ? '#000' : 'var(--neu-text-muted)',
                 }}
               >
                 {submitting ? 'Submitting…' : 'Submit Report'}

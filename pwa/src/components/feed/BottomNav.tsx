@@ -1,26 +1,23 @@
 'use client';
 
-import React, { useRef, useSyncExternalStore, useEffect, useState } from 'react';
+import React, { useRef, useSyncExternalStore, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
+import { LayoutGrid, Compass, Home, Shield, MessagesSquare, Siren, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { AppNavIcon, type AppNavIconName } from '@/components/navigation/AppNavIcon';
 import { useScrollHideBottomNav, scrollToTop } from '@/hooks/useScrollHideBottomNav';
 import { useUnreadCount } from '@/hooks/useNotifications';
+import { useSos } from '@/hooks/useSos';
+import { useSentinelBottomSheet } from '@/contexts/SentinelBottomSheetContext';
+import { LocalHuudBottomSheet } from '@/components/navigation/LocalHuudBottomSheet';
+import { UserProfileDrawer } from '@/components/navigation/UserProfileDrawer';
+import { resolveUserAvatarUrl, resolveProfileAvatarInitial } from '@/lib/userAvatar';
 
 interface BottomNavProps {
   /** Set true only when the nav should be fully hidden (e.g. map overlay). */
   hidden?: boolean;
 }
-
-type NavLinkTab = {
-  href: string;
-  label: string;
-  icon: AppNavIconName;
-  match: (p: string) => boolean;
-};
-
-import { useSentinelBottomSheet } from '@/contexts/SentinelBottomSheetContext';
 
 function useIsClient() {
   return useSyncExternalStore(
@@ -30,123 +27,238 @@ function useIsClient() {
   );
 }
 
-/** Shrinks the bottom nav pill to 2/3 size when the user scrolls down.
- *  Uses capture-phase listener so it catches scroll from ANY container
- *  (Next.js App Router wraps content in a scrollable div, not window). */
-function useScrollCompact() {
-  return false;
-}
-
 export function BottomNav({ hidden = false }: BottomNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
-  const compact = useScrollCompact();
   const scrollHidden = useScrollHideBottomNav();
-  const { openSheet } = useSentinelBottomSheet();
+  const { openSheet: openSentinelSheet } = useSentinelBottomSheet();
+  const { phase: sosPhase, triggerSos } = useSos();
+  const [localHuudOpen, setLocalHuudOpen] = useState(false);
+  const [userDrawerOpen, setUserDrawerOpen] = useState(false);
 
   const isClient = useIsClient();
   const { data: messageUnreadCount = 0 } = useUnreadCount('message');
 
-  // Long-press on the Sentinel tab jumps straight to Fake Call — the
-  // toolkit sheet + tile route needs 3+ taps, which undermines a feature
-  // whose entire value is being fast and unremarkable to reach.
-  const sentinelLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const sentinelLongPressFired = useRef(false);
+  const resolvedAvatar = isClient ? resolveUserAvatarUrl(user) : null;
+  const initial = isClient ? resolveProfileAvatarInitial(user, user?.username) : 'N';
 
-  const clearSentinelLongPressTimer = () => {
-    if (sentinelLongPressTimer.current) {
-      clearTimeout(sentinelLongPressTimer.current);
-      sentinelLongPressTimer.current = null;
+  // SOS activation logic
+  const sosLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sosLongPressFired = useRef(false);
+
+  const clearSosLongPressTimer = () => {
+    if (sosLongPressTimer.current) {
+      clearTimeout(sosLongPressTimer.current);
+      sosLongPressTimer.current = null;
     }
   };
-  const startSentinelLongPress = () => {
-    sentinelLongPressFired.current = false;
-    clearSentinelLongPressTimer();
-    sentinelLongPressTimer.current = setTimeout(() => {
-      sentinelLongPressFired.current = true;
-      router.push('/safety/fake-call');
+
+  const startSosLongPress = () => {
+    sosLongPressFired.current = false;
+    clearSosLongPressTimer();
+    sosLongPressTimer.current = setTimeout(() => {
+      sosLongPressFired.current = true;
+      if (sosPhase === 'idle') {
+        void triggerSos({ silent: true });
+      }
     }, 600);
   };
-  const cancelSentinelLongPress = () => {
-    clearSentinelLongPressTimer();
+
+  const cancelSosLongPress = () => {
+    clearSosLongPressTimer();
   };
 
-
-  const profileHref =
-    isClient && user?.username ? `/profile/${user.username}` : '/settings';
-  const isProfile =
-    pathname.startsWith('/profile') ||
-    (profileHref === '/settings' && pathname.startsWith('/settings'));
-
-  const LINK_TABS: NavLinkTab[] = [
-    { href: '/feed', label: 'Home', icon: 'home', match: (p) => p === '/feed' || p === '/' },
-    { href: '/explore', label: 'Search', icon: 'search', match: (p) => p.startsWith('/explore') && !p.startsWith('/map') },
-    { href: '/safety', label: 'Sentinel', icon: 'shield', match: (p) => p.startsWith('/safety') || p.startsWith('/sentinel') },
-    { href: '/friendship', label: 'Connect', icon: 'connect', match: (p) => p.startsWith('/friendship') || p.startsWith('/chat') },
-    { href: '/gist', label: 'Gist', icon: 'gist', match: (p) => p.startsWith('/gist') },
-    { href: profileHref, label: 'Profile', icon: 'profile', match: (p) => p.startsWith('/profile') || (profileHref === '/settings' && p.startsWith('/settings')) },
-  ];
-
-  const renderLinkTab = (tab: NavLinkTab) => {
-    const active = tab.match(pathname);
-    const badgeCount = tab.label === 'Connect' ? messageUnreadCount : 0;
-    const isSentinelTab = tab.label === 'Sentinel';
-
-    return (
-      <Link
-        key={tab.href}
-        href={tab.href}
-        className={`app-bottomnav__item ${active ? 'app-bottomnav__item--active' : ''} relative`}
-        aria-label={isSentinelTab ? 'Sentinel — tap to open, long-press for Fake Call' : tab.label}
-        aria-current={active ? 'page' : undefined}
-        onPointerDown={isSentinelTab ? startSentinelLongPress : undefined}
-        onPointerUp={isSentinelTab ? cancelSentinelLongPress : undefined}
-        onPointerLeave={isSentinelTab ? () => clearSentinelLongPressTimer() : undefined}
-        onContextMenu={isSentinelTab ? (e) => e.preventDefault() : undefined}
-        onClick={(e) => {
-          if (isSentinelTab) {
-            e.preventDefault();
-            if (sentinelLongPressFired.current) {
-              sentinelLongPressFired.current = false;
-              return;
-            }
-            openSheet();
-            return;
-          }
-          if (active) {
-            e.preventDefault();
-            scrollToTop();
-          }
-        }}
-      >
-        <span className="app-bottomnav__icon-wrap">
-          <div className="relative inline-flex items-center justify-center">
-            <AppNavIcon name={tab.icon} active={active} />
-            {badgeCount > 0 && (
-              <span className="absolute -top-1 -right-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-black">
-                {badgeCount > 99 ? '99+' : badgeCount}
-              </span>
-            )}
-          </div>
-        </span>
-      </Link>
-    );
+  const handleCenterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (sosLongPressFired.current) {
+      sosLongPressFired.current = false;
+      return;
+    }
+    if (pathname === '/feed' || pathname === '/') {
+      scrollToTop();
+    } else {
+      router.push('/feed');
+    }
   };
+
+  const sosActive = sosPhase !== 'idle';
+  const isFeed = pathname === '/feed' || pathname === '/';
+  const isExplore = pathname.startsWith('/map') || pathname.startsWith('/explore');
+  const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel');
+  const isChat = pathname.startsWith('/friendship') || pathname.startsWith('/chat');
+  const isProfile = pathname.startsWith('/profile') || userDrawerOpen;
 
   return (
-    <nav
-      className="app-bottomnav"
-      role="navigation"
-      aria-label="Main navigation"
-      data-compact={compact ? 'true' : undefined}
-    >
-      <div className={`app-bottomnav__dock${hidden || scrollHidden ? ' app-bottomnav__dock--hidden' : ''}`}>
-        <div className="app-bottomnav__pill app-bottomnav__glass">
-          {LINK_TABS.map(renderLinkTab)}
-        </div>
+    <>
+      <nav
+        className="fixed bottom-0 inset-x-0 z-40 pointer-events-none flex justify-center pb-safe mb-1.5 px-2.5 sm:px-3 select-none"
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        <div
+          className={`pointer-events-auto transition-transform duration-300 ease-out ${
+            hidden || scrollHidden ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'
+          }`}
+        >
+          {/* Frosted Curved Bottom Dock — Daylight Light Theme */}
+          <div className="flex items-center gap-0.5 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-3xl bg-white/95 backdrop-blur-2xl border border-black/10 shadow-[0_12px_40px_rgba(0,0,0,0.12)]">
+            {/* 1. MENU */}
+            <button
+              type="button"
+              onClick={() => setLocalHuudOpen(true)}
+              className="flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl text-[#4B5563] hover:text-[#111827] transition-all active:scale-95 group relative cursor-pointer"
+              aria-label="Community Menu"
+            >
+              <LayoutGrid size={19} className="transition-transform group-hover:scale-110" />
+              <span className="text-[10px] font-bold tracking-tight mt-0.5">Menu</span>
+            </button>
 
-      </div>
-    </nav>
+            {/* 2. EXPLORE */}
+            <Link
+              href="/map"
+              className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative ${
+                isExplore ? 'text-[#008A20] font-bold' : 'text-[#4B5563] hover:text-[#111827]'
+              }`}
+              aria-label="Explore & Street Radar"
+              aria-current={isExplore ? 'page' : undefined}
+            >
+              <Compass size={19} className="transition-transform group-hover:scale-110" />
+              <span className="text-[10px] font-bold tracking-tight mt-0.5">Explore</span>
+              {isExplore && (
+                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#008A20]" />
+              )}
+            </Link>
+
+            {/* 3. CENTER HIGHLIGHTED BEACON (FEED / SOS) */}
+            <div className="relative -top-2 px-0.5 sm:px-1">
+              <button
+                type="button"
+                onClick={handleCenterClick}
+                onPointerDown={startSosLongPress}
+                onPointerUp={cancelSosLongPress}
+                onPointerLeave={clearSosLongPressTimer}
+                onContextMenu={(e) => e.preventDefault()}
+                className={`relative w-12 sm:w-13 h-12 sm:h-13 rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-lg cursor-pointer ${
+                  sosActive
+                    ? 'bg-red-600 text-white shadow-red-600/50 animate-pulse'
+                    : isFeed
+                      ? 'bg-[#00D431] text-black shadow-[#00D431]/40'
+                      : 'bg-[#F0F4F1] text-black border border-black/10 hover:border-[#008A20]/40'
+                }`}
+                aria-label="Home Feed (Long press for SOS)"
+              >
+                {sosActive ? (
+                  <Siren size={23} className="stroke-[2.5]" />
+                ) : (
+                  <Home size={21} className={isFeed ? 'stroke-[2.5]' : 'stroke-2'} />
+                )}
+                {/* Ambient halo glow */}
+                <span
+                  className={`absolute -inset-1 rounded-2xl -z-10 blur-sm opacity-40 transition-opacity ${
+                    sosActive
+                      ? 'bg-red-500'
+                      : isFeed
+                        ? 'bg-[#00D431]'
+                        : 'bg-transparent'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* 4. SAFETY / SENTINEL */}
+            <button
+              type="button"
+              onClick={() => openSentinelSheet()}
+              className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative cursor-pointer ${
+                isSentinel ? 'text-[#008A20] font-bold' : 'text-[#4B5563] hover:text-[#111827]'
+              }`}
+              aria-label="Sentinel Safety Toolkit"
+              aria-current={isSentinel ? 'page' : undefined}
+            >
+              <Shield size={19} className="transition-transform group-hover:scale-110" />
+              <span className="text-[10px] font-bold tracking-tight mt-0.5">Sentinel</span>
+              {isSentinel && (
+                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#008A20]" />
+              )}
+            </button>
+
+            {/* 5. CHAT */}
+            <Link
+              href="/friendship"
+              className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative ${
+                isChat ? 'text-[#008A20] font-bold' : 'text-[#4B5563] hover:text-[#111827]'
+              }`}
+              aria-label="Chat & Messages"
+              aria-current={isChat ? 'page' : undefined}
+            >
+              <div className="relative">
+                <MessagesSquare size={19} className="transition-transform group-hover:scale-110" />
+                {messageUnreadCount > 0 && (
+                  <span className="absolute -top-1 -right-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-black text-white shadow-sm ring-2 ring-white">
+                    {messageUnreadCount > 99 ? '99+' : messageUnreadCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] font-bold tracking-tight mt-0.5">Chat</span>
+              {isChat && (
+                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#008A20]" />
+              )}
+            </Link>
+
+            {/* 6. PROFILE */}
+            <button
+              type="button"
+              onClick={() => setUserDrawerOpen(true)}
+              className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative cursor-pointer ${
+                isProfile ? 'text-[#008A20] font-bold' : 'text-[#4B5563] hover:text-[#111827]'
+              }`}
+              aria-label="Resident Profile"
+              aria-current={isProfile ? 'page' : undefined}
+            >
+              <div className="relative">
+                <div
+                  className={`w-5 h-5 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-black transition-all ${
+                    isProfile
+                      ? 'ring-2 ring-[#008A20] bg-emerald-100 text-[#008A20]'
+                      : 'ring-1 ring-black/15 bg-slate-100 text-slate-700'
+                  }`}
+                >
+                  {resolvedAvatar ? (
+                    <Image
+                      src={resolvedAvatar}
+                      alt={user?.firstName || 'Profile'}
+                      width={20}
+                      height={20}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : initial ? (
+                    <span>{initial}</span>
+                  ) : (
+                    <User size={13} className="stroke-[2.2]" />
+                  )}
+                </div>
+              </div>
+              <span className="text-[10px] font-bold tracking-tight mt-0.5">Profile</span>
+              {isProfile && (
+                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#008A20]" />
+              )}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Local Huud Community Services Bottom Sheet */}
+      <LocalHuudBottomSheet
+        open={localHuudOpen}
+        onClose={() => setLocalHuudOpen(false)}
+      />
+
+      {/* User Profile Drawer */}
+      <UserProfileDrawer
+        isOpen={userDrawerOpen}
+        onClose={() => setUserDrawerOpen(false)}
+      />
+    </>
   );
 }

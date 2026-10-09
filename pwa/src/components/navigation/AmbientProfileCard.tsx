@@ -217,9 +217,14 @@ function ensureLeafletCss() {
 }
 
 export function getPersonalizedName(firstName?: string, username?: string): string {
-  const raw = firstName?.trim() || username?.trim() || '';
-  if (!raw) return '';
-  return raw.charAt(0).toUpperCase() + raw.slice(1);
+  const target = firstName?.trim() || username?.trim() || '';
+  if (!target) return '';
+  const cleaned = target.replace(/^@/, '').replace(/[_-]+/g, ' ');
+  return cleaned
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
 }
 
 export function getGreeting(time: TimePeriod, firstName?: string, username?: string): string {

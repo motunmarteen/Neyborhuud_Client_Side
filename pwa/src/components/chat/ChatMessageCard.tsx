@@ -14,12 +14,13 @@
 import { type ReactNode, useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { ChatMessage } from '@/types/api';
 import { ChatExpandableText } from '@/components/chat/ChatExpandableText';
 import { ChatMessageTicks } from '@/components/chat/ChatMessageTicks';
 import { MessageReactions } from '@/components/chat/MessageReactions';
 import { MessageActionSheet } from '@/components/chat/MessageActionSheet';
+import { forwardLabel } from '@/lib/chatMessageRules';
 import { DealStatusCard } from '@/components/chat/DealStatusCard';
 import { OfferCard } from '@/components/chat/OfferCard';
 import { EventRsvpCard } from '@/components/chat/EventRsvpCard';
@@ -28,6 +29,7 @@ import { formatNaira } from '@/lib/currency';
 import { chatService } from '@/services/chat.service';
 import { InteractiveMap } from '@/components/ui/InteractiveMap';
 import socketService from '@/lib/socket';
+import { cdnVideo, cdnVideoPoster } from '@/lib/media';
 
 // ─── Reply-to quoted preview (audit finding #6) ──────────────────────────────
 // Rendered above the message content when a message has a replyToPreview,
@@ -61,6 +63,7 @@ function timeStr(dateStr: string | undefined): string {
 function Meta({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
     <div className={`flex shrink-0 items-center justify-end gap-1 text-[10px] ${mine ? 'text-white/60' : 'text-gray-400'}`}>
+      {msg.isEdited && !msg.isDeleted ? <span className="italic">Edited</span> : null}
       <span>{timeStr(msg.createdAt)}</span>
       {mine ? <ChatMessageTicks status={msg.status} /> : null}
     </div>
@@ -589,7 +592,8 @@ function VideoBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
     <div className="w-[280px] max-w-[80vw]">
       <video
-        src={msg.mediaUrl}
+        src={cdnVideo(msg.mediaUrl ?? '')}
+        poster={cdnVideoPoster(msg.mediaUrl ?? '', 640)}
         controls
         preload="metadata"
         playsInline
@@ -720,6 +724,10 @@ function MessageStack({
   onReactionsUpdate,
   onReply,
   onDeleteForMe,
+  onEdit,
+  onDeleteForEveryone,
+  onForward,
+  canModerate,
   children,
 }: {
   msg: ChatMessage;
@@ -729,12 +737,24 @@ function MessageStack({
   onReactionsUpdate?: (reactions: ChatMessage['reactions']) => void;
   onReply?: (msg: ChatMessage) => void;
   onDeleteForMe?: (msg: ChatMessage) => void;
+  onEdit?: (msg: ChatMessage) => void;
+  onDeleteForEveryone?: (msg: ChatMessage) => void;
+  onForward?: (msg: ChatMessage) => void;
+  canModerate?: boolean;
   children: ReactNode;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // ── Swipe right to reply (touch / pen) ──────────────────────────────────
+  const SWIPE_TRIGGER_PX = 60;
+  const SWIPE_MAX_PX = 90;
+  const swipeStart = useRef<{ x: number; y: number; active: boolean } | null>(null);
+  const [dragX, setDragX] = useState(0);
+  const canSwipeReply = !!onReply && !msg.isDeleted;
+  const forwarded = forwardLabel(msg);
 
   // Long-press opens the ACTION sheet (reply/report/delete-for-me) — a
   // right-click / long-context-menu still opens the emoji reaction picker,
@@ -748,21 +768,76 @@ function MessageStack({
     clearTimeout(timerRef.current);
   };
 
+  const onPointerDown = (e: React.PointerEvent) => {
+    swipeStart.current = { x: e.clientX, y: e.clientY, active: e.pointerType !== 'mouse' && canSwipeReply };
+    startPress();
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    const start = swipeStart.current;
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) cancelPress();
+    if (!start.active) return;
+    // Horizontal, rightward drags only — vertical scrolling stays native.
+    if (dx > 0 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      setDragX(Math.min(dx, SWIPE_MAX_PX));
+    } else if (Math.abs(dy) > 12) {
+      start.active = false;
+      setDragX(0);
+    }
+  };
+  const endSwipe = () => {
+    cancelPress();
+    if (dragX >= SWIPE_TRIGGER_PX && canSwipeReply) {
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate?.(10);
+      onReply?.(msg);
+    }
+    swipeStart.current = null;
+    setDragX(0);
+  };
+
   return (
     <div className={`flex flex-col ${mine ? 'items-end' : 'items-start'} my-0.5 px-1`}>
       {!mine && senderLabel ? (
         <span className="mb-0.5 ml-1 text-[11px] font-semibold text-gray-500">{senderLabel}</span>
       ) : null}
+      {forwarded ? (
+        <span className="mb-0.5 mx-1 flex items-center gap-0.5 text-[11px] italic text-gray-500">
+          <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+            {forwarded === 'Forwarded' ? 'forward' : 'fast_forward'}
+          </span>
+          {forwarded}
+        </span>
+      ) : null}
       <div
         ref={containerRef}
-        onPointerDown={startPress}
-        onPointerUp={cancelPress}
-        onPointerMove={cancelPress}
-        onPointerCancel={cancelPress}
+        onPointerDown={onPointerDown}
+        onPointerUp={endSwipe}
+        onPointerMove={onPointerMove}
+        onPointerCancel={endSwipe}
+        onPointerLeave={() => { if (dragX === 0) cancelPress(); }}
         onContextMenu={(e) => { e.preventDefault(); setPickerOpen(true); }}
         className="relative"
+        style={{ touchAction: 'pan-y' }}
       >
-        {children}
+        {dragX > 0 ? (
+          <span
+            className="material-symbols-outlined pointer-events-none absolute left-[-30px] top-1/2 -translate-y-1/2 text-[20px] text-gray-400"
+            style={{ opacity: Math.min(1, dragX / SWIPE_TRIGGER_PX) }}
+            aria-hidden="true"
+          >
+            reply
+          </span>
+        ) : null}
+        <div
+          style={{
+            transform: dragX ? `translateX(${dragX}px)` : undefined,
+            transition: dragX ? 'none' : 'transform 160ms ease-out',
+          }}
+        >
+          {children}
+        </div>
       </div>
       {!msg.isDeleted ? (
         <MessageReactions
@@ -783,6 +858,10 @@ function MessageStack({
         anchorRef={containerRef}
         onReply={(m) => onReply?.(m)}
         onDeleteForMe={(m) => onDeleteForMe?.(m)}
+        onEdit={onEdit}
+        onDeleteForEveryone={onDeleteForEveryone}
+        onForward={onForward}
+        canModerate={canModerate}
       />
     </div>
   );
@@ -796,6 +875,10 @@ export default function ChatMessageCard({
   senderLabel,
   onReply,
   onDeleteForMe,
+  onEdit,
+  onDeleteForEveryone,
+  onForward,
+  canModerate,
 }: {
   msg: ChatMessage;
   mine: boolean;
@@ -804,6 +887,10 @@ export default function ChatMessageCard({
   senderLabel?: string | null;
   onReply?: (msg: ChatMessage) => void;
   onDeleteForMe?: (msg: ChatMessage) => void;
+  onEdit?: (msg: ChatMessage) => void;
+  onDeleteForEveryone?: (msg: ChatMessage) => void;
+  onForward?: (msg: ChatMessage) => void;
+  canModerate?: boolean;
 }) {
   const isPriority = msg.priority === 'emergency';
   const textProps = { currentUserId, onReactionsUpdate };
@@ -817,6 +904,10 @@ export default function ChatMessageCard({
       onReactionsUpdate={onReactionsUpdate}
       onReply={onReply}
       onDeleteForMe={onDeleteForMe}
+      onEdit={onEdit}
+      onDeleteForEveryone={onDeleteForEveryone}
+      onForward={onForward}
+      canModerate={canModerate}
     >
       {node}
     </MessageStack>

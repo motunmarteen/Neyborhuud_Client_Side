@@ -17,7 +17,7 @@ import {
   writeEventDetailCache,
 } from "@/lib/event-detail-cache";
 import { getErrorMessage } from "@/lib/error-handler";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 import { useAwardCoins } from "@/hooks/useGamification";
 
@@ -394,7 +394,7 @@ export function useBoostEvent() {
         : "";
       toast.success(
         data?.extended ? `Boost extended! Featured until ${until} 🚀` : `Event boosted for ${days} days! 🚀`,
-        { description: `${data?.deducted ?? "–"} HuudCoins deducted.` },
+        `${data?.deducted ?? "–"} HuudCoins deducted.`,
       );
       queryClient.invalidateQueries({ queryKey: ["events"] });
       queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });

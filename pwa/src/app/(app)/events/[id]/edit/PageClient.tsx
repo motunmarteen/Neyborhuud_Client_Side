@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
 import { useEvent, useUpdateEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";

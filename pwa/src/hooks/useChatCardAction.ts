@@ -14,7 +14,8 @@
  */
 
 import { useCallback, useState } from 'react';
-import { toast } from 'sonner';
+import { DEMO_MODE } from '@/lib/demoMode';
+import { toast } from '@/lib/toast';
 
 export interface ChatCardAction {
   /** Which action is currently in flight, or null when idle. */
@@ -45,10 +46,23 @@ export function useChatCardAction(enabled: boolean = true): ChatCardAction {
         await fn();
         toast.success(successMessage);
         setDone(true);
-      } catch (e) {
-        toast.error(
-          (e as { message?: string })?.message || 'Something went wrong. Please try again.',
-        );
+      } catch (e: any) {
+        // Only the offline design-preview cards (demo-* ids, DEMO_MODE
+        // builds) may pretend an action succeeded. A real server rejection —
+        // including "order not found" — must never show as success on a
+        // payment/delivery step.
+        const isDemo =
+          DEMO_MODE &&
+          (String(e?.config?.url || '').includes('demo-') ||
+            String(e?.message || '').includes('demo-'));
+        if (isDemo) {
+          toast.success(successMessage);
+          setDone(true);
+        } else {
+          toast.error(
+            (e as { message?: string })?.message || 'Something went wrong. Please try again.',
+          );
+        }
       } finally {
         setBusy(null);
       }

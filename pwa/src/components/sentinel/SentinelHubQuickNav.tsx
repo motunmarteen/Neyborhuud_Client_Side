@@ -7,7 +7,7 @@ const QUICK_NAV: {
   icon: string;
   label: string;
   hint: string;
-  gradient: string;
+  bg: string;
   iconClass: string;
 }[] = [
   {
@@ -15,7 +15,7 @@ const QUICK_NAV: {
     icon: 'shield',
     label: 'Protect',
     hint: 'Trips · tracking · zones',
-    gradient: 'from-primary/15 to-primary/5',
+    bg: 'bg-primary/10',
     iconClass: 'text-primary',
   },
   {
@@ -23,7 +23,7 @@ const QUICK_NAV: {
     icon: 'groups',
     label: 'Network',
     hint: 'Guardians · circle · status',
-    gradient: 'from-brand-blue/15 to-brand-blue/5',
+    bg: 'bg-brand-blue/10',
     iconClass: 'text-brand-blue',
   },
   {
@@ -31,7 +31,7 @@ const QUICK_NAV: {
     icon: 'construction',
     label: 'Tools',
     hint: 'SOS · PIN · reports',
-    gradient: 'from-brand-red/12 to-brand-red/5',
+    bg: 'bg-brand-red/10',
     iconClass: 'text-brand-red',
   },
   {
@@ -39,7 +39,7 @@ const QUICK_NAV: {
     icon: 'history',
     label: 'History',
     hint: 'Trips · incidents',
-    gradient: 'from-[var(--neu-shadow-dark)]/40 to-transparent',
+    bg: 'bg-black/5 dark:bg-white/5',
     iconClass: 'text-[var(--neu-text-muted)]',
   },
 ];
@@ -64,7 +64,7 @@ export function SentinelHubQuickNav({ activeTab, onSelect }: SentinelHubQuickNav
             }`}
           >
             <div
-              className={`pointer-events-none absolute inset-0 bg-gradient-to-br opacity-80 ${item.gradient}`}
+              className={`pointer-events-none absolute inset-0 ${item.bg}`}
               aria-hidden
             />
             <div className="relative flex flex-col gap-1">

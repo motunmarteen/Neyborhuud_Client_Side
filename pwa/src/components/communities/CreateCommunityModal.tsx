@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useCreateHubCommunity } from '@/hooks/useHubCommunities';
 import { getErrorMessage } from '@/lib/error-handler';
 import { unwrapApiData } from '@/lib/apiPayload';

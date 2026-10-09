@@ -9,12 +9,7 @@ import { applySystemTheme, getStoredTheme, getSystemPrefersDark, subscribeSystem
  */
 export function ThemeSync() {
   useEffect(() => {
-    const stored = getStoredTheme();
-    const isDark = stored !== null ? stored === 'dark' : getSystemPrefersDark();
-    applySystemTheme(isDark);
-
-    const unsubscribe = subscribeSystemTheme((dark) => applySystemTheme(dark));
-    return unsubscribe;
+    applySystemTheme(false);
   }, []);
 
   return null;

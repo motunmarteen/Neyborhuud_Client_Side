@@ -52,39 +52,44 @@ function parseView(value: string | null): HuudView {
   return 'your-huud';
 }
 
+import {
+  MapPin,
+  Radar,
+  Clock,
+  Building2,
+  Heart,
+  RotateCw,
+  Sparkles,
+} from 'lucide-react';
+
 function StatCard({
-  icon,
+  icon: Icon,
   label,
   value,
   tone = 'primary',
 }: {
-  icon: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   value: string | number;
   tone?: 'primary' | 'red' | 'blue';
 }) {
-  const toneClass =
+  const toneBg =
     tone === 'red'
-      ? 'text-brand-red bg-brand-red/15'
+      ? 'bg-rose-50 text-rose-600 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800/40'
       : tone === 'blue'
-        ? 'text-brand-blue bg-brand-blue/10'
-        : 'text-primary bg-primary/15';
+        ? 'bg-blue-50 text-blue-600 border-blue-200/80 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800/40'
+        : 'bg-emerald-50 text-[#00C830] border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40';
 
   return (
-    <div className="mod-card flex items-center gap-3 rounded-xl p-4">
-      <div className={`mod-inset flex h-10 w-10 items-center justify-center rounded-full ${toneClass}`}>
-        <span
-          className="material-symbols-outlined text-[20px]"
-          style={{ fontVariationSettings: "'FILL' 1" }}
-        >
-          {icon}
-        </span>
+    <div className="bg-white dark:bg-[#12161A] rounded-2xl border border-black/[0.08] dark:border-white/[0.08] p-4 shadow-sm flex items-center gap-3.5">
+      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${toneBg}`}>
+        <Icon size={20} />
       </div>
       <div className="min-w-0">
-        <p className="text-lg font-extrabold tabular-nums" style={{ color: 'var(--neu-text)' }}>
+        <p className="text-xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
           {value}
         </p>
-        <p className="text-xs text-[var(--neu-text-muted)]">{label}</p>
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
       </div>
     </div>
   );
@@ -222,15 +227,14 @@ function HuudBrowseInner() {
                 type="button"
                 onClick={() => refetch()}
                 disabled={isFetching}
-                className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary disabled:opacity-50"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.08] px-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00C830] transition-colors disabled:opacity-50"
                 aria-label="Refresh My Huud feed"
               >
-                <span
-                  className={`material-symbols-outlined text-[18px] ${isFetching ? 'animate-spin' : ''}`}
+                <RotateCw
+                  size={14}
+                  className={isFetching ? 'animate-spin text-[#00C830]' : 'text-slate-500'}
                   aria-hidden
-                >
-                  refresh
-                </span>
+                />
                 <span>{isFetching ? 'Loading' : 'Refresh'}</span>
               </button>
             }
@@ -255,9 +259,9 @@ function HuudBrowseInner() {
           <div className="grid grid-cols-2 gap-3">
             {view === 'street-radar' ? (
               <>
-                <StatCard icon="radar" label="Street Radar posts" value={stats.count} tone="blue" />
+                <StatCard icon={Radar} label="Street Radar posts" value={stats.count} tone="blue" />
                 <StatCard
-                  icon="favorite"
+                  icon={Heart}
                   label="Top post likes"
                   value={stats.topLikes.toLocaleString()}
                   tone="primary"
@@ -265,9 +269,9 @@ function HuudBrowseInner() {
               </>
             ) : (
               <>
-                <StatCard icon="home_pin" label="Posts shown" value={stats.count} />
+                <StatCard icon={MapPin} label="Posts shown" value={stats.count} />
                 <StatCard
-                  icon="favorite"
+                  icon={Heart}
                   label="Total reactions"
                   value={stats.totalLikes.toLocaleString()}
                   tone="blue"

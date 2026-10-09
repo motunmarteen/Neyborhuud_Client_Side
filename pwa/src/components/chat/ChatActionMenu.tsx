@@ -18,7 +18,7 @@ import { createPortal } from 'react-dom';
 import { BottomSheetDragHandle } from '@/components/ui/BottomSheetDragHandle';
 import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import { useBottomSheetDrag } from '@/hooks/useBottomSheetDrag';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { ChatMessage, ChatMessageMeta, ChatMessageType } from '@/types/api';
 import VoiceRecorder from './VoiceRecorder';
 import { getGeolocation } from '@/lib/nativeGeolocation';

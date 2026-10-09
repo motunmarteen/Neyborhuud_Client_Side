@@ -14,7 +14,17 @@ import {
   extractUserMapCoords,
   unwrapNearbyUsersPayload,
 } from '@/lib/mapUserLocation';
+import {
+  ArrowLeft,
+  Users,
+  Building2,
+  MapPinOff,
+  HelpCircle,
+  Info,
+  Sparkles,
+} from 'lucide-react';
 import { MapSelectionSheet } from '@/components/map/MapSelectionSheet';
+import { cdnImage, escapeAttr } from '@/lib/media';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -91,6 +101,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
   const [radius, setRadius] = useState<number>(5000); // 5km default
   const [layer, setLayer] = useState<'people' | 'places'>('people');
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
+  const [showEli5, setShowEli5] = useState(false);
   
   const [isActionPending, setIsActionPending] = useState(false);
 
@@ -251,6 +262,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
 
   // ─── Update Map Markers Reactively ────────────────────────────────────────────
 
+  const authUserId = authUser?.id ? String(authUser.id) : '';
   const updateMarkers = useCallback((Leaflet: typeof L) => {
     const map = mapInstanceRef.current;
     const markersGroup = markersGroupRef.current;
@@ -286,7 +298,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
     // 2. Render layer elements
     if (layer === 'people') {
       const users: FollowUser[] = unwrapNearbyUsersPayload(nearbyUsersData) as FollowUser[];
-      const selfId = authUser?.id ? String(authUser.id) : '';
+      const selfId = authUserId;
       let placed = 0;
 
       users.forEach((u) => {
@@ -303,7 +315,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
 
         const markerHtml = avatarSrc
           ? `<div class="user-map-marker relative w-10 h-10 rounded-full border-2 border-primary overflow-hidden bg-white shadow-lg flex items-center justify-center">
-               <img src="${avatarSrc}" alt="${u.username}" class="w-full h-full object-cover" />
+               <img src="${escapeAttr(cdnImage(avatarSrc, 96))}" alt="${escapeAttr(String(u.username ?? ''))}" class="w-full h-full object-cover" />
              </div>`
           : `<div class="user-map-marker relative w-10 h-10 rounded-full border-2 border-primary bg-gradient-to-br from-primary to-brand-green-dark text-white text-[11px] font-extrabold flex items-center justify-center shadow-lg">
                ${initials}
@@ -370,7 +382,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         marker.addTo(markersGroup);
       });
     }
-  }, [userCoords, layer, nearbyUsersData, placesData, authUser?.id]);
+  }, [userCoords, layer, nearbyUsersData, placesData, authUserId]);
 
   // Sync markers when Leaflet is ready or dataset updates
   useEffect(() => {
@@ -448,14 +460,14 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
       <div ref={mapContainerRef} className="absolute inset-0 z-0" />
 
       {/* ─── Header Elements overlay ─── */}
-      <div className="absolute top-4 left-4 right-4 z-10 pointer-events-none flex justify-between items-center">
+      <div className="absolute top-4 left-4 right-4 z-10 pointer-events-none flex justify-between items-center gap-2">
         {!embedded && (
           <button
             onClick={() => router.back()}
-            className="pointer-events-auto w-11 h-11 rounded-full bg-white/90 border border-black/[0.08] flex items-center justify-center text-brand-black backdrop-blur-md shadow-lg active:scale-95 transition-all"
+            className="pointer-events-auto w-11 h-11 rounded-2xl bg-white/95 dark:bg-[#12161A]/95 border border-black/[0.08] dark:border-white/[0.08] flex items-center justify-center text-slate-800 dark:text-white backdrop-blur-md shadow-lg active:scale-95 transition-all"
             aria-label="Go back"
           >
-            <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+            <ArrowLeft size={20} />
           </button>
         )}
 
@@ -463,37 +475,78 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         <div
           role="tablist"
           aria-label="Map layer"
-          className={`pointer-events-auto bg-white/90 border border-black/[0.08] rounded-full p-1 shadow-lg backdrop-blur-md flex gap-0.5 ${embedded ? 'mx-auto' : ''}`}
+          className={`pointer-events-auto bg-white/95 dark:bg-[#12161A]/95 border border-black/[0.08] dark:border-white/[0.08] rounded-2xl p-1 shadow-lg backdrop-blur-md flex gap-1 ${embedded ? 'mx-auto' : ''}`}
         >
           <button
             type="button"
             role="tab"
             aria-selected={layer === 'people' ? 'true' : 'false'}
             onClick={() => { setLayer('people'); setSelectedItem(null); }}
-            className={`segmented-tab ${layer === 'people' ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold active:scale-[0.97]`}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
+              layer === 'people'
+                ? 'bg-[#00C830] text-white shadow-sm shadow-[#00C830]/20'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
           >
-            <span className="material-symbols-outlined text-[16px] fill-1">group</span>
-            People
+            <Users size={15} />
+            <span>Neighbors</span>
           </button>
           <button
             type="button"
             role="tab"
             aria-selected={layer === 'places' ? 'true' : 'false'}
             onClick={() => { setLayer('places'); setSelectedItem(null); }}
-            className={`segmented-tab ${layer === 'places' ? 'segmented-tab--active' : 'segmented-tab--inactive'} flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold active:scale-[0.97]`}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
+              layer === 'places'
+                ? 'bg-[#00C830] text-white shadow-sm shadow-[#00C830]/20'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
           >
-            <span className="material-symbols-outlined text-[16px] fill-1">location_city</span>
-            Places
+            <Building2 size={15} />
+            <span>Places</span>
           </button>
         </div>
 
-        {!embedded && <div className="w-11" />}
+        {/* Top-Right ELI5 button */}
+        {!embedded ? (
+          <button
+            type="button"
+            onClick={() => setShowEli5(!showEli5)}
+            className="pointer-events-auto w-11 h-11 rounded-2xl bg-white/95 dark:bg-[#12161A]/95 border border-black/[0.08] dark:border-white/[0.08] flex items-center justify-center text-slate-700 dark:text-slate-300 backdrop-blur-md shadow-lg active:scale-95 transition-all"
+            title="Explain Like I'm 5"
+            aria-label="Explain Discovery Map"
+          >
+            <HelpCircle size={18} />
+          </button>
+        ) : null}
       </div>
+
+      {/* ─── ELI5 Explanation Card Banner ─── */}
+      {showEli5 && (
+        <div className="absolute top-18 left-4 right-4 z-20 bg-emerald-50 dark:bg-emerald-950/90 border border-emerald-200/80 dark:border-emerald-800/60 rounded-3xl p-4 shadow-xl backdrop-blur-md text-xs text-emerald-950 dark:text-emerald-100 flex items-start gap-3">
+          <Info size={18} className="text-[#00C830] shrink-0 mt-0.5" />
+          <div className="flex-1 space-y-1">
+            <p className="font-extrabold text-emerald-900 dark:text-emerald-200 text-sm">
+              Vector Discovery Radar
+            </p>
+            <p className="leading-relaxed">
+              This map clusters active residents, verified artisans, and local businesses within your selected radius. Exact doorstep coordinates are masked for privacy using 2dsphere differential offsets.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowEli5(false)}
+            className="text-xs font-black text-emerald-800 dark:text-emerald-300 hover:underline px-1 py-0.5"
+          >
+            Got it
+          </button>
+        </div>
+      )}
 
       {/* ─── Location Status / Access Alert ─── */}
       {locationStatus === 'error' && (
-        <div className="absolute top-18 left-4 right-4 z-10 bg-brand-red/90 border border-brand-red text-white p-3 rounded-2xl shadow-xl flex items-start gap-2.5 backdrop-blur-md">
-          <span className="material-symbols-outlined shrink-0 text-[20px]">location_off</span>
+        <div className="absolute top-18 left-4 right-4 z-10 bg-rose-600/95 border border-rose-500 text-white p-3.5 rounded-3xl shadow-xl flex items-start gap-2.5 backdrop-blur-md">
+          <MapPinOff size={20} className="shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="text-xs font-bold">Location Permission Denied</p>
             <p className="text-[11px] opacity-90 mt-0.5 leading-tight">
@@ -502,7 +555,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
           </div>
           <button
             onClick={requestLocation}
-            className="text-xs font-black uppercase tracking-wider bg-white/20 hover:bg-white/30 px-2.5 py-1 rounded-xl transition-colors"
+            className="text-xs font-black uppercase tracking-wider bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-xl transition-colors"
           >
             Retry
           </button>

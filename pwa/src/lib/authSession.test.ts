@@ -65,17 +65,19 @@ describe('resolvePostAuthRoute', () => {
     vi.mocked(getNeedsGpsLocationVerification).mockReturnValue(false);
   });
 
-  it('prioritizes community selection gate', () => {
+  // "Instant access" onboarding (tracker 1.3): post-auth routing no longer
+  // detours through community / GPS gates — the feed surfaces them inline.
+  it('does not detour through the community gate any more', () => {
     vi.mocked(getNeedsCommunitySelection).mockReturnValue(true);
-    expect(resolvePostAuthRoute('/admin')).toBe('/pick-community');
+    expect(resolvePostAuthRoute('/admin')).toBe('/admin');
   });
 
   it('honors safe next when no gates', () => {
     expect(resolvePostAuthRoute('/admin')).toBe('/admin');
   });
 
-  it('falls back to setup-complete', () => {
-    expect(resolvePostAuthRoute()).toBe('/setup-complete');
+  it('falls back to the feed', () => {
+    expect(resolvePostAuthRoute()).toBe('/feed');
   });
 });
 

@@ -3,18 +3,32 @@
 import { Suspense, useMemo, useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Menu, X, Settings, ChevronDown } from 'lucide-react';
+import {
+  Menu,
+  Search,
+  MapPin,
+  ChevronDown,
+  ChevronLeft,
+  Plus,
+  PlusSquare,
+  PenSquare,
+  Megaphone,
+  ShieldAlert,
+  BarChart2,
+  Calendar,
+  HandHeart,
+  ShoppingBag,
+  Gift,
+  Bell,
+  Sparkles,
+} from 'lucide-react';
 
-import { NeyborHuudLogo, AnimatedNeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
-import { AppNavIcon } from '@/components/navigation/AppNavIcon';
+import { AnimatedNeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { useUnreadCount } from '@/hooks/useNotifications';
-import { useScrollHideBottomNav, useIsScrolled, scrollToTop } from '@/hooks/useScrollHideBottomNav';
+import { useScrollHideBottomNav, useIsScrolled } from '@/hooks/useScrollHideBottomNav';
 import { useAuth } from '@/hooks/useAuth';
-import { PostCardMenuIcon } from '@/components/feed/PostCardMenuIcon';
-import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
-import { resolveProfileDisplayName, getGuestUsername, getGuestDisplayName } from '@/lib/profileSnapHelpers';
-import { resolveProfileAvatarInitial, resolveUserAvatarUrl } from '@/lib/userAvatar';
+import { useHuudDisplayName } from '@/hooks/useHuudDisplayName';
+import { useMyGamificationStats } from '@/hooks/useGamification';
 
 type TopNavOrigin = 'page' | 'global';
 
@@ -26,6 +40,58 @@ function titleCaseFromSegment(segment: string) {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
 }
+
+const CREATE_MENU_OPTIONS = [
+  {
+    key: 'post',
+    label: 'Post',
+    subtitle: 'Share photos, news or thoughts',
+    icon: PenSquare,
+    color: 'text-sky-600 bg-sky-50 dark:text-sky-400 dark:bg-sky-500/15',
+  },
+  {
+    key: 'fyi',
+    label: 'FYI Alert',
+    subtitle: 'Power, road, or utility notice',
+    icon: Megaphone,
+    color: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-500/15',
+  },
+  {
+    key: 'emergency',
+    label: 'Safety Report',
+    subtitle: 'Urgent incident or hazard alert',
+    icon: ShieldAlert,
+    color: 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-500/15',
+  },
+  {
+    key: 'poll',
+    label: 'Community Poll',
+    subtitle: 'Ask neighbors to vote on a decision',
+    icon: BarChart2,
+    color: 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/15',
+  },
+  {
+    key: 'event',
+    label: 'Huud Event',
+    subtitle: 'Plan a gathering, patrol or meeting',
+    icon: Calendar,
+    color: 'text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-500/15',
+  },
+  {
+    key: 'help_request',
+    label: 'Help Request',
+    subtitle: 'Request a tool, ride or hand',
+    icon: HandHeart,
+    color: 'text-pink-600 bg-pink-50 dark:text-pink-400 dark:bg-pink-500/15',
+  },
+  {
+    key: 'marketplace',
+    label: 'Marketplace',
+    subtitle: 'Buy, sell or giveaway items',
+    icon: ShoppingBag,
+    color: 'text-teal-600 bg-teal-50 dark:text-teal-400 dark:bg-teal-500/15',
+  },
+];
 
 function getRouteTitle(pathname: string) {
   const parts = pathname.split('?')[0].split('#')[0].split('/').filter(Boolean);
@@ -48,6 +114,7 @@ function getRouteTitle(pathname: string) {
   }
 
   const map: Record<string, string> = {
+    feed: 'Huud Feed',
     friendship: 'Connections',
     marketplace: 'Marketplace',
     communities: 'Communities',
@@ -58,8 +125,8 @@ function getRouteTitle(pathname: string) {
     jobs: 'Jobs',
     notifications: 'Notifications',
     settings: 'Settings',
-    safety: 'Sentinel AI',
-    sentinel: 'Sentinel AI',
+    safety: 'Sentinel Radar',
+    sentinel: 'Sentinel Radar',
     map: 'Discovery',
     explore: 'Explore',
     popular: 'My Huud',
@@ -72,6 +139,7 @@ function getRouteTitle(pathname: string) {
     profile: 'Profile',
     gamification: 'Huud Economy',
     'huud-economy': 'Huud Economy',
+    rewards: 'Rewards & Streaks',
   };
 
   if (map[segment]) return map[segment];
@@ -82,290 +150,210 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
   const pathname = usePathname();
   const router = useRouter();
   const isOnFeed = pathname === '/feed' || pathname === '/';
-  const title = useMemo(() => (pathname ? getRouteTitle(pathname) : 'NeyborHuud'), [pathname]);
+  const title = useMemo(() => (pathname ? getRouteTitle(pathname) : 'Huud Feed'), [pathname]);
   const { data: unreadCount = 0 } = useUnreadCount(undefined, 'message');
+  const { data: stats } = useMyGamificationStats();
   const scrollHidden = useScrollHideBottomNav();
-  const isScrolled = useIsScrolled(60);
-  const { user, logout } = useAuth();
-  
+  const { user } = useAuth();
+  const huudName = useHuudDisplayName(user);
+
   const [mounted, setMounted] = useState(false);
+  const [balanceUnit, setBalanceUnit] = useState<'ngn' | 'coins'>('ngn');
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const profileHref = mounted && user?.username ? `/profile/${user.username}` : '/settings';
+  const huudCoins = stats?.totalHuudCoins ?? 150;
+  const balanceDisplay =
+    balanceUnit === 'ngn'
+      ? `₦${(huudCoins * 25).toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+      : `${huudCoins} HC`;
 
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownContainerRef = useRef<HTMLDivElement>(null);
-
-  const handle = (user?.username ?? getGuestUsername()).trim().toLowerCase();
-  const resolvedAvatar = resolveUserAvatarUrl(user);
-  const displayName = user ? resolveProfileDisplayName(user, handle) : getGuestDisplayName();
-  const initial = resolveProfileAvatarInitial(user, handle);
-
-  useEffect(() => {
-    if (!showDropdown) return;
-    function handleClickOutside(event: MouseEvent | TouchEvent) {
-      if (
-        dropdownContainerRef.current &&
-        !dropdownContainerRef.current.contains(event.target as Node)
-      ) {
-        setShowDropdown(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [showDropdown]);
-
-  const handleLogout = async () => {
-    try {
-      setShowDropdown(false);
-      try {
-        await logout();
-      } catch (error) {
-        console.warn('Backend logout failed, but clearing local session:', error);
-        localStorage.removeItem('neyborhuud_token');
-        localStorage.removeItem('neyborhuud_user');
-      }
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-      localStorage.removeItem('neyborhuud_token');
-      localStorage.removeItem('neyborhuud_user');
-      router.push('/login');
-    }
+  const openMobileSidebar = () => {
+    window.dispatchEvent(new CustomEvent('toggle-mobile-sidebar'));
   };
 
-  // If we are on the feed, and the nav is either at the top OR it is currently hiding,
-  // keep the transparent sky overlay so it doesn't flash solid white as it slides away.
-  const skyOverlay = isOnFeed && (!isScrolled || scrollHidden);
+  const [createMenuOpen, setCreateMenuOpen] = useState(false);
+  const createMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!createMenuOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (createMenuRef.current && !createMenuRef.current.contains(e.target as Node)) {
+        setCreateMenuOpen(false);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setCreateMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [createMenuOpen]);
+
+  const handleSelectCreateType = (contentType?: string) => {
+    setCreateMenuOpen(false);
+    window.dispatchEvent(
+      new CustomEvent('open-create-post', {
+        detail: { contentType },
+      })
+    );
+  };
 
   return (
     <>
-    <div
-      className={`app-topnav-host${skyOverlay ? ' app-topnav-host--sky-overlay' : ''}${scrollHidden ? ' app-topnav-host--hidden' : ''}`}
-      data-topnav-host="1"
-    >
-    <header
-      data-topnav="1"
-      data-topnav-origin={origin}
-      className={`app-topnav ${skyOverlay ? 'app-topnav--sky' : 'app-topnav--solid'}`}
-    >
-
-
-      {isOnFeed ? (
-        <div className="relative flex items-center min-w-0 pl-3 md:pl-4 gap-1.5" ref={dropdownContainerRef}>
-          <div className="flex items-center gap-1">
-            <div className="flex-shrink-0 cursor-pointer select-none" onClick={() => router.push('/feed')}>
-              <AnimatedNeyborHuudLogo tone={skyOverlay ? 'light' : 'primary'} />
-            </div>
+      <div
+        className={`w-full sticky top-2 sm:top-3 z-40 transition-transform duration-200 px-2.5 sm:px-4 pointer-events-none ${
+          scrollHidden ? '-translate-y-24' : 'translate-y-0'
+        }`}
+        data-topnav-host="1"
+      >
+        <header
+          data-topnav="1"
+          data-topnav-origin={origin}
+          className="pointer-events-auto max-w-4xl mx-auto h-12 sm:h-13 pl-2 sm:pl-3.5 pr-2 sm:pr-3 rounded-full bg-white/92 backdrop-blur-2xl border border-black/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-between gap-1 sm:gap-3 select-none"
+        >
+          {/* ZONE 1 (LEFT): Menu + Brand / Location */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Mobile Sidebar Hamburger Toggle */}
             <button
               type="button"
-              onClick={() => setShowDropdown(!showDropdown)}
-              className={`flex items-center justify-center cursor-pointer focus:outline-none select-none transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''} ${skyOverlay ? 'text-white/80 hover:text-white' : 'text-brand-black/60 dark:text-white/60 hover:text-brand-black dark:hover:text-white'}`}
-              aria-expanded={showDropdown}
-              aria-haspopup="true"
-              aria-label="Toggle menu"
+              onClick={openMobileSidebar}
+              className="lg:hidden p-1 sm:p-1.5 rounded-full text-slate-700 hover:text-slate-900 hover:bg-black/5 transition-colors cursor-pointer"
+              aria-label="Open sidebar menu"
             >
-              <ChevronDown className="w-4 h-4 ml-0.5" />
+              <Menu size={18} />
             </button>
-          </div>
-          
-          {showDropdown && (
-            <>
-              <div
-                className="fixed inset-0 z-[90] bg-transparent"
-                onClick={() => setShowDropdown(false)}
-                onTouchStart={() => setShowDropdown(false)}
-              />
-              <div
-                className="fixed top-[72px] inset-x-1.5 mx-auto max-w-[400px] z-[100] overflow-hidden rounded-none border border-black/5 bg-white dark:bg-[#1c221e] p-3 shadow-[0_30px_60px_rgba(0,0,0,0.2)] pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-200"
-              >
-              <div className="mb-2 flex items-center justify-between px-2">
-                {user ? (
-                  <Link
-                    href={profileHref}
-                    onClick={() => setShowDropdown(false)}
-                    className="flex items-center gap-3 hover:opacity-90 transition-opacity"
-                  >
-                    {/* Custom Clipped Map Pin */}
-                    <div className="relative h-[72px] w-[58px] shrink-0 group-hover:scale-105 transition-transform">
-                      <svg 
-                        viewBox="0 0 40 50" 
-                        fill="none" 
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="absolute inset-0 h-full w-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.15)]"
-                      >
-                        <defs>
-                          <clipPath id="pin-clip">
-                            <path d="M20 0C8.954 0 0 8.954 0 20C0 35 20 50 20 50C20 50 40 35 40 20C40 8.954 31.046 0 20 0Z" />
-                          </clipPath>
-                        </defs>
-                        
-                        <foreignObject x="0" y="0" width="40" height="50" clipPath="url(#pin-clip)">
-                          <div className="relative h-full w-full bg-gray-100 dark:bg-gray-800">
-                            {resolvedAvatar ? (
-                              <Image
-                                src={resolvedAvatar}
-                                alt={displayName}
-                                fill
-                                sizes="40px"
-                                className="object-cover object-center"
-                              />
-                            ) : (
-                              <div className="flex h-[40px] w-full items-center justify-center text-[18px] font-semibold text-gray-500">
-                                {initial}
-                              </div>
-                            )}
-                          </div>
-                        </foreignObject>
 
-                        {/* Thin crisp border around the pin */}
-                        <path 
-                          d="M20 1C9.507 1 1 9.507 1 20C1 34.256 19.06 48.163 20 48.914C20.94 48.163 39 34.256 39 20C39 9.507 30.493 1 20 1Z" 
-                          stroke="currentColor" 
-                          strokeWidth="2"
-                          className="text-white dark:text-black/10"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex flex-col min-w-0 max-w-[160px]">
-                      <span className="font-semibold text-[15px] text-brand-black dark:text-white truncate">
-                        {displayName}
-                      </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        @{handle}
-                      </span>
-                    </div>
-                  </Link>
-                ) : (
-                  <div className="w-10"></div>
-                )}
-
-                <Link
-                  href="/settings"
-                  onClick={() => setShowDropdown(false)}
-                  className="flex items-center justify-center text-brand-black dark:text-white hover:opacity-80 transition-opacity shrink-0"
-                  aria-label="Settings"
-                >
-                  <Settings 
-                    className="h-[30px] w-[30px]" 
-                    strokeWidth={1.5}
-                    style={{ animation: 'spin 12s linear infinite' }}
-                  />
+            {/* Mobile Logo / Desktop Location Breadcrumb */}
+            {isOnFeed ? (
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Link href="/feed" className="flex items-center focus:outline-none">
+                  <AnimatedNeyborHuudLogo tone="primary" />
                 </Link>
-              </div>
-              
-              {/* Inner Gray Container for Grid Menu */}
-              <div className="bg-[#f5f7f5] dark:bg-[#141a16] rounded-none py-3 px-4 mb-0 -mx-3">
-                <div className="grid grid-cols-3 gap-y-3 gap-x-2">
-                  <Link
-                    href="/marketplace"
-                    onClick={() => setShowDropdown(false)}
-                    className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
-                  >
-                    <span className="material-symbols-outlined text-[#007AFF]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>shopping_bag</span>
-                    <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Marketplace</span>
-                  </Link>
 
-                  <Link
-                    href="/jobs"
-                    onClick={() => setShowDropdown(false)}
-                    className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
-                  >
-                    <span className="material-symbols-outlined text-[#FF9500]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>work</span>
-                    <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Work</span>
-                  </Link>
-
-                  <Link
-                    href="/events"
-                    onClick={() => setShowDropdown(false)}
-                    className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
-                  >
-                    <span className="material-symbols-outlined text-[#AF52DE]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>local_activity</span>
-                    <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Events</span>
-                  </Link>
-
-                  <Link
-                    href="/fyi"
-                    onClick={() => setShowDropdown(false)}
-                    className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
-                  >
-                    <span className="material-symbols-outlined text-[#FFCC00]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>campaign</span>
-                    <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">FYI Bulletin</span>
-                  </Link>
-
-                  <Link
-                    href="/help-request"
-                    onClick={() => setShowDropdown(false)}
-                    className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
-                  >
-                    <span className="material-symbols-outlined text-[#34C759]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>volunteer_activism</span>
-                    <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Help Request</span>
-                  </Link>
-
-                  <Link
-                    href="/sos"
-                    onClick={() => setShowDropdown(false)}
-                    className="flex flex-col items-center gap-1 group transition-transform hover:scale-105"
-                  >
-                    <span className="material-symbols-outlined text-[#FF3B30]" style={{ fontSize: '38px', fontVariationSettings: "'wght' 300" }}>gpp_maybe</span>
-                    <span className="text-[13px] font-semibold text-brand-black dark:text-white tracking-wide whitespace-nowrap">Safety Alert</span>
-                  </Link>
+                <div suppressHydrationWarning className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/[0.04] border border-black/[0.06] text-xs font-bold text-slate-900">
+                  <MapPin size={12} className="text-[#008A20] shrink-0" />
+                  <span suppressHydrationWarning className="truncate max-w-[130px] lg:max-w-[180px]">
+                    {huudName !== 'your neighborhood' && huudName ? huudName : 'Lekki Phase 1'}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00D431] animate-pulse ml-0.5" />
                 </div>
               </div>
-
-              {/* Bottom Actions */}
-              <div className="mt-3 flex items-center justify-between px-1">
-                <Link
-                  href="/help-center"
-                  onClick={() => setShowDropdown(false)}
-                  className="flex items-center gap-2 rounded-lg px-2 py-2 text-[14px] font-medium text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'wght' 300" }} aria-hidden="true">support_agent</span>
-                  <span>Help Center</span>
-                </Link>
-                
+            ) : (
+              <div className="flex items-center gap-1 sm:gap-1.5">
                 <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 rounded-lg px-2 py-2 text-[14px] font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                  type="button"
+                  onClick={() => router.back()}
+                  className="p-1 rounded-full text-slate-900 hover:bg-black/5 transition-colors cursor-pointer"
+                  aria-label="Back"
                 >
-                  <span>Logout</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'wght' 300" }} aria-hidden="true">logout</span>
+                  <ChevronLeft size={19} />
                 </button>
+                <h1 className="text-sm sm:text-base font-black text-slate-900 truncate max-w-[120px] sm:max-w-xs">
+                  {title}
+                </h1>
               </div>
+            )}
+          </div>
+
+          {/* ZONE 2 (CENTER): Rewards / HuudCoins Pill (Modeled after game balance capsule) */}
+          <Link
+            href="/rewards"
+            className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-black/[0.04] hover:bg-black/[0.08] border border-black/[0.06] text-[11px] sm:text-xs font-bold text-slate-800 transition-all active:scale-95 group shadow-xs shrink-0 cursor-pointer"
+            title="Huud Economy & Daily Rewards"
+          >
+            <Gift size={13} className="text-amber-500 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="font-extrabold text-[10px] sm:text-xs text-[#008A20]">{huudCoins} HC</span>
+            <span className="hidden min-[360px]:inline-block w-1.5 h-1.5 rounded-full bg-[#00D431] animate-pulse" />
+          </Link>
+
+          {/* ZONE 3 (RIGHT): Search + Bell + Circular Green (+) Button + Avatar */}
+          <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
+            {/* Quick Search */}
+            <button
+              type="button"
+              onClick={() => router.push('/explore')}
+              className="p-1 sm:p-1.5 rounded-full text-slate-700 hover:text-slate-900 hover:bg-black/5 transition-colors cursor-pointer"
+              aria-label="Search"
+              title="Search"
+            >
+              <Search size={16} />
+            </button>
+
+            {/* Notification Bell */}
+            <Link
+              href="/notifications"
+              className="relative p-1 sm:p-1.5 rounded-full text-slate-700 hover:text-slate-900 hover:bg-black/5 transition-colors cursor-pointer"
+              aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
+              title="Notifications"
+            >
+              <Bell size={16} />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              )}
+            </Link>
+
+            {/* Vibrant Green Circular (+) Create Button with Facebook/Instagram Popover */}
+            <div className="relative" ref={createMenuRef}>
+              <button
+                type="button"
+                onClick={() => setCreateMenuOpen((prev) => !prev)}
+                className={`size-7 sm:size-8 rounded-full bg-[#00D431] hover:bg-[#00FF3E] text-slate-950 font-black shadow-sm flex items-center justify-center transition-transform active:scale-90 cursor-pointer shrink-0 ${
+                  createMenuOpen ? 'ring-2 ring-[#00D431]/40' : ''
+                }`}
+                aria-label="Create post or alert"
+                aria-expanded={createMenuOpen}
+                title="Create"
+              >
+                <Plus size={17} strokeWidth={2.8} />
+              </button>
+
+              {/* Popover Menu */}
+              {createMenuOpen && (
+                <div
+                  className="absolute right-0 top-full mt-2 w-56 sm:w-64 bg-white/95 dark:bg-[#242526] text-slate-800 dark:text-[#E4E6EB] border border-black/[0.08] dark:border-[#3E4042] rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.14)] dark:shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl select-none"
+                  role="menu"
+                >
+                  <div className="px-3 py-1.5 mb-1 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-white/50 border-b border-black/[0.06] dark:border-white/10">
+                    Create
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    {CREATE_MENU_OPTIONS.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => handleSelectCreateType(item.key)}
+                          className="w-full px-2.5 py-2 rounded-xl flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-[#3A3B3C] active:bg-slate-200 dark:active:bg-[#4E4F50] transition-colors text-left group cursor-pointer"
+                          role="menuitem"
+                        >
+                          <div className={`p-1.5 rounded-lg shrink-0 ${item.color}`}>
+                            <Icon size={16} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight leading-tight">
+                              {item.label}
+                            </p>
+                            <p className="text-[11px] text-slate-500 dark:text-white/60 truncate leading-tight mt-0.5">
+                              {item.subtitle}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="flex shrink-0 items-center min-w-0 pl-6">
-          <h1 className="app-topnav__title truncate">{title}</h1>
-        </div>
-      )}
-
-      <div className="flex-1" />
-
-      <div className="app-topnav__actions pr-6">
-        <Link
-          href="/notifications"
-          className="app-topnav__action"
-          aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
-        >
-          <AppNavIcon name="notifications" />
-          {unreadCount > 0 && (
-            <span className="app-topnav__badge" aria-hidden="true">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
-          )}
-        </Link>
+          </div>
+        </header>
       </div>
-    </header>
-    </div>
     </>
   );
 }

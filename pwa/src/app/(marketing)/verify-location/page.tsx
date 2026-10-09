@@ -17,6 +17,8 @@ import { getPostSetupRoute, hasCompletedProductTour } from '@/lib/onboarding';
 import { getAuthSetupProgress } from '@/lib/authSetupFlow';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthSheetStageHeader } from '@/components/auth/AuthSheetStageHeader';
+import { Eli5Tooltip } from '@/components/ui/Eli5Tooltip';
+import { MapPin, ChevronUp, ArrowRight, Info, Lightbulb, Loader2 } from 'lucide-react';
 
 export default function VerifyLocationPage() {
   const router = useRouter();
@@ -97,6 +99,21 @@ export default function VerifyLocationPage() {
         return;
       }
       const data = res.data;
+
+      // NIPOST NDAPS: Automatically resolve physical building and verify address
+      try {
+        const nipostRes = await geoService.resolveNipostBuilding(loc.lat, loc.lng);
+        if (nipostRes.success && nipostRes.data?.building) {
+          await geoService.verifyUserBuilding({
+            postcode: nipostRes.data.building.digitalPostcode,
+            latitude: loc.lat,
+            longitude: loc.lng,
+          });
+        }
+      } catch {
+        // Non-blocking: community GPS verification still succeeds
+      }
+
       if (data?.alreadyVerified) {
         clearGpsVerificationGate();
         await authService.syncCommunityFromProfile();
@@ -137,14 +154,14 @@ export default function VerifyLocationPage() {
       peek={
         <div className="auth-signup-location-peek">
           <span className="auth-signup-location-peek__icon" aria-hidden>
-            <span className="material-symbols-outlined" aria-hidden="true">my_location</span>
+            <MapPin size={18} strokeWidth={2} />
           </span>
           <div className="min-w-0 flex-1">
             <p className="auth-signup-location-peek__label">Verify location</p>
             <p className="auth-signup-location-peek__name truncate">{communityName}</p>
           </div>
           <span className="auth-signup-location-peek__chevron" aria-hidden>
-            <span className="material-symbols-outlined" aria-hidden="true">expand_less</span>
+            <ChevronUp size={16} strokeWidth={2} />
           </span>
         </div>
       }
@@ -154,17 +171,17 @@ export default function VerifyLocationPage() {
             type="button"
             disabled={submitting || !communityId}
             onClick={() => void handleVerify()}
-            className="auth-btn auth-btn-primary"
+            className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
           >
             {submitting ? (
               <>
-                <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                <Loader2 size={16} strokeWidth={2} className="shrink-0 animate-spin" />
                 <span>Checking location…</span>
               </>
             ) : (
               <>
                 <span>Use my current location</span>
-                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
               </>
             )}
           </button>
@@ -172,7 +189,7 @@ export default function VerifyLocationPage() {
       }
     >
       <AuthSheetStageHeader
-        icon="my_location"
+        icon={MapPin}
         eyebrow="Almost there"
         title="Confirm your area"
         meta={communityName}
@@ -181,21 +198,30 @@ export default function VerifyLocationPage() {
       />
 
       <div className="auth-signup-sheet-fields flex flex-col gap-3">
-        <div className="auth-flow-notice auth-flow-notice--info">
-          <span className="material-symbols-outlined shrink-0" aria-hidden="true">info</span>
-          <span>
-            Your device location is compared to a reference point for{' '}
-            <strong className="text-brand-black">{communityName}</strong> (LGA centroid or map center), within a
-            generous radius. No location data is stored.
-          </span>
+        <div className="auth-flow-notice auth-flow-notice--info flex items-start gap-2">
+          <Info size={16} strokeWidth={2} className="shrink-0 mt-0.5 text-blue-500" />
+          <div className="flex-1">
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="font-bold text-xs">Privacy Guaranteed</span>
+              <Eli5Tooltip
+                title="GPS Verification"
+                explanation="We only compare your phone's general area to the estate gate once to make sure you belong here. We do not store or track your exact home address."
+              />
+            </div>
+            <span>
+              Your device location is compared to a reference point for{' '}
+              <strong className="text-brand-black dark:text-white">{communityName}</strong> (LGA centroid or map center), within a
+              generous radius. No location data is stored.
+            </span>
+          </div>
         </div>
 
-        <div className="auth-flow-notice auth-flow-notice--info">
-          <span className="material-symbols-outlined shrink-0 text-status-warning" aria-hidden="true">lightbulb</span>
+        <div className="auth-flow-notice auth-flow-notice--info flex items-start gap-2">
+          <Lightbulb size={16} strokeWidth={2} className="shrink-0 mt-0.5 text-amber-500" />
           <span>
             Seeing &ldquo;too far&rdquo;? Try moving near a window or stepping outside. Admins can adjust area
             boundaries after running{' '}
-            <code className="rounded bg-black/5 px-1 text-[10px]">seed:communities</code>.
+            <code className="rounded bg-black/5 dark:bg-white/10 px-1 text-[10px]">seed:communities</code>.
           </span>
         </div>
 

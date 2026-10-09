@@ -11,7 +11,7 @@
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { chatService } from '@/services/chat.service';
 import { followService } from '@/services/follow.service';
 import { useAuth } from '@/hooks/useAuth';

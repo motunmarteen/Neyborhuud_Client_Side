@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
+import { User, Zap, Camera, Send, Smile, X, Bell, MapPin, ShieldCheck, CheckCircle2, XCircle } from 'lucide-react';
 import { useCommentMutations } from '@/hooks/useComments';
 import { useAuth } from '@/hooks/useAuth';
 import { usePostMutations } from '@/hooks/usePosts';
@@ -55,11 +56,11 @@ export const CommentForm: React.FC<CommentFormProps> = ({
     };
 
     const emergencyActionDefs = post?.contentType === 'emergency' && !parentId ? [
-        { key: 'aware', icon: 'notifications_active', label: 'Aware', active: post.isAware, colorClass: 'text-brand-blue', bgClass: 'bg-brand-blue/10', borderClass: 'border-brand-blue/20', accentClass: 'bg-brand-blue/40' },
-        { key: 'nearby', icon: 'location_on', label: 'Nearby', active: post.isNearby, colorClass: 'text-brand-red', bgClass: 'bg-brand-red/10', borderClass: 'border-brand-red/20', accentClass: 'bg-brand-red/40' },
-        { key: 'safe', icon: 'shield', label: 'Safe', active: post.isSafe, colorClass: 'text-brand-green', bgClass: 'bg-brand-green/10', borderClass: 'border-brand-green/20', accentClass: 'bg-brand-green/40' },
-        { key: 'confirm', icon: 'check_circle', label: 'Confirm', active: post.confirmDisputeAction === 'confirm', colorClass: 'text-primary', bgClass: 'bg-primary/10', borderClass: 'border-primary/20', accentClass: 'bg-primary/40' },
-        { key: 'dispute', icon: 'cancel', label: 'Dispute', active: post.confirmDisputeAction === 'dispute', colorClass: 'text-brand-red', bgClass: 'bg-brand-red/10', borderClass: 'border-brand-red/20', accentClass: 'bg-brand-red/40' },
+        { key: 'aware', Icon: Bell, label: 'Aware', active: post.isAware, colorClass: 'text-brand-blue', bgClass: 'bg-brand-blue/10', borderClass: 'border-brand-blue/20', accentClass: 'bg-brand-blue/40' },
+        { key: 'nearby', Icon: MapPin, label: 'Nearby', active: post.isNearby, colorClass: 'text-brand-red', bgClass: 'bg-brand-red/10', borderClass: 'border-brand-red/20', accentClass: 'bg-brand-red/40' },
+        { key: 'safe', Icon: ShieldCheck, label: 'Safe', active: post.isSafe, colorClass: 'text-brand-green', bgClass: 'bg-brand-green/10', borderClass: 'border-brand-green/20', accentClass: 'bg-brand-green/40' },
+        { key: 'confirm', Icon: CheckCircle2, label: 'Confirm', active: post.confirmDisputeAction === 'confirm', colorClass: 'text-primary', bgClass: 'bg-primary/10', borderClass: 'border-primary/20', accentClass: 'bg-primary/40' },
+        { key: 'dispute', Icon: XCircle, label: 'Dispute', active: post.confirmDisputeAction === 'dispute', colorClass: 'text-brand-red', bgClass: 'bg-brand-red/10', borderClass: 'border-brand-red/20', accentClass: 'bg-brand-red/40' },
     ].filter(a => !post.availableActions || post.availableActions.includes(a.key)) : [];
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
@@ -112,11 +113,10 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                 onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                     e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
-                                    e.currentTarget.parentElement!.innerHTML = '<span class="material-symbols-outlined text-[16px] opacity-50">person</span>';
                                 }}
                             />
                         ) : (
-                            <span className="material-symbols-outlined text-[16px] opacity-50">person</span>
+                            <User size={16} className="opacity-50" />
                         )}
                     </div>
                 </div>
@@ -126,7 +126,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                         <div className="mb-3">
                             <div className="flex items-center justify-between mb-2.5">
                                 <span className="text-[10px] font-extrabold text-[var(--neu-text-secondary)] uppercase tracking-widest flex items-center gap-1.5 opacity-80">
-                                    <span className="material-symbols-outlined text-[14px]">bolt</span>
+                                    <Zap size={13} className="text-primary" />
                                     Quick Status Update
                                 </span>
                             </div>
@@ -157,7 +157,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                             <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 transition-colors ${
                                                 isActive ? `${a.bgClass} ${a.colorClass}` : 'bg-black/5 dark:bg-white/5 text-[var(--neu-text-secondary)] group-hover:bg-black/10 dark:group-hover:bg-white/10'
                                             }`}>
-                                                <span className="material-symbols-outlined text-[20px]">{a.icon}</span>
+                                                <a.Icon size={18} />
                                             </div>
                                             <span className={`text-[11px] font-bold tracking-tight ${isActive ? a.colorClass : 'text-[var(--neu-text)]'}`}>
                                                 {a.label}
@@ -190,7 +190,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                         onClick={() => removeMediaUrl(idx)}
                                         className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
                                     >
-                                        <span className="material-symbols-outlined text-xs">close</span>
+                                        <X size={12} />
                                     </button>
                                 </div>
                             ))}
@@ -278,7 +278,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                 title="Add photo"
                                 disabled={isCreating}
                             >
-                                <span className="material-symbols-outlined text-[20px]">photo_camera</span>
+                                <Camera size={18} />
                             </button>
 
                             {(body.trim() || mediaUrls.length > 0) ? (
@@ -291,7 +291,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                     {isCreating ? (
                                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                                     ) : (
-                                        <span className="material-symbols-outlined text-[20px] fill-1">send</span>
+                                        <Send size={18} />
                                     )}
                                 </button>
                             ) : (
@@ -301,7 +301,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                     title="Sticker"
                                     disabled={isCreating}
                                 >
-                                    <span className="material-symbols-outlined text-[20px]">sentiment_satisfied</span>
+                                    <Smile size={18} />
                                 </button>
                             )}
                         </div>
