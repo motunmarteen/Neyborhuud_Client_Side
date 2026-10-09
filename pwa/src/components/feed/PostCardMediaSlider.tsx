@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Volume2, VolumeX, ImageOff } from 'lucide-react';
+import { cdnImage, cdnVideo, cdnVideoPoster } from '@/lib/media';
 
 export type PostCardMediaItem = {
   url: string;
@@ -121,8 +122,8 @@ export function PostCardMediaSlider({
             if (el) videoRefs.current.set(index, el);
             else videoRefs.current.delete(index);
           }}
-          src={item.url}
-          poster={item.thumbnailUrl}
+          src={cdnVideo(item.url)}
+          poster={item.thumbnailUrl ? cdnImage(item.thumbnailUrl, 828) : cdnVideoPoster(item.url, 828)}
           className="post-card-media-slider__media post-card-media-slider__media--video"
           muted={muted}
           loop

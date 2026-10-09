@@ -28,6 +28,7 @@ import { formatNaira } from '@/lib/currency';
 import { chatService } from '@/services/chat.service';
 import { InteractiveMap } from '@/components/ui/InteractiveMap';
 import socketService from '@/lib/socket';
+import { cdnVideo, cdnVideoPoster } from '@/lib/media';
 
 // ─── Reply-to quoted preview (audit finding #6) ──────────────────────────────
 // Rendered above the message content when a message has a replyToPreview,
@@ -589,7 +590,8 @@ function VideoBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
     <div className="w-[280px] max-w-[80vw]">
       <video
-        src={msg.mediaUrl}
+        src={cdnVideo(msg.mediaUrl ?? '')}
+        poster={cdnVideoPoster(msg.mediaUrl ?? '', 640)}
         controls
         preload="metadata"
         playsInline

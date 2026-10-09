@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type L from 'leaflet';
 import { extractUserHomeCoords, type MapUserLike } from '@/lib/mapUserLocation';
+import { cdnImage, escapeAttr } from '@/lib/media';
 
 export type ConnectMapUser = MapUserLike & {
   username?: string;
@@ -135,7 +136,7 @@ export function ConnectMap({ users, loading, emptyLabel = 'No neighbours to show
     const addUserPin = (u: PlottedUser, lat: number, lng: number) => {
       const avatar = u.avatarUrl || u.profilePicture;
       const html = avatar
-        ? `<div class="connect-map-pin"><img src="${avatar}" alt=""/></div>`
+        ? `<div class="connect-map-pin"><img src="${escapeAttr(cdnImage(avatar, 96))}" alt=""/></div>`
         : `<div class="connect-map-pin connect-map-pin--initial">${displayName(u)[0]?.toUpperCase() ?? '?'}</div>`;
       const icon = lib.divIcon({ html, className: '', iconSize: [36, 36], iconAnchor: [18, 18] });
       const marker = lib.marker([lat, lng], { icon }).addTo(group);

@@ -5,6 +5,7 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { ApiResponse } from "@/types/api";
+import { compressImageForUpload, compressImagesForUpload } from "./media";
 
 /** Auth routes that must not send a stored Bearer token (e.g. stale session on login). */
 const PUBLIC_AUTH_PATHS = [
@@ -269,7 +270,9 @@ class ApiClient {
     fieldName: string = "file",
   ): Promise<ApiResponse<T>> {
     const formData = new FormData();
-    formData.append(fieldName, file);
+    // Photos are downscaled/re-encoded on the device first (less mobile
+    // data, faster upload, EXIF/GPS stripped). Videos pass through.
+    formData.append(fieldName, await compressImageForUpload(file));
 
     if (additionalData) {
       Object.keys(additionalData).forEach((key) => {
@@ -356,7 +359,8 @@ class ApiClient {
     onProgress?: (progress: number) => void,
   ): Promise<ApiResponse<T>> {
     const formData = new FormData();
-    files.forEach((file) => {
+    const prepared = await compressImagesForUpload(files);
+    prepared.forEach((file) => {
       formData.append("files", file);
     });
 

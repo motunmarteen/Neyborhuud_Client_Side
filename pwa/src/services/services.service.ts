@@ -5,6 +5,7 @@
 
 import apiClient from "@/lib/api-client";
 import { Service, ServiceBooking, PaginatedResponse } from "@/types/api";
+import { compressImagesForUpload } from "@/lib/media";
 
 export const servicesService = {
   /**
@@ -248,7 +249,8 @@ export const servicesService = {
     if (payload.lga) fd.append("lga", payload.lga);
     if (payload.state) fd.append("state", payload.state);
     if (payload.phone) fd.append("phone", payload.phone);
-    payload.imageFiles?.forEach((f) => fd.append("images", f));
+    // Photos downscaled/re-encoded on the device before upload.
+    (await compressImagesForUpload(payload.imageFiles ?? [])).forEach((f) => fd.append("images", f));
     return await apiClient.post<Service>("/services", fd);
   },
 
@@ -276,7 +278,8 @@ export const servicesService = {
     if (payload.availability?.days) fd.append("availability.days", payload.availability.days.join(","));
     if (payload.availability?.hours != null) fd.append("availability.hours", payload.availability.hours);
     if (payload.status) fd.append("status", payload.status);
-    payload.imageFiles?.forEach((f) => fd.append("images", f));
+    // Photos downscaled/re-encoded on the device before upload.
+    (await compressImagesForUpload(payload.imageFiles ?? [])).forEach((f) => fd.append("images", f));
     return await apiClient.put<Service>(`/services/${serviceId}`, fd);
   },
 

@@ -205,17 +205,19 @@ export function QuickSignalBar() {
             },
           });
         } else {
+          // POST /content/posts contract (createPostApiSchema): { type,
+          // content, contentType, visibility, location{latitude,longitude} }.
           await contentService.createPost({
-            title: `${preset.defaultTitle} — ${locationName}`,
-            body: `${preset.sub}. Verified via 1-Tap Quick Signal.`,
+            type: 'text',
+            content: `${preset.defaultTitle} — ${locationName}
+${preset.sub}. Reported via 1-Tap Quick Signal.`,
             contentType: 'fyi',
+            visibility: 'neighborhood',
             location: {
               latitude: lat,
               longitude: lng,
             },
-            // The backend contract is { title, body } (see content.validation
-            // createPostSchema); the CreatePostPayload type predates it.
-          } as any);
+          });
         }
       } catch (networkErr: any) {
         nhToast.error(

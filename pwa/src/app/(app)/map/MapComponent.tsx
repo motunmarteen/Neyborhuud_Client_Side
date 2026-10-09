@@ -24,6 +24,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { MapSelectionSheet } from '@/components/map/MapSelectionSheet';
+import { cdnImage, escapeAttr } from '@/lib/media';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -314,7 +315,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
 
         const markerHtml = avatarSrc
           ? `<div class="user-map-marker relative w-10 h-10 rounded-full border-2 border-primary overflow-hidden bg-white shadow-lg flex items-center justify-center">
-               <img src="${avatarSrc}" alt="${u.username}" class="w-full h-full object-cover" />
+               <img src="${escapeAttr(cdnImage(avatarSrc, 96))}" alt="${escapeAttr(String(u.username ?? ''))}" class="w-full h-full object-cover" />
              </div>`
           : `<div class="user-map-marker relative w-10 h-10 rounded-full border-2 border-primary bg-gradient-to-br from-primary to-brand-green-dark text-white text-[11px] font-extrabold flex items-center justify-center shadow-lg">
                ${initials}

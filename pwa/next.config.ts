@@ -75,13 +75,14 @@ const nextConfig: NextConfig = {
     position: "bottom-left",
   },
   images: {
-    // Static export cannot use the Next.js image optimizer (no server).
-    // Also disable in dev so slow upstream images (like picsum.photos) don't crash the optimizer.
-    unoptimized: IS_CAP || process.env.NODE_ENV === "development",
-    remotePatterns: [
-      { protocol: 'https', hostname: '**' },
-      { protocol: 'http', hostname: 'localhost' },
-    ],
+    // Every image goes through our custom loader: Cloudinary uploads are
+    // resized + converted (AVIF/WebP, auto quality) by Cloudinary's CDN, in
+    // the web build AND the static Capacitor build. This replaces Next's
+    // own optimizer, which can't run in the native app and, with the old
+    // `hostname: "**"` allow-list, let anyone use our Vercel account to
+    // optimise arbitrary internet images.
+    loader: "custom",
+    loaderFile: "./src/lib/imageLoader.ts",
   },
   // redirects() is unsupported by `output: 'export'`. Keep it only for the
   // web/server build; the native build handles /messages client-side.
