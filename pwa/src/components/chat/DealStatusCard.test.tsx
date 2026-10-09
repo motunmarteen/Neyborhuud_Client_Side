@@ -25,7 +25,7 @@ vi.mock('@/services/chat.service', () => ({
 }));
 
 vi.mock('sonner', () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+  toast: { success: vi.fn(), error: vi.fn(), custom: vi.fn(), dismiss: vi.fn() },
 }));
 
 import { DealStatusCard } from './DealStatusCard';

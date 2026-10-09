@@ -6,6 +6,8 @@ import { fetchCurrentWeather, getWeekdayName, type CurrentWeather } from '@/lib/
 import { resolveHuudDisplayName } from '@/lib/huudName';
 import { getGeolocation } from '@/lib/nativeGeolocation';
 
+import { extractUserMapCoords } from '@/lib/mapUserLocation';
+
 function withHuudCity(
   weather: CurrentWeather,
   user: ReturnType<typeof useAuth>['user'],
@@ -33,6 +35,8 @@ function withHuudCity(
   return weather;
 }
 
+const DEFAULT_COORDS = { lat: 6.5244, lng: 3.3792 }; // Lagos centroid fallback
+
 export function useAmbientWeather() {
   const { user } = useAuth();
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
@@ -58,24 +62,23 @@ export function useAmbientWeather() {
       } catch {
         const fallbackCity = resolveHuudDisplayName(user);
         publish({
-          temp: 31,
-          condition: 'Partly Cloudy',
+          temp: 28,
+          condition: 'Rain Showers',
           city: fallbackCity !== 'Your Huud' ? fallbackCity : 'Your Area',
-          wmoCode: 2,
+          wmoCode: 80,
           forecast: [
-            { dayName: getWeekdayName(-1), temp: 30, isToday: false },
-            { dayName: getWeekdayName(0), temp: 31, isToday: true },
-            { dayName: getWeekdayName(1), temp: 32, isToday: false },
+            { dayName: getWeekdayName(-1), temp: 28, isToday: false },
+            { dayName: getWeekdayName(0), temp: 28, isToday: true },
+            { dayName: getWeekdayName(1), temp: 29, isToday: false },
           ],
         });
       }
     };
 
     const tryProfileCoords = () => {
-      const lat = user?.location?.latitude;
-      const lng = user?.location?.longitude;
-      if (lat && lng) {
-        void updateWeather(lat, lng, true);
+      const coords = user ? extractUserMapCoords(user as unknown as Parameters<typeof extractUserMapCoords>[0]) : null;
+      if (coords && coords.lat && coords.lng) {
+        void updateWeather(coords.lat, coords.lng, true);
         return true;
       }
       return false;
@@ -84,18 +87,7 @@ export function useAmbientWeather() {
     const geo = getGeolocation();
     if (!geo) {
       if (!tryProfileCoords()) {
-        const fallbackCity = resolveHuudDisplayName(user);
-        publish({
-          temp: 32,
-          condition: 'Sunny',
-          city: fallbackCity !== 'Your Huud' ? fallbackCity : 'Lagos',
-          wmoCode: 0,
-          forecast: [
-            { dayName: getWeekdayName(-1), temp: 31, isToday: false },
-            { dayName: getWeekdayName(0), temp: 32, isToday: true },
-            { dayName: getWeekdayName(1), temp: 33, isToday: false },
-          ],
-        });
+        void updateWeather(DEFAULT_COORDS.lat, DEFAULT_COORDS.lng, true);
       }
       return;
     }
@@ -104,18 +96,7 @@ export function useAmbientWeather() {
       (pos) => updateWeather(pos.coords.latitude, pos.coords.longitude),
       () => {
         if (!tryProfileCoords()) {
-          const fallbackCity = resolveHuudDisplayName(user);
-          publish({
-            temp: 31,
-            condition: 'Partly Cloudy',
-            city: fallbackCity !== 'Your Huud' ? fallbackCity : 'Lagos',
-            wmoCode: 2,
-            forecast: [
-              { dayName: getWeekdayName(-1), temp: 30, isToday: false },
-              { dayName: getWeekdayName(0), temp: 31, isToday: true },
-              { dayName: getWeekdayName(1), temp: 32, isToday: false },
-            ],
-          });
+          void updateWeather(DEFAULT_COORDS.lat, DEFAULT_COORDS.lng, true);
         }
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 120000 },
@@ -132,6 +113,7 @@ export function useAmbientWeather() {
       clearInterval(refreshInterval);
     };
   }, [
+    user,
     user?.location?.latitude,
     user?.location?.longitude,
     user?.location?.neighborhood,

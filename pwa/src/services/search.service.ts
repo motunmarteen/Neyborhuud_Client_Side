@@ -127,10 +127,14 @@ export const searchService = {
   /**
    * Get trending searches
    */
-  async getTrendingSearches(limit = 10) {
-    return await apiClient.get<string[]>("/search/trending", {
-      params: { limit },
-    });
+  async getTrendingSearches(limit = 10): Promise<string[]> {
+    // Backend route is /search/trends → { trends: [{ query, count }] }.
+    const res = await apiClient.get<{ trends?: Array<{ query?: string }> }>("/search/trends");
+    const trends = res.data?.trends ?? [];
+    return trends
+      .map((t) => (typeof t?.query === "string" ? t.query : ""))
+      .filter(Boolean)
+      .slice(0, limit);
   },
 
   /**

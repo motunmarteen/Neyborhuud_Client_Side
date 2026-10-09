@@ -1,6 +1,7 @@
 "use client";
 
 import { getPasswordStrengthSummary } from "@/lib/passwordPolicy";
+import { Check, CheckCircle2, XCircle, Circle } from "lucide-react";
 
 type Props = {
   password: string;
@@ -82,40 +83,40 @@ export function PasswordStrengthMeter({
           </p>
         </div>
         {meetsPolicy ? (
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-status-success dark:text-primary">
-            <span className="material-symbols-outlined text-base" aria-hidden="true">check</span>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#00D431]/15 text-[#008A20]">
+            <Check size={16} strokeWidth={2.4} aria-hidden="true" />
           </span>
         ) : null}
       </div>
 
-      <div className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+      <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
         <div
           className={cx("h-full rounded-full transition-all duration-300 ease-out", barClass)}
           style={{ width: `${scorePercent}%` }}
         />
       </div>
 
-      <ul className="max-h-44 space-y-1.5 overflow-y-auto pr-0.5 text-left text-[0.75rem] leading-snug text-zinc-600 dark:text-zinc-400">
+      <ul className="max-h-44 space-y-1.5 overflow-y-auto pr-0.5 text-left text-[0.75rem] leading-snug text-zinc-600">
         {checklist
           .filter((item) => !item.skipped)
           .map((item) => (
             <li key={item.id} className="flex items-start gap-2">
               <span
-                className="mt-0.5 shrink-0 text-zinc-400 dark:text-zinc-500"
+                className="mt-0.5 shrink-0 text-zinc-400"
                 aria-hidden
               >
                 {item.pending ? (
-                  <span className="material-symbols-outlined text-[0.65rem]" aria-hidden="true">circle</span>
+                  <Circle size={10} strokeWidth={2} aria-hidden="true" />
                 ) : item.ok ? (
-                  <span className="material-symbols-outlined text-status-success dark:text-primary text-sm"  aria-hidden="true">check_circle</span>
+                  <CheckCircle2 size={14} strokeWidth={2} className="text-[#008A20]" aria-hidden="true" />
                 ) : (
-                  <span className="material-symbols-outlined text-status-warning dark:text-primary text-sm"  aria-hidden="true">remove_circle</span>
+                  <XCircle size={14} strokeWidth={2} className="text-amber-600" aria-hidden="true" />
                 )}
               </span>
               <span
                 className={cx(
-                  item.pending && "text-zinc-400 dark:text-zinc-500",
-                  !item.pending && !item.ok && "font-medium text-status-warning dark:text-white/90",
+                  item.pending && "text-zinc-400",
+                  !item.pending && !item.ok && "font-medium text-amber-600",
                 )}
               >
                 {item.label}

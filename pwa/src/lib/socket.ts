@@ -7,7 +7,7 @@ import { io, Socket } from "socket.io-client";
 import apiClient, { getSocketUrl, shouldConnectSocket } from "./api-client";
 
 class SocketService {
-  private socket: Socket | null = null;
+  public socket: Socket | null = null;
   /** Whether authenticate() has been called; re-sent on every reconnect. */
   private shouldAuthenticate = false;
 

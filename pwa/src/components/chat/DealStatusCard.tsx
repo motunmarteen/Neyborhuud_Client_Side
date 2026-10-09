@@ -18,7 +18,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { ChatMessage } from '@/types/api';
 import { marketplaceService } from '@/services/marketplace.service';
 import { chatService } from '@/services/chat.service';
@@ -39,6 +39,7 @@ const ACTION_STYLE: Record<
   shipped: { icon: '🚚', label: 'On The Way', bg: 'bg-indigo-50', text: 'text-indigo-700' },
   completed: { icon: '✅', label: 'Deal Completed', bg: 'bg-emerald-50', text: 'text-emerald-700' },
   cancelled: { icon: '↩️', label: 'Deal Cancelled', bg: 'bg-gray-100', text: 'text-gray-600' },
+  disputed: { icon: '⚖️', label: 'Huud Community Dispute', bg: 'bg-rose-50', text: 'text-rose-700' },
 };
 
 type Payout = { bankName: string; accountNumber: string; accountName: string };
@@ -64,6 +65,25 @@ export function DealStatusCard({
   const proofInputRef = useRef<HTMLInputElement>(null);
   const [showShipForm, setShowShipForm] = useState(false);
   const [tracking, setTracking] = useState('');
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [disputeReason, setDisputeReason] = useState('Payment not received / unverified');
+  const [disputeDetails, setDisputeDetails] = useState('');
+  const [isDisputing, setIsDisputing] = useState(false);
+
+  const handleDisputeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orderId) return;
+    setIsDisputing(true);
+    try {
+      await marketplaceService.disputeOrder(orderId, disputeReason, disputeDetails);
+      toast.success('Dispute lodged! Routed to Huud Watch / Elders for community review.');
+      setShowDisputeModal(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to submit dispute');
+    } finally {
+      setIsDisputing(false);
+    }
+  };
 
   // Bank details ride along in the card's meta on "accepted", so the buyer sees
   // where to pay in the same chat turn the deal is agreed. Older "started"
@@ -175,7 +195,12 @@ export function DealStatusCard({
   const showConfirmReceipt = action === 'paid' && isSeller && !done;
   const showShip = action === 'paid_confirmed' && isSeller && !done;
   const showConfirmDelivery = action === 'shipped' && isBuyer && !done;
-  const hasActions = showPay || showConfirmReceipt || showShip || showConfirmDelivery;
+  const canDispute =
+    !!orderId &&
+    (isBuyer || isSeller) &&
+    ['paid', 'paid_confirmed', 'shipped'].includes(action) &&
+    !done;
+  const hasActions = showPay || showConfirmReceipt || showShip || showConfirmDelivery || canDispute;
 
   return (
     <div className={`overflow-hidden rounded-2xl ${style.bg} max-w-[300px] sm:max-w-sm`}>
@@ -187,6 +212,16 @@ export function DealStatusCard({
       </div>
 
       <div className="px-3 pb-3 pt-1">
+        {/* Zero-Escrow Transparency Banner */}
+        <div className="mb-2 rounded-xl border border-amber-300/80 bg-amber-500/10 p-2 text-[10px] text-amber-950 leading-snug">
+          <p className="font-extrabold flex items-center gap-1 text-amber-900">
+            <span>🛡️</span> Zero-Escrow Peer-to-Peer
+          </p>
+          <p className="mt-0.5 text-amber-900/90 text-[10px]">
+            NeyborHuud holds no funds (₦0.00). Transactions and payments are strictly between neighbors at their own risk. Contested deals route to local Huud Watch / Elders for community mediation.
+          </p>
+        </div>
+
         <p className="text-sm text-gray-700 leading-snug">{msg.content}</p>
 
         {isService && typeof meta.serviceTitle === 'string' && (
@@ -389,6 +424,82 @@ export function DealStatusCard({
                     : 'Confirm Delivery Received'}
               </button>
             )}
+
+            {canDispute && (
+              <button
+                type="button"
+                onClick={() => setShowDisputeModal(true)}
+                disabled={disabled}
+                className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100 disabled:opacity-60"
+              >
+                ⚖️ Dispute / Huud Watch
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Dispute Modal */}
+        {showDisputeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+              <div className="flex items-center gap-2 text-rose-700 font-extrabold text-sm">
+                <span>⚖️</span> Community Dispute Mediation
+              </div>
+              <p className="mt-1 text-[11px] text-gray-600 leading-snug">
+                NeyborHuud holds no funds. This will lodge your dispute directly with the <strong>Huud Watch Security Roster & Community Elders</strong> to arbitrate and adjust local TrustOS reputation.
+              </p>
+
+              <form onSubmit={handleDisputeSubmit} className="mt-3 space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                    Dispute Reason
+                  </label>
+                  <select
+                    value={disputeReason}
+                    onChange={(e) => setDisputeReason(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  >
+                    <option value="Payment not received / unverified">Payment not received / unverified</option>
+                    <option value="Item not delivered / service not rendered">Item not delivered / service not rendered</option>
+                    <option value="Item defective or counterfeit">Item defective or counterfeit</option>
+                    <option value="Counterparty unresponsive">Counterparty unreachable / unresponsive</option>
+                    <option value="Suspected fraud or scam">Suspected fraud or scam</option>
+                    <option value="Other mutual dispute">Other mutual disagreement</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                    Details for Mediators (optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={disputeDetails}
+                    onChange={(e) => setDisputeDetails(e.target.value)}
+                    placeholder="Provide context for the security watch/elders..."
+                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowDisputeModal(false)}
+                    disabled={isDisputing}
+                    className="rounded-full px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isDisputing}
+                    className="rounded-full bg-rose-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-rose-700 disabled:opacity-50"
+                  >
+                    {isDisputing ? 'Submitting…' : 'Lodge Dispute'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 

@@ -1,26 +1,38 @@
+import type { LucideIcon } from 'lucide-react';
+import {
+  Megaphone,
+  HelpCircle,
+  Briefcase,
+  Calendar,
+  ShoppingBag,
+  FileWarning,
+  ShieldAlert,
+  Building2,
+} from 'lucide-react';
+
 /** Community utilities grouped under one “Local Huud” menu (sidebar + explore). */
 export const LOCAL_HUUD_MENU = {
   id: 'local-huud',
   label: 'Local Huud',
-  icon: 'domain',
-  description: '8 services in your Huud',
+  Icon: Building2,
+  description: '7 services in your Huud',
 } as const;
 
 export type LocalHuudLink = {
-  icon: string;
+  Icon: LucideIcon;
   label: string;
   type: string;
   href: string;
 };
 
 export const LOCAL_HUUD_LINKS: LocalHuudLink[] = [
-  { icon: 'campaign', label: 'FYI Bulletins', type: 'fyi', href: '/fyi' },
-  { icon: 'help', label: 'Help Requests', type: 'help_request', href: '/help-request' },
-  { icon: 'work', label: 'Work', type: 'job', href: '/work' },
-  { icon: 'event', label: 'Events', type: 'event', href: '/events' },
-  { icon: 'shopping_bag', label: 'Marketplace', type: 'marketplace', href: '/marketplace' },
-  { icon: 'report', label: 'Incident Reports', type: 'incident', href: '/incident-reports' },
-  { icon: 'add_alert', label: 'Community Alerts', type: 'emergency', href: '/community-emergency' },
+  { Icon: Megaphone, label: 'FYI Bulletins', type: 'fyi', href: '/fyi' },
+  { Icon: HelpCircle, label: 'Help Requests', type: 'help_request', href: '/help-request' },
+  { Icon: Briefcase, label: 'Work & Gigs', type: 'job', href: '/work' },
+  { Icon: Calendar, label: 'Events', type: 'event', href: '/events' },
+  { Icon: ShoppingBag, label: 'Marketplace', type: 'marketplace', href: '/marketplace' },
+  { Icon: FileWarning, label: 'Incident Reports', type: 'incident', href: '/incident-reports' },
+  { Icon: ShieldAlert, label: 'Community Alerts', type: 'emergency', href: '/community-emergency' },
 ];
 
 export function isLocalHuudPath(pathname: string | null | undefined): boolean {

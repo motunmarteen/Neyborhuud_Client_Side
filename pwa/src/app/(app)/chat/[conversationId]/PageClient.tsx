@@ -23,13 +23,14 @@ import { chatService } from '@/services/chat.service';
 import { e2eeService } from '@/services/e2ee.service';
 import { ChatMessage, ChatMessageType, Conversation } from '@/types/api';
 import socketService from '@/lib/socket';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import ChatMessageCard from '@/components/chat/ChatMessageCard';
 import {
   resolveChatSenderLabel,
   shouldShowSenderLabel,
 } from '@/lib/chatSender';
 import { ChatRoomHeader } from '@/components/chat/ChatRoomHeader';
+import { useCall } from '@/contexts/CallContext';
 import { IncognitoInviteSheet } from '@/components/chat/IncognitoInviteSheet';
 import { MentionInvitePicker } from '@/components/chat/MentionInvitePicker';
 import { GuestCountdownBanner } from '@/components/chat/GuestCountdownBanner';
@@ -208,11 +209,190 @@ function KeyBundlePanel({ conversationId, onClose }: KeyBundlePanelProps) {
   );
 }
 
+import { Phone, Video, ShieldCheck, Sparkles } from 'lucide-react';
+import { DEMO_MODE } from '@/lib/demoMode';
+
+const DEMO_CONV_DETAILS: Record<string, Conversation> = {
+  'demo-neighbor': {
+    _id: 'demo-neighbor',
+    id: 'demo-neighbor',
+    conversationId: 'demo-neighbor',
+    name: 'Fatima Abdullahi',
+    type: 'direct',
+    isVerified: true,
+    otherParticipant: {
+      id: 'demo-fatima',
+      name: 'Fatima Abdullahi',
+      username: 'fatima_a',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      isVerified: true,
+      trustScore: 940,
+    },
+    participants: [
+      { userId: 'demo-fatima', name: 'Fatima Abdullahi', role: 'member' } as any,
+    ],
+    updatedAt: new Date().toISOString(),
+  } as any,
+  'demo-marketplace': {
+    _id: 'demo-marketplace',
+    id: 'demo-marketplace',
+    conversationId: 'demo-marketplace',
+    name: 'Kunle Balogun',
+    type: 'direct',
+    contextType: 'marketplace',
+    context: {
+      productId: 'demo-gen-item',
+      productTitle: 'Yamaha Generator 2.8kVA',
+      productPrice: 185000,
+      productCurrency: 'NGN',
+    },
+    isVerified: true,
+    otherParticipant: {
+      id: 'demo-kunle',
+      name: 'Kunle Balogun',
+      username: 'kunle_b',
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      isVerified: true,
+      trustScore: 880,
+    },
+    participants: [
+      { userId: 'demo-kunle', name: 'Kunle Balogun', role: 'member' } as any,
+    ],
+    updatedAt: new Date().toISOString(),
+  } as any,
+  'demo-estate': {
+    _id: 'demo-estate',
+    id: 'demo-estate',
+    conversationId: 'demo-estate',
+    name: 'Victoria Garden City (VGC) Hub',
+    groupName: 'Victoria Garden City (VGC) Hub',
+    type: 'community',
+    isCommunity: true,
+    participants: [],
+    updatedAt: new Date().toISOString(),
+  } as any,
+  'demo-security': {
+    _id: 'demo-security',
+    id: 'demo-security',
+    conversationId: 'demo-security',
+    name: 'Estate Rapid Response Patrol',
+    type: 'incident',
+    participants: [],
+    updatedAt: new Date().toISOString(),
+  } as any,
+};
+
+const DEMO_INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
+  'demo-neighbor': [
+    {
+      id: 'msg-demo-1',
+      _id: 'msg-demo-1',
+      conversationId: 'demo-neighbor',
+      senderId: 'demo-fatima',
+      content: 'Good morning neighbor! 👋 Just wanted to confirm that the estate security gate has received your visitor pass for 2pm.',
+      type: 'text',
+      createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      delivered: true,
+      read: true,
+    } as any,
+    {
+      id: 'msg-demo-2',
+      _id: 'msg-demo-2',
+      conversationId: 'demo-neighbor',
+      senderId: 'current-user',
+      content: 'Thank you so much Fatima! Also, did the facility team finish inspecting the streetlights on Avenue 3?',
+      type: 'text',
+      createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+      delivered: true,
+      read: true,
+    } as any,
+    {
+      id: 'msg-demo-3',
+      _id: 'msg-demo-3',
+      conversationId: 'demo-neighbor',
+      senderId: 'demo-fatima',
+      content: 'Yes! They completed it around 11am. The whole road is lit and secure now. 💡✨',
+      type: 'text',
+      createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+      delivered: true,
+      read: true,
+    } as any,
+  ],
+  'demo-marketplace': [
+    {
+      id: 'msg-mk-1',
+      _id: 'msg-mk-1',
+      conversationId: 'demo-marketplace',
+      senderId: 'current-user',
+      content: 'Hi Kunle, I saw your Yamaha Generator 2.8kVA on the huud marketplace. Is it still available?',
+      type: 'text',
+      createdAt: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
+      delivered: true,
+      read: true,
+    } as any,
+    {
+      id: 'msg-mk-2',
+      _id: 'msg-mk-2',
+      conversationId: 'demo-marketplace',
+      senderId: 'demo-kunle',
+      content: 'Hello! Yes, perfectly working with original copper coil and receipts.',
+      type: 'text',
+      createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+      delivered: true,
+      read: true,
+    } as any,
+    {
+      id: 'msg-mk-3',
+      _id: 'msg-mk-3',
+      conversationId: 'demo-marketplace',
+      senderId: 'demo-kunle',
+      content: '🤝 Offer accepted: Yamaha Generator 2.8kVA for ₦185,000.',
+      type: 'system',
+      createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+      delivered: true,
+      read: true,
+      meta: {
+        dealAction: 'accepted',
+        orderId: 'demo-order-123',
+        buyerId: 'current-user',
+        sellerId: 'demo-kunle',
+        itemTitle: 'Yamaha Generator 2.8kVA',
+        amount: 185000,
+        currency: 'NGN',
+      },
+    } as any,
+  ],
+  'demo-estate': [
+    {
+      id: 'msg-est-1',
+      _id: 'msg-est-1',
+      conversationId: 'demo-estate',
+      senderId: 'admin',
+      content: '📢 NOTICE: Scheduled transformer servicing today between 1:00 PM and 3:00 PM. Backup estate generators will power security gates and streetlights.',
+      type: 'text',
+      createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+    } as any,
+  ],
+  'demo-security': [
+    {
+      id: 'msg-sec-1',
+      _id: 'msg-sec-1',
+      conversationId: 'demo-security',
+      senderId: 'security-lead',
+      content: '🚨 PATROL UPDATE: Night protocol initiated. Estate gates are strictly manned with visitor ID logging.',
+      type: 'text',
+      createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
+    } as any,
+  ],
+};
+
 // ─── Main Chat Page ───────────────────────────────────────────────────────────
 
 export default function ConversationPage() {
   const params = useParams<{ conversationId: string }>();
   const conversationId = params.conversationId;
+  // Offline design-preview conversations exist only in DEMO_MODE builds.
+  const isDemo = DEMO_MODE && Boolean(conversationId?.startsWith('demo-'));
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -285,10 +465,13 @@ export default function ConversationPage() {
     queryKey: ['conversation-detail', conversationId],
     queryFn: () => chatService.getConversationDetail(conversationId),
     staleTime: 60_000,
-    enabled: !!conversationId && !isPlaceholder,
+    enabled: !!conversationId && !isPlaceholder && !isDemo,
   });
 
   const conv: Conversation | undefined = (() => {
+    if (isDemo && conversationId) {
+      return DEMO_CONV_DETAILS[conversationId] || DEMO_CONV_DETAILS['demo-neighbor'];
+    }
     // Prefer freshly fetched detail
     const detail = (detailData as any)?.data?.conversation;
     if (detail) return detail as Conversation;
@@ -373,6 +556,12 @@ export default function ConversationPage() {
 
   const loadMessages = useCallback(async () => {
     if (!conversationId || isPlaceholder) return;
+    if (isDemo) {
+      const demoMsgs = DEMO_INITIAL_MESSAGES[conversationId] || DEMO_INITIAL_MESSAGES['demo-neighbor'] || [];
+      setMessages(enrichMessagesReceipts([...demoMsgs], user?.id, peerUserId));
+      setLoading(false);
+      return;
+    }
     try {
       const res = await chatService.getMessages(conversationId);
       const raw = res.data?.messages ?? [];
@@ -386,7 +575,7 @@ export default function ConversationPage() {
     } finally {
       setLoading(false);
     }
-  }, [conversationId, isPlaceholder, user, peerUserId]);
+  }, [conversationId, isPlaceholder, isDemo, user, peerUserId]);
 
   /**
    * Load the next-older page and PREPEND it, preserving the user's scroll
@@ -679,6 +868,32 @@ export default function ConversationPage() {
     setMessages((prev) => [...prev, optimistic]);
     setInputText('');
     setReplyingTo(null);
+
+    if (isDemo) {
+      toast.success('Message sent ✅');
+      setTimeout(() => {
+        const replyMsg: ChatMessage = {
+          id: `reply-${Date.now()}`,
+          conversationId,
+          senderId: peerUserId || 'demo-peer',
+          sender: {
+            id: peerUserId || 'demo-peer',
+            username: 'fatima_a',
+            firstName: 'Fatima',
+            lastName: 'Abdullahi',
+            avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+          },
+          content: 'Got your message! Everything looks clear on our end. Let me know if you need anything else! 😊',
+          type: 'text',
+          createdAt: new Date().toISOString(),
+          status: 'delivered',
+          priority: 'normal',
+        } as any;
+        setMessages((prev) => [...prev, replyMsg]);
+      }, 1000);
+      return;
+    }
+
     setSending(true);
 
     try {
@@ -896,10 +1111,6 @@ export default function ConversationPage() {
   // ── Groups ────────────────────────────────────────────────────────────────
   const groups = groupByDate(messages, clientReady);
 
-  if (!clientReady) {
-    return <ChatThreadPlaceholder />;
-  }
-
   const isIncident = conv?.type === 'incident';
   const displayName = convDisplayName(conv, user?.id);
   const avatar = convAvatarMeta(conv);
@@ -911,6 +1122,7 @@ export default function ConversationPage() {
       : baseSubtitle;
 
   const viewerScoped = (conv as { viewerScoped?: { expiresAt?: string } } | undefined)?.viewerScoped;
+  const { initiateCall, simulateIncomingCall, simulateActiveCall } = useCall();
   const banners = (
     <>
       {viewerScoped?.expiresAt ? (
@@ -975,8 +1187,81 @@ export default function ConversationPage() {
         conversationId={conversationId}
       />
 
+      {isDemo && (
+        <div className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-2 border-b border-emerald-200 bg-emerald-50/95 px-3.5 py-2.5 backdrop-blur-md select-none shadow-xs">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Phase 3 Live Test View: {displayName}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => simulateIncomingCall({ name: displayName, avatar: avatar.url || undefined, huud: 'Lekki Phase 1 · Resident' }, 'audio')}
+              className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-white px-2.5 py-1 text-xs font-bold text-emerald-800 shadow-2xs hover:bg-emerald-100 active:scale-95 transition-transform cursor-pointer"
+            >
+              <Phone size={11} className="text-emerald-600" /> Ring Phone (Modal)
+            </button>
+            <button
+              type="button"
+              onClick={() => simulateActiveCall({ name: displayName, avatar: avatar.url || undefined, huud: 'Lekki Phase 1' }, 'video')}
+              className="inline-flex items-center gap-1 rounded-full border border-teal-300 bg-white px-2.5 py-1 text-xs font-bold text-teal-800 shadow-2xs hover:bg-teal-100 active:scale-95 transition-transform cursor-pointer"
+            >
+              <Video size={11} className="text-teal-600" /> Active WebRTC PiP
+            </button>
+            <button
+              type="button"
+              onClick={() => toast.success('Daylight notification test: Verified neighbor!')}
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white shadow-2xs hover:bg-emerald-700 active:scale-95 transition-transform cursor-pointer"
+            >
+              <Sparkles size={11} /> Test Toast
+            </button>
+          </div>
+        </div>
+      )}
+
     </>
   );
+
+
+  const handleAudioCall = useCallback(() => {
+    if (isDemo) {
+      simulateActiveCall({ name: displayName, avatar: avatar.url || undefined, huud: 'Lekki Phase 1' }, 'audio');
+      return;
+    }
+    if (!peerUserId) return;
+    initiateCall(
+      peerUserId,
+      'audio',
+      {
+        name: displayName,
+        avatar: avatar.url || undefined,
+        huud: headerSubtitle || 'Your Huud',
+      },
+      conversationId,
+    );
+  }, [isDemo, simulateActiveCall, peerUserId, displayName, avatar.url, headerSubtitle, conversationId, initiateCall]);
+
+  const handleVideoCall = useCallback(() => {
+    if (isDemo) {
+      simulateActiveCall({ name: displayName, avatar: avatar.url || undefined, huud: 'Lekki Phase 1' }, 'video');
+      return;
+    }
+    if (!peerUserId) return;
+    initiateCall(
+      peerUserId,
+      'video',
+      {
+        name: displayName,
+        avatar: avatar.url || undefined,
+        huud: headerSubtitle || 'Your Huud',
+      },
+      conversationId,
+    );
+  }, [isDemo, simulateActiveCall, peerUserId, displayName, avatar.url, headerSubtitle, conversationId, initiateCall]);
+
+  if (!clientReady) {
+    return <ChatThreadPlaceholder />;
+  }
 
   return (
     <ChatRoomLayout
@@ -993,6 +1278,8 @@ export default function ConversationPage() {
           onBack={() => navigateBack(router, { pathname, fallback: '/friendship?tab=chats' })}
           onInviteGuest={conv?.type === 'direct' && !isPlaceholder ? () => setInviteOpen(true) : undefined}
           onCommunityInfo={isCommunityChat(conv ?? ({} as any)) && !isPlaceholder ? () => setCommunityInfoOpen(true) : undefined}
+          onAudioCall={conv?.type === 'direct' && peerUserId ? handleAudioCall : undefined}
+          onVideoCall={conv?.type === 'direct' && peerUserId ? handleVideoCall : undefined}
         />
       }
       banners={banners}

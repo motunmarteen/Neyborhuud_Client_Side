@@ -17,7 +17,17 @@ import { EventComments } from "@/components/events/EventComments";
 import { useClientAuthUser } from "@/hooks/useClientAuthUser";
 import { formatNaira } from "@/lib/currency";
 import { eventsService } from "@/services/events.service";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
+import {
+  Calendar,
+  CalendarCheck,
+  MapPin,
+  Users,
+  Share2,
+  Flag,
+  Clock,
+  ArrowLeft,
+} from "lucide-react";
 
 const TYPE_COLORS: Record<string, string> = {
   community: "bg-brand-blue/20 text-brand-blue",
@@ -544,16 +554,16 @@ export default function EventDetailPage() {
                         backdropFilter: "blur(16px) saturate(160%)",
                       }}
                     >
-                      <div className="flex items-start gap-2">
-                        <span className="material-symbols-outlined mt-0.5 text-[19px] text-brand-blue">calendar_month</span>
+                      <div className="flex items-start gap-2.5">
+                        <Calendar size={18} className="mt-0.5 text-blue-400 shrink-0" />
                         <div>
                           <p className="text-[11px] font-semibold text-white/45">Start</p>
                           <p className="text-sm font-semibold text-white">{formatDateTime(event.startDate)}</p>
                         </div>
                       </div>
                       {event.endDate && (
-                        <div className="flex items-start gap-2">
-                          <span className="material-symbols-outlined mt-0.5 text-[19px] text-brand-blue">event_available</span>
+                        <div className="flex items-start gap-2.5">
+                          <CalendarCheck size={18} className="mt-0.5 text-blue-400 shrink-0" />
                           <div>
                             <p className="text-[11px] font-semibold text-white/45">End</p>
                             <p className="text-sm font-semibold text-white">{formatDateTime(event.endDate)}</p>
@@ -561,8 +571,8 @@ export default function EventDetailPage() {
                         </div>
                       )}
                       {event.venue && (
-                        <div className="flex items-start gap-2 sm:col-span-2">
-                          <span className="material-symbols-outlined mt-0.5 text-[19px] text-brand-red300">location_on</span>
+                        <div className="flex items-start gap-2.5 sm:col-span-2">
+                          <MapPin size={18} className="mt-0.5 text-rose-400 shrink-0" />
                           <div>
                             <p className="text-[11px] font-semibold text-white/45">Venue</p>
                             <p className="text-sm font-semibold text-white">{event.venue}</p>
@@ -570,11 +580,11 @@ export default function EventDetailPage() {
                         </div>
                       )}
                       {typeof attendeeCount === "number" && (
-                        <div className="flex items-start gap-2">
-                          <span className="material-symbols-outlined mt-0.5 text-[19px] text-white/60">group</span>
+                        <div className="flex items-start gap-2.5">
+                          <Users size={18} className="mt-0.5 text-emerald-400 shrink-0" />
                           <div>
                             <p className="text-[11px] font-semibold text-white/45">Attendees</p>
-                            <button onClick={() => setShowAttendees(true)} className="text-sm font-semibold text-brand-blue hover:underline">
+                            <button onClick={() => setShowAttendees(true)} className="text-sm font-semibold text-emerald-400 hover:underline">
                               {attendeeCount}
                               {event.capacity ? ` / ${event.capacity}` : ""} going - View list
                             </button>
@@ -582,8 +592,8 @@ export default function EventDetailPage() {
                         </div>
                       )}
                       {typeof event.sharesCount === "number" && event.sharesCount > 0 && (
-                        <div className="flex items-start gap-2">
-                          <span className="material-symbols-outlined mt-0.5 text-[19px] text-white/60">share</span>
+                        <div className="flex items-start gap-2.5">
+                          <Share2 size={18} className="mt-0.5 text-white/60 shrink-0" />
                           <div>
                             <p className="text-[11px] font-semibold text-white/45">Shares</p>
                             <p className="text-sm font-semibold text-white">{event.sharesCount}</p>
@@ -597,18 +607,18 @@ export default function EventDetailPage() {
                         <button
                           type="button"
                           onClick={() => setShowShareSheet(true)}
-                          className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 py-3 text-sm font-bold text-white/90 backdrop-blur-md transition-all hover:bg-white/15 disabled:opacity-50"
+                          className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 py-3 text-sm font-bold text-white/90 backdrop-blur-md transition-all hover:bg-white/15 disabled:opacity-50"
                         >
-                          <span className="material-symbols-outlined text-[18px]">share</span>
+                          <Share2 size={16} />
                           Share
                         </button>
                       )}
                       {!isOrganizer && (
                         <button
                           onClick={() => setShowReportModal(true)}
-                          className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 py-3 text-sm font-bold text-white/70 backdrop-blur-md transition-all hover:bg-white/15 hover:text-white"
+                          className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 py-3 text-sm font-bold text-white/70 backdrop-blur-md transition-all hover:bg-white/15 hover:text-white"
                         >
-                          <span className="material-symbols-outlined text-[18px]">flag</span>
+                          <Flag size={16} />
                           Report
                         </button>
                       )}

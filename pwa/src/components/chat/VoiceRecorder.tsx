@@ -9,7 +9,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import type { ActionResult } from './ChatActionMenu';
 

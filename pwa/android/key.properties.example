@@ -1,0 +1,10 @@
+# Android Play Store Release Keystore Properties
+# Keep this file and your release.keystore safe and DO NOT commit them to version control.
+#
+# Generated via:
+# & "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -genkey -v -keystore release.keystore -alias neyborhuud -keyalg RSA -keysize 2048 -validity 10000
+
+storePassword=your_keystore_password
+keyPassword=your_key_password
+keyAlias=neyborhuud
+storeFile=../release.keystore

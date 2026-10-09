@@ -15,6 +15,17 @@ import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthSheetStageHeader } from '@/components/auth/AuthSheetStageHeader';
 import { useMyGamificationStats } from '@/hooks/useGamification';
 import { resolveUserPhone } from '@/lib/userProfileFields';
+import { Eli5Tooltip } from '@/components/ui/Eli5Tooltip';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Coins,
+  ChevronUp,
+  SkipForward,
+  ShieldCheck,
+  Award,
+  Sparkles,
+} from 'lucide-react';
 
 const TOKEN_KEY = 'neyborhuud_access_token';
 
@@ -213,29 +224,35 @@ export default function CompleteProfilePage() {
                         <button
                             type="button"
                             onClick={() => router.push('/feed')}
-                            className="auth-btn auth-btn-primary"
+                            className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
                         >
                             <span>Enter the Huud</span>
-                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                            <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                         </button>
                     </div>
                 }
             >
                 <div className="flex flex-col gap-3">
-                    <div className="auth-flow-notice auth-flow-notice--success">
-                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
+                    <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
+                        <CheckCircle2 size={16} className="text-primary shrink-0" aria-hidden="true" />
                         <span>Your trust score has increased. Welcome to the Huud.</span>
                     </div>
-                    <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
+                    <div className="flex items-center justify-between rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3">
                         <div>
-                            <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
+                            <div className="flex items-center gap-1.5">
+                                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
+                                <Eli5Tooltip 
+                                    term="HuudCoins" 
+                                    explanation="Community tokens earned by helping neighbors, participating in cleanups, or reporting local hazards. Can be redeemed for rewards." 
+                                />
+                            </div>
                             <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Profile completion reward</p>
                         </div>
                         <div className="flex items-center gap-2 text-primary">
                             <span className="text-3xl font-black leading-none">
-                                {profileCoinBalance ?? '—'}
+                                {profileCoinBalance ?? '100'}
                             </span>
-                            <span className="material-symbols-outlined text-xl text-status-warning" aria-hidden="true">toll</span>
+                            <Coins size={22} className="text-primary shrink-0" aria-hidden="true" />
                         </div>
                     </div>
                     {profileCoinBalance === null ? (
@@ -265,7 +282,7 @@ export default function CompleteProfilePage() {
                             <p className="auth-signup-identity-peek__name truncate">{displayName}</p>
                         </div>
                         <span className="auth-signup-identity-peek__chevron" aria-hidden>
-                            <span className="material-symbols-outlined"  aria-hidden="true">expand_less</span>
+                            <ChevronUp size={16} strokeWidth={2} />
                         </span>
                     </div>
                 }
@@ -275,7 +292,7 @@ export default function CompleteProfilePage() {
                             <button
                                 type="submit"
                                 disabled={loading || !isFormValid}
-                                className="auth-btn auth-btn-primary"
+                                className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -285,20 +302,20 @@ export default function CompleteProfilePage() {
                                 ) : (
                                     <>
                                         <span>Claim 100 HuudCoins</span>
-                                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                                        <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                                     </>
                                 )}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => router.push('/feed')}
-                                className="auth-btn auth-btn-secondary"
+                                className="auth-btn auth-btn-secondary flex items-center justify-center gap-2"
                             >
-                                <span className="material-symbols-outlined shrink-0" aria-hidden="true">skip_next</span>
+                                <SkipForward size={16} strokeWidth={2} className="shrink-0" />
                                 <span>I&apos;ll do this later</span>
                             </button>
                         </div>
-                        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
+                        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 dark:border-white/10 pt-3">
                             Already complete? <Link href="/feed">Enter the Huud</Link>
                         </p>
                     </div>
@@ -379,8 +396,8 @@ export default function CompleteProfilePage() {
                         onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
                     />
 
-                    <div className="auth-flow-notice auth-flow-notice--info">
-                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">verified_user</span>
+                    <div className="auth-flow-notice auth-flow-notice--info flex items-center gap-2">
+                        <ShieldCheck size={16} className="text-primary shrink-0" aria-hidden="true" />
                         <span>
                             Verified profiles help build a safer NeyborHuud. We never share your personal ID details.
                         </span>

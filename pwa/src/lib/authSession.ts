@@ -132,19 +132,9 @@ export function parseSafeNextPath(next: string | null | undefined): string | nul
  * Setup gates take precedence over ?next=.
  */
 export function resolvePostAuthRoute(next?: string | null): string {
-  if (getNeedsCommunitySelection()) return '/pick-community';
-  if (getNeedsGpsLocationVerification()) return '/verify-location';
   const safeNext = parseSafeNextPath(next);
   if (safeNext) return safeNext;
-  // Returning users (product tour already done) go straight to feed.
-  if (hasCompletedProductTour()) return '/feed';
-  // Legacy users: already have a community (registered before the tour key was introduced).
-  // Mark tour complete so next launch skips setup-complete entirely.
-  if (getStoredCommunity()) {
-    markProductTourComplete();
-    return '/feed';
-  }
-  return getPostSetupRoute();
+  return '/feed';
 }
 
 export type SessionValidation = 'valid' | 'invalid' | 'unknown';

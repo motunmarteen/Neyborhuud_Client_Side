@@ -118,7 +118,22 @@ class ApiClient {
         }
         
         // 403 = Forbidden (authorized but not allowed) - don't logout, just reject
-        // This handles cases like "not verified" where user is logged in but can't perform action
+        // This handles cases like "not verified" where user is logged in but can't perform action.
+        // Exception: the server says the ACCOUNT itself is banned / suspended /
+        // deleted. That decision is the server's; the session is dead.
+        if (
+          status === 403 &&
+          ['ACCOUNT_BANNED', 'ACCOUNT_SUSPENDED', 'ACCOUNT_DELETED'].includes(errorData?.code) &&
+          this.getToken()
+        ) {
+          this.clearToken();
+          if (typeof window !== "undefined") {
+            const reason = encodeURIComponent(String(errorData.code).toLowerCase());
+            setTimeout(() => {
+              window.location.href = `/login?reason=${reason}`;
+            }, 1500);
+          }
+        }
         return Promise.reject(error);
       },
     );

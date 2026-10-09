@@ -134,7 +134,8 @@ User is on `/jobs` (browse grid) or lands directly on `/jobs/[id]` (real detail 
      getJobApplications(jobId)          GET  /jobs/{jobId}/applications
      getApplicationStatus(applicationId) GET  /jobs/applications/{applicationId}
      updateApplicationStatus(id, status) PATCH /jobs/applications/{applicationId}/status
-        status: 'reviewing' | 'shortlisted' | 'rejected' | 'accepted'
+        status: 'reviewing' | 'shortlisted' | 'rejected' | 'ac![whats next?
+        ](image.png)cepted'
    But: no page.tsx exists at any `/jobs/[id]/applications`-shaped path (directory listing confirms
    no such file), and a repo-wide grep for `getJobApplications`/`updateApplicationStatus`/
    `useJobApplications`/`useUpdateApplicationStatus` returns ONLY the service-file definitions

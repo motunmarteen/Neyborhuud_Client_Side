@@ -61,12 +61,16 @@ export function middleware(request: NextRequest) {
     );
 
     if (isPwaPath) {
+      // In local dev (localhost/127.0.0.1), don't force-redirect to app.localhost since Windows does not resolve it without hosts file edits
+      if (hostname.includes("localhost") || hostname.includes("127.0.0.1")) {
+        return NextResponse.next();
+      }
+
       const protocol = request.nextUrl.protocol;
       let targetHost = "app.neyborhuud.com";
 
-      // If we are developing locally, preserve the port and local domain
+      // If we are developing locally with custom local domain, preserve the port and local domain
       if (
-        hostname.includes("localhost") ||
         hostname.includes("local") ||
         hostname.includes(":")
       ) {

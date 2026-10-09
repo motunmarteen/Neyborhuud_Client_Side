@@ -130,7 +130,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
     };
 
     return (
-        <div className="flex gap-2 sm:gap-3 justify-center">
+        <div className="flex gap-1.5 sm:gap-2.5 justify-center w-full max-w-full">
             {Array.from({ length }).map((_, index) => (
                 <input
                     key={index}
@@ -147,20 +147,19 @@ export const OTPInput: React.FC<OTPInputProps> = ({
                     disabled={disabled}
                     aria-label={`Digit ${index + 1} of ${length}`}
                     className={`
-                        w-11 h-14 sm:w-12 sm:h-16
-                        text-center text-2xl font-bold
+                        flex-1 min-w-0 max-w-[44px] sm:max-w-[48px] h-12 sm:h-14
+                        text-center text-xl sm:text-2xl font-bold
                         rounded-xl transition-all duration-200
                         border-2 bg-transparent
                         focus:outline-none
                         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
                         ${error 
-                            ? 'border-brand-red/60 text-brand-red bg-brand-red/5' 
+                            ? 'border-red-500 text-red-600 bg-red-50' 
                             : localValues[index]
-                                ? 'border-primary/60 bg-primary/5'
-                                : 'border-white/20 focus:border-brand-blue/60 focus:bg-brand-blue/5'
+                                ? 'border-[#00D431] bg-[#00D431]/5 text-[#111814]'
+                                : 'border-black/15 focus:border-[#00D431] focus:bg-[#00D431]/5 bg-white text-[#111814]'
                         }
                     `}
-                    style={{ color: error ? undefined : 'var(--neu-text)' }}
                 />
             ))}
         </div>

@@ -22,11 +22,15 @@ type ProfileBrowseHeroProps = {
   messaging?: boolean;
   onChangePhoto?: () => void;
   identityVerified?: boolean;
+  isBuildingVerified?: boolean;
+  maskedPostcode?: string;
   /** Grey badge while verification journey is underway */
   verificationInProgress?: boolean;
   verificationTierLabel?: string;
   vouchReceived?: number;
   vouchGiven?: number;
+  onVouch?: () => void;
+  hasVouched?: boolean;
 };
 
 export function ProfileBrowseHero({
@@ -44,10 +48,14 @@ export function ProfileBrowseHero({
   messaging,
   onChangePhoto,
   identityVerified,
+  isBuildingVerified,
+  maskedPostcode,
   verificationInProgress = false,
   verificationTierLabel,
   vouchReceived = 0,
   vouchGiven = 0,
+  onVouch,
+  hasVouched = false,
 }: ProfileBrowseHeroProps) {
   const handle = username.trim().toLowerCase();
   const initial = resolveProfileAvatarInitial({ displayName, username: handle }, handle);
@@ -136,6 +144,21 @@ export function ProfileBrowseHero({
               Verifying
             </span>
           ) : null}
+          {isBuildingVerified ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-100 px-2.5 py-0.5 text-[10px] font-extrabold text-blue-700">
+              <span className="material-symbols-outlined text-[12px]">home_pin</span>
+              {maskedPostcode ? `🏠 ${maskedPostcode}` : 'Building Verified'}
+            </span>
+          ) : null}
+          {isOwnProfile ? (
+            <Link
+              href="/profile/passport"
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-extrabold hover:bg-emerald-900 transition"
+            >
+              <span className="material-symbols-outlined text-[12px]">badge</span>
+              Huud Passport
+            </Link>
+          ) : null}
           <span
             className={`inline-flex items-center gap-1 rounded-full bg-slate-50 border border-slate-100 px-2.5 py-0.5 text-[10px] font-extrabold text-slate-600 ${
               vouchReceived > 0 ? '' : 'opacity-65'
@@ -166,6 +189,20 @@ export function ProfileBrowseHero({
             >
               {messaging ? 'Opening…' : 'Message'}
             </button>
+
+            {onVouch && (
+              <button
+                type="button"
+                onClick={onVouch}
+                className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-bold shadow-sm transition ${
+                  hasVouched
+                    ? 'border border-emerald-300 bg-emerald-50 text-emerald-800'
+                    : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {hasVouched ? '🤜 Vouched' : '🤜 Vouch for Neighbor'}
+              </button>
+            )}
           </div>
         ) : null}
       </div>

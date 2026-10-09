@@ -11,6 +11,7 @@ import { evaluatePasswordPolicy } from '@/lib/passwordPolicy';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
+import { Lock, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 type Step = 'form' | 'success' | 'error' | 'expired';
 
@@ -75,24 +76,24 @@ function ResetPasswordContent() {
                 type="submit"
                 form="reset-password-form"
                 disabled={!canSubmit}
-                className="auth-btn auth-btn-primary"
+                className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
             >
                 {loading ? (
                     <>
-                        <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                        <Loader2 className="w-4 h-4 shrink-0 animate-spin" aria-hidden />
                         <span>Updating…</span>
                     </>
                 ) : (
                     <>
                         <span>Reset password</span>
-                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">lock</span>
+                        <Lock size={16} className="shrink-0" aria-hidden="true" />
                     </>
                 )}
             </button>
         ) : step === 'success' ? (
-            <Link href="/login" className="auth-btn auth-btn-primary no-underline">
+            <Link href="/login" className="auth-btn auth-btn-primary no-underline flex items-center justify-center gap-2">
                 <span>Enter your Huud</span>
-                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
             </Link>
         ) : (
             <div className="auth-signup-actions">
@@ -104,9 +105,9 @@ function ResetPasswordContent() {
                 >
                     <span>Retry</span>
                 </button>
-                <Link href="/forgot-password" className="auth-btn auth-btn-primary no-underline">
+                <Link href="/forgot-password" className="auth-btn auth-btn-primary no-underline flex items-center justify-center gap-2">
                     <span>New link</span>
-                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                    <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                 </Link>
             </div>
         );
@@ -160,15 +161,15 @@ function ResetPasswordContent() {
             )}
 
             {step === 'success' && (
-                <div className="auth-flow-notice auth-flow-notice--success">
-                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
+                <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-primary shrink-0" aria-hidden="true" />
                     <span>Your password has been updated. You can sign in with the new password.</span>
                 </div>
             )}
 
             {(step === 'error' || step === 'expired') && errorMessage ? (
-                <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
+                <div className="auth-flow-notice auth-flow-notice--error flex items-center gap-2" role="alert">
+                    <AlertCircle size={16} className="text-red-500 shrink-0" aria-hidden="true" />
                     <span>{errorMessage}</span>
                 </div>
             ) : null}

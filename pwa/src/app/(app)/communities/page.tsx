@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { Users, Zap, ShieldCheck, Plus, LogIn, Search } from 'lucide-react';
+import { toast } from '@/lib/toast';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 import { BrowseFilterChip } from '@/components/layout/BrowseFilterChip';
@@ -38,38 +39,33 @@ const CATEGORY_FILTERS: { id: CategoryFilter; label: string }[] = [
 ];
 
 function StatCard({
-  icon,
+  icon: Icon,
   label,
   value,
   tone = 'primary',
 }: {
-  icon: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   value: string | number;
   tone?: 'primary' | 'blue' | 'green';
 }) {
   const toneClass =
     tone === 'blue'
-      ? 'text-brand-blue bg-brand-blue/10'
+      ? 'text-blue-600 bg-blue-50 border-blue-200'
       : tone === 'green'
-        ? 'text-brand-green-dark bg-brand-green-dark/10'
-        : 'text-primary bg-primary/15';
+        ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+        : 'text-[#00C830] bg-emerald-50 border-emerald-200';
 
   return (
-    <div className="mod-card flex items-center gap-3 rounded-xl p-4">
-      <div className={`mod-inset flex h-10 w-10 items-center justify-center rounded-full ${toneClass}`}>
-        <span
-          className="material-symbols-outlined text-[20px]"
-          style={{ fontVariationSettings: "'FILL' 1" }}
-        >
-          {icon}
-        </span>
+    <div className="flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white p-3.5 shadow-2xs">
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${toneClass}`}>
+        <Icon size={20} />
       </div>
       <div className="min-w-0">
-        <p className="text-lg font-extrabold tabular-nums" style={{ color: 'var(--neu-text)' }}>
+        <p className="text-lg font-extrabold tabular-nums text-slate-900">
           {value}
         </p>
-        <p className="text-xs text-[var(--neu-text-muted)]">{label}</p>
+        <p className="text-xs font-medium text-slate-500">{label}</p>
       </div>
     </div>
   );
@@ -203,9 +199,9 @@ export default function CommunitiesPage() {
           )}
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard icon="groups" label="Showing" value={hubs.length} />
-            <StatCard icon="group" label="Joined here" value={joinedCount} tone="blue" />
-            <StatCard icon="bolt" label="High activity" value={highActivityCount} tone="green" />
+            <StatCard icon={Users} label="Showing" value={hubs.length} />
+            <StatCard icon={ShieldCheck} label="Joined here" value={joinedCount} tone="blue" />
+            <StatCard icon={Zap} label="High activity" value={highActivityCount} tone="green" />
           </div>
 
           {isLoading ? (

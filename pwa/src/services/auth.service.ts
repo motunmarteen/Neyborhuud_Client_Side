@@ -26,7 +26,6 @@ import {
 } from "@/types/api";
 import { normalizeAuthUser } from "@/lib/userAvatar";
 import {
-  extractUserFromIdentityPayload,
   extractUserFromProfileMeResponse,
   mergeAuthUserRecords,
 } from "@/lib/profileMe";
@@ -65,36 +64,13 @@ function buildProfilePatchForServer(data: {
   return patch;
 }
 
-/**
- * The identity profile patch is an optional enrichment service that may not be
- * deployed on every backend. Once we see a 404 we stop calling it for the rest
- * of the session to avoid spamming the network tab on every auth refresh.
- */
-let identityServiceUnavailable = false;
-
-async function fetchIdentityProfilePatch(): Promise<Partial<User> | null> {
-  if (identityServiceUnavailable) return null;
-  try {
-    const res = await apiClient.get<unknown>("/identity/profile");
-    if (res.success) {
-      return extractUserFromIdentityPayload(res.data);
-    }
-  } catch (err: unknown) {
-    const status = (err as { response?: { status?: number } } | undefined)?.response?.status;
-    if (status === 404) {
-      identityServiceUnavailable = true;
-    }
-    /* optional service — fall through to /profile/me data */
-  }
-  return null;
-}
-
 async function fetchMergedUserFromServer(): Promise<User | null> {
   try {
     const res = await apiClient.get<unknown>("/profile/me");
     const fromMe = extractUserFromProfileMeResponse(res);
-    const fromIdentity = await fetchIdentityProfilePatch();
-    const merged = mergeAuthUserRecords(fromMe, fromIdentity);
+    // /profile/me is the complete, authoritative profile (the backend has no
+    // GET /identity/profile — that call always 404'd).
+    const merged = mergeAuthUserRecords(fromMe, null);
     if (merged) {
       return persistProfileUploadUser(merged);
     }

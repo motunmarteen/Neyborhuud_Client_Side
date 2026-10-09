@@ -12,6 +12,7 @@ import { BrowseSearchField } from '@/components/layout/BrowseSearchField';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { SavedPostRow } from '@/components/feed/SavedPostRow';
 import { getPostId } from '@/components/feed/TrendingPostRow';
+import { Bookmark, Filter, RefreshCw, FileText, Megaphone, Briefcase } from 'lucide-react';
 import type { ContentType, Post } from '@/types/api';
 
 type ContentFilter = 'all' | ContentType;
@@ -35,7 +36,7 @@ function StatCard({
   value,
   tone = 'primary',
 }: {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   value: string | number;
   tone?: 'primary' | 'blue';
@@ -44,14 +45,9 @@ function StatCard({
     tone === 'blue' ? 'text-brand-blue bg-brand-blue/10' : 'text-primary bg-primary/15';
 
   return (
-    <div className="mod-card flex items-center gap-3 rounded-xl p-4">
+    <div className="mod-card flex items-center gap-3 rounded-2xl p-4 border border-black/5 dark:border-white/5">
       <div className={`mod-inset flex h-10 w-10 items-center justify-center rounded-full ${toneClass}`}>
-        <span
-          className="material-symbols-outlined text-[20px]"
-          style={{ fontVariationSettings: "'FILL' 1" }}
-        >
-          {icon}
-        </span>
+        {icon}
       </div>
       <div className="min-w-0">
         <p className="text-lg font-extrabold tabular-nums" style={{ color: 'var(--neu-text)' }}>
@@ -206,12 +202,11 @@ export default function SavedPage() {
                   className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary disabled:opacity-50"
                   aria-label="Refresh saved posts"
                 >
-                  <span
-                    className={`material-symbols-outlined text-[18px] ${isFetching ? 'animate-spin' : ''}`}
+                  <RefreshCw
+                    size={16}
+                    className={isFetching ? 'animate-spin' : ''}
                     aria-hidden
-                  >
-                    refresh
-                  </span>
+                  />
                   <span>{isFetching ? 'Loading' : 'Refresh'}</span>
                 </button>
               }
@@ -292,9 +287,9 @@ export default function SavedPage() {
       ) : (
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-3">
-            <StatCard icon="bookmark" label="Total saved" value={allPosts.length} />
+            <StatCard icon={<Bookmark size={20} className="fill-primary" />} label="Total saved" value={allPosts.length} />
             <StatCard
-              icon="filter_list"
+              icon={<Filter size={20} />}
               label="Showing now"
               value={filteredPosts.length}
               tone="blue"

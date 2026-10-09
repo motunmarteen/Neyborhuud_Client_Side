@@ -93,7 +93,7 @@ export function SentinelBottomSheet() {
         <div className="grid grid-cols-2 gap-2.5 mb-4">
           <Link
             href={sos?.href || '/sos'}
-            className="relative overflow-hidden bg-gradient-to-br from-[#FF3B30] to-[#D70015] rounded-sm p-3.5 flex flex-col justify-between shadow-[0_8px_24px_rgba(255,59,48,0.3)] hover:shadow-[0_12px_32px_rgba(255,59,48,0.4)] active:scale-[0.98] transition-all text-white min-h-[90px] group"
+            className="relative overflow-hidden bg-[#E53935] rounded-sm p-3.5 flex flex-col justify-between shadow-[0_8px_24px_rgba(255,59,48,0.3)] hover:shadow-[0_12px_32px_rgba(255,59,48,0.4)] active:scale-[0.98] transition-all text-white min-h-[90px] group"
             onClick={closeSheet}
           >
             <div className="absolute top-0 right-0 -mr-6 -mt-6 w-32 h-32 bg-white/20 rounded-full blur-2xl pointer-events-none" />
@@ -125,7 +125,7 @@ export function SentinelBottomSheet() {
         {sentinelAi && (
           <Link
             href={sentinelAi.href}
-            className="w-full bg-gradient-to-r from-[#0F2027] via-[#203A43] to-[#2C5364] rounded-sm py-2.5 px-3.5 mb-4 flex items-center justify-between text-white shadow-md active:scale-[0.98] transition-transform"
+            className="w-full bg-[#14181D] border border-white/10 rounded-sm py-2.5 px-3.5 mb-4 flex items-center justify-between text-white shadow-md active:scale-[0.98] transition-transform"
             onClick={closeSheet}
           >
             <div className="flex items-center gap-2.5">

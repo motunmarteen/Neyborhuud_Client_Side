@@ -7,12 +7,12 @@ type EffectSize = 'hero' | 'compact' | 'mini';
 type EffectVariant = 'contained' | 'column';
 
 const PARTICLE_COUNTS: Record<EffectSize, { rain: number; snow: number }> = {
-  hero: { rain: 25, snow: 32 },
-  compact: { rain: 14, snow: 18 },
-  mini: { rain: 10, snow: 14 },
+  hero: { rain: 46, snow: 32 },
+  compact: { rain: 22, snow: 18 },
+  mini: { rain: 14, snow: 14 },
 };
 
-const COLUMN_PARTICLE_COUNTS = { rain: 22, snow: 20 };
+const COLUMN_PARTICLE_COUNTS = { rain: 30, snow: 20 };
 
 export function SkyRainDrops({
   isDark = false,
@@ -31,13 +31,13 @@ export function SkyRainDrops({
         id: i,
         left: (i * 13 + 5) % 100,
         height: isColumn
-          ? 14 + (i * 7 + 3) % 22
-          : (size === 'mini' ? 6 : 10) + (i * 7 + 3) % (size === 'mini' ? 10 : 18),
+          ? 16 + ((i * 7 + 3) % 22)
+          : (size === 'mini' ? 8 : 16) + ((i * 7 + 3) % (size === 'mini' ? 8 : 18)),
         dur: isColumn
-          ? 0.9 + ((i * 11) % 8) / 10
-          : 0.35 + ((i * 11) % 4) / 15,
-        delay: ((i * 7) % (isColumn ? 40 : 25)) / 10,
-        angle: -12 + ((i * 3) % 10),
+          ? 0.85 + ((i * 11) % 8) / 12
+          : 0.65 + ((i * 11) % 6) / 10,
+        delay: ((i * 7) % (isColumn ? 35 : 22)) / 10,
+        angle: -12 + ((i * 3) % 8),
       })),
     [count, isColumn, size],
   );
@@ -50,15 +50,17 @@ export function SkyRainDrops({
           className={`absolute sky-rain-drop${isColumn ? ' sky-rain-drop--column' : ''}`}
           style={{
             left: `${d.left}%`,
-            top: isColumn ? undefined : size === 'mini' ? '-8px' : '-12px',
-            width: isColumn ? '1.5px' : size === 'mini' ? '1px' : '1.5px',
+            top: isColumn ? undefined : size === 'mini' ? '-10px' : '-16px',
+            width: isColumn ? '1.5px' : size === 'mini' ? '1px' : '1.8px',
             height: `${d.height}px`,
-            transform: isColumn ? `rotate(${d.angle}deg)` : `rotate(${d.angle}deg)`,
             background: isDark
-              ? 'linear-gradient(180deg, transparent, rgba(150,180,255,0.6), rgba(200,220,255,0.35))'
+              ? 'linear-gradient(180deg, transparent, rgba(160, 205, 255, 0.85), rgba(215, 235, 255, 0.6))'
               : isColumn
-                ? 'linear-gradient(180deg, transparent, rgba(90,130,200,0.45), rgba(140,170,220,0.2))'
-                : 'linear-gradient(180deg, transparent, rgba(255,255,255,0.55), transparent)',
+                ? 'linear-gradient(180deg, transparent, rgba(90, 140, 225, 0.7), rgba(150, 190, 245, 0.4))'
+                : 'linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(115, 180, 255, 0.95), rgba(70, 140, 240, 0.75))',
+            boxShadow: isDark
+              ? '0 0 2px rgba(160, 205, 255, 0.5)'
+              : '0 0 2px rgba(90, 160, 255, 0.4)',
             borderRadius: '1px',
             animation: `${isColumn ? 'ambient-rain-sidebar' : 'ambient-rain'} ${d.dur}s linear infinite`,
             animationDelay: `${d.delay}s`,

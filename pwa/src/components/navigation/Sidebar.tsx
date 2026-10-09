@@ -256,7 +256,9 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
             <div className="flex items-center justify-between h-14 px-3 mb-1">
                 <Link href="/feed" className={`flex items-center rounded-full transition-colors hover:bg-brand-surface dark:hover:bg-brand-black/80 ${isCollapsed ? 'h-12 w-12 justify-center' : 'px-1'}`}>
                     {isCollapsed ? (
-                        <span className="brand-wordmark text-[15px] font-extrabold text-[#00D431]">n</span>
+                        <span className="font-display font-black text-[16px] tracking-tight text-slate-900 dark:text-white select-none">
+                            N<span className="text-[#00C830]">H</span>
+                        </span>
                     ) : (
                         <NeyborHuudLogo layout="wordmark" size="md" tone="primary" />
                     )}

@@ -8,6 +8,7 @@ import { usePost } from '@/hooks/usePosts';
 import { useCommentMutations } from '@/hooks/useComments';
 import { CommentForm } from '@/components/feed/CommentForm';
 import { CommentItem } from '@/components/feed/CommentItem';
+import { X, ChevronDown, MessageSquare } from 'lucide-react';
 
 type CommentTarget = { kind: 'post'; id: string };
 
@@ -98,9 +99,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                             className="btn-ghost grid h-8 w-8 place-items-center rounded-full transition-colors"
                             aria-label="Close comments"
                         >
-                            <span className="material-symbols-outlined text-[18px]" style={{ color: 'var(--neu-text-secondary)' }}>
-                                close
-                            </span>
+                            <X size={18} style={{ color: 'var(--neu-text-secondary)' }} />
                         </button>
                     </div>
                 </div>
@@ -115,7 +114,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                                 className="flex items-center gap-1 text-[13px] font-bold text-[#050505] transition-colors hover:text-brand-blue dark:text-[#E4E6EB]"
                             >
                                 {sortBy === 'relevant' ? 'Most relevant' : 'Newest'}
-                                <span className="material-symbols-outlined text-[18px]">expand_more</span>
+                                <ChevronDown size={16} />
                             </button>
                         </div>
                     )}
@@ -134,8 +133,8 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                             ))}
                         </div>
                     ) : (
-                        <div className="py-14 text-center text-[var(--neu-text-muted)]">
-                            <span className="material-symbols-outlined text-3xl opacity-40">chat_bubble_outline</span>
+                        <div className="py-14 text-center text-[var(--neu-text-muted)] flex flex-col items-center">
+                            <MessageSquare className="w-8 h-8 opacity-40 text-primary" />
                             <p className="mt-2 text-sm">Start the conversation.</p>
                         </div>
                     )}

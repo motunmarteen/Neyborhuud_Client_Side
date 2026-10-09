@@ -19,14 +19,31 @@ export interface LocationAddress {
  * Uses fallback chain: Backend API -> OpenStreetMap -> Google Maps (if configured)
  */
 export async function reverseGeocode(lat: number, lng: number): Promise<LocationAddress | null> {
+    // 1. Try Google Maps if configured (fastest and most accurate in Nigeria)
+    try {
+        const googleResult = await reverseGeocodeGoogle(lat, lng);
+        if (googleResult) return googleResult;
+    } catch {
+        // Continue to OSM / backend fallback
+    }
+
+    // 2. Try OpenStreetMap / Nominatim (proxied via Next.js API or direct)
+    try {
+        const osmResult = await reverseGeocodeOSM(lat, lng);
+        if (osmResult) return osmResult;
+    } catch {
+        // Continue to backend fallback
+    }
+
+    // 3. Try Backend API if reachable
     try {
         const backendResult = await reverseGeocodeBackend(lat, lng);
         if (backendResult) return backendResult;
     } catch {
-        // Backend unavailable — try OSM proxy below
+        // Backend unavailable
     }
 
-    return reverseGeocodeOSM(lat, lng);
+    return null;
 }
 
 /**
@@ -183,18 +200,25 @@ async function reverseGeocodeGoogle(lat: number, lng: number): Promise<LocationA
 
     // Parse Google Maps address components
     const result = data.results[0];
-    const components = result.address_components;
+    const components = result.address_components || [];
 
+    let street = '';
     let neighborhood = '';
     let lga = '';
     let state = '';
     let country = '';
 
     for (const component of components) {
-        const types = component.types;
+        const types = component.types || [];
 
-        if (types.includes('sublocality') || types.includes('neighborhood')) {
-            neighborhood = component.long_name;
+        if (types.includes('route')) {
+            street = component.long_name;
+        } else if (
+            types.includes('sublocality_level_1') ||
+            types.includes('sublocality') ||
+            types.includes('neighborhood')
+        ) {
+            if (!neighborhood) neighborhood = component.long_name;
         } else if (types.includes('administrative_area_level_2')) {
             lga = component.long_name;
         } else if (types.includes('administrative_area_level_1')) {
@@ -204,15 +228,17 @@ async function reverseGeocodeGoogle(lat: number, lng: number): Promise<LocationA
         }
     }
 
-    const parts = [neighborhood, lga, state].filter(Boolean);
-    const formatted = parts.join(', ');
+    const effectiveNeighborhood = street || neighborhood || lga || 'Local Neighborhood';
+    const cleanFormatted =
+        result.formatted_address ||
+        [street || neighborhood, lga, state].filter(Boolean).join(', ');
 
     return {
-        neighborhood,
-        lga,
-        state,
-        country,
-        formatted,
-        source: 'google'
+        neighborhood: effectiveNeighborhood,
+        lga: lga || 'Region Detected',
+        state: state || 'GPS Locked',
+        country: country || 'Nigeria',
+        formatted: cleanFormatted,
+        source: 'google',
     };
 }

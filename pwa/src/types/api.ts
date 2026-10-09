@@ -594,7 +594,8 @@ export interface ChatMessageMeta {
     | "paid_confirmed"
     | "shipped"
     | "completed"
-    | "cancelled";
+    | "cancelled"
+    | "disputed";
   /** Order id this deal belongs to (used to drive the action buttons). */
   orderId?: string;
   amount?: number;
@@ -802,6 +803,7 @@ export interface Conversation {
     name: string;
     username: string;
     avatarUrl?: string | null;
+    isVerified?: boolean;
   };
   lastMessage?: ChatMessage | null;
   lastMessageAt?: string;

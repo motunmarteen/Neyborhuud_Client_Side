@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Newspaper, ArrowRight } from 'lucide-react';
 import { newsService } from '@/services/news.service';
 import type { RssArticle } from '@/types/incident';
 
@@ -125,66 +126,67 @@ export function NewsPanel() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center justify-between px-4 pt-3 pb-2">
-        <h3 className="text-base font-extrabold" style={{ color: 'var(--neu-text)' }}>
-          Today&rsquo;s News
-        </h3>
-        <Link href={`/local-news?tab=${region}`} className="text-xs font-bold text-primary no-underline hover:underline">
-          See all
+      <div className="flex items-center justify-between px-1 pb-2">
+        <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
+          <Newspaper size={13} className="text-[#008A20]" />
+          <span>Today’s News</span>
+        </div>
+        <Link href={`/local-news?tab=${region}`} className="text-[#008A20] text-[11px] font-bold hover:underline flex items-center gap-0.5">
+          <span>See all</span>
+          <ArrowRight size={11} />
         </Link>
       </div>
 
       {/* Region Tabs */}
-      <div className="flex gap-2 px-4 mb-3">
+      <div className="flex gap-1.5 px-1 mb-3">
         <button
           onClick={() => setRegion('nigeria')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             region === 'nigeria'
-              ? 'bg-primary text-black'
-              : 'bg-black/5 dark:bg-white/5 text-neu-text-secondary dark:text-white/60 hover:bg-black/10 dark:hover:bg-white/10'
+              ? 'bg-emerald-50 text-[#008A20] shadow-xs'
+              : 'text-[#6B7280] hover:bg-black/[0.04] hover:text-[#111827]'
           }`}
         >
           Nigeria
         </button>
         <button
           onClick={() => setRegion('international')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             region === 'international'
-              ? 'bg-primary text-black'
-              : 'bg-black/5 dark:bg-white/5 text-neu-text-secondary dark:text-white/60 hover:bg-black/10 dark:hover:bg-white/10'
+              ? 'bg-emerald-50 text-[#008A20] shadow-xs'
+              : 'text-[#6B7280] hover:bg-black/[0.04] hover:text-[#111827]'
           }`}
         >
-          International
+          World
         </button>
       </div>
 
       {error || items.length === 0 ? (
-        <div className="flex flex-col items-center py-10 px-6">
-          <span className="material-symbols-outlined mb-3 text-3xl text-[var(--neu-text-muted)]">newspaper</span>
-          <p className="mb-1 text-sm font-medium" style={{ color: 'var(--neu-text)' }}>No headlines right now</p>
-          <p className="mb-4 text-center text-xs" style={{ color: 'var(--neu-text-muted)' }}>
-            {error ?? 'Check Local News for the latest stories.'}
-          </p>
-          <Link href={`/local-news?tab=${region}`} className="mod-chip mod-chip-active rounded-full px-3 py-1.5 text-xs font-bold text-primary no-underline">
-            Open Local News
+        <div className="flex flex-col items-center py-6 px-4 text-center rounded-2xl bg-white border border-black/[0.08] shadow-xs">
+          <Newspaper size={24} className="text-[#9CA3AF] mb-2" />
+          <p className="text-xs font-semibold text-[#6B7280]">No headlines right now</p>
+          <Link href={`/local-news?tab=${region}`} className="text-xs font-bold text-[#008A20] hover:underline mt-1 inline-block">
+            Open Local News →
           </Link>
         </div>
       ) : (
-        <div className="flex flex-col divide-y" style={{ borderColor: 'var(--neu-shadow-dark, rgba(255,255,255,0.05))' }}>
-          {items.map((item) => (
+        <div className="flex flex-col gap-2">
+          {items.slice(0, 4).map((item) => (
             <a
               key={item.id}
               href={item.link || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-3 transition-colors hover:bg-white/[0.02]"
+              className="p-3 rounded-2xl bg-white border border-black/[0.08] hover:border-[#008A20]/40 transition-all shadow-xs group block"
             >
-              <h4 className="mb-1.5 text-[14px] font-bold leading-snug hover:text-primary transition-colors" style={{ color: 'var(--neu-text)' }}>
+              <h4 className="text-xs font-bold text-[#111827] group-hover:text-[#008A20] transition-colors line-clamp-2 leading-snug">
                 {item.title}
               </h4>
-              <span className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>
-                {item.sourceName ?? item.source ?? 'News'} · {item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' }) : 'Recent'}
-              </span>
+              <p className="text-[10px] font-semibold text-[#9CA3AF] mt-1.5 flex items-center gap-1.5">
+                <span className="text-[#008A20] font-bold">{item.sourceName ?? item.source ?? 'News'}</span>
+                <span>•</span>
+                <span>{item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' }) : 'Recent'}</span>
+              </p>
             </a>
           ))}
         </div>

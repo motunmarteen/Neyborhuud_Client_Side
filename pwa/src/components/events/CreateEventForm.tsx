@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useCreateEvent } from "@/hooks/useEvents";
 import { useRegisteredLocation } from "@/hooks/useRegisteredLocation";
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { CreateEventPayload } from "@/types/api";
 import { glassField, glassLabel, glassMutedLabel } from "@/lib/glass-form-styles";
 import { PremiumTextArea } from "@/components/ui/PremiumTextArea";

@@ -47,29 +47,29 @@ export function PostCardAuthorLines({
   return (
     <div className="post-card-header__text min-w-0 flex-1">
       <div className="post-card-header__identity flex items-center gap-1.5 min-w-0">
+        <Link
+          href={`/profile/${authorUsername}`}
+          onClick={onProfileClick}
+          className="truncate min-w-0 max-w-[60%] text-xs font-black text-[#111827] hover:text-[#008A20] transition-colors leading-tight"
+        >
+          {displayName}
+        </Link>
         <PostCardVerificationBadge
           author={author}
           hidden={isAnonymousAuthor}
           isVerified={isVerified}
           verificationBadge={verificationBadge}
         />
-        <Link
-          href={`/profile/${authorUsername}`}
-          onClick={onProfileClick}
-          className="truncate min-w-0 max-w-[55%] text-[14px] font-semibold text-[#050505] dark:text-[#E4E6EB] hover:underline leading-tight"
-        >
-          {displayName}
-        </Link>
-        <span className="truncate min-w-0 text-[13px] font-normal text-[#65676B] dark:text-[#B0B3B8] leading-tight">
+        <span className="truncate min-w-0 text-[11px] font-semibold text-[#6B7280] leading-tight">
           @{authorUsername}
         </span>
       </div>
-      <div className="post-card-header__meta flex items-center gap-1 mt-[2px] min-w-0 overflow-hidden text-[12px] font-normal text-[#65676B] dark:text-[#B0B3B8] leading-tight">
+      <div className="post-card-header__meta flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[11px] font-medium text-[#9CA3AF] leading-tight">
         <span className="shrink-0">{formatTimeAgo(createdAt)}</span>
         {place ? (
           <>
-            <span className="shrink-0">•</span>
-            <span className="truncate">{place}</span>
+            <span className="shrink-0 text-[#D1D5DB]">•</span>
+            <span className="truncate text-[#6B7280]">{place}</span>
           </>
         ) : null}
       </div>

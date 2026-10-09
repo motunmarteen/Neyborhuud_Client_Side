@@ -157,7 +157,8 @@ export default function RootLayout({
               <DailyCheckInModal />
               <Toaster
                 position="top-center"
-                duration={3000}
+                duration={3500}
+                theme="light"
                 toastOptions={{
                   unstyled: true,
                   classNames: {
@@ -171,7 +172,8 @@ export default function RootLayout({
                 }}
                 visibleToasts={3}
                 expand={false}
-                offset={12}
+                offset={72}
+                gap={8}
               />
               <SrToastAnnouncer />
               <NotificationPermissionPrompt />

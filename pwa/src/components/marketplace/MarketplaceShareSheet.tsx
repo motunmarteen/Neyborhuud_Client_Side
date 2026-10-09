@@ -108,7 +108,7 @@ export function MarketplaceShareSheet({ open, onClose, productId, title }: Marke
             <button
               type="button"
               onClick={() => void nativeShare()}
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-primary/35 bg-gradient-to-r from-primary/15 to-[#006F35]/12 py-3 text-sm font-bold text-[#006F35] shadow-[0_8px_24px_rgba(0,212,49,0.2)] transition-transform active:scale-[0.98] dark:border-primary/30 dark:from-emerald-500/20 dark:to-teal-600/15 dark:text-white/90"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-primary/35 bg-[#00D431]/15 py-3 text-sm font-bold text-[#006F35] dark:text-[#00D431] shadow-[0_8px_24px_rgba(0,212,49,0.2)] transition-transform active:scale-[0.98]"
             >
               <span className="material-symbols-outlined text-[20px]">ios_share</span>
               Share…

@@ -9,6 +9,7 @@ import { useEmailValidation } from '@/hooks/useEmailValidation';
 import { toast } from 'sonner';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
+import { Send, Loader2, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 
 function isNetworkError(message: string): boolean {
     const normalized = message.toLowerCase();
@@ -113,17 +114,17 @@ export default function ForgotPasswordPage() {
                 type="submit"
                 form="forgot-password-form"
                 disabled={loading || !emailValidation.isFormatValid}
-                className="auth-btn auth-btn-primary"
+                className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
             >
                 {loading ? (
                     <>
-                        <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                        <Loader2 className="w-4 h-4 shrink-0 animate-spin" aria-hidden />
                         <span>Sending…</span>
                     </>
                 ) : (
                     <>
                         <span>Send reset link</span>
-                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">send</span>
+                        <Send size={16} className="shrink-0" aria-hidden="true" />
                     </>
                 )}
             </button>
@@ -133,20 +134,24 @@ export default function ForgotPasswordPage() {
                     type="button"
                     onClick={handleResend}
                     disabled={resendCooldown > 0 || loading}
-                    className="auth-btn auth-btn-secondary"
+                    className="auth-btn auth-btn-secondary flex items-center justify-center gap-2"
                 >
-                    <span className={`material-symbols-outlined shrink-0 text-[1.125rem] ${loading ? 'animate-spin' : ''}`} aria-hidden="true">{loading ? 'progress_activity' : 'send'}</span>
+                    {loading ? (
+                        <Loader2 className="w-4 h-4 shrink-0 animate-spin" aria-hidden="true" />
+                    ) : (
+                        <Send size={16} className="shrink-0" aria-hidden="true" />
+                    )}
                     <span>{loading ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
                 </button>
-                <Link href="/login" className="auth-btn auth-btn-primary no-underline">
+                <Link href="/login" className="auth-btn auth-btn-primary no-underline flex items-center justify-center gap-2">
                     <span>Back to login</span>
-                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                    <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                 </Link>
             </div>
         ) : (
-            <button type="button" onClick={() => setStep('form')} className="auth-btn auth-btn-primary">
+            <button type="button" onClick={() => setStep('form')} className="auth-btn auth-btn-primary flex items-center justify-center gap-2">
                 <span>Try again</span>
-                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
             </button>
         );
 
@@ -181,15 +186,15 @@ export default function ForgotPasswordPage() {
             )}
 
             {step === 'sent' && (
-                <div className="auth-flow-notice auth-flow-notice--success">
-                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
+                <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-primary shrink-0" aria-hidden="true" />
                     <span>If an account exists for {email}, a reset link has been sent.</span>
                 </div>
             )}
 
             {step === 'error' && errorMessage ? (
-                <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
+                <div className="auth-flow-notice auth-flow-notice--error flex items-center gap-2" role="alert">
+                    <AlertCircle size={16} className="text-red-500 shrink-0" aria-hidden="true" />
                     <span>{errorMessage}</span>
                 </div>
             ) : null}

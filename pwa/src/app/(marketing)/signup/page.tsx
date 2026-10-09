@@ -27,13 +27,27 @@ import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { LEGAL_LINKS } from '@/components/legal/LegalDocumentPage';
 import { useMyGamificationStats } from '@/hooks/useGamification';
+import { Eli5Tooltip } from '@/components/ui/Eli5Tooltip';
+import {
+    ArrowRight,
+    ArrowLeft,
+    Loader2,
+    Send,
+    AlertCircle,
+    CheckCircle2,
+    MapPin,
+    ChevronUp,
+    ChevronDown,
+    Radio,
+    Gift,
+    Coins,
+} from 'lucide-react';
 
 import { SIGNUP_MAP_DEFAULT } from '@/lib/signupMap';
 
 const SIGNUP_STAGE_LABELS = {
     location: 'Street',
-    identity: '@name',
-    security: 'Secure',
+    identity: 'Account',
 } as const;
 
 function SignupPageContent() {
@@ -41,7 +55,7 @@ function SignupPageContent() {
     const searchParams = useSearchParams();
     const [referralCodeInput, setReferralCodeInput] = useState('');
     const [step, setStep] = useState<'form' | 'verify-email' | 'success'>('form');
-    const [signupStage, setSignupStage] = useState<'location' | 'identity' | 'security'>('location');
+    const [signupStage, setSignupStage] = useState<'location' | 'identity'>('location');
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -131,9 +145,8 @@ function SignupPageContent() {
         formData.acceptTermsAndPrivacy &&
         !loading;
     const signupStages = [
-        { id: 'location', label: 'Location', icon: 'location_on' },
-        { id: 'identity', label: 'Identity', icon: 'badge' },
-        { id: 'security', label: 'Secure', icon: 'lock' },
+        { id: 'location', label: 'Street', icon: 'location_on' },
+        { id: 'identity', label: 'Account', icon: 'badge' },
     ] as const;
     const activeStageIndex = signupStages.findIndex(item => item.id === signupStage);
     const huudName = resolvedAddress?.neighborhood || resolvedAddress?.lga || (location ? 'Huud point captured' : 'Finding your Huud');
@@ -161,8 +174,8 @@ function SignupPageContent() {
         });
     };
 
-    const identityContinueHint = (() => {
-        if (canContinueIdentity) return null;
+    const accountContinueHint = (() => {
+        if (canSubmit) return null;
         if (usernameValidation.status === 'checking' || emailValidation.status === 'checking') {
             return { text: 'Checking availability…', checking: true };
         }
@@ -190,7 +203,13 @@ function SignupPageContent() {
         if (emailValidation.status !== 'valid') {
             return { text: 'Use an email that isn\'t already registered', checking: false };
         }
-        return { text: 'Complete @name and email to continue', checking: false };
+        if (!isPassValid) {
+            return { text: passwordPolicy.message || 'Create a secure password (12+ chars)', checking: false };
+        }
+        if (!formData.acceptTermsAndPrivacy) {
+            return { text: 'Please accept terms & privacy to enter your Huud', checking: false };
+        }
+        return null;
     })();
 
     // Handle resend verification code
@@ -293,13 +312,16 @@ function SignupPageContent() {
 
             if (address) {
                 setResolvedAddress(address);
+                setLocError(null);
             } else {
                 setResolvedAddress({
-                    lga: 'Location Detected',
+                    neighborhood: 'Your Street',
+                    lga: 'Region Detected',
                     state: 'GPS Locked',
+                    country: 'Nigeria',
                     formatted: `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`
                 });
-                setLocError('Could not resolve address - coordinates captured');
+                setLocError(null);
             }
 
             setIsResolving(false);
@@ -468,30 +490,12 @@ function SignupPageContent() {
             );
 
             if (response.success && response.data) {
-                const ext = response.data;
-
-                if (isUserEmailVerified(ext.user)) {
-                    setVerificationNotice('Your email is already verified.');
-                    setVerificationError(null);
-                    advanceAfterVerified();
-                    return;
-                }
-
-                if (ext.emailDelivery?.sent === false) {
-                    setVerificationError(ext.emailDelivery.message || 'Account created, but the verification email could not be sent. Please request a new code.');
-                    setVerificationNotice(null);
-                    setResendCooldown(0);
-                } else {
-                    setVerificationNotice(ext.emailDelivery?.message || 'Verification code sent.');
-                    setVerificationError(null);
-                    setResendCooldown(60);
-                }
+                toast.success(`Welcome to your Huud, @${formData.username || 'resident'}! 🎉`);
+                router.replace('/feed');
+                return;
             } else if (!response.success) {
                 throw new Error(response.message || 'Registration failed');
             }
-
-            setVerificationCode('');
-            setStep('verify-email');
         } catch (error: unknown) {
             const err = error as { message?: string; status?: number; response?: { status?: number; data?: { message?: string } } };
             const backendMsg = err.response?.data?.message?.trim();
@@ -546,7 +550,11 @@ function SignupPageContent() {
                             disabled={resendCooldown > 0 || isResending}
                             className="auth-btn auth-btn-secondary"
                         >
-                            <span className={`material-symbols-outlined shrink-0 text-[1.125rem] ${isResending ? 'animate-spin' : ''}`} aria-hidden="true">{isResending ? 'progress_activity' : 'send'}</span>
+                            {isResending ? (
+                                <Loader2 className="shrink-0 animate-spin" size={17} strokeWidth={2} />
+                            ) : (
+                                <Send className="shrink-0" size={17} strokeWidth={2} />
+                            )}
                             <span>{isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
                         </button>
                         <button
@@ -557,13 +565,13 @@ function SignupPageContent() {
                         >
                             {isVerifying ? (
                                 <>
-                                    <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                                    <span className="h-4 w-4 shrink-0 rounded-full border-2 border-black/30 border-t-black animate-spin" aria-hidden />
                                     <span>Verifying</span>
                                 </>
                             ) : (
                                 <>
                                     <span>Verify</span>
-                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                                    <ArrowRight className="shrink-0" size={17} strokeWidth={2.4} />
                                 </>
                             )}
                         </button>
@@ -583,13 +591,13 @@ function SignupPageContent() {
                         Enter all 6 digits, then tap Verify
                     </p>
                     {verificationError ? (
-                        <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
+                        <div className="auth-flow-notice auth-flow-notice--error flex items-center gap-2" role="alert">
+                            <AlertCircle className="shrink-0 text-red-500" size={16} strokeWidth={2} />
                             <span>{verificationError}</span>
                         </div>
                     ) : verificationNotice ? (
-                        <div className="auth-flow-notice auth-flow-notice--success">
-                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
+                        <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
+                            <CheckCircle2 className="shrink-0 text-[#00D431]" size={16} strokeWidth={2} />
                             <span>{verificationNotice}</span>
                         </div>
                     ) : null}
@@ -625,10 +633,10 @@ function SignupPageContent() {
                             }
                             router.push(getPostSetupRoute());
                         }}
-                        className="auth-btn auth-btn-primary"
+                        className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
                     >
                         <span>{getNeedsCommunitySelection() ? 'Pick your Huud' : 'Enter my Huud'}</span>
-                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                        <ArrowRight className="shrink-0" size={17} strokeWidth={2.4} />
                     </button>
                 }
             >
@@ -641,7 +649,7 @@ function SignupPageContent() {
                         <span className="text-3xl font-black leading-none">
                             {signupCoinBalance ?? '—'}
                         </span>
-                        <span className="material-symbols-outlined text-xl text-status-warning" aria-hidden="true">toll</span>
+                        <Coins className="text-xl text-status-warning" size={24} strokeWidth={2} />
                     </div>
                 </div>
                 {signupCoinBalance === null ? (
@@ -702,9 +710,7 @@ function SignupPageContent() {
                             const canOpen =
                                 signupStage === 'location'
                                     ? item.id === 'location'
-                                    : index <= activeStageIndex ||
-                                      item.id === 'identity' ||
-                                      (item.id === 'security' && canContinueIdentity);
+                                    : index <= activeStageIndex || item.id === 'identity';
 
                             return (
                                 <button
@@ -712,7 +718,6 @@ function SignupPageContent() {
                                     type="button"
                                     role="tab"
                                     onClick={() => {
-                                        if (item.id === 'security' && !canContinueIdentity) return;
                                         if (canOpen) setSignupStage(item.id);
                                     }}
                                     disabled={!canOpen}
@@ -724,7 +729,7 @@ function SignupPageContent() {
                         })}
                     </div>
                     <p className="auth-signup-progress__label">
-                        Step {activeStageIndex + 1} of 3 · {SIGNUP_STAGE_LABELS[signupStage]}
+                        Step {activeStageIndex + 1} of 2 · {SIGNUP_STAGE_LABELS[signupStage]}
                     </p>
                 </div>
 
@@ -747,14 +752,14 @@ function SignupPageContent() {
                     peek={
                         <div className="auth-signup-location-peek">
                             <span className="auth-signup-location-peek__icon" aria-hidden>
-                                <span className="material-symbols-outlined"  aria-hidden="true">location_on</span>
+                                <MapPin size={18} strokeWidth={2} />
                             </span>
                             <div className="min-w-0 flex-1">
                                 <p className="auth-signup-location-peek__label">{huudStatus}</p>
                                 <p className="auth-signup-location-peek__name truncate">{huudName}</p>
                             </div>
                             <span className="auth-signup-location-peek__chevron" aria-hidden="true">
-                                <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">{locationSheetCollapsed ? 'expand_less' : 'expand_more'}</span>
+                                {locationSheetCollapsed ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                             </span>
                         </div>
                     }
@@ -767,17 +772,21 @@ function SignupPageContent() {
                                     disabled={isResolving}
                                     className="auth-btn auth-btn-secondary disabled:opacity-40"
                                 >
-                                    <span className={`material-symbols-outlined shrink-0 text-[1.125rem] ${isResolving ? 'animate-spin' : ''}`} aria-hidden="true">{isResolving ? 'progress_activity' : 'cell_tower'}</span>
+                                    {isResolving ? (
+                                        <Loader2 className="shrink-0 animate-spin" size={17} strokeWidth={2} />
+                                    ) : (
+                                        <Radio className="shrink-0" size={17} strokeWidth={2} />
+                                    )}
                                     <span>{isResolving ? 'Finding…' : 'Use my location'}</span>
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setSignupStage('identity')}
                                     disabled={!canContinueLocation}
-                                    className="auth-btn auth-btn-primary disabled:opacity-40"
+                                    className="auth-btn auth-btn-primary disabled:opacity-40 flex items-center justify-center gap-2"
                                 >
                                     <span>Confirm my street</span>
-                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                                    <ArrowRight className="shrink-0" size={17} strokeWidth={2.4} />
                                 </button>
                             </div>
                             {!canContinueLocation ? (
@@ -795,7 +804,7 @@ function SignupPageContent() {
                         <div className="mb-3 flex items-center gap-3">
                             <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
                                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-primary shadow-md">N</span>
-                                <span className="material-symbols-outlined text-xl" aria-hidden="true">location_on</span>
+                                <MapPin size={22} strokeWidth={2} />
                             </div>
                             <div className="min-w-0 flex-1">
                                 <div className="mb-1 flex items-center gap-2">
@@ -809,7 +818,7 @@ function SignupPageContent() {
                         </div>
                         {locError ? (
                             <div className="mb-3 flex items-start gap-2 rounded-xl border border-brand-red/15 bg-brand-red/10 px-3 py-2 text-[11px] font-semibold leading-relaxed text-brand-red">
-                                <span className="material-symbols-outlined mt-0.5 shrink-0" aria-hidden="true">error</span>
+                                <AlertCircle size={16} strokeWidth={2} className="mt-0.5 shrink-0" />
                                 <span>{locError}</span>
                             </div>
                         ) : null}
@@ -821,7 +830,7 @@ function SignupPageContent() {
 
             {signupStage === 'identity' && (
                 <SignupBottomSheet
-                    ariaLabel="Pick your @name"
+                    ariaLabel="Set up your account"
                     stageKey="identity"
                     keyboardAware
                     onCollapsedChange={setIdentitySheetCollapsed}
@@ -831,11 +840,11 @@ function SignupPageContent() {
                                 @
                             </span>
                             <div className="min-w-0 flex-1">
-                                <p className="auth-signup-identity-peek__label">Pick your @name</p>
+                                <p className="auth-signup-identity-peek__label">Step 2: Your Account</p>
                                 <p className="auth-signup-identity-peek__name truncate">{identityHandle}</p>
                             </div>
                             <span className="auth-signup-identity-peek__chevron" aria-hidden="true">
-                                <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">{identitySheetCollapsed ? 'expand_less' : 'expand_more'}</span>
+                                {identitySheetCollapsed ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                             </span>
                         </div>
                     }
@@ -845,30 +854,42 @@ function SignupPageContent() {
                                 <button
                                     type="button"
                                     onClick={() => setSignupStage('location')}
-                                    className="auth-btn auth-btn-secondary"
+                                    className="auth-btn auth-btn-secondary flex items-center justify-center gap-1.5"
                                 >
-                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_back</span>
+                                    <ArrowLeft size={16} strokeWidth={2} className="shrink-0" />
                                     <span>Back</span>
                                 </button>
                                 <button
-                                    type="button"
-                                    onClick={() => setSignupStage('security')}
-                                    disabled={!canContinueIdentity}
-                                    className="auth-btn auth-btn-primary"
+                                    type="submit"
+                                    disabled={!canSubmit}
+                                    className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
                                 >
-                                    <span>Set up my profile</span>
-                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                                    {loading ? (
+                                        <>
+                                            <span className="h-4 w-4 shrink-0 rounded-full border-2 border-black/30 border-t-black animate-spin" aria-hidden />
+                                            <span>Opening your Huud…</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Enter Your Huud</span>
+                                            <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
+                                        </>
+                                    )}
                                 </button>
                             </div>
-                            {identityContinueHint ? (
+                            {accountContinueHint ? (
                                 <p
-                                    className={`auth-signup-continue-hint${identityContinueHint.checking ? ' auth-signup-continue-hint--checking' : ''}`}
+                                    className={`auth-signup-continue-hint${accountContinueHint.checking ? ' auth-signup-continue-hint--checking' : ''}`}
                                     role="status"
                                     aria-live="polite"
                                 >
-                                    {identityContinueHint.text}
+                                    {accountContinueHint.text}
                                 </p>
                             ) : null}
+                            <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
+                                Already on the Huud?{' '}
+                                <Link href="/login">Enter your Huud</Link>
+                            </p>
                         </div>
                     }
                 >
@@ -890,7 +911,7 @@ function SignupPageContent() {
                     </div>
 
                     <p className="auth-signup-sheet-subcopy mb-3 text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
-                        This is how neighbors find you on the Huud
+                        Tell neighbors what to call you and set your secure password
                     </p>
 
                     <div className="auth-signup-sheet-fields flex flex-col gap-3">
@@ -932,6 +953,26 @@ function SignupPageContent() {
                             invalidText="Please enter a valid email address"
                             checkingText="Checking email…"
                         />
+                        <PremiumInput
+                            label="Secure Password"
+                            type="password"
+                            icon="lock"
+                            placeholder="12+ chars, mixed case, number"
+                            className="py-1"
+                            value={formData.password}
+                            onChange={e => setFormData({ ...formData, password: e.target.value })}
+                        />
+                        <PasswordStrengthMeter
+                            password={formData.password}
+                            email={formData.email}
+                            username={formData.username}
+                            showChecklist={false}
+                        />
+                        {!isPassValid && formData.password.length > 0 && (
+                            <p className="px-1 text-[10px] text-[var(--neu-text-muted)]">
+                                {passwordPolicy.ok ? '' : passwordPolicy.message}
+                            </p>
+                        )}
                         {showInviteField ? (
                             <PremiumInput
                                 label="Invite"
@@ -944,134 +985,66 @@ function SignupPageContent() {
                         ) : (
                             <button
                                 type="button"
-                                className="auth-signup-invite-toggle"
+                                className="auth-signup-invite-toggle flex items-center gap-1.5"
                                 onClick={() => setShowInviteField(true)}
                             >
-                                <span className="material-symbols-outlined" aria-hidden="true">redeem</span>
-                                Have an invite code?
+                                <Gift size={16} strokeWidth={2} />
+                                <span>Have an invite code?</span>
                             </button>
                         )}
+
+                        <div className="flex flex-col gap-2 rounded-2xl border border-charcoal/10 bg-[#f8faf8] px-3 py-3">
+                            <label className="flex cursor-pointer items-start gap-3">
+                                <input
+                                    type="checkbox"
+                                    id="acceptTermsAndPrivacy"
+                                    className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                                    checked={formData.acceptTermsAndPrivacy}
+                                    onChange={e =>
+                                        setFormData({
+                                            ...formData,
+                                            acceptTermsAndPrivacy: e.target.checked,
+                                        })
+                                    }
+                                />
+                                <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
+                                    I agree to the{' '}
+                                    <Link href={LEGAL_LINKS.communityRules} className="font-black text-brand-blue underline-offset-2 hover:underline">
+                                        Community Rules
+                                    </Link>{' '}
+                                    and{' '}
+                                    <Link href={LEGAL_LINKS.termsOfService} className="font-black text-brand-blue underline-offset-2 hover:underline">
+                                        Terms of Service
+                                    </Link>
+                                    , and I have read the{' '}
+                                    <Link href={LEGAL_LINKS.privacyPolicy} className="font-black text-brand-blue underline-offset-2 hover:underline">
+                                        Privacy Policy
+                                    </Link>
+                                    . I consent to the processing of my personal data needed to run my account, including under Nigerian data protection law (<span className="font-black text-brand-black">NDPA / NDPR</span>).
+                                </span>
+                            </label>
+                            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2.5">
+                                <input
+                                    type="checkbox"
+                                    className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-primary"
+                                    checked={formData.optionalProcessing}
+                                    onChange={e =>
+                                        setFormData({
+                                            ...formData,
+                                            optionalProcessing: e.target.checked,
+                                        })
+                                    }
+                                />
+                                <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
+                                    Product updates, offers, analytics, and limited partner use as described in the{' '}
+                                    <Link href={LEGAL_LINKS.privacyPolicy} className="font-black text-brand-blue underline-offset-2 hover:underline">
+                                        Privacy Policy
+                                    </Link>
+                                    .
+                                </span>
+                            </label>
+                        </div>
                     </div>
-                </SignupBottomSheet>
-            )}
-
-            {signupStage === 'security' && (
-                <SignupBottomSheet
-                    ariaLabel="Secure your Huud"
-                    stageKey="security"
-                    footer={
-                        <div>
-                            <div className="auth-signup-actions">
-                                <button
-                                    type="button"
-                                    onClick={() => setSignupStage('identity')}
-                                    className="auth-btn auth-btn-secondary"
-                                >
-                                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_back</span>
-                                    <span>Back</span>
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={!canSubmit}
-                                    className="auth-btn auth-btn-primary"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
-                                            <span>Joining…</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>Join NeyborHuud</span>
-                                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                            <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
-                                Already on the Huud?{' '}
-                                <Link href="/login">Enter your Huud</Link>
-                            </p>
-                        </div>
-                    }
-                >
-                        <div className="auth-signup-sheet__head">
-                            <h2 className="auth-signup-sheet__title">Secure your Huud</h2>
-                        </div>
-                        <div className="auth-signup-sheet-fields flex flex-col gap-3">
-                            <PremiumInput
-                                label="Secure Password"
-                                type="password"
-                                icon="lock"
-                                placeholder="12+ chars, mixed case, number"
-                                className="py-1"
-                                value={formData.password}
-                                onChange={e => setFormData({ ...formData, password: e.target.value })}
-                            />
-                            <PasswordStrengthMeter
-                                password={formData.password}
-                                email={formData.email}
-                                username={formData.username}
-                                showChecklist={false}
-                            />
-                            {!isPassValid && formData.password.length > 0 && (
-                                <p className="px-1 text-[10px] text-[var(--neu-text-muted)]">
-                                    {passwordPolicy.ok ? '' : passwordPolicy.message}
-                                </p>
-                            )}
-
-                            <div className="flex flex-col gap-2 rounded-2xl border border-charcoal/10 bg-[#f8faf8] px-3 py-3">
-                                <label className="flex cursor-pointer items-start gap-3">
-                                    <input
-                                        type="checkbox"
-                                        id="acceptTermsAndPrivacy"
-                                        className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-                                        checked={formData.acceptTermsAndPrivacy}
-                                        onChange={e =>
-                                            setFormData({
-                                                ...formData,
-                                                acceptTermsAndPrivacy: e.target.checked,
-                                            })
-                                        }
-                                    />
-                                    <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
-                                        I agree to the{' '}
-                                        <Link href={LEGAL_LINKS.communityRules} className="font-black text-brand-blue underline-offset-2 hover:underline">
-                                            Community Rules
-                                        </Link>{' '}
-                                        and{' '}
-                                        <Link href={LEGAL_LINKS.termsOfService} className="font-black text-brand-blue underline-offset-2 hover:underline">
-                                            Terms of Service
-                                        </Link>
-                                        , and I have read the{' '}
-                                        <Link href={LEGAL_LINKS.privacyPolicy} className="font-black text-brand-blue underline-offset-2 hover:underline">
-                                            Privacy Policy
-                                        </Link>
-                                        . I consent to the processing of my personal data needed to run my account, including under Nigerian data protection law (<span className="font-black text-brand-black">NDPA / NDPR</span>).
-                                    </span>
-                                </label>
-                                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-charcoal/5 bg-brand-surface px-3 py-2.5">
-                                    <input
-                                        type="checkbox"
-                                        className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-primary"
-                                        checked={formData.optionalProcessing}
-                                        onChange={e =>
-                                            setFormData({
-                                                ...formData,
-                                                optionalProcessing: e.target.checked,
-                                            })
-                                        }
-                                    />
-                                    <span className="text-[11px] font-medium leading-relaxed text-[var(--neu-text-secondary)]">
-                                        Product updates, offers, analytics, and limited partner use as described in the{' '}
-                                        <Link href={LEGAL_LINKS.privacyPolicy} className="font-black text-brand-blue underline-offset-2 hover:underline">
-                                            Privacy Policy
-                                        </Link>
-                                        .
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
                 </SignupBottomSheet>
             )}
         </form>

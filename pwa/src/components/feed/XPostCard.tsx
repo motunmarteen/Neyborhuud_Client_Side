@@ -33,6 +33,7 @@ import { generatePostNarrative } from '@/lib/postNarrative';
 import { usePostMutations } from '@/hooks/usePosts';
 import { renderFormattedText } from '@/lib/renderFormattedText';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
+import { MessageCircle, Repeat2, GitFork, Pin } from 'lucide-react';
 
 const formatCompactCount = (value?: number) => {
     if (!value) return undefined;
@@ -205,7 +206,7 @@ export function XPostCard({
         <div className={`post-narrative-block flex flex-col gap-2 p-3.5 border ${narrative.accentBorder} mt-3`}>
             <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
-                    <span className="material-symbols-outlined text-[14px]">{narrative.icon}</span>
+                    <MessageCircle size={14} className="text-primary" />
                     {narrative.typeLabel}
                 </span>
                 <button
@@ -215,7 +216,7 @@ export function XPostCard({
                     }}
                     className="px-2.5 py-1 rounded-none text-[9.5px] font-black uppercase border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 active:scale-95 transition-all cursor-pointer flex items-center gap-1"
                 >
-                    <span className="material-symbols-outlined text-[11px]">chat</span>
+                    <MessageCircle size={11} />
                     DM
                 </button>
             </div>
@@ -238,14 +239,14 @@ export function XPostCard({
         const isLongText = displayText.length > 280;
 
         return (
-            <div className={`relative text-[14px] font-normal text-[#050505] dark:text-[#E4E6EB] leading-[1.45] tracking-normal whitespace-pre-wrap break-words ${!expanded && isLongText ? 'max-h-[140px] overflow-hidden' : ''}`}>
+            <div className={`relative text-xs sm:text-[13px] font-medium text-[#1F2937] leading-relaxed tracking-normal whitespace-pre-wrap break-words ${!expanded && isLongText ? 'max-h-[140px] overflow-hidden' : ''}`}>
                 {renderFormattedText(displayText, { stopPropagation: true })}
                 
                 {!expanded && isLongText && (
                     <div className="post-read-more-fade absolute bottom-0 left-0 right-0 h-16 pointer-events-none flex items-end pb-0.5">
                         <button
                             onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
-                            className="pointer-events-auto text-primary hover:text-brand-green-dark font-semibold hover:underline cursor-pointer px-1 -ml-1 rounded"
+                            className="pointer-events-auto text-[#008A20] hover:text-[#005B15] font-bold hover:underline cursor-pointer px-1 -ml-1 rounded"
                         >
                             Read more
                         </button>
@@ -254,7 +255,7 @@ export function XPostCard({
                 {expanded && isLongText && (
                     <button
                         onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
-                        className="block mt-2 text-primary hover:text-brand-green-dark font-semibold hover:underline cursor-pointer"
+                        className="block mt-2 text-[#008A20] hover:text-[#005B15] font-bold hover:underline cursor-pointer"
                     >
                         Show less
                     </button>
@@ -297,7 +298,7 @@ export function XPostCard({
     return (
         <>
         <article
-            className={`bg-white dark:bg-[#121b14] px-3 py-2.5 mx-auto w-full select-none ${cardStyleClass} ${elevationClass} max-w-none rounded-none flex flex-col gap-0`}
+            className="rounded-2xl bg-white border border-black/[0.08] p-3.5 sm:p-4 shadow-xs transition-all hover:border-black/[0.12] w-full select-none flex flex-col gap-0"
             {...articleGestureProps}
         >
             {/* Repost Shared Origin Label */}
@@ -315,12 +316,12 @@ export function XPostCard({
                                 handleOpenRepostChain();
                             }}
                         >
-                            <span className="material-symbols-outlined text-[13px] text-brand-green" style={{ transform: 'scaleX(-1)' }}>reply</span>
+                            <Repeat2 size={13} className="text-brand-green" />
                             <span className="flex items-center gap-1.5">
                                 <MapPinAvatar src={sharerAvatar} fallbackInitial={sharerInitial} size="xs" />
                                 reposted by <span className="text-brand-green font-bold group-hover:underline">@{sharerUsername}</span>
                             </span>
-                            <span className="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-70 transition-opacity text-brand-green">hub</span>
+                            <GitFork size={10} className="opacity-0 group-hover:opacity-70 transition-opacity text-brand-green" />
                         </div>
                     );
                 }
@@ -339,12 +340,12 @@ export function XPostCard({
                             handleOpenRepostChain();
                         }}
                     >
-                        <span className="material-symbols-outlined text-[13px] text-primary" style={{ transform: 'scaleX(-1)' }}>reply</span>
+                        <Repeat2 size={13} className="text-primary" />
                         <span className="flex items-center gap-1.5">
                             <MapPinAvatar src={sharerAvatar} fallbackInitial={sharerInitial} size="xs" />
                             shared from <span className="text-primary font-bold group-hover:underline">@{sharerUsername}</span>
                         </span>
-                        <span className="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-70 transition-opacity text-primary">hub</span>
+                        <GitFork size={10} className="opacity-0 group-hover:opacity-70 transition-opacity text-primary" />
                     </div>
                 );
             })()}
@@ -384,7 +385,7 @@ export function XPostCard({
                         onToggle={toggleFollow}
                     />
                     {post.isPinned && (
-                        <span className="material-symbols-outlined text-[16px] text-status-warning" style={{ fontVariationSettings: '"FILL" 1' }}>push_pin</span>
+                        <Pin size={16} className="text-status-warning fill-status-warning" />
                     )}
 
                     <PostSentinelLink />
@@ -418,35 +419,35 @@ export function XPostCard({
             {narrativeBlock}
 
             {/* Action Bar (Horizontal Row) */}
-            <div className="post-card-action-bar flex items-center justify-between mt-3 text-[11px] font-bold w-full">
+            <div className="post-card-action-bar flex items-center justify-between mt-3 pt-2.5 border-t border-black/[0.05] text-[11px] font-semibold text-[#6B7280] w-full">
                 {/* Comment action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onComment(); }}
-                    className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 active:scale-95 cursor-pointer group"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[#6B7280] hover:text-[#111827] hover:bg-black/[0.04] transition-all active:scale-95 cursor-pointer group"
                     aria-label="Comment"
                 >
-                    <XReplyIcon size={18} className="group-hover:text-brand-blue group-hover:animate-dance-comment" />
-                    <span className="group-hover:text-brand-blue tabular-nums transition-colors duration-200">{post.comments ? formatCompactCount(post.comments) : '0'}</span>
+                    <XReplyIcon size={17} className="group-hover:text-[#111827]" />
+                    <span className="tabular-nums font-bold">{post.comments ? formatCompactCount(post.comments) : '0'}</span>
                 </button>
 
                 {/* FYI Helpful action / Repost action */}
                 {post.contentType === 'fyi' && onHelpful ? (
                     <button
                         onClick={(e) => { e.stopPropagation(); onHelpful(); }}
-                        className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 cursor-pointer group ${post.isHelpful ? 'text-primary' : 'text-neu-text-secondary dark:text-white/60 hover:text-primary'}`}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isHelpful ? 'text-[#008A20] bg-emerald-50' : 'text-[#6B7280] hover:text-[#008A20] hover:bg-emerald-50'}`}
                         aria-label="Helpful"
                     >
-                        <XThumbUpIcon size={18} filled={!!post.isHelpful} className="group-hover:text-primary" />
-                        <span className="group-hover:text-primary tabular-nums">{post.helpfulCount ? formatCompactCount(post.helpfulCount) : '0'}</span>
+                        <XThumbUpIcon size={17} filled={!!post.isHelpful} className={post.isHelpful ? 'text-[#008A20]' : 'group-hover:text-[#008A20]'} />
+                        <span className="tabular-nums font-bold">{post.helpfulCount ? formatCompactCount(post.helpfulCount) : '0'}</span>
                     </button>
                 ) : (
                     <button
                         onClick={(e) => { e.stopPropagation(); handleInstantRepost(); }}
-                        className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 active:scale-95 cursor-pointer group ${post.isShared ? 'text-brand-green-dark' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-green-dark'}`}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isShared ? 'text-[#008A20] bg-emerald-50' : 'text-[#6B7280] hover:text-[#008A20] hover:bg-emerald-50'}`}
                         aria-label="Repost"
                     >
-                        <XRepostIcon size={18} className={`${post.isShared ? 'text-brand-green-dark' : 'group-hover:text-brand-green-dark'} group-hover:animate-dance-repost`} />
-                        <span className={`${post.isShared ? 'text-brand-green-dark' : 'group-hover:text-brand-green-dark'} tabular-nums transition-colors duration-200`}>
+                        <XRepostIcon size={17} className={post.isShared ? 'text-[#008A20]' : 'group-hover:text-[#008A20]'} />
+                        <span className="tabular-nums font-bold">
                             {post.shares ? formatCompactCount(post.shares) : '0'}
                         </span>
                     </button>
@@ -455,31 +456,29 @@ export function XPostCard({
                 {/* Like action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onLike(); }}
-                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 active:scale-95 cursor-pointer group ${post.isLiked ? 'text-brand-red' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-red'}`}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isLiked ? 'text-rose-600 bg-rose-50' : 'text-[#6B7280] hover:text-rose-600 hover:bg-rose-50'}`}
                     aria-label="Like"
                 >
-                    <XLikeIcon size={18} filled={post.isLiked} className={`group-active:scale-75 group-hover:animate-dance-like group-hover:text-brand-red ${post.isLiked ? 'text-brand-red' : ''}`} />
-                    <span className="group-hover:text-brand-red tabular-nums transition-colors duration-200">{post.likes ? formatCompactCount(post.likes) : '0'}</span>
+                    <XLikeIcon size={17} filled={post.isLiked} className={post.isLiked ? 'text-rose-600' : 'group-hover:text-rose-600'} />
+                    <span className="tabular-nums font-bold">{post.likes ? formatCompactCount(post.likes) : '0'}</span>
                 </button>
-
-                {/* Views moved to bottom sheet to save space */}
 
                 {/* Save action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onSave(); }}
-                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 active:scale-95 cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-blue'}`}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isSaved ? 'text-[#008A20] bg-emerald-50' : 'text-[#6B7280] hover:text-[#008A20] hover:bg-emerald-50'}`}
                     aria-label="Bookmark"
                 >
-                    <XBookmarkIcon size={18} filled={post.isSaved} className="group-hover:animate-dance-save group-hover:text-brand-blue" />
+                    <XBookmarkIcon size={17} filled={post.isSaved} className={post.isSaved ? 'text-[#008A20]' : 'group-hover:text-[#008A20]'} />
                 </button>
 
                 {/* Share action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
-                    className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 active:scale-95 cursor-pointer group"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[#6B7280] hover:text-[#111827] hover:bg-black/[0.04] transition-all active:scale-95 cursor-pointer group"
                     aria-label="Share"
                 >
-                    <XShareIcon size={18} className="group-hover:animate-dance-share group-hover:text-brand-blue" />
+                    <XShareIcon size={17} className="group-hover:text-[#111827]" />
                 </button>
             </div>
 

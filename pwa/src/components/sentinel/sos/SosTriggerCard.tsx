@@ -54,7 +54,7 @@ export function SosTriggerCard({ sos }: SosTriggerCardProps) {
         type="button"
         onClick={handleTrigger}
         disabled={disabled}
-        className="relative mx-auto flex aspect-square w-full max-w-[200px] flex-col items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-red-700 text-white shadow-[0_8px_32px_rgba(220,38,38,0.3)] transition-transform active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-55"
+        className="relative mx-auto flex aspect-square w-full max-w-[200px] flex-col items-center justify-center rounded-full bg-[#E53935] hover:bg-[#D32F2F] text-white shadow-[0_8px_32px_rgba(220,38,38,0.3)] transition-transform active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-55"
         aria-label="Trigger SOS"
       >
         <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-red-600/25" />

@@ -2,6 +2,7 @@
   "name": "neyborhuud-monorepo",
   "private": true,
   "scripts": {
+    "dev": "pnpm --filter pwa dev",
     "dev:pwa": "pnpm --filter pwa dev",
     "dev:landing": "pnpm --filter neyborhuud-landing dev",
     "build:pwa": "pnpm --filter pwa build",

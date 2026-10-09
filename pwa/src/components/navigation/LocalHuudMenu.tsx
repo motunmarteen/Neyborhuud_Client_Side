@@ -69,7 +69,7 @@ function useLocalHuudRotation(active = true) {
 
 function NavRow({
   href,
-  icon,
+  Icon,
   label,
   active,
   onNavigate,
@@ -77,7 +77,7 @@ function NavRow({
   flat = false,
 }: {
   href: string;
-  icon: string;
+  Icon: import('lucide-react').LucideIcon;
   label: string;
   active: boolean;
   onNavigate?: () => void;
@@ -92,7 +92,7 @@ function NavRow({
       className={`left-sidebar__link${flat ? ' left-sidebar__link--flat' : ''}${active ? ' left-sidebar__link--active' : ''}`}
     >
       <span className="left-sidebar__link-icon" aria-hidden>
-        <span className={`material-symbols-outlined${active ? ' fill-1' : ''}`}>{icon}</span>
+        <Icon className={`w-5 h-5 text-primary`} />
       </span>
       <span className="left-sidebar__link-text min-w-0 flex-1">
         <span className="left-sidebar__link-label block">{label}</span>
@@ -128,11 +128,11 @@ export function LocalHuudMenu({
         <li key={item.type} className="left-sidebar__nav-item">
           <NavRow
             href={item.href}
-            icon={item.icon}
+            Icon={item.Icon}
             label={item.label}
-                active={
-                  pathname === item.href || Boolean(pathname?.startsWith(`${item.href}/`))
-                }
+            active={
+              pathname === item.href || Boolean(pathname?.startsWith(`${item.href}/`))
+            }
             onNavigate={onNavigate}
           />
         </li>
@@ -144,12 +144,12 @@ export function LocalHuudMenu({
 
   return (
     <li className={`left-sidebar__nav-item ${className}`.trim()}>
-          <NavRow
+      <NavRow
         href={currentItem.href}
-            icon={LOCAL_HUUD_MENU.icon}
-            label={LOCAL_HUUD_MENU.label}
-            active={childActive}
-            flat
+        Icon={LOCAL_HUUD_MENU.Icon}
+        label={LOCAL_HUUD_MENU.label}
+        active={childActive}
+        flat
         onNavigate={onNavigate}
         subtitle={
           childActive && activeLink ? (
@@ -158,7 +158,7 @@ export function LocalHuudMenu({
             <LocalHuudRotatingSubtitle label={items[index]?.label ?? ''} visible={visible} />
           )
         }
-          />
-        </li>
+      />
+    </li>
   );
 }

@@ -17,6 +17,7 @@
     "dev:3003": "set NEXT_DIST_DIR=.next-3003&& set PORT=3003&& next dev --turbopack --port 3003",
     "build": "next build --webpack",
     "build:cap": "node scripts/cap-build.mjs",
+    "build:android-release": "node scripts/build-android-release.mjs",
     "start": "next start",
     "lint": "node run-lint.mjs",
     "lint:strict": "eslint . --max-warnings 0",

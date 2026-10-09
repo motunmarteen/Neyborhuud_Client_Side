@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { Sparkles, ChevronUp, ArrowRight, ShieldAlert, Newspaper, Coins } from 'lucide-react';
 import { AuthOverlaySheet } from '@/components/auth/AuthOverlaySheet';
 import { getStoredCommunity } from '@/lib/communityContext';
 import { hasCompletedProductTour, markProductTourComplete } from '@/lib/onboarding';
@@ -9,21 +10,21 @@ import { getGuestDisplayName } from '@/lib/profileSnapHelpers';
 const FEED_TIPS = [
     {
         id: 'sos',
-        icon: 'warning',
+        Icon: ShieldAlert,
         label: 'Safety Alert',
         description: 'Tap the red button anytime — guardians get your location instantly.',
         iconClass: 'bg-brand-red text-white',
     },
     {
         id: 'feed',
-        icon: 'newspaper',
+        Icon: Newspaper,
         label: 'Your feed',
         description: 'Posts, FYI alerts, jobs, and events from your street — live.',
         iconClass: 'bg-primary text-white',
     },
     {
         id: 'coins',
-        icon: 'toll',
+        Icon: Coins,
         label: 'HuudCoins',
         description: 'Check in daily and participate to earn — already started from signup.',
         iconClass: 'bg-status-warning text-[#0a1a0f]',
@@ -38,7 +39,7 @@ function WelcomePeek({ huudName, handle }: { huudName: string; handle: string })
     return (
         <div className="auth-signup-location-peek">
             <span className="auth-signup-location-peek__icon" aria-hidden>
-                <span className="material-symbols-outlined"  aria-hidden="true">auto_awesome</span>
+                <Sparkles size={16} aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1 text-left">
                 <p className="auth-signup-location-peek__label">Welcome to the Huud</p>
@@ -48,7 +49,7 @@ function WelcomePeek({ huudName, handle }: { huudName: string; handle: string })
                 </p>
             </div>
             <span className="auth-signup-location-peek__chevron" aria-hidden>
-                <span className="material-symbols-outlined"  aria-hidden="true">expand_less</span>
+                <ChevronUp size={16} aria-hidden="true" />
             </span>
         </div>
     );
@@ -91,16 +92,16 @@ export function FeedWelcomeSheet() {
             peek={<WelcomePeek huudName={huudName} handle={handle} />}
             footer={
                 <div className="auth-signup-actions pb-[max(0.25rem,env(safe-area-inset-bottom))]">
-                    <button type="button" onClick={dismiss} className="auth-btn auth-btn-primary">
+                    <button type="button" onClick={dismiss} className="auth-btn auth-btn-primary flex items-center justify-center gap-2">
                         <span>Explore my Huud</span>
-                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                        <ArrowRight size={16} className="shrink-0" aria-hidden="true" />
                     </button>
                 </div>
             }
         >
             <div className="auth-flow-hero-card mb-4">
                 <span className="auth-flow-hero-card__icon" aria-hidden>
-                    <span className="material-symbols-outlined"  aria-hidden="true">auto_awesome</span>
+                    <Sparkles size={18} aria-hidden="true" />
                 </span>
                 <div className="min-w-0 flex-1">
                     <p className="auth-flow-hero-card__eyebrow">Welcome to the Huud</p>
@@ -115,27 +116,30 @@ export function FeedWelcomeSheet() {
             </p>
 
             <ul className="mb-2 grid gap-2">
-                {FEED_TIPS.map((tip) => (
-                    <li
-                        key={tip.id}
-                        className="flex items-start gap-3 rounded-2xl border border-charcoal/8 bg-[var(--neu-bg)] px-3.5 py-3 shadow-[0_4px_16px_rgba(26,26,46,0.06)]"
-                    >
-                        <span
-                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tip.iconClass}`}
-                            aria-hidden
+                {FEED_TIPS.map((tip) => {
+                    const Icon = tip.Icon;
+                    return (
+                        <li
+                            key={tip.id}
+                            className="flex items-start gap-3 rounded-2xl border border-charcoal/8 bg-[var(--neu-bg)] px-3.5 py-3 shadow-[0_4px_16px_rgba(26,26,46,0.06)]"
                         >
-                            <i className={`bi ${tip.icon} text-sm`} />
-                        </span>
-                        <div className="min-w-0 text-left">
-                            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[var(--neu-text)]">
-                                {tip.label}
-                            </p>
-                            <p className="mt-0.5 text-[11px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
-                                {tip.description}
-                            </p>
-                        </div>
-                    </li>
-                ))}
+                            <span
+                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tip.iconClass}`}
+                                aria-hidden
+                            >
+                                <Icon size={16} />
+                            </span>
+                            <div className="min-w-0 text-left">
+                                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[var(--neu-text)]">
+                                    {tip.label}
+                                </p>
+                                <p className="mt-0.5 text-[11px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
+                                    {tip.description}
+                                </p>
+                            </div>
+                        </li>
+                    );
+                })}
             </ul>
         </AuthOverlaySheet>
     );

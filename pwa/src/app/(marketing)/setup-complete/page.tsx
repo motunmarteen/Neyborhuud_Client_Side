@@ -13,6 +13,18 @@ import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 import { useMyGamificationStats } from '@/hooks/useGamification';
+import { Eli5Tooltip } from '@/components/ui/Eli5Tooltip';
+import {
+  UserCheck,
+  MailCheck,
+  Home,
+  Compass,
+  ArrowRight,
+  CheckCircle2,
+  Check,
+  Coins,
+  Sparkles,
+} from 'lucide-react';
 
 type StoredUser = {
   username?: string;
@@ -25,10 +37,10 @@ const SIGNUP_REWARDS = [
 ] as const;
 
 const SETUP_CHECKLIST = [
-  { id: 'account', label: 'Account created', icon: 'how_to_reg' },
-  { id: 'email', label: 'Email verified', icon: 'mark_email_read' },
-  { id: 'huud', label: 'Huud selected', icon: 'home' },
-  { id: 'location', label: 'Location confirmed', icon: 'my_location' },
+  { id: 'account', label: 'Account created', Icon: UserCheck },
+  { id: 'email', label: 'Email verified', Icon: MailCheck },
+  { id: 'huud', label: 'Huud selected', Icon: Home },
+  { id: 'location', label: 'Location confirmed', Icon: Compass },
 ] as const;
 
 export default function SetupCompletePage() {
@@ -106,52 +118,61 @@ export default function SetupCompletePage() {
           <button
             type="button"
             onClick={() => router.push('/feed')}
-            className="auth-btn auth-btn-primary"
+            className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
           >
             <span>Enter your Huud</span>
-            <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+            <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
           </button>
         </div>
       }
       footerLink={
-        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
+        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 dark:border-white/10 pt-3">
           A quick welcome on your feed — three tips, then you are in.
         </p>
       }
     >
       <div className="flex flex-col gap-3">
-        <div className="auth-flow-notice auth-flow-notice--success">
-          <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
+        <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
+          <CheckCircle2 size={16} className="text-primary shrink-0" aria-hidden="true" />
           <span>Your account is ready. Welcome to the Huud.</span>
         </div>
 
         <ul className="grid gap-2">
-          {SETUP_CHECKLIST.map((item) => (
-            <li
-              key={item.id}
-              className="flex items-center gap-3 rounded-2xl border border-primary/12 bg-primary/5 px-3.5 py-2.5"
-            >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
-                <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">{item.icon}</span>
-              </span>
-              <span className="text-sm font-semibold text-[var(--neu-text)]">{item.label}</span>
-              <span className="material-symbols-outlined ml-auto text-primary" aria-hidden="true">check</span>
-            </li>
-          ))}
+          {SETUP_CHECKLIST.map((item) => {
+            const ItemIcon = item.Icon;
+            return (
+              <li
+                key={item.id}
+                className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 dark:bg-primary/10 px-3.5 py-2.5"
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-black font-bold">
+                  <ItemIcon size={16} aria-hidden="true" />
+                </span>
+                <span className="text-sm font-semibold text-charcoal dark:text-white">{item.label}</span>
+                <Check size={16} className="ml-auto text-primary" aria-hidden="true" />
+              </li>
+            );
+          })}
         </ul>
 
-        <div className="flex flex-col gap-2 rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
+        <div className="flex flex-col gap-2 rounded-2xl border border-primary/25 bg-primary/10 dark:bg-[#161B22] px-4 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
+                <Eli5Tooltip 
+                  term="Starting Balance" 
+                  explanation="Free welcome tokens credited to your wallet for completing account verification. Use them in your community marketplace." 
+                />
+              </div>
               <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Already in your wallet</p>
             </div>
             <div className="flex items-center gap-2 text-primary">
               <span className="text-3xl font-black leading-none">{walletBalance}</span>
-              <span className="material-symbols-outlined text-xl text-status-warning" aria-hidden="true">toll</span>
+              <Coins size={22} className="text-primary shrink-0" aria-hidden="true" />
             </div>
           </div>
-          <ul className="grid gap-1 border-t border-primary/10 pt-2">
+          <ul className="grid gap-1 border-t border-primary/15 pt-2">
             {SIGNUP_REWARDS.map((item) => (
               <li
                 key={item.label}

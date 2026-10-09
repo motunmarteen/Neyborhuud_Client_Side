@@ -15,6 +15,14 @@ import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 import { useMyGamificationStats } from '@/hooks/useGamification';
+import {
+    ArrowRight,
+    Loader2,
+    Send,
+    AlertCircle,
+    CheckCircle2,
+    Coins,
+} from 'lucide-react';
 
 type Step = 'code-entry' | 'verifying' | 'success' | 'error' | 'expired';
 
@@ -158,7 +166,11 @@ function VerifyEmailContent() {
                     disabled={resendCooldown > 0 || isResending || !email}
                     className="auth-btn auth-btn-secondary"
                 >
-                    <span className={`material-symbols-outlined shrink-0 text-[1.125rem] ${isResending ? 'animate-spin' : ''}`} aria-hidden="true">{isResending ? 'progress_activity' : 'send'}</span>
+                    {isResending ? (
+                        <Loader2 className="shrink-0 animate-spin" size={17} strokeWidth={2} />
+                    ) : (
+                        <Send className="shrink-0" size={17} strokeWidth={2} />
+                    )}
                     <span>{isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
                 </button>
                 <button
@@ -169,21 +181,21 @@ function VerifyEmailContent() {
                 >
                     {isVerifying ? (
                         <>
-                            <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
+                            <span className="h-4 w-4 shrink-0 rounded-full border-2 border-black/30 border-t-black animate-spin" aria-hidden />
                             <span>Verifying</span>
                         </>
                     ) : (
                         <>
                             <span>Verify</span>
-                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                            <ArrowRight className="shrink-0" size={17} strokeWidth={2.4} />
                         </>
                     )}
                 </button>
             </div>
         ) : step === 'success' ? (
-            <button type="button" onClick={() => router.push(nextRoute)} className="auth-btn auth-btn-primary">
+            <button type="button" onClick={() => router.push(nextRoute)} className="auth-btn auth-btn-primary flex items-center justify-center gap-2">
                 <span>Enter your Huud</span>
-                <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                <ArrowRight className="shrink-0" size={17} strokeWidth={2.4} />
             </button>
         ) : step === 'error' || step === 'expired' ? (
             <div className="auth-signup-actions">
@@ -202,10 +214,10 @@ function VerifyEmailContent() {
                         setErrorMessage('');
                         setVerificationCode('');
                     }}
-                    className="auth-btn auth-btn-primary"
+                    className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
                 >
                     <span>Enter code</span>
-                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">arrow_forward</span>
+                    <ArrowRight className="shrink-0" size={17} strokeWidth={2.4} />
                 </button>
             </div>
         ) : null;
@@ -281,8 +293,8 @@ function VerifyEmailContent() {
                         autoFocus={!!email}
                     />
                     {errorMessage ? (
-                        <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                            <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
+                        <div className="auth-flow-notice auth-flow-notice--error flex items-center gap-2" role="alert">
+                            <AlertCircle size={16} strokeWidth={2} className="shrink-0 text-red-500" />
                             <span>{errorMessage}</span>
                         </div>
                     ) : (
@@ -294,16 +306,16 @@ function VerifyEmailContent() {
             )}
 
             {step === 'verifying' && (
-                <div className="auth-flow-notice auth-flow-notice--info" role="status">
-                    <span className="h-4 w-4 shrink-0 rounded-full border-2 border-brand-blue/30 border-t-brand-blue animate-spin" aria-hidden />
+                <div className="auth-flow-notice auth-flow-notice--info flex items-center gap-2" role="status">
+                    <Loader2 size={16} strokeWidth={2} className="shrink-0 text-blue-500 animate-spin" />
                     <span>Verifying your email…</span>
                 </div>
             )}
 
             {step === 'success' && (
                 <div className="flex flex-col gap-3">
-                    <div className="auth-flow-notice auth-flow-notice--success">
-                        <span className="material-symbols-outlined shrink-0" aria-hidden="true">check_circle</span>
+                    <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
+                        <CheckCircle2 size={16} strokeWidth={2} className="shrink-0 text-[#00D431]" />
                         <span>Your email is verified. Welcome to the Huud.</span>
                     </div>
                     <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
@@ -315,7 +327,7 @@ function VerifyEmailContent() {
                             <span className="text-3xl font-black leading-none">
                                 {verifyCoinBalance ?? '—'}
                             </span>
-                            <span className="material-symbols-outlined text-xl text-status-warning" aria-hidden="true">toll</span>
+                            <Coins size={22} strokeWidth={2} className="text-status-warning" />
                         </div>
                     </div>
                     {verifyCoinBalance === null ? (
@@ -327,8 +339,8 @@ function VerifyEmailContent() {
             )}
 
             {(step === 'error' || step === 'expired') && errorMessage ? (
-                <div className="auth-flow-notice auth-flow-notice--error" role="alert">
-                    <span className="material-symbols-outlined shrink-0" aria-hidden="true">error</span>
+                <div className="auth-flow-notice auth-flow-notice--error flex items-center gap-2" role="alert">
+                    <AlertCircle size={16} strokeWidth={2} className="shrink-0 text-red-500" />
                     <span>{errorMessage}</span>
                 </div>
             ) : null}

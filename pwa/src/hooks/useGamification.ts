@@ -134,26 +134,20 @@ export function useClaimAchievement() {
 // ── Earn / Award ───────────────────────────────────────────────
 
 /**
- * Returns a stable fire-and-forget function to award HuudCoins for a user action.
- * Silently swallows errors (backend may not be ready yet).
- * Invalidates wallet + stats cache on success so balances refresh automatically.
+ * Called after a user action that may earn HuudCoins.
+ *
+ * Coins are awarded SERVER-SIDE by the endpoint that performed the action
+ * (create post, comment, event, job, listing, ...) — the client never asks
+ * to be paid. This hook only refreshes the wallet so the new balance shows.
+ * The (action, metadata) parameters are kept for call-site compatibility.
  */
 export function useAwardCoins() {
   const queryClient = useQueryClient();
-  return (action: string, metadata?: Record<string, unknown>) => {
-    gamificationService
-      .awardCoins(action, metadata)
-      .then((res: any) => {
-        const earned = res?.data?.awarded ?? res?.awarded;
-        if (earned) {
-          queryClient.invalidateQueries({ queryKey: ["gamification", "stats"] });
-          queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
-          queryClient.invalidateQueries({ queryKey: ["gamification", "transactions"] });
-        }
-      })
-      .catch(() => {
-        /* backend not yet implemented — fail silently */
-      });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return (_action: string, _metadata?: Record<string, unknown>) => {
+    queryClient.invalidateQueries({ queryKey: ["gamification", "stats"] });
+    queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+    queryClient.invalidateQueries({ queryKey: ["gamification", "transactions"] });
   };
 }
 

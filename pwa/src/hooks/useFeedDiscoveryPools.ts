@@ -11,6 +11,7 @@ import { helpRequestService } from "@/services/help-request.service";
 import { servicesService } from "@/services/services.service";
 import { newsService } from "@/services/news.service";
 import type { Event, Job, Post, Service, User } from "@/types/api";
+import { DEMO_MODE } from "@/lib/demoMode";
 import type { RssArticle } from "@/types/incident";
 import type { DiscoveryPools } from "@/lib/feedDiscoveryMerge";
 import { geoService } from "@/services/geo.service";
@@ -207,8 +208,9 @@ export function useFeedDiscoveryPools(enabled: boolean, geo: { lat: number | nul
         const list = extractUsers(res);
         if (list.length) return list;
       }
-      const res = await searchService.searchUsers("", 1, 18);
-      return extractUsers(res);
+      // No location → no "nearby" list. (An empty search query is rejected
+      // by the API, so there is nothing meaningful to fall back to.)
+      return [];
     },
     enabled,
     staleTime: 5 * 60_000,
@@ -264,12 +266,14 @@ export function useFeedDiscoveryPools(enabled: boolean, geo: { lat: number | nul
   const pools = useMemo<DiscoveryPools>(
     () => ({
       marketplace: marketplace.data ?? [],
-      events: events.data?.length ? events.data : MOCK_EVENTS,
-      jobs: jobs.data?.length ? jobs.data : MOCK_JOBS,
-      helpRequests: helpRequests.data?.length ? helpRequests.data : MOCK_HELP,
-      services: services.data?.length ? services.data : MOCK_SERVICES,
+      // Mock padding only in DEMO_MODE: real residents must never be shown
+      // invented events, jobs, help requests, businesses or neighbours.
+      events: events.data?.length ? events.data : DEMO_MODE ? MOCK_EVENTS : [],
+      jobs: jobs.data?.length ? jobs.data : DEMO_MODE ? MOCK_JOBS : [],
+      helpRequests: helpRequests.data?.length ? helpRequests.data : DEMO_MODE ? MOCK_HELP : [],
+      services: services.data?.length ? services.data : DEMO_MODE ? MOCK_SERVICES : [],
       news: news.data ?? [],
-      neighbors: neighbors.data?.length ? neighbors.data : MOCK_NEIGHBORS,
+      neighbors: neighbors.data?.length ? neighbors.data : DEMO_MODE ? MOCK_NEIGHBORS : [],
     }),
     [marketplace.data, events.data, jobs.data, helpRequests.data, services.data, news.data, neighbors.data, MOCK_EVENTS, MOCK_JOBS, MOCK_HELP, MOCK_SERVICES, MOCK_NEIGHBORS],
   );

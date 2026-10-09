@@ -710,4 +710,45 @@ export const marketplaceService = {
       `/marketplace/orders/${orderId}/confirm-delivery`,
     );
   },
+
+  /**
+   * P2P Community Dispute: Escalates a stalled/contested deal to Huud Watch / Elders.
+   * NeyborHuud holds no escrow funds.
+   * POST /api/v1/marketplace/orders/:orderId/dispute
+   */
+  async disputeOrder(orderId: string, reason: string, details?: string) {
+    return await apiClient.post(
+      `/marketplace/orders/${orderId}/dispute`,
+      { reason, details },
+    );
+  },
+
+  /**
+   * Resolves a community dispute (Community Elders, Huud Watch, or mutual parties).
+   * POST /api/v1/marketplace/orders/:orderId/resolve-dispute
+   */
+  async resolveDispute(
+    orderId: string,
+    payload: {
+      resolution: "amicably_resolved" | "seller_fault" | "buyer_fault" | "dismissed";
+      notes?: string;
+      penalizeUser?: boolean;
+    },
+  ) {
+    return await apiClient.post(
+      `/marketplace/orders/${orderId}/resolve-dispute`,
+      payload,
+    );
+  },
+
+  /**
+   * Report a fraudulent listing / scam.
+   * POST /api/v1/marketplace/:id/report
+   */
+  async reportProduct(productId: string, reason: string, details?: string) {
+    return await apiClient.post(
+      `/marketplace/${productId}/report`,
+      { reason, details },
+    );
+  },
 };

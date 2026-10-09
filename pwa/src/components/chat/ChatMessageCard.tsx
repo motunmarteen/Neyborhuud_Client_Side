@@ -14,7 +14,7 @@
 import { type ReactNode, useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { ChatMessage } from '@/types/api';
 import { ChatExpandableText } from '@/components/chat/ChatExpandableText';
 import { ChatMessageTicks } from '@/components/chat/ChatMessageTicks';

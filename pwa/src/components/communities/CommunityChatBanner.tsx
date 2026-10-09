@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
+import { Users, ShieldCheck, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useHubCommunityByConversation, useJoinHubCommunity } from '@/hooks/useHubCommunities';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 
@@ -27,7 +28,7 @@ export function CommunityChatBanner({ conversationId }: CommunityChatBannerProps
     try {
       const res = await joinMutation.mutateAsync(hub.id);
       if (res.data?.pending) {
-        toast.success('Join request sent — waiting for admin approval');
+        toast.success('Join request sent — awaiting admin approval');
         return;
       }
       const cid = res.data?.conversationId ?? hub.conversationId;
@@ -35,42 +36,51 @@ export function CommunityChatBanner({ conversationId }: CommunityChatBannerProps
         router.replace(`/chat/${cid}`);
       }
     } catch {
-      toast.error('Could not join');
+      toast.error('Could not join community');
     }
   };
 
   return (
-    <div className="border-b border-gray-100 bg-slate-50 px-4 py-2.5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-xs font-semibold text-slate-700">
-            {hub.name}
-            <span className="ml-2 font-normal text-slate-500">
-              · {hub.membersCount.toLocaleString()} members
-            </span>
-          </p>
-          {hub.largeGroupMode ? (
-            <p className="text-[11px] text-status-warning">Large group — notifications for admins first</p>
-          ) : null}
-          {!hub.joined && mounted ? (
-            <p className="text-[11px] text-slate-500">Join to participate in this community chat.</p>
-          ) : null}
+    <div className="border-b border-black/[0.06] dark:border-white/[0.06] bg-slate-50/90 dark:bg-[#161B20] px-4 py-2.5 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="min-w-0 flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/40 flex items-center justify-center text-[#00C830] shrink-0">
+            <Users size={16} />
+          </div>
+          <div className="truncate">
+            <p className="truncate text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+              <span>{hub.name}</span>
+              <span className="font-normal text-slate-500 dark:text-slate-400 text-[11px]">
+                · {hub.membersCount.toLocaleString()} members
+              </span>
+            </p>
+            {hub.largeGroupMode ? (
+              <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                Large group — notifications for admins first
+              </p>
+            ) : !hub.joined && mounted ? (
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                Join to participate in this estate conversation
+              </p>
+            ) : null}
+          </div>
         </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
+
+        <div className="flex shrink-0 items-center gap-2">
           <Link
             href={`/communities/${hub.id}`}
-            className="rounded-full border border-slate-200 px-3 py-1 text-[11px] font-bold text-slate-600 no-underline"
+            className="rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00C830] transition-colors"
           >
-            Details
+            Hub Info
           </Link>
           {mounted && !hub.joined ? (
             <button
               type="button"
               disabled={joinMutation.isPending}
               onClick={() => void handleJoin()}
-              className="rounded-full bg-[#00D431] px-3 py-1 text-[11px] font-bold text-white disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-xl bg-[#00C830] hover:bg-[#00B52B] active:scale-95 px-3 py-1.5 text-xs font-black text-white shadow-sm shadow-[#00C830]/20 disabled:opacity-50 transition-all"
             >
-              {joinMutation.isPending ? 'Joining…' : 'Join'}
+              {joinMutation.isPending ? 'Joining…' : 'Join Estate'}
             </button>
           ) : null}
         </div>
@@ -78,3 +88,4 @@ export function CommunityChatBanner({ conversationId }: CommunityChatBannerProps
     </div>
   );
 }
+
