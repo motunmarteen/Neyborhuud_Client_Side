@@ -3,6 +3,7 @@ import { ArrowRight, Plus, Siren, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { CardsAndChipsDemo } from './CardsAndChipsDemo';
 import { SheetDemo } from './SheetDemo';
+import { TopBarDemo } from './TopBarDemo';
 
 export const metadata: Metadata = {
   title: 'Design kit',
@@ -117,6 +118,10 @@ export default function DesignKitPage() {
 
         <Section id="sheets" title="Bottom sheet (F-05)" note="The slide-up panel. Title, close button, scrolling body, main action pinned at the bottom.">
           <SheetDemo />
+        </Section>
+
+        <Section id="topbar" title="Top bar (F-06)" note="Floats over the map. Logo and your area on the left; HuudCredit, alerts, create and you on the right.">
+          <TopBarDemo />
         </Section>
       </div>
     </main>

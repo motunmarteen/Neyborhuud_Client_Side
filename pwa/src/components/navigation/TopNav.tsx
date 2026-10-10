@@ -1,16 +1,12 @@
 'use client';
 
-import { Suspense, useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Menu,
   Search,
-  MapPin,
-  ChevronDown,
   ChevronLeft,
   Plus,
-  PlusSquare,
   PenSquare,
   Megaphone,
   ShieldAlert,
@@ -18,19 +14,31 @@ import {
   Calendar,
   HandHeart,
   ShoppingBag,
-  Gift,
   Bell,
-  Sparkles,
 } from 'lucide-react';
 
 import { AnimatedNeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { useUnreadCount } from '@/hooks/useNotifications';
-import { useScrollHideBottomNav, useIsScrolled } from '@/hooks/useScrollHideBottomNav';
+import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
 import { useAuth } from '@/hooks/useAuth';
-import { useHuudDisplayName } from '@/hooks/useHuudDisplayName';
+import { useHuudDisplayName, HUUD_NAME_FALLBACK } from '@/hooks/useHuudDisplayName';
 import { useMyGamificationStats } from '@/hooks/useGamification';
 
 type TopNavOrigin = 'page' | 'global';
+
+/*
+ * Design foundation F-06: floating top bar (matches the home mockup).
+ *
+ *   [ NeyborHuud      ]          [🪙 120] [🔔•] [+] [T]
+ *   [ ● Somolu        ]
+ *
+ * Home: logo + your area. Other pages: back arrow + page title.
+ * Right: HuudCredit balance (only once it has loaded — never a made-up number),
+ * notifications, create, and your avatar, which opens the "Me" menu.
+ * Visitors (not signed in) see "Join free" instead.
+ *
+ * Create (+) and Search stay here until the new bottom bar (F-07) gives them a home.
+ */
 
 function titleCaseFromSegment(segment: string) {
   const normalized = segment.replace(/[-_]+/g, ' ').trim();
@@ -42,76 +50,23 @@ function titleCaseFromSegment(segment: string) {
 }
 
 const CREATE_MENU_OPTIONS = [
-  {
-    key: 'post',
-    label: 'Post',
-    subtitle: 'Share photos, news or thoughts',
-    icon: PenSquare,
-    color: 'text-sky-600 bg-sky-50  ',
-  },
-  {
-    key: 'fyi',
-    label: 'FYI Alert',
-    subtitle: 'Power, road, or utility notice',
-    icon: Megaphone,
-    color: 'text-amber-600 bg-amber-50  ',
-  },
-  {
-    key: 'emergency',
-    label: 'Safety Report',
-    subtitle: 'Urgent incident or hazard alert',
-    icon: ShieldAlert,
-    color: 'text-rose-600 bg-rose-50  ',
-  },
-  {
-    key: 'poll',
-    label: 'Community Poll',
-    subtitle: 'Ask neighbors to vote on a decision',
-    icon: BarChart2,
-    color: 'text-emerald-600 bg-emerald-50  ',
-  },
-  {
-    key: 'event',
-    label: 'Huud Event',
-    subtitle: 'Plan a gathering, patrol or meeting',
-    icon: Calendar,
-    color: 'text-purple-600 bg-purple-50  ',
-  },
-  {
-    key: 'help_request',
-    label: 'Help Request',
-    subtitle: 'Request a tool, ride or hand',
-    icon: HandHeart,
-    color: 'text-pink-600 bg-pink-50  ',
-  },
-  {
-    key: 'marketplace',
-    label: 'Marketplace',
-    subtitle: 'Buy, sell or giveaway items',
-    icon: ShoppingBag,
-    color: 'text-teal-600 bg-teal-50  ',
-  },
+  { key: 'post', label: 'Post', subtitle: 'Share photos, news or thoughts', icon: PenSquare, color: 'text-[#2B6AA6] bg-blue-soft' },
+  { key: 'fyi', label: 'FYI Alert', subtitle: 'Power, road or water notice', icon: Megaphone, color: 'text-amber-ink bg-amber-soft' },
+  { key: 'emergency', label: 'Safety Report', subtitle: 'Urgent incident or hazard', icon: ShieldAlert, color: 'text-[#C2353A] bg-red-soft' },
+  { key: 'poll', label: 'Community Poll', subtitle: 'Ask neighbours to vote', icon: BarChart2, color: 'text-brand-green-dark bg-green-soft' },
+  { key: 'event', label: 'Huud Event', subtitle: 'Plan a meeting, patrol or party', icon: Calendar, color: 'text-[#5E3BB8] bg-purple-soft' },
+  { key: 'help_request', label: 'Help Request', subtitle: 'Ask for a tool, a ride or a hand', icon: HandHeart, color: 'text-[#C2353A] bg-red-soft' },
+  { key: 'marketplace', label: 'Marketplace', subtitle: 'Buy, sell or give away', icon: ShoppingBag, color: 'text-brand-green-dark bg-green-soft' },
 ];
 
 function getRouteTitle(pathname: string) {
   const parts = pathname.split('?')[0].split('#')[0].split('/').filter(Boolean);
   const segment = (parts[0] ?? '').toLowerCase();
 
-  if (
-    (segment === 'gamification' || segment === 'huud-economy') &&
-    parts[1] === 'wallet'
-  ) {
-    return 'Huud Wallet';
-  }
-  if (segment === 'huud-economy' && parts[1] === 'score') {
-    return 'Huud Score';
-  }
-  if (segment === 'huud-economy') {
-    return 'Huud Economy';
-  }
-  if (segment === 'local-news' && parts[1] === 'gist') {
-    return 'HuudGist';
-  }
+  if ((segment === 'gamification' || segment === 'huud-economy') && parts[1] === 'wallet') return 'Huud Wallet';
+  if (segment === 'huud-economy' && parts[1] === 'score') return 'Huud Score';
+  if (segment === 'huud-economy') return 'Huud Economy';
+  if (segment === 'local-news' && parts[1] === 'gist') return 'HuudGist';
 
   const map: Record<string, string> = {
     feed: 'Huud Feed',
@@ -146,43 +101,51 @@ function getRouteTitle(pathname: string) {
   return titleCaseFromSegment(segment) || 'NeyborHuud';
 }
 
-export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const isOnFeed = pathname === '/feed' || pathname === '/';
-  const title = useMemo(() => (pathname ? getRouteTitle(pathname) : 'Huud Feed'), [pathname]);
-  const { data: unreadCount = 0 } = useUnreadCount(undefined, 'message');
-  const { data: stats } = useMyGamificationStats();
-  const scrollHidden = useScrollHideBottomNav();
-  const { user } = useAuth();
-  const huudName = useHuudDisplayName(user);
+const ICON_BTN =
+  'tap-target relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#F3F5F9] text-navy ' +
+  'transition-colors hover:bg-[#E6EAF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
 
-  const [mounted, setMounted] = useState(false);
-  const [balanceUnit, setBalanceUnit] = useState<'ngn' | 'coins'>('ngn');
+export type TopBarProps = {
+  isHome: boolean;
+  title: string;
+  /** Your area, e.g. "Somolu"; null hides the line. */
+  area: string | null;
+  signedIn: boolean;
+  /** HuudCredit balance; null while loading (shows a placeholder, never a guess). */
+  credit: number | null;
+  unreadCount: number;
+  initial: string;
+  avatarUrl: string | null;
+  scrollHidden?: boolean;
+  origin?: TopNavOrigin;
+  onBack: () => void;
+  onSearch: () => void;
+  onMe: () => void;
+};
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const huudCoins = stats?.totalHuudCoins ?? 150;
-  const balanceDisplay =
-    balanceUnit === 'ngn'
-      ? `₦${(huudCoins * 25).toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-      : `${huudCoins} HC`;
-
-  const openMobileSidebar = () => {
-    window.dispatchEvent(new CustomEvent('toggle-mobile-sidebar'));
-  };
-
+/** The bar itself, driven only by props (also shown on /design-kit with sample data). */
+export function TopBar({
+  isHome,
+  title,
+  area,
+  signedIn,
+  credit,
+  unreadCount,
+  initial,
+  avatarUrl,
+  scrollHidden = false,
+  origin = 'page',
+  onBack,
+  onSearch,
+  onMe,
+}: TopBarProps) {
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const createMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!createMenuOpen) return;
     const handleOutsideClick = (e: MouseEvent) => {
-      if (createMenuRef.current && !createMenuRef.current.contains(e.target as Node)) {
-        setCreateMenuOpen(false);
-      }
+      if (createMenuRef.current && !createMenuRef.current.contains(e.target as Node)) setCreateMenuOpen(false);
     };
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setCreateMenuOpen(false);
@@ -197,163 +160,182 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
 
   const handleSelectCreateType = (contentType?: string) => {
     setCreateMenuOpen(false);
-    window.dispatchEvent(
-      new CustomEvent('open-create-post', {
-        detail: { contentType },
-      })
-    );
+    window.dispatchEvent(new CustomEvent('open-create-post', { detail: { contentType } }));
   };
 
   return (
-    <>
-      <div
-        className={`w-full sticky top-2 sm:top-3 z-40 transition-transform duration-200 px-2.5 sm:px-4 pointer-events-none ${
-          scrollHidden ? '-translate-y-24' : 'translate-y-0'
-        }`}
-        data-topnav-host="1"
+    <div
+      className={`pointer-events-none sticky top-2 z-40 w-full px-3 transition-transform duration-200 motion-reduce:transition-none sm:top-3 sm:px-4 ${
+        scrollHidden ? '-translate-y-24' : 'translate-y-0'
+      }`}
+      data-topnav-host="1"
+    >
+      <header
+        data-topnav="1"
+        data-topnav-origin={origin}
+        className="pointer-events-auto mx-auto flex h-[52px] max-w-4xl select-none items-center justify-between gap-2 rounded-full bg-white/[0.97] pl-3.5 pr-2 min-[380px]:pl-4 shadow-[0_6px_18px_rgba(29,36,51,0.16)]"
       >
-        <header
-          data-topnav="1"
-          data-topnav-origin={origin}
-          className="pointer-events-auto max-w-4xl mx-auto h-12 sm:h-13 pl-2 sm:pl-3.5 pr-2 sm:pr-3 rounded-full bg-white/92 backdrop-blur-2xl border border-black/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-between gap-1 sm:gap-3 select-none"
-        >
-          {/* ZONE 1 (LEFT): Menu + Brand / Location */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            {/* Mobile Sidebar Hamburger Toggle */}
-            <button
-              type="button"
-              onClick={openMobileSidebar}
-              className="lg:hidden p-1 sm:p-1.5 rounded-full text-slate-700 hover:text-slate-900 hover:bg-black/5 transition-colors cursor-pointer"
-              aria-label="Open sidebar menu"
-            >
-              <Menu size={18} />
-            </button>
-
-            {/* Mobile Logo / Desktop Location Breadcrumb */}
-            {isOnFeed ? (
-              <div className="flex items-center gap-1 sm:gap-2">
-                <Link href="/feed" className="flex items-center focus:outline-none">
-                  <AnimatedNeyborHuudLogo tone="primary" />
-                </Link>
-
-                <div suppressHydrationWarning className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/[0.04] border border-black/[0.06] text-xs font-bold text-slate-900">
-                  <MapPin size={12} className="text-[#0E8A3E] shrink-0" />
-                  <span suppressHydrationWarning className="truncate max-w-[130px] lg:max-w-[180px]">
-                    {huudName !== 'your neighborhood' && huudName ? huudName : 'Lekki Phase 1'}
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00B82E] animate-pulse ml-0.5" />
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 sm:gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => router.back()}
-                  className="p-1 rounded-full text-slate-900 hover:bg-black/5 transition-colors cursor-pointer"
-                  aria-label="Back"
-                >
-                  <ChevronLeft size={19} />
-                </button>
-                <h1 className="text-sm sm:text-base font-black text-slate-900 truncate max-w-[120px] sm:max-w-xs">
-                  {title}
-                </h1>
-              </div>
-            )}
-          </div>
-
-          {/* ZONE 2 (CENTER): Rewards / HuudCredit Pill (Modeled after game balance capsule) */}
-          <Link
-            href="/rewards"
-            className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-black/[0.04] hover:bg-black/[0.08] border border-black/[0.06] text-[11px] sm:text-xs font-bold text-slate-800 transition-all active:scale-95 group shadow-xs shrink-0 cursor-pointer"
-            title="Huud Economy & Daily Rewards"
-          >
-            <Gift size={13} className="text-amber-500 group-hover:scale-110 transition-transform shrink-0" />
-            <span className="font-extrabold text-[10px] sm:text-xs text-[#0E8A3E]">{huudCoins} HC</span>
-            <span className="hidden min-[360px]:inline-block w-1.5 h-1.5 rounded-full bg-[#00B82E] animate-pulse" />
+        {/* Left: logo + area on home, back + title elsewhere */}
+        {isHome ? (
+          <Link href="/feed" className="flex min-w-0 shrink-0 flex-col justify-center leading-none focus:outline-none" aria-label="NeyborHuud home">
+            <AnimatedNeyborHuudLogo tone="primary" />
+            {area ? (
+              <span suppressHydrationWarning className="mt-0.5 inline-flex min-w-0 items-center gap-1 text-[11.5px] font-extrabold text-brand-green-dark">
+                <span className="h-[7px] w-[7px] shrink-0 rounded-full bg-primary" aria-hidden />
+                <span className="truncate">{area}</span>
+              </span>
+            ) : null}
           </Link>
-
-          {/* ZONE 3 (RIGHT): Search + Bell + Circular Green (+) Button + Avatar */}
-          <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
-            {/* Quick Search */}
-            <button
-              type="button"
-              onClick={() => router.push('/explore')}
-              className="p-1 sm:p-1.5 rounded-full text-slate-700 hover:text-slate-900 hover:bg-black/5 transition-colors cursor-pointer"
-              aria-label="Search"
-              title="Search"
-            >
-              <Search size={16} />
+        ) : (
+          <div className="-ml-2 flex min-w-0 items-center gap-1">
+            <button type="button" onClick={onBack} className={`${ICON_BTN} bg-transparent`} aria-label="Back">
+              <ChevronLeft size={20} />
             </button>
+            <h1 className="truncate font-heading text-base font-extrabold text-navy">{title}</h1>
+          </div>
+        )}
 
-            {/* Notification Bell */}
+        {/* Right */}
+        <div className="flex shrink-0 items-center gap-1 min-[380px]:gap-1.5">
+          {!signedIn ? (
             <Link
-              href="/notifications"
-              className="relative p-1 sm:p-1.5 rounded-full text-slate-700 hover:text-slate-900 hover:bg-black/5 transition-colors cursor-pointer"
-              aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
-              title="Notifications"
+              href="/signup"
+              className="tap-target inline-flex h-[38px] items-center rounded-full bg-primary px-4 text-[13px] font-extrabold text-white"
             >
-              <Bell size={16} />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
-              )}
+              Join free
             </Link>
+          ) : (
+            <>
+              {credit !== null ? (
+                <Link
+                  href="/rewards"
+                  className="tap-target hidden h-[34px] items-center gap-1 rounded-full bg-[#FFF6E0] min-[350px]:inline-flex px-2.5 text-xs font-extrabold text-amber-ink transition-colors hover:bg-amber-soft"
+                  aria-label={`${credit.toLocaleString('en-NG')} HuudCredit. Open rewards`}
+                >
+                  <span aria-hidden>🪙</span>
+                  {credit.toLocaleString('en-NG')}
+                </Link>
+              ) : (
+                <span className="hidden h-[34px] w-14 animate-pulse rounded-full bg-[#F3F5F9] motion-reduce:animate-none min-[350px]:block" aria-hidden />
+              )}
 
-            {/* Vibrant Green Circular (+) Create Button with Facebook/Instagram Popover */}
-            <div className="relative" ref={createMenuRef}>
-              <button
-                type="button"
-                onClick={() => setCreateMenuOpen((prev) => !prev)}
-                className={`size-7 sm:size-8 rounded-full bg-[#00B82E] hover:bg-[#00FF3E] text-slate-950 font-black shadow-sm flex items-center justify-center transition-transform active:scale-90 cursor-pointer shrink-0 ${
-                  createMenuOpen ? 'ring-2 ring-[#00B82E]/40' : ''
-                }`}
-                aria-label="Create post or alert"
-                aria-expanded={createMenuOpen}
-                title="Create"
-              >
-                <Plus size={17} strokeWidth={2.8} />
+              <button type="button" onClick={onSearch} className={`${ICON_BTN} hidden min-[400px]:grid`} aria-label="Search">
+                <Search size={17} />
               </button>
 
-              {/* Popover Menu */}
-              {createMenuOpen && (
-                <div
-                  className="absolute right-0 top-full mt-2 w-56 sm:w-64 bg-white/95  text-slate-800  border border-black/[0.08]  rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.14)]  p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl select-none"
-                  role="menu"
+              <Link
+                href="/notifications"
+                className={ICON_BTN}
+                aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} new` : 'Notifications'}
+              >
+                <Bell size={17} />
+                {unreadCount > 0 ? (
+                  <span className="absolute right-[7px] top-1.5 h-2 w-2 rounded-full border-2 border-white bg-brand-red" aria-hidden />
+                ) : null}
+              </Link>
+
+              <div className="relative" ref={createMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setCreateMenuOpen((prev) => !prev)}
+                  className={`${ICON_BTN} bg-green-soft text-brand-green-dark hover:bg-[#D6F1DE] ${createMenuOpen ? 'ring-2 ring-primary/40' : ''}`}
+                  aria-label="Create post or alert"
+                  aria-expanded={createMenuOpen}
+                  aria-haspopup="menu"
                 >
-                  <div className="px-3 py-1.5 mb-1 text-[10px] font-black uppercase tracking-wider text-slate-400  border-b border-black/[0.06] ">
-                    Create
+                  <Plus size={19} strokeWidth={2.6} />
+                </button>
+
+                {createMenuOpen ? (
+                  <div
+                    className="absolute right-0 top-full z-50 mt-2 w-64 select-none rounded-[22px] bg-white p-1.5 text-navy shadow-[0_14px_34px_rgba(29,36,51,0.22)]"
+                    role="menu"
+                  >
+                    <div className="mb-1 border-b border-line px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-faint">
+                      Create
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      {CREATE_MENU_OPTIONS.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => handleSelectCreateType(item.key)}
+                            className="flex min-h-12 w-full items-center gap-3 rounded-2xl px-2.5 text-left transition-colors hover:bg-background"
+                            role="menuitem"
+                          >
+                            <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${item.color}`}>
+                              <Icon size={16} />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-bold leading-tight">{item.label}</span>
+                              <span className="mt-0.5 block truncate text-[11px] leading-tight text-muted">{item.subtitle}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-0.5">
-                    {CREATE_MENU_OPTIONS.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <button
-                          key={item.key}
-                          type="button"
-                          onClick={() => handleSelectCreateType(item.key)}
-                          className="w-full px-2.5 py-2 rounded-xl flex items-center gap-3 hover:bg-slate-100  active:bg-slate-200  transition-colors text-left group cursor-pointer"
-                          role="menuitem"
-                        >
-                          <div className={`p-1.5 rounded-lg shrink-0 ${item.color}`}>
-                            <Icon size={16} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-900  tracking-tight leading-tight">
-                              {item.label}
-                            </p>
-                            <p className="text-[11px] text-slate-500  truncate leading-tight mt-0.5">
-                              {item.subtitle}
-                            </p>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-      </div>
-    </>
+                ) : null}
+              </div>
+
+              <button
+                type="button"
+                onClick={onMe}
+                className="tap-target grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-primary font-heading text-base font-extrabold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                aria-label="Me: profile, HuudCredit, settings and more"
+              >
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span aria-hidden>{initial}</span>
+                )}
+              </button>
+            </>
+          )}
+        </div>
+      </header>
+    </div>
+  );
+}
+
+
+export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const title = useMemo(() => (pathname ? getRouteTitle(pathname) : 'Huud Feed'), [pathname]);
+  const { user } = useAuth();
+  const { data: unreadCount = 0 } = useUnreadCount(undefined, 'message');
+  const { data: stats } = useMyGamificationStats();
+  const scrollHidden = useScrollHideBottomNav();
+  const huudName = useHuudDisplayName(user);
+
+  const me = user as {
+    firstName?: string | null;
+    name?: string;
+    username?: string;
+    avatarUrl?: string | null;
+    profilePicture?: string | null;
+  } | null;
+  const displayName = me?.firstName || me?.name || me?.username || '';
+
+  return (
+    <TopBar
+      isHome={pathname === '/feed' || pathname === '/'}
+      title={title}
+      area={huudName && huudName !== HUUD_NAME_FALLBACK ? huudName : null}
+      signedIn={Boolean(user)}
+      credit={typeof stats?.totalHuudCoins === 'number' ? stats.totalHuudCoins : null}
+      unreadCount={unreadCount}
+      initial={displayName.trim().charAt(0).toUpperCase() || '🙂'}
+      avatarUrl={me?.avatarUrl || me?.profilePicture || null}
+      scrollHidden={scrollHidden}
+      origin={origin}
+      onBack={() => router.back()}
+      onSearch={() => router.push('/explore')}
+      onMe={() => window.dispatchEvent(new CustomEvent('toggle-mobile-sidebar'))}
+    />
   );
 }

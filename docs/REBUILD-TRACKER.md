@@ -133,7 +133,7 @@ Kept here so the whole history is in one place.
 - [x] F-03 (shared <Button> rebuilt: primary/secondary/soft/ghost/danger, sm 40 with 48px tap area, md 48, lg 56; 44 filled buttons converted; shared .btn-glass-* restyled; /design-kit page shows all blocks) Buttons: pill shapes (primary green, white outline, danger); 48 px touch targets
 - [x] F-04 (<Card> plain/accent/floating, <Chip> 6 tones, <FilterChip> navy-when-on; BrowseFilterChip uses it; legacy .mod-chip (221 uses) restyled for light theme; shown on /design-kit) Cards, chips and filter chips (the map-layer style)
 - [x] F-05 (AppBottomSheet: title/close/footer, 90svh, safe area; handle 40x5; navy-tint backdrop; reduced motion = fade; 3 dark chat sheets made light; drag/Esc/backdrop tested; ~36 custom sheets move over screen by screen) Bottom sheet component (the slide-up panel used everywhere), with handle and drag-to-close
-- [ ] F-06 Floating top bar (logo, area, HuudCredit, bell, avatar)
+- [x] F-06 (TopBar 52px pill: logo + area / back + title; HuudCredit pill only when loaded (no fake 150); bell; avatar opens Me menu; Join free for visitors; fits 320-412px; ＋ and Search stay until F-07) Floating top bar (logo, area, HuudCredit, bell, avatar)
 - [ ] F-07 New bottom bar: My Huud · Gist · ➕ Create · Chats · Sentinel
 - [ ] F-08 Toast and thank-you card (with coin animation)
 - [ ] F-09 Empty states, loading skeletons, error states (Nigerian wording)
