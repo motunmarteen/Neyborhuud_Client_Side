@@ -29,7 +29,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | Phase | Done | Total | Status |
 |---|---|---|---|
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
-| 1. Infrastructure and accounts | 9 | 18 | 🟡 API live on HTTPS; owner items left |
+| 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 1 | 13 | ⏸ after Phase 1 |
 | 3. Map home (sky + live map) | 0 | 16 | ⬜ |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
@@ -101,6 +101,7 @@ Kept here so the whole history is in one place.
 - [ ] I-04b Upgrade the AWS account from the **Free plan** to a paid plan before **11 January 2027** (Free-plan accounts are closed when credits or the plan run out) (*owner*)
 - [ ] I-04c Fix the AWS MCP server in VS Code: fully quit and reopen VS Code so it finds `uvx` (installed during setup)
 - [ ] ⏸ I-05 (owner chose to defer 2026-10-10: accounts locked down, no known outside copies; revisit before launch) **Rotate leaked secrets**: MongoDB password, Cloudinary secret, API keys, email password (old `.env.staging` in git history)
+- [ ] 🔴 I-05b **Email is not sending** (checked 2026-10-10: Gmail rejects the login after the password change). Fix: new app password at myaccount.google.com/apppasswords (neyborhuudteam@gmail.com) → paste after MAIL_PASS= in ~/.neyborhuud-secrets/rotated.env → Claude runs apply-rotated + put-secret-value + redeploy (*owner*, deferred)
 - [x] I-06 (done 2026-10-10 by owner) Lock former collaborator out of: domain registrar (Namecheap), MongoDB Atlas, Cloudinary, Firebase, Termii, Vercel — *owner*
 - [x] I-07 (done 2026-10-10; org now has only motunmarteen, no invites or outside collaborators) Remove former collaborator from the NeyborHuud GitHub org (`gh auth refresh -s admin:org`, then remove)
 - [ ] I-08 Fix GitHub Actions billing on the personal account so server tests run again — *owner*
