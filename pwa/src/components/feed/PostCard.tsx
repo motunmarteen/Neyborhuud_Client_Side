@@ -330,22 +330,53 @@ function HelpBlock({ post }: { post: Post }) {
   );
 }
 
+/** Server shape: metadata.lostFound (see /api/v1/lost-found). HuudCredit pledges only, never cash. */
+export type LostFoundMeta = {
+  kind: 'lost' | 'found';
+  itemName: string;
+  category?: string;
+  place?: string;
+  seenAt?: string;
+  pledge?: number;
+  pledgeStatus?: 'none' | 'held' | 'assigned' | 'released' | 'refunded';
+  status?: 'open' | 'matched' | 'returned' | 'closed';
+};
+
+const lostFoundOf = (post: Post) => (post.metadata?.lostFound ?? null) as LostFoundMeta | null;
+
+function seenWhen(iso?: string) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const today = new Date();
+  const sameDay = d.toDateString() === today.toDateString();
+  const yesterday = new Date(today.getTime() - 864e5).toDateString() === d.toDateString();
+  const time = d.toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit', hour12: true });
+  if (sameDay) return `Today, ${time}`;
+  if (yesterday) return `Yesterday, ${time}`;
+  return d.toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
 function LostFoundBlock({ post }: { post: Post }) {
-  const m = post.metadata ?? {};
-  const isFound = m.lostFound === 'found';
+  const lf = lostFoundOf(post);
+  if (!lf) return null;
+  const isFound = lf.kind === 'found';
+  const done = lf.status === 'returned';
   return (
     <div className="flex flex-col gap-2 rounded-2xl bg-background p-3">
       <div className="flex items-center gap-2">
-        <Chip tone={isFound ? 'green' : 'amber'}>{isFound ? 'Found' : 'Lost'}</Chip>
-        {m.itemName ? <p className="min-w-0 truncate font-heading text-lg font-extrabold text-navy">{m.itemName}</p> : null}
+        {done ? <Chip tone="green" icon="✓">Returned</Chip> : <Chip tone={isFound ? 'green' : 'amber'}>{isFound ? 'Found' : 'Lost'}</Chip>}
+        <p className="min-w-0 truncate font-heading text-lg font-extrabold text-navy">{lf.itemName}</p>
       </div>
-      {m.lastSeen ? (
+      {lf.place ? (
         <InfoRow icon={<MapPin size={15} />}>
-          {isFound ? 'Found at' : 'Last seen'} {m.lastSeen}
-          {m.seenAt ? <span className="text-muted"> · {m.seenAt}</span> : null}
+          {isFound ? 'Found at' : 'Last seen'} {lf.place}
+          {lf.seenAt ? <span className="text-muted"> · {seenWhen(lf.seenAt)}</span> : null}
         </InfoRow>
       ) : null}
-      {m.reward ? <p className="text-sm font-extrabold text-brand-green-dark">Reward: {formatNaira(m.reward)}</p> : null}
+      {!done && lf.pledge && lf.pledgeStatus === 'held' ? (
+        <p className="text-sm font-extrabold text-amber-ink">🪙 {lf.pledge} HuudCredit thank-you for whoever returns it</p>
+      ) : null}
+      {!done ? <p className="text-xs text-muted">{isFound ? 'To claim it, describe something only the owner would know.' : 'Returned items earn the finder 50 HuudCredit.'}</p> : null}
     </div>
   );
 }
@@ -443,7 +474,10 @@ function quotedSummary(post: Post, kind: PostKind): string | null {
       return d ? `Event · ${new Date(d).toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short' })}` : 'Event';
     }
     case 'services': return m.serviceName ? `Service · ${m.serviceName}` : 'Service';
-    case 'lost_found': return `${m.lostFound === 'found' ? 'Found' : 'Lost'}${m.itemName ? ` · ${m.itemName}` : ''}`;
+    case 'lost_found': {
+      const lf = lostFoundOf(post);
+      return lf ? `${lf.kind === 'found' ? 'Found' : 'Lost'} · ${lf.itemName}` : 'Lost & Found';
+    }
     case 'emergency': return 'Safety alert';
     case 'poll': return 'Poll';
     default: return null;
@@ -495,10 +529,13 @@ function primaryFor(kind: PostKind, post: Post): { action: PostPrimaryAction; la
     case 'event': return { action: 'going', label: "I'm going" };
     case 'services': return { action: 'book', label: 'Book' };
     case 'help_request': return { action: 'help', label: 'I can help' };
-    case 'lost_found':
-      return post.metadata?.lostFound === 'found'
+    case 'lost_found': {
+      const lf = lostFoundOf(post);
+      if (!lf || lf.status === 'returned' || lf.status === 'closed') return null;
+      return lf.kind === 'found'
         ? { action: 'its_mine', label: "It's mine" }
-        : { action: 'found_it', label: 'I found it / I saw it' };
+        : { action: 'found_it', label: 'I have it / I saw it' };
+    }
     default: return null;
   }
 }
