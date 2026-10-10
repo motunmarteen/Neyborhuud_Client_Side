@@ -79,7 +79,7 @@ export function MentionInvitePicker({ query, excludeIds, onPick }: MentionInvite
               <span className="block truncate text-[14px] font-semibold text-slate-800">{p.name}</span>
               {p.username ? <span className="block truncate text-[12px] text-slate-400">@{p.username}</span> : null}
             </span>
-            <span className="material-symbols-outlined text-[18px] text-[#00A555]">person_add</span>
+            <span className="material-symbols-outlined text-[18px] text-[#0E8A3E]">person_add</span>
           </button>
         ))}
       </div>

@@ -220,7 +220,7 @@ export function StreetRadarView({ onOpenWhoIsInMyHuud, onOpenAskSentinel }: Stre
       case 'community':
         return {
           pill: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-          dot: 'bg-[#00C830]',
+          dot: 'bg-[#00B82E]',
           icon: ShieldCheck,
           label: 'Community Patrol',
         };
@@ -232,14 +232,14 @@ export function StreetRadarView({ onOpenWhoIsInMyHuud, onOpenAskSentinel }: Stre
       {/* ── Top Header Bar ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3.5 border-b border-black/[0.05]">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00C830] border border-emerald-100 shadow-2xs">
+          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00B82E] border border-emerald-100 shadow-2xs">
             <Radar size={22} strokeWidth={2.4} />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-extrabold tracking-tight text-slate-900">Street Radar</h2>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/70 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-800 border border-emerald-200/60">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#00C830] animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#00B82E] animate-pulse" />
                 Live 2km
               </span>
               <button
@@ -265,7 +265,7 @@ export function StreetRadarView({ onOpenWhoIsInMyHuud, onOpenAskSentinel }: Stre
               onClick={onOpenWhoIsInMyHuud}
               className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
             >
-              <Users size={14} className="text-[#00C830]" />
+              <Users size={14} className="text-[#00B82E]" />
               Who is around?
             </button>
           )}
@@ -273,7 +273,7 @@ export function StreetRadarView({ onOpenWhoIsInMyHuud, onOpenAskSentinel }: Stre
             <button
               type="button"
               onClick={onOpenAskSentinel}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#00C830] px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-[#00B52B] active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#00B82E] px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-[#00B82E] active:scale-95 transition-all cursor-pointer"
             >
               <Sparkles size={14} />
               Ask Sentinel
@@ -332,7 +332,7 @@ export function StreetRadarView({ onOpenWhoIsInMyHuud, onOpenAskSentinel }: Stre
       <div className="space-y-2.5 mt-1">
         {loading ? (
           <div className="py-8 text-center text-slate-500 text-[12px] flex items-center justify-center gap-2">
-            <Loader2 size={16} className="animate-spin text-[#00C830]" />
+            <Loader2 size={16} className="animate-spin text-[#00B82E]" />
             Scanning street signals...
           </div>
         ) : allSignalsList.length === 0 ? (
@@ -367,8 +367,8 @@ export function StreetRadarView({ onOpenWhoIsInMyHuud, onOpenAskSentinel }: Stre
                     )}
                   </div>
                   {signal.isVerified && (
-                    <span className="text-[10px] text-[#00C830] flex items-center gap-1 font-bold">
-                      <ShieldCheck size={13} className="fill-[#00C830]/10" />
+                    <span className="text-[10px] text-[#00B82E] flex items-center gap-1 font-bold">
+                      <ShieldCheck size={13} className="fill-[#00B82E]/10" />
                       Verified
                     </span>
                   )}
@@ -386,7 +386,7 @@ export function StreetRadarView({ onOpenWhoIsInMyHuud, onOpenAskSentinel }: Stre
                   </span>
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1 font-semibold text-slate-600">
-                      <ThumbsUp size={12} className="text-[#00C830]" />
+                      <ThumbsUp size={12} className="text-[#00B82E]" />
                       {signal.confirmCount} confirmed
                     </span>
                   </div>

@@ -85,7 +85,7 @@ export function IncognitoInviteSheet({ open, onClose, conversationId, invitee }:
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" />
 
         <div className="mb-1 flex items-center gap-2">
-          <span className="material-symbols-outlined text-[22px] text-[#00A555]">visibility</span>
+          <span className="material-symbols-outlined text-[22px] text-[#0E8A3E]">visibility</span>
           <h2 className="text-[17px] font-bold text-slate-900">Invite to witness</h2>
         </div>
         <p className="mb-4 text-[13px] leading-relaxed text-slate-500">
@@ -109,7 +109,7 @@ export function IncognitoInviteSheet({ open, onClose, conversationId, invitee }:
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search people you follow…"
-              className="mb-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#00D431] focus:outline-none"
+              className="mb-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-[#00B82E] focus:outline-none"
             />
             <div className="mb-4 max-h-[220px] divide-y divide-slate-100 overflow-y-auto rounded-xl border border-slate-100">
               {candidates.length === 0 ? (
@@ -139,7 +139,7 @@ export function IncognitoInviteSheet({ open, onClose, conversationId, invitee }:
           <button
             type="button"
             onClick={() => setPicked(null)}
-            className="mb-4 flex items-center gap-2 text-[13px] font-semibold text-[#00A555]"
+            className="mb-4 flex items-center gap-2 text-[13px] font-semibold text-[#0E8A3E]"
           >
             <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
             Change person ({target.name})
@@ -155,7 +155,7 @@ export function IncognitoInviteSheet({ open, onClose, conversationId, invitee }:
               onClick={() => setDuration(d.seconds)}
               className={`rounded-xl py-2.5 text-[13px] font-bold transition-all ${
                 duration === d.seconds
-                  ? 'bg-[#00D431] text-white shadow'
+                  ? 'bg-[#00B82E] text-white shadow'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
@@ -180,7 +180,7 @@ export function IncognitoInviteSheet({ open, onClose, conversationId, invitee }:
             type="button"
             onClick={handleInvite}
             disabled={submitting || !target}
-            className="flex-1 rounded-xl bg-[#00D431] py-3 text-sm font-bold text-white active:scale-95 disabled:opacity-50"
+            className="flex-1 rounded-xl bg-[#00B82E] py-3 text-sm font-bold text-white active:scale-95 disabled:opacity-50"
           >
             {submitting ? 'Sending…' : 'Send invite'}
           </button>

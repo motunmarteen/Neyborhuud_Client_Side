@@ -70,7 +70,7 @@ function ActiveSessionsList() {
             key={s._id}
             href={`/safety/kidnapping-tracking/watch/${s._id}`}
             className="mod-card flex items-center gap-3 rounded-2xl border-2 p-4 no-underline"
-            style={{ borderColor: live ? '#FF0000' : 'var(--neu-border, transparent)' }}
+            style={{ borderColor: live ? '#E5484D' : 'var(--neu-border, transparent)' }}
           >
             <div className="mod-inset flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-brand-red">
               <span className="material-symbols-outlined text-[22px]">my_location</span>
@@ -79,7 +79,7 @@ function ActiveSessionsList() {
               <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
                 {name} — {emergencyTypeLabel(s.emergencyType)}
               </p>
-              <p className="mt-0.5 text-xs capitalize" style={{ color: live ? '#FF0000' : 'var(--neu-text-muted)' }}>
+              <p className="mt-0.5 text-xs capitalize" style={{ color: live ? '#E5484D' : 'var(--neu-text-muted)' }}>
                 {s.status.replace('_', ' ')}
               </p>
             </div>

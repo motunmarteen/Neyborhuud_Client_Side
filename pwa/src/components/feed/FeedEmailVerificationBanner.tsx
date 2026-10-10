@@ -49,19 +49,19 @@ export function FeedEmailVerificationBanner() {
 
   return (
     <>
-      <div className="mx-3.5 sm:mx-4 p-3.5 rounded-2xl bg-white border border-[#00D431]/25 shadow-xs flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+      <div className="mx-3.5 sm:mx-4 p-3.5 rounded-2xl bg-white border border-[#00B82E]/25 shadow-xs flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-10 h-10 shrink-0 rounded-xl bg-[#00D431]/15 text-[#008A20] flex items-center justify-center border border-[#00D431]/25">
+          <div className="w-10 h-10 shrink-0 rounded-xl bg-[#00B82E]/15 text-[#0E8A3E] flex items-center justify-center border border-[#00B82E]/25">
             <Gift size={20} strokeWidth={2.2} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#008A20]">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#0E8A3E]">
                 Claim 50 HuudCredit
               </span>
-              <Sparkles size={11} className="text-[#008A20]" />
+              <Sparkles size={11} className="text-[#0E8A3E]" />
             </div>
-            <p className="text-xs font-bold text-[#111814] truncate">
+            <p className="text-xs font-bold text-[#1D2433] truncate">
               Confirm your email to unlock posting & perks
             </p>
           </div>
@@ -71,7 +71,7 @@ export function FeedEmailVerificationBanner() {
           <button
             type="button"
             onClick={() => setShowModal(true)}
-            className="px-3.5 py-1.5 rounded-xl bg-[#00D431] hover:bg-[#00FF3E] text-black font-extrabold text-xs transition-transform active:scale-95 shadow-sm"
+            className="px-3.5 py-1.5 rounded-xl bg-[#00B82E] hover:bg-[#00FF3E] text-black font-extrabold text-xs transition-transform active:scale-95 shadow-sm"
           >
             Verify
           </button>
@@ -91,10 +91,10 @@ export function FeedEmailVerificationBanner() {
           <div className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-black/10 animate-in slide-in-from-bottom duration-250">
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-black/5">
               <div className="flex items-center gap-2">
-                <span className="p-1 rounded-lg bg-[#00D431]/15 text-[#008A20]">
+                <span className="p-1 rounded-lg bg-[#00B82E]/15 text-[#0E8A3E]">
                   <CheckCircle2 size={16} strokeWidth={2.2} />
                 </span>
-                <span className="text-sm font-bold text-[#111814]">Verify Your Email</span>
+                <span className="text-sm font-bold text-[#1D2433]">Verify Your Email</span>
               </div>
               <button
                 type="button"

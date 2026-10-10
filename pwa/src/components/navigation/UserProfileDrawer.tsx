@@ -75,19 +75,19 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
       />
 
       {/* Drawer Surface */}
-      <div className="relative z-10 w-full max-w-sm h-full bg-white text-[#111814] flex flex-col shadow-2xl overflow-y-auto overscroll-contain border-l border-black/[0.08] animate-in slide-in-from-right duration-250 select-none">
+      <div className="relative z-10 w-full max-w-sm h-full bg-white text-[#1D2433] flex flex-col shadow-2xl overflow-y-auto overscroll-contain border-l border-black/[0.08] animate-in slide-in-from-right duration-250 select-none">
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3.5 bg-white/95 backdrop-blur-md border-b border-black/[0.06]">
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-1.5 text-[#374151] hover:text-[#111827] transition-colors"
+            className="flex items-center gap-1.5 text-[#374151] hover:text-[#1D2433] transition-colors"
             aria-label="Back"
           >
             <ChevronLeft size={18} />
-            <span className="text-xs font-black text-[#111827]">Resident Profile</span>
+            <span className="text-xs font-black text-[#1D2433]">Resident Profile</span>
           </button>
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">NeyborHuud</span>
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">NeyborHuud</span>
         </div>
 
         <div className="flex-1 p-4 space-y-4">
@@ -95,23 +95,23 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
           <Link
             href={`/profile/${username}`}
             onClick={onClose}
-            className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white border border-black/[0.08] shadow-xs hover:border-[#008A20]/50 transition-all group no-underline"
+            className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white border border-black/[0.08] shadow-xs hover:border-[#0E8A3E]/50 transition-all group no-underline"
           >
             <div className="relative">
-              <div className="w-11 h-11 rounded-full bg-emerald-100 text-[#008A20] flex items-center justify-center text-base font-black border border-emerald-300/40">
+              <div className="w-11 h-11 rounded-full bg-emerald-100 text-[#0E8A3E] flex items-center justify-center text-base font-black border border-emerald-300/40">
                 {user?.firstName?.[0] || 'M'}
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#00D431] ring-2 ring-white" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#00B82E] ring-2 ring-white" />
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black text-[#111827] truncate group-hover:text-[#008A20] transition-colors">
+                <span className="text-xs font-black text-[#1D2433] truncate group-hover:text-[#0E8A3E] transition-colors">
                   {displayName}
                 </span>
-                <Shield size={13} className="text-[#008A20] shrink-0" />
+                <Shield size={13} className="text-[#0E8A3E] shrink-0" />
               </div>
-              <div className="flex items-center gap-1.5 mt-0.5 text-[11px] font-semibold text-[#6B7280]">
+              <div className="flex items-center gap-1.5 mt-0.5 text-[11px] font-semibold text-[#5B6478]">
                 <span>@{username}</span>
                 <span>•</span>
                 <span>ID: {residentId}</span>
@@ -122,15 +122,15 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
                     e.stopPropagation();
                     handleCopyId();
                   }}
-                  className="p-0.5 hover:text-[#008A20] transition-colors"
+                  className="p-0.5 hover:text-[#0E8A3E] transition-colors"
                   aria-label="Copy Resident ID"
                 >
-                  {copiedId ? <Check size={11} className="text-[#008A20]" /> : <Copy size={11} />}
+                  {copiedId ? <Check size={11} className="text-[#0E8A3E]" /> : <Copy size={11} />}
                 </button>
               </div>
             </div>
 
-            <ChevronRight size={16} className="text-[#9CA3AF] group-hover:text-[#111827] group-hover:translate-x-0.5 transition-all shrink-0" />
+            <ChevronRight size={16} className="text-[#9AA3B1] group-hover:text-[#1D2433] group-hover:translate-x-0.5 transition-all shrink-0" />
           </Link>
 
           {/* Level & Reputation Card */}
@@ -152,7 +152,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
 
             <div className="w-full h-2 rounded-full bg-black/10 overflow-hidden p-0.5">
               <div
-                className="h-full rounded-full bg-[#00D431] transition-all duration-500"
+                className="h-full rounded-full bg-[#00B82E] transition-all duration-500"
                 style={{ width: `${Math.min(trustScore, 100)}%` }}
               />
             </div>
@@ -162,14 +162,14 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
           <div className="p-4 rounded-2xl bg-white border border-black/[0.08] shadow-sm space-y-3.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Wallet size={16} className="text-[#008A20]" />
+                <Wallet size={16} className="text-[#0E8A3E]" />
                 <span className="text-xs font-semibold text-black/60">Total Balance</span>
                 <Eli5Tooltip
                   term="Huud Balance"
                   explanation="Your available funds and HuudCredit for peer-to-peer services, marketplace shopping, and community contributions."
                 />
               </div>
-              <span className="text-lg font-black tracking-tight text-[#111814]">
+              <span className="text-lg font-black tracking-tight text-[#1D2433]">
                 ₦{(huudCoins * 25).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -179,7 +179,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
               <Link
                 href="/huud-economy/wallet"
                 onClick={onClose}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#00D431] hover:bg-[#00FF3E] text-black font-bold text-xs transition-all active:scale-[0.98] shadow-sm no-underline"
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#00B82E] hover:bg-[#00FF3E] text-black font-bold text-xs transition-all active:scale-[0.98] shadow-sm no-underline"
               >
                 <CreditCard size={14} className="stroke-[2.5]" />
                 <span>Deposit</span>
@@ -188,7 +188,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
               <Link
                 href="/huud-economy/wallet"
                 onClick={onClose}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-black/[0.05] hover:bg-black/[0.08] text-[#111814] font-bold text-xs transition-all active:scale-[0.98] border border-black/[0.08] no-underline"
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-black/[0.05] hover:bg-black/[0.08] text-[#1D2433] font-bold text-xs transition-all active:scale-[0.98] border border-black/[0.08] no-underline"
               >
                 <Receipt size={14} />
                 <span>Withdraw</span>
@@ -202,7 +202,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
                 onClick={onClose}
                 className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-black/[0.03] transition-colors group no-underline"
               >
-                <div className="w-8 h-8 rounded-lg bg-black/[0.04] group-hover:bg-[#00D431]/15 group-hover:text-[#008A20] flex items-center justify-center text-black/70 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-black/[0.04] group-hover:bg-[#00B82E]/15 group-hover:text-[#0E8A3E] flex items-center justify-center text-black/70 transition-colors">
                   <CreditCard size={15} />
                 </div>
                 <span className="text-[10px] font-semibold text-black/70">Buy</span>
@@ -213,7 +213,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
                 onClick={onClose}
                 className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-black/[0.03] transition-colors group no-underline"
               >
-                <div className="w-8 h-8 rounded-lg bg-black/[0.04] group-hover:bg-[#00D431]/15 group-hover:text-[#008A20] flex items-center justify-center text-black/70 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-black/[0.04] group-hover:bg-[#00B82E]/15 group-hover:text-[#0E8A3E] flex items-center justify-center text-black/70 transition-colors">
                   <ArrowRightLeft size={15} />
                 </div>
                 <span className="text-[10px] font-semibold text-black/70">Swap</span>
@@ -224,7 +224,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
                 onClick={onClose}
                 className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-black/[0.03] transition-colors group no-underline"
               >
-                <div className="w-8 h-8 rounded-lg bg-black/[0.04] group-hover:bg-[#00D431]/15 group-hover:text-[#008A20] flex items-center justify-center text-black/70 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-black/[0.04] group-hover:bg-[#00B82E]/15 group-hover:text-[#0E8A3E] flex items-center justify-center text-black/70 transition-colors">
                   <Lock size={15} />
                 </div>
                 <span className="text-[10px] font-semibold text-black/70">Vault Pro</span>
@@ -235,7 +235,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
                 onClick={onClose}
                 className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-black/[0.03] transition-colors group no-underline"
               >
-                <div className="w-8 h-8 rounded-lg bg-black/[0.04] group-hover:bg-[#00D431]/15 group-hover:text-[#008A20] flex items-center justify-center text-black/70 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-black/[0.04] group-hover:bg-[#00B82E]/15 group-hover:text-[#0E8A3E] flex items-center justify-center text-black/70 transition-colors">
                   <Receipt size={15} />
                 </div>
                 <span className="text-[10px] font-semibold text-black/70">History</span>
@@ -252,7 +252,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
                 type="button"
                 onClick={() => setDndEnabled(!dndEnabled)}
                 className={`w-11 h-6 rounded-full transition-colors relative ${
-                  dndEnabled ? 'bg-[#00D431]' : 'bg-black/15'
+                  dndEnabled ? 'bg-[#00B82E]' : 'bg-black/15'
                 }`}
                 aria-label="Toggle Do Not Disturb"
               >
@@ -275,7 +275,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
                 <span className="text-xs font-semibold text-black/80">Notification</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="px-1.5 py-0.5 rounded-full bg-[#00D431]/20 text-[#008A20] text-[10px] font-bold">
+                <span className="px-1.5 py-0.5 rounded-full bg-[#00B82E]/20 text-[#0E8A3E] text-[10px] font-bold">
                   8
                 </span>
                 <ChevronRight size={16} className="text-black/30" />
@@ -309,7 +309,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
                 <span className="text-xs font-semibold text-black/80">Global Settings</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Check size={14} className="text-[#008A20]" />
+                <Check size={14} className="text-[#0E8A3E]" />
                 <ChevronRight size={16} className="text-black/30" />
               </div>
             </Link>

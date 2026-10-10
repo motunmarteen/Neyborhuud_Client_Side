@@ -104,13 +104,13 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
       return 'border-rose-500 ring-1 ring-rose-500/20';
     }
     if (success || validationStatus === 'valid') {
-      return 'border-[#008A20] ring-1 ring-[#008A20]/20';
+      return 'border-[#0E8A3E] ring-1 ring-[#0E8A3E]/20';
     }
     if (validationStatus === 'checking') {
-      return 'border-[#008A20] ring-1 ring-[#008A20]/20';
+      return 'border-[#0E8A3E] ring-1 ring-[#0E8A3E]/20';
     }
     if (isFocused) {
-      return 'border-[#008A20] ring-1 ring-[#008A20]/20';
+      return 'border-[#0E8A3E] ring-1 ring-[#0E8A3E]/20';
     }
     return 'border-black/[0.08] hover:border-black/[0.15]';
   };
@@ -120,14 +120,14 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
 
     if (validationStatus === 'checking') {
       return (
-        <div className="ml-2 w-4 h-4 border-2 border-[#00D431]/30 border-t-[#00D431] rounded-full animate-spin shrink-0" />
+        <div className="ml-2 w-4 h-4 border-2 border-[#00B82E]/30 border-t-[#00B82E] rounded-full animate-spin shrink-0" />
       );
     }
     if (error || validationStatus === 'invalid' || validationStatus === 'taken') {
       return <AlertCircle size={17} strokeWidth={2} className="ml-2 text-red-500 shrink-0" />;
     }
     if (success || validationStatus === 'valid') {
-      return <CheckCircle2 size={17} strokeWidth={2} className="ml-2 text-[#00D431] shrink-0" />;
+      return <CheckCircle2 size={17} strokeWidth={2} className="ml-2 text-[#00B82E] shrink-0" />;
     }
     return null;
   };
@@ -143,13 +143,13 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
       return { text: invalidText ?? 'Please check this field', color: 'text-red-500' };
     }
     if (validationStatus === 'checking') {
-      return { text: checkingText ?? 'Checking availability…', color: 'text-[#00D431]' };
+      return { text: checkingText ?? 'Checking availability…', color: 'text-[#00B82E]' };
     }
     if (successText && (success || validationStatus === 'valid')) {
-      return { text: successText, color: 'text-[#00D431]' };
+      return { text: successText, color: 'text-[#00B82E]' };
     }
     if (helperText) {
-      return { text: helperText, color: 'text-[#4B5E52]' };
+      return { text: helperText, color: 'text-[#5B6478]' };
     }
     return null;
   };
@@ -189,7 +189,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
         {IconComp && (
           <span
             className={`mr-2.5 transition-colors shrink-0 ${
-              isFocused ? 'text-[#008A20]' : 'text-[#6B7280]'
+              isFocused ? 'text-[#0E8A3E]' : 'text-[#5B6478]'
             }`}
             aria-hidden="true"
           >
@@ -200,7 +200,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
         {prefix && (
           <span
             className={`mr-0.5 shrink-0 text-sm font-bold tracking-tight transition-colors ${
-              isFocused ? 'text-[#008A20]' : 'text-[#6B7280]'
+              isFocused ? 'text-[#0E8A3E]' : 'text-[#5B6478]'
             }`}
             aria-hidden
           >
@@ -218,10 +218,10 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
               ${IconComp ? 'ml-[2.75rem]' : prefix ? 'ml-[3rem]' : 'ml-3.5'}
               ${
                 isFloating
-                  ? 'top-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]'
-                  : 'top-1/2 -translate-y-1/2 text-xs font-semibold text-[#6B7280]'
+                  ? 'top-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]'
+                  : 'top-1/2 -translate-y-1/2 text-xs font-semibold text-[#5B6478]'
               }
-              ${isFocused && isFloating ? 'text-[#008A20]' : ''}
+              ${isFocused && isFloating ? 'text-[#0E8A3E]' : ''}
             `}
           >
             {label}
@@ -234,7 +234,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
           type={inputType}
           value={value}
           defaultValue={defaultValue}
-          className="bg-transparent w-full py-0.5 border-none outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 text-xs font-semibold text-[#111827] placeholder:text-[#9CA3AF]"
+          className="bg-transparent w-full py-0.5 border-none outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 text-xs font-semibold text-[#1D2433] placeholder:text-[#9AA3B1]"
           placeholder={isFloating ? placeholder : undefined}
           onFocus={handleFocus}
           onBlur={handleBlur}
@@ -246,7 +246,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="ml-2 flex items-center justify-center rounded-lg p-1 text-black/40 hover:text-[#00D431] transition-colors focus:outline-none active:scale-95"
+            className="ml-2 flex items-center justify-center rounded-lg p-1 text-black/40 hover:text-[#00B82E] transition-colors focus:outline-none active:scale-95"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff size={17} strokeWidth={1.8} /> : <Eye size={17} strokeWidth={1.8} />}

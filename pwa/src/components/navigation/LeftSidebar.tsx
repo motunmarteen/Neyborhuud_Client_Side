@@ -85,8 +85,8 @@ function SidebarNavItem({
         onClick={onNavigate}
         className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
           active
-            ? 'bg-emerald-50 text-[#008A20] font-bold shadow-xs'
-            : 'text-[#374151] hover:bg-black/[0.04] hover:text-[#111827]'
+            ? 'bg-emerald-50 text-[#0E8A3E] font-bold shadow-xs'
+            : 'text-[#374151] hover:bg-black/[0.04] hover:text-[#1D2433]'
         }`}
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -94,7 +94,7 @@ function SidebarNavItem({
             size={18}
             strokeWidth={active ? 2.5 : 2}
             className={`shrink-0 transition-transform group-hover:scale-105 ${
-              active ? 'text-[#008A20]' : 'text-[#6B7280] group-hover:text-[#111827]'
+              active ? 'text-[#0E8A3E]' : 'text-[#5B6478] group-hover:text-[#1D2433]'
             }`}
           />
           <span className="truncate">{item.label}</span>
@@ -103,7 +103,7 @@ function SidebarNavItem({
         {item.badge && (
           <span
             className={`text-[9px] font-black tracking-wide px-1.5 py-0.5 rounded-md shrink-0 ${
-              item.badgeColor || 'bg-black/5 text-[#111827]'
+              item.badgeColor || 'bg-black/5 text-[#1D2433]'
             }`}
           >
             {item.badge}
@@ -172,7 +172,7 @@ function SidebarContent({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-black/5 text-[#6B7280] hover:text-[#111827] transition-colors"
+            className="p-1.5 rounded-xl hover:bg-black/5 text-[#5B6478] hover:text-[#1D2433] transition-colors"
             aria-label="Close menu"
           >
             <X size={18} />
@@ -189,7 +189,7 @@ function SidebarContent({
           className="group block p-3 rounded-2xl bg-white hover:bg-black/[0.02] border border-black/[0.08] shadow-xs transition-all"
         >
           <div className="flex items-center gap-3">
-            <div suppressHydrationWarning className="relative w-10 h-10 rounded-full overflow-hidden bg-emerald-100 flex items-center justify-center text-sm font-black text-[#008A20] shrink-0 border border-emerald-300/40">
+            <div suppressHydrationWarning className="relative w-10 h-10 rounded-full overflow-hidden bg-emerald-100 flex items-center justify-center text-sm font-black text-[#0E8A3E] shrink-0 border border-emerald-300/40">
               {resolvedAvatar ? (
                 <Image
                   src={resolvedAvatar}
@@ -201,37 +201,37 @@ function SidebarContent({
               ) : (
                 <span suppressHydrationWarning>{initial}</span>
               )}
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#00D431] ring-2 ring-white" />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#00B82E] ring-2 ring-white" />
             </div>
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1">
-                <span suppressHydrationWarning className="text-xs font-black text-[#111827] truncate">
+                <span suppressHydrationWarning className="text-xs font-black text-[#1D2433] truncate">
                   {displayName}
                 </span>
-                <ShieldCheck size={13} className="text-[#008A20] shrink-0" />
+                <ShieldCheck size={13} className="text-[#0E8A3E] shrink-0" />
               </div>
-              <p suppressHydrationWarning className="text-[11px] font-semibold text-[#6B7280] truncate">
+              <p suppressHydrationWarning className="text-[11px] font-semibold text-[#5B6478] truncate">
                 @{handle}
               </p>
             </div>
 
             <ChevronRight
               size={14}
-              className="text-[#9CA3AF] group-hover:text-[#111827] group-hover:translate-x-0.5 transition-all shrink-0"
+              className="text-[#9AA3B1] group-hover:text-[#1D2433] group-hover:translate-x-0.5 transition-all shrink-0"
             />
           </div>
 
           {/* Active Huud Badge & Balance */}
           <div className="mt-2.5 pt-2 border-t border-black/[0.05] flex items-center justify-between text-[11px]">
-            <span suppressHydrationWarning className="inline-flex items-center gap-1 font-bold text-[#008A20]">
+            <span suppressHydrationWarning className="inline-flex items-center gap-1 font-bold text-[#0E8A3E]">
               <MapPin size={11} />
               <span suppressHydrationWarning className="truncate max-w-[110px]">
                 {huudName !== 'your neighborhood' && huudName ? huudName : 'Lekki Phase 1'}
               </span>
             </span>
 
-            <span suppressHydrationWarning className="font-extrabold text-[#111827] tabular-nums">
+            <span suppressHydrationWarning className="font-extrabold text-[#1D2433] tabular-nums">
               {huudCoins} HC
             </span>
           </div>
@@ -242,7 +242,7 @@ function SidebarContent({
       <nav className="flex-1 overflow-y-auto px-3.5 py-2 space-y-4 no-scrollbar">
         {/* Main Section */}
         <div>
-          <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
+          <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
             Main
           </p>
           <ul className="space-y-0.5">
@@ -259,7 +259,7 @@ function SidebarContent({
 
         {/* Discover & Services */}
         <div>
-          <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
+          <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
             Services &amp; Safety
           </p>
           <ul className="space-y-0.5">
@@ -276,7 +276,7 @@ function SidebarContent({
 
         {/* Economy */}
         <div>
-          <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
+          <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
             Economy
           </p>
           <ul className="space-y-0.5">

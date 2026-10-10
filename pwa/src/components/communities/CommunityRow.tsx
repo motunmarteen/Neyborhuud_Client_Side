@@ -34,7 +34,7 @@ export function CommunityRow({
     <div className="flex items-center gap-3.5 rounded-2xl border border-black/[0.06] bg-white p-3.5 transition-all hover:bg-slate-50/70 shadow-2xs">
       <Link
         href={`/communities/${community.id}`}
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00C830] border border-emerald-100 shadow-2xs no-underline hover:scale-105 active:scale-95 transition-transform"
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00B82E] border border-emerald-100 shadow-2xs no-underline hover:scale-105 active:scale-95 transition-transform"
       >
         <Users size={22} strokeWidth={2.2} />
       </Link>
@@ -80,7 +80,7 @@ export function CommunityRow({
             e.stopPropagation();
             onJoin(community.id);
           }}
-          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#00C830] px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-[#00B52B] disabled:opacity-50 active:scale-95 transition-all cursor-pointer"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#00B82E] px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-[#00B82E] disabled:opacity-50 active:scale-95 transition-all cursor-pointer"
         >
           {joinPending ? (
             <Loader2 size={13} className="animate-spin" />

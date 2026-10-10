@@ -61,7 +61,7 @@ export function Eli5Tooltip({
           setIsOpen((prev) => !prev);
         }}
         aria-label={effectiveTitle ? `Explain: ${effectiveTitle}` : 'Explain this feature'}
-        className="group p-1 text-black/40 hover:text-[#008A20] focus:text-[#008A20] transition-colors rounded-full focus:outline-none"
+        className="group p-1 text-black/40 hover:text-[#0E8A3E] focus:text-[#0E8A3E] transition-colors rounded-full focus:outline-none"
       >
         <HelpCircle
           size={14}
@@ -77,10 +77,10 @@ export function Eli5Tooltip({
         >
           <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-black/[0.06] mb-1.5">
             <div className="flex items-center gap-1.5">
-              <span className="p-0.5 rounded-md bg-[#00D431]/10 text-[#008A20]">
+              <span className="p-0.5 rounded-md bg-[#00B82E]/10 text-[#0E8A3E]">
                 <Sparkles size={11} strokeWidth={2.2} />
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#008A20]">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#0E8A3E]">
                 {effectiveTitle || 'Quick Guide'}
               </span>
             </div>
@@ -93,7 +93,7 @@ export function Eli5Tooltip({
               <X size={12} strokeWidth={2} />
             </button>
           </div>
-          <p className="text-[12px] leading-relaxed text-[#111814] font-normal selection:bg-[#00D431]/20">
+          <p className="text-[12px] leading-relaxed text-[#1D2433] font-normal selection:bg-[#00B82E]/20">
             {explanation}
           </p>
         </div>

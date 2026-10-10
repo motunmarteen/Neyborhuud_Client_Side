@@ -254,7 +254,7 @@ export function FYICard({
     return (
         <>
         <article
-            className="bg-white dark:bg-[#121b14] px-4 py-3.5 mx-auto w-full select-none border-0 border-b border-black/[0.06] dark:border-white/[0.06] shadow-none max-w-[580px] rounded-none flex flex-col gap-0"
+            className="bg-white dark:bg-[#1D2433] px-4 py-3.5 mx-auto w-full select-none border-0 border-b border-black/[0.06] dark:border-white/[0.06] shadow-none max-w-[580px] rounded-none flex flex-col gap-0"
             {...articleGestureProps}
         >
             {/* Top Header Row */}

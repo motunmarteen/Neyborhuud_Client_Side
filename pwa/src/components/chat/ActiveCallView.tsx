@@ -79,7 +79,7 @@ export function ActiveCallView() {
   if (isMinimized) {
     return (
       <div className="fixed bottom-20 right-4 z-50 flex items-center gap-3 bg-slate-900/95 backdrop-blur-2xl border border-white/20 text-white px-4 py-2.5 rounded-full shadow-2xl animate-in slide-in-from-bottom duration-300 select-none">
-        <div className="h-2.5 w-2.5 rounded-full bg-[#00D431] animate-pulse" />
+        <div className="h-2.5 w-2.5 rounded-full bg-[#00B82E] animate-pulse" />
         <span className="text-xs font-bold truncate max-w-[100px]">{target.name}</span>
         <span className="text-xs font-semibold text-slate-300">
           {callStatus === 'connected' ? formatTime(callDuration) : 'Ringing…'}
@@ -119,8 +119,8 @@ export function ActiveCallView() {
 
         <div className="flex flex-col items-center">
           <h3 className="text-base font-bold text-white tracking-tight">{target.name}</h3>
-          <p className="text-xs font-semibold text-[#00D431] flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#00D431] animate-pulse" />
+          <p className="text-xs font-semibold text-[#00B82E] flex items-center gap-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#00B82E] animate-pulse" />
             <span>{callStatus === 'connected' ? formatTime(callDuration) : 'Calling…'}</span>
           </p>
         </div>
@@ -162,11 +162,11 @@ export function ActiveCallView() {
                   callStatus === 'connected' ? 'animate-pulse' : 'animate-ping'
                 }`}
               />
-              <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-[#00C830]/40 shadow-2xl bg-slate-900 flex items-center justify-center">
+              <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-[#00B82E]/40 shadow-2xl bg-slate-900 flex items-center justify-center">
                 {target.avatar ? (
                   <Image src={target.avatar} alt={target.name} fill className="object-cover" />
                 ) : (
-                  <span className="text-5xl font-black text-[#00D431]">
+                  <span className="text-5xl font-black text-[#00B82E]">
                     {target.name.charAt(0).toUpperCase()}
                   </span>
                 )}
@@ -175,7 +175,7 @@ export function ActiveCallView() {
 
             <h2 className="text-2xl font-black text-white mb-2">{target.name}</h2>
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-xl text-xs font-semibold text-emerald-300 border border-white/10 shadow-xs">
-              <ShieldCheck size={14} className="text-[#00D431] shrink-0" />
+              <ShieldCheck size={14} className="text-[#00B82E] shrink-0" />
               <span>Verified Resident • 📍 {target.huud || 'Your Huud'}</span>
             </div>
           </div>

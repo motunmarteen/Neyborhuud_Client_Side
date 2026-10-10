@@ -63,7 +63,7 @@ export function ChatComposer({
       {uploadProgress !== null ? (
         <div className="mx-auto w-full max-w-[600px] px-2 mb-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-[#00D431] transition-all"
+            className="h-full rounded-full bg-[#00B82E] transition-all"
             style={{ width: `${uploadProgress}%` }}
           />
         </div>
@@ -135,7 +135,7 @@ export function ChatComposer({
           disabled={sending && !canSend}
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all mb-0.5 active:scale-95 disabled:opacity-50 cursor-pointer shadow-xs ${
             canSend
-              ? 'bg-[#00C830] text-white hover:bg-[#00B02A]'
+              ? 'bg-[#00B82E] text-white hover:bg-[#00B02A]'
               : recording
                 ? 'scale-125 bg-rose-500 text-white'
                 : 'bg-slate-900 text-white hover:bg-black'

@@ -120,16 +120,16 @@ export function CommunityInfoSheet({ open, onClose, conversationId }: CommunityI
                       autoFocus
                       value={nameValue}
                       onChange={(e) => setNameValue(e.target.value)}
-                      className="flex-1 rounded-xl border border-slate-200 px-3 py-1.5 text-[15px] font-semibold focus:border-[#00D431] focus:outline-none"
+                      className="flex-1 rounded-xl border border-slate-200 px-3 py-1.5 text-[15px] font-semibold focus:border-[#00B82E] focus:outline-none"
                     />
-                    <button type="button" onClick={handleSaveName} disabled={updateHub.isPending} className="rounded-xl bg-[#00D431] px-3 py-1.5 text-xs font-bold text-white active:scale-95 disabled:opacity-50">Save</button>
+                    <button type="button" onClick={handleSaveName} disabled={updateHub.isPending} className="rounded-xl bg-[#00B82E] px-3 py-1.5 text-xs font-bold text-white active:scale-95 disabled:opacity-50">Save</button>
                     <button type="button" onClick={() => setEditName(false)} className="text-xs text-slate-400">Cancel</button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <p className="truncate text-[16px] font-bold text-slate-900">{hub.name}</p>
                     {canManage && (
-                      <button type="button" onClick={() => { setNameValue(hub.name); setEditName(true); }} className="text-slate-400 hover:text-[#00A555]">
+                      <button type="button" onClick={() => { setNameValue(hub.name); setEditName(true); }} className="text-slate-400 hover:text-[#0E8A3E]">
                         <span className="material-symbols-outlined text-[18px]">edit</span>
                       </button>
                     )}
@@ -159,7 +159,7 @@ export function CommunityInfoSheet({ open, onClose, conversationId }: CommunityI
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14px] font-semibold text-slate-800">{mname}{isSelf ? ' (you)' : ''}</p>
                     {ROLE_LABEL[role] && (
-                      <span className="rounded-full bg-[#00A555]/10 px-2 py-0.5 text-[11px] font-bold text-[#00A555]">{ROLE_LABEL[role]}</span>
+                      <span className="rounded-full bg-[#0E8A3E]/10 px-2 py-0.5 text-[11px] font-bold text-[#0E8A3E]">{ROLE_LABEL[role]}</span>
                     )}
                   </div>
                   {canManage && !isSelf && role !== 'owner' && (

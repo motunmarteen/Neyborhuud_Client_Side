@@ -36,7 +36,7 @@ export function SentinelHubHero({
           isActive
             ? 'bg-red-500/10'
             : isPending
-              ? 'bg-[#00D431]/10'
+              ? 'bg-[#00B82E]/10'
               : 'bg-white/[0.03]'
         }`}
         aria-hidden

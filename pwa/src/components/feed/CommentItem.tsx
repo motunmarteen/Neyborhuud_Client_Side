@@ -123,12 +123,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                             <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 dark:bg-white/[0.06]">
                                 <Link
                                     href={`/profile/${username}`}
-                                    className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] hover:underline dark:text-[#E4E6EB]"
+                                    className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] hover:underline dark:text-[#DDE3EC]"
                                 >
                                     {displayName}
                                 </Link>
-                                <span className="text-[12px] font-normal text-[#65676B] dark:text-[#B0B3B8]">@{username}</span>
-                                <span className="ml-1.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#E4E6EB]">
+                                <span className="text-[12px] font-normal text-[#5B6478] dark:text-[#9AA3B1]">@{username}</span>
+                                <span className="ml-1.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#DDE3EC]">
                                     {isStatusUpdate ? cleanBody : comment.body}
                                 </span>
                             </div>
@@ -155,18 +155,18 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                         )}
 
                         {/* Micro action row (Facebook: Like · Reply · time) */}
-                        <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#65676B] dark:text-[#B0B3B8]">
+                        <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#5B6478] dark:text-[#9AA3B1]">
                             <button
                                 type="button"
                                 onClick={handleLike}
-                                className={`transition-colors ${comment.isLiked ? 'text-brand-red' : 'hover:text-[#050505] dark:hover:text-[#E4E6EB]'}`}
+                                className={`transition-colors ${comment.isLiked ? 'text-brand-red' : 'hover:text-[#050505] dark:hover:text-[#DDE3EC]'}`}
                             >
                                 Like
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setIsReplying(!isReplying)}
-                                className={`transition-colors ${isReplying ? 'text-brand-blue' : 'hover:text-[#050505] dark:hover:text-[#E4E6EB]'}`}
+                                className={`transition-colors ${isReplying ? 'text-brand-blue' : 'hover:text-[#050505] dark:hover:text-[#DDE3EC]'}`}
                             >
                                 Reply
                             </button>
@@ -222,7 +222,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                         <button
                             type="button"
                             onClick={() => setShowReplies(!showReplies)}
-                            className="flex items-center gap-2 pl-1 text-[12px] font-bold text-[#65676B] transition-colors hover:text-[#050505] dark:text-[#B0B3B8] dark:hover:text-[#E4E6EB]"
+                            className="flex items-center gap-2 pl-1 text-[12px] font-bold text-[#5B6478] transition-colors hover:text-[#050505] dark:text-[#9AA3B1] dark:hover:text-[#DDE3EC]"
                         >
                             <span className="h-px w-5 bg-[var(--neu-shadow-dark)]" aria-hidden />
                             {showReplies

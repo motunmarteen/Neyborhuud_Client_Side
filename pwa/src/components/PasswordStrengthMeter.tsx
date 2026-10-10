@@ -83,7 +83,7 @@ export function PasswordStrengthMeter({
           </p>
         </div>
         {meetsPolicy ? (
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#00D431]/15 text-[#008A20]">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#00B82E]/15 text-[#0E8A3E]">
             <Check size={16} strokeWidth={2.4} aria-hidden="true" />
           </span>
         ) : null}
@@ -108,7 +108,7 @@ export function PasswordStrengthMeter({
                 {item.pending ? (
                   <Circle size={10} strokeWidth={2} aria-hidden="true" />
                 ) : item.ok ? (
-                  <CheckCircle2 size={14} strokeWidth={2} className="text-[#008A20]" aria-hidden="true" />
+                  <CheckCircle2 size={14} strokeWidth={2} className="text-[#0E8A3E]" aria-hidden="true" />
                 ) : (
                   <XCircle size={14} strokeWidth={2} className="text-amber-600" aria-hidden="true" />
                 )}

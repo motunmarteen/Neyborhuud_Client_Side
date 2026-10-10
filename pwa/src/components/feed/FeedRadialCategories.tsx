@@ -6,9 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 type Category = { type: string; label: string; icon: string; accent: string; href?: string };
 
 const CATEGORIES: Category[] = [
-  { type: 'marketplace', label: 'Market', icon: 'shopping_bag', accent: '#00C431' },
+  { type: 'marketplace', label: 'Market', icon: 'shopping_bag', accent: '#00B82E' },
   { type: 'work', label: 'Work', icon: 'work', accent: '#9A5ACF', href: '/work' },
-  { type: 'event', label: 'Events', icon: 'local_activity', accent: '#1A56FF' },
+  { type: 'event', label: 'Events', icon: 'local_activity', accent: '#3B82C4' },
   { type: 'fyi', label: 'FYI', icon: 'lightbulb', accent: '#3A6A9A' },
   { type: 'help_request', label: 'Help', icon: 'favorite', accent: '#CC3333' },
   { type: 'incident_report', label: 'Safety Alert', icon: 'shield_person', accent: '#A82020' },

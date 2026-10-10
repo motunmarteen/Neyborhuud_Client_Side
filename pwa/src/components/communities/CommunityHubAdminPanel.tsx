@@ -74,7 +74,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center text-[#00C830]">
+          <div className="h-8 w-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center text-[#00B82E]">
             <ShieldCheck size={18} />
           </div>
           <div>
@@ -101,7 +101,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
       {/* ELI5 Banner */}
       {showEli5 && (
         <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/40 rounded-2xl p-3 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2">
-          <Info size={15} className="text-[#00C830] shrink-0 mt-0.5" />
+          <Info size={15} className="text-[#00B82E] shrink-0 mt-0.5" />
           <div className="flex-1">
             <span className="font-bold">Gatekeeper Info: </span>
             As an estate admin or gate elder, you verify real residents before they gain access to the private neighborhood channel.
@@ -126,7 +126,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
             <button
               type="button"
               onClick={() => void createInvite()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#00C830] hover:bg-[#00B52B] active:scale-95 text-white shadow-sm shadow-[#00C830]/20 transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#00B82E] hover:bg-[#00B82E] active:scale-95 text-white shadow-sm shadow-[#00B82E]/20 transition-all"
             >
               <Link2 size={13} />
               <span>{inviteUrl ? 'Regenerate Link' : 'Generate Invite Link'}</span>
@@ -146,10 +146,10 @@ export function CommunityHubAdminPanel({ hub }: Props) {
                   setTimeout(() => setCopied(false), 2000);
                   toast.success('Link copied!');
                 }}
-                className="shrink-0 p-1.5 rounded-xl bg-white dark:bg-[#1a2127] border border-black/[0.08] dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:text-[#00C830] transition-colors"
+                className="shrink-0 p-1.5 rounded-xl bg-white dark:bg-[#1a2127] border border-black/[0.08] dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:text-[#00B82E] transition-colors"
                 title="Copy to clipboard"
               >
-                {copied ? <Check size={14} className="text-[#00C830]" /> : <Copy size={14} />}
+                {copied ? <Check size={14} className="text-[#00B82E]" /> : <Copy size={14} />}
               </button>
             </div>
           )}

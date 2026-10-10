@@ -152,12 +152,12 @@ export function MapSelectionSheet({
                           unoptimized
                         />
                       ) : (
-                        <div className="flex h-15 w-15 items-center justify-center rounded-2xl border-2 border-black/[0.08] bg-gradient-to-br from-[#00C830] to-teal-700 text-lg font-black text-white shadow-sm">
+                        <div className="flex h-15 w-15 items-center justify-center rounded-2xl border-2 border-black/[0.08] bg-gradient-to-br from-[#00B82E] to-teal-700 text-lg font-black text-white shadow-sm">
                           {`${(selection.data.firstName || '')[0] || ''}${(selection.data.lastName || '')[0] || ''}`.toUpperCase() || '?'}
                         </div>
                       )}
                       {selection.data.isVerified ? (
-                        <span className="absolute -bottom-1 -right-1 rounded-full bg-white dark:bg-slate-900 p-0.5 text-[#00C830] shadow-sm">
+                        <span className="absolute -bottom-1 -right-1 rounded-full bg-white dark:bg-slate-900 p-0.5 text-[#00B82E] shadow-sm">
                           <CheckCircle2 size={16} />
                         </span>
                       ) : null}
@@ -177,7 +177,7 @@ export function MapSelectionSheet({
                             {[selection.data.lga, selection.data.state].filter(Boolean).join(', ')}
                           </span>
                           {selection.data.distanceMetres != null ? (
-                            <span className="font-black text-[#00C830]">
+                            <span className="font-black text-[#00B82E]">
                               · {fmtDist(selection.data.distanceMetres)}
                             </span>
                           ) : null}
@@ -196,7 +196,7 @@ export function MapSelectionSheet({
                   <div className="flex items-center gap-2.5 pt-1">
                     <Link
                       href={`/profile/${selection.data.username}`}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00C830] transition-colors"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00B82E] transition-colors"
                       onClick={onClose}
                     >
                       <span>View Profile</span>
@@ -214,7 +214,7 @@ export function MapSelectionSheet({
                       className={`flex-1 rounded-2xl py-3 text-xs font-black transition-all active:scale-95 disabled:opacity-50 ${
                         selection.data.isFollowing
                           ? 'border border-black/[0.08] dark:border-white/[0.08] bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300'
-                          : 'bg-[#00C830] hover:bg-[#00B52B] text-white shadow-md shadow-[#00C830]/20'
+                          : 'bg-[#00B82E] hover:bg-[#00B82E] text-white shadow-md shadow-[#00B82E]/20'
                       }`}
                     >
                       {isActionPending
@@ -245,7 +245,7 @@ export function MapSelectionSheet({
                       </p>
                       <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-300 font-medium">
                         <span className="inline-flex items-center gap-1">
-                          <Users size={12} className="text-[#00C830]" />
+                          <Users size={12} className="text-[#00B82E]" />
                           <span>{selection.data.userCount.toLocaleString()} residents</span>
                         </span>
                         <span className="inline-flex items-center gap-1">
@@ -273,7 +273,7 @@ export function MapSelectionSheet({
                       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                         Followers
                       </p>
-                      <p className="mt-0.5 text-base font-black text-[#00C830]">
+                      <p className="mt-0.5 text-base font-black text-[#00B82E]">
                         {loadingPlaceStats
                           ? '…'
                           : (placeStats?.followerCount ?? selection.data.followerCount)}
@@ -302,7 +302,7 @@ export function MapSelectionSheet({
                     className={`w-full rounded-2xl py-3 text-xs font-black transition-all active:scale-95 disabled:opacity-50 ${
                       selection.data.isFollowing
                         ? 'border border-black/[0.08] dark:border-white/[0.08] bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300'
-                        : 'bg-[#00C830] hover:bg-[#00B52B] text-white shadow-md shadow-[#00C830]/20'
+                        : 'bg-[#00B82E] hover:bg-[#00B82E] text-white shadow-md shadow-[#00B82E]/20'
                     }`}
                   >
                     {isActionPending

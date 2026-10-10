@@ -336,7 +336,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                                 onClick={handleCopyAccount}
                                 className="flex items-center gap-0.5 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
                                 style={{
-                                    background: copied ? 'rgba(0,212,49,0.15)' : 'rgba(0,0,0,0.04)',
+                                    background: copied ? 'rgba(0, 184, 46,0.15)' : 'rgba(0,0,0,0.04)',
                                     color: copied ? 'var(--primary)' : 'var(--neu-text-secondary)',
                                 }}
                             >
@@ -353,7 +353,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
     return (
         <>
         <article
-            className="bg-white dark:bg-[#121b14] border-b border-black/5 dark:border-white/5 px-4 py-3.5 mx-auto w-full select-none max-w-none rounded-none flex flex-col gap-0"
+            className="bg-white dark:bg-[#1D2433] border-b border-black/5 dark:border-white/5 px-4 py-3.5 mx-auto w-full select-none max-w-none rounded-none flex flex-col gap-0"
             {...articleGestureProps}
         >
             {/* Top Header Row */}

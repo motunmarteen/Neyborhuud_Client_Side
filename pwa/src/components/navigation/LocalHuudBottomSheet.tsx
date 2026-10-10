@@ -52,7 +52,7 @@ export function LocalHuudBottomSheet({ open, onClose }: LocalHuudBottomSheetProp
                   className="flex min-h-[4.5rem] flex-col items-center justify-center gap-1.5 rounded-2xl border border-primary/20 bg-primary/[0.06] dark:bg-white/[0.04] px-2 py-2.5 text-center no-underline transition-colors hover:border-primary/40 hover:bg-primary/10 active:scale-[0.98]"
                 >
                   <ItemIcon className="w-6 h-6 text-primary" aria-hidden="true" />
-                  <span className="text-[11px] font-bold leading-tight tracking-tight text-[#1A1A1A] dark:text-white">
+                  <span className="text-[11px] font-bold leading-tight tracking-tight text-[#1D2433] dark:text-white">
                     {item.label}
                   </span>
                 </Link>

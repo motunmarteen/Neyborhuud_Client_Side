@@ -49,9 +49,9 @@ export function AuthSheetStageHeader({
   return (
     <>
       <div className="mb-3.5 flex items-center gap-3">
-        <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-[#00D431] text-black shadow-lg shadow-[#00D431]/25">
+        <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-[#00B82E] text-black shadow-lg shadow-[#00B82E]/25">
           {badge ? (
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-[#00D431] border border-black/10 shadow-sm">
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-[#00B82E] border border-black/10 shadow-sm">
               {badge}
             </span>
           ) : null}
@@ -59,19 +59,19 @@ export function AuthSheetStageHeader({
         </div>
         <div className="min-w-0 flex-1">
           <div className="mb-0.5 flex items-center gap-2">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#00D431]">{eyebrow}</p>
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#00B82E]">{eyebrow}</p>
             {signal ? (
               <>
-                <span className="h-1 w-1 rounded-full bg-[#1A56FF]" aria-hidden />
-                <p className="truncate text-[10px] font-bold uppercase tracking-wider text-[#1A56FF]">
+                <span className="h-1 w-1 rounded-full bg-[#3B82C4]" aria-hidden />
+                <p className="truncate text-[10px] font-bold uppercase tracking-wider text-[#3B82C4]">
                   {signal}
                 </p>
               </>
             ) : null}
           </div>
-          <h2 className="truncate text-[1.35rem] font-black tracking-tight text-[#111814]">{title}</h2>
+          <h2 className="truncate text-[1.35rem] font-black tracking-tight text-[#1D2433]">{title}</h2>
           {meta ? (
-            <p className="truncate text-xs font-medium text-[#4B5E52]">{meta}</p>
+            <p className="truncate text-xs font-medium text-[#5B6478]">{meta}</p>
           ) : null}
         </div>
       </div>

@@ -11,15 +11,15 @@ import { useRedZoneAlerts } from '@/contexts/RedZoneAlertsContext';
 
 const SEVERITY_STYLE: Record<string, { bg: string; border: string; shadow: string; text: string }> = {
   critical: {
-    bg: 'linear-gradient(135deg, rgba(255,0,0,0.08), rgba(255,255,255,0.9))',
-    border: 'rgba(255,0,0,0.18)',
-    shadow: '0 4px 16px rgba(255,0,0,0.08)',
+    bg: 'linear-gradient(135deg, rgba(229, 72, 77,0.08), rgba(255,255,255,0.9))',
+    border: 'rgba(229, 72, 77,0.18)',
+    shadow: '0 4px 16px rgba(229, 72, 77,0.08)',
     text: 'text-brand-red',
   },
   high: {
-    bg: 'linear-gradient(135deg, rgba(255,0,0,0.06), rgba(255,255,255,0.9))',
-    border: 'rgba(255,0,0,0.16)',
-    shadow: '0 4px 16px rgba(255,0,0,0.06)',
+    bg: 'linear-gradient(135deg, rgba(229, 72, 77,0.06), rgba(255,255,255,0.9))',
+    border: 'rgba(229, 72, 77,0.16)',
+    shadow: '0 4px 16px rgba(229, 72, 77,0.06)',
     text: 'text-brand-red',
   },
   warning: {
@@ -48,7 +48,7 @@ export function RedZoneBanner() {
         <div className="flex items-start gap-3">
           <div
             className={`rounded-xl size-10 shrink-0 flex items-center justify-center ${style.text}`}
-            style={{ background: 'rgba(255,0,0,0.1)' }}
+            style={{ background: 'rgba(229, 72, 77,0.1)' }}
           >
             <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: '"FILL" 1' }}>
               shield

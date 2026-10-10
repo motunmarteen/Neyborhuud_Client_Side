@@ -50,7 +50,7 @@ const DISCOVERY_HUBS = [
     badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200/80',
     description: 'Real-time power, transit slowdowns & street patrol signals.',
     icon: Radar,
-    iconColor: 'text-[#00C830]',
+    iconColor: 'text-[#00B82E]',
     bgColor: 'bg-emerald-50/70',
     borderColor: 'border-emerald-200/70',
     href: '/feed',
@@ -275,7 +275,7 @@ function ExplorePageInner() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search neighbors, artisans, radar, items..."
-                className="w-full h-11 pl-11 pr-11 bg-slate-100 rounded-full text-[14px] font-medium text-slate-900 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-[#00C830]/40 placeholder:text-slate-400 border border-black/[0.05]"
+                className="w-full h-11 pl-11 pr-11 bg-slate-100 rounded-full text-[14px] font-medium text-slate-900 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-[#00B82E]/40 placeholder:text-slate-400 border border-black/[0.05]"
               />
               {query && (
                 <button
@@ -329,7 +329,7 @@ function ExplorePageInner() {
           <div className="mx-auto max-w-2xl px-4 py-4 space-y-4">
             {searchLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <Loader2 size={24} className="animate-spin text-[#00C830]" />
+                <Loader2 size={24} className="animate-spin text-[#00B82E]" />
                 <span className="text-xs font-bold text-slate-500">Scanning neighborhood records...</span>
               </div>
             ) : searchError ? (
@@ -389,7 +389,7 @@ function ExplorePageInner() {
             <div className="rounded-3xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-teal-50/60 to-white p-4 sm:p-5 shadow-xs">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#00C830] text-white shadow-xs">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#00B82E] text-white shadow-xs">
                     <Sparkles size={20} />
                   </div>
                   <div>
@@ -408,13 +408,13 @@ function ExplorePageInner() {
                   onClick={() => setIsWhoIsInMyHuudOpen(true)}
                   className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-800 shadow-2xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
                 >
-                  <Users size={14} className="text-[#00C830]" />
+                  <Users size={14} className="text-[#00B82E]" />
                   Who is in my Huud?
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsAskSentinelOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[#00C830] px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-[#00B52B] active:scale-95 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#00B82E] px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-[#00B82E] active:scale-95 transition-all cursor-pointer"
                 >
                   <Sparkles size={14} />
                   Ask Sentinel AI
@@ -471,7 +471,7 @@ function ExplorePageInner() {
             {trendingTopics.length > 0 && (
               <section className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-2xs">
                 <div className="flex items-center gap-2 mb-2.5">
-                  <TrendingUp size={16} className="text-[#00C830]" />
+                  <TrendingUp size={16} className="text-[#00B82E]" />
                   <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Trending in your Huud</h3>
                 </div>
                 <div className="flex flex-wrap gap-1.5">

@@ -156,8 +156,8 @@ export const OTPInput: React.FC<OTPInputProps> = ({
                         ${error 
                             ? 'border-red-500 text-red-600 bg-red-50' 
                             : localValues[index]
-                                ? 'border-[#00D431] bg-[#00D431]/5 text-[#111814]'
-                                : 'border-black/15 focus:border-[#00D431] focus:bg-[#00D431]/5 bg-white text-[#111814]'
+                                ? 'border-[#00B82E] bg-[#00B82E]/5 text-[#1D2433]'
+                                : 'border-black/15 focus:border-[#00B82E] focus:bg-[#00B82E]/5 bg-white text-[#1D2433]'
                         }
                     `}
                 />

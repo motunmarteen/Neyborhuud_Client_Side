@@ -90,19 +90,19 @@ function NotificationsPageInner() {
   const totalUnread = rawNotifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="min-h-screen bg-[#F6F8F6] text-[#111827] flex flex-col select-none">
+    <div className="min-h-screen bg-[#F6F8F6] text-[#1D2433] flex flex-col select-none">
       {/* 1. TOP HEADER */}
       <header className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-white/95 backdrop-blur-md border-b border-black/[0.08]">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => router.back()}
-            className="p-1.5 rounded-xl hover:bg-black/[0.04] transition-colors text-[#4B5563] hover:text-[#111827]"
+            className="p-1.5 rounded-xl hover:bg-black/[0.04] transition-colors text-[#5B6478] hover:text-[#1D2433]"
             aria-label="Back"
           >
             <ChevronLeft size={20} />
           </button>
-          <h1 className="text-xs sm:text-[13px] font-black tracking-tight text-[#111827]">Notifications</h1>
+          <h1 className="text-xs sm:text-[13px] font-black tracking-tight text-[#1D2433]">Notifications</h1>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -132,13 +132,13 @@ function NotificationsPageInner() {
                 onClick={() => setCategory(tab.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95 ${
                   active
-                    ? 'bg-emerald-50 text-[#008A20] border border-emerald-200/60 shadow-xs'
-                    : 'bg-white text-[#4B5563] hover:text-[#111827] hover:bg-black/[0.04] border border-black/[0.08]'
+                    ? 'bg-emerald-50 text-[#0E8A3E] border border-emerald-200/60 shadow-xs'
+                    : 'bg-white text-[#5B6478] hover:text-[#1D2433] hover:bg-black/[0.04] border border-black/[0.08]'
                 }`}
               >
                 <span>{tab.label}</span>
                 {tab.badge > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-[#008A20] text-white text-[9px] font-black">
+                  <span className="px-1.5 py-0.5 rounded-md bg-[#0E8A3E] text-white text-[9px] font-black">
                     {tab.badge}
                   </span>
                 )}
@@ -153,15 +153,15 @@ function NotificationsPageInner() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-            <span className="text-xs text-[#6B7280]">Loading notifications…</span>
+            <span className="text-xs text-[#5B6478]">Loading notifications…</span>
           </div>
         ) : displayNotifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-4 text-center rounded-2xl bg-white border border-black/[0.08] shadow-xs">
-            <div className="w-12 h-12 rounded-xl bg-black/[0.03] border border-black/[0.06] flex items-center justify-center mb-3 text-[#9CA3AF]">
+            <div className="w-12 h-12 rounded-xl bg-black/[0.03] border border-black/[0.06] flex items-center justify-center mb-3 text-[#9AA3B1]">
               <Inbox size={22} />
             </div>
-            <h3 className="text-xs sm:text-[13px] font-black text-[#111827]">All caught up</h3>
-            <p className="text-xs text-[#6B7280] max-w-xs mt-1">
+            <h3 className="text-xs sm:text-[13px] font-black text-[#1D2433]">All caught up</h3>
+            <p className="text-xs text-[#5B6478] max-w-xs mt-1">
               {showUnreadOnly
                 ? 'You have no unread notifications right now.'
                 : 'New alerts and trade messages will appear here.'}
@@ -186,7 +186,7 @@ function NotificationsPageInner() {
                 }`}
               >
                 {/* Header row: timestamp + unread indicator */}
-                <div className="flex items-center justify-between text-[10px] text-[#9CA3AF] pb-2">
+                <div className="flex items-center justify-between text-[10px] text-[#9AA3B1] pb-2">
                   <div className="flex items-center gap-1.5 font-medium">
                     <span>
                       {new Date(n.createdAt).toLocaleDateString('en-US', {
@@ -199,7 +199,7 @@ function NotificationsPageInner() {
                       })}
                     </span>
                     {isUnread && (
-                      <span className="w-2 h-2 rounded-full bg-[#008A20]" />
+                      <span className="w-2 h-2 rounded-full bg-[#0E8A3E]" />
                     )}
                   </div>
 
@@ -221,17 +221,17 @@ function NotificationsPageInner() {
                         isSafety
                           ? 'bg-red-50 text-red-700 border border-red-200/60'
                           : isUnread
-                            ? 'bg-emerald-50 text-[#008A20] border border-emerald-200/60'
-                            : 'bg-black/[0.04] text-[#4B5563] border border-black/[0.06]'
+                            ? 'bg-emerald-50 text-[#0E8A3E] border border-emerald-200/60'
+                            : 'bg-black/[0.04] text-[#5B6478] border border-black/[0.06]'
                       }`}
                     >
                       {isSafety ? 'ALERT' : isUnread ? 'NEW' : 'INFO'}
                     </span>
-                    <h4 className="text-xs sm:text-[13px] font-black text-[#111827] tracking-tight">{n.title}</h4>
+                    <h4 className="text-xs sm:text-[13px] font-black text-[#1D2433] tracking-tight">{n.title}</h4>
                   </div>
 
                   {n.message && (
-                    <p className="text-xs text-[#4B5563] leading-relaxed font-medium">
+                    <p className="text-xs text-[#5B6478] leading-relaxed font-medium">
                       {n.message}
                     </p>
                   )}
@@ -246,7 +246,7 @@ function NotificationsPageInner() {
                         if (isUnread && id) markRead.mutate(id);
                         router.push(n.actionUrl!);
                       }}
-                      className="px-3.5 py-1.5 rounded-xl bg-black/[0.04] hover:bg-[#00D431] hover:text-black text-[#111827] font-extrabold text-xs transition-all border border-black/[0.08] active:scale-95"
+                      className="px-3.5 py-1.5 rounded-xl bg-black/[0.04] hover:bg-[#00B82E] hover:text-black text-[#1D2433] font-extrabold text-xs transition-all border border-black/[0.08] active:scale-95"
                     >
                       View Details
                     </button>
@@ -267,7 +267,7 @@ function NotificationsPageInner() {
               type="button"
               onClick={() => setShowUnreadOnly(!showUnreadOnly)}
               className={`w-9 h-5 rounded-full transition-colors relative ${
-                showUnreadOnly ? 'bg-[#008A20]' : 'bg-black/20'
+                showUnreadOnly ? 'bg-[#0E8A3E]' : 'bg-black/20'
               }`}
               aria-label="Toggle show unread only"
             >
@@ -277,7 +277,7 @@ function NotificationsPageInner() {
                 }`}
               />
             </button>
-            <span className="font-semibold text-[#4B5563]">Show unread</span>
+            <span className="font-semibold text-[#5B6478]">Show unread</span>
           </div>
 
           {/* Mark All Read */}
@@ -285,7 +285,7 @@ function NotificationsPageInner() {
             type="button"
             onClick={() => markAllRead.mutate()}
             disabled={markAllRead.isPending || totalUnread === 0}
-            className="flex items-center gap-1.5 text-xs font-bold text-[#008A20] hover:text-emerald-700 disabled:opacity-40 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-bold text-[#0E8A3E] hover:text-emerald-700 disabled:opacity-40 transition-colors"
           >
             <Check size={14} className="stroke-[3]" />
             <span>Mark all as read</span>

@@ -41,7 +41,7 @@ const ACCENT_PALETTE = [
 ];
 
 const GIST_ACCENTS: Record<string, { color: string; text: string; bgSoft: string }> = {
-  all: { color: 'bg-[#00D431]', text: 'text-[#00D431]', bgSoft: 'bg-[#00D431]/10' },
+  all: { color: 'bg-[#00B82E]', text: 'text-[#00B82E]', bgSoft: 'bg-[#00B82E]/10' },
   local_gist: { color: 'bg-blue-600', text: 'text-blue-600', bgSoft: 'bg-blue-50' },
   community_question: { color: 'bg-purple-600', text: 'text-purple-600', bgSoft: 'bg-purple-50' },
   business_inquiry: { color: 'bg-emerald-600', text: 'text-emerald-600', bgSoft: 'bg-emerald-50' },

@@ -19,7 +19,7 @@ export const OSM_MAP_STYLE: StyleSpecification = {
 export const GEOFENCE_COLORS = {
     safe_zone: { stroke: GREEN_ROLE.forest, fill: GREEN_ROLE.deep },
     alert_zone: { stroke: GREEN_ROLE.brand, fill: GREEN_ROLE.brand },
-    restricted_zone: { stroke: '#FF0000', fill: '#FF0000' },
+    restricted_zone: { stroke: '#E5484D', fill: '#E5484D' },
 } as const;
 
 export type GeofenceColorKey = keyof typeof GEOFENCE_COLORS;

@@ -326,9 +326,9 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
             <div class="relative flex items-center justify-center" style="width: 40px; height: 40px;">
               <style>
                 @keyframes mapPulse {
-                  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 212, 49, 0.7); }
-                  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 212, 49, 0); }
-                  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 212, 49, 0); }
+                  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 46, 0.7); }
+                  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 184, 46, 0); }
+                  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 46, 0); }
                 }
                 .user-map-marker {
                   animation: mapPulse 2s infinite;
@@ -484,7 +484,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
             onClick={() => { setLayer('people'); setSelectedItem(null); }}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
               layer === 'people'
-                ? 'bg-[#00C830] text-white shadow-sm shadow-[#00C830]/20'
+                ? 'bg-[#00B82E] text-white shadow-sm shadow-[#00B82E]/20'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -498,7 +498,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
             onClick={() => { setLayer('places'); setSelectedItem(null); }}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
               layer === 'places'
-                ? 'bg-[#00C830] text-white shadow-sm shadow-[#00C830]/20'
+                ? 'bg-[#00B82E] text-white shadow-sm shadow-[#00B82E]/20'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -524,7 +524,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
       {/* ─── ELI5 Explanation Card Banner ─── */}
       {showEli5 && (
         <div className="absolute top-18 left-4 right-4 z-20 bg-emerald-50 dark:bg-emerald-950/90 border border-emerald-200/80 dark:border-emerald-800/60 rounded-3xl p-4 shadow-xl backdrop-blur-md text-xs text-emerald-950 dark:text-emerald-100 flex items-start gap-3">
-          <Info size={18} className="text-[#00C830] shrink-0 mt-0.5" />
+          <Info size={18} className="text-[#00B82E] shrink-0 mt-0.5" />
           <div className="flex-1 space-y-1">
             <p className="font-extrabold text-emerald-900 dark:text-emerald-200 text-sm">
               Vector Discovery Radar

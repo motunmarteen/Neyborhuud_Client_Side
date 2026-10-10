@@ -174,7 +174,7 @@ function EventCommentItem({
           {avatar ? (
             <Image src={avatar} alt={username} width={40} height={40} className="h-full w-full object-cover" />
           ) : (
-            <span className="text-[15px] font-bold text-[#65676B] dark:text-[#B0B3B8]">
+            <span className="text-[15px] font-bold text-[#5B6478] dark:text-[#9AA3B1]">
               {username[0]?.toUpperCase()}
             </span>
           )}
@@ -189,7 +189,7 @@ function EventCommentItem({
             <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 dark:bg-white/[0.06]">
               <Link
                 href={`/profile/${username}`}
-                className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] hover:underline dark:text-[#E4E6EB]"
+                className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] hover:underline dark:text-[#DDE3EC]"
               >
                 {displayName}
               </Link>
@@ -199,8 +199,8 @@ function EventCommentItem({
                   Organizer
                 </span>
               )}
-              <span className="text-[12px] font-normal text-[#65676B] dark:text-[#B0B3B8]">@{username}</span>
-              <span className="ml-1.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#E4E6EB]">
+              <span className="text-[12px] font-normal text-[#5B6478] dark:text-[#9AA3B1]">@{username}</span>
+              <span className="ml-1.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#DDE3EC]">
                 {comment.body}
               </span>
             </div>
@@ -226,8 +226,8 @@ function EventCommentItem({
             )}
 
             {/* Micro action row */}
-            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#65676B] dark:text-[#B0B3B8]">
-              <button type="button" className="transition-colors hover:text-[#050505] dark:hover:text-[#E4E6EB]">
+            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#5B6478] dark:text-[#9AA3B1]">
+              <button type="button" className="transition-colors hover:text-[#050505] dark:hover:text-[#DDE3EC]">
                 Like
               </button>
               <span className="font-normal">{formatTimeAgo(comment.createdAt)}</span>
@@ -244,7 +244,7 @@ function EventCommentItem({
           </div>
 
           {/* Right-edge heart (Instagram style) */}
-          <div className="mt-1 flex flex-shrink-0 flex-col items-center gap-0.5 pr-0.5 text-[#65676B] dark:text-[#B0B3B8]">
+          <div className="mt-1 flex flex-shrink-0 flex-col items-center gap-0.5 pr-0.5 text-[#5B6478] dark:text-[#9AA3B1]">
             <span className="material-symbols-outlined text-[17px]">favorite</span>
             {likesCount > 0 && (
               <span className="text-[11px] font-semibold leading-none tabular-nums">{likesCount}</span>

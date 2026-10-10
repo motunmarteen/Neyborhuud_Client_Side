@@ -230,7 +230,7 @@ export default function PwaInstallPrompt() {
                                     <span className="pwa-install-step-num">{step.num}</span>
                                     <div className="min-w-0 flex-1 text-left">
                                         <div className="flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-[20px] text-[#00D431]">
+                                            <span className="material-symbols-outlined text-[20px] text-[#00B82E]">
                                                 {step.icon}
                                             </span>
                                             <p className="pwa-install-step-title text-sm font-bold">
@@ -251,7 +251,7 @@ export default function PwaInstallPrompt() {
                                     <span className="pwa-install-step-num">{step.num}</span>
                                     <div className="min-w-0 flex-1 text-left">
                                         <div className="flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-[20px] text-[#00D431]">
+                                            <span className="material-symbols-outlined text-[20px] text-[#00B82E]">
                                                 {step.icon}
                                             </span>
                                             <p className="pwa-install-step-title text-sm font-bold">
@@ -269,7 +269,7 @@ export default function PwaInstallPrompt() {
                         <ul className="mb-5 space-y-2.5">
                             {ANDROID_BENEFITS.map((line) => (
                                 <li key={line} className="pwa-install-benefit">
-                                    <span className="material-symbols-outlined text-[18px] text-[#00D431]">
+                                    <span className="material-symbols-outlined text-[18px] text-[#00B82E]">
                                         check_circle
                                     </span>
                                     {line}

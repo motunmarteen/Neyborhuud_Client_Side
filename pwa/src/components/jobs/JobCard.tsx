@@ -131,7 +131,7 @@ export default function JobCard({ job, onApply, onSave }: JobCardProps) {
             <span
               className="material-symbols-outlined text-[17px]"
               style={{
-                color: (job as any).isSaved ? "#00D431" : "white",
+                color: (job as any).isSaved ? "#00B82E" : "white",
                 filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.8))",
               }}
             >
@@ -156,7 +156,7 @@ export default function JobCard({ job, onApply, onSave }: JobCardProps) {
 
           {/* Salary highlight */}
           {salary && (
-            <p className="text-[12px] font-black text-primary drop-shadow-[0_0_8px_rgba(0,212,49,0.3)]">
+            <p className="text-[12px] font-black text-primary drop-shadow-[0_0_8px_rgba(0, 184, 46,0.3)]">
               {salary}
             </p>
           )}

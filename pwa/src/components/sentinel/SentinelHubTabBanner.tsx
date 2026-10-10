@@ -13,7 +13,7 @@ export function SentinelHubTabBanner({ tab, count }: SentinelHubTabBannerProps) 
 
   return (
     <div className="relative overflow-hidden rounded-2xl mod-card p-4">
-      <div className="pointer-events-none absolute inset-0 bg-[#00D431]/5" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-[#00B82E]/5" aria-hidden />
       <div className="relative flex items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">{meta.title}</p>

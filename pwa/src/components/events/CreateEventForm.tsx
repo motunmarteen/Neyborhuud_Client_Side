@@ -119,7 +119,7 @@ export default function CreateEventForm() {
             <Image src={coverPreview} fill unoptimized sizes="100vw" className="object-cover" alt="Cover preview" />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-brand-green-dark/70 dark:text-white/55">
-              <span className="material-symbols-outlined text-4xl text-[#006F35]/60 dark:text-primary/70">add_photo_alternate</span>
+              <span className="material-symbols-outlined text-4xl text-[#0E8A3E]/60 dark:text-primary/70">add_photo_alternate</span>
               <span className="text-sm font-medium">Upload cover image (max 10MB)</span>
             </div>
           )}
@@ -127,7 +127,7 @@ export default function CreateEventForm() {
         <input ref={fileRef} type="file" accept="image/*" aria-label="Upload cover image" className="hidden" onChange={handleCoverChange} />
         {isUploading && (
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-light)] dark:bg-white/10">
-            <div className="h-full bg-gradient-to-r from-primary to-[#006F35] transition-all" style={{ width: `${uploadProgress}%` }} />
+            <div className="h-full bg-gradient-to-r from-primary to-[#0E8A3E] transition-all" style={{ width: `${uploadProgress}%` }} />
           </div>
         )}
       </div>
@@ -225,7 +225,7 @@ export default function CreateEventForm() {
             aria-checked={isFree ? "true" : "false"}
             aria-label="Free event"
             onClick={() => setIsFree((v) => !v)}
-            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${isFree ? "bg-gradient-to-r from-primary to-[#006F35]" : "bg-[#3D5A3E]/25 dark:bg-white/15"}`}
+            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${isFree ? "bg-gradient-to-r from-primary to-[#0E8A3E]" : "bg-[#5B6478]/25 dark:bg-white/15"}`}
           >
             <span
               className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${isFree ? "translate-x-[1.375rem]" : "translate-x-0"}`}
@@ -302,7 +302,7 @@ export default function CreateEventForm() {
       <button
         type="submit"
         disabled={createEvent.isPending}
-        className="min-h-[52px] w-full rounded-full bg-gradient-to-r from-primary to-[#006F35] py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,212,49,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none dark:from-emerald-500 dark:to-teal-600"
+        className="min-h-[52px] w-full rounded-full bg-gradient-to-r from-primary to-[#0E8A3E] py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0, 184, 46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none dark:from-emerald-500 dark:to-teal-600"
       >
         {createEvent.isPending ? "Creating…" : "Create event"}
       </button>

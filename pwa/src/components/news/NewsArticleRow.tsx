@@ -38,7 +38,7 @@ export function NewsArticleRow({ article }: NewsArticleRowProps) {
           />
         </div>
       ) : (
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 text-[#00C830]">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 text-[#00B82E]">
           <Newspaper size={24} />
         </div>
       )}
@@ -55,7 +55,7 @@ export function NewsArticleRow({ article }: NewsArticleRowProps) {
           ) : null}
         </div>
 
-        <p className="line-clamp-2 text-sm font-extrabold leading-snug text-slate-900 dark:text-white group-hover:text-[#00C830] transition-colors">
+        <p className="line-clamp-2 text-sm font-extrabold leading-snug text-slate-900 dark:text-white group-hover:text-[#00B82E] transition-colors">
           {article.title}
         </p>
 
@@ -66,7 +66,7 @@ export function NewsArticleRow({ article }: NewsArticleRowProps) {
         ) : null}
       </div>
 
-      <div className="shrink-0 p-1 rounded-lg text-slate-400 group-hover:text-[#00C830] transition-colors">
+      <div className="shrink-0 p-1 rounded-lg text-slate-400 group-hover:text-[#00B82E] transition-colors">
         <ExternalLink size={16} />
       </div>
     </a>

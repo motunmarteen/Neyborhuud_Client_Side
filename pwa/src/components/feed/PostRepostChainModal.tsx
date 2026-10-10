@@ -127,12 +127,12 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
                                     <div key={item.postId} className="relative group select-none animate-fadeIn">
                                         {/* Connector Circle / Node */}
                                         <div className={`absolute -left-[31px] top-1.5 w-[18px] h-[18px] rounded-full border-2 bg-white dark:bg-brand-black flex items-center justify-center transition-all ${
-                                            isOrigin ? 'border-[#00c431] shadow-[0_0_8px_rgba(0,196,49,0.4)]' :
+                                            isOrigin ? 'border-[#00B82E] shadow-[0_0_8px_rgba(0,196,49,0.4)]' :
                                             isLast ? 'border-primary ring-4 ring-primary/10' :
                                             'border-primary/45'
                                         }`}>
                                             <div className={`w-2 h-2 rounded-full ${
-                                                isOrigin ? 'bg-[#00c431]' :
+                                                isOrigin ? 'bg-[#00B82E]' :
                                                 isLast ? 'bg-primary' :
                                                 'bg-primary/50'
                                             }`} />
@@ -156,7 +156,7 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
                                                             unoptimized
                                                         />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-[10px] font-black" style={{ background: 'linear-gradient(135deg, #00c431, #009924)', color: 'white' }}>
+                                                        <div className="w-full h-full flex items-center justify-center text-[10px] font-black" style={{ background: 'linear-gradient(135deg, #00B82E, #009924)', color: 'white' }}>
                                                             {username.slice(0, 2).toUpperCase()}
                                                         </div>
                                                     )}
@@ -173,7 +173,7 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
                                                             <span className="text-[10px] text-primary font-bold">@{username}</span>
                                                         </Link>
                                                         {isOrigin && (
-                                                            <span className="text-[8.5px] px-1.5 py-0.5 rounded-full bg-[#00c431]/15 text-[#00c431] font-black uppercase tracking-wider scale-90">Originator</span>
+                                                            <span className="text-[8.5px] px-1.5 py-0.5 rounded-full bg-[#00B82E]/15 text-[#00B82E] font-black uppercase tracking-wider scale-90">Originator</span>
                                                         )}
                                                         {isLast && !isOrigin && (
                                                             <span className="text-[8.5px] px-1.5 py-0.5 rounded-full bg-primary/20 text-brand-green-dark dark:text-primary font-black uppercase tracking-wider scale-90">Current</span>

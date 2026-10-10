@@ -21,7 +21,7 @@ export function IncomingCallModal() {
         {/* Pulsing Avatar Ring */}
         <div className="relative mb-6">
           <div className="absolute inset-0 rounded-full bg-emerald-500/25 animate-ping" />
-          <div className="relative h-28 w-28 rounded-full overflow-hidden border-4 border-[#00C830]/50 shadow-2xl bg-slate-900 flex items-center justify-center">
+          <div className="relative h-28 w-28 rounded-full overflow-hidden border-4 border-[#00B82E]/50 shadow-2xl bg-slate-900 flex items-center justify-center">
             {caller.avatar ? (
               <Image
                 src={caller.avatar}
@@ -30,7 +30,7 @@ export function IncomingCallModal() {
                 className="object-cover"
               />
             ) : (
-              <span className="text-4xl font-black text-[#00D431]">
+              <span className="text-4xl font-black text-[#00B82E]">
                 {caller.name.charAt(0).toUpperCase()}
               </span>
             )}
@@ -44,7 +44,7 @@ export function IncomingCallModal() {
 
         {/* Hyperlocal Trust Badge */}
         <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/15 text-xs font-semibold text-emerald-300 mb-3 shadow-xs">
-          <ShieldCheck size={14} className="text-[#00D431] shrink-0" />
+          <ShieldCheck size={14} className="text-[#00B82E] shrink-0" />
           <span>Verified Resident • 📍 {caller.huud || 'Your Huud'}</span>
           {caller.trustScore ? (
             <span className="text-slate-300 font-bold">({caller.trustScore} Trust)</span>
@@ -81,10 +81,10 @@ export function IncomingCallModal() {
             className="flex flex-col items-center gap-2 group cursor-pointer focus:outline-none"
             aria-label="Answer Call"
           >
-            <div className="h-16 w-16 rounded-full bg-[#00C830] hover:bg-[#00B02A] active:scale-90 text-white flex items-center justify-center shadow-lg shadow-emerald-950/50 animate-bounce transition-all">
+            <div className="h-16 w-16 rounded-full bg-[#00B82E] hover:bg-[#00B02A] active:scale-90 text-white flex items-center justify-center shadow-lg shadow-emerald-950/50 animate-bounce transition-all">
               {isVideo ? <Video size={28} strokeWidth={2.4} /> : <Phone size={28} strokeWidth={2.4} />}
             </div>
-            <span className="text-xs font-bold text-[#00D431] group-hover:text-emerald-300 uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#00B82E] group-hover:text-emerald-300 uppercase tracking-wider">
               Answer
             </span>
           </button>

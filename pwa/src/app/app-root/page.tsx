@@ -194,7 +194,7 @@ export default function AppRootPage() {
               letterSpacing: "-0.03em"
             }}
           >
-            Neybor<span style={{ color: "#00d431" }}>Huud</span>
+            Neybor<span style={{ color: "#00B82E" }}>Huud</span>
           </span>
         </div>
       </div>

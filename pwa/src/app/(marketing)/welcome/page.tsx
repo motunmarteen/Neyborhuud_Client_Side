@@ -25,7 +25,7 @@ const FEATURE_CARDS = [
     description: 'Instant live updates on power, road blockages, and community safety within walking distance.',
     eli5: 'A magical sensor showing what is happening on your street right now up to 500 meters away.',
     gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent',
-    accentColor: '#00D431',
+    accentColor: '#00B82E',
   },
   {
     id: 'marketplace',
@@ -35,7 +35,7 @@ const FEATURE_CARDS = [
     description: 'Trade solar inverters, electronics, and hire verified artisans face-to-face with zero platform fees.',
     eli5: 'We do not touch your money! You pay your neighbor directly face-to-face only after you see what you are buying.',
     gradient: 'from-blue-500/20 via-indigo-500/10 to-transparent',
-    accentColor: '#1A56FF',
+    accentColor: '#3B82C4',
   },
   {
     id: 'sentinel',
@@ -45,7 +45,7 @@ const FEATURE_CARDS = [
     description: 'Silent panic button with 5-second cancel, direct estate guard dispatch, and 500m resident fanout.',
     eli5: 'Your emergency red button! Press it if you are in danger to quietly call estate security for help.',
     gradient: 'from-rose-500/20 via-orange-500/10 to-transparent',
-    accentColor: '#FF3B30',
+    accentColor: '#E5484D',
   },
   {
     id: 'trustos',
@@ -55,7 +55,7 @@ const FEATURE_CARDS = [
     description: 'Verifiable physical building address via NIPOST NDAPS without exposing your private street number.',
     eli5: 'A secret 11-letter code for your building. It proves you live here without telling strangers your house number.',
     gradient: 'from-amber-500/20 via-yellow-500/10 to-transparent',
-    accentColor: '#F59E0B',
+    accentColor: '#F0A93B',
   },
 ];
 
@@ -64,24 +64,24 @@ export default function WelcomePage() {
   const activeFeature = FEATURE_CARDS[activeFeatureIndex];
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between bg-[#F4F7F5] dark:bg-[#0B0E11] text-[#111814] dark:text-white transition-colors duration-300 selection:bg-[#00D431]/20 overflow-x-hidden">
+    <div className="min-h-screen w-full flex flex-col justify-between bg-[#EEF2F7] dark:bg-[#0B0E11] text-[#1D2433] dark:text-white transition-colors duration-300 selection:bg-[#00B82E]/20 overflow-x-hidden">
       {/* Background Ambient Glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-[#00D431]/15 dark:bg-[#00D431]/10 rounded-full blur-[120px]" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-[#00B82E]/15 dark:bg-[#00B82E]/10 rounded-full blur-[120px]" />
         <div className="absolute top-1/2 -right-40 w-[400px] h-[400px] bg-blue-500/10 dark:bg-blue-600/5 rounded-full blur-[100px]" />
       </div>
 
       {/* Top Header Bar */}
       <header className="relative z-10 w-full max-w-lg mx-auto px-5 pt-6 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl bg-[#00D431] flex items-center justify-center shadow-lg shadow-[#00D431]/30">
+          <div className="w-10 h-10 rounded-2xl bg-[#00B82E] flex items-center justify-center shadow-lg shadow-[#00B82E]/30">
             <span className="font-extrabold text-black text-xl tracking-tighter">N</span>
           </div>
           <div>
-            <h1 className="text-base font-extrabold tracking-tight dark:text-white text-[#111814]">
-              Neybor<span className="text-[#00D431]">Huud</span>
+            <h1 className="text-base font-extrabold tracking-tight dark:text-white text-[#1D2433]">
+              Neybor<span className="text-[#00B82E]">Huud</span>
             </h1>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#4B5E52] dark:text-white/50">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6478] dark:text-white/50">
               Community Operating System
             </p>
           </div>
@@ -117,7 +117,7 @@ export default function WelcomePage() {
 
             {/* Live Status Chip on 3D Card */}
             <div className="absolute top-3.5 left-3.5 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15">
-              <span className="w-2 h-2 rounded-full bg-[#00D431] animate-bc-halo" />
+              <span className="w-2 h-2 rounded-full bg-[#00B82E] animate-bc-halo" />
               <span className="text-[11px] font-bold tracking-wide text-white">
                 Lagos Pilot Zones Live
               </span>
@@ -125,7 +125,7 @@ export default function WelcomePage() {
 
             {/* Bottom Caption Inside Image */}
             <div className="absolute bottom-4 left-4 right-4">
-              <div className="flex items-center gap-1.5 text-[#00D431] text-[11px] font-bold uppercase tracking-wider mb-1">
+              <div className="flex items-center gap-1.5 text-[#00B82E] text-[11px] font-bold uppercase tracking-wider mb-1">
                 <Sparkles size={12} strokeWidth={2.2} />
                 <span>Verified Neighborhood Defense</span>
               </div>
@@ -139,7 +139,7 @@ export default function WelcomePage() {
         {/* Feature Interactive Card Tabs */}
         <div className="w-full mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#4B5E52] dark:text-white/40">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5B6478] dark:text-white/40">
               Platform Pillars
             </span>
             <div className="flex gap-1.5">
@@ -149,7 +149,7 @@ export default function WelcomePage() {
                   onClick={() => setActiveFeatureIndex(idx)}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
                     idx === activeFeatureIndex
-                      ? 'w-6 bg-[#00D431]'
+                      ? 'w-6 bg-[#00B82E]'
                       : 'w-2 bg-black/15 dark:bg-white/20'
                   }`}
                   aria-label={`Slide to ${feat.title}`}
@@ -180,7 +180,7 @@ export default function WelcomePage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#4B5E52] dark:text-white/50">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#5B6478] dark:text-white/50">
                         {activeFeature.badge}
                       </span>
                       <Eli5Tooltip
@@ -188,14 +188,14 @@ export default function WelcomePage() {
                         explanation={activeFeature.eli5}
                       />
                     </div>
-                    <h3 className="text-sm font-bold text-[#111814] dark:text-white">
+                    <h3 className="text-sm font-bold text-[#1D2433] dark:text-white">
                       {activeFeature.title}
                     </h3>
                   </div>
                 </div>
               </div>
 
-              <p className="mt-2 text-xs leading-relaxed text-[#4B5E52] dark:text-white/70 relative z-10">
+              <p className="mt-2 text-xs leading-relaxed text-[#5B6478] dark:text-white/70 relative z-10">
                 {activeFeature.description}
               </p>
             </motion.div>
@@ -206,7 +206,7 @@ export default function WelcomePage() {
         <div className="flex flex-col gap-2.5 w-full">
           <Link
             href="/signup"
-            className="group w-full py-3.5 px-6 rounded-2xl bg-[#00D431] hover:bg-[#00FF3E] text-black font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#00D431]/25 transition-all duration-200 active:scale-[0.98]"
+            className="group w-full py-3.5 px-6 rounded-2xl bg-[#00B82E] hover:bg-[#00FF3E] text-black font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#00B82E]/25 transition-all duration-200 active:scale-[0.98]"
           >
             <span>Claim Your Resident ID</span>
             <ArrowRight size={16} strokeWidth={2.4} className="group-hover:translate-x-1 transition-transform" />
@@ -214,7 +214,7 @@ export default function WelcomePage() {
 
           <Link
             href="/explore"
-            className="w-full py-3 px-6 rounded-2xl border border-black/[0.08] dark:border-white/[0.12] bg-white/70 dark:bg-white/[0.05] backdrop-blur-md text-[#111814] dark:text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.1] transition-all active:scale-[0.98]"
+            className="w-full py-3 px-6 rounded-2xl border border-black/[0.08] dark:border-white/[0.12] bg-white/70 dark:bg-white/[0.05] backdrop-blur-md text-[#1D2433] dark:text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.1] transition-all active:scale-[0.98]"
           >
             <span>Explore Public Huud Radar</span>
           </Link>
@@ -222,13 +222,13 @@ export default function WelcomePage() {
       </main>
 
       {/* Footer Guarantees */}
-      <footer className="relative z-10 w-full max-w-lg mx-auto px-5 py-4 flex items-center justify-center gap-6 text-[11px] font-semibold text-[#4B5E52] dark:text-white/40">
+      <footer className="relative z-10 w-full max-w-lg mx-auto px-5 py-4 flex items-center justify-center gap-6 text-[11px] font-semibold text-[#5B6478] dark:text-white/40">
         <div className="flex items-center gap-1.5">
-          <CheckCircle2 size={13} strokeWidth={2} className="text-[#00D431]" />
+          <CheckCircle2 size={13} strokeWidth={2} className="text-[#00B82E]" />
           <span>₦0.00 Platform Fee</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Lock size={13} strokeWidth={2} className="text-[#00D431]" />
+          <Lock size={13} strokeWidth={2} className="text-[#00B82E]" />
           <span>AES-256 Encrypted GPS</span>
         </div>
       </footer>

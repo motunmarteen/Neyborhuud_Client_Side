@@ -127,11 +127,11 @@ export function NewsPanel() {
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between px-1 pb-2">
-        <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
-          <Newspaper size={13} className="text-[#008A20]" />
+        <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+          <Newspaper size={13} className="text-[#0E8A3E]" />
           <span>Today’s News</span>
         </div>
-        <Link href={`/local-news?tab=${region}`} className="text-[#008A20] text-[11px] font-bold hover:underline flex items-center gap-0.5">
+        <Link href={`/local-news?tab=${region}`} className="text-[#0E8A3E] text-[11px] font-bold hover:underline flex items-center gap-0.5">
           <span>See all</span>
           <ArrowRight size={11} />
         </Link>
@@ -143,8 +143,8 @@ export function NewsPanel() {
           onClick={() => setRegion('nigeria')}
           className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             region === 'nigeria'
-              ? 'bg-emerald-50 text-[#008A20] shadow-xs'
-              : 'text-[#6B7280] hover:bg-black/[0.04] hover:text-[#111827]'
+              ? 'bg-emerald-50 text-[#0E8A3E] shadow-xs'
+              : 'text-[#5B6478] hover:bg-black/[0.04] hover:text-[#1D2433]'
           }`}
         >
           Nigeria
@@ -153,8 +153,8 @@ export function NewsPanel() {
           onClick={() => setRegion('international')}
           className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             region === 'international'
-              ? 'bg-emerald-50 text-[#008A20] shadow-xs'
-              : 'text-[#6B7280] hover:bg-black/[0.04] hover:text-[#111827]'
+              ? 'bg-emerald-50 text-[#0E8A3E] shadow-xs'
+              : 'text-[#5B6478] hover:bg-black/[0.04] hover:text-[#1D2433]'
           }`}
         >
           World
@@ -163,9 +163,9 @@ export function NewsPanel() {
 
       {error || items.length === 0 ? (
         <div className="flex flex-col items-center py-6 px-4 text-center rounded-2xl bg-white border border-black/[0.08] shadow-xs">
-          <Newspaper size={24} className="text-[#9CA3AF] mb-2" />
-          <p className="text-xs font-semibold text-[#6B7280]">No headlines right now</p>
-          <Link href={`/local-news?tab=${region}`} className="text-xs font-bold text-[#008A20] hover:underline mt-1 inline-block">
+          <Newspaper size={24} className="text-[#9AA3B1] mb-2" />
+          <p className="text-xs font-semibold text-[#5B6478]">No headlines right now</p>
+          <Link href={`/local-news?tab=${region}`} className="text-xs font-bold text-[#0E8A3E] hover:underline mt-1 inline-block">
             Open Local News →
           </Link>
         </div>
@@ -177,13 +177,13 @@ export function NewsPanel() {
               href={item.link || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 rounded-2xl bg-white border border-black/[0.08] hover:border-[#008A20]/40 transition-all shadow-xs group block"
+              className="p-3 rounded-2xl bg-white border border-black/[0.08] hover:border-[#0E8A3E]/40 transition-all shadow-xs group block"
             >
-              <h4 className="text-xs font-bold text-[#111827] group-hover:text-[#008A20] transition-colors line-clamp-2 leading-snug">
+              <h4 className="text-xs font-bold text-[#1D2433] group-hover:text-[#0E8A3E] transition-colors line-clamp-2 leading-snug">
                 {item.title}
               </h4>
-              <p className="text-[10px] font-semibold text-[#9CA3AF] mt-1.5 flex items-center gap-1.5">
-                <span className="text-[#008A20] font-bold">{item.sourceName ?? item.source ?? 'News'}</span>
+              <p className="text-[10px] font-semibold text-[#9AA3B1] mt-1.5 flex items-center gap-1.5">
+                <span className="text-[#0E8A3E] font-bold">{item.sourceName ?? item.source ?? 'News'}</span>
                 <span>•</span>
                 <span>{item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' }) : 'Recent'}</span>
               </p>

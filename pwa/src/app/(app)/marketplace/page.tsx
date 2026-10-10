@@ -65,7 +65,7 @@ function MarketplacePageInner() {
     if (!el) return;
     const raf = requestAnimationFrame(() => {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
-      el.style.outline = "2px solid #006F35";
+      el.style.outline = "2px solid #0E8A3E";
       el.style.outlineOffset = "4px";
     });
     const clear = window.setTimeout(() => {

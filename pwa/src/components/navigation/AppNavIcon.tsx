@@ -86,12 +86,12 @@ export function SentinelIcon({ active, className, ...props }: React.SVGProps<SVG
       {/* Primary AI Star inside */}
       <path
         d="M12 8c0 2 1.5 3.5 3.5 3.5-2 0-3.5 1.5-3.5 3.5 0-2-1.5-3.5-3.5-3.5C10.5 11.5 12 10 12 8z"
-        fill={active ? "#1A221C" : "#00c431"}
+        fill={active ? "#1A221C" : "#00B82E"}
       />
       {/* Accent AI Star top right */}
       <path
         d="M16.5 5.5c0 .8.6 1.4 1.4 1.4-.8 0-1.4.6-1.4 1.4 0-.8-.6-1.4-1.4-1.4.8 0 1.4-.6 1.4-1.4z"
-        fill={active ? "#1A221C" : "#00c431"}
+        fill={active ? "#1A221C" : "#00B82E"}
       />
     </svg>
   );

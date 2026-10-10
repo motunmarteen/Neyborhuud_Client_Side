@@ -89,7 +89,7 @@ export default function RewardsPage() {
                 : 'text-white/50 hover:text-white/80'
             }`}
           >
-            <Crown size={14} className="text-[#00D431]" />
+            <Crown size={14} className="text-[#00B82E]" />
             <span>VIP</span>
           </button>
         </div>
@@ -103,7 +103,7 @@ export default function RewardsPage() {
           {/* Left: Level Status */}
           <div className="p-3.5 rounded-2xl bg-[#141A20] border border-primary/20 flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-primary/20 text-[#00D431] flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-xl bg-primary/20 text-[#00B82E] flex items-center justify-center font-bold">
                 <Award size={16} />
               </div>
               <span className="text-[10px] font-black uppercase tracking-wider text-white/40">Tier</span>
@@ -120,7 +120,7 @@ export default function RewardsPage() {
                 <span>13.6K XP to Silver I</span>
               </div>
               <div className="w-full h-1.5 rounded-full bg-black/40 overflow-hidden">
-                <div className="w-[45%] h-full rounded-full bg-[#00D431]" />
+                <div className="w-[45%] h-full rounded-full bg-[#00B82E]" />
               </div>
             </div>
           </div>
@@ -129,7 +129,7 @@ export default function RewardsPage() {
           <div className="p-3.5 rounded-2xl bg-[#141A20] border border-primary/20 flex flex-col justify-between">
             <div>
               <span className="text-xs text-white/60 block">Total Claimable</span>
-              <span className="text-lg font-black text-[#00D431] tracking-tight">
+              <span className="text-lg font-black text-[#00B82E] tracking-tight">
                 ₦{claimableAmount.toFixed(2)}
               </span>
             </div>
@@ -138,7 +138,7 @@ export default function RewardsPage() {
               type="button"
               onClick={handleClaimAll}
               disabled={claimableAmount === 0}
-              className="mt-3 w-full py-2.5 px-3 rounded-xl bg-[#00D431] hover:bg-[#00E536] disabled:opacity-40 text-black font-black text-xs flex items-center justify-center gap-1.5 transition-transform active:scale-95 shadow-md shadow-[#00D431]/20"
+              className="mt-3 w-full py-2.5 px-3 rounded-xl bg-[#00B82E] hover:bg-[#00E536] disabled:opacity-40 text-black font-black text-xs flex items-center justify-center gap-1.5 transition-transform active:scale-95 shadow-md shadow-[#00B82E]/20"
             >
               <Zap size={14} className="stroke-[3]" />
               <span>Claim All</span>
@@ -168,7 +168,7 @@ export default function RewardsPage() {
                   <p className="text-[11px] text-white/50">Post, help neighbors, collect earnings.</p>
                 </div>
               </div>
-              <span className="text-xs font-black text-[#00D431]">
+              <span className="text-xs font-black text-[#00B82E]">
                 {huudCoins} HC
               </span>
             </div>
@@ -176,7 +176,7 @@ export default function RewardsPage() {
             {/* Item 2 */}
             <div className="p-3.5 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-[#00D431] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-[#00B82E] flex items-center justify-center shrink-0">
                   <Zap size={18} />
                 </div>
                 <div>
@@ -213,7 +213,7 @@ export default function RewardsPage() {
                   <p className="text-[11px] text-white/50">Available upon reaching Silver I.</p>
                 </div>
               </div>
-              <span className="text-xs font-black text-[#00D431]">₦500.00</span>
+              <span className="text-xs font-black text-[#00B82E]">₦500.00</span>
             </div>
 
             {/* Daily Bonus */}
@@ -272,7 +272,7 @@ export default function RewardsPage() {
           <button
             type="submit"
             disabled={redeeming || !promoCode.trim()}
-            className="px-5 py-3 rounded-2xl bg-[#1C252E] hover:bg-[#00D431] hover:text-black disabled:opacity-40 text-white font-bold text-xs uppercase tracking-wider border border-white/10 transition-all active:scale-95"
+            className="px-5 py-3 rounded-2xl bg-[#1C252E] hover:bg-[#00B82E] hover:text-black disabled:opacity-40 text-white font-bold text-xs uppercase tracking-wider border border-white/10 transition-all active:scale-95"
           >
             {redeeming ? 'Redeeming…' : 'Redeem'}
           </button>

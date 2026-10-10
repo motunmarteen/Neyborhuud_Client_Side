@@ -87,7 +87,7 @@ export function FeedBcActionRibbon() {
         {/* Left Card: Sentinel Safety Radar */}
         <Link
           href="/safety"
-          className="group relative overflow-hidden rounded-2xl bg-white border border-black/[0.08] p-3.5 sm:p-4 transition-all hover:border-[#008A20]/40 hover:shadow-md active:scale-[0.98] flex flex-col justify-between min-h-[140px] shadow-xs"
+          className="group relative overflow-hidden rounded-2xl bg-white border border-black/[0.08] p-3.5 sm:p-4 transition-all hover:border-[#0E8A3E]/40 hover:shadow-md active:scale-[0.98] flex flex-col justify-between min-h-[140px] shadow-xs"
         >
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-black tracking-wide">
@@ -101,7 +101,7 @@ export function FeedBcActionRibbon() {
           </div>
 
           <div className="mt-2">
-            <h4 className="text-sm sm:text-base font-black text-[#111814] group-hover:text-[#008A20] transition-colors flex items-center gap-1.5">
+            <h4 className="text-sm sm:text-base font-black text-[#1D2433] group-hover:text-[#0E8A3E] transition-colors flex items-center gap-1.5">
               <span>Sentinel Radar</span>
               <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
             </h4>
@@ -110,7 +110,7 @@ export function FeedBcActionRibbon() {
             </p>
           </div>
 
-          <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[#008A20]">
+          <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[#0E8A3E]">
             <Users size={12} />
             <span>48 Verified Neighbors</span>
           </div>
@@ -133,7 +133,7 @@ export function FeedBcActionRibbon() {
           </div>
 
           <div className="mt-2">
-            <h4 className="text-sm sm:text-base font-black text-[#111814] group-hover:text-amber-700 transition-colors flex items-center gap-1.5">
+            <h4 className="text-sm sm:text-base font-black text-[#1D2433] group-hover:text-amber-700 transition-colors flex items-center gap-1.5">
               <span>Huud Market</span>
               <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
             </h4>
@@ -157,12 +157,12 @@ export function FeedBcActionRibbon() {
             <Link
               key={cat.label}
               href={cat.href}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-black/[0.08] hover:border-[#008A20] transition-all shrink-0 active:scale-95 group shadow-xs"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-black/[0.08] hover:border-[#0E8A3E] transition-all shrink-0 active:scale-95 group shadow-xs"
             >
               <div className={`p-1.5 rounded-lg ${cat.bg} ${cat.color} group-hover:scale-110 transition-transform`}>
                 <Icon size={14} strokeWidth={2.5} />
               </div>
-              <span className="text-xs font-bold text-[#111814] group-hover:text-[#008A20] transition-colors whitespace-nowrap">
+              <span className="text-xs font-bold text-[#1D2433] group-hover:text-[#0E8A3E] transition-colors whitespace-nowrap">
                 {cat.label}
               </span>
             </Link>
@@ -173,8 +173,8 @@ export function FeedBcActionRibbon() {
       {/* 3. LIVE NEIGHBORHOOD ACTIVITY / HEARTBEAT TICKER */}
       <div className="rounded-2xl bg-white border border-black/[0.08] p-3.5 shadow-xs">
         <div className="flex items-center justify-between pb-2 border-b border-black/[0.05]">
-          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
-            <span className="w-2 h-2 rounded-full bg-[#00D431] animate-pulse" />
+          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+            <span className="w-2 h-2 rounded-full bg-[#00B82E] animate-pulse" />
             <span>Live Huud Pulse</span>
           </div>
 
@@ -187,8 +187,8 @@ export function FeedBcActionRibbon() {
                 onClick={() => setPulseFilter(filter)}
                 className={`px-2.5 py-1 rounded-lg capitalize transition-all ${
                   pulseFilter === filter
-                    ? 'bg-emerald-50 text-[#008A20] font-bold shadow-xs'
-                    : 'text-[#6B7280] hover:text-[#111827]'
+                    ? 'bg-emerald-50 text-[#0E8A3E] font-bold shadow-xs'
+                    : 'text-[#5B6478] hover:text-[#1D2433]'
                 }`}
               >
                 {filter}
@@ -202,12 +202,12 @@ export function FeedBcActionRibbon() {
           {filteredPulses.map((pulse) => (
             <div key={pulse.id} className="flex items-center justify-between py-2 text-xs">
               <div className="flex items-center gap-2 min-w-0">
-                <CheckCircle2 size={13} className="text-[#008A20] shrink-0" />
-                <span className="font-black text-[#111827] truncate">{pulse.user}</span>
-                <span className="text-[#6B7280] truncate text-[11px] font-medium">{pulse.action}</span>
-                <span className="font-bold text-[#008A20] truncate text-[11px] hidden sm:inline">{pulse.target}</span>
+                <CheckCircle2 size={13} className="text-[#0E8A3E] shrink-0" />
+                <span className="font-black text-[#1D2433] truncate">{pulse.user}</span>
+                <span className="text-[#5B6478] truncate text-[11px] font-medium">{pulse.action}</span>
+                <span className="font-bold text-[#0E8A3E] truncate text-[11px] hidden sm:inline">{pulse.target}</span>
               </div>
-              <span className="text-[10px] font-medium text-[#9CA3AF] shrink-0 ml-2">
+              <span className="text-[10px] font-medium text-[#9AA3B1] shrink-0 ml-2">
                 {pulse.time}
               </span>
             </div>

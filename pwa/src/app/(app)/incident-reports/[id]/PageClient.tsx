@@ -61,23 +61,23 @@ function CommentItem({ comment, currentUserId, onDelete }: {
           <div className="min-w-0 flex-1">
             {/* Bubble (Facebook style) */}
             <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 dark:bg-white/[0.06]">
-              <span className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] dark:text-[#E4E6EB]">
+              <span className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] dark:text-[#DDE3EC]">
                 {authorName}
               </span>
               {/* Anonymous badge — incident-specific context */}
               {comment.isAnonymous && (
-                <span className="mr-1.5 inline-flex items-center gap-0.5 rounded-full bg-black/[0.06] px-1.5 py-px align-middle text-[10px] font-bold text-[#65676B] dark:bg-white/10 dark:text-[#B0B3B8]">
+                <span className="mr-1.5 inline-flex items-center gap-0.5 rounded-full bg-black/[0.06] px-1.5 py-px align-middle text-[10px] font-bold text-[#5B6478] dark:bg-white/10 dark:text-[#9AA3B1]">
                   <span className="material-symbols-outlined text-[12px]">shield_person</span>
                   Anonymous
                 </span>
               )}
-              <span className="ml-0.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#E4E6EB]">
+              <span className="ml-0.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#DDE3EC]">
                 {comment.body}
               </span>
             </div>
 
             {/* Micro action row */}
-            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#65676B] dark:text-[#B0B3B8]">
+            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#5B6478] dark:text-[#9AA3B1]">
               <span className="font-normal">{formatTimeAgo(comment.createdAt)}</span>
               {isOwner && (
                 <button

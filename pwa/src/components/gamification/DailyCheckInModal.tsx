@@ -88,7 +88,7 @@ export default function DailyCheckInModal() {
         className="mod-modal relative w-full max-w-sm overflow-hidden rounded-2xl p-6 text-center shadow-[0_28px_80px_rgba(15,23,42,0.22)]"
         style={{
           background: "var(--neu-bg, #ffffff)",
-          color: "var(--neu-text, #1A1A1A)",
+          color: "var(--neu-text, #1D2433)",
           border: "1px solid var(--neu-border, rgba(0,0,0,0.08))",
         }}
       >

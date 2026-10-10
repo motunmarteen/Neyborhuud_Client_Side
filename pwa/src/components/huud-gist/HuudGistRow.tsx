@@ -42,7 +42,7 @@ export function HuudGistRow({ post }: HuudGistRowProps) {
           ) : null}
         </div>
 
-        <p className="line-clamp-2 text-sm sm:text-[15px] font-extrabold leading-snug text-slate-900 dark:text-white group-hover:text-[#00C830] transition-colors">
+        <p className="line-clamp-2 text-sm sm:text-[15px] font-extrabold leading-snug text-slate-900 dark:text-white group-hover:text-[#00B82E] transition-colors">
           {post.title || post.body}
         </p>
 
@@ -63,7 +63,7 @@ export function HuudGistRow({ post }: HuudGistRowProps) {
         </div>
       </div>
 
-      <div className="mt-2 shrink-0 text-slate-400 group-hover:text-[#00C830] group-hover:translate-x-0.5 transition-all">
+      <div className="mt-2 shrink-0 text-slate-400 group-hover:text-[#00B82E] group-hover:translate-x-0.5 transition-all">
         <ChevronRight size={18} />
       </div>
     </Link>

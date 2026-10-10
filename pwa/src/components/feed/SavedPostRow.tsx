@@ -59,11 +59,11 @@ export function SavedPostRow({ post, onUnsave, isRemoving }: SavedPostRowProps) 
   return (
     <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white border border-black/[0.08] shadow-xs mb-2.5 transition-all hover:border-black/[0.14] hover:shadow-sm">
       <Link href="/feed" className="flex min-w-0 flex-1 items-start gap-3">
-        <div className="flex w-7 shrink-0 justify-center pt-0.5 text-[#008A20]">
-          <Bookmark size={18} className="fill-[#008A20] text-[#008A20]" />
+        <div className="flex w-7 shrink-0 justify-center pt-0.5 text-[#0E8A3E]">
+          <Bookmark size={18} className="fill-[#0E8A3E] text-[#0E8A3E]" />
         </div>
 
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black text-[#008A20] bg-emerald-50 border border-emerald-300/60">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black text-[#0E8A3E] bg-emerald-50 border border-emerald-300/60">
           {avatar ? (
             <Image src={avatar} alt="" width={36} height={36} className="h-full w-full object-cover" />
           ) : (
@@ -73,18 +73,18 @@ export function SavedPostRow({ post, onUnsave, isRemoving }: SavedPostRowProps) 
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <span className="truncate text-xs font-black text-[#111827]">
+            <span className="truncate text-xs font-black text-[#1D2433]">
               {authorName(post)}
             </span>
-            <span className="shrink-0 rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-[#008A20] border border-emerald-200/50">
+            <span className="shrink-0 rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-[#0E8A3E] border border-emerald-200/50">
               {typeLabel}
             </span>
             {timeLabel ? (
-              <span className="text-[10px] font-medium text-[#9CA3AF]">{timeLabel}</span>
+              <span className="text-[10px] font-medium text-[#9AA3B1]">{timeLabel}</span>
             ) : null}
           </div>
           {username ? (
-            <p className="truncate text-[11px] font-semibold text-[#6B7280]">@{username}</p>
+            <p className="truncate text-[11px] font-semibold text-[#5B6478]">@{username}</p>
           ) : null}
           <p className="mt-1 line-clamp-2 text-xs font-medium leading-relaxed text-[#1F2937]">
             {postPreview(post)}

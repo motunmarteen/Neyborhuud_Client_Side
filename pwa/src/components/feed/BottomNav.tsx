@@ -107,7 +107,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             <button
               type="button"
               onClick={() => setLocalHuudOpen(true)}
-              className="flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl text-[#4B5563] hover:text-[#111827] transition-all active:scale-95 group relative cursor-pointer"
+              className="flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl text-[#5B6478] hover:text-[#1D2433] transition-all active:scale-95 group relative cursor-pointer"
               aria-label="Community Menu"
             >
               <LayoutGrid size={19} className="transition-transform group-hover:scale-110" />
@@ -118,7 +118,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             <Link
               href="/map"
               className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative ${
-                isExplore ? 'text-[#008A20] font-bold' : 'text-[#4B5563] hover:text-[#111827]'
+                isExplore ? 'text-[#0E8A3E] font-bold' : 'text-[#5B6478] hover:text-[#1D2433]'
               }`}
               aria-label="Explore & Street Radar"
               aria-current={isExplore ? 'page' : undefined}
@@ -126,7 +126,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
               <Compass size={19} className="transition-transform group-hover:scale-110" />
               <span className="text-[10px] font-bold tracking-tight mt-0.5">Explore</span>
               {isExplore && (
-                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#008A20]" />
+                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#0E8A3E]" />
               )}
             </Link>
 
@@ -143,8 +143,8 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
                   sosActive
                     ? 'bg-red-600 text-white shadow-red-600/50 animate-pulse'
                     : isFeed
-                      ? 'bg-[#00D431] text-black shadow-[#00D431]/40'
-                      : 'bg-[#F0F4F1] text-black border border-black/10 hover:border-[#008A20]/40'
+                      ? 'bg-[#00B82E] text-black shadow-[#00B82E]/40'
+                      : 'bg-[#F0F4F1] text-black border border-black/10 hover:border-[#0E8A3E]/40'
                 }`}
                 aria-label="Home Feed (Long press for SOS)"
               >
@@ -159,7 +159,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
                     sosActive
                       ? 'bg-red-500'
                       : isFeed
-                        ? 'bg-[#00D431]'
+                        ? 'bg-[#00B82E]'
                         : 'bg-transparent'
                   }`}
                 />
@@ -171,7 +171,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
               type="button"
               onClick={() => openSentinelSheet()}
               className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative cursor-pointer ${
-                isSentinel ? 'text-[#008A20] font-bold' : 'text-[#4B5563] hover:text-[#111827]'
+                isSentinel ? 'text-[#0E8A3E] font-bold' : 'text-[#5B6478] hover:text-[#1D2433]'
               }`}
               aria-label="Sentinel Safety Toolkit"
               aria-current={isSentinel ? 'page' : undefined}
@@ -179,7 +179,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
               <Shield size={19} className="transition-transform group-hover:scale-110" />
               <span className="text-[10px] font-bold tracking-tight mt-0.5">Sentinel</span>
               {isSentinel && (
-                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#008A20]" />
+                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#0E8A3E]" />
               )}
             </button>
 
@@ -187,7 +187,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             <Link
               href="/friendship"
               className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative ${
-                isChat ? 'text-[#008A20] font-bold' : 'text-[#4B5563] hover:text-[#111827]'
+                isChat ? 'text-[#0E8A3E] font-bold' : 'text-[#5B6478] hover:text-[#1D2433]'
               }`}
               aria-label="Chat & Messages"
               aria-current={isChat ? 'page' : undefined}
@@ -202,7 +202,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
               </div>
               <span className="text-[10px] font-bold tracking-tight mt-0.5">Chat</span>
               {isChat && (
-                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#008A20]" />
+                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#0E8A3E]" />
               )}
             </Link>
 
@@ -211,7 +211,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
               type="button"
               onClick={() => setUserDrawerOpen(true)}
               className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative cursor-pointer ${
-                isProfile ? 'text-[#008A20] font-bold' : 'text-[#4B5563] hover:text-[#111827]'
+                isProfile ? 'text-[#0E8A3E] font-bold' : 'text-[#5B6478] hover:text-[#1D2433]'
               }`}
               aria-label="Resident Profile"
               aria-current={isProfile ? 'page' : undefined}
@@ -220,7 +220,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
                 <div
                   className={`w-5 h-5 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-black transition-all ${
                     isProfile
-                      ? 'ring-2 ring-[#008A20] bg-emerald-100 text-[#008A20]'
+                      ? 'ring-2 ring-[#0E8A3E] bg-emerald-100 text-[#0E8A3E]'
                       : 'ring-1 ring-black/15 bg-slate-100 text-slate-700'
                   }`}
                 >
@@ -241,7 +241,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
               </div>
               <span className="text-[10px] font-bold tracking-tight mt-0.5">Profile</span>
               {isProfile && (
-                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#008A20]" />
+                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#0E8A3E]" />
               )}
             </button>
           </div>

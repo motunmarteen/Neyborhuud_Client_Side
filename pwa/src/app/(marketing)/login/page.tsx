@@ -194,7 +194,7 @@ function LoginPageContent() {
             <button
               type="submit"
               disabled={!canLogin}
-              className="w-full py-3 px-5 rounded-xl bg-[#00D431] hover:bg-[#00FF3E] disabled:opacity-40 disabled:pointer-events-none text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer"
+              className="w-full py-3 px-5 rounded-xl bg-[#00B82E] hover:bg-[#00FF3E] disabled:opacity-40 disabled:pointer-events-none text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer"
             >
               {loading ? (
                 <>
@@ -216,16 +216,16 @@ function LoginPageContent() {
             <button
               type="button"
               onClick={handleDemoLogin}
-              className="w-full py-2.5 px-5 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] text-[#111827] font-bold text-xs flex items-center justify-center gap-2 border border-black/[0.08] transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full py-2.5 px-5 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] text-[#1D2433] font-bold text-xs flex items-center justify-center gap-2 border border-black/[0.08] transition-all active:scale-[0.98] cursor-pointer"
             >
-              <Sparkles size={14} className="text-[#008A20]" />
+              <Sparkles size={14} className="text-[#0E8A3E]" />
               <span>Explore as Demo Resident (1-Tap Pass)</span>
             </button>
             )}
 
             <Link
               href="/signup"
-              className="w-full py-2.5 px-5 rounded-xl border border-black/[0.08] bg-white text-[#111827] font-bold text-xs flex items-center justify-center gap-2 hover:bg-black/[0.04] transition-all active:scale-[0.98] no-underline cursor-pointer"
+              className="w-full py-2.5 px-5 rounded-xl border border-black/[0.08] bg-white text-[#1D2433] font-bold text-xs flex items-center justify-center gap-2 hover:bg-black/[0.04] transition-all active:scale-[0.98] no-underline cursor-pointer"
             >
               <UserPlus size={14} strokeWidth={2} />
               <span>Create New Resident Account</span>
@@ -266,7 +266,7 @@ function LoginPageContent() {
             <button
               type="button"
               onClick={fillTestCredentials}
-              className="text-[11px] font-bold text-[#008A20] hover:text-[#00B02A] flex items-center gap-1 transition-colors"
+              className="text-[11px] font-bold text-[#0E8A3E] hover:text-[#00B02A] flex items-center gap-1 transition-colors"
             >
               <Sparkles size={12} />
               <span>Fill demo credentials</span>
@@ -274,7 +274,7 @@ function LoginPageContent() {
             ) : <span />}
             <Link
               href="/forgot-password"
-              className="text-[11px] font-bold text-[#006F35] hover:underline"
+              className="text-[11px] font-bold text-[#0E8A3E] hover:underline"
             >
               Forgot password?
             </Link>

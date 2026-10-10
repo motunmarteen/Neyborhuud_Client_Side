@@ -5,7 +5,7 @@ export function PostSkeleton({ index = 0 }: { index?: number }) {
 
     return (
         <div
-            className="relative w-full bg-white dark:bg-[#121b14] border-b border-black/5 dark:border-white/5 px-4 py-3.5 flex flex-col gap-0 overflow-hidden"
+            className="relative w-full bg-white dark:bg-[#1D2433] border-b border-black/5 dark:border-white/5 px-4 py-3.5 flex flex-col gap-0 overflow-hidden"
             aria-hidden="true"
         >
             {/* Header Row */}

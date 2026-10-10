@@ -78,7 +78,7 @@ function StatCard({
       ? 'bg-rose-50 text-rose-600 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800/40'
       : tone === 'blue'
         ? 'bg-blue-50 text-blue-600 border-blue-200/80 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800/40'
-        : 'bg-emerald-50 text-[#00C830] border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40';
+        : 'bg-emerald-50 text-[#00B82E] border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40';
 
   return (
     <div className="bg-white dark:bg-[#12161A] rounded-2xl border border-black/[0.08] dark:border-white/[0.08] p-4 shadow-sm flex items-center gap-3.5">
@@ -227,12 +227,12 @@ function HuudBrowseInner() {
                 type="button"
                 onClick={() => refetch()}
                 disabled={isFetching}
-                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.08] px-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00C830] transition-colors disabled:opacity-50"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.08] px-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00B82E] transition-colors disabled:opacity-50"
                 aria-label="Refresh My Huud feed"
               >
                 <RotateCw
                   size={14}
-                  className={isFetching ? 'animate-spin text-[#00C830]' : 'text-slate-500'}
+                  className={isFetching ? 'animate-spin text-[#00B82E]' : 'text-slate-500'}
                   aria-hidden
                 />
                 <span>{isFetching ? 'Loading' : 'Refresh'}</span>

@@ -3,13 +3,13 @@
  * Keep in sync with `--green-*` tokens in globals.css.
  */
 export const GREEN_SCALE = {
-  50: '#E9F6E6',
+  50: '#E8F7EC',
   100: '#D4EDCF',
   200: '#B8E0B0',
   300: '#52C952',
-  400: '#00D431',
+  400: '#00B82E',
   500: '#00B82A',
-  600: '#006F35',
+  600: '#0E8A3E',
   700: '#004D25',
 } as const;
 

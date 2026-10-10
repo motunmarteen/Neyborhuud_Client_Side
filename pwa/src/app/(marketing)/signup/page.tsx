@@ -597,7 +597,7 @@ function SignupPageContent() {
                         </div>
                     ) : verificationNotice ? (
                         <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
-                            <CheckCircle2 className="shrink-0 text-[#00D431]" size={16} strokeWidth={2} />
+                            <CheckCircle2 className="shrink-0 text-[#00B82E]" size={16} strokeWidth={2} />
                             <span>{verificationNotice}</span>
                         </div>
                     ) : null}
@@ -736,7 +736,7 @@ function SignupPageContent() {
                 {referralCodeInput.trim() ? (
                     <div className="mt-2 shrink-0 rounded-xl border border-white/20 bg-black/35 px-3 py-2 backdrop-blur-md">
                         <p className="text-[10px] font-medium leading-relaxed text-white/80">
-                            Invite: <span className="font-bold text-[var(--landing-green,#00d431)]">{referralCodeInput.trim()}</span>
+                            Invite: <span className="font-bold text-[var(--landing-green,#00B82E)]">{referralCodeInput.trim()}</span>
                         </p>
                     </div>
                 ) : null}
@@ -802,7 +802,7 @@ function SignupPageContent() {
                     }
                 >
                         <div className="mb-3 flex items-center gap-3">
-                            <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(0,111,53,0.34)]">
+                            <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(14, 138, 62,0.34)]">
                                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-primary shadow-md">N</span>
                                 <MapPin size={22} strokeWidth={2} />
                             </div>
@@ -993,7 +993,7 @@ function SignupPageContent() {
                             </button>
                         )}
 
-                        <div className="flex flex-col gap-2 rounded-2xl border border-charcoal/10 bg-[#f8faf8] px-3 py-3">
+                        <div className="flex flex-col gap-2 rounded-2xl border border-charcoal/10 bg-[#F6F8FB] px-3 py-3">
                             <label className="flex cursor-pointer items-start gap-3">
                                 <input
                                     type="checkbox"

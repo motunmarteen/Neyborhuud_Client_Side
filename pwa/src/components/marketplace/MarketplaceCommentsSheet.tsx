@@ -61,9 +61,9 @@ export function MarketplaceCommentsSheet({
           <BottomSheetDragHandle handleProps={handleProps} className="pt-2.5 pb-1" />
 
           <div className="flex items-center justify-between border-b border-black/5 px-3 py-2.5 dark:border-white/5">
-            <h2 className="text-[15px] font-semibold tracking-tight text-[#050505] dark:text-[#E4E6EB]">Comments</h2>
+            <h2 className="text-[15px] font-semibold tracking-tight text-[#050505] dark:text-[#DDE3EC]">Comments</h2>
             <div className="flex items-center gap-3">
-              <span className="text-[12px] font-bold tabular-nums text-[#65676B] dark:text-[#B0B3B8]">{commentsCount}</span>
+              <span className="text-[12px] font-bold tabular-nums text-[#5B6478] dark:text-[#9AA3B1]">{commentsCount}</span>
               <button
                 type="button"
                 onClick={onClose}

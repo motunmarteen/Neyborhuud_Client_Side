@@ -315,7 +315,7 @@ function VerifyEmailContent() {
             {step === 'success' && (
                 <div className="flex flex-col gap-3">
                     <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
-                        <CheckCircle2 size={16} strokeWidth={2} className="shrink-0 text-[#00D431]" />
+                        <CheckCircle2 size={16} strokeWidth={2} className="shrink-0 text-[#00B82E]" />
                         <span>Your email is verified. Welcome to the Huud.</span>
                     </div>
                     <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">

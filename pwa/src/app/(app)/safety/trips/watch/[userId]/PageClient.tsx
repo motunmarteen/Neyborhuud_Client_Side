@@ -14,10 +14,10 @@ function fmt(iso?: string) {
 }
 
 function escalationColor(level: number): string {
-  if (level === 0) return '#006F35';
+  if (level === 0) return '#0E8A3E';
   if (level === 1) return '#eab308';
   if (level === 2) return '#f97316';
-  return '#FF0000';
+  return '#E5484D';
 }
 
 function minsAgo(iso?: string): string {
@@ -116,7 +116,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
       {sosAutoTriggered && (
         <div
           className="rounded-2xl p-4 border-2 flex flex-col gap-2"
-          style={{ background: '#fef2f2', borderColor: '#dc2626' }}
+          style={{ background: '#fef2f2', borderColor: '#E5484D' }}
         >
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-status-danger" style={{ fontSize: '20px' }}>emergency</span>
@@ -129,7 +129,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
             {(trip.missedCheckIns ?? 0) !== 1 ? 's' : ''}.
             Their last known location and trip details have been shared with all guardians.
           </p>
-          <p className="text-[11px] font-semibold" style={{ color: '#dc2626' }}>
+          <p className="text-[11px] font-semibold" style={{ color: '#E5484D' }}>
             Please contact {displayName ?? 'them'} immediately or dispatch help.
           </p>
         </div>
@@ -202,7 +202,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
           <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Deviation</p>
           <p
             className="text-xs font-semibold mt-0.5"
-            style={{ color: (trip.routeDeviationMeters ?? 0) > 300 ? '#00D431' : 'var(--neu-text)' }}
+            style={{ color: (trip.routeDeviationMeters ?? 0) > 300 ? '#00B82E' : 'var(--neu-text)' }}
           >
             {trip.routeDeviationMeters ? `${trip.routeDeviationMeters.toFixed(0)} m` : '—'}
           </p>
@@ -211,7 +211,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
           <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Missed Check-ins</p>
           <p
             className="text-xs font-semibold mt-0.5"
-            style={{ color: (trip.missedCheckIns ?? 0) > 0 ? '#00D431' : 'var(--neu-text)' }}
+            style={{ color: (trip.missedCheckIns ?? 0) > 0 ? '#00B82E' : 'var(--neu-text)' }}
           >
             {trip.missedCheckIns ?? 0}
           </p>

@@ -54,7 +54,7 @@ function StatCard({
       ? 'text-blue-600 bg-blue-50 border-blue-200'
       : tone === 'green'
         ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
-        : 'text-[#00C830] bg-emerald-50 border-emerald-200';
+        : 'text-[#00B82E] bg-emerald-50 border-emerald-200';
 
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white p-3.5 shadow-2xs">

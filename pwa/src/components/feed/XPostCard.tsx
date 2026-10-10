@@ -246,7 +246,7 @@ export function XPostCard({
                     <div className="post-read-more-fade absolute bottom-0 left-0 right-0 h-16 pointer-events-none flex items-end pb-0.5">
                         <button
                             onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
-                            className="pointer-events-auto text-[#008A20] hover:text-[#005B15] font-bold hover:underline cursor-pointer px-1 -ml-1 rounded"
+                            className="pointer-events-auto text-[#0E8A3E] hover:text-[#005B15] font-bold hover:underline cursor-pointer px-1 -ml-1 rounded"
                         >
                             Read more
                         </button>
@@ -255,7 +255,7 @@ export function XPostCard({
                 {expanded && isLongText && (
                     <button
                         onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
-                        className="block mt-2 text-[#008A20] hover:text-[#005B15] font-bold hover:underline cursor-pointer"
+                        className="block mt-2 text-[#0E8A3E] hover:text-[#005B15] font-bold hover:underline cursor-pointer"
                     >
                         Show less
                     </button>
@@ -419,14 +419,14 @@ export function XPostCard({
             {narrativeBlock}
 
             {/* Action Bar (Horizontal Row) */}
-            <div className="post-card-action-bar flex items-center justify-between mt-3 pt-2.5 border-t border-black/[0.05] text-[11px] font-semibold text-[#6B7280] w-full">
+            <div className="post-card-action-bar flex items-center justify-between mt-3 pt-2.5 border-t border-black/[0.05] text-[11px] font-semibold text-[#5B6478] w-full">
                 {/* Comment action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onComment(); }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[#6B7280] hover:text-[#111827] hover:bg-black/[0.04] transition-all active:scale-95 cursor-pointer group"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[#5B6478] hover:text-[#1D2433] hover:bg-black/[0.04] transition-all active:scale-95 cursor-pointer group"
                     aria-label="Comment"
                 >
-                    <XReplyIcon size={17} className="group-hover:text-[#111827]" />
+                    <XReplyIcon size={17} className="group-hover:text-[#1D2433]" />
                     <span className="tabular-nums font-bold">{post.comments ? formatCompactCount(post.comments) : '0'}</span>
                 </button>
 
@@ -434,19 +434,19 @@ export function XPostCard({
                 {post.contentType === 'fyi' && onHelpful ? (
                     <button
                         onClick={(e) => { e.stopPropagation(); onHelpful(); }}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isHelpful ? 'text-[#008A20] bg-emerald-50' : 'text-[#6B7280] hover:text-[#008A20] hover:bg-emerald-50'}`}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isHelpful ? 'text-[#0E8A3E] bg-emerald-50' : 'text-[#5B6478] hover:text-[#0E8A3E] hover:bg-emerald-50'}`}
                         aria-label="Helpful"
                     >
-                        <XThumbUpIcon size={17} filled={!!post.isHelpful} className={post.isHelpful ? 'text-[#008A20]' : 'group-hover:text-[#008A20]'} />
+                        <XThumbUpIcon size={17} filled={!!post.isHelpful} className={post.isHelpful ? 'text-[#0E8A3E]' : 'group-hover:text-[#0E8A3E]'} />
                         <span className="tabular-nums font-bold">{post.helpfulCount ? formatCompactCount(post.helpfulCount) : '0'}</span>
                     </button>
                 ) : (
                     <button
                         onClick={(e) => { e.stopPropagation(); handleInstantRepost(); }}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isShared ? 'text-[#008A20] bg-emerald-50' : 'text-[#6B7280] hover:text-[#008A20] hover:bg-emerald-50'}`}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isShared ? 'text-[#0E8A3E] bg-emerald-50' : 'text-[#5B6478] hover:text-[#0E8A3E] hover:bg-emerald-50'}`}
                         aria-label="Repost"
                     >
-                        <XRepostIcon size={17} className={post.isShared ? 'text-[#008A20]' : 'group-hover:text-[#008A20]'} />
+                        <XRepostIcon size={17} className={post.isShared ? 'text-[#0E8A3E]' : 'group-hover:text-[#0E8A3E]'} />
                         <span className="tabular-nums font-bold">
                             {post.shares ? formatCompactCount(post.shares) : '0'}
                         </span>
@@ -456,7 +456,7 @@ export function XPostCard({
                 {/* Like action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onLike(); }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isLiked ? 'text-rose-600 bg-rose-50' : 'text-[#6B7280] hover:text-rose-600 hover:bg-rose-50'}`}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isLiked ? 'text-rose-600 bg-rose-50' : 'text-[#5B6478] hover:text-rose-600 hover:bg-rose-50'}`}
                     aria-label="Like"
                 >
                     <XLikeIcon size={17} filled={post.isLiked} className={post.isLiked ? 'text-rose-600' : 'group-hover:text-rose-600'} />
@@ -466,19 +466,19 @@ export function XPostCard({
                 {/* Save action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onSave(); }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isSaved ? 'text-[#008A20] bg-emerald-50' : 'text-[#6B7280] hover:text-[#008A20] hover:bg-emerald-50'}`}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 cursor-pointer group ${post.isSaved ? 'text-[#0E8A3E] bg-emerald-50' : 'text-[#5B6478] hover:text-[#0E8A3E] hover:bg-emerald-50'}`}
                     aria-label="Bookmark"
                 >
-                    <XBookmarkIcon size={17} filled={post.isSaved} className={post.isSaved ? 'text-[#008A20]' : 'group-hover:text-[#008A20]'} />
+                    <XBookmarkIcon size={17} filled={post.isSaved} className={post.isSaved ? 'text-[#0E8A3E]' : 'group-hover:text-[#0E8A3E]'} />
                 </button>
 
                 {/* Share action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[#6B7280] hover:text-[#111827] hover:bg-black/[0.04] transition-all active:scale-95 cursor-pointer group"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[#5B6478] hover:text-[#1D2433] hover:bg-black/[0.04] transition-all active:scale-95 cursor-pointer group"
                     aria-label="Share"
                 >
-                    <XShareIcon size={17} className="group-hover:text-[#111827]" />
+                    <XShareIcon size={17} className="group-hover:text-[#1D2433]" />
                 </button>
             </div>
 
