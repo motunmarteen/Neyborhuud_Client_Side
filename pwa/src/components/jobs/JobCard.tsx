@@ -156,7 +156,7 @@ export default function JobCard({ job, onApply, onSave }: JobCardProps) {
 
           {/* Salary highlight */}
           {salary && (
-            <p className="text-[12px] font-black text-primary drop-shadow-[0_0_8px_rgba(0, 184, 46,0.3)]">
+            <p className="text-[12px] font-black text-primary drop-shadow-[0_0_8px_rgba(0,184,46,0.3)]">
               {salary}
             </p>
           )}

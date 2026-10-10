@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source not "../../.transcript_chunks";
 
 /** Dark variant exists, but the app is forced to light theme. */
 @custom-variant dark (&:where(.dark, .dark *));

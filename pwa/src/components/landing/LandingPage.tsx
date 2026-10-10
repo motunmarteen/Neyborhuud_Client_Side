@@ -68,7 +68,7 @@ export function LandingPage() {
       {/* 1. Hero Section (Asymmetrical & Editorial) */}
       <section className="section" style={{ minHeight: "100vh", display: "flex", alignItems: "center", position: "relative", overflow: "hidden", paddingTop: "clamp(100px, 15vw, 160px)", paddingBottom: "clamp(60px, 10vw, 120px)" }}>
         <div className="blob" style={{ position: "absolute", top: "-10%", left: "-10%", width: "clamp(300px, 50vw, 600px)", height: "clamp(300px, 50vw, 600px)", background: "var(--brand-surface)", filter: "blur(100px)", zIndex: -1 }}></div>
-        <div className="blob" style={{ position: "absolute", bottom: "-20%", right: "-10%", width: "clamp(250px, 40vw, 500px)", height: "clamp(250px, 40vw, 500px)", background: "rgba(0, 184, 46, 0.15)", filter: "blur(100px)", zIndex: -1 }}></div>
+        <div className="blob" style={{ position: "absolute", bottom: "-20%", right: "-10%", width: "clamp(250px, 40vw, 500px)", height: "clamp(250px, 40vw, 500px)", background: "rgba(0,184,46, 0.15)", filter: "blur(100px)", zIndex: -1 }}></div>
 
         <div className="container" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 480px), 1fr))", gap: "60px", alignItems: "center" }}>
           
@@ -199,7 +199,7 @@ export function LandingPage() {
       <section id="trust" className="section" style={{ background: "#0c0d12", color: "#fff", position: "relative", overflow: "hidden", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "160px 0" }}>
         
         {/* Intense radial glow in background */}
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "1000px", height: "1000px", background: "radial-gradient(circle, rgba(0, 184, 46,0.1) 0%, rgba(0,0,0,0) 70%)", pointerEvents: "none" }}></div>
+        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "1000px", height: "1000px", background: "radial-gradient(circle, rgba(0,184,46,0.1) 0%, rgba(0,0,0,0) 70%)", pointerEvents: "none" }}></div>
         
         <div className="container relative z-10">
           <div className="grid-responsive-fortress" style={{ gap: "100px" }}>
@@ -250,7 +250,7 @@ export function LandingPage() {
                     <div style={{ color: "rgba(255,255,255,0.4)", fontWeight: 700, fontSize: "0.85rem", marginBottom: "8px" }}>Elite Neighbor Trust Score</div>
                     <div className="text-display-large" style={{ lineHeight: 0.8, fontSize: "3.5rem", color: "white" }}>98<span style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.4)", fontWeight: 500 }}>/100</span></div>
                   </div>
-                  <div style={{ background: "rgba(0, 184, 46, 0.15)", color: "var(--primary)", border: "1px solid rgba(0, 184, 46, 0.3)", padding: "8px 20px", borderRadius: "99px", fontWeight: 800, fontSize: "0.8rem", letterSpacing: "0.05em" }}>ELITE GUARDIAN STATUS</div>
+                  <div style={{ background: "rgba(0,184,46, 0.15)", color: "var(--primary)", border: "1px solid rgba(0,184,46, 0.3)", padding: "8px 20px", borderRadius: "99px", fontWeight: 800, fontSize: "0.8rem", letterSpacing: "0.05em" }}>ELITE GUARDIAN STATUS</div>
                 </div>
                 
                 <div style={{ height: "10px", background: "rgba(255,255,255,0.05)", borderRadius: "99px", overflow: "hidden", marginBottom: "16px" }}>
@@ -267,7 +267,7 @@ export function LandingPage() {
 
       {/* 6. Final CTA */}
       <section className="cta-section text-center" style={{ background: "var(--bg-secondary)", position: "relative", overflow: "hidden", borderBottom: "1px solid var(--border-subtle)", padding: "clamp(80px, 15vw, 160px) 0" }}>
-        <div className="blob" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "800px", height: "800px", background: "rgba(0, 184, 46, 0.08)", filter: "blur(120px)", zIndex: 1, pointerEvents: "none" }}></div>
+        <div className="blob" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "800px", height: "800px", background: "rgba(0,184,46, 0.08)", filter: "blur(120px)", zIndex: 1, pointerEvents: "none" }}></div>
         
         <div className="container relative z-10">
           <motion.h2 initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-display-huge" style={{ marginBottom: "40px", fontSize: "clamp(3.5rem, 8vw, 6.5rem)", lineHeight: 0.9 }}>

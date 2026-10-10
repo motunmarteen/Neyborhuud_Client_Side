@@ -336,7 +336,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                                 onClick={handleCopyAccount}
                                 className="flex items-center gap-0.5 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
                                 style={{
-                                    background: copied ? 'rgba(0, 184, 46,0.15)' : 'rgba(0,0,0,0.04)',
+                                    background: copied ? 'rgba(0,184,46,0.15)' : 'rgba(0,0,0,0.04)',
                                     color: copied ? 'var(--primary)' : 'var(--neu-text-secondary)',
                                 }}
                             >

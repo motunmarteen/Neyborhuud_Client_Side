@@ -802,7 +802,7 @@ function SignupPageContent() {
                     }
                 >
                         <div className="mb-3 flex items-center gap-3">
-                            <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(14, 138, 62,0.34)]">
+                            <div className="relative flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-[1.25rem] bg-primary text-white shadow-[0_18px_34px_rgba(14,138,62,0.34)]">
                                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-primary shadow-md">N</span>
                                 <MapPin size={22} strokeWidth={2} />
                             </div>

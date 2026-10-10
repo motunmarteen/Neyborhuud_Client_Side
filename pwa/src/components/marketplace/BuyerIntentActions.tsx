@@ -71,7 +71,7 @@ function MakeOfferDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="make-offer-title"
-        className="doodle-modal-panel relative z-10 flex max-h-[min(92vh,640px)] w-full max-w-md flex-col overflow-hidden rounded-t-[28px] border border-[var(--border-light)] shadow-[0_24px_60px_rgba(14, 138, 62,0.18)]   sm:mx-4 sm:max-h-[85vh] sm:rounded-[28px] sm:rounded-b-[28px]"
+        className="doodle-modal-panel relative z-10 flex max-h-[min(92vh,640px)] w-full max-w-md flex-col overflow-hidden rounded-t-[28px] border border-[var(--border-light)] shadow-[0_24px_60px_rgba(14,138,62,0.18)]   sm:mx-4 sm:max-h-[85vh] sm:rounded-[28px] sm:rounded-b-[28px]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="doodle-modal-panel-wash z-0" aria-hidden />
@@ -162,7 +162,7 @@ function MakeOfferDialog({
             type="button"
             onClick={() => void onSubmit()}
             disabled={isSubmitting || !offerAmount.trim()}
-            className="min-h-[48px] w-full shrink-0 rounded-full bg-[#00B82E] hover:bg-[#00F53B] px-4 text-sm font-extrabold text-black shadow-[0_8px_24px_rgba(0, 184, 46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-0 sm:flex-1"
+            className="min-h-[48px] w-full shrink-0 rounded-full bg-[#00B82E] hover:bg-[#00F53B] px-4 text-sm font-extrabold text-black shadow-[0_8px_24px_rgba(0,184,46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-0 sm:flex-1"
           >
             {isSubmitting ? "Sending…" : "Send my price"}
           </button>
@@ -291,7 +291,7 @@ export function BuyerIntentActions({
             e.stopPropagation();
             router.push("/login");
           }}
-          className="w-full rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] py-2.5 text-center text-xs font-semibold text-[#0E8A3E] shadow-[0_2px_12px_rgba(14, 138, 62,0.08)] backdrop-blur-xl transition-transform active:scale-[0.98] hover:bg-white     184, 46,0.12)] "
+          className="w-full rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] py-2.5 text-center text-xs font-semibold text-[#0E8A3E] shadow-[0_2px_12px_rgba(14,138,62,0.08)] backdrop-blur-xl transition-transform active:scale-[0.98] hover:bg-white     184, 46,0.12)] "
         >
           Log in to buy
         </button>
@@ -416,7 +416,7 @@ export function BuyerIntentActions({
               void handleBuyNow();
             }}
             disabled={busy}
-            className="relative flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full bg-[#00B82E] hover:bg-[#00F53B] px-3 py-2.5 text-xs font-black tracking-tight text-black shadow-[0_4px_18px_rgba(0, 184, 46,0.28)] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px]"
+            className="relative flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full bg-[#00B82E] hover:bg-[#00F53B] px-3 py-2.5 text-xs font-black tracking-tight text-black shadow-[0_4px_18px_rgba(0,184,46,0.28)] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px]"
           >
             {createOrder.isPending ? (
               <span className="material-symbols-outlined animate-spin shrink-0 text-[18px]">progress_activity</span>
@@ -453,7 +453,7 @@ export function BuyerIntentActions({
             }}
             disabled={contactingSeller}
             aria-label="Chat with seller"
-            className="flex min-h-[44px] w-11 shrink-0 items-center justify-center rounded-full border border-[var(--border-light)] bg-white/85 text-brand-black shadow-[0_2px_12px_rgba(14, 138, 62,0.06)] transition-transform active:scale-[0.98] disabled:opacity-50 sm:min-h-[40px]   "
+            className="flex min-h-[44px] w-11 shrink-0 items-center justify-center rounded-full border border-[var(--border-light)] bg-white/85 text-brand-black shadow-[0_2px_12px_rgba(14,138,62,0.06)] transition-transform active:scale-[0.98] disabled:opacity-50 sm:min-h-[40px]   "
           >
             <span className="material-symbols-outlined text-[18px]">
               {contactingSeller ? "progress_activity" : "chat"}
