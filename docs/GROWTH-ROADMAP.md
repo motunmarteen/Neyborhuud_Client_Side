@@ -24,14 +24,14 @@ Three outcomes to design around:
 
 ---
 
-## 1. Nigerian voice across the whole platform
+## 1. Speak like Nigerians across the whole platform
 
-**Goal:** every word NeyborHuud shows should sound like it was written by a Lagosian who respects the person reading it. Plain Nigerian English that people understand at once and act on, with local expressions where they help, and full Pidgin, Yoruba, Igbo and Hausa options.
+**Goal:** every greeting, prompt, button and explanation should sound the way Nigerians actually talk ("Good morning o", "Wetin dey happen for your street?", "Buy am", "Price am", "You don reach?"), not textbook English. Plain Nigerian English that people understand at once and act on, with local expressions where they help, and full Pidgin, Yoruba, Igbo and Hausa options.
 
 **Where we are:** `pwa/src/lib/i18n.tsx` already supports `en`, `pcm` (Pidgin), `yo`, `ig` and `ha`, but only about 50 phrases each, used on 5 screens. Most text is written directly in the components (about 465 screen files), and server messages, notifications, emails and SMS are all in generic international English.
 
 Steps:
-- [ ] **Voice guide** (`docs/VOICE.md`): how NeyborHuud talks. Warm, direct, respectful, familiar Nigerian phrasing ("Your Huud", "neighbours", "estate", "gate man", "light don come"), naira formatting (₦), Nigerian place names and examples (Lekki, Ikeja, Yaba, Surulere, Abuja, Port Harcourt). What to avoid: stiff corporate English, Americanisms ("apartment", "zip code", "cell phone"), jokes in serious moments.
+- [ ] **Language guide** (`docs/LANGUAGE.md`): the words and expressions NeyborHuud uses. Warm, direct, respectful, familiar Nigerian phrasing ("Your Huud", "neighbours", "estate", "gate man", "light don come"), naira formatting (₦), Nigerian place names and examples (Lekki, Ikeja, Yaba, Surulere, Abuja, Port Harcourt). What to avoid: stiff corporate English, Americanisms ("apartment", "zip code", "cell phone"), jokes in serious moments.
 - [ ] **Safety copy stays crystal clear.** SOS, kidnapping, emergency and payment screens use short, plain English first, with no slang. Slang must never slow someone down in an emergency.
 - [ ] **Rewrite the English (`en`) copy** screen by screen in Nigerian English: onboarding, feed, chat, marketplace, safety, profile, settings, errors, empty states and toasts.
 - [ ] **Server-side messages:** error messages, push notifications, emails and SMS (Termii) in the same voice.
@@ -164,4 +164,4 @@ Pilot hypotheses (to test, not benchmarks): 40% of sign-ups complete a meaningfu
 2. Set-up-your-estate flow with invite link and QR code.
 3. Honest empty-neighbourhood screen.
 4. Activation, retention and invite-conversion tracking.
-5. Nigerian voice: voice guide plus rewritten onboarding and home screen copy (see section 1).
+5. Nigerian language: language guide plus rewritten greetings, onboarding and home-screen text (see section 1).
