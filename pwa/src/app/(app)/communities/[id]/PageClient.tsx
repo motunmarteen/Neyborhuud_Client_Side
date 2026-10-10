@@ -198,7 +198,7 @@ export default function CommunityDetailPage() {
               <button
                 type="button"
                 onClick={openChat}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#00B82E] hover:bg-[#00B82E] active:scale-95 py-3.5 text-xs font-black text-white shadow-md shadow-[#00B82E]/20 transition-all"
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-[#00B82E] hover:bg-[#00B82E] active:scale-95 py-3.5 text-xs font-black text-white shadow-md shadow-[#00B82E]/20 transition-all"
               >
                 <MessageSquare size={16} />
                 <span>Open Estate Group Chat</span>

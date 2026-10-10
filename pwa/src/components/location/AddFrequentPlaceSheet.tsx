@@ -130,7 +130,7 @@ export function AddFrequentPlaceSheet({ onClose, onSaved, initialCoords, initial
           type="button"
           onClick={handleSave}
           disabled={!coords || add.isPending}
-          className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-white disabled:opacity-50"
+          className="w-full rounded-full bg-primary py-3 text-sm font-bold text-white disabled:opacity-50 min-h-12"
         >
           {add.isPending ? "Saving…" : "Save place"}
         </button>

@@ -242,7 +242,7 @@ export function AvatarAdjusterModal({ file, onSave, onCancel }: AvatarAdjusterMo
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 py-3 text-sm font-semibold rounded-xl text-white bg-primary hover:bg-primary/95 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
+            className="flex-1 py-3 text-sm font-semibold rounded-full text-white bg-primary hover:bg-primary/95 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
           >
             Save Photo
           </button>

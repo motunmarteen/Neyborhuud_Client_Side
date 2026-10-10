@@ -255,7 +255,7 @@ export function AskMyHuudDrawer({ isOpen, onClose }: AskMyHuudDrawerProps) {
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#00B82E] text-white shadow-xs hover:bg-[#00B82E] disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all cursor-pointer"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#00B82E] text-white shadow-xs hover:bg-[#00B82E] disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all cursor-pointer"
             >
               <ArrowUp size={18} strokeWidth={2.4} />
             </button>

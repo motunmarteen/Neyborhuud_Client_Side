@@ -339,7 +339,7 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-image: url('/doodle-pattern.svg?v=2');
+  background-image: url('/doodle-pattern.svg?v=3');
   background-repeat: repeat;
   background-size: 360px 360px;
   opacity: 0.04;
@@ -4188,7 +4188,7 @@ main.feed-scroll-main--sky-feed {
 .min-h-screen.bg-white,
 .min-h-screen.bg-soft-bg {
   background-color: #EEF2F7;
-  background-image: url('/doodle-pattern.svg?v=2');
+  background-image: url('/doodle-pattern.svg?v=3');
   background-repeat: repeat;
   background-size: 360px 360px;
 }
@@ -4198,14 +4198,14 @@ main.feed-scroll-main--sky-feed {
 /* Dark page wrappers (marketplace, safety dark pages) */
 .min-h-screen.bg-black,
 .min-h-screen.bg-\[\#0f0f1e\] {
-  background-image: url('/doodle-pattern-dark.svg?v=2');
+  background-image: url('/doodle-pattern-dark.svg?v=3');
   background-repeat: repeat;
   background-size: 360px 360px;
 }
 
 .doodle-surface {
   background-color: #EEF2F7;
-  background-image: url('/doodle-pattern.svg?v=2');
+  background-image: url('/doodle-pattern.svg?v=3');
   background-repeat: repeat;
   background-size: 360px 360px;
   color: var(--foreground);
@@ -4213,7 +4213,7 @@ main.feed-scroll-main--sky-feed {
 
 .doodle-surface-muted {
   background-color: #F2F7F2;
-  background-image: url('/doodle-pattern.svg?v=2');
+  background-image: url('/doodle-pattern.svg?v=3');
   background-repeat: repeat;
   background-size: 360px 360px;
 }
@@ -5208,7 +5208,7 @@ button.left-sidebar__link:focus-visible {
 .feed-comments-panel,
 .doodle-modal-panel {
   background-color: #ffffff;
-  background-image: url('/doodle-pattern.svg?v=2');
+  background-image: url('/doodle-pattern.svg?v=3');
   background-repeat: repeat;
   background-size: 360px 360px;
   color: var(--neu-text);
@@ -6435,105 +6435,64 @@ button.mod-card:active {
    Use btn-glass-danger for destructive / emergency actions.
    ═══════════════════════════════════════════════════════ */
 
-/* Shared base */
+/* Design foundation F-03: pill buttons (same look as <Button> in components/ui/Button.tsx). */
 .btn-glass-primary,
 .btn-glass-danger {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  gap: 0.5rem;
+  min-height: 48px;
   border: none;
-  border-radius: 1rem;
-  padding: 1rem 1.5rem;
+  border-radius: 999px;
+  padding: 0 1.5rem;
   font-family: var(--font-body);
-  font-size: 0.875rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
+  font-size: 0.9375rem;
+  font-weight: 800;
   color: #ffffff;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
-/* Specular highlight — top-left light catch */
-.btn-glass-primary::before,
-.btn-glass-danger::before {
+.btn-glass-primary {
+  background: #00B82E;
+  box-shadow: 0 6px 16px rgba(0, 184, 46, 0.28);
+}
+.btn-glass-primary:hover { background: #0E8A3E; }
+
+.btn-glass-danger {
+  background: #E5484D;
+  box-shadow: 0 6px 16px rgba(229, 72, 77, 0.28);
+}
+.btn-glass-danger:hover { background: #D23A40; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-glass-primary:active,
+  .btn-glass-danger:active { transform: scale(0.97); }
+}
+
+.btn-glass-primary:disabled,
+.btn-glass-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-glass-primary.btn-paired { padding: 0 1rem; }
+
+/* Small controls keep a 48px tap area without looking bigger. */
+.tap-target { position: relative; }
+.tap-target::after {
   content: '';
   position: absolute;
-  top: 4px;
-  left: 12%;
-  width: 40%;
-  height: 35%;
-  border-radius: 50%;
-  background: linear-gradient(150deg, rgba(255,255,255,0.28) 0%, transparent 100%);
-  pointer-events: none;
-}
-
-/* Primary — brand green */
-.btn-glass-primary {
-  background: radial-gradient(circle at 38% 32%, #3DEA60 0%, #00B82E 45%, #009922 100%);
-  box-shadow:
-    0 8px 28px rgba(0, 184, 46, 0.42),
-    0 3px 10px rgba(0, 0, 0, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.06);
-}
-
-.btn-glass-primary:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 12px 36px rgba(0, 184, 46, 0.52),
-    0 4px 12px rgba(0, 0, 0, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
-}
-
-.btn-glass-primary:active {
-  transform: scale(0.96) translateY(1px);
-  box-shadow:
-    0 4px 16px rgba(0, 184, 46, 0.32),
-    0 2px 6px rgba(0, 0, 0, 0.1),
-    inset 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.btn-glass-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Side-by-side with btn-secondary — match label size/casing (see end of file for !important overrides) */
-.btn-glass-primary.btn-paired {
-  font-weight: 700;
-  text-transform: none;
-  letter-spacing: normal;
-  padding: 0.875rem 1rem;
-}
-
-/* Danger — brand red */
-.btn-glass-danger {
-  background: radial-gradient(circle at 38% 32%, #FF4D4D 0%, #E5484D 50%, #B30000 100%);
-  box-shadow: 0 10px 32px rgba(229, 72, 77,0.45), 0 3px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.18);
-}
-
-.btn-glass-danger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 40px rgba(229, 72, 77,0.55), 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18);
-}
-
-.btn-glass-danger:active {
-  transform: scale(0.97) translateY(0);
-  box-shadow: 0 5px 18px rgba(229, 72, 77,0.35), 0 2px 6px rgba(0,0,0,0.12);
-}
-
-.btn-glass-danger:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  inset: 50% auto auto 50%;
+  width: max(100%, 48px);
+  height: max(100%, 48px);
+  transform: translate(-50%, -50%);
 }
 
 /* Secondary button — premium raised surface */
@@ -6800,7 +6759,7 @@ button.mod-card:active {
   padding: 0.75rem 1rem 1.25rem;
   -webkit-overflow-scrolling: touch;
   background-color: #ffffff;
-  background-image: url('/doodle-pattern.svg?v=2');
+  background-image: url('/doodle-pattern.svg?v=3');
   background-repeat: repeat;
   background-size: 360px 360px;
   background-attachment: local;

@@ -194,7 +194,7 @@ function LoginPageContent() {
             <button
               type="submit"
               disabled={!canLogin}
-              className="w-full py-3 px-5 rounded-xl bg-[#00B82E] hover:bg-[#00FF3E] disabled:opacity-40 disabled:pointer-events-none text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer"
+              className="w-full py-3 px-5 rounded-full bg-[#00B82E] hover:bg-[#00FF3E] disabled:opacity-40 disabled:pointer-events-none text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer min-h-12"
             >
               {loading ? (
                 <>

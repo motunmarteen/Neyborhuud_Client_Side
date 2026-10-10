@@ -124,7 +124,7 @@ export default function DailyCheckInModal() {
             </div>
             <button
               onClick={handleDismiss}
-              className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-white transition-colors hover:bg-primary/90"
+              className="w-full rounded-full bg-primary py-3 text-sm font-bold text-white transition-colors hover:bg-primary/90 min-h-12"
             >
               Awesome! 🎊
             </button>
@@ -150,7 +150,7 @@ export default function DailyCheckInModal() {
             <button
               onClick={handleClaim}
               disabled={checkIn.isPending}
-              className="mb-2 w-full rounded-xl bg-brand-red py-3 text-sm font-bold text-white transition-colors hover:bg-brand-red disabled:opacity-50"
+              className="mb-2 w-full rounded-full bg-brand-red py-3 text-sm font-bold text-white transition-colors hover:bg-brand-red disabled:opacity-50 min-h-12"
             >
               {checkIn.isPending ? "Claiming…" : "Claim Daily Bonus 🔥"}
             </button>

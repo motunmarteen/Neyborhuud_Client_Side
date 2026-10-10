@@ -130,7 +130,7 @@ Kept here so the whole history is in one place.
 - [x] F-01 (ea6f99e palette, ~1,100 colour values in 121 files; next commit removes 137 dark CSS rules + 993 dark: classes; build passes) Colour tokens: green `#00B82E` / deep green `#0E8A3E`, navy text `#1D2433`, muted `#5B6478`, background `#EEF2F7`, safety red `#E5484D`, amber, purple; remove dark-mode-only styles
 - [x] F-02a Fredoka for headings and logo, self-hosted (2965456)
 - [x] F-02b (1ac93e0; ₦, Yoruba/Igbo dots and Hausa ɓ ɗ ƙ checked in the browser; mockup artboards still show Fredoka) Switch headings to **Nunito** and text to **Nunito Sans** (Fredoka can't draw ₦ or Yoruba/Igbo letters); Noto Sans as fallback for Hausa ɓ ɗ ƙ; update mockup and share cards
-- [ ] F-03 Buttons: pill shapes (primary green, white outline, danger); 48 px touch targets
+- [x] F-03 (shared <Button> rebuilt: primary/secondary/soft/ghost/danger, sm 40 with 48px tap area, md 48, lg 56; 44 filled buttons converted; shared .btn-glass-* restyled; /design-kit page shows all blocks) Buttons: pill shapes (primary green, white outline, danger); 48 px touch targets
 - [ ] F-04 Cards, chips and filter chips (the map-layer style)
 - [ ] F-05 Bottom sheet component (the slide-up panel used everywhere), with handle and drag-to-close
 - [ ] F-06 Floating top bar (logo, area, HuudCredit, bell, avatar)

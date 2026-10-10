@@ -122,7 +122,7 @@ export function CommunityInfoSheet({ open, onClose, conversationId }: CommunityI
                       onChange={(e) => setNameValue(e.target.value)}
                       className="flex-1 rounded-xl border border-slate-200 px-3 py-1.5 text-[15px] font-semibold focus:border-[#00B82E] focus:outline-none"
                     />
-                    <button type="button" onClick={handleSaveName} disabled={updateHub.isPending} className="rounded-xl bg-[#00B82E] px-3 py-1.5 text-xs font-bold text-white active:scale-95 disabled:opacity-50">Save</button>
+                    <button type="button" onClick={handleSaveName} disabled={updateHub.isPending} className="rounded-full bg-[#00B82E] px-3 py-1.5 text-xs font-bold text-white active:scale-95 disabled:opacity-50">Save</button>
                     <button type="button" onClick={() => setEditName(false)} className="text-xs text-slate-400">Cancel</button>
                   </div>
                 ) : (
