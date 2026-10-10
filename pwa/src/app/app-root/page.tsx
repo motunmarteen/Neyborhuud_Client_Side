@@ -151,7 +151,7 @@ export default function AppRootPage() {
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "column",
-          fontFamily: "var(--font-jakarta), sans-serif"
+          fontFamily: "var(--font-body)"
         }}
       >
         <style dangerouslySetInnerHTML={{__html: `

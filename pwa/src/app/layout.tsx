@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import { Fredoka, Plus_Jakarta_Sans } from "next/font/google";
+import { Noto_Sans, Nunito, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import "./simulator.css";
 import { Providers, SrToastAnnouncer } from "@/components/providers";
@@ -24,19 +24,32 @@ import { FloatingSosButton } from "@/components/sentinel/FloatingSosButton";
 
 const BRAND_TITLE = `${BRAND_NAME} — Your Huud Operating System`;
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta",
+// Design foundation F-02b. Served from our own domain by next/font, so the PWA caches them.
+// latin-ext carries ₦ and the Yoruba/Igbo letters (ẹ ọ ṣ ị ụ ń).
+// Text: Nunito Sans.
+const nunitoSans = Nunito_Sans({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-nunito-sans",
   weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
-// Rounded, friendly display face for headings and the logo (design foundation F-02).
-// Served from our own domain by next/font, so it is cached by the PWA like the rest.
-const fredoka = Fredoka({
-  subsets: ["latin"],
-  variable: "--font-fredoka",
-  weight: ["500", "600", "700"],
+// Headings and the logo: Nunito (rounded, friendly).
+const nunito = Nunito({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-nunito",
+  weight: ["600", "700", "800", "900"],
   display: "swap",
+});
+
+// Fallback for Hausa hooked letters (ɓ ɗ ƙ). Not preloaded: the browser only
+// downloads it when a page actually shows one of those letters.
+const notoSans = Noto_Sans({
+  subsets: ["latin-ext"],
+  variable: "--font-noto",
+  weight: ["400", "700"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -93,7 +106,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+      className={`${nunitoSans.variable} ${nunito.variable} ${notoSans.variable}`}
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -122,7 +140,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${jakarta.variable} ${fredoka.variable} app-body font-display text-foreground transition-colors duration-200`}
+        className={`app-body font-display text-foreground transition-colors duration-200`}
         suppressHydrationWarning
       >
         <AppViewport />

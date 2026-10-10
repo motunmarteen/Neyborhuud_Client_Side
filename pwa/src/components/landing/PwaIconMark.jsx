@@ -26,7 +26,7 @@ export function PwaIconMark({ variant = "square", sizePx = 512 }) {
           fontWeight: 800,
           letterSpacing: "-0.05em",
           fontFamily:
-            '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif',
+            'var(--font-head)',
           lineHeight: 1,
           color: nhColor,
         }}

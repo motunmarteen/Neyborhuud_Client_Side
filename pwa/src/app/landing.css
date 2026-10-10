@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+/* Fonts come from next/font in the root layout (F-02b: Nunito Sans text, Nunito headings). */
 
 :root {
   /* Brand Core (Consistent across themes) */
@@ -45,7 +45,7 @@
 .landing-page-wrapper {
   background-color: var(--bg-main);
   color: var(--text-main);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
@@ -90,7 +90,7 @@
   color: white;
   padding: 16px 32px;
   border-radius: 99px; /* Neumorphic pill shape */
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 900;
   font-size: 0.875rem; /* text-sm */
   text-transform: uppercase;
@@ -260,7 +260,7 @@
 }
 
 .landing-page-wrapper .text-editorial {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   letter-spacing: -0.01em;
 }
