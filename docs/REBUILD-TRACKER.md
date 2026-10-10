@@ -139,6 +139,9 @@ Kept here so the whole history is in one place.
 - [ ] F-09 Empty states, loading skeletons, error states (Nigerian wording)
 - [ ] F-10 Pins and badges component set (emoji pins, coloured rings, ripple)
 - [ ] F-11 Reduced-motion and low-data modes respected by all animations
+- [ ] 🟡 F-13 **Post card** — one card for every post type (`components/feed/PostCard.tsx`, proposal on /design-kit). Type shown by an icon badge on the avatar corner (only safety alerts pulse); no label row, no coloured edge; follow icon (person+ / person-tick); two-line more icon; Facebook-style photo grid (2 / 3 / 4 / 5+ with +N); full-width cards. Types: post, FYI, lost & found, poll, safety alert, marketplace, job, event, service, help request. ⬜ owner approval → ⬜ swap into feed, profile, FYI, help request → ⬜ replace ProductCard / JobCard / EventCard / ServiceCard on their own pages
+- [ ] F-13b **Feed polls on the server**: polls today exist only in chat (PollVote). Add poll posts (question, 2-4 options, end date), one vote per person, results, and the ➕ "Community Poll" option that has no backend yet
+- [ ] F-13c **Lost & Found fields**: lost or found, item name, last seen place and time, optional reward (kobo) in the FYI create form and API (today Lost & Found is only an FYI subtype label)
 - [ ] F-12 Visual check of 10 key screens after the switch (no broken layouts)
 
 ---

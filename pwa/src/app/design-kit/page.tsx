@@ -125,7 +125,7 @@ export default function DesignKitPage() {
           <TopBarDemo />
         </Section>
 
-        <Section id="postcard" title="Post card (proposal)" note="One card for every post type. The detail block and main button change with the type. Tap like, save, the safety buttons and I'm going.">
+        <Section id="postcard" title="Post card (proposal)" note="One card for every post type. The icon on the avatar shows what each post is (only safety alerts pulse). Try like, follow, vote, the safety buttons and I'm going.">
           <PostCardDemo />
         </Section>
       </div>
