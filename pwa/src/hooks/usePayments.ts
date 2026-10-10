@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * usePayments — HuudCoin spend hooks
+ * usePayments — HuudCredit spend hooks
  *
- * All platform transactions are denominated in HuudCoins.
+ * All platform transactions are denominated in HuudCredit.
  * There is no fiat gateway.  Transactions are instant (no redirect).
  */
 
@@ -16,7 +16,7 @@ import {
 import { toast } from "sonner";
 import { paymentsService } from "@/services/payments.service";
 
-// ── Initiate a HuudCoin spend ───────────────────────────────────────────
+// ── Initiate a HuudCredit spend ───────────────────────────────────────────
 
 export function useInitiatePayment() {
   const queryClient = useQueryClient();
@@ -39,7 +39,7 @@ export function useInitiatePayment() {
       paymentsService.initiatePayment(
         payload.type as any,
         payload.amount,
-        payload.currency ?? "HuudCoins",
+        payload.currency ?? "HuudCredit",
         payload.metadata,
       ),
     onSuccess: (data) => {
@@ -52,12 +52,12 @@ export function useInitiatePayment() {
         return;
       }
 
-      // Instant HuudCoin transaction — show coin deduction toast
+      // Instant HuudCredit transaction — show coin deduction toast
       const coins: number = result?.coinsSpent ?? result?.coins;
       const newBalance: number = result?.newBalance;
       if (coins) {
         toast.success(
-          `🪙 ${coins} HuudCoins deducted${newBalance !== undefined ? ` • Balance: ${newBalance}` : ""}`,
+          `🪙 ${coins} HuudCredit deducted${newBalance !== undefined ? ` • Balance: ${newBalance}` : ""}`,
         );
       } else {
         toast.success("Transaction complete!");
@@ -85,7 +85,7 @@ export function useTipUser() {
       paymentsService.tipUser(recipientId, amount),
     onSuccess: (data, variables) => {
       const result = (data as any)?.data ?? data;
-      toast.success(`🎁 ${variables.amount} HuudCoins sent!`);
+      toast.success(`🎁 ${variables.amount} HuudCredit sent!`);
       queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
       queryClient.invalidateQueries({ queryKey: ["gamification", "stats"] });
     },
@@ -153,7 +153,7 @@ export function usePaymentStats() {
   });
 }
 
-// ── HuudCoin balance + tier progress ──────────────────────────────────
+// ── HuudCredit balance + tier progress ──────────────────────────────────
 
 export function usePaymentBalance() {
   return useQuery({

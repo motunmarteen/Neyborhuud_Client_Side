@@ -98,7 +98,7 @@ export function BoostModal({
               <h2 className="text-lg font-black leading-tight line-clamp-2 max-w-xs">
                 {itemTitle}
               </h2>
-              <p className="mt-1 text-sm opacity-75">{meta.verb} — powered by HuudCoins</p>
+              <p className="mt-1 text-sm opacity-75">{meta.verb} — powered by HuudCredit</p>
             </div>
             <button
               onClick={onClose}
@@ -129,7 +129,7 @@ export function BoostModal({
               <div className="mb-3 text-5xl animate-bounce">🚀</div>
               <h3 className="text-lg font-black text-[var(--neu-text-muted)]">Boost Active!</h3>
               <p className="mt-1 text-sm text-[var(--neu-text-muted)]">
-                <span className="font-bold text-amber-600">🪙 {selectedOpt.coins.toLocaleString()} HuudCoins</span> deducted.
+                <span className="font-bold text-amber-600">🪙 {selectedOpt.coins.toLocaleString()} HuudCredit</span> deducted.
                 Your {type} is now featured for{" "}
                 <strong>{selectedDays} {selectedDays === 1 ? "day" : "days"}</strong>.
               </p>
@@ -205,7 +205,7 @@ export function BoostModal({
               {/* Insufficient balance */}
               {!hasEnough && (
                 <div className="mb-4 rounded-xl bg-status-danger/8 border border-status-danger/20 px-4 py-2 text-xs text-status-danger font-medium">
-                  You need {(selectedOpt.coins - walletCoins).toLocaleString()} more HuudCoins for this option.
+                  You need {(selectedOpt.coins - walletCoins).toLocaleString()} more HuudCredit for this option.
                   Earn more by posting, commenting, and engaging in your community!
                 </div>
               )}

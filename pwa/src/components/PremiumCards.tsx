@@ -3,8 +3,8 @@
 import { useWallet } from "@/hooks/useGamification";
 
 /**
- * Tier definitions — earned automatically by accumulating HuudCoins.
- * No fiat purchase required.  Tier = f(HuudCoin balance).
+ * Tier definitions — earned automatically by accumulating HuudCredit.
+ * No fiat purchase required.  Tier = f(HuudCredit balance).
  */
 const TIERS = [
   {
@@ -53,7 +53,7 @@ const TIERS = [
       "Everything in Silver",
       "25 marketplace listings",
       "15 active job posts",
-      "2× HuudCoins earn rate",
+      "2× HuudCredit earn rate",
       "Analytics dashboard",
       "Promoted profile",
     ],
@@ -71,7 +71,7 @@ const TIERS = [
       "Everything in Gold",
       "Unlimited listings",
       "Unlimited job posts",
-      "3× HuudCoins earn rate",
+      "3× HuudCredit earn rate",
       "Featured seller badge",
       "Early feature access",
       "Dedicated support",
@@ -80,7 +80,7 @@ const TIERS = [
   },
 ];
 
-/** Ways to earn HuudCoins — shown in the "earn more" section */
+/** Ways to earn HuudCredit — shown in the "earn more" section */
 const EARN_ACTIONS = [
   { icon: "✍️", label: "Post content",         coins: "+1–5" },
   { icon: "💬", label: "Comment on posts",       coins: "+2" },
@@ -117,7 +117,7 @@ export function PremiumCards({ currentTier }: Props) {
           <h3 className="font-bold text-status-warning text-base">Tiers are earned, not bought</h3>
           <p className="text-[var(--neu-text-muted)] text-sm mt-1 leading-relaxed">
             NeyborHuud is free for everyone. Your tier badge is automatically upgraded as you
-            accumulate HuudCoins through platform activity — no payment, no subscription.
+            accumulate HuudCredit through platform activity — no payment, no subscription.
             Stay active, help your neighbours, and watch your tier grow.
           </p>
         </div>
@@ -127,7 +127,7 @@ export function PremiumCards({ currentTier }: Props) {
       <div className="rounded-2xl border border-black/[0.08] bg-brand-black px-6 py-5 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-[var(--neu-text-muted)]">Your HuudCoins balance</p>
+            <p className="text-sm text-[var(--neu-text-muted)]">Your HuudCredit balance</p>
             <p className="text-3xl font-bold text-primary">🪙 {balance.toLocaleString()}</p>
           </div>
           <div className="text-right">
@@ -257,11 +257,11 @@ export function PremiumCards({ currentTier }: Props) {
         })}
       </div>
 
-      {/* ── How to earn more HuudCoins ────────────────────────────────── */}
+      {/* ── How to earn more HuudCredit ────────────────────────────────── */}
       <div className="rounded-2xl border border-black/[0.08] bg-brand-black px-6 py-5">
         <h3 className="font-bold text-white mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">bolt</span>
-          How to earn more HuudCoins
+          How to earn more HuudCredit
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {EARN_ACTIONS.map((action) => (

@@ -41,7 +41,7 @@ const TIERS = [
       'Everything in Silver',
       '25 marketplace listings',
       '15 active job posts',
-      '2× HuudCoins earn rate',
+      '2× HuudCredit earn rate',
       'Analytics dashboard',
       'Promoted profile',
     ],
@@ -56,7 +56,7 @@ const TIERS = [
       'Everything in Gold',
       'Unlimited listings',
       'Unlimited job posts',
-      '3× HuudCoins earn rate',
+      '3× HuudCredit earn rate',
       'Featured seller badge',
       'Early feature access',
       'Dedicated support',
@@ -122,7 +122,7 @@ export function HuudCoinTierPanel() {
               Activity tier
             </p>
             <p className="mt-1 text-sm leading-relaxed text-[var(--neu-text-muted)]">
-              Tiers are earned through HuudCoins — not bought. Stay active in your Huud and your
+              Tiers are earned through HuudCredit — not bought. Stay active in your Huud and your
               tier upgrades automatically.
             </p>
           </div>
@@ -137,7 +137,7 @@ export function HuudCoinTierPanel() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
-                  HuudCoins balance
+                  HuudCredit balance
                 </p>
                 <p className="mt-1 text-3xl font-extrabold tabular-nums text-primary">
                   {balance.toLocaleString()}
@@ -255,7 +255,7 @@ export function HuudCoinTierPanel() {
       <div className="mod-card rounded-2xl p-4">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-bold" style={{ color: 'var(--neu-text)' }}>
           <span className="material-symbols-outlined text-[18px] text-primary">bolt</span>
-          Quick ways to earn HuudCoins
+          Quick ways to earn HuudCredit
         </h3>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {EARN_ACTIONS.map((action) => (

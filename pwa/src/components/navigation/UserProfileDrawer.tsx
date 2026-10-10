@@ -166,7 +166,7 @@ export function UserProfileDrawer({ isOpen, onClose }: UserProfileDrawerProps) {
                 <span className="text-xs font-semibold text-black/60">Total Balance</span>
                 <Eli5Tooltip
                   term="Huud Balance"
-                  explanation="Your available funds and HuudCoins for peer-to-peer services, marketplace shopping, and community contributions."
+                  explanation="Your available funds and HuudCredit for peer-to-peer services, marketplace shopping, and community contributions."
                 />
               </div>
               <span className="text-lg font-black tracking-tight text-[#111814]">

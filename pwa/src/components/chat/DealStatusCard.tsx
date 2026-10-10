@@ -505,7 +505,7 @@ export function DealStatusCard({
 
         {action === 'completed' && typeof meta.reward === 'number' && (
           <p className="mt-2 text-xs font-semibold text-emerald-700">
-            +{meta.reward} HuudCoins each · trust boosted
+            +{meta.reward} HuudCredit each · trust boosted
           </p>
         )}
       </div>

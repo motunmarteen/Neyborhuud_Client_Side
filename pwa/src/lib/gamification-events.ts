@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Dispatched after HuudCoins balance changes so profile hero stats can refresh.
+ * Dispatched after HuudCredit balance changes so profile hero stats can refresh.
  */
 export const COINS_UPDATED_EVENT = 'neyborhuud:coins-updated';
 

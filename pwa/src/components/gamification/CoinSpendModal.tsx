@@ -91,7 +91,7 @@ export function CoinSpendModal({
 
         {/* Wallet balance */}
         <div className="mb-4 flex items-center justify-between rounded-lg bg-amber-50 px-4 py-2 text-sm">
-          <span className="text-amber-800">Your HuudCoins</span>
+          <span className="text-amber-800">Your HuudCredit</span>
           <span className="font-bold text-amber-700">🪙 {walletCoins.toLocaleString()}</span>
         </div>
 
@@ -100,7 +100,7 @@ export function CoinSpendModal({
             <div className="mb-2 text-4xl">🎉</div>
             <p className="font-semibold text-[var(--neu-text-muted)]">Done!</p>
             <p className="mt-1 text-sm text-[var(--neu-text-muted)]">
-              {selectedOption?.coins.toLocaleString()} HuudCoins deducted.
+              {selectedOption?.coins.toLocaleString()} HuudCredit deducted.
             </p>
             <button
               onClick={onClose}
@@ -150,7 +150,7 @@ export function CoinSpendModal({
                 <strong>
                   {((selectedOption?.coins ?? 0) - walletCoins).toLocaleString()} more
                 </strong>{" "}
-                HuudCoins. Earn them by participating in your neighbourhood!
+                HuudCredit. Earn them by participating in your neighbourhood!
               </p>
             )}
 

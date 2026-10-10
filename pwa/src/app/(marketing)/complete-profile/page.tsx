@@ -240,9 +240,9 @@ export default function CompleteProfilePage() {
                     <div className="flex items-center justify-between rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3">
                         <div>
                             <div className="flex items-center gap-1.5">
-                                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary">HuudCredit</p>
                                 <Eli5Tooltip 
-                                    term="HuudCoins" 
+                                    term="HuudCredit" 
                                     explanation="Community tokens earned by helping neighbors, participating in cleanups, or reporting local hazards. Can be redeemed for rewards." 
                                 />
                             </div>
@@ -301,7 +301,7 @@ export default function CompleteProfilePage() {
                                     </>
                                 ) : (
                                     <>
-                                        <span>Claim 100 HuudCoins</span>
+                                        <span>Claim 100 HuudCredit</span>
                                         <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                                     </>
                                 )}
@@ -325,7 +325,7 @@ export default function CompleteProfilePage() {
                     icon="badge"
                     eyebrow="Unlock your reward"
                     title={displayName}
-                    meta="100 HuudCoins when you finish"
+                    meta="100 HuudCredit when you finish"
                     signal="Tier 1 Neyborh"
                     badge=""
                 />

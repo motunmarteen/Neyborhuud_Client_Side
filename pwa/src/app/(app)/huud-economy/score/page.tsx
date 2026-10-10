@@ -238,7 +238,7 @@ export default function HuudScorePage() {
             <Link
               href="/huud-economy/wallet"
               className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary"
-              aria-label="HuudCoins wallet"
+              aria-label="HuudCredit wallet"
             >
               <span aria-hidden>🪙</span>
               <span className="tabular-nums">
@@ -300,7 +300,7 @@ export default function HuudScorePage() {
                     />
                     <StatCard
                       icon="token"
-                      label="HuudCoins"
+                      label="HuudCredit"
                       value={(statsData.huudCoins ?? statsData.totalHuudCoins ?? 0).toLocaleString()}
                       color="bg-primary/20 text-primary400"
                     />
@@ -536,7 +536,7 @@ export default function HuudScorePage() {
                     </span>
                   </div>
                   <p className="mb-4 text-xs text-[var(--neu-text-muted)]">
-                    Hit follower milestones to earn HuudCoins and unlock celebrations.
+                    Hit follower milestones to earn HuudCredit and unlock celebrations.
                   </p>
 
                   {/* Next milestone progress bar */}

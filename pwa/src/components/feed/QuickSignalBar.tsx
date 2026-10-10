@@ -189,7 +189,7 @@ export function QuickSignalBar() {
       const locationName = huudName && huudName !== 'your neighborhood' ? huudName : 'your area';
 
       // 2. Send to the server. Only a confirmed server write counts as
-      // "logged" — the server also awards any HuudCoins for it.
+      // "logged" — the server also awards any HuudCredit for it.
       try {
         if (preset.type === 'incident') {
           await incidentService.create({

@@ -241,7 +241,7 @@ export function LandingPage() {
               </div>
               <h2 className="text-display-large" style={{ marginBottom: "32px", fontSize: "clamp(2.5rem, 5vw, 4rem)", lineHeight: 1 }}>Gamification.</h2>
               <p className="text-editorial" style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.7)", marginBottom: "48px", lineHeight: "1.8" }}>
-                Good behavior is the currency of the neighborhood. Help check routes, report municipal blockages, vouch for verified users, and earn HuudCoins to trade locally.
+                Good behavior is the currency of the neighborhood. Help check routes, report municipal blockages, vouch for verified users, and earn HuudCredit to trade locally.
               </p>
               
               <motion.div whileHover={{ scale: 1.01 }} style={{ background: "rgba(255,255,255,0.02)", padding: "40px", borderRadius: "2rem", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(20px)" }}>

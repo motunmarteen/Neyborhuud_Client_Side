@@ -298,7 +298,7 @@ export function useBoostJob() {
         : "";
       toast.success(
         data?.extended ? `Boost extended! Featured until ${until} 🚀` : `Job boosted for ${days} days! 🚀`,
-        { description: `${data?.deducted ?? "–"} HuudCoins deducted.` },
+        { description: `${data?.deducted ?? "–"} HuudCredit deducted.` },
       );
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });

@@ -1,7 +1,7 @@
 /**
- * Payments Service — HuudCoin Economy
+ * Payments Service — HuudCredit Economy
  *
- * No fiat payments.  All platform features are powered by HuudCoins
+ * No fiat payments.  All platform features are powered by HuudCredit
  * earned through activity.  Real-money P2P trades happen off-platform.
  */
 
@@ -10,7 +10,7 @@ import { Payment, PaginatedResponse } from "@/types/api";
 
 export const paymentsService = {
   /**
-   * Initiate a HuudCoin spend for a platform feature.
+   * Initiate a HuudCredit spend for a platform feature.
    * Returns { reference, status, coinsSpent, newBalance, description } — NO paymentUrl.
    */
   async initiatePayment(
@@ -24,7 +24,7 @@ export const paymentsService = {
       | "marketplace_pledge"
       | "service_payment",
     amount: number,
-    currency = "HuudCoins",
+    currency = "HuudCredit",
     metadata?: Record<string, any>,
   ) {
     return await apiClient.post<{
@@ -37,7 +37,7 @@ export const paymentsService = {
   },
 
   /**
-   * Send a tip in HuudCoins to another user.
+   * Send a tip in HuudCredit to another user.
    */
   async tipUser(recipientId: string, amount: number) {
     return await apiClient.post<{ reference: string; coinsSpent: number; status: string }>(
@@ -47,7 +47,7 @@ export const paymentsService = {
   },
 
   /**
-   * Verify a HuudCoin payment by its reference string.
+   * Verify a HuudCredit payment by its reference string.
    */
   async verifyPayment(reference: string) {
     return await apiClient.get<Payment>(`/payments/verify/${reference}`);
@@ -84,7 +84,7 @@ export const paymentsService = {
   },
 
   /**
-   * Get current HuudCoin balance + tier progress.
+   * Get current HuudCredit balance + tier progress.
    */
   async getBalance() {
     return await apiClient.get<{

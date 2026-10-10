@@ -5,7 +5,7 @@
  * ──────────
  * Lets users share a post to external platforms.
  * On share:
- *  1. Calls POST /content/:postId/share/external  → awards 5 HuudCoins + returns tracking link
+ *  1. Calls POST /content/:postId/share/external  → awards 5 HuudCredit + returns tracking link
  *  2. Opens the platform share URL (or copies link to clipboard)
  *  3. Shows a toast with points earned
  */
@@ -190,7 +190,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
         setTimeout(() => setCopied(false), 3000);
       }
 
-      toast.success(`+${points_earned} HuudCoins earned for sharing! 🎉`, { duration: 3000 });
+      toast.success(`+${points_earned} HuudCredit earned for sharing! 🎉`, { duration: 3000 });
     } catch {
       toast.error('Could not share right now. Please try again.');
     } finally {
@@ -209,7 +209,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
       await navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
-      toast.success(`+${points_earned} HuudCoins earned for sharing! 🎉`, { duration: 3000 });
+      toast.success(`+${points_earned} HuudCredit earned for sharing! 🎉`, { duration: 3000 });
     } catch {
       toast.error('Could not copy link.');
     } finally {
@@ -232,7 +232,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
         url: link,
       });
       if (shared) {
-        toast.success(`+${points_earned} HuudCoins earned for sharing! 🎉`, { duration: 3000 });
+        toast.success(`+${points_earned} HuudCredit earned for sharing! 🎉`, { duration: 3000 });
       }
     } catch {
       // user cancelled — no error toast
@@ -257,7 +257,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
           <div className="mb-5 flex items-center justify-between">
             <div>
               <p className="text-lg font-black text-[var(--neu-text-muted)] dark:text-white">Share Post</p>
-              <p className="text-xs text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">Earn <span className="font-black text-status-warning">+5 HuudCoins</span> per share</p>
+              <p className="text-xs text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)]">Earn <span className="font-black text-status-warning">+5 HuudCredit</span> per share</p>
             </div>
             <button
               onClick={onClose}

@@ -342,15 +342,15 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                 />
               </div>
 
-              {/* HuudCoin Coming Soon */}
+              {/* HuudCredit Coming Soon */}
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-primary/40 bg-primary/5">
                 <span className="text-primary text-xl">🪙</span>
                 <div className="flex-1">
                   <p className="text-[12px] font-bold text-primary">
-                    Pay with HuudCoins
+                    Pay with HuudCredit
                   </p>
                   <p className="text-[11px] text-white/50">
-                    Coming soon — HuudCoins will be exchangeable for Naira
+                    Coming soon: pay neighbours with HuudCredit
                   </p>
                 </div>
                 <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-primary/10 text-primary whitespace-nowrap">

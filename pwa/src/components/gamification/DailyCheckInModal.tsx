@@ -40,7 +40,7 @@ export default function DailyCheckInModal() {
     });
     if (data?.coinsEarned) {
       emitCoinsUpdated({ totalHuudCoins: data?.totalHuudCoins });
-      toast.success(`+${data.coinsEarned} HuudCoins added to your wallet`);
+      toast.success(`+${data.coinsEarned} HuudCredit added to your wallet`);
     }
   });
 
@@ -113,7 +113,7 @@ export default function DailyCheckInModal() {
             <h2 className="mb-1 text-xl font-extrabold" style={{ color: "var(--neu-text)" }}>
               Day {currentStreak} Check-In!
             </h2>
-            <p className="mb-1 text-2xl font-bold text-status-warning">+{coins} HuudCoins</p>
+            <p className="mb-1 text-2xl font-bold text-status-warning">+{coins} HuudCredit</p>
             {rewardData?.totalHuudCoins != null && (
               <p className="mb-2 text-xs" style={{ color: "var(--neu-text-muted)" }}>
                 Wallet balance: {rewardData.totalHuudCoins.toLocaleString()} coins
@@ -144,8 +144,8 @@ export default function DailyCheckInModal() {
             </div>
             <p className="mb-5 text-xs" style={{ color: "var(--neu-text-muted)" }}>
               {nextMilestone && nextMilestoneReward > 0
-                ? `Day ${nextMilestone} milestone: +${nextMilestoneReward} bonus HuudCoins`
-                : "Keep your streak alive and earn HuudCoins"}
+                ? `Day ${nextMilestone} milestone: +${nextMilestoneReward} bonus HuudCredit`
+                : "Keep your streak alive and earn HuudCredit"}
             </p>
             <button
               onClick={handleClaim}

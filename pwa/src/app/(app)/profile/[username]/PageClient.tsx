@@ -1382,7 +1382,7 @@ export default function ProfilePage() {
               {!listingsLoading && isOwnProfile && (
                 <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 py-5">
                   <div className="pb-3">
-                    <ProfileBrowseEyebrow>Your HuudCoins activity</ProfileBrowseEyebrow>
+                    <ProfileBrowseEyebrow>Your HuudCredit activity</ProfileBrowseEyebrow>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <Link
@@ -1405,7 +1405,7 @@ export default function ProfilePage() {
                         <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-extrabold text-gray-800">HuudCoins Wallet</p>
+                        <p className="text-sm font-extrabold text-gray-800">HuudCredit Wallet</p>
                         <p className="text-[11px] font-semibold text-gray-400 mt-0.5">Balance · History</p>
                       </div>
                     </Link>
@@ -1697,7 +1697,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-center">
                 <p className="text-[15px] font-extrabold text-slate-800">Huud Economy</p>
-                <p className="text-[13px] font-medium text-slate-400 mt-1">Your HuudCoins, wallet, badges and gamification stats</p>
+                <p className="text-[13px] font-medium text-slate-400 mt-1">Your HuudCredit, wallet, badges and gamification stats</p>
               </div>
               <div className="flex items-center gap-3">
                 <Link

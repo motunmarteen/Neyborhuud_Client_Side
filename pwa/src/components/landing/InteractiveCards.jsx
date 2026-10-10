@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, MapPin, Store, Bell, Lock, Zap, CheckCircle2, Star, Plus, ShieldAlert, Award, ArrowRight } from "lucide-react";
 
 export function InteractiveCards() {
-  // Card 1: HuudCoin state
+  // Card 1: HuudCredit state
   const [coins, setCoins] = useState(25);
   const [isSpinning, setIsSpinning] = useState(false);
   const [floatingTexts, setFloatingTexts] = useState([]);
@@ -55,14 +55,14 @@ export function InteractiveCards() {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))", gap: "30px", marginTop: "40px" }}>
       
-      {/* 1. HuudCoin Spin Card */}
+      {/* 1. HuudCredit Spin Card */}
       <div className="glass-premium glow-card" style={{ padding: "32px", borderRadius: "2rem", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: "320px", position: "relative" }}>
         <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0, 212, 49, 0.1)", border: "1px solid rgba(0, 212, 49, 0.2)", padding: "4px 12px", borderRadius: "99px", marginBottom: "16px" }}>
             <Award size={14} color="var(--primary)" />
             <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--primary)", letterSpacing: "0.05em", uppercase: "true" }}>REWARDS</span>
           </div>
-          <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "8px" }}>HuudCoins Hub</h3>
+          <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "8px" }}>HuudCredit Hub</h3>
           <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: "1.5" }}>
             Earn coins for submitting verified road updates, safety alerts, or helping neighbors. Redeem for local marketplace boosts.
           </p>
@@ -113,7 +113,7 @@ export function InteractiveCards() {
                     whiteSpace: "nowrap"
                   }}
                 >
-                  +1 HuudCoin
+                  +1 HuudCredit
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -301,7 +301,7 @@ export function InteractiveCards() {
             <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", lineHeight: "1.4" }}>
               {dealStep === 1 && "Buyer and seller agree on ₦180,000. The deal thread opens in chat."}
               {dealStep === 2 && "Buyer pays the seller directly and marks it \"I've Paid\" in chat."}
-              {dealStep === 3 && "Seller confirms receipt. Deal complete — both earn HuudCoins and a trust boost."}
+              {dealStep === 3 && "Seller confirms receipt. Deal complete — both earn HuudCredit and a trust boost."}
             </div>
             <ArrowRight size={18} color="var(--brand-blue)" style={{ flexShrink: 0 }} />
           </div>

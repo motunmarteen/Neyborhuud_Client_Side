@@ -202,7 +202,7 @@ export const jobsService = {
   },
 
   /**
-   * Boost a job listing with HuudCoins
+   * Boost a job listing with HuudCredit
    */
   async boostJob(jobId: string, days: 3 | 7) {
     return await apiClient.post<{ deducted: number; days: number; boostedUntil: string }>(

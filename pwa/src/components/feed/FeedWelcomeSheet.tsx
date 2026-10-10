@@ -25,7 +25,7 @@ const FEED_TIPS = [
     {
         id: 'coins',
         Icon: Coins,
-        label: 'HuudCoins',
+        label: 'HuudCredit',
         description: 'Check in daily and participate to earn — already started from signup.',
         iconClass: 'bg-status-warning text-[#0a1a0f]',
     },

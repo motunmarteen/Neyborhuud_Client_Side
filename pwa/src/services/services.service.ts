@@ -284,7 +284,7 @@ export const servicesService = {
   },
 
   /**
-   * Boost a service listing with HuudCoins
+   * Boost a service listing with HuudCredit
    */
   async boostService(serviceId: string, days: 3 | 7) {
     return await apiClient.post<{ deducted: number; days: number; boostedUntil: string }>(

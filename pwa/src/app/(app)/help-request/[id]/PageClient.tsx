@@ -95,7 +95,7 @@ function OfferForm({ postId, onDone }: { postId: string; onDone: () => void }) {
         </button>
       </div>
       <p className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>
-        If the requestor confirms your help, you earn <span className="font-bold text-primary">+5 HuudCoins</span> (max 3 per week).
+        If the requestor confirms your help, you earn <span className="font-bold text-primary">+5 HuudCredit</span> (max 3 per week).
       </p>
     </form>
   );
@@ -150,7 +150,7 @@ function OfferRow({
       )}
 
       {offer.coinsAwarded && (
-        <p className="text-[11px] text-primary">+5 HuudCoins awarded ✓</p>
+        <p className="text-[11px] text-primary">+5 HuudCredit awarded ✓</p>
       )}
 
       <p className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>{formatTimeAgo(offer.createdAt)}</p>
@@ -356,8 +356,8 @@ export default function HelpRequestDetailPage() {
                   <div className="mt-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-primary/40 bg-primary/5">
                     <span className="text-primary text-lg">🪙</span>
                     <div className="flex-1">
-                      <p className="text-[12px] font-bold text-primary">Pay with HuudCoins</p>
-                      <p className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>Coming soon — HuudCoins will be exchangeable for Naira</p>
+                      <p className="text-[12px] font-bold text-primary">Pay with HuudCredit</p>
+                      <p className="text-[11px]" style={{ color: 'var(--neu-text-muted)' }}>Coming soon: pay neighbours with HuudCredit</p>
                     </div>
                     <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-primary/10 text-primary">SOON</span>
                   </div>

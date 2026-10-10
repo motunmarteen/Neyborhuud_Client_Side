@@ -44,7 +44,7 @@ export function FeedEmailVerificationBanner() {
   const handleVerifiedSuccess = () => {
     setShowModal(false);
     setDismissed(true);
-    toast.success('Email verified! 50 HuudCoins unlocked. 🎉');
+    toast.success('Email verified! 50 HuudCredit unlocked. 🎉');
   };
 
   return (
@@ -57,7 +57,7 @@ export function FeedEmailVerificationBanner() {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-black uppercase tracking-wider text-[#008A20]">
-                Claim 50 HuudCoins
+                Claim 50 HuudCredit
               </span>
               <Sparkles size={11} className="text-[#008A20]" />
             </div>

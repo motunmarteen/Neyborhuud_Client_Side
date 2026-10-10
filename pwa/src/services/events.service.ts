@@ -365,7 +365,7 @@ export const eventsService = {
   },
 
   /**
-   * Boost an event with HuudCoins
+   * Boost an event with HuudCredit
    */
   async boostEvent(eventId: string, days: 3 | 7) {
     return await apiClient.post<{ deducted: number; days: number; boostedUntil: string }>(

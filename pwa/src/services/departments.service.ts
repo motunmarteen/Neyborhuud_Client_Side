@@ -46,7 +46,7 @@ export const departmentService = {
   },
 
   /**
-   * Get HuudCoin rewards for a department
+   * Get HuudCredit rewards for a department
    */
   async getDepartmentRewards(identifier: string): Promise<HuudCoinReward[]> {
     const res = await apiClient.get<any>(
@@ -56,7 +56,7 @@ export const departmentService = {
   },
 
   /**
-   * Get HuudCoin reward for a specific action within a department
+   * Get HuudCredit reward for a specific action within a department
    */
   async getDepartmentRewardForAction(
     identifier: string,

@@ -51,7 +51,7 @@ export function useDepartmentServices(
 }
 
 /**
- * Fetch HuudCoin reward config for a department.
+ * Fetch HuudCredit reward config for a department.
  */
 export function useDepartmentRewards(identifier: string | undefined) {
   return useQuery<HuudCoinReward[]>({

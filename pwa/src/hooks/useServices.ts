@@ -247,7 +247,7 @@ export function useBoostService() {
         : "";
       toast.success(
         data?.extended ? `Boost extended! Featured until ${until} 🚀` : `Service boosted for ${days} days! 🚀`,
-        { description: `${data?.deducted ?? "–"} HuudCoins deducted.` },
+        { description: `${data?.deducted ?? "–"} HuudCredit deducted.` },
       );
       queryClient.invalidateQueries({ queryKey: ["services"] });
       queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });

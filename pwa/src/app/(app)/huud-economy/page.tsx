@@ -103,7 +103,7 @@ export default function HuudEconomyOverviewPage() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <PreviewStat
             icon="account_balance_wallet"
-            label="HuudCoins balance"
+            label="HuudCredit balance"
             value={`${balance.toLocaleString()} HC`}
             href="/huud-economy/wallet"
           />
@@ -162,7 +162,7 @@ export default function HuudEconomyOverviewPage() {
               ))}
             </div>
           ) : recentTxs.length === 0 ? (
-            <p className="text-sm text-[var(--neu-text-muted)]">No transactions yet — earn HuudCoins from daily activity.</p>
+            <p className="text-sm text-[var(--neu-text-muted)]">No transactions yet — earn HuudCredit from daily activity.</p>
           ) : (
             <div className="space-y-2">
               {recentTxs.map((tx, i) => {

@@ -8,7 +8,7 @@
  * - NO paid KYC / identityVerified gate (admin/KYC reserved for future Phase 2)
  *
  * Identity is proven via email, rich profile, community anchoring, trust score,
- * vouches, HuudCoin activity, streaks, and clean history.
+ * vouches, HuudCredit activity, streaks, and clean history.
  */
 
 import { normalizeTrustScore, TRUST_TIERS } from '@/lib/trust-economy';
@@ -407,7 +407,7 @@ export function getVerificationProgress(
       label: 'Activity',
       percent: Math.min(100, Math.round((coins / HUUD_PLATINUM) * 100)),
       done: coins >= HUUD_SILVER,
-      detail: `${coins.toLocaleString()} HuudCoins · ${streak}d streak`,
+      detail: `${coins.toLocaleString()} HuudCredit · ${streak}d streak`,
     },
     {
       id: 'community',
@@ -429,7 +429,7 @@ export function getVerificationProgress(
   if (tier === 'silver' && trust < TRUST_TREE && vouches < MIN_VOUCHES_GOLD)
     blockers.push(`Build trust to ${TRUST_TREE} or earn ${MIN_VOUCHES_GOLD} vouches`);
   if (tier === 'silver' && coins < HUUD_SILVER && streak < MIN_STREAK_GOLD)
-    blockers.push(`Earn ${HUUD_SILVER} HuudCoins or a ${MIN_STREAK_GOLD}-day streak`);
+    blockers.push(`Earn ${HUUD_SILVER} HuudCredit or a ${MIN_STREAK_GOLD}-day streak`);
   if (!hasCleanHistory(input)) blockers.push('Resolve account penalties to advance');
 
   const percentToNext = nextTier

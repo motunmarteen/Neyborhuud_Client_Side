@@ -181,7 +181,7 @@ export default function FollowerMilestoneCelebration({ milestone, onDismiss }: P
         </div>
 
         <p className={`text-sm ${style.sub} mb-6`}>
-          HuudCoins have been added to your wallet!
+          HuudCredit have been added to your wallet!
         </p>
 
         <button

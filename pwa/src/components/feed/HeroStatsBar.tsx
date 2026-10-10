@@ -40,9 +40,9 @@ export function HeroStatsBar() {
       {/* Dot separator */}
       <span className="text-white/20 text-[8px]">●</span>
 
-      {/* HuudCoins */}
+      {/* HuudCredit */}
       <div className="flex items-center gap-1.5">
-        <span className="text-[13px]" role="img" aria-label="HuudCoins">⭐</span>
+        <span className="text-[13px]" role="img" aria-label="HuudCredit">⭐</span>
         <span className="text-[13px] font-bold text-white/90 tabular-nums">{stats.totalHuudCoins.toLocaleString()}</span>
         <span className="text-[11px] font-medium uppercase tracking-wider text-white/40">HC</span>
       </div>

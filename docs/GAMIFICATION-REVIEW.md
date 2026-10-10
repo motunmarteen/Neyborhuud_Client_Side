@@ -8,7 +8,7 @@ Review of the current coins, levels, badges, achievements, streaks, leaderboard,
 
 | Part | How it works now |
 |---|---|
-| **HuudCoins** | Earned for actions; spent on boosts, pinning posts (100 for 1 day, 300 for 7), tipping (50 / 100 / 200 / 500), creating a community, event, job, product and service boosts |
+| **HuudCredit** | Earned for actions; spent on boosts, pinning posts (100 for 1 day, 300 for 7), tipping (50 / 100 / 200 / 500), creating a community, event, job, product and service boosts |
 | **Points and levels** | 20 levels on a points total: Level 2 at 100, Level 10 at **100,000**, Level 20 at **2,000,000** |
 | **Badges** | **50** badges across onboarding, posts, social, market, jobs, events, services, safety, streaks, FYI, gossip, chat, news, trust, vouching, referrals, levels, legendary |
 | **Achievements** | **41** achievements that pay coins when claimed (25 to 1,500) |
@@ -42,7 +42,7 @@ What earns coins today (amount, daily cap): post 10 (5 a day), FYI 8 (3), commen
 ### Rule 1: Only two numbers
 
 - **⭐ Impact**: your standing in your area. **Earned only by real outcomes. Can't be bought or spent.** Drives your level.
-- **🪙 HuudCoins**: spending money inside the app. Earned with Impact, also given in challenges and rewards, spent on fun and useful things.
+- **🪙 HuudCredit**: spending money inside the app. Earned with Impact, also given in challenges and rewards, spent on fun and useful things.
 
 Trust stays, but as a **verification tick** (✅ verified, 🏠 address verified, 🤝 vouched), not another score on screen.
 

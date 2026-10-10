@@ -129,7 +129,7 @@ function BalanceCard({
       ) : (
         <>
           <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">
-            HuudCoins wallet
+            HuudCredit wallet
           </p>
           <p className="mt-1 text-4xl font-extrabold tabular-nums text-primary">
             {balance.toLocaleString()}
@@ -277,7 +277,7 @@ export default function WalletPage() {
             <div className="mod-card rounded-2xl p-4">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-bold" style={{ color: "var(--neu-text)" }}>
                 <span className="material-symbols-outlined text-[18px] text-brand-blue">tips_and_updates</span>
-                Ways to earn HuudCoins
+                Ways to earn HuudCredit
               </h2>
               <div className="grid grid-cols-2 gap-2">
                 {[
@@ -296,7 +296,7 @@ export default function WalletPage() {
             <div className="mod-card rounded-2xl p-4">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-bold" style={{ color: "var(--neu-text)" }}>
                 <span aria-hidden>🪙</span>
-                Ways to spend HuudCoins
+                Ways to spend HuudCredit
               </h2>
               <div className="grid grid-cols-2 gap-2">
                 {[
@@ -358,7 +358,7 @@ export default function WalletPage() {
                 <p className="text-sm text-[var(--neu-text-muted)]">
                   {txQuery.isError
                     ? "Transaction history unavailable"
-                    : "No transactions yet. Start earning HuudCoins!"}
+                    : "No transactions yet. Start earning HuudCredit!"}
                 </p>
               </div>
             ) : (
@@ -487,7 +487,7 @@ export default function WalletPage() {
                   </span>
                   <p className="text-sm text-[var(--neu-text-muted)]">No boosts or payments yet.</p>
                   <p className="mt-1 text-xs text-[var(--neu-text-muted)]">
-                    Spend HuudCoins to boost jobs, services, or events.
+                    Spend HuudCredit to boost jobs, services, or events.
                   </p>
                 </div>
               )}

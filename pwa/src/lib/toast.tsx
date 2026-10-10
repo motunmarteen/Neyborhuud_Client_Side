@@ -208,7 +208,7 @@ export const nhToast = {
   },
 
   /**
-   * HuudCoin / Gamification Reward Toast
+   * HuudCredit / Gamification Reward Toast
    */
   reward: ({ coins, reason, duration = 4000 }: RewardToastProps) => {
     return sonnerToast.custom(
@@ -219,7 +219,7 @@ export const nhToast = {
           </div>
           <div className="nh-toast-card__body">
             <div className="flex items-center justify-between gap-2">
-              <h4 className="nh-toast-card__title">HuudCoins Earned!</h4>
+              <h4 className="nh-toast-card__title">HuudCredit Earned!</h4>
               <span className="nh-toast-badge nh-toast-badge--coins">
                 <Coins size={11} className="text-emerald-600 shrink-0" />
                 <span>+{coins} HC</span>

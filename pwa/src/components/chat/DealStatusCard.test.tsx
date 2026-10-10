@@ -169,7 +169,7 @@ describe('DealStatusCard — role-aware actions along the order chain', () => {
     );
     expect(screen.queryByText(/I've Paid/)).toBeNull();
     expect(screen.queryByText('Confirm Delivery Received')).toBeNull();
-    expect(screen.getByText(/\+10 HuudCoins each/)).toBeTruthy();
+    expect(screen.getByText(/\+10 HuudCredit each/)).toBeTruthy();
   });
 
   it('explains an auto-cancellation caused by the payment window expiring', () => {

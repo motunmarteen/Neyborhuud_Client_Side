@@ -185,10 +185,10 @@ export const STATIC_BADGES: Badge[] = [
   },
   {
     id: "badge_coins_collector",
-    name: "HuudCoins Collector",
+    name: "HuudCredit Collector",
     icon: "🪙",
     rarity: "epic",
-    description: "Accumulated 5,000 HuudCoins through community participation.",
+    description: "Accumulated 5,000 HuudCredit through community participation.",
   },
   // ── FYI Bulletins ──
   {
@@ -576,7 +576,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_1000_coins",
     name: "Coin Collector",
-    description: "Earn 1,000 HuudCoins through community participation.",
+    description: "Earn 1,000 HuudCredit through community participation.",
     progress: 0,
     goal: 1000,
     completed: false,
@@ -585,7 +585,7 @@ export const STATIC_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach_5000_coins",
     name: "Coin Hoarder",
-    description: "Accumulate 5,000 HuudCoins.",
+    description: "Accumulate 5,000 HuudCredit.",
     progress: 0,
     goal: 5000,
     completed: false,

@@ -19,7 +19,7 @@ export function ProfileSnapPlusCard({
 }: ProfileSnapPlusCardProps) {
   const href = isOwnProfile ? '/huud-economy' : `/profile/${username}?tab=trust`;
   const eyebrow = isOwnProfile ? 'My Huud Score' : 'Huud Score';
-  const title = isOwnProfile ? 'Trust, badges & HuudCoins' : `${trustLabel} · NeyborHuud credibility`;
+  const title = isOwnProfile ? 'Trust, badges & HuudCredit' : `${trustLabel} · NeyborHuud credibility`;
 
   return (
     <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-1">

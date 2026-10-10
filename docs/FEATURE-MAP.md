@@ -8,11 +8,11 @@ Every feature and screen in the app (taken from the code on 10 October 2026: `pw
 
 **Bottom bar (5):** 🏠 **My Huud** (the map) · 📰 **Gist** (the feed) · ➕ **Create** · 💬 **Chats** · 🛡️ **Sentinel** (safety)
 
-**Always on the map:** top bar (logo, area, HuudCoins, notifications, your photo → Me), map layer chips, ⚡ Pulse ticker, Sentinel orb, Calm view, SOS button.
+**Always on the map:** top bar (logo, area, HuudCredit, notifications, your photo → Me), map layer chips, ⚡ Pulse ticker, Sentinel orb, Calm view, SOS button.
 
 **Map layers (chips):** All · 🛡️ Safety · 🚗 Traffic · 💡 Light & water · 🛒 Market · 💼 Work · 🎉 Events · 🙋 Help. Every listing, job, service, event, FYI and help request with a location becomes a pin on its layer.
 
-**Me (tap your photo):** profile, Huud Passport, HuudCoins and rewards, Huud Economy score, premium, saved, settings, help, and **Everything in NeyborHuud** (a grid of every hub).
+**Me (tap your photo):** profile, Huud Passport, HuudCredit and rewards, Huud Economy score, premium, saved, settings, help, and **Everything in NeyborHuud** (a grid of every hub).
 
 ---
 
@@ -92,7 +92,7 @@ Every feature and screen in the app (taken from the code on 10 October 2026: `pw
 |---|---|---|
 | Profile, followers, following | `/profile/[username]/*` | Me |
 | Huud Passport (verification, trust) | `/profile/passport` | Me → Passport |
-| HuudCoins, wallet, rewards | `/huud-economy/*`, `/rewards`, `/gamification/*` | 🪙 in the top bar → wallet; Me → Rewards |
+| HuudCredit, wallet, rewards | `/huud-economy/*`, `/rewards`, `/gamification/*` | 🪙 in the top bar → wallet; Me → Rewards |
 | Huud Economy score | `/huud-economy/score` | Me → Score |
 | Premium | `/premium`, `/premium/success` | Me → Premium |
 | Saved posts | `/saved` | Me → Saved |
@@ -161,9 +161,9 @@ Redirects only: `/chat`, `/messages`, `/gossip`, `/popular`, `/premium`, `/gamif
 | `/gossip` | Redirect only: no screen |
 | `/help-request` | Help layer on the map / ➕ Help request |
 | `/help-request/[id]` | Help layer on the map / ➕ Help request |
-| `/huud-economy` | Me → HuudCoins, rewards, score (🪙 in top bar) |
-| `/huud-economy/score` | Me → HuudCoins, rewards, score (🪙 in top bar) |
-| `/huud-economy/wallet` | Me → HuudCoins, rewards, score (🪙 in top bar) |
+| `/huud-economy` | Me → HuudCredit, rewards, score (🪙 in top bar) |
+| `/huud-economy/score` | Me → HuudCredit, rewards, score (🪙 in top bar) |
+| `/huud-economy/wallet` | Me → HuudCredit, rewards, score (🪙 in top bar) |
 | `/incident-reports` | Safety layer pins / Sentinel → Reports |
 | `/incident-reports/[id]` | Safety layer pins / Sentinel → Reports |
 | `/info/community-rules` | Me → Help & rules |
@@ -196,7 +196,7 @@ Redirects only: `/chat`, `/messages`, `/gossip`, `/popular`, `/premium`, `/gamif
 | `/profile/[username]/followers` | Me → profile, passport, followers |
 | `/profile/[username]/following` | Me → profile, passport, followers |
 | `/profile/passport` | Me → profile, passport, followers |
-| `/rewards` | Me → HuudCoins, rewards, score (🪙 in top bar) |
+| `/rewards` | Me → HuudCredit, rewards, score (🪙 in top bar) |
 | `/safety` | Sentinel tab |
 | `/safety/dashboard` | Redirect only: no screen |
 | `/safety/emergency` | Sentinel → Tools → Report emergency |

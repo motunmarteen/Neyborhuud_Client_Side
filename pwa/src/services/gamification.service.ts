@@ -30,7 +30,7 @@ export const gamificationService = {
   },
 
   /**
-   * Get hero stats (trust score + HuudCoins) — lightweight endpoint for the sky hero status bar
+   * Get hero stats (trust score + HuudCredit) — lightweight endpoint for the sky hero status bar
    */
   async getHeroStats() {
     return await apiClient.get<{ trustScore: number; totalHuudCoins: number }>("/gamification/hero-stats");
@@ -97,14 +97,14 @@ export const gamificationService = {
   },
 
   /**
-   * Get HuudCoins wallet balance and summary
+   * Get HuudCredit wallet balance and summary
    */
   async getWallet() {
     return await apiClient.get<HuudCoinWallet>("/gamification/wallet");
   },
 
   /**
-   * Get HuudCoins transaction history
+   * Get HuudCredit transaction history
    */
   async getTransactions(page = 1, limit = 20) {
     return await apiClient.get<PaginatedResponse<HuudCoinTransaction>>("/gamification/wallet/transactions", {
@@ -113,7 +113,7 @@ export const gamificationService = {
   },
 
   /**
-   * Send a HuudCoin tip to another user — purely P2P, no platform cut.
+   * Send a HuudCredit tip to another user — purely P2P, no platform cut.
    */
   async tipUser(recipientId: string, amount: 50 | 100 | 200 | 500) {
     return await apiClient.post<{ sent: number; recipientId: string }>(

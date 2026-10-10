@@ -12,7 +12,7 @@ export function HuudEconomyHero() {
     <div className="mod-card rounded-2xl p-4">
       <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">Huud Economy</p>
       <p className="mt-1 text-sm leading-relaxed text-[var(--neu-text-muted)]">
-        Huud Score, HuudCoins wallet, and TrustOS — your neighbourhood reputation and currency in one hub.
+        Huud Score, HuudCredit wallet, and TrustOS — your neighbourhood reputation and currency in one hub.
       </p>
     </div>
   );

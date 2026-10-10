@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useWallet } from "@/hooks/useGamification";
 import { useBoostProduct } from "@/hooks/useMarketplace";
 
-/** Boost durations and their HuudCoin costs — must match backend BOOST_COSTS */
+/** Boost durations and their HuudCredit costs — must match backend BOOST_COSTS */
 const BOOST_OPTIONS = [
   { label: "3 Days",  days: 3  as const, coins: 300,  popular: false },
   { label: "7 Days",  days: 7  as const, coins: 500,  popular: true  },
@@ -67,7 +67,7 @@ export function BoostModal({
             <span className="text-white font-semibold">{selectedDays} days</span>.
           </p>
           <p className="text-xs text-[var(--neu-text-muted)]">
-            {selected.coins} HuudCoins deducted
+            {selected.coins} HuudCredit deducted
           </p>
           <button
             onClick={onClose}
@@ -124,9 +124,9 @@ export function BoostModal({
             </div>
           )}
 
-          {/* HuudCoin wallet balance */}
+          {/* HuudCredit wallet balance */}
           <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-brand-black border border-black/[0.08]">
-            <span className="text-[var(--neu-text-muted)] text-sm">Your HuudCoins</span>
+            <span className="text-[var(--neu-text-muted)] text-sm">Your HuudCredit</span>
             <span className={`font-bold text-base ${hasEnough ? "text-primary" : "text-brand-red"}`}>
               🪙 {walletCoins.toLocaleString()}
             </span>
@@ -170,7 +170,7 @@ export function BoostModal({
           {!hasEnough && (
             <p className="text-xs text-brand-red text-center">
               You need{" "}
-              <strong>{selected.coins - walletCoins} more HuudCoins</strong> to
+              <strong>{selected.coins - walletCoins} more HuudCredit</strong> to
               boost for {selected.label.toLowerCase()}. Earn coins by posting,
               commenting, completing jobs, and helping neighbours.
             </p>
@@ -180,7 +180,7 @@ export function BoostModal({
           <div className="rounded-xl bg-brand-black border border-black/[0.08] px-4 py-3 flex items-center justify-between">
             <span className="text-[var(--neu-text-muted)] text-sm">Cost</span>
             <span className="font-bold text-white text-lg flex items-center gap-1">
-              🪙 {selected.coins.toLocaleString()} HuudCoins
+              🪙 {selected.coins.toLocaleString()} HuudCredit
             </span>
           </div>
 

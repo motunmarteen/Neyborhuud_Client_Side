@@ -15,22 +15,22 @@ const CROSS_PROMOS: Record<ContentType, CrossPromo[]> = {
   job: [
     { icon: 'campaign', label: 'Share to feed', description: 'Let neighbours know about this opening', href: '/feed' },
     { icon: 'event', label: 'Host a hiring event', description: 'Meet candidates in person', href: '/events/create' },
-    { icon: 'rocket_launch', label: 'Boost this job', description: 'Reach more people with HuudCoins', href: '/huud-economy/wallet?tab=spends' },
+    { icon: 'rocket_launch', label: 'Boost this job', description: 'Reach more people with HuudCredit', href: '/huud-economy/wallet?tab=spends' },
   ],
   event: [
     { icon: 'campaign', label: 'Share to feed', description: 'Spread the word in your Huud', href: '/feed' },
     { icon: 'work', label: 'Need help running it?', description: 'Post a job for event staff', href: '/jobs/create' },
-    { icon: 'rocket_launch', label: 'Boost this event', description: 'Get more RSVPs with HuudCoins', href: '/huud-economy/wallet?tab=spends' },
+    { icon: 'rocket_launch', label: 'Boost this event', description: 'Get more RSVPs with HuudCredit', href: '/huud-economy/wallet?tab=spends' },
   ],
   marketplace: [
     { icon: 'campaign', label: 'Share to feed', description: 'Show off your listing', href: '/feed' },
     { icon: 'storefront', label: 'List another item', description: 'Keep your shop active', href: '/marketplace/create' },
-    { icon: 'rocket_launch', label: 'Boost this listing', description: 'More eyeballs with HuudCoins', href: '/huud-economy/wallet?tab=spends' },
+    { icon: 'rocket_launch', label: 'Boost this listing', description: 'More eyeballs with HuudCredit', href: '/huud-economy/wallet?tab=spends' },
   ],
   service: [
     { icon: 'campaign', label: 'Share to feed', description: 'Let your Huud know you\'re available', href: '/feed' },
     { icon: 'work', label: 'Looking for talent?', description: 'Post a job too', href: '/jobs/create' },
-    { icon: 'rocket_launch', label: 'Boost your service', description: 'Stand out with HuudCoins', href: '/huud-economy/wallet?tab=spends' },
+    { icon: 'rocket_launch', label: 'Boost your service', description: 'Stand out with HuudCredit', href: '/huud-economy/wallet?tab=spends' },
   ],
 };
 

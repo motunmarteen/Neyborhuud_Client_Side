@@ -261,7 +261,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
             )}
           </div>
 
-          {/* ZONE 2 (CENTER): Rewards / HuudCoins Pill (Modeled after game balance capsule) */}
+          {/* ZONE 2 (CENTER): Rewards / HuudCredit Pill (Modeled after game balance capsule) */}
           <Link
             href="/rewards"
             className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-black/[0.04] hover:bg-black/[0.08] border border-black/[0.06] text-[11px] sm:text-xs font-bold text-slate-800 transition-all active:scale-95 group shadow-xs shrink-0 cursor-pointer"

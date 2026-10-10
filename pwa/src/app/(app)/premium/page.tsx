@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-/** Legacy route — activity tier lives in the HuudCoins wallet hub. */
+/** Legacy route — activity tier lives in the HuudCredit wallet hub. */
 export default function PremiumRedirectPage() {
   const router = useRouter();
 

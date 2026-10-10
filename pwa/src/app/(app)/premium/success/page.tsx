@@ -9,7 +9,7 @@ import type { Payment } from "@/types/api";
 
 function SuccessInner() {
   const searchParams = useSearchParams();
-  // HuudCoin refs start with "hc_"; legacy Paystack refs are kept for compatibility
+  // HuudCredit refs start with "hc_"; legacy Paystack refs are kept for compatibility
   const reference =
     searchParams.get("reference") ?? searchParams.get("trxref");
   const queryClient = useQueryClient();
@@ -63,11 +63,11 @@ function SuccessInner() {
               <span className="text-5xl">🪙</span>
             </div>
             <h1 className="text-2xl font-bold mb-2 text-primary">
-              HuudCoins Spent!
+              HuudCredit Spent!
             </h1>
             {payment?.coinsSpent && (
               <p className="text-[var(--neu-text-muted)] text-base font-semibold mb-1">
-                {payment.coinsSpent} HuudCoins deducted
+                {payment.coinsSpent} HuudCredit deducted
               </p>
             )}
             {payment?.description && (

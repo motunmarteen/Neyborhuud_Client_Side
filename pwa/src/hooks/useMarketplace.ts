@@ -809,7 +809,7 @@ export function useCancelOrder(orderId: string) {
 // recreate exactly the two-code-paths problem this rebuild removed.
 
 /**
- * Hook for boosting a marketplace listing with HuudCoins.
+ * Hook for boosting a marketplace listing with HuudCredit.
  * On success invalidates the listings cache so the boosted badge appears immediately.
  */
 export function useBoostProduct() {
@@ -827,7 +827,7 @@ export function useBoostProduct() {
         data?.extended
           ? `Boost extended! Featured until ${until} 🚀`
           : `Listing boosted for ${days} days! Featured until ${until} 🚀`,
-        { description: `${data?.deducted ?? "–"} HuudCoins deducted from your wallet.` },
+        { description: `${data?.deducted ?? "–"} HuudCredit deducted from your wallet.` },
       );
       queryClient.invalidateQueries({ queryKey: ["marketplace", "my-listings"] });
       queryClient.invalidateQueries({ queryKey: ["marketplace", "products"] });

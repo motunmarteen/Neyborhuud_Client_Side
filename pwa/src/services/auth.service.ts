@@ -658,7 +658,7 @@ export const authService = {
   /**
    * Complete optional profile enrichment after signup.
    * Uses PATCH /identity/profile for updates; only calls /auth/complete-profile
-   * for first-time HuudCoin reward (skipped when name is already saved).
+   * for first-time HuudCredit reward (skipped when name is already saved).
    */
   async completeProfile(data: CompleteProfileInput): Promise<ApiResponse<User>> {
     const phone = data.phone?.trim();
@@ -702,7 +702,7 @@ export const authService = {
           success: true,
           message:
             rewardResult === "success"
-              ? "Profile completed successfully! 100 HuudCoins awarded."
+              ? "Profile completed successfully! 100 HuudCredit awarded."
               : "Profile saved.",
           data: synced ?? undefined,
         };

@@ -37,7 +37,7 @@ export const LOCAL_HUUD_HUBS: Record<LocalHuudHubId, LocalHuudHubConfig> = {
     description: 'Neighbourhood listings, offers, and trusted local trade — powered by Huud Score.',
     icon: 'shopping_bag',
     href: '/marketplace',
-    economyNote: 'Boost listings with HuudCoins · Build seller trust',
+    economyNote: 'Boost listings with HuudCredit · Build seller trust',
     sections: [
       { id: 'browse', label: 'Browse', href: '/marketplace', icon: 'storefront' },
       { id: 'listings', label: 'My Listings', href: '/marketplace/my-listings', icon: 'inventory_2', matchPrefix: '/marketplace/my-listings' },
@@ -53,7 +53,7 @@ export const LOCAL_HUUD_HUBS: Record<LocalHuudHubId, LocalHuudHubConfig> = {
     description: 'Book trusted local pros — ratings, reviews, and Huud Economy rewards.',
     icon: 'handyman',
     href: '/services',
-    economyNote: 'Earn HuudCoins for great service · Boost visibility',
+    economyNote: 'Earn HuudCredit for great service · Boost visibility',
     sections: [
       { id: 'browse', label: 'Browse', href: '/services', icon: 'search' },
       { id: 'bookings', label: 'Bookings', href: '/services/my-bookings', icon: 'event_available', matchPrefix: '/services/my-bookings' },
@@ -81,7 +81,7 @@ export const LOCAL_HUUD_HUBS: Record<LocalHuudHubId, LocalHuudHubConfig> = {
     description: 'Discover and host neighbourhood gatherings — RSVP and share with your Huud.',
     icon: 'event',
     href: '/events',
-    economyNote: 'Boost events · Earn engagement HuudCoins',
+    economyNote: 'Boost events · Earn engagement HuudCredit',
     sections: [
       { id: 'browse', label: 'Browse', href: '/events', icon: 'calendar_month' },
       { id: 'mine', label: 'My Events', href: '/events/my-events', icon: 'event_note', matchPrefix: '/events/my-events' },
@@ -105,7 +105,7 @@ export const LOCAL_HUUD_HUBS: Record<LocalHuudHubId, LocalHuudHubConfig> = {
     description: 'Request help from your community — neighbours respond with care and Huud trust.',
     icon: 'help',
     href: '/help-request',
-    economyNote: 'HuudCoins rewards coming soon for helpers',
+    economyNote: 'HuudCredit rewards coming soon for helpers',
     sections: [{ id: 'browse', label: 'Requests', href: '/help-request', icon: 'volunteer_activism' }],
   },
   'incident-reports': {

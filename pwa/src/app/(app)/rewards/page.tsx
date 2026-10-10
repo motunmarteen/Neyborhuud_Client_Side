@@ -49,7 +49,7 @@ export default function RewardsPage() {
     setTimeout(() => {
       setRedeeming(false);
       setPromoCode('');
-      toast.success(`Code "${promoCode.toUpperCase()}" redeemed for +50 HuudCoins!`);
+      toast.success(`Code "${promoCode.toUpperCase()}" redeemed for +50 HuudCredit!`);
     }, 800);
   };
 
@@ -164,7 +164,7 @@ export default function RewardsPage() {
                   <Coins size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white">Instant HuudCoins f(x)</h4>
+                  <h4 className="text-xs font-bold text-white">Instant HuudCredit f(x)</h4>
                   <p className="text-[11px] text-white/50">Post, help neighbors, collect earnings.</p>
                 </div>
               </div>

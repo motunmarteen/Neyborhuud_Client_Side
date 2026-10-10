@@ -150,7 +150,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
               <p className="mt-1 text-sm text-[var(--neu-text-muted)]">
                 You sent{" "}
                 <span className="font-bold text-amber-600">
-                  🪙 {selected.toLocaleString()} HuudCoins
+                  🪙 {selected.toLocaleString()} HuudCredit
                 </span>{" "}
                 to {recipient.displayName}.
               </p>
@@ -215,7 +215,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
               {/* Insufficient balance warning */}
               {!hasEnough && (
                 <div className="mb-4 rounded-xl bg-status-danger/8 border border-status-danger/20 px-4 py-2 text-xs text-status-danger font-medium">
-                  You need {(selected - walletCoins).toLocaleString()} more HuudCoins to send this tip.
+                  You need {(selected - walletCoins).toLocaleString()} more HuudCredit to send this tip.
                   Earn them by posting, commenting, and participating in your community.
                 </div>
               )}
@@ -237,7 +237,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
                     Sending...
                   </span>
                 ) : (
-                  `Send 🪙 ${selected.toLocaleString()} HuudCoins`
+                  `Send 🪙 ${selected.toLocaleString()} HuudCredit`
                 )}
               </button>
             </>

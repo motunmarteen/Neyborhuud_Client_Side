@@ -159,7 +159,7 @@ export default function SetupCompletePage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-1.5">
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary">HuudCredit</p>
                 <Eli5Tooltip 
                   term="Starting Balance" 
                   explanation="Free welcome tokens credited to your wallet for completing account verification. Use them in your community marketplace." 

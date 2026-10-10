@@ -394,7 +394,7 @@ export function useBoostEvent() {
         : "";
       toast.success(
         data?.extended ? `Boost extended! Featured until ${until} 🚀` : `Event boosted for ${days} days! 🚀`,
-        `${data?.deducted ?? "–"} HuudCoins deducted.`,
+        `${data?.deducted ?? "–"} HuudCredit deducted.`,
       );
       queryClient.invalidateQueries({ queryKey: ["events"] });
       queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });

@@ -218,7 +218,7 @@ export const marketplaceService = {
    * DELETE /api/v1/marketplace/{productId}
    */
   /**
-   * Boost a product listing using HuudCoins.
+   * Boost a product listing using HuudCredit.
    * POST /api/v1/marketplace/products/:productId/boost
    */
   async boostProduct(productId: string, days: 3 | 7 | 14 | 30) {

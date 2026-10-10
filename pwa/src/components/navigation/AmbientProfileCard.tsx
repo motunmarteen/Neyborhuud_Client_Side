@@ -343,7 +343,7 @@ export default function AmbientProfileCard({
     };
   }, [mounted, lat, lng]);
 
-  // Fetch hero stats (NeyburH Score + HuudCoins)
+  // Fetch hero stats (NeyburH Score + HuudCredit)
   const fetchHeroStats = useCallback(() => {
     if (!userId) return;
     import('@/services/gamification.service').then(({ gamificationService }) => {
@@ -493,7 +493,7 @@ export default function AmbientProfileCard({
           </div>
         </a>
 
-        {/* ── Stats row — NeyburH Score + HuudCoins ── */}
+        {/* ── Stats row — NeyburH Score + HuudCredit ── */}
         {heroStats && (
           <div className="flex gap-2 mt-3">
             {/* NeyburH Score */}
@@ -517,7 +517,7 @@ export default function AmbientProfileCard({
                 NeyburH Score
               </p>
             </div>
-            {/* HuudCoins */}
+            {/* HuudCredit */}
             <div
               className="flex-1 flex flex-col items-center justify-center py-2.5 rounded-2xl backdrop-blur-xl transition-all duration-200 hover:scale-[1.02]"
               style={{
@@ -533,7 +533,7 @@ export default function AmbientProfileCard({
                 </p>
               </div>
               <p className="text-[10px] font-bold uppercase mt-1.5 text-status-warning/60 text-center" style={{ letterSpacing: '0.08em' }}>
-                HuudCoins
+                HuudCredit
               </p>
             </div>
           </div>

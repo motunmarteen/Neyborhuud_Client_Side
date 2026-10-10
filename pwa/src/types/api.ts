@@ -1198,7 +1198,7 @@ export interface Report {
 }
 
 // ==================== Payment Types ====================
-// All platform transactions are denominated in HuudCoins.
+// All platform transactions are denominated in HuudCredit.
 // No external payment gateway is integrated.
 
 export interface Payment {
@@ -1214,7 +1214,7 @@ export interface Payment {
     | "marketplace_pledge"
     | "service_payment";
   coinsSpent: number;
-  /** Always "HuudCoins" */
+  /** Always "HuudCredit" */
   currency: string;
   status: "completed" | "failed" | "refunded";
   /** Always "huudcoins" — no external gateway */

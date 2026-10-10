@@ -134,7 +134,7 @@ export function useClaimAchievement() {
 // ── Earn / Award ───────────────────────────────────────────────
 
 /**
- * Called after a user action that may earn HuudCoins.
+ * Called after a user action that may earn HuudCredit.
  *
  * Coins are awarded SERVER-SIDE by the endpoint that performed the action
  * (create post, comment, event, job, listing, ...) — the client never asks

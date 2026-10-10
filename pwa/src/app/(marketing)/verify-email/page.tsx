@@ -320,7 +320,7 @@ function VerifyEmailContent() {
                     </div>
                     <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
                         <div>
-                            <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCoins</p>
+                            <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCredit</p>
                             <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Email verification reward</p>
                         </div>
                         <div className="flex items-center gap-2 text-primary">

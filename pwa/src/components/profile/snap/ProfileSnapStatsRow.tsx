@@ -67,7 +67,7 @@ export function ProfileSnapStatsRow({
         {birthday ? <StatCard icon="🎈" label="Birthday" value={birthday} /> : null}
         <StatCard
           icon="🪙"
-          label="HuudCoins"
+          label="HuudCredit"
           value={huudCoins.toLocaleString()}
           href={isOwnProfile ? '/huud-economy/wallet' : undefined}
         />

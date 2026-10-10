@@ -84,7 +84,7 @@ Seven-day improvement challenges, clean-up campaigns, tracking unresolved infras
 Proposed levels: **Neighbour** → **Contributor** → **Trusted Contributor** → **Community Champion**.
 - Users can see why recognition was earned and appeal mistakes.
 - Neighbourhood milestones: first 25 residents, first 10 businesses, first completed project, first 100 confirmed helpful contributions, a month of steady participation.
-- *Already have:* HuudCoins, streaks, badge catalogue.
+- *Already have:* HuudCredit, streaks, badge catalogue.
 
 **Strategic priority:** Huud Circles connected to Huud Live. A new resident should immediately find their estate, an announcement from a recognised admin, a nearby road update, a recommended local service, an upcoming meeting and a way to help. Never fabricate activity: an empty area shows useful public information and an honest invitation to set up the community.
 

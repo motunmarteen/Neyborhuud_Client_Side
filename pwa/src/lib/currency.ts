@@ -10,7 +10,7 @@
  * convert with fromKobo() before displaying it, or use formatNaira() to do
  * both the conversion and the display formatting in one call.
  *
- * This does NOT apply to HuudCoin/points values — those are an internal
+ * This does NOT apply to HuudCredit/points values — those are an internal
  * non-monetary ledger, not real money, and are untouched by this module.
  */
 
