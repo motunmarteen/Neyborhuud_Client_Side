@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { FilterChip } from '@/components/ui/Chip';
 
 type BrowseFilterChipProps = {
   active: boolean;
@@ -9,22 +10,11 @@ type BrowseFilterChipProps = {
   className?: string;
 };
 
-export function BrowseFilterChip({
-  active,
-  onClick,
-  children,
-  className = '',
-}: BrowseFilterChipProps) {
+/** Filter chip for browse screens — the shared F-04 FilterChip (map-layer style). */
+export function BrowseFilterChip({ active, onClick, children, className = '' }: BrowseFilterChipProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-        active ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'
-      } ${className}`.trim()}
-      style={active ? undefined : { color: 'var(--neu-text-muted)' }}
-    >
+    <FilterChip active={active} onClick={onClick} className={className}>
       {children}
-    </button>
+    </FilterChip>
   );
 }

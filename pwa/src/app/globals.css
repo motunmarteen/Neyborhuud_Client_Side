@@ -6321,15 +6321,20 @@ button.mod-card:active {
 .icon-filled   { font-variation-settings: 'FILL' 1; }
 .icon-outlined { font-variation-settings: 'FILL' 0; }
 
-/* ── Chip / Tag ── */
+/* ── Chip / Tag (F-04) ──
+   Legacy class used across many screens. New code: <Chip> / <FilterChip> in components/ui/Chip.tsx.
+   .mod-chip        = white chip with a line border and soft shadow (was a dark-mode glass style,
+                      nearly invisible on the light background)
+   .mod-chip-active = green tint with deep-green text (same as the "soft" button) */
 .mod-chip {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #FFFFFF;
+  border: 1px solid #DDE3EC;
+  box-shadow: 0 1px 3px rgba(29, 36, 51, 0.06);
 }
 .mod-chip-active {
-  background: rgba(0, 184, 46, 0.12);
-  border: 1px solid rgba(0, 184, 46, 0.35);
-  color: var(--primary);
+  background: #E8F7EC;
+  border: 1px solid transparent;
+  color: #0E8A3E;
   font-weight: 700;
 }
 

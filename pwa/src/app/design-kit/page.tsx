@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ArrowRight, Plus, Siren, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { CardsAndChipsDemo } from './CardsAndChipsDemo';
 
 export const metadata: Metadata = {
   title: 'Design kit',
@@ -107,6 +108,10 @@ export default function DesignKitPage() {
             </div>
             <p className="text-xs text-muted">Small buttons still have a 48px tap area.</p>
           </div>
+        </Section>
+
+        <Section id="cards" title="Cards and chips (F-04)" note="White cards with soft shadows. Filter chips turn navy when on, like the map layers.">
+          <CardsAndChipsDemo />
         </Section>
       </div>
     </main>
