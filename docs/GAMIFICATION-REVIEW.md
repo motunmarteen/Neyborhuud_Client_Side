@@ -153,7 +153,60 @@ Safety reports are never made into public share cards.
 
 ---
 
-## 8. Build order
+## 8. Additions (version 2): quests, map billboards, gifting, contributor earnings
+
+Adds ideas from a parallel ChatGPT review and from the product owner, with the decisions below.
+
+### 8.1 More ways to earn
+
+| New way | How it works | Pays |
+|---|---|---|
+| **Welcome quest** | 5 first steps: add a guardian, confirm a light update, finish the safety checklist, set your home area, invite one neighbour | 🪙100 total, plus 🌱 → 🌿 level-up |
+| **Daily quests** | 3 rotating useful tasks a day (confirm an update, answer a neighbour's question, rate a deal) | 🪙10 each, 🪙20 bonus for all 3 |
+| **Weekly challenge** | Huud of the Week (see section 4) | Impact and coins on completion |
+| **Sponsored missions** | A local business funds a task (e.g. "Try Mama Bisi's akara and rate it honestly", "Attend the free health check"), clearly labelled; never buys positive reviews | Sponsor pays NeyborHuud; part goes to users as coins |
+| **Contributor programme** | Monthly cash share of ad revenue for verified people whose contributions genuinely help (see 8.4) | Naira, through licensed payouts |
+
+### 8.2 More to spend on
+
+- **🪧 Billboards on the map (the big one).** Businesses (and people, for events or birthdays) buy a billboard standing at a real place on the map. Everyone scrolling the map nearby sees it, in the same illustrated style, by day and lit up at night. Slots are limited per area, which keeps prices meaningful. Ads are clearly labelled "Ad" and moderated (no scams, no prohibited items: the listing-safety rules already block these). Billboards can be bought with **HuudCredit or naira**; naira purchases give businesses a direct reason to buy credits, which gives HuudCredit real value.
+- **📣 Other ads:** sponsored pin on the map, sponsored card in Gist, featured service, boosted event.
+- **🎂 Birthday and celebration boards:** a neighbour pays to put "Happy birthday Mama Tunde!" on the street billboard for a day.
+- **🏗️ Community projects:** put coins toward verified local projects (gutter clearing, solar gate lights, first-aid kits). Sponsors can match. Progress and results are shown on the map.
+- **🎁 Gifting:** send HuudCredit to a neighbour (see 8.3).
+- Plus everything in section 3, Rule 4 (map skins, frames, shout-outs, boosts).
+
+### 8.3 Transfers and trading: decision
+
+- **Yes to gifting between people, with limits:** Level 2+, verified phone, up to 🪙500 a day and 🪙2,000 a month, a 24-hour hold on the first gift to a new person, and no gifting from coins earned in the last 7 days. This keeps the fun (tips, thank-yous, "abeg help me with credits for my billboard") without turning HuudCredit into a laundering tool.
+- **No to open trading or selling HuudCredit between users for money.** Under the Investments and Securities Act 2025, digital and virtual assets count as securities, and running a place where they are traded needs an SEC licence. A tradable currency also attracts fraud ("format" scams, stolen accounts, fake engagement to farm coins). We can revisit this with a fintech lawyer if NeyborHuud later gets the licences.
+- **Money comes in one way:** businesses and users can **buy** HuudCredit with naira (through Paystack or Flutterwave). HuudCredit **never** goes back to naira except through the contributor programme below, at a rate NeyborHuud sets. This is how TikTok coins work.
+
+### 8.4 Revenue sharing for contributors: yes, done safely
+
+Like X's creator revenue sharing and TikTok's creator rewards, but built for a community safety platform:
+
+- **Who qualifies:** Level 3+ (Helper), verified identity (the existing KYC), active for 60+ days, no upheld abuse reports.
+- **What counts:** *useful* contribution only: confirmed reports, light and road updates that neighbours relied on, help given, Sentinel answers improved by your corrections, events hosted, good marketplace and service ratings, engagement on genuinely useful posts.
+- **What never counts:** safety alerts, SOS, crime reports or anything that rewards fear. A safety platform must never pay people for alarming content.
+- **How it pays:** each month a fixed share of ad and billboard revenue goes into a **Contributor Pool**. It is split by verified Impact, paid in **naira** to a verified bank account through a licensed payout partner, with a minimum payout (e.g. ₦5,000) and tax withholding as required. Contributors can also choose to take it as HuudCredit at a bonus rate.
+- **Why naira, not "HC you can sell":** paying out directly from real revenue is the same model as X and TikTok, is easier to keep legal, and can't be gamed by people trading coins.
+- **Before launch:** confirm with a Nigerian fintech/tax lawyer (payouts, withholding tax, AML/KYC record-keeping).
+
+### 8.5 One economy, one price list
+
+All earning and prices must come from one table, checked against real behaviour, so coins neither pile up nor feel worthless. Starting points to test:
+
+| Earn per week (active helper) | Price |
+|---|---|
+| ~🪙150–400 from quests, verified help, updates | Profile frame 🪙250 · Map skin 🪙300 · Title 🪙500 |
+| Referral (when friend is active) 🪙50 | Birthday board (1 day) 🪙400 |
+| Sponsored mission 🪙20–100 | Business billboard: 🪙1,500 a week (≈ naira price set later) |
+|  | Boost a listing 🪙150 · Pin a post 🪙100 |
+
+Track: earned vs spent per week, % of users who spend, billboard occupancy, fraud reversals, and 7- and 30-day retention of invited users.
+
+## 9. Build order
 
 1. **Server:** two meters (Impact separate from coins), new earning table with "pay on confirmation", referral-on-activation, 6-level ladder, area leaderboards.
 2. **Share cards:** level-up, badge, Area Champion, "Today in Somolu", area ranking.
