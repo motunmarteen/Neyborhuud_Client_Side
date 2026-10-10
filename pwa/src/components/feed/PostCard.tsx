@@ -3,20 +3,23 @@
 /**
  * PostCard — the one card every post type uses (feed, profile, marketplace, events, ...).
  *
- * Same frame for all types (author, text, photos, actions), plus a detail block
- * that changes with the type so the important thing stands out:
+ * Same frame for all types (author, text, photos, actions). What a post is, is shown
+ * by a small icon badge on the corner of the author's avatar (no extra space); only a
+ * safety alert's badge pulses. A detail block and one main button change with the type:
  *
  *   post         text + photos
  *   fyi          📢 notice, "Helpful" instead of repost
- *   emergency    🚨 red edge, severity, Confirm / Not true / I'm safe / I'm nearby
+ *   lost_found   🔎 lost / found item, last seen → I found it / It's mine
+ *   poll         📊 options with live results → tap to vote
+ *   emergency    🚨 severity, It's true / Not true / I'm safe / I'm nearby
  *   marketplace  🛒 big price, condition, delivery → Message seller
  *   job          💼 title, salary, type → Message to apply
  *   event        🎉 date tile, time, venue, going → I'm going
  *   services     🛠️ rate, areas → Book
  *   help_request 🙏 category, progress → I can help
  *
- * Presentational: data in, callbacks out. Follow, the ⋯ menu, share sheets and
- * reposting are wired by the screen that renders it.
+ * Presentational: data in, callbacks out. The screen that renders it wires follow,
+ * the menu sheet, sharing, reposting and voting.
  */
 
 import Link from 'next/link';
@@ -24,14 +27,17 @@ import { useState, type ReactNode } from 'react';
 import {
   BadgeCheck,
   Bookmark,
+  Check,
   Heart,
+  Loader2,
   MapPin,
   MessageCircle,
-  MoreHorizontal,
   Pin,
   Repeat2,
   Share2,
   ThumbsUp,
+  UserCheck,
+  UserPlus,
   Users,
 } from 'lucide-react';
 import type { MediaItem, Post, PostAuthor } from '@/types/api';
@@ -39,12 +45,34 @@ import { Card } from '@/components/ui/Card';
 import { Chip, type ChipTone } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { PostCardMediaSlider } from '@/components/feed/PostCardMediaSlider';
+import { PostCardMenuIcon } from '@/components/feed/PostCardMenuIcon';
 import { formatNaira } from '@/lib/currency';
 import { renderFormattedText } from '@/lib/renderFormattedText';
 import { resolveUserAvatarUrl } from '@/lib/userAvatar';
 
-export type PostPrimaryAction = 'message_seller' | 'apply' | 'going' | 'book' | 'help';
+export type PostKind =
+  | 'post'
+  | 'fyi'
+  | 'lost_found'
+  | 'poll'
+  | 'emergency'
+  | 'marketplace'
+  | 'job'
+  | 'event'
+  | 'services'
+  | 'help_request'
+  | 'gossip';
+
+export type PostPrimaryAction = 'message_seller' | 'apply' | 'going' | 'book' | 'help' | 'found_it' | 'its_mine';
 export type EmergencyAction = 'confirm' | 'dispute' | 'safe' | 'nearby';
+
+/** Poll data on a post (metadata.poll). Feed polls still need server support — see REBUILD-TRACKER. */
+export type PostPoll = {
+  options: { text: string; votes: number }[];
+  /** Index the viewer voted for, if any. */
+  myVote?: number | null;
+  endsAt?: string;
+};
 
 export type PostCardProps = {
   post: Post;
@@ -58,14 +86,16 @@ export type PostCardProps = {
   onCardClick?: () => void;
   onPrimaryAction?: (action: PostPrimaryAction) => void;
   onEmergencyAction?: (action: EmergencyAction) => void;
-  /** Shown as "Follow" next to the name when provided. */
+  onVote?: (optionIndex: number) => void;
+  /** Shows the follow icon next to the name when provided (hidden on your own posts). */
   onFollow?: () => void;
   isFollowing?: boolean;
+  followPending?: boolean;
   /** For events: whether the viewer is going (changes the button). */
   isGoing?: boolean;
 };
 
-// ── Small helpers ────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 const compact = (n?: number) => {
   if (!n) return '';
@@ -95,19 +125,29 @@ function salaryText(raw: unknown): string | null {
 
 const cap = (s?: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/[_-]+/g, ' ') : '');
 
+export function getPostKind(post: Post): PostKind {
+  const m = post.metadata ?? {};
+  if (post.type === 'poll' || m.poll) return 'poll';
+  if (post.contentType === 'fyi' && m.fyiType === 'lost_found') return 'lost_found';
+  if (post.cardStyle === 'emergency_red') return 'emergency';
+  return (post.contentType as PostKind) ?? 'post';
+}
+
 const CONDITION: Record<string, string> = { new: 'Brand new', used: 'Tokunbo (used)', refurbished: 'Refurbished', free: 'Free' };
 const DELIVERY: Record<string, string> = { pickup: 'Pickup', delivery: 'Delivery', both: 'Pickup or delivery' };
 
-type TypeMeta = { label: string; icon: string; tone: ChipTone };
-const TYPE_META: Partial<Record<NonNullable<Post['contentType']>, TypeMeta>> = {
-  fyi: { label: 'FYI', icon: '📢', tone: 'amber' },
-  emergency: { label: 'Safety alert', icon: '🚨', tone: 'red' },
-  marketplace: { label: 'For sale', icon: '🛒', tone: 'green' },
-  job: { label: 'Job', icon: '💼', tone: 'blue' },
-  event: { label: 'Event', icon: '🎉', tone: 'purple' },
-  services: { label: 'Service', icon: '🛠️', tone: 'blue' },
-  help_request: { label: 'Needs help', icon: '🙏', tone: 'red' },
-  gossip: { label: 'Gist', icon: '💬', tone: 'neutral' },
+/** Icon badge per type: what the post is, shown on the avatar corner. */
+const KIND_BADGE: Partial<Record<PostKind, { icon: string; label: string; bg: string }>> = {
+  fyi: { icon: '📢', label: 'FYI', bg: 'bg-amber-soft' },
+  lost_found: { icon: '🔎', label: 'Lost and found', bg: 'bg-blue-soft' },
+  poll: { icon: '📊', label: 'Poll', bg: 'bg-green-soft' },
+  emergency: { icon: '🚨', label: 'Safety alert', bg: 'bg-red-soft' },
+  marketplace: { icon: '🛒', label: 'For sale', bg: 'bg-green-soft' },
+  job: { icon: '💼', label: 'Job', bg: 'bg-blue-soft' },
+  event: { icon: '🎉', label: 'Event', bg: 'bg-purple-soft' },
+  services: { icon: '🛠️', label: 'Service', bg: 'bg-blue-soft' },
+  help_request: { icon: '🙏', label: 'Needs help', bg: 'bg-red-soft' },
+  gossip: { icon: '💬', label: 'Gist', bg: 'bg-background' },
 };
 
 function InfoRow({ icon, children }: { icon: ReactNode; children: ReactNode }) {
@@ -153,6 +193,47 @@ function ActionButton({
   );
 }
 
+// ── Photos: Facebook-style grid (videos fall back to the swipe slider) ───────
+
+type MediaEntry = { url: string; type?: MediaItem['type']; thumbnailUrl?: string };
+
+function PhotoGrid({ items, alt, onOpen }: { items: MediaEntry[]; alt: string; onOpen?: () => void }) {
+  const hasVideo = items.some((m) => m.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(m.url));
+  if (hasVideo || items.length === 1) {
+    return <PostCardMediaSlider items={items} altPrefix={alt} />;
+  }
+  const shown = items.slice(0, 4);
+  const extra = items.length - shown.length;
+  const n = shown.length;
+  // 2: side by side · 3: one tall + two stacked · 4+: 2x2 (last tile shows +N)
+  const grid =
+    n === 2 ? 'grid-cols-2 grid-rows-1 aspect-[2/1]'
+    : n === 3 ? 'grid-cols-2 grid-rows-2 aspect-[4/3]'
+    : 'grid-cols-2 grid-rows-2 aspect-square';
+  return (
+    <div className={`grid gap-0.5 ${grid}`} role="group" aria-label={`${alt}, ${items.length} photos`}>
+      {shown.map((m, i) => (
+        <button
+          key={m.url + i}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen?.();
+          }}
+          className={`relative overflow-hidden bg-background ${n === 3 && i === 0 ? 'row-span-2' : ''}`}
+          aria-label={`Photo ${i + 1} of ${items.length}`}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={m.thumbnailUrl || m.url} alt="" loading="lazy" className="h-full w-full object-cover" />
+          {extra > 0 && i === shown.length - 1 ? (
+            <span className="absolute inset-0 grid place-items-center bg-navy/55 font-heading text-2xl font-black text-white">+{extra}</span>
+          ) : null}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ── Type detail blocks ───────────────────────────────────────────────────────
 
 function MarketplaceBlock({ post }: { post: Post }) {
@@ -162,6 +243,7 @@ function MarketplaceBlock({ post }: { post: Post }) {
   const delivery = post.deliveryOption ?? m.deliveryOption;
   const negotiable = post.isNegotiable ?? m.isNegotiable;
   const availability = post.availability ?? m.availability;
+  const category = post.itemCategory ?? m.itemCategory;
   const isFree = condition === 'free' || price === 0;
 
   return (
@@ -174,7 +256,7 @@ function MarketplaceBlock({ post }: { post: Post }) {
         {availability === 'sold' ? <Chip tone="red">Sold</Chip> : availability === 'reserved' ? <Chip tone="amber">Reserved</Chip> : null}
         {condition && condition !== 'free' ? <Chip>{CONDITION[condition] ?? cap(condition)}</Chip> : null}
         {delivery ? <Chip>{DELIVERY[delivery] ?? cap(delivery)}</Chip> : null}
-        {post.itemCategory ?? m.itemCategory ? <Chip>{cap(post.itemCategory ?? m.itemCategory)}</Chip> : null}
+        {category ? <Chip>{cap(category)}</Chip> : null}
       </div>
     </div>
   );
@@ -285,6 +367,69 @@ function HelpBlock({ post }: { post: Post }) {
   );
 }
 
+function LostFoundBlock({ post }: { post: Post }) {
+  const m = post.metadata ?? {};
+  const isFound = m.lostFound === 'found';
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl bg-background p-3">
+      <div className="flex items-center gap-2">
+        <Chip tone={isFound ? 'green' : 'amber'}>{isFound ? 'Found' : 'Lost'}</Chip>
+        {m.itemName ? <p className="min-w-0 truncate font-heading text-lg font-extrabold text-navy">{m.itemName}</p> : null}
+      </div>
+      {m.lastSeen ? (
+        <InfoRow icon={<MapPin size={15} />}>
+          {isFound ? 'Found at' : 'Last seen'} {m.lastSeen}
+          {m.seenAt ? <span className="text-muted"> · {m.seenAt}</span> : null}
+        </InfoRow>
+      ) : null}
+      {m.reward ? <p className="text-sm font-extrabold text-brand-green-dark">Reward: {formatNaira(m.reward)}</p> : null}
+    </div>
+  );
+}
+
+function PollBlock({ poll, onVote }: { poll: PostPoll; onVote?: (i: number) => void }) {
+  const total = poll.options.reduce((s, o) => s + o.votes, 0);
+  const ended = poll.endsAt ? new Date(poll.endsAt).getTime() < Date.now() : false;
+  const showResults = ended || poll.myVote != null;
+  const left = poll.endsAt && !ended ? Math.ceil((new Date(poll.endsAt).getTime() - Date.now()) / 864e5) : null;
+  return (
+    <div className="flex flex-col gap-2" role="group" aria-label="Poll">
+      {poll.options.map((o, i) => {
+        const pct = total ? Math.round((o.votes / total) * 100) : 0;
+        const mine = poll.myVote === i;
+        return showResults ? (
+          <div key={i} className="relative min-h-11 overflow-hidden rounded-2xl border border-line">
+            <div className={`absolute inset-y-0 left-0 ${mine ? 'bg-green-soft' : 'bg-background'}`} style={{ width: `${pct}%` }} aria-hidden />
+            <div className="relative flex min-h-11 items-center justify-between gap-2 px-3.5 text-sm">
+              <span className={`flex items-center gap-1.5 ${mine ? 'font-extrabold text-brand-green-dark' : 'font-semibold text-navy'}`}>
+                {mine ? <Check size={15} aria-label="Your vote" /> : null}
+                {o.text}
+              </span>
+              <span className="font-extrabold tabular-nums text-navy">{pct}%</span>
+            </div>
+          </div>
+        ) : (
+          <button
+            key={i}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onVote?.(i);
+            }}
+            className="min-h-11 rounded-2xl border border-line bg-white px-3.5 text-left text-sm font-bold text-navy transition-colors hover:border-primary hover:bg-green-soft"
+          >
+            {o.text}
+          </button>
+        );
+      })}
+      <p className="text-xs font-bold text-muted">
+        {total.toLocaleString('en-NG')} {total === 1 ? 'vote' : 'votes'}
+        {ended ? ' · Poll closed' : left != null ? ` · ${left} ${left === 1 ? 'day' : 'days'} left` : ''}
+      </p>
+    </div>
+  );
+}
+
 const SEVERITY: Record<string, { label: string; tone: ChipTone }> = {
   critical: { label: 'Critical', tone: 'red' },
   medium: { label: 'Serious', tone: 'amber' },
@@ -296,7 +441,7 @@ function EmergencyBlock({ post, onAction }: { post: Post; onAction?: (a: Emergen
   const confirmed = post.confirmDisputeAction === 'confirm';
   const disputed = post.confirmDisputeAction === 'dispute';
   const btn = (on: boolean) =>
-    `inline-flex min-h-10 items-center justify-center gap-1 rounded-full border px-3 text-[13px] font-bold transition-colors ${
+    `inline-flex min-h-11 items-center justify-center gap-1 rounded-full border px-3 text-[13px] font-bold transition-colors ${
       on ? 'border-transparent bg-navy text-white' : 'border-line bg-white text-navy hover:bg-background'
     }`;
   const fire = (a: EmergencyAction) => (e: React.MouseEvent) => {
@@ -321,13 +466,20 @@ function EmergencyBlock({ post, onAction }: { post: Post; onAction?: (a: Emergen
   );
 }
 
-const PRIMARY: Partial<Record<NonNullable<Post['contentType']>, { action: PostPrimaryAction; label: string }>> = {
-  marketplace: { action: 'message_seller', label: 'Message seller' },
-  job: { action: 'apply', label: 'Message to apply' },
-  event: { action: 'going', label: "I'm going" },
-  services: { action: 'book', label: 'Book' },
-  help_request: { action: 'help', label: 'I can help' },
-};
+function primaryFor(kind: PostKind, post: Post): { action: PostPrimaryAction; label: string } | null {
+  switch (kind) {
+    case 'marketplace': return { action: 'message_seller', label: 'Message seller' };
+    case 'job': return { action: 'apply', label: 'Message to apply' };
+    case 'event': return { action: 'going', label: "I'm going" };
+    case 'services': return { action: 'book', label: 'Book' };
+    case 'help_request': return { action: 'help', label: 'I can help' };
+    case 'lost_found':
+      return post.metadata?.lostFound === 'found'
+        ? { action: 'its_mine', label: "It's mine" }
+        : { action: 'found_it', label: 'I found it / I saw it' };
+    default: return null;
+  }
+}
 
 // ── Card ─────────────────────────────────────────────────────────────────────
 
@@ -343,8 +495,10 @@ export function PostCard({
   onCardClick,
   onPrimaryAction,
   onEmergencyAction,
+  onVote,
   onFollow,
   isFollowing,
+  followPending,
   isGoing,
 }: PostCardProps) {
   const [expanded, setExpanded] = useState(false);
@@ -354,37 +508,37 @@ export function PostCard({
   const username = author?.username;
   const isAnonymous = !author?.id || author.id === 'anonymous';
   const avatar = resolveUserAvatarUrl(author);
-  const area =
-    (post.location as { lga?: string } | undefined)?.lga ||
-    author?.location?.lga ||
-    '';
+  const area = (post.location as { lga?: string } | undefined)?.lga || author?.location?.lga || '';
 
-  const type = post.contentType ?? 'post';
-  const meta = TYPE_META[type];
-  const primary = PRIMARY[type];
-  const isEmergency = type === 'emergency' || post.cardStyle === 'emergency_red';
-  const isFyi = type === 'fyi';
+  const kind = getPostKind(post);
+  const badge = KIND_BADGE[kind];
+  const primary = primaryFor(kind, post);
+  const isEmergency = kind === 'emergency';
+  const helpfulKind = kind === 'fyi' || kind === 'lost_found';
+  const poll = (post.metadata?.poll as PostPoll | undefined) ?? null;
 
   const text = (post.content || post.body || '').trim();
   const isLong = text.length > 260;
 
-  const media: Array<{ url: string; type?: MediaItem['type']; thumbnailUrl?: string }> = Array.isArray(post.media)
+  const media: MediaEntry[] = Array.isArray(post.media)
     ? post.media
         .map((m) => (typeof m === 'string' ? { url: m } : { url: m.url, type: m.type, thumbnailUrl: m.thumbnailUrl }))
         .filter((m) => Boolean(m.url))
     : [];
 
   const detail =
-    type === 'marketplace' ? <MarketplaceBlock post={post} />
-    : type === 'job' ? <JobBlock post={post} />
-    : type === 'event' ? <EventBlock post={post} />
-    : type === 'services' ? <ServiceBlock post={post} />
-    : type === 'help_request' ? <HelpBlock post={post} />
+    kind === 'marketplace' ? <MarketplaceBlock post={post} />
+    : kind === 'job' ? <JobBlock post={post} />
+    : kind === 'event' ? <EventBlock post={post} />
+    : kind === 'services' ? <ServiceBlock post={post} />
+    : kind === 'help_request' ? <HelpBlock post={post} />
+    : kind === 'lost_found' ? <LostFoundBlock post={post} />
+    : kind === 'poll' && poll ? <PollBlock poll={poll} onVote={onVote} />
     : isEmergency ? <EmergencyBlock post={post} onAction={onEmergencyAction} />
     : null;
 
-  // Marketplace leads with the photo and price, like a listing; other types lead with the words.
-  const photosFirst = type === 'marketplace';
+  // Listings lead with the photo and price; everything else leads with the words.
+  const photosFirst = kind === 'marketplace';
 
   const handleCardClick = (e: React.MouseEvent) => {
     const t = e.target as HTMLElement;
@@ -393,70 +547,88 @@ export function PostCard({
 
   const photos = media.length ? (
     <div className="mt-3">
-      <PostCardMediaSlider items={media} altPrefix={text ? text.slice(0, 80) : `Post by ${name}`} />
+      <PhotoGrid items={media} alt={text ? text.slice(0, 80) : `Post by ${name}`} onOpen={onCardClick} />
     </div>
   ) : null;
 
+  const avatarEl = isAnonymous || !username ? (
+    <span className="grid h-11 w-11 place-items-center rounded-full bg-background text-lg" aria-hidden>👤</span>
+  ) : avatar ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={avatar} alt="" className="h-11 w-11 rounded-full object-cover" />
+  ) : (
+    <span className="grid h-11 w-11 place-items-center rounded-full bg-green-soft font-heading text-base font-extrabold text-brand-green-dark" aria-hidden>
+      {name.charAt(0).toUpperCase()}
+    </span>
+  );
+
   return (
-    <Card
-      variant={isEmergency ? 'accent' : 'plain'}
-      accentColor="#E5484D"
-      padding="none"
-      className="w-full overflow-hidden"
-      onClick={handleCardClick}
-    >
-      <article aria-label={`${meta ? meta.label + ' from' : 'Post from'} ${name}`}>
-        {/* Top line: what kind of post, and pinned / reposted */}
-        {meta || post.repostedBy || post.isPinned ? (
-          <div className="flex min-w-0 items-center gap-2 px-4 pt-3 text-xs font-bold text-muted">
-            {meta ? <Chip tone={meta.tone} icon={meta.icon}>{meta.label}</Chip> : null}
+    <Card padding="none" className="w-full overflow-hidden" onClick={handleCardClick}>
+      <article aria-label={`${badge ? badge.label + ' from' : 'Post from'} ${isAnonymous ? 'a neighbour' : name}`}>
+        {/* Pinned / reposted line */}
+        {post.isPinned || post.repostedBy ? (
+          <div className="flex min-w-0 items-center gap-1.5 px-4 pt-3 text-xs font-bold text-muted">
             {post.isPinned ? (
-              <span className="inline-flex items-center gap-1">
+              <>
                 <Pin size={13} aria-hidden /> Pinned
-              </span>
-            ) : post.repostedBy ? (
+              </>
+            ) : (
               <span className="inline-flex min-w-0 items-center gap-1 truncate">
                 <Repeat2 size={14} className="shrink-0" aria-hidden /> {post.repostedBy?.name || `@${post.repostedBy?.username}`} reposted
               </span>
-            ) : null}
+            )}
           </div>
         ) : null}
 
         {/* Header */}
-        <header className={`flex items-start gap-3 px-4 ${meta || post.repostedBy || post.isPinned ? 'pt-2.5' : 'pt-3.5'}`}>
-          {isAnonymous || !username ? (
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-background text-lg" aria-hidden>👤</span>
-          ) : (
-            <Link href={`/profile/${username}`} className="shrink-0" aria-label={`${name}'s profile`} onClick={(e) => e.stopPropagation()}>
-              {avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatar} alt="" className="h-10 w-10 rounded-full object-cover" />
-              ) : (
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-green-soft font-heading text-base font-extrabold text-brand-green-dark" aria-hidden>
-                  {name.charAt(0).toUpperCase()}
+        <header className={`flex items-start gap-3 px-4 ${post.isPinned || post.repostedBy ? 'pt-2' : 'pt-3.5'}`}>
+          <div className="relative shrink-0">
+            {isAnonymous || !username ? (
+              avatarEl
+            ) : (
+              <Link href={`/profile/${username}`} className="block" aria-label={`${name}'s profile`} onClick={(e) => e.stopPropagation()}>
+                {avatarEl}
+              </Link>
+            )}
+            {/* What this post is: icon badge on the avatar corner (takes no space in the card) */}
+            {badge ? (
+              <span className="absolute -bottom-1 -right-1.5 grid h-[22px] w-[22px] place-items-center" title={badge.label}>
+                {isEmergency ? (
+                  <span className="absolute inset-0 rounded-full bg-brand-red/50 motion-safe:animate-ping" aria-hidden />
+                ) : null}
+                <span className={`relative grid h-[22px] w-[22px] place-items-center rounded-full text-[12px] leading-none ring-2 ring-white ${badge.bg}`} aria-label={badge.label} role="img">
+                  {badge.icon}
                 </span>
-              )}
-            </Link>
-          )}
+              </span>
+            ) : null}
+          </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-1">
               <span className="truncate text-[15px] font-extrabold text-navy">{isAnonymous ? 'A neighbour' : name}</span>
               {author?.isVerified ? <BadgeCheck size={16} className="shrink-0 fill-primary text-white" aria-label="Verified" /> : null}
-              {onFollow && !isFollowing && !isAnonymous ? (
-                <>
-                  <span className="text-faint" aria-hidden>·</span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onFollow();
-                    }}
-                    className="tap-target shrink-0 text-[13px] font-extrabold text-brand-green-dark hover:underline"
-                  >
-                    Follow
-                  </button>
-                </>
+              {onFollow && !isAnonymous ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onFollow();
+                  }}
+                  disabled={followPending}
+                  aria-label={isFollowing ? `Following ${name}. Tap to unfollow` : `Follow ${name}`}
+                  aria-pressed={!!isFollowing}
+                  className={`tap-target ml-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full transition-colors disabled:opacity-50 ${
+                    isFollowing ? 'text-brand-green-dark hover:text-brand-red' : 'text-muted hover:bg-background hover:text-navy'
+                  }`}
+                >
+                  {followPending ? (
+                    <Loader2 className="h-[17px] w-[17px] motion-safe:animate-spin" strokeWidth={1.75} aria-hidden />
+                  ) : isFollowing ? (
+                    <UserCheck className="h-[17px] w-[17px]" strokeWidth={1.75} aria-hidden />
+                  ) : (
+                    <UserPlus className="h-[17px] w-[17px]" strokeWidth={1.75} aria-hidden />
+                  )}
+                </button>
               ) : null}
             </div>
             <p className="flex min-w-0 items-center gap-1 text-[13px] text-muted">
@@ -475,29 +647,23 @@ export function PostCard({
             </p>
           </div>
 
-          <div className="flex shrink-0 items-center">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onMenu?.();
-              }}
-              aria-label="More options"
-              aria-haspopup="menu"
-              className="tap-target -mr-1.5 grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-background hover:text-navy"
-            >
-              <MoreHorizontal size={20} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMenu?.();
+            }}
+            aria-label="More options"
+            aria-haspopup="menu"
+            className="tap-target -mr-1.5 grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted hover:bg-background hover:text-navy"
+          >
+            <PostCardMenuIcon className="h-5 w-5" />
+          </button>
         </header>
 
-        {/* Photos first for listings */}
         {photosFirst ? photos : null}
-
-        {/* Detail block for listings sits right under the photo */}
         {photosFirst && detail ? <div className="px-4 pt-3">{detail}</div> : null}
 
-        {/* Text */}
         {text ? (
           <div className="px-4 pt-2.5">
             <div className={`whitespace-pre-wrap break-words text-[15px] leading-[1.5] text-navy ${!expanded && isLong ? 'line-clamp-5' : ''}`}>
@@ -521,7 +687,6 @@ export function PostCard({
         {!photosFirst && detail ? <div className="px-4 pt-3">{detail}</div> : null}
         {!photosFirst ? photos : null}
 
-        {/* Main action for the type */}
         {primary && onPrimaryAction ? (
           <div className="px-4 pt-3">
             <Button
@@ -537,7 +702,6 @@ export function PostCard({
           </div>
         ) : null}
 
-        {/* Action row */}
         <footer className="mt-2 flex items-center justify-between border-t border-line px-2 py-1">
           <div className="flex items-center">
             <ActionButton label={post.isLiked ? 'Unlike' : 'Like'} count={compact(post.likes)} active={post.isLiked} activeClass="text-brand-red bg-red-soft" onClick={onLike}>
@@ -546,7 +710,7 @@ export function PostCard({
             <ActionButton label="Comment" count={compact(post.comments)} activeClass="" onClick={onComment}>
               <MessageCircle size={19} aria-hidden />
             </ActionButton>
-            {isFyi && onHelpful ? (
+            {helpfulKind && onHelpful ? (
               <ActionButton
                 label="Helpful"
                 count={compact(post.helpfulCount as number | undefined)}
