@@ -500,7 +500,7 @@ export default function AmbientProfileCard({
             <div
               className="flex-1 flex flex-col items-center justify-center py-2.5 rounded-2xl backdrop-blur-xl transition-all duration-200 hover:scale-[1.02]"
               style={{
-                background: 'rgba(14, 138, 62,0.2)',
+                background: 'rgba(14,138,62,0.2)',
                 border: '1px solid rgba(52,211,153,0.2)',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
               }}

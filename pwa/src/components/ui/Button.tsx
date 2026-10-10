@@ -18,7 +18,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: [
     'bg-brand-blue text-white',
-    'hover:bg-brand-blue/90 hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(59, 130, 196,0.35)]',
+    'hover:bg-brand-blue/90 hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(59,130,196,0.35)]',
     'active:translate-y-0 active:shadow-none',
     'focus-visible:ring-brand-blue focus-visible:ring-offset-brand-black',
     'disabled:bg-brand-blue/40 disabled:text-white/50',
@@ -50,7 +50,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 
   success: [
     'bg-status-success text-brand-black font-bold',
-    'hover:bg-status-success/85 hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(0, 184, 46,0.30)]',
+    'hover:bg-status-success/85 hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(0,184,46,0.30)]',
     'active:translate-y-0 active:shadow-none',
     'focus-visible:ring-status-success focus-visible:ring-offset-brand-black',
     'disabled:bg-status-success/40 disabled:text-brand-black/50',

@@ -58,7 +58,7 @@ export function InteractiveCards() {
       {/* 1. HuudCredit Spin Card */}
       <div className="glass-premium glow-card" style={{ padding: "32px", borderRadius: "2rem", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: "320px", position: "relative" }}>
         <div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0, 184, 46, 0.1)", border: "1px solid rgba(0, 184, 46, 0.2)", padding: "4px 12px", borderRadius: "99px", marginBottom: "16px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0,184,46, 0.1)", border: "1px solid rgba(0,184,46, 0.2)", padding: "4px 12px", borderRadius: "99px", marginBottom: "16px" }}>
             <Award size={14} color="var(--primary)" />
             <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--primary)", letterSpacing: "0.05em", uppercase: "true" }}>REWARDS</span>
           </div>
@@ -125,7 +125,7 @@ export function InteractiveCards() {
               {coins}
               <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: 500 }}>HC</span>
             </div>
-            <div style={{ fontSize: "0.7rem", color: "rgba(0, 184, 46, 0.8)", fontWeight: 700 }}>Tap coin to collect daily reward!</div>
+            <div style={{ fontSize: "0.7rem", color: "rgba(0,184,46, 0.8)", fontWeight: 700 }}>Tap coin to collect daily reward!</div>
           </div>
         </div>
       </div>
@@ -172,7 +172,7 @@ export function InteractiveCards() {
                 }
               }}
               style={{
-                background: vouched ? "rgba(0, 184, 46, 0.15)" : "var(--brand-blue)",
+                background: vouched ? "rgba(0,184,46, 0.15)" : "var(--brand-blue)",
                 color: vouched ? "var(--primary)" : "white",
                 border: "none",
                 padding: "6px 14px",
@@ -191,7 +191,7 @@ export function InteractiveCards() {
       {/* 3. Radius Dial Card */}
       <div className="glass-premium glow-card" style={{ padding: "32px", borderRadius: "2rem", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: "320px" }}>
         <div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0, 184, 46, 0.1)", border: "1px solid rgba(0, 184, 46, 0.2)", padding: "4px 12px", borderRadius: "99px", marginBottom: "16px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0,184,46, 0.1)", border: "1px solid rgba(0,184,46, 0.2)", padding: "4px 12px", borderRadius: "99px", marginBottom: "16px" }}>
             <MapPin size={14} color="var(--primary)" />
             <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--primary)", letterSpacing: "0.05em", uppercase: "true" }}>CASCADING RADIUS</span>
           </div>
@@ -311,7 +311,7 @@ export function InteractiveCards() {
       {/* 5. Hyperlocal Community Board Card */}
       <div className="glass-premium glow-card" style={{ padding: "32px", borderRadius: "2rem", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: "320px" }}>
         <div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0, 184, 46, 0.1)", border: "1px solid rgba(0, 184, 46, 0.2)", padding: "4px 12px", borderRadius: "99px", marginBottom: "16px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(0,184,46, 0.1)", border: "1px solid rgba(0,184,46, 0.2)", padding: "4px 12px", borderRadius: "99px", marginBottom: "16px" }}>
             <Bell size={14} color="var(--primary)" />
             <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--primary)", letterSpacing: "0.05em", uppercase: "true" }}>LIVE UPDATES</span>
           </div>

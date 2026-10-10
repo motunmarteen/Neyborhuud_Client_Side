@@ -302,7 +302,7 @@ export default function CreateEventForm() {
       <button
         type="submit"
         disabled={createEvent.isPending}
-        className="min-h-[52px] w-full rounded-full bg-gradient-to-r from-primary to-[#0E8A3E] py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0, 184, 46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none  "
+        className="min-h-[52px] w-full rounded-full bg-gradient-to-r from-primary to-[#0E8A3E] py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,184,46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none  "
       >
         {createEvent.isPending ? "Creating…" : "Create event"}
       </button>

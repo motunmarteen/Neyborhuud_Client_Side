@@ -435,7 +435,7 @@ export default function EventDetailPage() {
       ? "radial-gradient(circle at 20% 22%, rgba(236,72,153,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(168,85,247,0.20), transparent 40%)"
       : eventType === "cultural"
         ? "radial-gradient(circle at 20% 22%, rgba(245,158,11,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(217,70,239,0.20), transparent 40%)"
-        : "radial-gradient(circle at 20% 22%, rgba(0, 184, 46,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(59,130,246,0.20), transparent 40%)";
+        : "radial-gradient(circle at 20% 22%, rgba(0,184,46,0.24), transparent 36%), radial-gradient(circle at 82% 82%, rgba(59,130,246,0.20), transparent 40%)";
 
   const eventTitle = typeof event.title === "string" ? event.title : "Event";
 

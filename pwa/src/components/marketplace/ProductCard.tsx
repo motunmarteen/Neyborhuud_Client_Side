@@ -247,7 +247,7 @@ export function ProductCard({
             <h2 className="text-[13px] font-extrabold text-white leading-tight line-clamp-2 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
               {product.title}
             </h2>
-            <p className="text-[14px] font-black text-primary drop-shadow-[0_0_12px_rgba(0, 184, 46,0.4)]">
+            <p className="text-[14px] font-black text-primary drop-shadow-[0_0_12px_rgba(0,184,46,0.4)]">
               {formattedPrice}
               {product.negotiable && (
                 <span className="ml-1 text-[9px] font-semibold text-white/45">· negotiable</span>

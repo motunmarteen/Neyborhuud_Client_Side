@@ -512,15 +512,15 @@ function XFeedInner() {
                                     <div
                                         className="px-5 py-3.5 animate-fade-in"
                                         style={{
-                                            background: 'linear-gradient(135deg, rgba(229, 72, 77,0.06), rgba(255,255,255,0.9))',
-                                            borderBottom: '1px solid rgba(229, 72, 77,0.16)',
-                                            boxShadow: '0 4px 16px rgba(229, 72, 77,0.06)',
+                                            background: 'linear-gradient(135deg, rgba(229,72,77,0.06), rgba(255,255,255,0.9))',
+                                            borderBottom: '1px solid rgba(229,72,77,0.16)',
+                                            boxShadow: '0 4px 16px rgba(229,72,77,0.06)',
                                         }}
                                     >
                                         <div className="flex items-start gap-3">
                                             <div
                                                 className="rounded-xl size-10 shrink-0 flex items-center justify-center text-brand-red"
-                                                style={{ background: 'rgba(229, 72, 77,0.1)' }}
+                                                style={{ background: 'rgba(229,72,77,0.1)' }}
                                             >
                                                 <Shield className="w-5 h-5 text-brand-red" />
                                             </div>

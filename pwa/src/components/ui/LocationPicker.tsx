@@ -191,7 +191,7 @@ export function LocationPicker({
                     {isPremium && (
                         <>
                             <div className="absolute left-[10%] top-[22%] h-2.5 w-32 rotate-12 rounded-full bg-brand-blue/18 shadow-[0_0_24px_rgba(74,144,217,0.16)]" aria-hidden />
-                            <div className="absolute right-[8%] top-[41%] h-2.5 w-36 -rotate-12 rounded-full bg-primary/18 shadow-[0_0_24px_rgba(14, 138, 62,0.16)]" aria-hidden />
+                            <div className="absolute right-[8%] top-[41%] h-2.5 w-36 -rotate-12 rounded-full bg-primary/18 shadow-[0_0_24px_rgba(14,138,62,0.16)]" aria-hidden />
                             <div className="absolute bottom-[24%] left-[18%] h-2.5 w-40 -rotate-6 rounded-full bg-status-warning/22 shadow-[0_0_24px_rgba(245,158,11,0.16)]" aria-hidden />
                             <div className="absolute inset-x-8 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/28 to-transparent" aria-hidden />
                             <div className="absolute inset-y-8 left-1/2 w-px bg-gradient-to-b from-transparent via-brand-blue/22 to-transparent" aria-hidden />
@@ -202,7 +202,7 @@ export function LocationPicker({
                             <div className="absolute h-48 w-48 rounded-full border border-primary/14 bg-primary/[0.035]" aria-hidden />
                             <div className="absolute h-32 w-32 rounded-full border border-brand-blue/18 bg-brand-blue/[0.035]" aria-hidden />
                             <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-[0_28px_62px_rgba(26,26,46,0.2)]">
-                                <span className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-black text-white shadow-[0_10px_22px_rgba(14, 138, 62,0.36)]">N</span>
+                                <span className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-black text-white shadow-[0_10px_22px_rgba(14,138,62,0.36)]">N</span>
                                 <span className="material-symbols-outlined text-5xl text-primary/70" aria-hidden="true">location_on</span>
                             </div>
                             <span className="sr-only">Location not available</span>

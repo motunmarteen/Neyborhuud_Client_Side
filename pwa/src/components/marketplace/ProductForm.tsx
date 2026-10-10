@@ -282,7 +282,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               onClick={() => setCondition(cond.value as typeof condition)}
               className={`rounded-2xl border-2 px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
                 condition === cond.value
-                  ? "border-transparent bg-[#00B82E] text-black font-extrabold shadow-[0_8px_20px_rgba(0, 184, 46,0.28)]"
+                  ? "border-transparent bg-[#00B82E] text-black font-extrabold shadow-[0_8px_20px_rgba(0,184,46,0.28)]"
                   : "border-[var(--border-light)] bg-white/75 text-brand-green-dark/70 hover:border-primary/35   "
               }`}
             >
@@ -403,7 +403,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         <button
           type="submit"
           disabled={isPending || (!isEditing && locationLoading)}
-          className="min-h-[48px] w-full shrink-0 rounded-full bg-[#00B82E] hover:bg-[#00F53B] px-4 text-sm font-extrabold text-black shadow-[0_8px_24px_rgba(0, 184, 46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-0 sm:flex-1"
+          className="min-h-[48px] w-full shrink-0 rounded-full bg-[#00B82E] hover:bg-[#00F53B] px-4 text-sm font-extrabold text-black shadow-[0_8px_24px_rgba(0,184,46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-0 sm:flex-1"
         >
           {isPending ? (isEditing ? "Updating…" : "Creating…") : isEditing ? "Save changes" : "Create listing"}
         </button>

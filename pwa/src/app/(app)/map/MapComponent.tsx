@@ -326,9 +326,9 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
             <div class="relative flex items-center justify-center" style="width: 40px; height: 40px;">
               <style>
                 @keyframes mapPulse {
-                  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 46, 0.7); }
-                  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 184, 46, 0); }
-                  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 46, 0); }
+                  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,184,46, 0.7); }
+                  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0,184,46, 0); }
+                  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,184,46, 0); }
                 }
                 .user-map-marker {
                   animation: mapPulse 2s infinite;
