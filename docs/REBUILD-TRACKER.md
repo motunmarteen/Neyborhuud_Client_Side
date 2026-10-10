@@ -29,7 +29,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | Phase | Done | Total | Status |
 |---|---|---|---|
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
-| 1. Infrastructure and accounts | 5 | 17 | 🟡 API running; waiting on DNS |
+| 1. Infrastructure and accounts | 6 | 18 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 1 | 13 | ⏸ after Phase 1 |
 | 3. Map home (sky + live map) | 0 | 16 | ⬜ |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
@@ -93,10 +93,11 @@ Kept here so the whole history is in one place.
 - [x] I-01 AWS account ready: account 843256241786, signed in on this computer as profile `neyborhuud`, default Region **eu-west-2 (London)**
 - [x] I-01b AWS tools: AWS CLI 2.36, uv, Agent Toolkit (113 skills; AWS MCP server set to the `neyborhuud` profile; AWS rules in the workspace CLAUDE.md)
 - [ ] I-01c Stop using the root login day to day: create an admin user (IAM Identity Center or IAM) with two-factor sign-in; turn on MFA for root; set a billing alert
-- [x] I-02 API server on AWS: CloudFormation stack `neyborhuud-api` (eu-west-2), EC2 t3.small Ubuntu 24.04 `i-0c5ee86c58bd879eb`, fixed IP **16.60.205.159**, no SSH port (Session Manager), IMDSv2, encrypted disk, CloudTrail audit log. Files: server repo `infra/` (b81af3c)
+- [x] I-02 API server on AWS: CloudFormation stack `neyborhuud-api` (eu-west-2), EC2 **t4g.small** (Graviton, arm64) Ubuntu 24.04 `i-00316803d10522364`, 20 GB disk, about **$19.60/month** on credits, fixed IP **16.60.205.159**, no SSH port (Session Manager), IMDSv2, encrypted disk, CloudTrail audit log. Files: server repo `infra/` (b81af3c, e1a1b16)
 - [x] I-02b Read-only GitHub deploy key on the server repo
-- [ ] 🟡 I-03 Point `api.neyborhuud.com` DNS to **16.60.205.159** in Namecheap (*owner*), then HTTPS certificate (certbot)
-- [x] I-04 Production settings in Secrets Manager (`neyborhuud/prod/api-env`, dedicated KMS key); API deployed with PM2 + Nginx; preflight 16/16 passed; MongoDB Atlas connected; health 200 from the internet
+- [x] I-03 `api.neyborhuud.com` → 16.60.205.159 (Namecheap); Let's Encrypt HTTPS with HTTP→HTTPS redirect, auto-renewal tested (cert until 8 Jan 2027, renews itself); CORS for app.neyborhuud.com and socket.io checked
+- [x] I-04 Production settings in Secrets Manager (`neyborhuud/prod/api-env`, AWS-managed key); API deployed with PM2 + Nginx; preflight 16/16 passed; MongoDB Atlas connected; health 200 from the internet
+- [ ] I-04d Delete the old unused KMS key `5a022ab4-dcb3-491b-bbb6-df3c0217d16c` (about $1/month): `aws kms schedule-key-deletion --key-id 5a022ab4-dcb3-491b-bbb6-df3c0217d16c --pending-window-in-days 7 --region eu-west-2 --profile neyborhuud` (*owner*)
 - [ ] I-04b Upgrade the AWS account from the **Free plan** to a paid plan before **11 January 2027** (Free-plan accounts are closed when credits or the plan run out) (*owner*)
 - [ ] I-04c Fix the AWS MCP server in VS Code: fully quit and reopen VS Code so it finds `uvx` (installed during setup)
 - [ ] I-05 **Rotate leaked secrets**: MongoDB password, Cloudinary secret, API keys, email password (old `.env.staging` in git history)
