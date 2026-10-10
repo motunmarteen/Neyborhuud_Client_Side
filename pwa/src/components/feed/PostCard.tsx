@@ -3,7 +3,7 @@
 /**
  * PostCard — the one card every post type uses (feed, profile, marketplace, events, ...).
  *
- * Same frame for all types (author, text, photos, actions). What a post is, is shown
+ * Same frame for all types (author, text, photo slider, actions). What a post is, is shown
  * by a small icon badge on the corner of the author's avatar (no extra space); only a
  * safety alert's badge pulses. A detail block and one main button change with the type:
  *
@@ -44,7 +44,7 @@ import type { MediaItem, Post, PostAuthor } from '@/types/api';
 import { Card } from '@/components/ui/Card';
 import { Chip, type ChipTone } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
-import { PostCardMediaSlider } from '@/components/feed/PostCardMediaSlider';
+import { PhotoCarousel } from '@/components/feed/PhotoCarousel';
 import { PostCardMenuIcon } from '@/components/feed/PostCardMenuIcon';
 import { formatNaira } from '@/lib/currency';
 import { renderFormattedText } from '@/lib/renderFormattedText';
@@ -87,6 +87,8 @@ export type PostCardProps = {
   onPrimaryAction?: (action: PostPrimaryAction) => void;
   onEmergencyAction?: (action: EmergencyAction) => void;
   onVote?: (optionIndex: number) => void;
+  /** Open the original post inside a repost-with-comment. */
+  onOpenQuoted?: () => void;
   /** Shows the follow icon next to the name when provided (hidden on your own posts). */
   onFollow?: () => void;
   isFollowing?: boolean;
@@ -193,46 +195,7 @@ function ActionButton({
   );
 }
 
-// ── Photos: Facebook-style grid (videos fall back to the swipe slider) ───────
-
 type MediaEntry = { url: string; type?: MediaItem['type']; thumbnailUrl?: string };
-
-function PhotoGrid({ items, alt, onOpen }: { items: MediaEntry[]; alt: string; onOpen?: () => void }) {
-  const hasVideo = items.some((m) => m.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(m.url));
-  if (hasVideo || items.length === 1) {
-    return <PostCardMediaSlider items={items} altPrefix={alt} />;
-  }
-  const shown = items.slice(0, 4);
-  const extra = items.length - shown.length;
-  const n = shown.length;
-  // 2: side by side · 3: one tall + two stacked · 4+: 2x2 (last tile shows +N)
-  const grid =
-    n === 2 ? 'grid-cols-2 grid-rows-1 aspect-[2/1]'
-    : n === 3 ? 'grid-cols-2 grid-rows-2 aspect-[4/3]'
-    : 'grid-cols-2 grid-rows-2 aspect-square';
-  return (
-    <div className={`grid gap-0.5 ${grid}`} role="group" aria-label={`${alt}, ${items.length} photos`}>
-      {shown.map((m, i) => (
-        <button
-          key={m.url + i}
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpen?.();
-          }}
-          className={`relative overflow-hidden bg-background ${n === 3 && i === 0 ? 'row-span-2' : ''}`}
-          aria-label={`Photo ${i + 1} of ${items.length}`}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={m.thumbnailUrl || m.url} alt="" loading="lazy" className="h-full w-full object-cover" />
-          {extra > 0 && i === shown.length - 1 ? (
-            <span className="absolute inset-0 grid place-items-center bg-navy/55 font-heading text-2xl font-black text-white">+{extra}</span>
-          ) : null}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 // ── Type detail blocks ───────────────────────────────────────────────────────
 
@@ -466,6 +429,65 @@ function EmergencyBlock({ post, onAction }: { post: Post; onAction?: (a: Emergen
   );
 }
 
+/** One-line summary of what a post is, for the framed original inside a repost. */
+function quotedSummary(post: Post, kind: PostKind): string | null {
+  const m = post.metadata ?? {};
+  switch (kind) {
+    case 'marketplace': {
+      const price = post.price ?? m.price;
+      return price != null ? `For sale · ${formatNaira(price)}` : 'For sale';
+    }
+    case 'job': return [m.jobTitle, salaryText(m.salary)].filter(Boolean).join(' · ') || 'Job';
+    case 'event': {
+      const d = post.eventDate ?? m.eventDate;
+      return d ? `Event · ${new Date(d).toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short' })}` : 'Event';
+    }
+    case 'services': return m.serviceName ? `Service · ${m.serviceName}` : 'Service';
+    case 'lost_found': return `${m.lostFound === 'found' ? 'Found' : 'Lost'}${m.itemName ? ` · ${m.itemName}` : ''}`;
+    case 'emergency': return 'Safety alert';
+    case 'poll': return 'Poll';
+    default: return null;
+  }
+}
+
+function QuotedPost({ post, onOpen }: { post: Post; onOpen?: () => void }) {
+  const a = post.author as PostAuthor;
+  const name = [a?.firstName, a?.lastName].filter(Boolean).join(' ') || a?.name || a?.username || 'Neighbour';
+  const kind = getPostKind(post);
+  const badge = KIND_BADGE[kind];
+  const summary = quotedSummary(post, kind);
+  const text = (post.content || post.body || '').trim();
+  const first = Array.isArray(post.media) && post.media.length ? (typeof post.media[0] === 'string' ? post.media[0] : post.media[0].thumbnailUrl || post.media[0].url) : null;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpen?.();
+      }}
+      className="block w-full overflow-hidden rounded-2xl border border-line text-left transition-colors hover:bg-[#F6F8FB]"
+      aria-label={`Original post by ${name}`}
+    >
+      <div className="flex items-center gap-2 px-3 pt-2.5 text-[13px]">
+        <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-green-soft text-[11px] font-extrabold text-brand-green-dark" aria-hidden>{name.charAt(0).toUpperCase()}</span>
+        <span className="truncate font-extrabold text-navy">{name}</span>
+        {badge ? <span aria-label={badge.label} role="img" className="shrink-0">{badge.icon}</span> : null}
+        <span className="shrink-0 text-muted">· {shortTimeAgo(post.createdAt)}</span>
+      </div>
+      {summary ? (
+        <p className={`px-3 pt-1 text-[13px] font-extrabold ${kind === 'emergency' ? 'text-[#C2353A]' : 'text-brand-green-dark'}`}>{summary}</p>
+      ) : null}
+      {text ? <p className="line-clamp-3 px-3 pt-1 text-sm leading-snug text-navy">{text}</p> : null}
+      {first ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={first} alt="" loading="lazy" className="mt-2.5 aspect-[16/9] w-full object-cover" />
+      ) : (
+        <span className="block h-2.5" aria-hidden />
+      )}
+    </button>
+  );
+}
+
 function primaryFor(kind: PostKind, post: Post): { action: PostPrimaryAction; label: string } | null {
   switch (kind) {
     case 'marketplace': return { action: 'message_seller', label: 'Message seller' };
@@ -496,6 +518,7 @@ export function PostCard({
   onPrimaryAction,
   onEmergencyAction,
   onVote,
+  onOpenQuoted,
   onFollow,
   isFollowing,
   followPending,
@@ -547,7 +570,7 @@ export function PostCard({
 
   const photos = media.length ? (
     <div className="mt-3">
-      <PhotoGrid items={media} alt={text ? text.slice(0, 80) : `Post by ${name}`} onOpen={onCardClick} />
+      <PhotoCarousel items={media} alt={text ? text.slice(0, 80) : `Post by ${name}`} />
     </div>
   ) : null;
 
@@ -687,6 +710,13 @@ export function PostCard({
         {!photosFirst && detail ? <div className="px-4 pt-3">{detail}</div> : null}
         {!photosFirst ? photos : null}
 
+        {/* Repost with comment: the original sits inside as a small framed card */}
+        {post.quotedPost ? (
+          <div className="px-4 pt-3">
+            <QuotedPost post={post.quotedPost} onOpen={onOpenQuoted ?? onCardClick} />
+          </div>
+        ) : null}
+
         {primary && onPrimaryAction ? (
           <div className="px-4 pt-3">
             <Button
@@ -704,12 +734,7 @@ export function PostCard({
 
         <footer className="mt-2 flex items-center justify-between border-t border-line px-2 py-1">
           <div className="flex items-center">
-            <ActionButton label={post.isLiked ? 'Unlike' : 'Like'} count={compact(post.likes)} active={post.isLiked} activeClass="text-brand-red bg-red-soft" onClick={onLike}>
-              <Heart size={19} className={post.isLiked ? 'fill-current' : ''} aria-hidden />
-            </ActionButton>
-            <ActionButton label="Comment" count={compact(post.comments)} activeClass="" onClick={onComment}>
-              <MessageCircle size={19} aria-hidden />
-            </ActionButton>
+            {/* One reaction per card: notices (FYI, lost & found) get "Helpful", everything else "Like". */}
             {helpfulKind && onHelpful ? (
               <ActionButton
                 label="Helpful"
@@ -720,7 +745,15 @@ export function PostCard({
               >
                 <ThumbsUp size={18} className={post.isHelpful ? 'fill-current' : ''} aria-hidden />
               </ActionButton>
-            ) : onRepost ? (
+            ) : (
+              <ActionButton label={post.isLiked ? 'Unlike' : 'Like'} count={compact(post.likes)} active={post.isLiked} activeClass="text-brand-red bg-red-soft" onClick={onLike}>
+                <Heart size={19} className={post.isLiked ? 'fill-current' : ''} aria-hidden />
+              </ActionButton>
+            )}
+            <ActionButton label="Comment" count={compact(post.comments)} activeClass="" onClick={onComment}>
+              <MessageCircle size={19} aria-hidden />
+            </ActionButton>
+            {onRepost ? (
               <ActionButton label="Repost" count={compact(post.shares)} active={post.isShared} activeClass="text-brand-green-dark bg-green-soft" onClick={onRepost}>
                 <Repeat2 size={19} aria-hidden />
               </ActionButton>

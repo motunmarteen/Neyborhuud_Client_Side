@@ -6489,6 +6489,9 @@ button.mod-card:active {
 
 .btn-glass-primary.btn-paired { padding: 0 1rem; }
 
+/* PhotoCarousel: the active pill fills while the photo waits to auto-advance. */
+@keyframes nh-carousel-fill { from { width: 0%; } to { width: 100%; } }
+
 /* Small controls keep a 48px tap area without looking bigger. */
 .tap-target { position: relative; }
 .tap-target::after {
