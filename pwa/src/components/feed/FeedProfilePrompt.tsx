@@ -52,7 +52,7 @@ export function FeedProfilePrompt() {
   }
 
   return (
-    <div className="lg:hidden mod-card rounded-2xl p-4 flex flex-col gap-3 border border-black/5 dark:border-white/5 mx-3.5 sm:mx-4">
+    <div className="lg:hidden mod-card rounded-2xl p-4 flex flex-col gap-3 border border-black/5  mx-3.5 sm:mx-4">
       {/* Header row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">

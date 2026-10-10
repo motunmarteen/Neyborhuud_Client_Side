@@ -59,7 +59,7 @@ export const UserSearchResult = ({ user, onClose }: Props) => {
   );
 
   return (
-    <div className="w-full flex items-center justify-between p-3 hover:bg-brand-surface dark:hover:bg-surface-base-dark rounded-lg transition-colors text-left">
+    <div className="w-full flex items-center justify-between p-3 hover:bg-brand-surface  rounded-lg transition-colors text-left">
       {/* Clickable Info Area */}
       <div
         onClick={handleClick}
@@ -76,7 +76,7 @@ export const UserSearchResult = ({ user, onClose }: Props) => {
         {/* User Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
-            <span className="font-semibold text-[var(--neu-text-muted)] dark:text-white truncate">
+            <span className="font-semibold text-[var(--neu-text-muted)]  truncate">
               {displayName}
             </span>
             {user.isVerified && (
@@ -85,11 +85,11 @@ export const UserSearchResult = ({ user, onClose }: Props) => {
               </span>
             )}
           </div>
-          <p className="text-sm text-[var(--neu-text-muted)] dark:text-text-secondary-dark truncate">
+          <p className="text-sm text-[var(--neu-text-muted)]  truncate">
             @{user.username}
           </p>
           {user.bio && (
-            <p className="text-sm text-[var(--neu-text-secondary)] dark:text-text-secondary-dark/80 truncate mt-1">
+            <p className="text-sm text-[var(--neu-text-secondary)]  truncate mt-1">
               {user.bio}
             </p>
           )}
@@ -97,7 +97,7 @@ export const UserSearchResult = ({ user, onClose }: Props) => {
 
         {/* Follower Count */}
         {typeof user?.followerCount === 'number' && (
-          <div className="text-sm text-[var(--neu-text-muted)] dark:text-text-secondary-dark shrink-0 mr-2">
+          <div className="text-sm text-[var(--neu-text-muted)]  shrink-0 mr-2">
             {user.followerCount.toLocaleString()} follower{user.followerCount !== 1 ? 's' : ''}
           </div>
         )}
@@ -107,8 +107,8 @@ export const UserSearchResult = ({ user, onClose }: Props) => {
       {!isOwnProfile && currentUser && (
         <div className="ml-3 shrink-0">
           {isLoadingStatus ? (
-            <div className="px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-black/[0.08] animate-pulse">
-              <div className="w-16 h-4 bg-brand-surface dark:bg-brand-black rounded" />
+            <div className="px-4 py-1.5 rounded-full border border-black/[0.08]  animate-pulse">
+              <div className="w-16 h-4 bg-brand-surface  rounded" />
             </div>
           ) : (
             <button
@@ -120,8 +120,8 @@ export const UserSearchResult = ({ user, onClose }: Props) => {
               disabled={isPending}
               className={`px-4 py-1.5 rounded-full font-semibold text-sm transition-all ${
                 isFollowing
-                  ? 'border border-black/[0.08] dark:border-black/[0.08] hover:border-brand-red dark:hover:border-brand-red hover:bg-brand-red/10 dark:hover:bg-brand-red/20 hover:text-brand-red dark:hover:text-brand-red group'
-                  : 'bg-brand-black dark:bg-white text-white dark:text-black hover:bg-brand-black dark:hover:bg-brand-surface'
+                  ? 'border border-black/[0.08]  hover:border-brand-red  hover:bg-brand-red/10  hover:text-brand-red  group'
+                  : 'bg-brand-black  text-white  hover:bg-brand-black '
               } disabled:opacity-50 disabled:cursor-not-allowed`}
               type="button"
             >

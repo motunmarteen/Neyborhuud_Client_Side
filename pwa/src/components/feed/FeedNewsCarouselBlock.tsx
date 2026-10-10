@@ -82,10 +82,10 @@ export function FeedNewsCarouselBlock() {
                 className="horizontal-carousel-item relative overflow-hidden rounded-none shrink-0"
                 style={{ width: 200, aspectRatio: '1/1' }}
               >
-                <div className="w-full h-full bg-black/5 dark:bg-white/5 animate-pulse" />
+                <div className="w-full h-full bg-black/5  animate-pulse" />
                 <div className="absolute inset-x-0 bottom-0 p-2.5 space-y-2">
-                  <div className="h-3 w-3/4 rounded-none bg-black/10 dark:bg-white/10 animate-pulse" />
-                  <div className="h-2 w-1/2 rounded-none bg-black/10 dark:bg-white/10 animate-pulse" />
+                  <div className="h-3 w-3/4 rounded-none bg-black/10  animate-pulse" />
+                  <div className="h-2 w-1/2 rounded-none bg-black/10  animate-pulse" />
                 </div>
               </div>
             ))

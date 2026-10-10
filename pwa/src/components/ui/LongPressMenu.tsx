@@ -37,7 +37,7 @@ export function LongPressMenu({ open, onClose, items, anchor }: LongPressMenuPro
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 4 }}
                         transition={{ type: 'spring', damping: 26, stiffness: 380 }}
-                        className="fixed z-[301] min-w-[200px] overflow-hidden rounded-2xl border border-white/25 bg-white/95 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl dark:bg-[rgba(12,18,24,0.92)]"
+                        className="fixed z-[301] min-w-[200px] overflow-hidden rounded-2xl border border-white/25 bg-white/95 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl "
                         style={
                             anchor
                                 ? {
@@ -57,7 +57,7 @@ export function LongPressMenu({ open, onClose, items, anchor }: LongPressMenuPro
                                     onClose();
                                 }}
                                 className={`flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold transition-colors hover:bg-black/[0.04] active:scale-[0.98] ${
-                                    item.danger ? 'text-brand-red' : 'text-brand-black dark:text-white'
+                                    item.danger ? 'text-brand-red' : 'text-brand-black '
                                 }`}
                             >
                                 <span className="material-symbols-outlined text-xl">{item.icon}</span>

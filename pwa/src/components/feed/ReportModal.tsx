@@ -62,11 +62,11 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
       handleClassName="pt-2 pb-0"
     >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 dark:border-white/10">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 ">
           <h3 className="text-base font-semibold" style={{ color: 'var(--neu-text)' }}>
             Report Post
           </h3>
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-black/10  transition-colors">
             <X size={18} style={{ color: 'var(--neu-text-muted)' }} />
           </button>
         </div>
@@ -96,7 +96,7 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
                         selectedReason === r.value
                           ? 'bg-brand-green-dark/20 ring-1 ring-primary/40 text-primary font-bold'
-                          : 'hover:bg-black/5 dark:hover:bg-white/5 text-charcoal dark:text-white'
+                          : 'hover:bg-black/5  text-charcoal '
                       }`}
                     >
                       <Icon size={16} />

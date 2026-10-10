@@ -84,7 +84,7 @@ export default function CommunityDetailPage() {
   if (isLoading) {
     return (
       <AppBrowseLayout maxWidth="680">
-        <div className="bg-white dark:bg-[#12161A] rounded-3xl border border-black/[0.08] dark:border-white/[0.08] h-52 animate-pulse" />
+        <div className="bg-white  rounded-3xl border border-black/[0.08]  h-52 animate-pulse" />
       </AppBrowseLayout>
     );
   }
@@ -113,17 +113,17 @@ export default function CommunityDetailPage() {
     <AppBrowseLayout maxWidth="680">
       <div className="space-y-4">
         {/* ── Main Estate Hero Card ── */}
-        <div className="bg-white dark:bg-[#12161A] rounded-3xl border border-black/[0.08] dark:border-white/[0.08] p-5 sm:p-6 shadow-sm space-y-4">
+        <div className="bg-white  rounded-3xl border border-black/[0.08]  p-5 sm:p-6 shadow-sm space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3.5">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-[#00B82E] shadow-sm">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50  border border-emerald-200/80  text-[#00B82E] shadow-sm">
                 <Users size={28} />
               </div>
               <div className="min-w-0">
-                <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900  leading-tight">
                   {hub.name}
                 </h1>
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs font-bold text-slate-500  mt-0.5">
                   {hub.categoryLabel || 'Estate Hub'}
                 </p>
               </div>
@@ -132,7 +132,7 @@ export default function CommunityDetailPage() {
             <button
               type="button"
               onClick={() => setShowEli5(!showEli5)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 transition-colors"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200  text-slate-500  transition-colors"
               title="Explain Like I'm 5"
               aria-label="Explain estate hub"
             >
@@ -142,7 +142,7 @@ export default function CommunityDetailPage() {
 
           {/* ELI5 Banner */}
           {showEli5 && (
-            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/40 rounded-2xl p-3.5 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2.5">
+            <div className="bg-emerald-50  border border-emerald-200/70  rounded-2xl p-3.5 text-xs text-emerald-900  flex items-start gap-2.5">
               <Info size={16} className="text-[#00B82E] shrink-0 mt-0.5" />
               <div className="flex-1">
                 <span className="font-bold">Estate Hub: </span>
@@ -159,23 +159,23 @@ export default function CommunityDetailPage() {
             </div>
           )}
 
-          <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+          <p className="text-sm leading-relaxed text-slate-700 ">
             {hub.description || 'Verified residents and neighbors sharing local updates.'}
           </p>
 
           {/* BC.Game 3-Chip Info Bar */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-white/[0.04] text-slate-700 dark:text-slate-300">
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-black/[0.06] ">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100  text-slate-700 ">
               <Users size={13} className="text-[#00B82E]" />
               <span>{hub.membersCount.toLocaleString()} verified members</span>
             </span>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50  text-emerald-700  border border-emerald-200/60 ">
               <Zap size={13} />
               <span className="capitalize">{hub.activityLevel} activity</span>
             </span>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-white/[0.04] text-slate-700 dark:text-slate-300">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100  text-slate-700 ">
               {hub.visibility === 'private' ? (
                 <>
                   <Lock size={12} className="text-amber-600" />
@@ -207,7 +207,7 @@ export default function CommunityDetailPage() {
                 type="button"
                 onClick={() => void handleJoinLeave()}
                 disabled={leaveMutation.isPending || hub.myRole === 'owner'}
-                className="flex-1 rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.04] py-3.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-rose-600 transition-colors disabled:opacity-50"
+                className="flex-1 rounded-2xl border border-black/[0.08]  bg-slate-50  py-3.5 text-xs font-bold text-slate-600  hover:text-rose-600 transition-colors disabled:opacity-50"
               >
                 {hub.myRole === 'owner' ? 'You Own This Hub' : leaveMutation.isPending ? 'Leaving…' : 'Leave Estate'}
               </button>
@@ -228,10 +228,10 @@ export default function CommunityDetailPage() {
         {/* Quick Link to Messages */}
         <Link
           href="/chat?tab=communities"
-          className="group flex items-center justify-between rounded-2xl bg-white dark:bg-[#12161A] border border-black/[0.08] dark:border-white/[0.08] px-4.5 py-3.5 text-xs font-bold text-slate-800 dark:text-slate-200 hover:border-black/[0.14] dark:hover:border-white/[0.14] shadow-sm transition-all no-underline"
+          className="group flex items-center justify-between rounded-2xl bg-white  border border-black/[0.08]  px-4.5 py-3.5 text-xs font-bold text-slate-800  hover:border-black/[0.14]  shadow-sm transition-all no-underline"
         >
           <span className="inline-flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-xl bg-blue-50  text-blue-600 flex items-center justify-center">
               <MessageSquare size={16} />
             </div>
             <span>View all Estate Chats in Messages</span>
@@ -241,9 +241,9 @@ export default function CommunityDetailPage() {
 
         {/* ── Members Roster ── */}
         {hub.joined && members.length > 0 && (
-          <div className="bg-white dark:bg-[#12161A] rounded-3xl border border-black/[0.08] dark:border-white/[0.08] p-5 shadow-sm space-y-3">
+          <div className="bg-white  rounded-3xl border border-black/[0.08]  p-5 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
+              <h2 className="text-sm font-extrabold text-slate-900 ">
                 Active Residents ({hub.membersCount.toLocaleString()})
               </h2>
               <span className="text-[11px] font-semibold text-slate-500">
@@ -255,19 +255,19 @@ export default function CommunityDetailPage() {
               {members.slice(0, 12).map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-center justify-between gap-2.5 rounded-2xl border border-black/[0.04] dark:border-white/[0.04] bg-slate-50/60 dark:bg-white/[0.02] p-2.5"
+                  className="flex items-center justify-between gap-2.5 rounded-2xl border border-black/[0.04]  bg-slate-50/60  p-2.5"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center text-[11px] font-black text-slate-700 dark:text-slate-200">
+                    <div className="h-7 w-7 rounded-full bg-slate-200  flex items-center justify-center text-[11px] font-black text-slate-700 ">
                       {(m.firstName || m.username || 'U')[0]?.toUpperCase()}
                     </div>
-                    <span className="truncate text-xs font-bold text-slate-800 dark:text-slate-200">
+                    <span className="truncate text-xs font-bold text-slate-800 ">
                       {m.firstName || m.lastName
                         ? `${m.firstName ?? ''} ${m.lastName ?? ''}`.trim()
                         : m.username ?? 'Member'}
                     </span>
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-500">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100  text-slate-500">
                     {m.role}
                   </span>
                 </div>

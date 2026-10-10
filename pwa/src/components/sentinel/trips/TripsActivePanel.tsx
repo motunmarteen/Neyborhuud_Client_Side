@@ -20,7 +20,7 @@ type TripsActivePanelProps = {
 };
 
 function escalationDotClass(level: number, active: boolean): string {
-  if (!active) return 'bg-brand-surface dark:bg-brand-black';
+  if (!active) return 'bg-brand-surface ';
   if (level === 1) return 'bg-primary400';
   if (level === 2) return 'bg-amber-500';
   return 'bg-brand-red';

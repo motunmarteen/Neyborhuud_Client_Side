@@ -47,49 +47,49 @@ const CREATE_MENU_OPTIONS = [
     label: 'Post',
     subtitle: 'Share photos, news or thoughts',
     icon: PenSquare,
-    color: 'text-sky-600 bg-sky-50 dark:text-sky-400 dark:bg-sky-500/15',
+    color: 'text-sky-600 bg-sky-50  ',
   },
   {
     key: 'fyi',
     label: 'FYI Alert',
     subtitle: 'Power, road, or utility notice',
     icon: Megaphone,
-    color: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-500/15',
+    color: 'text-amber-600 bg-amber-50  ',
   },
   {
     key: 'emergency',
     label: 'Safety Report',
     subtitle: 'Urgent incident or hazard alert',
     icon: ShieldAlert,
-    color: 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-500/15',
+    color: 'text-rose-600 bg-rose-50  ',
   },
   {
     key: 'poll',
     label: 'Community Poll',
     subtitle: 'Ask neighbors to vote on a decision',
     icon: BarChart2,
-    color: 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/15',
+    color: 'text-emerald-600 bg-emerald-50  ',
   },
   {
     key: 'event',
     label: 'Huud Event',
     subtitle: 'Plan a gathering, patrol or meeting',
     icon: Calendar,
-    color: 'text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-500/15',
+    color: 'text-purple-600 bg-purple-50  ',
   },
   {
     key: 'help_request',
     label: 'Help Request',
     subtitle: 'Request a tool, ride or hand',
     icon: HandHeart,
-    color: 'text-pink-600 bg-pink-50 dark:text-pink-400 dark:bg-pink-500/15',
+    color: 'text-pink-600 bg-pink-50  ',
   },
   {
     key: 'marketplace',
     label: 'Marketplace',
     subtitle: 'Buy, sell or giveaway items',
     icon: ShoppingBag,
-    color: 'text-teal-600 bg-teal-50 dark:text-teal-400 dark:bg-teal-500/15',
+    color: 'text-teal-600 bg-teal-50  ',
   },
 ];
 
@@ -316,10 +316,10 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
               {/* Popover Menu */}
               {createMenuOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-56 sm:w-64 bg-white/95 dark:bg-[#242526] text-slate-800 dark:text-[#DDE3EC] border border-black/[0.08] dark:border-[#3E4042] rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.14)] dark:shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl select-none"
+                  className="absolute right-0 top-full mt-2 w-56 sm:w-64 bg-white/95  text-slate-800  border border-black/[0.08]  rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.14)]  p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl select-none"
                   role="menu"
                 >
-                  <div className="px-3 py-1.5 mb-1 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-white/50 border-b border-black/[0.06] dark:border-white/10">
+                  <div className="px-3 py-1.5 mb-1 text-[10px] font-black uppercase tracking-wider text-slate-400  border-b border-black/[0.06] ">
                     Create
                   </div>
                   <div className="flex flex-col gap-0.5">
@@ -330,17 +330,17 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                           key={item.key}
                           type="button"
                           onClick={() => handleSelectCreateType(item.key)}
-                          className="w-full px-2.5 py-2 rounded-xl flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-[#3A3B3C] active:bg-slate-200 dark:active:bg-[#4E4F50] transition-colors text-left group cursor-pointer"
+                          className="w-full px-2.5 py-2 rounded-xl flex items-center gap-3 hover:bg-slate-100  active:bg-slate-200  transition-colors text-left group cursor-pointer"
                           role="menuitem"
                         >
                           <div className={`p-1.5 rounded-lg shrink-0 ${item.color}`}>
                             <Icon size={16} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight leading-tight">
+                            <p className="text-sm font-semibold text-slate-900  tracking-tight leading-tight">
                               {item.label}
                             </p>
-                            <p className="text-[11px] text-slate-500 dark:text-white/60 truncate leading-tight mt-0.5">
+                            <p className="text-[11px] text-slate-500  truncate leading-tight mt-0.5">
                               {item.subtitle}
                             </p>
                           </div>

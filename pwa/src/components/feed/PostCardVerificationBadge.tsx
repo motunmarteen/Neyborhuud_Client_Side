@@ -49,7 +49,7 @@ export function PostCardVerificationBadge({
   if (withAvatarBackground) {
     const sizeClass = avatarBadgeSize === 'sm' ? 'h-[17px] w-[17px]' : 'h-[20px] w-[20px]';
     return (
-      <div className={`post-card-avatar-badge absolute -bottom-1 -right-1 z-10 flex ${sizeClass} items-center justify-center rounded-full bg-white dark:bg-[#1D2433] border-[1.5px] border-white dark:border-[#1D2433] shadow-sm select-none pointer-events-none`}>
+      <div className={`post-card-avatar-badge absolute -bottom-1 -right-1 z-10 flex ${sizeClass} items-center justify-center rounded-full bg-white  border-[1.5px] border-white  shadow-sm select-none pointer-events-none`}>
         {badge}
       </div>
     );

@@ -210,7 +210,7 @@ export default function VerifyLocationPage() {
             </div>
             <span>
               Your device location is compared to a reference point for{' '}
-              <strong className="text-brand-black dark:text-white">{communityName}</strong> (LGA centroid or map center), within a
+              <strong className="text-brand-black ">{communityName}</strong> (LGA centroid or map center), within a
               generous radius. No location data is stored.
             </span>
           </div>
@@ -221,7 +221,7 @@ export default function VerifyLocationPage() {
           <span>
             Seeing &ldquo;too far&rdquo;? Try moving near a window or stepping outside. Admins can adjust area
             boundaries after running{' '}
-            <code className="rounded bg-black/5 dark:bg-white/10 px-1 text-[10px]">seed:communities</code>.
+            <code className="rounded bg-black/5  px-1 text-[10px]">seed:communities</code>.
           </span>
         </div>
 

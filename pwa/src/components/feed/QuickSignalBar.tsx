@@ -275,7 +275,7 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
     <>
       {/* ── THE 1-TAP QUICK SIGNAL BAR (Waze-style dock) ── */}
       <div className="w-full px-3 sm:px-4 py-2 select-none">
-        <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#181D23] border border-black/[0.08] dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] p-3">
+        <div className="relative overflow-hidden rounded-2xl bg-white  border border-black/[0.08]  shadow-[0_4px_20px_rgba(0,0,0,0.04)] p-3">
           {/* Header Row */}
           <div className="flex items-center justify-between gap-2 mb-2.5">
             <div className="flex items-center gap-1.5 min-w-0">
@@ -283,15 +283,15 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+              <p className="text-xs font-black text-slate-900  uppercase tracking-wider">
                 1-Tap Street Signals
               </p>
-              <span className="hidden sm:inline-block text-[11px] font-medium text-slate-400 dark:text-white/40">
+              <span className="hidden sm:inline-block text-[11px] font-medium text-slate-400 ">
                 • Waze for your Huud
               </span>
             </div>
 
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 shrink-0">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50  border border-emerald-500/20 text-[11px] font-extrabold text-emerald-700  shrink-0">
               <Sparkles size={11} className="text-emerald-500" />
               <span>+15 HC each</span>
             </div>
@@ -305,13 +305,13 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
               onClick={() => handleOpenSheet('power')}
               className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-xl bg-amber-500/8 hover:bg-amber-500/15 border border-amber-500/20 active:scale-95 transition-all text-center group cursor-pointer"
             >
-              <div className="size-8 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+              <div className="size-8 rounded-full bg-amber-500/15 text-amber-600  flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
                 <Zap size={16} strokeWidth={2.5} />
               </div>
-              <span className="text-[11px] sm:text-xs font-extrabold text-slate-900 dark:text-white leading-tight">
+              <span className="text-[11px] sm:text-xs font-extrabold text-slate-900  leading-tight">
                 Power & Light
               </span>
-              <span className="text-[9px] sm:text-[10px] font-medium text-amber-700 dark:text-amber-400/80 leading-tight truncate max-w-full">
+              <span className="text-[9px] sm:text-[10px] font-medium text-amber-700  leading-tight truncate max-w-full">
                 Light Don Go?
               </span>
             </button>
@@ -322,13 +322,13 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
               onClick={() => handleOpenSheet('traffic')}
               className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-xl bg-blue-500/8 hover:bg-blue-500/15 border border-blue-500/20 active:scale-95 transition-all text-center group cursor-pointer"
             >
-              <div className="size-8 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+              <div className="size-8 rounded-full bg-blue-500/15 text-blue-600  flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
                 <Car size={16} strokeWidth={2.5} />
               </div>
-              <span className="text-[11px] sm:text-xs font-extrabold text-slate-900 dark:text-white leading-tight">
+              <span className="text-[11px] sm:text-xs font-extrabold text-slate-900  leading-tight">
                 Road & Traffic
               </span>
-              <span className="text-[9px] sm:text-[10px] font-medium text-blue-700 dark:text-blue-400/80 leading-tight truncate max-w-full">
+              <span className="text-[9px] sm:text-[10px] font-medium text-blue-700  leading-tight truncate max-w-full">
                 Gridlock / Flood
               </span>
             </button>
@@ -339,27 +339,27 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
               onClick={() => handleOpenSheet('safety')}
               className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-xl bg-rose-500/8 hover:bg-rose-500/15 border border-rose-500/20 active:scale-95 transition-all text-center group cursor-pointer"
             >
-              <div className="size-8 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+              <div className="size-8 rounded-full bg-rose-500/15 text-rose-600  flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
                 <ShieldAlert size={16} strokeWidth={2.5} />
               </div>
-              <span className="text-[11px] sm:text-xs font-extrabold text-slate-900 dark:text-white leading-tight">
+              <span className="text-[11px] sm:text-xs font-extrabold text-slate-900  leading-tight">
                 Safety & Gate
               </span>
-              <span className="text-[9px] sm:text-[10px] font-medium text-rose-700 dark:text-rose-400/80 leading-tight truncate max-w-full">
+              <span className="text-[9px] sm:text-[10px] font-medium text-rose-700  leading-tight truncate max-w-full">
                 Prowler / Threat
               </span>
             </button>
           </div>
 
           {/* Share to Estate WhatsApp Action */}
-          <div className="mt-2.5 pt-2 border-t border-black/[0.06] dark:border-white/10 flex items-center justify-between gap-2">
+          <div className="mt-2.5 pt-2 border-t border-black/[0.06]  flex items-center justify-between gap-2">
             {recentSignal ? (
-              <span className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold truncate">
+              <span className="flex items-center gap-1.5 text-[11px] text-emerald-700  font-semibold truncate">
                 <CheckCircle2 size={13} className="shrink-0" />
                 <span className="truncate">"{recentSignal}" fed to Sentinel</span>
               </span>
             ) : (
-              <span className="text-[11px] text-slate-500 dark:text-white/50 flex items-center gap-1 truncate">
+              <span className="text-[11px] text-slate-500  flex items-center gap-1 truncate">
                 <Radio size={12} className="text-emerald-500 shrink-0" />
                 <span className="truncate">Live radar fed by verified neighbors</span>
               </span>
@@ -368,7 +368,7 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
             <button
               type="button"
               onClick={handleShareToWhatsApp}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] dark:text-[#25D366] text-[11px] font-extrabold transition-colors active:scale-95 shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E]  text-[11px] font-extrabold transition-colors active:scale-95 shrink-0 cursor-pointer"
               title="Share live status to estate WhatsApp group"
             >
               <span>Share to WhatsApp</span>
@@ -385,22 +385,22 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
           onClick={handleClose}
         >
           <div
-            className="w-full max-w-md bg-white dark:bg-[#1E232B] rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-black/10 dark:border-white/10 animate-in slide-in-from-bottom duration-200 select-none"
+            className="w-full max-w-md bg-white  rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-black/10  animate-in slide-in-from-bottom duration-200 select-none"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-black/[0.06] dark:border-white/10">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-black/[0.06] ">
               <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                <span className="p-1.5 rounded-xl bg-emerald-500/15 text-emerald-600 ">
                   <Radio size={18} strokeWidth={2.5} />
                 </span>
                 <div>
-                  <h3 className="text-sm font-black text-slate-900 dark:text-white leading-tight">
+                  <h3 className="text-sm font-black text-slate-900  leading-tight">
                     {activeCategory === 'power' && 'Log Power & Grid Status'}
                     {activeCategory === 'traffic' && 'Log Road & Traffic Condition'}
                     {activeCategory === 'safety' && 'Log Security or Hazard Signal'}
                   </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-white/60">
+                  <p className="text-[11px] text-slate-500 ">
                     1 tap notifies neighbors & powers Sentinel AI
                   </p>
                 </div>
@@ -409,7 +409,7 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
               <button
                 type="button"
                 onClick={handleClose}
-                className="p-1 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                className="p-1 rounded-full text-slate-400 hover:text-slate-900  hover:bg-black/5  transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <X size={18} />
@@ -427,7 +427,7 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
                   className={`w-full p-3 rounded-2xl border transition-all text-left flex items-center gap-3.5 group cursor-pointer ${
                     submittingId === preset.id
                       ? 'bg-emerald-500/10 border-emerald-500/30 opacity-75'
-                      : 'bg-black/[0.02] dark:bg-white/[0.04] hover:bg-emerald-500/8 dark:hover:bg-emerald-500/15 border-black/[0.06] dark:border-white/10 hover:border-emerald-500/30'
+                      : 'bg-black/[0.02]  hover:bg-emerald-500/8  border-black/[0.06]  hover:border-emerald-500/30'
                   }`}
                 >
                   <span className="text-2xl shrink-0 group-hover:scale-110 transition-transform">
@@ -436,21 +436,21 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                      <p className="text-sm font-bold text-slate-900  leading-tight">
                         {preset.label}
                       </p>
                       {preset.severity === 'critical' && (
-                        <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-500/15 text-rose-600 dark:text-rose-400 uppercase">
+                        <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-500/15 text-rose-600  uppercase">
                           Alert
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-white/60 leading-snug mt-0.5 truncate">
+                    <p className="text-xs text-slate-500  leading-snug mt-0.5 truncate">
                       {preset.sub}
                     </p>
                   </div>
 
-                  <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[11px] font-black group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                  <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-700  text-[11px] font-black group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                     <span>+15 HC</span>
                   </div>
                 </button>
@@ -458,7 +458,7 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
             </div>
 
             {/* Footer Disclaimer */}
-            <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-white/50 px-1">
+            <div className="flex items-center justify-between text-[11px] text-slate-400  px-1">
               <span className="flex items-center gap-1">
                 <MapPin size={12} className="text-emerald-500" />
                 <span>Tagged to {huudName && huudName !== 'your neighborhood' ? huudName : 'your live area'}</span>

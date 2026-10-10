@@ -50,7 +50,7 @@ function RecentRedZoneAlerts() {
   if (loading && alerts.length === 0) {
     return (
       <div className="mt-3 mod-card rounded-2xl p-4">
-        <div className="h-16 animate-pulse rounded-xl bg-black/5 dark:bg-white/5" />
+        <div className="h-16 animate-pulse rounded-xl bg-black/5 " />
       </div>
     );
   }

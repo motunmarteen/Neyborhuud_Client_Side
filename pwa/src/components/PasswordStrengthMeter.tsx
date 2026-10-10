@@ -31,14 +31,14 @@ export function PasswordStrengthMeter({
 
   const barClass =
     meetsPolicy || tier === "strong"
-      ? "bg-primary dark:bg-primary"
+      ? "bg-primary "
       : tier === "good"
-        ? "bg-primary/90 dark:bg-primary/80"
+        ? "bg-primary/90 "
         : tier === "fair"
-          ? "bg-primary dark:bg-primary/90"
+          ? "bg-primary "
           : tier === "weak"
-            ? "bg-status-warning/85 dark:bg-status-warning/80"
-            : "bg-zinc-300 dark:bg-zinc-600";
+            ? "bg-status-warning/85 "
+            : "bg-zinc-300 ";
 
   if (!showChecklist) {
     return (
@@ -47,7 +47,7 @@ export function PasswordStrengthMeter({
           Password strength: {label}
         </p>
         <div
-          className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700"
+          className="h-2 overflow-hidden rounded-full bg-zinc-200 "
           aria-hidden
         >
           <div
@@ -61,21 +61,21 @@ export function PasswordStrengthMeter({
 
   const labelClass =
     meetsPolicy || tier === "strong"
-      ? "text-status-success dark:text-white/90"
+      ? "text-status-success "
       : tier === "empty"
-        ? "text-zinc-500 dark:text-zinc-400"
-        : "text-zinc-700 dark:text-zinc-300";
+        ? "text-zinc-500 "
+        : "text-zinc-700 ";
 
   return (
     <div
       className={cx(
-        "mt-2 space-y-3 rounded-xl border border-zinc-200/80 bg-zinc-50/50 px-3 py-3 dark:border-zinc-700/60 dark:bg-zinc-900/30",
+        "mt-2 space-y-3 rounded-xl border border-zinc-200/80 bg-zinc-50/50 px-3 py-3  ",
         className,
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-zinc-500 ">
             Password strength
           </p>
           <p className={cx("mt-0.5 text-sm font-medium", labelClass)} aria-live="polite">
@@ -121,7 +121,7 @@ export function PasswordStrengthMeter({
               >
                 {item.label}
                 {!item.pending && !item.ok ? (
-                  <span className="mt-0.5 block font-normal text-status-warning/90 dark:text-white/90/85">
+                  <span className="mt-0.5 block font-normal text-status-warning/90 ">
                     {item.failMessage}
                   </span>
                 ) : null}

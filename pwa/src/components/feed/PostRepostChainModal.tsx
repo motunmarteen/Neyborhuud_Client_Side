@@ -73,18 +73,18 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
             zIndexClass="z-[350]"
             alignClass="items-end justify-center sm:items-center"
             backdropClassName="bg-black/60 backdrop-blur-sm"
-            panelClassName="w-full max-w-md rounded-t-3xl bg-white pb-safe shadow-2xl dark:bg-brand-black sm:rounded-3xl"
+            panelClassName="w-full max-w-md rounded-t-3xl bg-white pb-safe shadow-2xl  sm:rounded-3xl"
             handleClassName="pt-2 pb-0"
         >
             <div className="px-5 pb-6 pt-2 max-h-[80vh] flex flex-col">
                 {/* Header */}
                 <div className="mb-5 flex items-center justify-between shrink-0">
                     <div>
-                        <p className="text-lg font-black text-[var(--neu-text-muted)] dark:text-white flex items-center gap-1.5">
+                        <p className="text-lg font-black text-[var(--neu-text-muted)]  flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-primary text-[22px]">hub</span>
                             Chain of Post
                         </p>
-                        <p className="text-xs text-[var(--neu-text-muted)] dark:text-[var(--neu-text-muted)] mt-0.5">
+                        <p className="text-xs text-[var(--neu-text-muted)]  mt-0.5">
                             {!loading && chain.length > 0
                                 ? `Shared ${chain.length - 1} time${chain.length - 1 !== 1 ? 's' : ''} — trace back to originator`
                                 : 'Origin trace diagram back to originator'}
@@ -92,7 +92,7 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
                     </div>
                     <button
                         onClick={onClose}
-                        className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-surface dark:bg-brand-black text-[var(--neu-text-muted)] hover:bg-brand-surface dark:hover:bg-brand-black/80 transition-colors"
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-surface  text-[var(--neu-text-muted)] hover:bg-brand-surface  transition-colors"
                         aria-label="Close"
                     >
                         <span className="material-symbols-outlined text-[18px]">close</span>
@@ -104,13 +104,13 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                            <p className="text-xs text-neu-text-secondary/70 dark:text-white/50 mt-3 font-semibold">Tracing origin...</p>
+                            <p className="text-xs text-neu-text-secondary/70  mt-3 font-semibold">Tracing origin...</p>
                         </div>
                     ) : chain.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-center">
                             <span className="material-symbols-outlined text-[36px] text-neu-text-secondary/55 mb-2">error</span>
                             <p className="text-sm font-bold">No chain found</p>
-                            <p className="text-xs text-neu-text-secondary/70 dark:text-white/50 mt-1">This post appears to be the original creator's.</p>
+                            <p className="text-xs text-neu-text-secondary/70  mt-1">This post appears to be the original creator's.</p>
                         </div>
                     ) : (
                         <div className="relative pl-6 space-y-7 border-l-2 border-primary/20 ml-3 py-1">
@@ -126,7 +126,7 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
                                 return (
                                     <div key={item.postId} className="relative group select-none animate-fadeIn">
                                         {/* Connector Circle / Node */}
-                                        <div className={`absolute -left-[31px] top-1.5 w-[18px] h-[18px] rounded-full border-2 bg-white dark:bg-brand-black flex items-center justify-center transition-all ${
+                                        <div className={`absolute -left-[31px] top-1.5 w-[18px] h-[18px] rounded-full border-2 bg-white  flex items-center justify-center transition-all ${
                                             isOrigin ? 'border-[#00B82E] shadow-[0_0_8px_rgba(0,196,49,0.4)]' :
                                             isLast ? 'border-primary ring-4 ring-primary/10' :
                                             'border-primary/45'
@@ -142,10 +142,10 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
                                         <div className={`p-3 rounded-2xl border transition-all ${
                                             isLast 
                                                 ? 'bg-primary/5 border-primary/20 shadow-sm'
-                                                : 'bg-black/[0.015] dark:bg-white/[0.015] border-black/[0.06] dark:border-white/[0.06] hover:bg-black/[0.025] hover:dark:bg-white/[0.025]'
+                                                : 'bg-black/[0.015]  border-black/[0.06]  hover:bg-black/[0.025] '
                                         }`}>
                                             <div className="flex items-center gap-2.5">
-                                                <div className="w-8 h-8 rounded-full overflow-hidden relative border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 shrink-0">
+                                                <div className="w-8 h-8 rounded-full overflow-hidden relative border border-black/10  bg-black/5  shrink-0">
                                                     {avatar ? (
                                                         <Image
                                                             src={avatar}
@@ -166,7 +166,7 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
                                                         <Link href={`/profile/${username}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
                                                             <h4 className="text-xs font-black truncate max-w-[120px]">{authorName}</h4>
                                                         </Link>
-                                                        <span className="text-[9px] font-bold text-neu-text-secondary/60 dark:text-white/40">{dateStr}</span>
+                                                        <span className="text-[9px] font-bold text-neu-text-secondary/60 ">{dateStr}</span>
                                                     </div>
                                                     <div className="flex items-center justify-between">
                                                         <Link href={`/profile/${username}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
@@ -176,13 +176,13 @@ export function PostRepostChainModal({ postId, open, onClose }: PostRepostChainM
                                                             <span className="text-[8.5px] px-1.5 py-0.5 rounded-full bg-[#00B82E]/15 text-[#00B82E] font-black uppercase tracking-wider scale-90">Originator</span>
                                                         )}
                                                         {isLast && !isOrigin && (
-                                                            <span className="text-[8.5px] px-1.5 py-0.5 rounded-full bg-primary/20 text-brand-green-dark dark:text-primary font-black uppercase tracking-wider scale-90">Current</span>
+                                                            <span className="text-[8.5px] px-1.5 py-0.5 rounded-full bg-primary/20 text-brand-green-dark  font-black uppercase tracking-wider scale-90">Current</span>
                                                         )}
                                                     </div>
                                                 </div>
                                             </div>
                                             {item.body && (
-                                                <p className="text-[11.5px] mt-2 text-neu-text-secondary dark:text-white/70 line-clamp-2 leading-relaxed italic">
+                                                <p className="text-[11.5px] mt-2 text-neu-text-secondary  line-clamp-2 leading-relaxed italic">
                                                     "{item.body}"
                                                 </p>
                                             )}

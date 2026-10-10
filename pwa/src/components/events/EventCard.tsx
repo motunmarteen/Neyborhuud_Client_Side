@@ -38,57 +38,57 @@ interface EventTypeConfig {
 const TYPE_CONFIG: Record<Event["type"], EventTypeConfig> = {
   community: {
     label: "Community",
-    badgeBg: "bg-emerald-50 dark:bg-emerald-950/40",
-    badgeText: "text-emerald-700 dark:text-emerald-400",
-    borderColor: "border-emerald-200/80 dark:border-emerald-800/40",
+    badgeBg: "bg-emerald-50 ",
+    badgeText: "text-emerald-700 ",
+    borderColor: "border-emerald-200/80 ",
     icon: Users,
     gradient: "from-emerald-500/15 via-teal-500/10 to-transparent",
   },
   social: {
     label: "Social",
-    badgeBg: "bg-pink-50 dark:bg-pink-950/40",
-    badgeText: "text-pink-700 dark:text-pink-400",
-    borderColor: "border-pink-200/80 dark:border-pink-800/40",
+    badgeBg: "bg-pink-50 ",
+    badgeText: "text-pink-700 ",
+    borderColor: "border-pink-200/80 ",
     icon: Sparkles,
     gradient: "from-pink-500/15 via-purple-500/10 to-transparent",
   },
   sports: {
     label: "Sports",
-    badgeBg: "bg-blue-50 dark:bg-blue-950/40",
-    badgeText: "text-blue-700 dark:text-blue-400",
-    borderColor: "border-blue-200/80 dark:border-blue-800/40",
+    badgeBg: "bg-blue-50 ",
+    badgeText: "text-blue-700 ",
+    borderColor: "border-blue-200/80 ",
     icon: Trophy,
     gradient: "from-blue-500/15 via-cyan-500/10 to-transparent",
   },
   cultural: {
     label: "Cultural",
-    badgeBg: "bg-purple-50 dark:bg-purple-950/40",
-    badgeText: "text-purple-700 dark:text-purple-400",
-    borderColor: "border-purple-200/80 dark:border-purple-800/40",
+    badgeBg: "bg-purple-50 ",
+    badgeText: "text-purple-700 ",
+    borderColor: "border-purple-200/80 ",
     icon: Palette,
     gradient: "from-purple-500/15 via-amber-500/10 to-transparent",
   },
   educational: {
     label: "Educational",
-    badgeBg: "bg-teal-50 dark:bg-teal-950/40",
-    badgeText: "text-teal-700 dark:text-teal-400",
-    borderColor: "border-teal-200/80 dark:border-teal-800/40",
+    badgeBg: "bg-teal-50 ",
+    badgeText: "text-teal-700 ",
+    borderColor: "border-teal-200/80 ",
     icon: GraduationCap,
     gradient: "from-teal-500/15 via-emerald-500/10 to-transparent",
   },
   business: {
     label: "Business",
-    badgeBg: "bg-amber-50 dark:bg-amber-950/40",
-    badgeText: "text-amber-700 dark:text-amber-400",
-    borderColor: "border-amber-200/80 dark:border-amber-800/40",
+    badgeBg: "bg-amber-50 ",
+    badgeText: "text-amber-700 ",
+    borderColor: "border-amber-200/80 ",
     icon: Briefcase,
     gradient: "from-amber-500/15 via-orange-500/10 to-transparent",
   },
   other: {
     label: "General",
-    badgeBg: "bg-slate-50 dark:bg-slate-800/50",
-    badgeText: "text-slate-700 dark:text-slate-300",
-    borderColor: "border-slate-200 dark:border-slate-700",
+    badgeBg: "bg-slate-50 ",
+    badgeText: "text-slate-700 ",
+    borderColor: "border-slate-200 ",
     icon: Layers,
     gradient: "from-slate-500/15 via-slate-600/10 to-transparent",
   },
@@ -149,7 +149,7 @@ export default function EventCard({
 
   return (
     <article
-      className={`group relative mx-auto w-full overflow-hidden rounded-3xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-[#12161A] shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex flex-col ${
+      className={`group relative mx-auto w-full overflow-hidden rounded-3xl border border-black/[0.08]  bg-white  shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex flex-col ${
         isCancelled ? "ring-2 ring-rose-500/50" : ""
       }`}
     >
@@ -250,7 +250,7 @@ export default function EventCard({
 
       {/* ── ELI5 Explanation Banner (Collapsible) ── */}
       {showEli5 && (
-        <div className="bg-emerald-50 dark:bg-emerald-950/40 border-b border-emerald-100 dark:border-emerald-900/50 p-3.5 flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
+        <div className="bg-emerald-50  border-b border-emerald-100  p-3.5 flex items-start gap-2.5 text-xs text-emerald-900 ">
           <HelpCircle size={16} className="text-[#00B82E] shrink-0 mt-0.5" />
           <div className="flex-1">
             <span className="font-bold">What is this? </span>
@@ -275,34 +275,34 @@ export default function EventCard({
             href={`/events/${eventId}`}
             onMouseEnter={prefetchDetail}
             onFocus={prefetchDetail}
-            className="block text-slate-900 dark:text-white font-black text-lg sm:text-xl leading-snug line-clamp-2 hover:text-[#00B82E] dark:hover:text-[#00B82E] transition-colors"
+            className="block text-slate-900  font-black text-lg sm:text-xl leading-snug line-clamp-2 hover:text-[#00B82E]  transition-colors"
           >
             {event.title}
           </Link>
 
           {/* Venue Location Chip */}
           {event.venue && (
-            <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 text-xs font-semibold">
+            <div className="flex items-center gap-1.5 text-slate-600  text-xs font-semibold">
               <MapPin size={14} className="text-rose-500 shrink-0" />
               <span className="truncate">{event.venue}</span>
             </div>
           )}
 
           {event.description && (
-            <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed line-clamp-2">
+            <p className="text-slate-600  text-xs leading-relaxed line-clamp-2">
               {event.description}
             </p>
           )}
         </div>
 
         {/* ── BC.Game Tactile Action Footer ── */}
-        <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between gap-3">
+        <div className="pt-2 border-t border-black/[0.06]  flex items-center justify-between gap-3">
           {/* Details Link */}
           <Link
             href={`/events/${eventId}`}
             onMouseEnter={prefetchDetail}
             onFocus={prefetchDetail}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00B82E] transition-colors px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.05]"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700  hover:text-[#00B82E] transition-colors px-2 py-1.5 rounded-xl hover:bg-slate-100 "
           >
             <span>View Details</span>
             <ArrowRight size={14} />
@@ -316,7 +316,7 @@ export default function EventCard({
               disabled={attendPending}
               className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all active:scale-95 disabled:opacity-50 ${
                 event.isAttending
-                  ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200"
+                  ? "bg-emerald-100  text-emerald-800  border border-emerald-300  hover:bg-emerald-200"
                   : "bg-[#00B82E] hover:bg-[#00B82E] text-white shadow-md shadow-[#00B82E]/20 font-black"
               }`}
             >

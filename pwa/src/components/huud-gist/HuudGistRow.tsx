@@ -24,29 +24,29 @@ export function HuudGistRow({ post }: HuudGistRowProps) {
   return (
     <Link
       href={`/gist/${id}`}
-      className="group flex items-start gap-3.5 p-4 rounded-2xl bg-white dark:bg-[#12161A] border border-black/[0.06] dark:border-white/[0.06] hover:border-black/[0.12] dark:hover:border-white/[0.12] shadow-sm hover:shadow transition-all active:scale-[0.99] no-underline"
+      className="group flex items-start gap-3.5 p-4 rounded-2xl bg-white  border border-black/[0.06]  hover:border-black/[0.12]  shadow-sm hover:shadow transition-all active:scale-[0.99] no-underline"
     >
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-200/70 dark:border-blue-800/40 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-200/70  bg-blue-50  text-blue-600  group-hover:scale-105 transition-transform">
         <MessageSquare size={20} />
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2 mb-1">
-          <span className="shrink-0 rounded-full bg-slate-100 dark:bg-white/[0.06] px-2.5 py-0.5 text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+          <span className="shrink-0 rounded-full bg-slate-100  px-2.5 py-0.5 text-[10px] font-black text-slate-600  uppercase tracking-wider">
             {sectionLabel}
           </span>
           {timeLabel ? (
-            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+            <span className="text-[11px] text-slate-400  font-medium">
               {timeLabel}
             </span>
           ) : null}
         </div>
 
-        <p className="line-clamp-2 text-sm sm:text-[15px] font-extrabold leading-snug text-slate-900 dark:text-white group-hover:text-[#00B82E] transition-colors">
+        <p className="line-clamp-2 text-sm sm:text-[15px] font-extrabold leading-snug text-slate-900  group-hover:text-[#00B82E] transition-colors">
           {post.title || post.body}
         </p>
 
-        <div className="mt-1.5 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 font-medium">
+        <div className="mt-1.5 flex items-center gap-3 text-xs text-slate-500  font-medium">
           <span className="truncate">{authorName}</span>
           {post.commentCount ? (
             <span className="inline-flex items-center gap-1">

@@ -121,7 +121,7 @@ export function BottomSheet({
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                        className="fixed bottom-0 left-0 right-0 z-[201] mx-auto max-w-lg rounded-t-3xl border border-white/20 bg-white/90 shadow-[0_-12px_48px_rgba(0,0,0,0.18)] backdrop-blur-2xl dark:bg-[rgba(12,18,24,0.92)]"
+                        className="fixed bottom-0 left-0 right-0 z-[201] mx-auto max-w-lg rounded-t-3xl border border-white/20 bg-white/90 shadow-[0_-12px_48px_rgba(0,0,0,0.18)] backdrop-blur-2xl "
                         style={{ maxHeight }}
                     >
                         <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">

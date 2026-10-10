@@ -76,7 +76,7 @@ export function AuthSheetStageHeader({
         </div>
       </div>
       {error ? (
-        <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 text-xs flex items-center gap-2 mb-3.5" role="alert">
+        <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500  text-xs flex items-center gap-2 mb-3.5" role="alert">
           <AlertCircle size={16} strokeWidth={2} className="shrink-0" />
           <span>{error}</span>
         </div>

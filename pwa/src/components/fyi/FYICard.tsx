@@ -219,7 +219,7 @@ export function FYICard({
         const displayText = shouldTruncate ? `${textContent.slice(0, 260)}...` : textContent;
 
         return (
-            <div className="px-1 text-[14px] font-normal text-neu-text dark:text-white/90 leading-[19px] tracking-normal whitespace-pre-wrap break-words">
+            <div className="px-1 text-[14px] font-normal text-neu-text  leading-[19px] tracking-normal whitespace-pre-wrap break-words">
                 {displayText}
                 {shouldTruncate && (
                     <button
@@ -254,7 +254,7 @@ export function FYICard({
     return (
         <>
         <article
-            className="bg-white dark:bg-[#1D2433] px-4 py-3.5 mx-auto w-full select-none border-0 border-b border-black/[0.06] dark:border-white/[0.06] shadow-none max-w-[580px] rounded-none flex flex-col gap-0"
+            className="bg-white  px-4 py-3.5 mx-auto w-full select-none border-0 border-b border-black/[0.06]  shadow-none max-w-[580px] rounded-none flex flex-col gap-0"
             {...articleGestureProps}
         >
             {/* Top Header Row */}
@@ -262,7 +262,7 @@ export function FYICard({
                 <div className="flex items-center gap-2.5 min-w-0">
                     <div className="relative shrink-0">
                         <Link href={`/profile/${authorUsername}`} onClick={(e) => e.stopPropagation()}>
-                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-glass-border bg-black/[0.04] dark:bg-white/10">
+                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-glass-border bg-black/[0.04] ">
                                 {authorAvatar && !imageError ? (
                                     <Image
                                         src={authorAvatar}
@@ -274,7 +274,7 @@ export function FYICard({
                                         unoptimized
                                     />
                                 ) : (
-                                    <span className="material-symbols-outlined text-[18px] text-neu-text-secondary dark:text-white/60">person</span>
+                                    <span className="material-symbols-outlined text-[18px] text-neu-text-secondary ">person</span>
                                 )}
                             </div>
                         </Link>
@@ -336,7 +336,7 @@ export function FYICard({
             {contactInfo && (
                 <div className="flex items-center gap-2 p-3 rounded-2xl bg-status-warning/5 mt-3">
                     <span className="material-symbols-outlined text-[16px] text-status-warning">contact_phone</span>
-                    <span className="text-[12px] text-neu-text-secondary dark:text-white/70 font-semibold">{contactInfo}</span>
+                    <span className="text-[12px] text-neu-text-secondary  font-semibold">{contactInfo}</span>
                 </div>
             )}
 
@@ -345,7 +345,7 @@ export function FYICard({
                 {/* Comment action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onComment?.(postId); }}
-                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 cursor-pointer group"
+                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary  hover:text-brand-blue transition-colors duration-200 cursor-pointer group"
                     aria-label="Comment"
                 >
                     <XReplyIcon size={18} className="group-hover:text-brand-blue group-hover:animate-dance-comment" />
@@ -355,7 +355,7 @@ export function FYICard({
                 {/* Helpful action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); helpfulMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 transition-colors duration-200 cursor-pointer group ${post.isHelpful ? 'text-primary' : 'text-neu-text-secondary dark:text-white/60 hover:text-primary'}`}
+                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 transition-colors duration-200 cursor-pointer group ${post.isHelpful ? 'text-primary' : 'text-neu-text-secondary  hover:text-primary'}`}
                     aria-label="Helpful"
                 >
                     <XThumbUpIcon size={18} filled={!!post.isHelpful} className="group-hover:text-primary" />
@@ -365,7 +365,7 @@ export function FYICard({
                 {/* Like action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 transition-colors duration-200 cursor-pointer group ${isLiked ? 'text-brand-red' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-red'}`}
+                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 transition-colors duration-200 cursor-pointer group ${isLiked ? 'text-brand-red' : 'text-neu-text-secondary  hover:text-brand-red'}`}
                     aria-label="Like"
                 >
                     <XLikeIcon size={18} filled={isLiked} className={`transition-transform active:scale-75 group-hover:animate-dance-like group-hover:text-brand-red ${isLiked ? 'text-brand-red' : ''}`} />
@@ -373,7 +373,7 @@ export function FYICard({
                 </button>
 
                 {/* Views action */}
-                <div className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary dark:text-white/60" aria-label="Views">
+                <div className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary " aria-label="Views">
                     <XViewIcon size={18} />
                     <span className="tabular-nums">{post.views ? formatCompactCount(post.views) : '1.2K'}</span>
                 </div>
@@ -381,7 +381,7 @@ export function FYICard({
                 {/* Save action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); saveMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 transition-colors duration-200 cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-blue'}`}
+                    className={`post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 transition-colors duration-200 cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'text-neu-text-secondary  hover:text-brand-blue'}`}
                     aria-label="Bookmark"
                 >
                     <XBookmarkIcon size={18} filled={post.isSaved} className="group-hover:animate-dance-save group-hover:text-brand-blue" />
@@ -390,7 +390,7 @@ export function FYICard({
                 {/* Share action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
-                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 cursor-pointer group"
+                    className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary  hover:text-brand-blue transition-colors duration-200 cursor-pointer group"
                     aria-label="Share"
                 >
                     <XShareIcon size={18} className="group-hover:animate-dance-share group-hover:text-brand-blue" />

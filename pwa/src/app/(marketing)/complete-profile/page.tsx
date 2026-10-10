@@ -315,7 +315,7 @@ export default function CompleteProfilePage() {
                                 <span>I&apos;ll do this later</span>
                             </button>
                         </div>
-                        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 dark:border-white/10 pt-3">
+                        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8  pt-3">
                             Already complete? <Link href="/feed">Enter the Huud</Link>
                         </p>
                     </div>

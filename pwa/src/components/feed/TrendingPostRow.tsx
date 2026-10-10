@@ -21,7 +21,7 @@ function RankDisplay({ rank }: { rank: number }) {
   if (rank === 2) return <span className="text-xl leading-none">🥈</span>;
   if (rank === 3) return <span className="text-xl leading-none">🥉</span>;
   return (
-    <span className="w-7 text-center text-xs font-bold tabular-nums text-charcoal/50 dark:text-white/50">
+    <span className="w-7 text-center text-xs font-bold tabular-nums text-charcoal/50 ">
       #{rank}
     </span>
   );

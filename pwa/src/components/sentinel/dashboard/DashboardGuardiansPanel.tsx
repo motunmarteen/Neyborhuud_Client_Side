@@ -200,7 +200,7 @@ export function DashboardGuardiansPanel({
 
           {linkersMessage && !linkersLoading ? (
             <p
-              className={`text-xs leading-relaxed ${linkers.length === 0 ? 'rounded-xl border border-amber-400/40 bg-amber-50/80 px-3 py-2 text-status-warning/90 dark:bg-status-warning/10 dark:text-status-warning' : ''}`}
+              className={`text-xs leading-relaxed ${linkers.length === 0 ? 'rounded-xl border border-amber-400/40 bg-amber-50/80 px-3 py-2 text-status-warning/90  ' : ''}`}
               style={linkers.length > 0 ? { color: 'var(--neu-text-muted)' } : undefined}
             >
               {linkersMessage}

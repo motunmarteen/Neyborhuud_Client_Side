@@ -410,10 +410,10 @@ function PickCommunityContent() {
               <span>Detect My Location (GPS)</span>
             </button>
 
-            <div className="flex items-center gap-3 my-2 text-charcoal/50 dark:text-white/40" aria-hidden="true">
-              <span className="flex-1 h-[1px] bg-charcoal/10 dark:bg-white/10" />
+            <div className="flex items-center gap-3 my-2 text-charcoal/50 " aria-hidden="true">
+              <span className="flex-1 h-[1px] bg-charcoal/10 " />
               <span className="text-[10px] font-bold tracking-widest uppercase">or enter manually</span>
-              <span className="flex-1 h-[1px] bg-charcoal/10 dark:bg-white/10" />
+              <span className="flex-1 h-[1px] bg-charcoal/10 " />
             </div>
 
             <PremiumInput
@@ -443,7 +443,7 @@ function PickCommunityContent() {
         ) : (
           <>
             <div className="flex items-center justify-between pb-1">
-              <span className="text-xs font-semibold text-charcoal/70 dark:text-white/70">Assigned Ward / Huud</span>
+              <span className="text-xs font-semibold text-charcoal/70 ">Assigned Ward / Huud</span>
               <Eli5Tooltip 
                 term="Community Ward" 
                 explanation="Your Huud is your hyper-local ward or neighborhood. Posts, SOS alerts, and trade items are shared with residents inside this verified boundary." 
@@ -457,12 +457,12 @@ function PickCommunityContent() {
                 className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 transition-all outline-none focus:outline-none ${
                   selectedId
                     ? 'border-primary/40 bg-primary/10 shadow-[0_0_0_1px_rgba(0, 184, 46,0.2)]'
-                    : 'border-charcoal/10 dark:border-white/10 bg-white dark:bg-[#1A212A] shadow-[0_4px_16px_rgba(0,0,0,0.06)]'
+                    : 'border-charcoal/10  bg-white  shadow-[0_4px_16px_rgba(0,0,0,0.06)]'
                 }`}
               >
                 <div
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all ${
-                    selectedId ? 'bg-primary text-black font-bold' : 'bg-charcoal/5 dark:bg-white/5 text-[var(--neu-text-muted)]'
+                    selectedId ? 'bg-primary text-black font-bold' : 'bg-charcoal/5  text-[var(--neu-text-muted)]'
                   }`}
                 >
                   {selectedId ? <Check className="w-4 h-4" aria-hidden="true" /> : <MapPin className="w-4 h-4" aria-hidden="true" />}
@@ -485,9 +485,9 @@ function PickCommunityContent() {
               </button>
 
               {dropdownOpen ? (
-                <div className="mt-2 overflow-hidden rounded-2xl border border-charcoal/10 dark:border-white/10 bg-white dark:bg-[#161B22] shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
-                  <div className="border-b border-charcoal/10 dark:border-white/10 px-3 pb-2 pt-3">
-                    <div className="flex items-center gap-2 rounded-xl border border-charcoal/10 dark:border-white/10 bg-brand-surface dark:bg-[#0B0E11] px-3 py-2">
+                <div className="mt-2 overflow-hidden rounded-2xl border border-charcoal/10  bg-white  shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+                  <div className="border-b border-charcoal/10  px-3 pb-2 pt-3">
+                    <div className="flex items-center gap-2 rounded-xl border border-charcoal/10  bg-brand-surface  px-3 py-2">
                       <Search className="w-4 h-4 text-[var(--neu-text-muted)] shrink-0" aria-hidden="true" />
                       <input
                         type="text"
@@ -495,13 +495,13 @@ function PickCommunityContent() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         autoFocus
-                        className="w-full border-0 bg-transparent text-sm text-brand-black dark:text-white outline-none placeholder:text-[var(--neu-text-muted)] focus:outline-none"
+                        className="w-full border-0 bg-transparent text-sm text-brand-black  outline-none placeholder:text-[var(--neu-text-muted)] focus:outline-none"
                       />
                       {search ? (
                         <button
                           type="button"
                           onClick={() => setSearch('')}
-                          className="text-[var(--neu-text-muted)] hover:text-brand-black dark:hover:text-white transition-colors"
+                          className="text-[var(--neu-text-muted)] hover:text-brand-black  transition-colors"
                           aria-label="Clear search"
                         >
                           <X className="w-4 h-4" aria-hidden="true" />
@@ -510,7 +510,7 @@ function PickCommunityContent() {
                     </div>
                   </div>
 
-                  <ul className="max-h-48 overflow-y-auto py-1 sm:max-h-56 divide-y divide-charcoal/5 dark:divide-white/5">
+                  <ul className="max-h-48 overflow-y-auto py-1 sm:max-h-56 divide-y divide-charcoal/5 ">
                     {filtered.length === 0 ? (
                       <li className="px-4 py-5 text-center text-sm text-[var(--neu-text-muted)]">
                         No areas match &ldquo;{search}&rdquo;
@@ -530,12 +530,12 @@ function PickCommunityContent() {
                               className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                                 isSelected
                                   ? 'bg-primary/10 text-primary font-semibold'
-                                  : 'text-brand-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                                  : 'text-brand-black  hover:bg-black/5 '
                               }`}
                             >
                               <div
                                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all ${
-                                  isSelected ? 'bg-primary text-black' : 'border border-charcoal/20 dark:border-white/20'
+                                  isSelected ? 'bg-primary text-black' : 'border border-charcoal/20 '
                                 }`}
                               >
                                 {isSelected ? (
@@ -543,7 +543,7 @@ function PickCommunityContent() {
                                 ) : null}
                               </div>
                               <span className="flex-1 truncate text-sm">{o.name}</span>
-                              <span className="shrink-0 text-[10px] uppercase font-bold tracking-wide px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 text-[var(--neu-text-muted)]">
+                              <span className="shrink-0 text-[10px] uppercase font-bold tracking-wide px-1.5 py-0.5 rounded bg-black/5  text-[var(--neu-text-muted)]">
                                 {o.kind === 'ward' ? 'Ward' : o.kind === 'lcda' ? 'LCDA' : 'LGA'}
                               </span>
                             </button>
@@ -561,7 +561,7 @@ function PickCommunityContent() {
                 <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500" aria-hidden="true" />
                 <span>
                   Areas not seeded yet. Ask your backend admin to run{' '}
-                  <code className="rounded bg-black/10 dark:bg-white/10 px-1 text-[10px]">pnpm run seed:communities</code>, then retry.
+                  <code className="rounded bg-black/10  px-1 text-[10px]">pnpm run seed:communities</code>, then retry.
                 </span>
               </div>
             ) : null}

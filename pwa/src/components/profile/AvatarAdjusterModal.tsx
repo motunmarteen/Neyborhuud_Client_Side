@@ -151,9 +151,9 @@ export function AvatarAdjusterModal({ file, onSave, onCancel }: AvatarAdjusterMo
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-[#132218] shadow-2xl border border-black/5 dark:border-white/5 p-5 flex flex-col items-center">
-        <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">Adjust Profile Photo</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-6">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white  shadow-2xl border border-black/5  p-5 flex flex-col items-center">
+        <h3 className="text-lg font-bold text-gray-800  mb-2">Adjust Profile Photo</h3>
+        <p className="text-xs text-gray-500  text-center mb-6">
           Drag your face to the center of the map pin, and use the slider to zoom.
         </p>
 
@@ -225,7 +225,7 @@ export function AvatarAdjusterModal({ file, onSave, onCancel }: AvatarAdjusterMo
             step="0.05"
             value={scale}
             onChange={(e) => setScale(parseFloat(e.target.value))}
-            className="flex-1 accent-primary h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+            className="flex-1 accent-primary h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer "
           />
           <span className="material-symbols-outlined text-gray-400 text-2xl">zoom_in</span>
         </div>
@@ -235,7 +235,7 @@ export function AvatarAdjusterModal({ file, onSave, onCancel }: AvatarAdjusterMo
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-3 text-sm font-semibold rounded-xl text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border border-gray-200 dark:border-white/5"
+            className="flex-1 py-3 text-sm font-semibold rounded-xl text-gray-500 hover:bg-gray-50  transition-colors border border-gray-200 "
           >
             Cancel
           </button>

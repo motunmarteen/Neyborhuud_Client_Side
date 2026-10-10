@@ -5,7 +5,7 @@ export function PostSkeleton({ index = 0 }: { index?: number }) {
 
     return (
         <div
-            className="relative w-full bg-white dark:bg-[#1D2433] border-b border-black/5 dark:border-white/5 px-4 py-3.5 flex flex-col gap-0 overflow-hidden"
+            className="relative w-full bg-white  border-b border-black/5  px-4 py-3.5 flex flex-col gap-0 overflow-hidden"
             aria-hidden="true"
         >
             {/* Header Row */}
@@ -35,7 +35,7 @@ export function PostSkeleton({ index = 0 }: { index?: number }) {
             )}
 
             {/* Action bar */}
-            <div className="flex items-center justify-between mt-4 pt-2.5 border-t border-black/[0.04] dark:border-white/[0.04]">
+            <div className="flex items-center justify-between mt-4 pt-2.5 border-t border-black/[0.04] ">
                 <div className="feed-skeleton-shimmer rounded-sm h-7 w-16" />
                 <div className="feed-skeleton-shimmer rounded-sm h-7 w-12" />
                 <div className="feed-skeleton-shimmer rounded-sm h-7 w-12" />

@@ -28,7 +28,7 @@ export default function GlobalError({ error, reset }: ErrorPageProps) {
         {/* Copy */}
         <div className="flex flex-col gap-2">
           <h1 className="type-display font-black text-white">Something went wrong</h1>
-          <p className="text-sm text-[var(--text-secondary-light)] dark:text-[var(--text-secondary-dark)]">
+          <p className="text-sm text-[var(--text-secondary-light)] ">
             We hit an unexpected error. This has been noted and we&apos;re looking into it.
           </p>
           {error.digest && (
@@ -48,7 +48,7 @@ export default function GlobalError({ error, reset }: ErrorPageProps) {
           </button>
           <Link
             href="/feed"
-            className="w-full py-3 rounded-xl border border-border text-charcoal dark:text-[var(--text-primary-dark)] font-bold text-sm text-center transition-colors hover:bg-black/5"
+            className="w-full py-3 rounded-xl border border-border text-charcoal  font-bold text-sm text-center transition-colors hover:bg-black/5"
           >
             Go to Feed
           </Link>

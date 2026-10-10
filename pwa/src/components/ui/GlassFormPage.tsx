@@ -33,7 +33,7 @@ export function GlassFormPage({ title, subtitle, titleId = "glass-form-title", o
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className={`doodle-modal-panel relative z-10 mx-auto w-full shrink-0 overflow-hidden rounded-[24px] border border-[var(--border-light)] shadow-[0_24px_60px_rgba(14, 138, 62,0.14),0_0_0_1px_rgba(255,255,255,0.85)_inset] dark:border-[var(--neu-shadow-dark)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)] sm:rounded-[28px] ${wide ? "max-w-2xl" : "max-w-lg"}`}
+            className={`doodle-modal-panel relative z-10 mx-auto w-full shrink-0 overflow-hidden rounded-[24px] border border-[var(--border-light)] shadow-[0_24px_60px_rgba(14, 138, 62,0.14),0_0_0_1px_rgba(255,255,255,0.85)_inset]   sm:rounded-[28px] ${wide ? "max-w-2xl" : "max-w-lg"}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="doodle-modal-panel-wash z-0" aria-hidden />
@@ -43,11 +43,11 @@ export function GlassFormPage({ title, subtitle, titleId = "glass-form-title", o
 
             <div className="relative z-[1] flex flex-col">
               <div className="flex shrink-0 justify-center pt-3 pb-1 sm:hidden">
-                <div className="h-1 w-11 rounded-full bg-black/15 dark:bg-white/25" aria-hidden />
+                <div className="h-1 w-11 rounded-full bg-black/15 " aria-hidden />
               </div>
 
               <div
-                className="border-b border-[var(--border-light)] px-4 pb-4 pt-2 dark:border-white/10 sm:px-6 sm:pt-4"
+                className="border-b border-[var(--border-light)] px-4 pb-4 pt-2  sm:px-6 sm:pt-4"
                 style={{ boxShadow: "0 1px 0 var(--neu-shadow-light)" }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -56,7 +56,7 @@ export function GlassFormPage({ title, subtitle, titleId = "glass-form-title", o
                       {title}
                     </h1>
                     {subtitle ? (
-                      <p className="mt-1 text-xs font-medium leading-relaxed text-brand-green-dark/70 dark:text-white/55 sm:text-sm">{subtitle}</p>
+                      <p className="mt-1 text-xs font-medium leading-relaxed text-brand-green-dark/70  sm:text-sm">{subtitle}</p>
                     ) : null}
                   </div>
                   <button

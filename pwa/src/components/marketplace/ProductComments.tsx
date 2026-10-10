@@ -60,7 +60,7 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
   }, [commentBody]);
 
   if (isLoading) {
-    const skelBg = embedded ? "bg-[var(--surface-light)] dark:bg-white/10" : "bg-brand-black";
+    const skelBg = embedded ? "bg-[var(--surface-light)] " : "bg-brand-black";
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
@@ -92,8 +92,8 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
       {currentUserId ? (
         <form onSubmit={handleSubmitComment} className="space-y-2">
           {replyingTo && (
-            <div className="flex items-center justify-between rounded-xl border border-black/5 bg-black/[0.03] px-3 py-2 text-[12px] dark:border-white/10 dark:bg-white/[0.04]">
-              <span className="font-semibold text-[#5B6478] dark:text-[#9AA3B1]">Replying to comment</span>
+            <div className="flex items-center justify-between rounded-xl border border-black/5 bg-black/[0.03] px-3 py-2 text-[12px]  ">
+              <span className="font-semibold text-[#5B6478] ">Replying to comment</span>
               <button
                 type="button"
                 onClick={handleCancelReply}
@@ -103,7 +103,7 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
               </button>
             </div>
           )}
-          <div className="flex items-end gap-2 rounded-[24px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 transition-all focus-within:border-black/10 dark:border-white/[0.06] dark:bg-white/[0.04] dark:focus-within:border-white/15">
+          <div className="flex items-end gap-2 rounded-[24px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 transition-all focus-within:border-black/10   ">
             <textarea
               ref={textareaRef}
               value={commentBody}
@@ -133,14 +133,14 @@ export function ProductComments({ productId, currentUserId, embedded }: ProductC
           </div>
         </form>
       ) : (
-        <div className="rounded-xl border border-black/5 bg-black/[0.03] p-4 text-center text-[13px] text-[var(--neu-text-muted)] dark:border-white/10 dark:bg-white/[0.04]">
+        <div className="rounded-xl border border-black/5 bg-black/[0.03] p-4 text-center text-[13px] text-[var(--neu-text-muted)]  ">
           Please log in to ask about this item.
         </div>
       )}
 
       {/* Comments List */}
       {comments.length > 0 ? (
-        <div className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="divide-y divide-black/[0.04] ">
           {comments.map((comment) => (
             <CommentItem
               key={comment.id || comment._id}
@@ -196,11 +196,11 @@ function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemP
   return (
     <div className="flex gap-2.5 py-2">
       {/* Avatar — feed-aligned */}
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-[#1A221C] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)]   ">
         {avatar ? (
           <Image src={avatar} alt={username} width={40} height={40} className="h-full w-full object-cover" />
         ) : (
-          <span className="text-[15px] font-bold text-[#5B6478] dark:text-[#9AA3B1]">{username[0]?.toUpperCase()}</span>
+          <span className="text-[15px] font-bold text-[#5B6478] ">{username[0]?.toUpperCase()}</span>
         )}
       </div>
 
@@ -209,8 +209,8 @@ function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemP
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             {/* Bubble (Facebook style) */}
-            <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 dark:bg-white/[0.06]">
-              <span className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] dark:text-[#DDE3EC]">
+            <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 ">
+              <span className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] ">
                 {displayName}
               </span>
               {/* Seller badge — marketplace-specific context */}
@@ -220,8 +220,8 @@ function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemP
                   Seller
                 </span>
               )}
-              <span className="text-[12px] font-normal text-[#5B6478] dark:text-[#9AA3B1]">@{username}</span>
-              <span className="ml-1.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#DDE3EC]">
+              <span className="text-[12px] font-normal text-[#5B6478] ">@{username}</span>
+              <span className="ml-1.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] ">
                 {comment.body}
               </span>
             </div>
@@ -244,15 +244,15 @@ function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemP
             )}
 
             {/* Micro action row (Facebook: Like · Reply · time) */}
-            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#5B6478] dark:text-[#9AA3B1]">
-              <button type="button" className="transition-colors hover:text-[#050505] dark:hover:text-[#DDE3EC]">
+            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#5B6478] ">
+              <button type="button" className="transition-colors hover:text-[#050505] ">
                 Like
               </button>
               {currentUserId && (
                 <button
                   type="button"
                   onClick={() => onReply(commentId, username)}
-                  className="transition-colors hover:text-[#050505] dark:hover:text-[#DDE3EC]"
+                  className="transition-colors hover:text-[#050505] "
                 >
                   Reply
                 </button>
@@ -262,7 +262,7 @@ function CommentItem({ comment, onReply, currentUserId, embedded }: CommentItemP
           </div>
 
           {/* Right-edge heart (Instagram style) */}
-          <div className="mt-1 flex flex-shrink-0 flex-col items-center gap-0.5 pr-0.5 text-[#5B6478] dark:text-[#9AA3B1]">
+          <div className="mt-1 flex flex-shrink-0 flex-col items-center gap-0.5 pr-0.5 text-[#5B6478] ">
             <span className="material-symbols-outlined text-[17px]">favorite</span>
             {likesCount > 0 && (
               <span className="text-[11px] font-semibold leading-none tabular-nums">{likesCount}</span>

@@ -9,10 +9,10 @@ import { SentinelIcon } from '@/components/navigation/AppNavIcon';
 
 const getIconBgClasses = (accent: string) => {
   switch (accent) {
-    case 'primary': return 'bg-[#00B82E]/10 text-[#00B82E] dark:bg-[#00B82E]/15';
-    case 'blue': return 'bg-[#6B9FFF]/10 text-[#6B9FFF] dark:bg-[#6B9FFF]/15';
-    case 'red': return 'bg-[#FF6B6B]/10 text-[#FF6B6B] dark:bg-[#FF6B6B]/15';
-    default: return 'bg-black/5 text-neu-text-secondary dark:bg-white/10 dark:text-white/70';
+    case 'primary': return 'bg-[#00B82E]/10 text-[#00B82E] ';
+    case 'blue': return 'bg-[#6B9FFF]/10 text-[#6B9FFF] ';
+    case 'red': return 'bg-[#FF6B6B]/10 text-[#FF6B6B] ';
+    default: return 'bg-black/5 text-neu-text-secondary  ';
   }
 };
 
@@ -58,12 +58,12 @@ export function SentinelBottomSheet() {
 
       {/* Sheet Panel */}
       <div 
-        className={`relative w-full sm:max-w-[600px] max-h-[85vh] overflow-y-auto overscroll-contain bg-[#f9fdf9] dark:bg-[#0A120C] rounded-t-[2rem] rounded-b-none px-4 pt-4 pb-6 shadow-[0_-12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_-12px_40px_rgba(0,0,0,0.6)] border-t border-white/60 dark:border-white/5 transition-transform duration-400 ease-[cubic-bezier(0.175,0.885,0.32,1.1)] ${isOpen ? 'translate-y-0' : 'translate-y-[120%]'}`}
+        className={`relative w-full sm:max-w-[600px] max-h-[85vh] overflow-y-auto overscroll-contain bg-[#f9fdf9]  rounded-t-[2rem] rounded-b-none px-4 pt-4 pb-6 shadow-[0_-12px_40px_rgba(0,0,0,0.15)]  border-t border-white/60  transition-transform duration-400 ease-[cubic-bezier(0.175,0.885,0.32,1.1)] ${isOpen ? 'translate-y-0' : 'translate-y-[120%]'}`}
         style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
         onClick={(e) => e.stopPropagation()} 
       >
         {/* Grab Handle */}
-        <div className="w-12 h-1.5 rounded-full mx-auto mb-4 shrink-0 bg-black/15 dark:bg-white/20" />
+        <div className="w-12 h-1.5 rounded-full mx-auto mb-4 shrink-0 bg-black/15 " />
 
         {/* Header */}
         <div className="flex items-center justify-between w-full mb-4 relative shrink-0">
@@ -72,17 +72,17 @@ export function SentinelBottomSheet() {
                <SentinelIcon active className="w-5 h-5 text-[#00B82E]" />
             </div>
             <div className="flex flex-col">
-              <h2 className="text-[20px] font-black leading-tight text-neu-text dark:text-white tracking-tight">
+              <h2 className="text-[20px] font-black leading-tight text-neu-text  tracking-tight">
                 Safety Toolkit
               </h2>
-              <span className="text-[11px] font-bold text-neu-text-secondary dark:text-white/50">
+              <span className="text-[11px] font-bold text-neu-text-secondary ">
                 Protected by Sentinel
               </span>
             </div>
           </div>
           <button 
             onClick={closeSheet} 
-            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-neu-text-secondary hover:bg-black/10 dark:hover:bg-white/20 transition-colors shrink-0"
+            className="w-8 h-8 rounded-full bg-black/5  flex items-center justify-center text-neu-text-secondary hover:bg-black/10  transition-colors shrink-0"
             aria-label="Close"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
@@ -108,15 +108,15 @@ export function SentinelBottomSheet() {
 
           <Link
             href={emergency?.href || '/safety'}
-            className="relative overflow-hidden bg-[#FFF5F5] dark:bg-[#1A0A0A] border border-[#E5484D]/15 dark:border-[#E5484D]/20 rounded-sm p-3.5 flex flex-col justify-between hover:bg-[#FFE8E8] dark:hover:bg-[#2A1111] active:scale-[0.98] transition-all min-h-[90px] group"
+            className="relative overflow-hidden bg-[#FFF5F5]  border border-[#E5484D]/15  rounded-sm p-3.5 flex flex-col justify-between hover:bg-[#FFE8E8]  active:scale-[0.98] transition-all min-h-[90px] group"
             onClick={closeSheet}
           >
             <div className="mb-2.5 flex">
                <span className="material-symbols-outlined text-[#E5484D] text-[36px]" style={{ fontVariationSettings: '"FILL" 1' }}>local_police</span>
             </div>
             <div className="flex flex-col">
-               <span className="font-bold text-[15px] text-[#E5484D] dark:text-[#FF4B4B] leading-tight tracking-tight mb-0.5">Report</span>
-               <span className="text-[11px] font-medium text-neu-text-secondary dark:text-white/60">Local agencies</span>
+               <span className="font-bold text-[15px] text-[#E5484D]  leading-tight tracking-tight mb-0.5">Report</span>
+               <span className="text-[11px] font-medium text-neu-text-secondary ">Local agencies</span>
             </div>
           </Link>
         </div>
@@ -141,7 +141,7 @@ export function SentinelBottomSheet() {
 
         {/* 3. QUICK ACTIONS GRID */}
         <div className="mb-5">
-          <h3 className="text-[11px] font-black tracking-widest uppercase text-neu-text-secondary dark:text-white/40 mb-3 px-1">
+          <h3 className="text-[11px] font-black tracking-widest uppercase text-neu-text-secondary  mb-3 px-1">
             Quick Actions
           </h3>
           <div className="grid grid-cols-4 gap-y-5 gap-x-2">
@@ -152,7 +152,7 @@ export function SentinelBottomSheet() {
                   case 'primary': return 'text-[#00B82E]';
                   case 'blue': return 'text-[#6B9FFF]';
                   case 'red': return 'text-[#FF6B6B]';
-                  default: return 'text-[#9FBBA0] dark:text-[#9FBBA0]';
+                  default: return 'text-[#9FBBA0] ';
                 }
               };
               
@@ -166,7 +166,7 @@ export function SentinelBottomSheet() {
                   <span className={`material-symbols-outlined text-[48px] sm:text-[52px] ${getIconTextClasses(feature.accent)} transition-opacity group-hover:opacity-80`} style={{ fontVariationSettings: '"FILL" 1' }}>
                     {feature.icon}
                   </span>
-                  <span className="font-bold text-[10px] sm:text-[11px] text-neu-text dark:text-white leading-tight px-0.5">
+                  <span className="font-bold text-[10px] sm:text-[11px] text-neu-text  leading-tight px-0.5">
                     {feature.label}
                   </span>
                 </Link>
@@ -176,22 +176,22 @@ export function SentinelBottomSheet() {
         </div>
 
         {/* 4. LIST OPTIONS */}
-        <div className="bg-white dark:bg-white/5 rounded-sm border border-black/5 dark:border-white/5 overflow-hidden mb-4 shadow-sm">
+        <div className="bg-white  rounded-sm border border-black/5  overflow-hidden mb-4 shadow-sm">
            {listOptions.map((feature, index) => (
              <Link
                key={feature.id}
                href={feature.href}
-               className={`flex items-center gap-2.5 py-2.5 px-3.5 active:bg-black/5 dark:active:bg-white/10 transition-colors ${index !== listOptions.length - 1 ? 'border-b border-black/5 dark:border-white/5' : ''}`}
+               className={`flex items-center gap-2.5 py-2.5 px-3.5 active:bg-black/5  transition-colors ${index !== listOptions.length - 1 ? 'border-b border-black/5 ' : ''}`}
                onClick={closeSheet}
              >
                <span className={`material-symbols-outlined text-[28px] ${
                   feature.accent === 'primary' ? 'text-[#00B82E]' : 
                   feature.accent === 'blue' ? 'text-[#6B9FFF]' : 
                   feature.accent === 'red' ? 'text-[#FF6B6B]' : 
-                  'text-[#9FBBA0] dark:text-[#9FBBA0]'
+                  'text-[#9FBBA0] '
                }`} style={{ fontVariationSettings: '"FILL" 1' }}>{feature.icon}</span>
-               <span className="font-bold text-[13px] text-neu-text dark:text-white flex-1">{feature.label}</span>
-               <span className="material-symbols-outlined text-neu-text-secondary/50 dark:text-white/30 text-[18px]">chevron_right</span>
+               <span className="font-bold text-[13px] text-neu-text  flex-1">{feature.label}</span>
+               <span className="material-symbols-outlined text-neu-text-secondary/50  text-[18px]">chevron_right</span>
              </Link>
            ))}
         </div>
@@ -199,7 +199,7 @@ export function SentinelBottomSheet() {
         {/* 5. MANAGE SENTINEL SETTINGS */}
         <button
           type="button"
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-sm bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-neu-text dark:text-white font-bold text-[13px] transition-colors active:scale-[0.98]"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-sm bg-black/5  hover:bg-black/10  text-neu-text  font-bold text-[13px] transition-colors active:scale-[0.98]"
           onClick={() => {
             closeSheet();
             router.push('/safety/sentinel/settings');

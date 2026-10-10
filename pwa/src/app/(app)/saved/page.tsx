@@ -45,7 +45,7 @@ function StatCard({
     tone === 'blue' ? 'text-brand-blue bg-brand-blue/10' : 'text-primary bg-primary/15';
 
   return (
-    <div className="mod-card flex items-center gap-3 rounded-2xl p-4 border border-black/5 dark:border-white/5">
+    <div className="mod-card flex items-center gap-3 rounded-2xl p-4 border border-black/5 ">
       <div className={`mod-inset flex h-10 w-10 items-center justify-center rounded-full ${toneClass}`}>
         {icon}
       </div>

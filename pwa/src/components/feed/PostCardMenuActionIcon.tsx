@@ -45,7 +45,7 @@ export function PostCardMenuActionIcon({ name, className = '', danger = false }:
     <Icon
       size={20}
       strokeWidth={2}
-      className={`post-card-actions-sheet__item-icon shrink-0 ${danger ? 'text-brand-red' : 'text-neu-text-secondary dark:text-white/60'} ${className}`}
+      className={`post-card-actions-sheet__item-icon shrink-0 ${danger ? 'text-brand-red' : 'text-neu-text-secondary '} ${className}`}
       aria-hidden
     />
   );

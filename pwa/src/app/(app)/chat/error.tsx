@@ -24,7 +24,7 @@ export default function ChatError({ error, reset }: ErrorPageProps) {
 
         <div className="flex flex-col gap-2">
           <h1 className="type-display font-black text-white">Chat hit a snag</h1>
-          <p className="text-sm text-[var(--text-secondary-light)] dark:text-[var(--text-secondary-dark)]">
+          <p className="text-sm text-[var(--text-secondary-light)] ">
             We hit an unexpected error loading your messages. Your conversations are safe — try again.
           </p>
           {error.digest && (
@@ -43,7 +43,7 @@ export default function ChatError({ error, reset }: ErrorPageProps) {
           </button>
           <Link
             href="/chat"
-            className="w-full py-3 rounded-xl border border-border text-charcoal dark:text-[var(--text-primary-dark)] font-bold text-sm text-center transition-colors hover:bg-black/5"
+            className="w-full py-3 rounded-xl border border-border text-charcoal  font-bold text-sm text-center transition-colors hover:bg-black/5"
           >
             Back to Chats
           </Link>

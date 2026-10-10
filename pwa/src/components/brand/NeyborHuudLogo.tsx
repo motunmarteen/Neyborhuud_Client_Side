@@ -62,7 +62,7 @@ export function NeyborHuudLogo({
               ? 'text-slate-900'
               : tone === 'hero'
                 ? 'text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]'
-                : 'text-slate-900 dark:text-white';
+                : 'text-slate-900 ';
 
     const huudColor =
         tone === 'light'
@@ -71,7 +71,7 @@ export function NeyborHuudLogo({
               ? 'text-[#00B528]'
               : tone === 'hero'
                 ? 'text-[#00E536] drop-shadow-[0_0_24px_rgba(0,229,54,0.6)]'
-                : 'text-[#00B82E] dark:text-[#00E536]';
+                : 'text-[#00B82E] ';
 
     const isLockup = presentation === 'lockup';
     const firstPart = isLockup ? 'neybor' : 'Neybor';

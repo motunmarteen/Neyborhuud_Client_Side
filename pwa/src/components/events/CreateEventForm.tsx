@@ -112,21 +112,21 @@ export default function CreateEventForm() {
           className={`relative h-48 cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed transition-colors ${
             coverPreview
               ? "border-transparent"
-              : "border-primary/30 bg-primary/[0.06] hover:border-primary/45 dark:border-primary/25 dark:bg-primary/10"
+              : "border-primary/30 bg-primary/[0.06] hover:border-primary/45  "
           }`}
         >
           {coverPreview ? (
             <Image src={coverPreview} fill unoptimized sizes="100vw" className="object-cover" alt="Cover preview" />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-2 text-brand-green-dark/70 dark:text-white/55">
-              <span className="material-symbols-outlined text-4xl text-[#0E8A3E]/60 dark:text-primary/70">add_photo_alternate</span>
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-brand-green-dark/70 ">
+              <span className="material-symbols-outlined text-4xl text-[#0E8A3E]/60 ">add_photo_alternate</span>
               <span className="text-sm font-medium">Upload cover image (max 10MB)</span>
             </div>
           )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" aria-label="Upload cover image" className="hidden" onChange={handleCoverChange} />
         {isUploading && (
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-light)] dark:bg-white/10">
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-light)] ">
             <div className="h-full bg-gradient-to-r from-primary to-[#0E8A3E] transition-all" style={{ width: `${uploadProgress}%` }} />
           </div>
         )}
@@ -217,15 +217,15 @@ export default function CreateEventForm() {
       </div>
 
       <div>
-        <div className="mb-3 flex items-center justify-between rounded-2xl border border-[var(--border-light)] bg-[var(--surface-light)]/80 px-4 py-3 dark:border-white/12 dark:bg-white/[0.05]">
-          <span className="text-sm font-medium text-brand-green-dark/70 dark:text-white/65">Free event</span>
+        <div className="mb-3 flex items-center justify-between rounded-2xl border border-[var(--border-light)] bg-[var(--surface-light)]/80 px-4 py-3  ">
+          <span className="text-sm font-medium text-brand-green-dark/70 ">Free event</span>
           <button
             type="button"
             role="switch"
             aria-checked={isFree ? "true" : "false"}
             aria-label="Free event"
             onClick={() => setIsFree((v) => !v)}
-            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${isFree ? "bg-gradient-to-r from-primary to-[#0E8A3E]" : "bg-[#5B6478]/25 dark:bg-white/15"}`}
+            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${isFree ? "bg-gradient-to-r from-primary to-[#0E8A3E]" : "bg-[#5B6478]/25 "}`}
           >
             <span
               className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${isFree ? "translate-x-[1.375rem]" : "translate-x-0"}`}
@@ -277,7 +277,7 @@ export default function CreateEventForm() {
           <button
             type="button"
             onClick={addTag}
-            className="shrink-0 rounded-2xl border border-[var(--border-light)] bg-white px-4 py-3 text-sm font-bold text-brand-black shadow-sm transition-colors hover:bg-[var(--surface-light)] dark:border-white/15 dark:bg-white/10 dark:text-white"
+            className="shrink-0 rounded-2xl border border-[var(--border-light)] bg-white px-4 py-3 text-sm font-bold text-brand-black shadow-sm transition-colors hover:bg-[var(--surface-light)]   "
           >
             Add
           </button>
@@ -287,10 +287,10 @@ export default function CreateEventForm() {
             {tags.map((t) => (
               <span
                 key={t}
-                className="flex items-center gap-1 rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] px-3 py-1 text-sm font-medium text-[#2E502E] dark:border-white/12 dark:bg-white/[0.06] dark:text-white/85"
+                className="flex items-center gap-1 rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] px-3 py-1 text-sm font-medium text-[#2E502E]   "
               >
                 #{t}
-                <button type="button" onClick={() => removeTag(t)} className="ml-0.5 text-brand-green-dark/70 transition-colors hover:text-brand-red dark:text-white/50">
+                <button type="button" onClick={() => removeTag(t)} className="ml-0.5 text-brand-green-dark/70 transition-colors hover:text-brand-red ">
                   ×
                 </button>
               </span>
@@ -302,7 +302,7 @@ export default function CreateEventForm() {
       <button
         type="submit"
         disabled={createEvent.isPending}
-        className="min-h-[52px] w-full rounded-full bg-gradient-to-r from-primary to-[#0E8A3E] py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0, 184, 46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none dark:from-emerald-500 dark:to-teal-600"
+        className="min-h-[52px] w-full rounded-full bg-gradient-to-r from-primary to-[#0E8A3E] py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0, 184, 46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none  "
       >
         {createEvent.isPending ? "Creating…" : "Create event"}
       </button>

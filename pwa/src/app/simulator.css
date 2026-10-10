@@ -158,10 +158,6 @@
     transform: translate3d(0, 0, 0);
     contain: layout;
   }
-  
-  .dark .phone-mockup-screen {
-    background-color: var(--background-dark, #0c0d12);
-  }
 
   /* Overwrite body shell widths for standard layouts in phone simulator */
   .phone-mockup-screen .app-shell,

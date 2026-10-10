@@ -40,7 +40,7 @@ export function LiveTrackingTrailPanel({
       </div>
 
       {error ? (
-        <div className="mod-card rounded-2xl border border-status-warning/40 bg-status-warning/10 px-4 py-3 text-sm text-status-warning dark:bg-status-warning/10">
+        <div className="mod-card rounded-2xl border border-status-warning/40 bg-status-warning/10 px-4 py-3 text-sm text-status-warning ">
           {error}
         </div>
       ) : null}

@@ -39,7 +39,7 @@ const QUICK_NAV: {
     icon: 'history',
     label: 'History',
     hint: 'Trips · incidents',
-    bg: 'bg-black/5 dark:bg-white/5',
+    bg: 'bg-black/5 ',
     iconClass: 'text-[var(--neu-text-muted)]',
   },
 ];

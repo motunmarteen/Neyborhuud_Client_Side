@@ -59,10 +59,10 @@ export function RepostComposerSheet({
       open={open} 
       onClose={onClose} 
       ariaLabel="Repost composer"
-      panelClassName="flex w-full flex-col overflow-hidden rounded-t-[32px] bg-white dark:bg-black border border-black/[0.08] dark:border-white/[0.08] md:max-w-[560px] shadow-2xl pb-4"
+      panelClassName="flex w-full flex-col overflow-hidden rounded-t-[32px] bg-white  border border-black/[0.08]  md:max-w-[560px] shadow-2xl pb-4"
     >
-      <div className="px-4 pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-        <h2 className="text-base font-black text-neu-text dark:text-white">Repost</h2>
+      <div className="px-4 pt-4 pb-3 border-b border-black/[0.06] ">
+        <h2 className="text-base font-black text-neu-text ">Repost</h2>
       </div>
       <div className="flex flex-col gap-4 px-4 pb-6 pt-3">
         <textarea
@@ -71,11 +71,11 @@ export function RepostComposerSheet({
           placeholder="Add a comment…"
           rows={3}
           maxLength={500}
-          className="w-full resize-none rounded-2xl border border-black/[0.08] dark:border-white/[0.1] bg-black/[0.02] dark:bg-white/[0.04] px-4 py-3 text-sm text-neu-text dark:text-white placeholder:text-neu-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="w-full resize-none rounded-2xl border border-black/[0.08]  bg-black/[0.02]  px-4 py-3 text-sm text-neu-text  placeholder:text-neu-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
 
         {sourcePost.mood === 'repost' && sourcePost.content?.trim() && sourcePost.quotedPost && (
-          <p className="text-sm font-medium text-neu-text-secondary dark:text-white/70 whitespace-pre-wrap">
+          <p className="text-sm font-medium text-neu-text-secondary  whitespace-pre-wrap">
             {sourcePost.content.trim()}
           </p>
         )}

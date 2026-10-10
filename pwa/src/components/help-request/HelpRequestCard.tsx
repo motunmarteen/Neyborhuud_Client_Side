@@ -216,7 +216,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
         const displayText = shouldTruncate ? `${textContent.slice(0, 260)}...` : textContent;
 
         return (
-            <div className="px-1 text-[14px] font-normal text-neu-text dark:text-white/90 leading-[19px] tracking-normal whitespace-pre-wrap break-words">
+            <div className="px-1 text-[14px] font-normal text-neu-text  leading-[19px] tracking-normal whitespace-pre-wrap break-words">
                 {displayText}
                 {shouldTruncate && (
                     <button
@@ -254,12 +254,12 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[17px] text-primary" style={{ fontVariationSettings: '"FILL" 1' }}>savings</span>
-                    <span className="text-[10px] font-black uppercase text-neu-text-secondary dark:text-white/50 tracking-wider">Funding Goal</span>
+                    <span className="text-[10px] font-black uppercase text-neu-text-secondary  tracking-wider">Funding Goal</span>
                 </div>
-                <span className="text-sm font-black text-neu-text dark:text-white">{formatNaira(targetAmount)}</span>
+                <span className="text-sm font-black text-neu-text ">{formatNaira(targetAmount)}</span>
             </div>
             <div>
-                <div className="w-full h-1.5 rounded-full overflow-hidden bg-black/[0.08] dark:bg-white/10">
+                <div className="w-full h-1.5 rounded-full overflow-hidden bg-black/[0.08] ">
                     <div
                         className="h-full rounded-full bg-primary transition-all duration-500"
                         style={{ width: `${progressPct ?? 0}%` }}
@@ -267,7 +267,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                 </div>
                 <div className="flex items-center justify-between mt-1.5 text-[10px] font-bold">
                     <span className="text-primary">{formatNaira(localReceived)} raised</span>
-                    <span className="text-neu-text-secondary dark:text-white/40">{progressPct != null ? `${progressPct}%` : ''}</span>
+                    <span className="text-neu-text-secondary ">{progressPct != null ? `${progressPct}%` : ''}</span>
                 </div>
             </div>
             {isOwner && !showUpdateReceived && (
@@ -291,7 +291,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                             onChange={(e) => setReceivedInput(e.target.value)}
                             min="0"
                             placeholder="Amount received"
-                            className="w-full pl-6 pr-2 py-1.5 rounded-xl text-[12px] focus:outline-none bg-black/5 dark:bg-white/10 text-neu-text border border-glass-border focus:border-primary"
+                            className="w-full pl-6 pr-2 py-1.5 rounded-xl text-[12px] focus:outline-none bg-black/5  text-neu-text border border-glass-border focus:border-primary"
                         />
                     </div>
                     <button type="button" onClick={handleSaveReceived} disabled={updateReceivedMutation.isPending}
@@ -299,7 +299,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                         {updateReceivedMutation.isPending ? '…' : 'Save'}
                     </button>
                     <button type="button" onClick={(e) => { e.stopPropagation(); setShowUpdateReceived(false); }}
-                        className="px-2.5 py-1.5 rounded-xl text-[12px] font-bold text-neu-text-secondary hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer">
+                        className="px-2.5 py-1.5 rounded-xl text-[12px] font-bold text-neu-text-secondary hover:bg-black/5  transition-colors cursor-pointer">
                         ✕
                     </button>
                 </div>
@@ -308,29 +308,29 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
     ) : null;
 
     const accountBlock = accountDetails && (accountDetails.bankName || accountDetails.accountName || accountDetails.accountNumber) ? (
-        <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/5 flex flex-col gap-2 mt-3">
+        <div className="p-3.5 rounded-2xl bg-black/[0.02]  flex flex-col gap-2 mt-3">
             <div className="flex items-center gap-1.5 mb-1">
-                <span className="material-symbols-outlined text-[16px] text-neu-text-secondary dark:text-white/40">account_balance</span>
-                <span className="text-[10px] font-black uppercase text-neu-text-secondary dark:text-white/40 tracking-wider">How to Help</span>
+                <span className="material-symbols-outlined text-[16px] text-neu-text-secondary ">account_balance</span>
+                <span className="text-[10px] font-black uppercase text-neu-text-secondary  tracking-wider">How to Help</span>
             </div>
             <div className="flex flex-col gap-1.5 text-xs">
                 {accountDetails.bankName && (
                     <div className="flex items-center justify-between">
-                        <span className="text-neu-text-secondary dark:text-white/40 font-semibold">Bank</span>
-                        <span className="font-bold text-neu-text dark:text-white">{accountDetails.bankName}</span>
+                        <span className="text-neu-text-secondary  font-semibold">Bank</span>
+                        <span className="font-bold text-neu-text ">{accountDetails.bankName}</span>
                     </div>
                 )}
                 {accountDetails.accountName && (
                     <div className="flex items-center justify-between">
-                        <span className="text-neu-text-secondary dark:text-white/40 font-semibold">Name</span>
-                        <span className="font-bold text-neu-text dark:text-white">{accountDetails.accountName}</span>
+                        <span className="text-neu-text-secondary  font-semibold">Name</span>
+                        <span className="font-bold text-neu-text ">{accountDetails.accountName}</span>
                     </div>
                 )}
                 {accountDetails.accountNumber && (
                     <div className="flex items-center justify-between gap-2">
-                        <span className="text-neu-text-secondary dark:text-white/40 font-semibold">Account</span>
+                        <span className="text-neu-text-secondary  font-semibold">Account</span>
                         <div className="flex items-center gap-2">
-                            <span className="font-mono font-black tracking-wider text-neu-text dark:text-white text-[13px]">{accountDetails.accountNumber}</span>
+                            <span className="font-mono font-black tracking-wider text-neu-text  text-[13px]">{accountDetails.accountNumber}</span>
                             <button
                                 type="button"
                                 onClick={handleCopyAccount}
@@ -353,7 +353,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
     return (
         <>
         <article
-            className="bg-white dark:bg-[#1D2433] border-b border-black/5 dark:border-white/5 px-4 py-3.5 mx-auto w-full select-none max-w-none rounded-none flex flex-col gap-0"
+            className="bg-white  border-b border-black/5  px-4 py-3.5 mx-auto w-full select-none max-w-none rounded-none flex flex-col gap-0"
             {...articleGestureProps}
         >
             {/* Top Header Row */}
@@ -361,7 +361,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                 <div className="flex items-center gap-2.5 min-w-0">
                     <div className="relative shrink-0">
                         <Link href={`/profile/${authorUsername}`} onClick={(e) => e.stopPropagation()}>
-                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-glass-border bg-black/[0.04] dark:bg-white/10">
+                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-glass-border bg-black/[0.04] ">
                                 {authorAvatar && !imageError ? (
                                     <Image
                                         src={authorAvatar}
@@ -373,7 +373,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                                         unoptimized
                                     />
                                 ) : (
-                                    <span className="material-symbols-outlined text-[18px] text-neu-text-secondary dark:text-white/60">person</span>
+                                    <span className="material-symbols-outlined text-[18px] text-neu-text-secondary ">person</span>
                                 )}
                             </div>
                         </Link>
@@ -440,7 +440,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                 {/* Comment action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); onComment?.(postId); }}
-                    className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 active:scale-95 cursor-pointer group"
+                    className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary  hover:text-brand-blue transition-colors duration-200 active:scale-95 cursor-pointer group"
                     aria-label="Comment"
                 >
                     <XReplyIcon size={18} className="group-hover:text-brand-blue group-hover:animate-dance-comment" />
@@ -460,7 +460,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                 {/* Like action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 active:scale-95 cursor-pointer group ${isLiked ? 'text-brand-red' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-red'}`}
+                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 active:scale-95 cursor-pointer group ${isLiked ? 'text-brand-red' : 'text-neu-text-secondary  hover:text-brand-red'}`}
                     aria-label="Like"
                 >
                     <XLikeIcon size={18} filled={isLiked} className={`transition-transform active:scale-75 group-hover:animate-dance-like group-hover:text-brand-red ${isLiked ? 'text-brand-red' : ''}`} />
@@ -468,7 +468,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                 </button>
 
                 {/* Views action */}
-                <div className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary dark:text-white/60" aria-label="Views">
+                <div className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary " aria-label="Views">
                     <XViewIcon size={18} />
                     <span className="tabular-nums">{post.views ? formatCompactCount(post.views) : '1.2K'}</span>
                 </div>
@@ -476,7 +476,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                 {/* Save action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); saveMutation.mutate(); }}
-                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 active:scale-95 cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'text-neu-text-secondary dark:text-white/60 hover:text-brand-blue'}`}
+                    className={`post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 transition-colors duration-200 active:scale-95 cursor-pointer group ${post.isSaved ? 'text-brand-blue' : 'text-neu-text-secondary  hover:text-brand-blue'}`}
                     aria-label="Bookmark"
                 >
                     <XBookmarkIcon size={18} filled={post.isSaved} className="group-hover:animate-dance-save group-hover:text-brand-blue" />
@@ -485,7 +485,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                 {/* Share action */}
                 <button
                     onClick={(e) => { e.stopPropagation(); setShowShare(true); }}
-                    className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary dark:text-white/60 hover:text-brand-blue transition-colors duration-200 active:scale-95 cursor-pointer group"
+                    className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary  hover:text-brand-blue transition-colors duration-200 active:scale-95 cursor-pointer group"
                     aria-label="Share"
                 >
                     <XShareIcon size={18} className="group-hover:animate-dance-share group-hover:text-brand-blue" />

@@ -455,17 +455,17 @@ function XFeedInner() {
                                                 <Image src={banner.imageSrc} alt={banner.title} fill sizes="80px" className="object-cover" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="text-sm font-black text-neu-text dark:text-white leading-tight flex items-center gap-1.5 flex-wrap">
+                                                <h3 className="text-sm font-black text-neu-text  leading-tight flex items-center gap-1.5 flex-wrap">
                                                     {banner.title}
                                                     <button
                                                         onClick={() => router.replace('/feed')}
-                                                        className="ml-auto flex items-center justify-center h-6 w-6 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 text-neu-text-secondary dark:text-white/60 cursor-pointer text-xs"
+                                                        className="ml-auto flex items-center justify-center h-6 w-6 rounded-full bg-black/5  hover:bg-black/10 text-neu-text-secondary  cursor-pointer text-xs"
                                                         aria-label="Clear filter"
                                                     >
                                                         <X size={14} />
                                                     </button>
                                                 </h3>
-                                                <p className="text-[11px] font-medium text-neu-text-secondary dark:text-white/60 mt-1.5 leading-snug">{banner.desc}</p>
+                                                <p className="text-[11px] font-medium text-neu-text-secondary  mt-1.5 leading-snug">{banner.desc}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -549,8 +549,8 @@ function XFeedInner() {
                             {/* Error State */}
                             {isError && (
                                 <div className="w-full">
-                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white dark:bg-[#1A2128] border-y border-gray-100 dark:border-white/5 w-full">
-                                        <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center mb-4">
+                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white  border-y border-gray-100  w-full">
+                                        <div className="w-16 h-16 rounded-full bg-gray-50  border border-gray-100  flex items-center justify-center mb-4">
                                             <AlertTriangle className="w-8 h-8 text-brand-red" />
                                         </div>
                                         <p className="text-sm text-center mb-2" style={{ color: 'var(--neu-text)' }}>
@@ -583,8 +583,8 @@ function XFeedInner() {
                             {/* Empty State: No Location and No Posts */}
                             {!isLoading && !isError && !location && locationError && timeline.length === 0 && mergedFeed.length === 0 && (
                                 <div className="w-full">
-                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white dark:bg-[#1A2128] border-y border-gray-100 dark:border-white/5 w-full">
-                                        <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center mb-4">
+                                    <div className="flex flex-col items-center justify-center py-12 px-5 bg-white  border-y border-gray-100  w-full">
+                                        <div className="w-16 h-16 rounded-full bg-gray-50  border border-gray-100  flex items-center justify-center mb-4">
                                             <MapPinOff className="w-8 h-8 text-brand-red" />
                                         </div>
                                         <p className="text-sm text-center" style={{ color: 'var(--neu-text)' }}>

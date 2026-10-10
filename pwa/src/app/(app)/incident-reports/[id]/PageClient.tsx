@@ -49,7 +49,7 @@ function CommentItem({ comment, currentUserId, onDelete }: {
   return (
     <div className="flex gap-2.5 py-2">
       {/* Avatar — feed-aligned */}
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-[#1A221C] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)]   ">
         <span className="material-symbols-outlined text-[18px]" style={{ color: 'var(--neu-text-muted)' }}>
           {comment.isAnonymous ? 'visibility_off' : 'person'}
         </span>
@@ -60,24 +60,24 @@ function CommentItem({ comment, currentUserId, onDelete }: {
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             {/* Bubble (Facebook style) */}
-            <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 dark:bg-white/[0.06]">
-              <span className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] dark:text-[#DDE3EC]">
+            <div className="inline-block max-w-full rounded-[18px] bg-black/[0.045] px-3.5 py-2 ">
+              <span className="mr-1.5 text-[14px] font-semibold leading-[1.45] text-[#050505] ">
                 {authorName}
               </span>
               {/* Anonymous badge — incident-specific context */}
               {comment.isAnonymous && (
-                <span className="mr-1.5 inline-flex items-center gap-0.5 rounded-full bg-black/[0.06] px-1.5 py-px align-middle text-[10px] font-bold text-[#5B6478] dark:bg-white/10 dark:text-[#9AA3B1]">
+                <span className="mr-1.5 inline-flex items-center gap-0.5 rounded-full bg-black/[0.06] px-1.5 py-px align-middle text-[10px] font-bold text-[#5B6478]  ">
                   <span className="material-symbols-outlined text-[12px]">shield_person</span>
                   Anonymous
                 </span>
               )}
-              <span className="ml-0.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] dark:text-[#DDE3EC]">
+              <span className="ml-0.5 whitespace-pre-wrap break-words text-[14px] font-normal leading-[1.45] text-[#050505] ">
                 {comment.body}
               </span>
             </div>
 
             {/* Micro action row */}
-            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#5B6478] dark:text-[#9AA3B1]">
+            <div className="mt-1 flex items-center gap-4 pl-1 text-[12px] font-bold text-[#5B6478] ">
               <span className="font-normal">{formatTimeAgo(comment.createdAt)}</span>
               {isOwner && (
                 <button
@@ -482,7 +482,7 @@ function IncidentDetailInner() {
         {/* Add comment — unified pill (incident framing) */}
         {user && (
           <form onSubmit={handleAddComment} className="flex flex-col gap-2">
-            <div className="flex items-end gap-2 rounded-[24px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 transition-all focus-within:border-black/10 dark:border-white/[0.06] dark:bg-white/[0.04] dark:focus-within:border-white/15">
+            <div className="flex items-end gap-2 rounded-[24px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 transition-all focus-within:border-black/10   ">
               <textarea
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
@@ -525,7 +525,7 @@ function IncidentDetailInner() {
             <p className="mt-2 text-sm">No comments yet — be the first to share what you know.</p>
           </div>
         ) : (
-          <div className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="divide-y divide-black/[0.04] ">
             {comments.map(c => (
               <CommentItem
                 key={c.id}
