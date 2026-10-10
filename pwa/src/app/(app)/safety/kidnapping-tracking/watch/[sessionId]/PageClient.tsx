@@ -29,9 +29,9 @@ function minsAgo(iso?: string): string {
 }
 
 function statusColor(status: KidnappingTrackingSession['status']): string {
-  if (status === 'active') return '#FF0000';
+  if (status === 'active') return '#E5484D';
   if (status === 'lost_signal') return '#f97316';
-  if (status === 'ended') return '#6b7280';
+  if (status === 'ended') return '#5B6478';
   return '#eab308';
 }
 

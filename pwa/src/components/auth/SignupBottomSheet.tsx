@@ -249,7 +249,7 @@ export function SignupBottomSheet({
             key={stageKey}
             ref={sheetRef}
             className={[
-                'auth-signup-bottom-sheet bg-white text-[#111814]',
+                'auth-signup-bottom-sheet bg-white text-[#1D2433]',
                 overlay ? 'auth-signup-bottom-sheet--overlay' : '',
                 collapsed ? 'auth-signup-bottom-sheet--collapsed' : '',
                 isDragging ? 'auth-signup-bottom-sheet--dragging' : '',

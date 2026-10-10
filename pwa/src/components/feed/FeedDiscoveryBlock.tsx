@@ -94,7 +94,7 @@ export function DiscoveryChrome({
   children: ReactNode;
 }) {
   return (
-    <div className="bg-white dark:bg-[#121b14] border-b border-black/5 dark:border-white/5 overflow-hidden w-full max-w-none mx-auto">
+    <div className="bg-white dark:bg-[#1D2433] border-b border-black/5 dark:border-white/5 overflow-hidden w-full max-w-none mx-auto">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-none bg-primary/10 text-primary border border-primary/20">
@@ -305,7 +305,7 @@ export function CategoryCoverCard({
       className="horizontal-carousel-item group/cover relative block overflow-hidden rounded-none shrink-0 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
       style={{ width: width || 100 }}
     >
-      <div className="relative w-full aspect-square overflow-hidden" style={{ background: gradient || "linear-gradient(135deg, #0e4a1f 0%, #1a8a3e 50%, #00d431 100%)" }}>
+      <div className="relative w-full aspect-square overflow-hidden" style={{ background: gradient || "linear-gradient(135deg, #0e4a1f 0%, #1a8a3e 50%, #00B82E 100%)" }}>
         <Image
           src={imageSrc}
           alt={title}
@@ -405,7 +405,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             subtitle="Trade with neighbors"
             buttonLabel="Shop Now"
             buttonHref="/marketplace"
-            gradient="linear-gradient(135deg, #1a4a28 0%, #0d8a3e 50%, #00c431 100%)"
+            gradient="linear-gradient(135deg, #1a4a28 0%, #0d8a3e 50%, #00B82E 100%)"
             priority={true}
           />
           {products.map((p) => {
@@ -472,7 +472,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             subtitle="Connect locally"
             buttonLabel="All Events"
             buttonHref="/events"
-            gradient="linear-gradient(135deg, #1a2a4a 0%, #2a4a8a 50%, #1a56ff 100%)"
+            gradient="linear-gradient(135deg, #1a2a4a 0%, #2a4a8a 50%, #3B82C4 100%)"
           />
           <StakeCard
             href={`/events/${eventId}`}
@@ -487,7 +487,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             }
             title={ev.title}
             subtitle={formatEventDate(ev.startDate)}
-            statDot="#1A56FF"
+            statDot="#3B82C4"
             statText={ev.attendeesCount != null ? `${ev.attendeesCount} going` : ev.venue || undefined}
           />
         </AutoScrollCarousel>
@@ -572,7 +572,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               }
               title={req.content?.slice(0, 60) || "Help needed"}
               subtitle={req.author?.name || "Neighbor"}
-              statDot="#FF0000"
+              statDot="#E5484D"
               statText={formatTimeAgo(req.createdAt)}
             />
           ))}
@@ -593,7 +593,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
             subtitle="Trusted professionals"
             buttonLabel="Browse Services"
             buttonHref="/work?tab=for_hire"
-            gradient="linear-gradient(135deg, #1a3a2a 0%, #2a6a4a 50%, #00a555 100%)"
+            gradient="linear-gradient(135deg, #1a3a2a 0%, #2a6a4a 50%, #0E8A3E 100%)"
           />
           {services.map(srv => (
             <StakeCard
@@ -649,7 +649,7 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
               }
               title={art.title}
               subtitle={art.sourceName}
-              statDot="#1A56FF"
+              statDot="#3B82C4"
               statText={formatTimeAgo(art.pubDate)}
               width={200}
             />

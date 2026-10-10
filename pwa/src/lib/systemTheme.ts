@@ -5,7 +5,7 @@ export type AppTheme = 'light' | 'dark';
 const STORAGE_KEY = 'neyborhuud:theme';
 
 const THEME_COLOR: Record<AppTheme, string> = {
-  light: '#F4F7F5',
+  light: '#EEF2F7',
   dark:  '#0B0E11',
 };
 
@@ -94,5 +94,5 @@ export const SYSTEM_THEME_BOOT_SCRIPT = `(function(){try{
   d.style.colorScheme='light';
   try{localStorage.setItem('neyborhuud:theme','light');}catch(_){}
   var meta=document.querySelector('meta[name="theme-color"]');
-  if(meta)meta.setAttribute('content','#F4F7F5');
+  if(meta)meta.setAttribute('content','#EEF2F7');
 }catch(e){}}());`;

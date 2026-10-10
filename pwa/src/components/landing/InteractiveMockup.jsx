@@ -101,7 +101,7 @@ export function InteractiveMockup() {
         {/* 2. Device Header */}
         <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(0, 212, 49, 0.15)", display: "flex", justifyContent: "center", alignItems: "center", border: "1px solid rgba(0, 212, 49, 0.3)" }}>
+            <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(0, 184, 46, 0.15)", display: "flex", justifyContent: "center", alignItems: "center", border: "1px solid rgba(0, 184, 46, 0.3)" }}>
               <MapPin size={18} color="var(--primary)" />
             </div>
             <div>
@@ -210,7 +210,7 @@ export function InteractiveMockup() {
                       }
                     }}
                     style={{ 
-                      background: vouched ? "rgba(0, 212, 49, 0.15)" : "var(--primary)", 
+                      background: vouched ? "rgba(0, 184, 46, 0.15)" : "var(--primary)", 
                       color: vouched ? "var(--primary)" : "white",
                       border: "none", 
                       padding: "6px 12px", 
@@ -218,7 +218,7 @@ export function InteractiveMockup() {
                       fontSize: "0.65rem", 
                       fontWeight: 800,
                       cursor: vouched ? "default" : "pointer",
-                      boxShadow: vouched ? "none" : "0 4px 10px rgba(0, 212, 49, 0.3)"
+                      boxShadow: vouched ? "none" : "0 4px 10px rgba(0, 184, 46, 0.3)"
                     }}
                   >
                     {vouched ? "VOUCHED" : "VOUCH"}
@@ -274,7 +274,7 @@ export function InteractiveMockup() {
                           width: "16px", 
                           height: "16px", 
                           borderRadius: "50%", 
-                          background: dealStep >= s.step ? "rgba(0, 212, 49, 0.15)" : "rgba(255,255,255,0.05)", 
+                          background: dealStep >= s.step ? "rgba(0, 184, 46, 0.15)" : "rgba(255,255,255,0.05)", 
                           border: `1px solid ${dealStep >= s.step ? "var(--primary)" : "rgba(255,255,255,0.1)"}`,
                           display: "flex", 
                           alignItems: "center", 
@@ -321,7 +321,7 @@ export function InteractiveMockup() {
               background: "var(--brand-red)", 
               color: "white", 
               border: "none", 
-              boxShadow: "0 8px 24px rgba(255,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.3)", 
+              boxShadow: "0 8px 24px rgba(229, 72, 77,0.5), inset 0 2px 4px rgba(255,255,255,0.3)", 
               display: "flex", 
               alignItems: "center", 
               justifyContent: "center", 

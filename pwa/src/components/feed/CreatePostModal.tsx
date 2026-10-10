@@ -44,10 +44,10 @@ interface CreatePostModalProps {
 }
 
 const POST_TYPES = [
-    { value: 'services', label: 'Services', desc: 'Offer or hire local services', icon: '🛠️', color: 'text-[#00a555] bg-[#00a555]/5 border-[#00a555]/10 hover:bg-[#00a555]/10' },
+    { value: 'services', label: 'Services', desc: 'Offer or hire local services', icon: '🛠️', color: 'text-[#0E8A3E] bg-[#0E8A3E]/5 border-[#0E8A3E]/10 hover:bg-[#0E8A3E]/10' },
     { value: 'fyi', label: 'FYI', desc: 'Announcements & notices', icon: '📢', color: 'text-[#3a6a9a] bg-[#3a6a9a]/5 border-[#3a6a9a]/10 hover:bg-[#3a6a9a]/10' },
     { value: 'help_request', label: 'Help Request', desc: 'Raise support or funds', icon: '🆘', color: 'text-[#cc3333] bg-[#cc3333]/5 border-[#cc3333]/10 hover:bg-[#cc3333]/10' },
-    { value: 'marketplace', label: 'Marketplace', desc: 'Buy, sell or trade items', icon: '🛒', color: 'text-[#00c431] bg-[#00c431]/5 border-[#00c431]/10 hover:bg-[#00c431]/10' },
+    { value: 'marketplace', label: 'Marketplace', desc: 'Buy, sell or trade items', icon: '🛒', color: 'text-[#00B82E] bg-[#00B82E]/5 border-[#00B82E]/10 hover:bg-[#00B82E]/10' },
     { value: 'event', label: 'Event', desc: 'Gatherings & meetups', icon: '📅', color: 'text-brand-blue bg-brand-blue/5 border-brand-blue/10 hover:bg-brand-blue/10' },
     { value: 'job', label: 'Job', desc: 'Hiring or job postings', icon: '💼', color: 'text-[#9a5acf] bg-[#9a5acf]/5 border-[#9a5acf]/10 hover:bg-[#9a5acf]/10' },
     { value: 'emergency', label: 'Safety Alert', desc: 'Report incident or threat', icon: '🚨', color: 'text-brand-red bg-brand-red/5 border-brand-red/10 hover:bg-brand-red/10' },
@@ -352,7 +352,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
     if (!canPost) {
         return (
             <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm">
-                <div className="bg-white dark:bg-[#121b14] rounded-t-[32px] w-full max-w-md p-8 flex flex-col items-center text-center shadow-2xl">
+                <div className="bg-white dark:bg-[#1D2433] rounded-t-[32px] w-full max-w-md p-8 flex flex-col items-center text-center shadow-2xl">
                     <div className="w-12 h-1 bg-black/10 dark:bg-white/20 rounded-full mx-auto mb-6 shrink-0" />
                     <div className="w-16 h-16 rounded-full bg-brand-red/10 flex items-center justify-center mb-4">
                         <Globe className="w-8 h-8 text-brand-red" />
@@ -713,10 +713,10 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                     {showSuccess ? (
                         <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                             <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center mb-3">
-                                <CheckCircle2 className="w-8 h-8 text-[#008A20]" />
+                                <CheckCircle2 className="w-8 h-8 text-[#0E8A3E]" />
                             </div>
-                            <h3 className="text-base font-black text-[#111827]">{t('createPost.postShared')}</h3>
-                            <p className="text-xs text-[#6B7280] mt-1 font-medium">{t('createPost.willAppear')}</p>
+                            <h3 className="text-base font-black text-[#1D2433]">{t('createPost.postShared')}</h3>
+                            <p className="text-xs text-[#5B6478] mt-1 font-medium">{t('createPost.willAppear')}</p>
                         </div>
                     ) : (
                         <>
@@ -727,16 +727,16 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                     <div className="px-5 pt-3 pb-3">
                                         <div className="flex items-start justify-between gap-3">
                                             <div>
-                                                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
+                                                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
                                                     Create post
                                                 </p>
-                                                <h2 className="text-base font-black tracking-tight text-[#111827] mt-0.5">
+                                                <h2 className="text-base font-black tracking-tight text-[#1D2433] mt-0.5">
                                                     Wetin dey happen around you today?
                                                 </h2>
                                             </div>
                                             <button
                                                 onClick={handleClose}
-                                                className="w-8 h-8 rounded-xl flex items-center justify-center bg-black/[0.04] hover:bg-black/[0.08] text-[#6B7280] hover:text-[#111827] transition-all cursor-pointer shrink-0 mt-0.5"
+                                                className="w-8 h-8 rounded-xl flex items-center justify-center bg-black/[0.04] hover:bg-black/[0.08] text-[#5B6478] hover:text-[#1D2433] transition-all cursor-pointer shrink-0 mt-0.5"
                                             >
                                                 <X size={18} />
                                             </button>
@@ -761,8 +761,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                     {/* Label & description */}
                                                     <div className="flex-1 min-w-0">
-                                                        <h4 className="text-xs font-black text-[#111827] tracking-tight">{pt.label}</h4>
-                                                        <p className="text-[11px] text-[#6B7280] mt-0.5 leading-snug font-medium line-clamp-2">{pt.desc}</p>
+                                                        <h4 className="text-xs font-black text-[#1D2433] tracking-tight">{pt.label}</h4>
+                                                        <p className="text-[11px] text-[#5B6478] mt-0.5 leading-snug font-medium line-clamp-2">{pt.desc}</p>
                                                     </div>
                                                 </button>
                                             );
@@ -837,7 +837,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     {user.avatarUrl ? (
                                                         <Image src={user.avatarUrl} alt="Avatar" fill sizes="44px" className="object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-sm font-black" style={{ background: '#00D431', color: '#0B0E11' }}>
+                                                        <div className="w-full h-full flex items-center justify-center text-sm font-black" style={{ background: '#00B82E', color: '#0B0E11' }}>
                                                             {user.username.slice(0,2).toUpperCase()}
                                                         </div>
                                                     )}
@@ -954,7 +954,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setContactInfo(e.target.value)}
                                                         disabled={isSubmitting}
                                                         placeholder="e.g. WhatsApp: 080..., DM"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] focus:ring-2 focus:ring-primary/10 transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] focus:ring-2 focus:ring-primary/10 transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -975,7 +975,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             onChange={(e) => setEventDate(e.target.value)}
                                                             disabled={isSubmitting}
                                                             required
-                                                            className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                            className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                         />
                                                     </div>
                                                     <div className="flex-1">
@@ -985,7 +985,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             value={eventTime}
                                                             onChange={(e) => setEventTime(e.target.value)}
                                                             disabled={isSubmitting}
-                                                            className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                            className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                         />
                                                     </div>
                                                 </div>
@@ -998,7 +998,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         disabled={isSubmitting}
                                                         required
                                                         placeholder="e.g. Town Hall, Landmark Centre"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                                 <div>
@@ -1009,7 +1009,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setVenueAddress(e.target.value)}
                                                         disabled={isSubmitting}
                                                         placeholder="e.g. 15 Broad Street, Lagos"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                                 <div className="flex gap-2">
@@ -1036,7 +1036,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                                 required
                                                                 min="0"
                                                                 placeholder="0"
-                                                                className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                                className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                             />
                                                         </div>
                                                     )}
@@ -1051,7 +1051,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             disabled={isSubmitting}
                                                             min="1"
                                                             placeholder="Unlimited"
-                                                            className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                            className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                         />
                                                     </div>
                                                     <div className="flex-1">
@@ -1078,7 +1078,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setOrganizer(e.target.value)}
                                                         disabled={isSubmitting}
                                                         placeholder="Your name or organization"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -1101,7 +1101,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             required
                                                             min="0"
                                                             placeholder="e.g. 15000"
-                                                            className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                            className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                         />
                                                     </div>
                                                     <div className="flex-1 flex items-end pb-0.5">
@@ -1174,7 +1174,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setContactMethod(e.target.value)}
                                                         disabled={isSubmitting}
                                                         placeholder="e.g. WhatsApp: 080... or Call"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -1250,7 +1250,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                                 min="0"
                                                                 step="100"
                                                                 placeholder="e.g. 50000 (optional)"
-                                                                className="w-full pl-7 pr-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                                className="w-full pl-7 pr-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                             />
                                                         </div>
                                                         <div className="flex justify-between mt-2">
@@ -1286,7 +1286,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                                 onChange={(e) => setBankName(e.target.value)}
                                                                 disabled={isSubmitting}
                                                                 placeholder="e.g. GTBank, Zenith"
-                                                                className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                                className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                             />
                                                         </div>
                                                         <div>
@@ -1297,7 +1297,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                                 onChange={(e) => setAccountName(e.target.value)}
                                                                 disabled={isSubmitting}
                                                                 placeholder="Name matching account"
-                                                                className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                                className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                             />
                                                         </div>
                                                         <div>
@@ -1310,7 +1310,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                                 placeholder="10-digit NUBAN"
                                                                 maxLength={10}
                                                                 inputMode="numeric"
-                                                                className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all font-mono"
+                                                                className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all font-mono"
                                                             />
                                                         </div>
                                                         <button
@@ -1340,7 +1340,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         disabled={isSubmitting}
                                                         required
                                                         placeholder="e.g. Professional Electrical Fixes"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                                 <div className="flex gap-2">
@@ -1385,7 +1385,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             disabled={isSubmitting}
                                                             min="0"
                                                             placeholder="e.g. 5000 (optional)"
-                                                            className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                            className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                         />
                                                     </div>
                                                     <div className="flex-1">
@@ -1410,7 +1410,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setServiceArea(e.target.value)}
                                                         disabled={isSubmitting}
                                                         placeholder="e.g. Ikeja, Lekki Phase 1, Yaba"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                                 <div>
@@ -1422,7 +1422,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         disabled={isSubmitting}
                                                         required
                                                         placeholder="e.g. WhatsApp: 080... or Call"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -1443,7 +1443,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         disabled={isSubmitting}
                                                         required
                                                         placeholder="e.g. Front-End React Developer"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                                 <div className="flex gap-2">
@@ -1484,7 +1484,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setSalary(e.target.value)}
                                                         disabled={isSubmitting}
                                                         placeholder="e.g. ₦150k - ₦200k / month (or Negotiable)"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                                 <div>
@@ -1494,7 +1494,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setJobRequirements(e.target.value)}
                                                         disabled={isSubmitting}
                                                         placeholder="e.g. 2+ years React experience, CSS/HTML, strong communication skills..."
-                                                        className="w-full p-3 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] resize-none transition-all"
+                                                        className="w-full p-3 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] resize-none transition-all"
                                                         rows={3}
                                                     />
                                                 </div>
@@ -1507,7 +1507,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         disabled={isSubmitting}
                                                         required
                                                         placeholder="e.g. Email cv to jobs@company.com or Call"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -1544,7 +1544,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             onChange={(e) => setIncidentTime(e.target.value)}
                                                             disabled={isSubmitting}
                                                             placeholder="e.g. Just now, 10 mins ago"
-                                                            className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                            className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                         />
                                                     </div>
                                                     <div className="flex-1">
@@ -1570,7 +1570,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         disabled={isSubmitting}
                                                         required
                                                         placeholder="e.g. Near Ikeja City Mall gate, Herbert Macaulay Way"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                                 <div>
@@ -1581,7 +1581,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setRecommendedAction(e.target.value)}
                                                         disabled={isSubmitting}
                                                         placeholder="e.g. Avoid the area, take alternative routes"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -1631,7 +1631,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         disabled={isSubmitting}
                                                         required
                                                         placeholder="e.g. Yaba LGA, whole of Lagos Mainland"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                                 <div>
@@ -1642,7 +1642,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setRecommendedPrecautions(e.target.value)}
                                                         disabled={isSubmitting}
                                                         placeholder="e.g. Stay indoors, boil all drinking water"
-                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#121b14] transition-all"
+                                                        className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] focus:border-primary/50 focus:bg-white dark:focus:bg-[#1D2433] transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -1666,7 +1666,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                     </div>
 
                                     {/* Footer Actions */}
-                                    <div className="p-4 px-6 pb-6 flex items-center justify-between border-t border-black/[0.04] dark:border-white/[0.04] shrink-0 bg-white/95 dark:bg-[#121b14]/95 backdrop-blur-md">
+                                    <div className="p-4 px-6 pb-6 flex items-center justify-between border-t border-black/[0.04] dark:border-white/[0.04] shrink-0 bg-white/95 dark:bg-[#1D2433]/95 backdrop-blur-md">
                                         {/* Attachment Buttons */}
                                         <div className="flex items-center gap-1.5">
                                             <button
@@ -1702,7 +1702,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         <button
                                             type="submit"
                                             disabled={isSubmitting || (!content.trim() && selectedFiles.length === 0)}
-                                            className="px-6 py-3 rounded-xl disabled:opacity-40 flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg text-xs font-black bg-[#00D431] hover:bg-[#00F53B] text-black active:scale-[0.97] transition-all"
+                                            className="px-6 py-3 rounded-xl disabled:opacity-40 flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg text-xs font-black bg-[#00B82E] hover:bg-[#00F53B] text-black active:scale-[0.97] transition-all"
                                         >
                                             {isSubmitting ? (
                                                 <>

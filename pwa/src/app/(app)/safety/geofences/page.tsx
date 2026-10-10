@@ -55,9 +55,9 @@ const TYPE_LABELS: Record<GeofenceType, string> = {
 };
 
 const TYPE_COLORS: Record<GeofenceType, string> = {
-  safe_zone: '#006F35',   // green
-  alert_zone: '#00D431',  // amber
-  restricted_zone: '#FF0000', // red
+  safe_zone: '#0E8A3E',   // green
+  alert_zone: '#00B82E',  // amber
+  restricted_zone: '#E5484D', // red
 };
 
 const TYPE_DOT_CLASS: Record<GeofenceType, string> = {

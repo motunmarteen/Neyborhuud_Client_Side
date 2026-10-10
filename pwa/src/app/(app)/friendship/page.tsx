@@ -60,7 +60,7 @@ const Avatar = ({ user, size = 48 }: { user: FollowUser; size?: number }) => {
 };
 
 const VerifiedBadge = () => (
-  <span className="material-symbols-outlined text-[14px] text-[#00D431] fill-1 ml-0.5 flex-shrink-0">verified</span>
+  <span className="material-symbols-outlined text-[14px] text-[#00B82E] fill-1 ml-0.5 flex-shrink-0">verified</span>
 );
 
 const fmtDist = (m: number) =>
@@ -107,7 +107,7 @@ function UserCard({ user, currentUserId, onFollowToggle, onMessage, pendingIds, 
             {user.distanceMetres != null && (
               <>
                 <span className="text-slate-300">·</span>
-                <span className="text-[#00A555] font-bold shrink-0">{fmtDist(user.distanceMetres)}</span>
+                <span className="text-[#0E8A3E] font-bold shrink-0">{fmtDist(user.distanceMetres)}</span>
               </>
             )}
           </div>

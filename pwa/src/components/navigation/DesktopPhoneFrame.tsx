@@ -68,7 +68,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
         margin: 1,
         width: 256,
         color: {
-          dark: "#1a1a1a",
+          dark: "#1D2433",
           light: "#ffffff",
         },
       })
@@ -256,7 +256,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
                 letterSpacing: "-0.03em"
               }}
             >
-              Neybor<span style={{ color: "#00d431" }}>Huud</span>
+              Neybor<span style={{ color: "#00B82E" }}>Huud</span>
             </span>
           </div>
 
@@ -264,7 +264,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
             Designed for Mobile
           </h2>
           
-          <p style={{ color: "#9ca3af", fontSize: "0.875rem", marginBottom: "1.5rem", lineHeight: "1.5" }}>
+          <p style={{ color: "#9AA3B1", fontSize: "0.875rem", marginBottom: "1.5rem", lineHeight: "1.5" }}>
             NeyborHuud is built for your street. Scan to install the app on your phone for full safety features (GPS & instant SOS).
           </p>
 
@@ -283,7 +283,7 @@ export default function DesktopPhoneFrame({ children }: { children: ReactNode })
             )}
           </div>
 
-          <p style={{ fontSize: "10px", color: "#6b7280", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          <p style={{ fontSize: "10px", color: "#5B6478", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
             Scan to install
           </p>
         </div>

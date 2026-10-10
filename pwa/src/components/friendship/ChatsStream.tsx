@@ -239,12 +239,12 @@ export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
               aria-selected={active}
               onClick={() => setFilter(t.id)}
               className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-bold transition-colors ${
-                active ? 'bg-[#00C830] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                active ? 'bg-[#00B82E] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               {t.label}
               {unread > 0 && (
-                <span className={`min-w-[18px] rounded-full px-1 text-[10px] leading-[18px] ${active ? 'bg-white/25 text-white' : 'bg-[#00C830] text-white'}`}>
+                <span className={`min-w-[18px] rounded-full px-1 text-[10px] leading-[18px] ${active ? 'bg-white/25 text-white' : 'bg-[#00B82E] text-white'}`}>
                   {unread > 99 ? '99+' : unread}
                 </span>
               )}
@@ -274,7 +274,7 @@ export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
                     {row.name}
                   </p>
                   {row.isVerified && (
-                    <ShieldCheck size={14} className="text-[#00C830] shrink-0 fill-[#00C830]/10" />
+                    <ShieldCheck size={14} className="text-[#00B82E] shrink-0 fill-[#00B82E]/10" />
                   )}
                 </div>
                 <span className="shrink-0 text-[11px] font-medium text-slate-400">{formatTimeAgo(new Date(row.ts).toISOString())}</span>
@@ -284,7 +284,7 @@ export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
                   {row.subtitle.text}
                 </p>
                 {row.unreadCount != null && row.unreadCount > 0 && (
-                  <span className="flex h-4 min-w-[16px] shrink-0 items-center justify-center rounded-full bg-[#00C830] px-1 text-[10px] font-bold text-white shadow-xs">
+                  <span className="flex h-4 min-w-[16px] shrink-0 items-center justify-center rounded-full bg-[#00B82E] px-1 text-[10px] font-bold text-white shadow-xs">
                     {row.unreadCount}
                   </span>
                 )}
@@ -310,7 +310,7 @@ function Avatar({
 }) {
   return (
     <div className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-slate-100 shadow-2xs ${
-      isVerified ? 'border-[#00C830]/60 ring-2 ring-[#00C830]/20' : 'border-black/[0.08]'
+      isVerified ? 'border-[#00B82E]/60 ring-2 ring-[#00B82E]/20' : 'border-black/[0.08]'
     }`}>
       {src ? (
         <Image src={src} alt={name} width={48} height={48} className="h-full w-full object-cover" />

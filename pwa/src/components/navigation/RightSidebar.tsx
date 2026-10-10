@@ -35,15 +35,15 @@ export default function RightSidebar() {
       <button
         type="button"
         onClick={() => router.push('/explore')}
-        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.08] text-xs text-[#6B7280] transition-all cursor-pointer group"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.08] text-xs text-[#5B6478] transition-all cursor-pointer group"
       >
         <div className="flex items-center gap-2.5 truncate">
-          <Search size={15} className="text-[#9CA3AF] group-hover:text-[#008A20] transition-colors shrink-0" />
+          <Search size={15} className="text-[#9AA3B1] group-hover:text-[#0E8A3E] transition-colors shrink-0" />
           <span suppressHydrationWarning className="truncate font-medium">
             Search in {huudName !== 'your neighborhood' && huudName ? huudName : 'your neighborhood'}...
           </span>
         </div>
-        <kbd className="px-1.5 py-0.5 rounded-lg bg-white border border-black/10 text-[10px] font-bold text-[#9CA3AF] shrink-0">
+        <kbd className="px-1.5 py-0.5 rounded-lg bg-white border border-black/10 text-[10px] font-bold text-[#9AA3B1] shrink-0">
           ⌘K
         </kbd>
       </button>
@@ -54,11 +54,11 @@ export default function RightSidebar() {
       {/* Events Widget */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
-            <Calendar size={13} className="text-[#008A20]" />
+          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+            <Calendar size={13} className="text-[#0E8A3E]" />
             <span>Upcoming Events</span>
           </div>
-          <Link href="/events" className="text-[#008A20] text-[11px] font-bold hover:underline flex items-center gap-0.5">
+          <Link href="/events" className="text-[#0E8A3E] text-[11px] font-bold hover:underline flex items-center gap-0.5">
             <span>See all</span>
             <ArrowRight size={11} />
           </Link>
@@ -79,8 +79,8 @@ export default function RightSidebar() {
             </>
           ) : upcomingEvents.length === 0 ? (
             <div className="p-3.5 rounded-2xl bg-white border border-black/[0.08] text-center shadow-xs">
-              <p className="text-xs font-semibold text-[#6B7280]">No upcoming events nearby</p>
-              <Link href="/events" className="text-xs font-bold text-[#008A20] hover:underline mt-1 inline-block">
+              <p className="text-xs font-semibold text-[#5B6478]">No upcoming events nearby</p>
+              <Link href="/events" className="text-xs font-bold text-[#0E8A3E] hover:underline mt-1 inline-block">
                 Explore all events →
               </Link>
             </div>
@@ -94,21 +94,21 @@ export default function RightSidebar() {
                 <Link
                   key={event._id ?? event.id}
                   href={`/events/${event._id ?? event.id}`}
-                  className="p-3 rounded-2xl bg-white border border-black/[0.08] hover:border-[#008A20]/50 transition-all flex gap-3 cursor-pointer shadow-xs group"
+                  className="p-3 rounded-2xl bg-white border border-black/[0.08] hover:border-[#0E8A3E]/50 transition-all flex gap-3 cursor-pointer shadow-xs group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col items-center justify-center shrink-0 text-[#008A20]">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col items-center justify-center shrink-0 text-[#0E8A3E]">
                     <span className="text-[10px] font-black uppercase leading-none">{month}</span>
                     <span className="text-base font-black leading-tight">{day}</span>
                   </div>
                   <div className="flex flex-col min-w-0 justify-center">
-                    <h3 className="text-xs font-bold text-[#111827] group-hover:text-[#008A20] transition-colors truncate">
+                    <h3 className="text-xs font-bold text-[#1D2433] group-hover:text-[#0E8A3E] transition-colors truncate">
                       {event.title}
                     </h3>
-                    <p className="text-[11px] font-medium text-[#6B7280] truncate mt-0.5">
+                    <p className="text-[11px] font-medium text-[#5B6478] truncate mt-0.5">
                       {event.location?.name ?? event.location?.address ?? event.locationName ?? 'Lekki Phase 1'}
                     </p>
                     {attendees > 0 && (
-                      <p className="text-[10px] mt-1 text-[#008A20] font-bold">
+                      <p className="text-[10px] mt-1 text-[#0E8A3E] font-bold">
                         {attendees} neighbors attending
                       </p>
                     )}
@@ -123,11 +123,11 @@ export default function RightSidebar() {
       {/* Marketplace Widget */}
       <div className="flex flex-col gap-3 pt-2 border-t border-black/[0.06]">
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9CA3AF]">
+          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
             <ShoppingBag size={13} className="text-amber-600" />
             <span>Marketplace Picks</span>
           </div>
-          <Link href="/marketplace" className="text-[#008A20] text-[11px] font-bold hover:underline flex items-center gap-0.5">
+          <Link href="/marketplace" className="text-[#0E8A3E] text-[11px] font-bold hover:underline flex items-center gap-0.5">
             <span>Browse</span>
             <ArrowRight size={11} />
           </Link>
@@ -145,8 +145,8 @@ export default function RightSidebar() {
           </div>
         ) : recentListings.length === 0 ? (
           <div className="p-3.5 rounded-2xl bg-white border border-black/[0.08] text-center shadow-xs">
-            <p className="text-xs font-semibold text-[#6B7280]">No local listings nearby yet</p>
-            <Link href="/marketplace" className="text-xs font-bold text-[#008A20] hover:underline mt-1 inline-block">
+            <p className="text-xs font-semibold text-[#5B6478]">No local listings nearby yet</p>
+            <Link href="/marketplace" className="text-xs font-bold text-[#0E8A3E] hover:underline mt-1 inline-block">
               Sell or browse items →
             </Link>
           </div>
@@ -171,15 +171,15 @@ export default function RightSidebar() {
                       style={{ backgroundImage: `url("${image}")` }}
                     />
                   ) : (
-                    <div className="aspect-square rounded-xl mb-2 bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#008A20]">
+                    <div className="aspect-square rounded-xl mb-2 bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#0E8A3E]">
                       <ShoppingBag size={24} />
                     </div>
                   )}
                   <div>
-                    <h4 className="text-xs font-bold text-[#111827] group-hover:text-amber-700 transition-colors truncate">
+                    <h4 className="text-xs font-bold text-[#1D2433] group-hover:text-amber-700 transition-colors truncate">
                       {item.title ?? item.name}
                     </h4>
-                    <p className="text-xs font-black text-[#008A20] mt-0.5">
+                    <p className="text-xs font-black text-[#0E8A3E] mt-0.5">
                       {price}
                     </p>
                   </div>

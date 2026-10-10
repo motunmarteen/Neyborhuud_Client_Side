@@ -130,7 +130,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
         {/* ── Header ── */}
         <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00C830] border border-emerald-100 shadow-2xs">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00B82E] border border-emerald-100 shadow-2xs">
               <Users size={20} strokeWidth={2.4} />
             </div>
             <div>
@@ -251,7 +251,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
         {/* ── Key Emergency Contacts Pill ── */}
         <div className="p-3 rounded-2xl bg-emerald-50/60 border border-emerald-200/60 flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Shield size={16} className="text-[#00C830]" />
+            <Shield size={16} className="text-[#00B82E]" />
             <span className="text-xs font-bold text-emerald-950">
               Security Patrol: {data?.counts.securityPersonnel || 8} Guards
             </span>

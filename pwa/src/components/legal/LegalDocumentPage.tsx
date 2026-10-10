@@ -50,7 +50,7 @@ export function LegalDocumentPage({
         ))}
         <p className="text-[10px] font-medium text-[var(--neu-text-muted)]">
           Questions? Contact{' '}
-          <Link href="mailto:support@neyborhuud.com" className="font-semibold text-[var(--landing-green-deep,#006f35)]">
+          <Link href="mailto:support@neyborhuud.com" className="font-semibold text-[var(--landing-green-deep,#0E8A3E)]">
             support@neyborhuud.com
           </Link>
         </p>

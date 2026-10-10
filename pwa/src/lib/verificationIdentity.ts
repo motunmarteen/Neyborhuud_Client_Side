@@ -146,7 +146,7 @@ export const VERIFICATION_TIER_META: Record<VerificationTier, VerificationTierMe
     tier: 'gold',
     label: 'Gold',
     emoji: '🥇',
-    color: '#00D431',
+    color: '#00B82E',
     colorClass: 'verification-tier--gold',
     description: 'Community-trusted neighbour.',
   },

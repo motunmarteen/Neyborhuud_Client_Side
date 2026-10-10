@@ -21,7 +21,7 @@ import { SENTINEL_FEATURES } from '@/lib/sentinel-catalog';
 import { SentinelIcon } from '@/components/navigation/AppNavIcon';
 
 const ACCENT: Record<string, string> = {
-  primary: '#00D431',
+  primary: '#00B82E',
   blue: '#6B9FFF',
   red: '#FF6B6B',
   muted: '#9FBBA0',

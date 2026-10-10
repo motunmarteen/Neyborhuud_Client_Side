@@ -33,7 +33,7 @@ export function GlassFormPage({ title, subtitle, titleId = "glass-form-title", o
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className={`doodle-modal-panel relative z-10 mx-auto w-full shrink-0 overflow-hidden rounded-[24px] border border-[var(--border-light)] shadow-[0_24px_60px_rgba(0,111,53,0.14),0_0_0_1px_rgba(255,255,255,0.85)_inset] dark:border-[var(--neu-shadow-dark)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)] sm:rounded-[28px] ${wide ? "max-w-2xl" : "max-w-lg"}`}
+            className={`doodle-modal-panel relative z-10 mx-auto w-full shrink-0 overflow-hidden rounded-[24px] border border-[var(--border-light)] shadow-[0_24px_60px_rgba(14, 138, 62,0.14),0_0_0_1px_rgba(255,255,255,0.85)_inset] dark:border-[var(--neu-shadow-dark)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)] sm:rounded-[28px] ${wide ? "max-w-2xl" : "max-w-lg"}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="doodle-modal-panel-wash z-0" aria-hidden />

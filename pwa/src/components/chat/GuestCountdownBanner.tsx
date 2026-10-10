@@ -34,7 +34,7 @@ export function GuestCountdownBanner({ expiresAt }: GuestCountdownBannerProps) {
   return (
     <div
       className={`flex items-center justify-center gap-2 px-4 py-2 text-[13px] font-semibold ${
-        expiring ? 'bg-brand-red/10 text-brand-red' : 'bg-[#00A555]/10 text-[#00A555]'
+        expiring ? 'bg-brand-red/10 text-brand-red' : 'bg-[#0E8A3E]/10 text-[#0E8A3E]'
       }`}
     >
       <span className="material-symbols-outlined text-[16px]">visibility</span>

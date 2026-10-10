@@ -57,11 +57,11 @@ function pointsFeatureCollection(points: MapOverlayPoint[]): GeoJSON.FeatureColl
 }
 
 const OVERLAY_PAINT: Record<MapOverlay['type'], { color: string; opacity: number; radius: number }> = {
-    danger_heatmap: { color: '#FF0000', opacity: 0.2, radius: 28 },
-    safe_zones: { color: '#00D431', opacity: 0.15, radius: 22 },
-    event_density: { color: '#1A56FF', opacity: 0.18, radius: 20 },
-    emergency_pulse: { color: '#FF0000', opacity: 0.35, radius: 16 },
-    commerce: { color: '#006F35', opacity: 0.2, radius: 18 },
+    danger_heatmap: { color: '#E5484D', opacity: 0.2, radius: 28 },
+    safe_zones: { color: '#00B82E', opacity: 0.15, radius: 22 },
+    event_density: { color: '#3B82C4', opacity: 0.18, radius: 20 },
+    emergency_pulse: { color: '#E5484D', opacity: 0.35, radius: 16 },
+    commerce: { color: '#0E8A3E', opacity: 0.2, radius: 18 },
 };
 
 export function InteractiveMap({
@@ -135,9 +135,9 @@ export function InteractiveMap({
                         source: 'accuracy',
                         paint: {
                             'circle-radius': accuracyRadius / 0.5,
-                            'circle-color': '#1A56FF',
+                            'circle-color': '#3B82C4',
                             'circle-opacity': 0.12,
-                            'circle-stroke-color': '#1A56FF',
+                            'circle-stroke-color': '#3B82C4',
                             'circle-stroke-width': 2,
                             'circle-stroke-opacity': 0.35,
                         },

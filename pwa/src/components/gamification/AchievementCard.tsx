@@ -51,7 +51,7 @@ export default function AchievementCard({ achievement }: Props) {
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               achievement.completed
-                ? "bg-gradient-to-r from-primary to-[#006F35]"
+                ? "bg-gradient-to-r from-primary to-[#0E8A3E]"
                 : "bg-brand-blue"
             }`}
             style={{ width: `${pct}%` }}

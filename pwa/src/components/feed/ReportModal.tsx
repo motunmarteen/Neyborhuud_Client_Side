@@ -129,7 +129,7 @@ export function ReportModal({ postId, onClose, onSubmit }: ReportModalProps) {
                 disabled={!selectedReason || submitting}
                 className="w-full py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-40"
                 style={{
-                  backgroundColor: selectedReason ? 'var(--neu-accent, #00D431)' : undefined,
+                  backgroundColor: selectedReason ? 'var(--neu-accent, #00B82E)' : undefined,
                   color: selectedReason ? '#000' : 'var(--neu-text-muted)',
                 }}
               >

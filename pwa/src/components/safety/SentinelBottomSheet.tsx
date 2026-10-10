@@ -9,7 +9,7 @@ import { SentinelIcon } from '@/components/navigation/AppNavIcon';
 
 const getIconBgClasses = (accent: string) => {
   switch (accent) {
-    case 'primary': return 'bg-[#00D431]/10 text-[#00D431] dark:bg-[#00D431]/15';
+    case 'primary': return 'bg-[#00B82E]/10 text-[#00B82E] dark:bg-[#00B82E]/15';
     case 'blue': return 'bg-[#6B9FFF]/10 text-[#6B9FFF] dark:bg-[#6B9FFF]/15';
     case 'red': return 'bg-[#FF6B6B]/10 text-[#FF6B6B] dark:bg-[#FF6B6B]/15';
     default: return 'bg-black/5 text-neu-text-secondary dark:bg-white/10 dark:text-white/70';
@@ -68,8 +68,8 @@ export function SentinelBottomSheet() {
         {/* Header */}
         <div className="flex items-center justify-between w-full mb-4 relative shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#00D431]/10 flex items-center justify-center">
-               <SentinelIcon active className="w-5 h-5 text-[#00D431]" />
+            <div className="w-9 h-9 rounded-full bg-[#00B82E]/10 flex items-center justify-center">
+               <SentinelIcon active className="w-5 h-5 text-[#00B82E]" />
             </div>
             <div className="flex flex-col">
               <h2 className="text-[20px] font-black leading-tight text-neu-text dark:text-white tracking-tight">
@@ -93,7 +93,7 @@ export function SentinelBottomSheet() {
         <div className="grid grid-cols-2 gap-2.5 mb-4">
           <Link
             href={sos?.href || '/sos'}
-            className="relative overflow-hidden bg-[#E53935] rounded-sm p-3.5 flex flex-col justify-between shadow-[0_8px_24px_rgba(255,59,48,0.3)] hover:shadow-[0_12px_32px_rgba(255,59,48,0.4)] active:scale-[0.98] transition-all text-white min-h-[90px] group"
+            className="relative overflow-hidden bg-[#E5484D] rounded-sm p-3.5 flex flex-col justify-between shadow-[0_8px_24px_rgba(255,59,48,0.3)] hover:shadow-[0_12px_32px_rgba(255,59,48,0.4)] active:scale-[0.98] transition-all text-white min-h-[90px] group"
             onClick={closeSheet}
           >
             <div className="absolute top-0 right-0 -mr-6 -mt-6 w-32 h-32 bg-white/20 rounded-full blur-2xl pointer-events-none" />
@@ -108,14 +108,14 @@ export function SentinelBottomSheet() {
 
           <Link
             href={emergency?.href || '/safety'}
-            className="relative overflow-hidden bg-[#FFF5F5] dark:bg-[#1A0A0A] border border-[#FF3B30]/15 dark:border-[#FF3B30]/20 rounded-sm p-3.5 flex flex-col justify-between hover:bg-[#FFE8E8] dark:hover:bg-[#2A1111] active:scale-[0.98] transition-all min-h-[90px] group"
+            className="relative overflow-hidden bg-[#FFF5F5] dark:bg-[#1A0A0A] border border-[#E5484D]/15 dark:border-[#E5484D]/20 rounded-sm p-3.5 flex flex-col justify-between hover:bg-[#FFE8E8] dark:hover:bg-[#2A1111] active:scale-[0.98] transition-all min-h-[90px] group"
             onClick={closeSheet}
           >
             <div className="mb-2.5 flex">
-               <span className="material-symbols-outlined text-[#FF3B30] text-[36px]" style={{ fontVariationSettings: '"FILL" 1' }}>local_police</span>
+               <span className="material-symbols-outlined text-[#E5484D] text-[36px]" style={{ fontVariationSettings: '"FILL" 1' }}>local_police</span>
             </div>
             <div className="flex flex-col">
-               <span className="font-bold text-[15px] text-[#FF3B30] dark:text-[#FF4B4B] leading-tight tracking-tight mb-0.5">Report</span>
+               <span className="font-bold text-[15px] text-[#E5484D] dark:text-[#FF4B4B] leading-tight tracking-tight mb-0.5">Report</span>
                <span className="text-[11px] font-medium text-neu-text-secondary dark:text-white/60">Local agencies</span>
             </div>
           </Link>
@@ -149,7 +149,7 @@ export function SentinelBottomSheet() {
               // Convert getIconBgClasses to text colors
               const getIconTextClasses = (accent: string) => {
                 switch (accent) {
-                  case 'primary': return 'text-[#00D431]';
+                  case 'primary': return 'text-[#00B82E]';
                   case 'blue': return 'text-[#6B9FFF]';
                   case 'red': return 'text-[#FF6B6B]';
                   default: return 'text-[#9FBBA0] dark:text-[#9FBBA0]';
@@ -185,7 +185,7 @@ export function SentinelBottomSheet() {
                onClick={closeSheet}
              >
                <span className={`material-symbols-outlined text-[28px] ${
-                  feature.accent === 'primary' ? 'text-[#00D431]' : 
+                  feature.accent === 'primary' ? 'text-[#00B82E]' : 
                   feature.accent === 'blue' ? 'text-[#6B9FFF]' : 
                   feature.accent === 'red' ? 'text-[#FF6B6B]' : 
                   'text-[#9FBBA0] dark:text-[#9FBBA0]'

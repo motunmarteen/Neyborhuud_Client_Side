@@ -282,7 +282,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               onClick={() => setCondition(cond.value as typeof condition)}
               className={`rounded-2xl border-2 px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
                 condition === cond.value
-                  ? "border-transparent bg-[#00D431] text-black font-extrabold shadow-[0_8px_20px_rgba(0,212,49,0.28)]"
+                  ? "border-transparent bg-[#00B82E] text-black font-extrabold shadow-[0_8px_20px_rgba(0, 184, 46,0.28)]"
                   : "border-[var(--border-light)] bg-white/75 text-brand-green-dark/70 hover:border-primary/35 dark:border-white/12 dark:bg-white/[0.06] dark:text-white/75"
               }`}
             >
@@ -309,7 +309,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           htmlFor="product-images"
           className="block w-full cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-primary/[0.06] px-4 py-8 text-center text-sm font-medium text-brand-green-dark/70 transition-colors hover:border-primary/50 hover:bg-primary/[0.1] dark:border-primary/25 dark:bg-primary/10 dark:text-white/70"
         >
-          <span className="material-symbols-outlined mx-auto mb-2 block text-4xl text-[#006F35]/60 dark:text-primary/70">
+          <span className="material-symbols-outlined mx-auto mb-2 block text-4xl text-[#0E8A3E]/60 dark:text-primary/70">
             add_photo_alternate
           </span>
           Click to upload images (max 5)
@@ -368,7 +368,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             <p className="text-sm font-medium text-brand-green-dark/70 dark:text-white/55">Loading your location…</p>
           )}
           {!locationLoading && registeredLocation && (
-            <p className="rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3 text-sm font-medium text-[#006F35] dark:border-primary/20 dark:bg-primary/10 dark:text-primary">
+            <p className="rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3 text-sm font-medium text-[#0E8A3E] dark:border-primary/20 dark:bg-primary/10 dark:text-primary">
               📍 Listed in your registered area{areaLabel ? `: ${areaLabel}` : ""}
             </p>
           )}
@@ -403,7 +403,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         <button
           type="submit"
           disabled={isPending || (!isEditing && locationLoading)}
-          className="min-h-[48px] w-full shrink-0 rounded-full bg-[#00D431] hover:bg-[#00F53B] px-4 text-sm font-extrabold text-black shadow-[0_8px_24px_rgba(0,212,49,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-0 sm:flex-1"
+          className="min-h-[48px] w-full shrink-0 rounded-full bg-[#00B82E] hover:bg-[#00F53B] px-4 text-sm font-extrabold text-black shadow-[0_8px_24px_rgba(0, 184, 46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-0 sm:flex-1"
         >
           {isPending ? (isEditing ? "Updating…" : "Creating…") : isEditing ? "Save changes" : "Create listing"}
         </button>

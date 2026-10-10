@@ -13,7 +13,7 @@ const ACCENT: Record<
   primary: {
     icon: 'text-primary bg-primary/12',
     ring: 'ring-primary/12 hover:ring-primary/30',
-    glow: 'group-hover:shadow-[0_8px_24px_rgba(0,111,53,0.12)]',
+    glow: 'group-hover:shadow-[0_8px_24px_rgba(14, 138, 62,0.12)]',
   },
   blue: {
     icon: 'text-brand-blue bg-brand-blue/10',

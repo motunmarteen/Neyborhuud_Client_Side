@@ -237,11 +237,11 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
                 </Link>
 
                 <div suppressHydrationWarning className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/[0.04] border border-black/[0.06] text-xs font-bold text-slate-900">
-                  <MapPin size={12} className="text-[#008A20] shrink-0" />
+                  <MapPin size={12} className="text-[#0E8A3E] shrink-0" />
                   <span suppressHydrationWarning className="truncate max-w-[130px] lg:max-w-[180px]">
                     {huudName !== 'your neighborhood' && huudName ? huudName : 'Lekki Phase 1'}
                   </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00D431] animate-pulse ml-0.5" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00B82E] animate-pulse ml-0.5" />
                 </div>
               </div>
             ) : (
@@ -268,8 +268,8 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
             title="Huud Economy & Daily Rewards"
           >
             <Gift size={13} className="text-amber-500 group-hover:scale-110 transition-transform shrink-0" />
-            <span className="font-extrabold text-[10px] sm:text-xs text-[#008A20]">{huudCoins} HC</span>
-            <span className="hidden min-[360px]:inline-block w-1.5 h-1.5 rounded-full bg-[#00D431] animate-pulse" />
+            <span className="font-extrabold text-[10px] sm:text-xs text-[#0E8A3E]">{huudCoins} HC</span>
+            <span className="hidden min-[360px]:inline-block w-1.5 h-1.5 rounded-full bg-[#00B82E] animate-pulse" />
           </Link>
 
           {/* ZONE 3 (RIGHT): Search + Bell + Circular Green (+) Button + Avatar */}
@@ -303,8 +303,8 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
               <button
                 type="button"
                 onClick={() => setCreateMenuOpen((prev) => !prev)}
-                className={`size-7 sm:size-8 rounded-full bg-[#00D431] hover:bg-[#00FF3E] text-slate-950 font-black shadow-sm flex items-center justify-center transition-transform active:scale-90 cursor-pointer shrink-0 ${
-                  createMenuOpen ? 'ring-2 ring-[#00D431]/40' : ''
+                className={`size-7 sm:size-8 rounded-full bg-[#00B82E] hover:bg-[#00FF3E] text-slate-950 font-black shadow-sm flex items-center justify-center transition-transform active:scale-90 cursor-pointer shrink-0 ${
+                  createMenuOpen ? 'ring-2 ring-[#00B82E]/40' : ''
                 }`}
                 aria-label="Create post or alert"
                 aria-expanded={createMenuOpen}
@@ -316,7 +316,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
               {/* Popover Menu */}
               {createMenuOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-56 sm:w-64 bg-white/95 dark:bg-[#242526] text-slate-800 dark:text-[#E4E6EB] border border-black/[0.08] dark:border-[#3E4042] rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.14)] dark:shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl select-none"
+                  className="absolute right-0 top-full mt-2 w-56 sm:w-64 bg-white/95 dark:bg-[#242526] text-slate-800 dark:text-[#DDE3EC] border border-black/[0.08] dark:border-[#3E4042] rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.14)] dark:shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl select-none"
                   role="menu"
                 >
                   <div className="px-3 py-1.5 mb-1 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-white/50 border-b border-black/[0.06] dark:border-white/10">

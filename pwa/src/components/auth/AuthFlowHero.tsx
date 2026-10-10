@@ -53,7 +53,7 @@ export function AuthFlowHero({ icon, eyebrow, title, meta, error, pulse }: AuthF
         className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-colors ${
           error
             ? 'bg-rose-50 text-rose-600 border border-rose-200'
-            : 'bg-emerald-50 text-[#008A20] border border-emerald-200/60'
+            : 'bg-emerald-50 text-[#0E8A3E] border border-emerald-200/60'
         }`}
         aria-hidden="true"
       >
@@ -64,11 +64,11 @@ export function AuthFlowHero({ icon, eyebrow, title, meta, error, pulse }: AuthF
         />
       </span>
       <div className="min-w-0 flex-1">
-        <p className={`text-[10px] font-extrabold uppercase tracking-wider ${error ? 'text-rose-600' : 'text-[#9CA3AF]'}`}>
+        <p className={`text-[10px] font-extrabold uppercase tracking-wider ${error ? 'text-rose-600' : 'text-[#9AA3B1]'}`}>
           {eyebrow}
         </p>
-        <p className="text-sm sm:text-base font-black text-[#111827] truncate leading-snug">{title}</p>
-        {meta ? <p className="text-[11px] font-semibold text-[#6B7280] truncate mt-0.5">{meta}</p> : null}
+        <p className="text-sm sm:text-base font-black text-[#1D2433] truncate leading-snug">{title}</p>
+        {meta ? <p className="text-[11px] font-semibold text-[#5B6478] truncate mt-0.5">{meta}</p> : null}
       </div>
     </div>
   );

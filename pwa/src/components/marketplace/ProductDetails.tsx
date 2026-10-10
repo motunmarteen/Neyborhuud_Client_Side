@@ -346,7 +346,7 @@ export function ProductDetails({
         {/* Safe Meetup Guidelines Modal */}
         {showGuidelines && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-[#0f172a] border border-slate-800 p-6 text-white shadow-2xl space-y-4">
+            <div className="w-full max-w-md rounded-2xl bg-[#1D2433] border border-slate-800 p-6 text-white shadow-2xl space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-bold flex items-center gap-2 text-amber-400">
                   <span>🛡️</span> Zero-Escrow Safe Meetup Rules
@@ -404,7 +404,7 @@ export function ProductDetails({
         {/* Report Listing / Scam Modal */}
         {showReportModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-[#0f172a] border border-slate-800 p-6 text-white shadow-2xl">
+            <div className="w-full max-w-md rounded-2xl bg-[#1D2433] border border-slate-800 p-6 text-white shadow-2xl">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-base font-bold flex items-center gap-2 text-rose-400">
                   <span>🚩</span> Report Suspicious Listing

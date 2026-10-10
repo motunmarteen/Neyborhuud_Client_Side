@@ -203,7 +203,7 @@ export function ConnectMap({ users, loading, emptyLabel = 'No neighbours to show
       {/* Loading / empty overlays */}
       {loading && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[1px]">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#00D431] border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#00B82E] border-t-transparent" />
         </div>
       )}
       {!loading && plotted.length === 0 && (

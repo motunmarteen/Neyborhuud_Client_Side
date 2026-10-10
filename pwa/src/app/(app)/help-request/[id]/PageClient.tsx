@@ -314,12 +314,12 @@ export default function HelpRequestDetailPage() {
                       <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--neu-shadow-light)' }}>
                         <div
                           className="h-full rounded-full transition-all"
-                          style={{ width: `${progressPct ?? 0}%`, background: (progressPct ?? 0) >= 100 ? '#006F35' : 'var(--primary)' }}
+                          style={{ width: `${progressPct ?? 0}%`, background: (progressPct ?? 0) >= 100 ? '#0E8A3E' : 'var(--primary)' }}
                         />
                       </div>
                       <div className="flex justify-between text-[11px]">
                         <span style={{ color: 'var(--neu-text-muted)' }}>Received: <span className="font-semibold text-primary">{formatNaira(amountReceived)}</span></span>
-                        <span className="font-semibold" style={{ color: (progressPct ?? 0) >= 100 ? '#006F35' : 'var(--primary)' }}>{progressPct ?? 0}%</span>
+                        <span className="font-semibold" style={{ color: (progressPct ?? 0) >= 100 ? '#0E8A3E' : 'var(--primary)' }}>{progressPct ?? 0}%</span>
                       </div>
                     </>
                   )}

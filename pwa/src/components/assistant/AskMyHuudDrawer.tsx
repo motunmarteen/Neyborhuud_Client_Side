@@ -128,7 +128,7 @@ export function AskMyHuudDrawer({ isOpen, onClose }: AskMyHuudDrawerProps) {
         {/* ── Header ── */}
         <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00C830] border border-emerald-100 shadow-2xs">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00B82E] border border-emerald-100 shadow-2xs">
               <Bot size={22} strokeWidth={2.4} />
             </div>
             <div>
@@ -184,7 +184,7 @@ export function AskMyHuudDrawer({ isOpen, onClose }: AskMyHuudDrawerProps) {
               <div
                 className={`max-w-[85%] rounded-2xl p-3.5 text-[13px] leading-relaxed shadow-2xs ${
                   msg.role === 'user'
-                    ? 'bg-[#00C830] text-white font-medium rounded-tr-xs'
+                    ? 'bg-[#00B82E] text-white font-medium rounded-tr-xs'
                     : 'bg-slate-100/90 text-slate-800 border border-black/[0.04] rounded-tl-xs'
                 }`}
               >
@@ -201,7 +201,7 @@ export function AskMyHuudDrawer({ isOpen, onClose }: AskMyHuudDrawerProps) {
                         key={sIdx}
                         className="flex items-center gap-1.5 text-[11px] text-emerald-800 font-mono bg-white px-2 py-0.5 rounded-lg border border-emerald-200/50"
                       >
-                        <ShieldCheck size={12} className="text-[#00C830] shrink-0" />
+                        <ShieldCheck size={12} className="text-[#00B82E] shrink-0" />
                         <span className="truncate">{src.title}</span>
                         {src.distanceLabel && (
                           <span className="text-slate-400 font-normal">({src.distanceLabel})</span>
@@ -216,7 +216,7 @@ export function AskMyHuudDrawer({ isOpen, onClose }: AskMyHuudDrawerProps) {
 
           {loading && (
             <div className="flex items-center gap-2 p-3 text-xs text-slate-500 bg-slate-50 rounded-2xl border border-slate-100 w-fit">
-              <Loader2 size={14} className="animate-spin text-[#00C830]" />
+              <Loader2 size={14} className="animate-spin text-[#00B82E]" />
               Sentinel checking live neighborhood radar...
             </div>
           )}
@@ -250,12 +250,12 @@ export function AskMyHuudDrawer({ isOpen, onClose }: AskMyHuudDrawerProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask Sentinel about your street..."
-              className="flex-1 rounded-2xl bg-slate-100/90 border border-black/[0.06] px-4 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00C830]/40 transition-all font-medium"
+              className="flex-1 rounded-2xl bg-slate-100/90 border border-black/[0.06] px-4 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00B82E]/40 transition-all font-medium"
             />
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#00C830] text-white shadow-xs hover:bg-[#00B52B] disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all cursor-pointer"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#00B82E] text-white shadow-xs hover:bg-[#00B82E] disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all cursor-pointer"
             >
               <ArrowUp size={18} strokeWidth={2.4} />
             </button>

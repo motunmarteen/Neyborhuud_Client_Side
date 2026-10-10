@@ -112,10 +112,10 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
         >
             <div
                 ref={modalRef}
-                className="bg-white dark:bg-[#121b14] w-full max-w-2xl h-full sm:h-[90vh] sm:rounded-2xl overflow-hidden flex flex-col transition-all duration-300 animate-in slide-in-from-bottom-4 shadow-2xl"
+                className="bg-white dark:bg-[#1D2433] w-full max-w-2xl h-full sm:h-[90vh] sm:rounded-2xl overflow-hidden flex flex-col transition-all duration-300 animate-in slide-in-from-bottom-4 shadow-2xl"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 sticky top-0 bg-white/90 dark:bg-[#121b14]/90 backdrop-blur-md border-b border-black/5 dark:border-white/5 z-10">
+                <div className="flex items-center justify-between px-4 py-3 sticky top-0 bg-white/90 dark:bg-[#1D2433]/90 backdrop-blur-md border-b border-black/5 dark:border-white/5 z-10">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={onClose}

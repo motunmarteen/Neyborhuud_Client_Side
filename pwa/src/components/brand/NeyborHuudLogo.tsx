@@ -71,7 +71,7 @@ export function NeyborHuudLogo({
               ? 'text-[#00B528]'
               : tone === 'hero'
                 ? 'text-[#00E536] drop-shadow-[0_0_24px_rgba(0,229,54,0.6)]'
-                : 'text-[#00C830] dark:text-[#00E536]';
+                : 'text-[#00B82E] dark:text-[#00E536]';
 
     const isLockup = presentation === 'lockup';
     const firstPart = isLockup ? 'neybor' : 'Neybor';
@@ -96,7 +96,7 @@ export function NeyborHuudLogo({
                 {secondPart}
             </span>
             {showAccentDot && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00D431] ml-1 self-center inline-block" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00B82E] ml-1 self-center inline-block" />
             )}
         </span>
     );

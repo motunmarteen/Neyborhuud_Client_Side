@@ -229,7 +229,7 @@ export default function EventCard({
         {/* Floating Date Badge on Cover Bottom */}
         <div className="absolute bottom-3 left-4 right-4 z-10 flex items-center justify-between">
           <div className="flex items-center gap-2 text-white/90 text-xs font-bold bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
-            <Calendar size={13} className="text-[#00C830]" />
+            <Calendar size={13} className="text-[#00B82E]" />
             <span>{formatEventDate(startDate)}</span>
             <span className="text-white/40">·</span>
             <Clock size={13} className="text-white/70" />
@@ -238,7 +238,7 @@ export default function EventCard({
 
           {typeof attendeeCount === "number" && (
             <div className="flex items-center gap-1.5 text-white/90 text-xs font-bold bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
-              <Users size={13} className="text-[#00C830]" />
+              <Users size={13} className="text-[#00B82E]" />
               <span>
                 {attendeeCount}
                 {event.capacity ? `/${event.capacity}` : ""} going
@@ -251,7 +251,7 @@ export default function EventCard({
       {/* ── ELI5 Explanation Banner (Collapsible) ── */}
       {showEli5 && (
         <div className="bg-emerald-50 dark:bg-emerald-950/40 border-b border-emerald-100 dark:border-emerald-900/50 p-3.5 flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
-          <HelpCircle size={16} className="text-[#00C830] shrink-0 mt-0.5" />
+          <HelpCircle size={16} className="text-[#00B82E] shrink-0 mt-0.5" />
           <div className="flex-1">
             <span className="font-bold">What is this? </span>
             This is an organized neighborhood event. Tapping{" "}
@@ -275,7 +275,7 @@ export default function EventCard({
             href={`/events/${eventId}`}
             onMouseEnter={prefetchDetail}
             onFocus={prefetchDetail}
-            className="block text-slate-900 dark:text-white font-black text-lg sm:text-xl leading-snug line-clamp-2 hover:text-[#00C830] dark:hover:text-[#00C830] transition-colors"
+            className="block text-slate-900 dark:text-white font-black text-lg sm:text-xl leading-snug line-clamp-2 hover:text-[#00B82E] dark:hover:text-[#00B82E] transition-colors"
           >
             {event.title}
           </Link>
@@ -302,7 +302,7 @@ export default function EventCard({
             href={`/events/${eventId}`}
             onMouseEnter={prefetchDetail}
             onFocus={prefetchDetail}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00C830] transition-colors px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.05]"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00B82E] transition-colors px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.05]"
           >
             <span>View Details</span>
             <ArrowRight size={14} />
@@ -317,12 +317,12 @@ export default function EventCard({
               className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all active:scale-95 disabled:opacity-50 ${
                 event.isAttending
                   ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200"
-                  : "bg-[#00C830] hover:bg-[#00B52B] text-white shadow-md shadow-[#00C830]/20 font-black"
+                  : "bg-[#00B82E] hover:bg-[#00B82E] text-white shadow-md shadow-[#00B82E]/20 font-black"
               }`}
             >
               {event.isAttending ? (
                 <>
-                  <CheckCircle2 size={14} className="text-[#00C830]" />
+                  <CheckCircle2 size={14} className="text-[#00B82E]" />
                   <span>Going</span>
                 </>
               ) : (

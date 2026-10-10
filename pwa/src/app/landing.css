@@ -2,26 +2,26 @@
 
 :root {
   /* Brand Core (Consistent across themes) */
-  --primary: #00D431;
+  --primary: #00B82E;
   --brand-blue: #0000FF;
-  --brand-red: #FF0000;
-  --brand-green-dark: #006F35;
+  --brand-red: #E5484D;
+  --brand-green-dark: #0E8A3E;
   
   /* Light Theme Defaults */
-  --bg-main: #E9F6E6; /* brand-surface */
+  --bg-main: #E8F7EC; /* brand-surface */
   --bg-secondary: #FFFFFF;
   --bg-card: #FFFFFF;
-  --text-main: #1A1A1A; /* brand-black */
+  --text-main: #1D2433; /* brand-black */
   --text-muted: #555555;
   --border-subtle: rgba(0, 0, 0, 0.1);
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(255, 255, 255, 0.8);
   --glass-shadow: rgba(0, 0, 0, 0.05);
-  --doodle-stroke: rgba(0, 212, 49, 0.2);
-  --doodle-fill: rgba(0, 212, 49, 0.2);
+  --doodle-stroke: rgba(0, 184, 46, 0.2);
+  --doodle-fill: rgba(0, 184, 46, 0.2);
   
   /* Inverse values for cards that are always dark (like The Fortress) */
-  --inverse-bg: #1A1A1A;
+  --inverse-bg: #1D2433;
   --inverse-text: #FFFFFF;
   --inverse-text-muted: rgba(255, 255, 255, 0.7);
 }
@@ -37,8 +37,8 @@
   --glass-bg: rgba(26, 31, 46, 0.6);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: rgba(0, 0, 0, 0.37);
-  --doodle-stroke: rgba(0, 111, 53, 0.4);
-  --doodle-fill: rgba(0, 111, 53, 0.4);
+  --doodle-stroke: rgba(14, 138, 62, 0.4);
+  --doodle-fill: rgba(14, 138, 62, 0.4);
 }
 
 /* Let's scope landing page styles under the .landing-page class and marketing layout wrapper to avoid polluting the rest of PWA */
@@ -100,7 +100,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0, 212, 49, 0.3), inset 0 2px 4px rgba(255,255,255,0.4);
+  box-shadow: 0 8px 24px rgba(0, 184, 46, 0.3), inset 0 2px 4px rgba(255,255,255,0.4);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -296,7 +296,7 @@
   border-radius: 1rem;
   font-family: 'Courier New', Courier, monospace;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 212, 49, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 184, 46, 0.1);
 }
 
 .landing-page-wrapper .terminal-header {
@@ -342,7 +342,7 @@
 
 /* Glowing text */
 .landing-page-wrapper .glow-text-green {
-  text-shadow: 0 0 8px rgba(0, 212, 49, 0.6);
+  text-shadow: 0 0 8px rgba(0, 184, 46, 0.6);
   color: var(--primary) !important;
 }
 
@@ -352,7 +352,7 @@
 }
 
 .landing-page-wrapper .glow-text-red {
-  text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+  text-shadow: 0 0 8px rgba(229, 72, 77, 0.6);
   color: var(--brand-red) !important;
 }
 
@@ -402,10 +402,10 @@
 
 @keyframes sos-glow {
   from {
-    box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.4), 0 0 30px rgba(255, 0, 0, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(229, 72, 77, 0.4), 0 0 30px rgba(229, 72, 77, 0.2);
   }
   to {
-    box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.7), 0 0 50px rgba(255, 0, 0, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(229, 72, 77, 0.7), 0 0 50px rgba(229, 72, 77, 0.5);
   }
 }
 
@@ -440,8 +440,8 @@
 
 .landing-page-wrapper .glass-premium:hover {
   transform: translateY(-6px);
-  border-color: rgba(0, 212, 49, 0.3);
-  box-shadow: 0 20px 40px rgba(0, 212, 49, 0.08), 0 0 20px rgba(0, 212, 49, 0.05);
+  border-color: rgba(0, 184, 46, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 184, 46, 0.08), 0 0 20px rgba(0, 184, 46, 0.05);
 }
 
 /* Custom glow borders on cards */

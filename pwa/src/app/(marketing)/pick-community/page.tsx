@@ -364,7 +364,7 @@ function PickCommunityContent() {
             Data sourced from public Nigerian administrative ward listings.{' '}
             <Link
               href="/info/nigeria-postal-codes"
-              className="font-semibold text-[var(--landing-green-deep,#006f35)] underline-offset-2 hover:underline"
+              className="font-semibold text-[var(--landing-green-deep,#0E8A3E)] underline-offset-2 hover:underline"
             >
               Nigeria postal codes &amp; myths
             </Link>
@@ -456,7 +456,7 @@ function PickCommunityContent() {
                 aria-label={selectedOption ? `Selected area: ${selectedOption.name}` : 'Select your area'}
                 className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 transition-all outline-none focus:outline-none ${
                   selectedId
-                    ? 'border-primary/40 bg-primary/10 shadow-[0_0_0_1px_rgba(0,212,49,0.2)]'
+                    ? 'border-primary/40 bg-primary/10 shadow-[0_0_0_1px_rgba(0, 184, 46,0.2)]'
                     : 'border-charcoal/10 dark:border-white/10 bg-white dark:bg-[#1A212A] shadow-[0_4px_16px_rgba(0,0,0,0.06)]'
                 }`}
               >

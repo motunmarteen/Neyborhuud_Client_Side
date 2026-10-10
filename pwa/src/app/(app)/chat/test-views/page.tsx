@@ -249,7 +249,7 @@ function Phase3TestViews() {
               className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 hover:bg-slate-100/70 active:scale-[0.99] transition-all cursor-pointer"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-[#00C830] ring-2 ring-[#00C830]/20">
+                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-[#00B82E] ring-2 ring-[#00B82E]/20">
                   <Image
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
                     alt="Fatima"
@@ -261,7 +261,7 @@ function Phase3TestViews() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-xs font-extrabold text-slate-900">Fatima Abdullahi</p>
-                    <ShieldCheck size={14} className="text-[#00C830]" />
+                    <ShieldCheck size={14} className="text-[#00B82E]" />
                     <span className="rounded-full bg-emerald-100 px-1.5 py-0.2 text-[9px] font-black text-emerald-800">
                       Resident
                     </span>
@@ -272,7 +272,7 @@ function Phase3TestViews() {
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="rounded-full bg-[#00C830] px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs">
+                <span className="rounded-full bg-[#00B82E] px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs">
                   1 Unread
                 </span>
                 <ExternalLink size={14} className="text-slate-400" />

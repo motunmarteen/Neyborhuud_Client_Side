@@ -624,7 +624,7 @@ export default function HuudScorePage() {
                               <span className="text-brand-blue300 font-bold text-xs">{v.voucherUsername.charAt(0).toUpperCase()}</span>
                             </div>
                           )}
-                          <span className="text-xs font-semibold text-brand-blue group-hover:text-[#006F35]">@{v.voucherUsername}</span>
+                          <span className="text-xs font-semibold text-brand-blue group-hover:text-[#0E8A3E]">@{v.voucherUsername}</span>
                         </a>
                       ))}
                     </div>

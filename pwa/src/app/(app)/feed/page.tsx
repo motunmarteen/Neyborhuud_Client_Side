@@ -512,15 +512,15 @@ function XFeedInner() {
                                     <div
                                         className="px-5 py-3.5 animate-fade-in"
                                         style={{
-                                            background: 'linear-gradient(135deg, rgba(255,0,0,0.06), rgba(255,255,255,0.9))',
-                                            borderBottom: '1px solid rgba(255,0,0,0.16)',
-                                            boxShadow: '0 4px 16px rgba(255,0,0,0.06)',
+                                            background: 'linear-gradient(135deg, rgba(229, 72, 77,0.06), rgba(255,255,255,0.9))',
+                                            borderBottom: '1px solid rgba(229, 72, 77,0.16)',
+                                            boxShadow: '0 4px 16px rgba(229, 72, 77,0.06)',
                                         }}
                                     >
                                         <div className="flex items-start gap-3">
                                             <div
                                                 className="rounded-xl size-10 shrink-0 flex items-center justify-center text-brand-red"
-                                                style={{ background: 'rgba(255,0,0,0.1)' }}
+                                                style={{ background: 'rgba(229, 72, 77,0.1)' }}
                                             >
                                                 <Shield className="w-5 h-5 text-brand-red" />
                                             </div>
@@ -600,16 +600,16 @@ function XFeedInner() {
                                         <div className="relative w-full max-w-[240px] h-[120px] rounded-xl overflow-hidden mb-4 border border-black/[0.06] bg-black/[0.02]">
                                             <Image src="/illustration_services.png" alt="Welcome" fill sizes="240px" className="object-cover" />
                                         </div>
-                                        <p className="text-sm font-black text-[#111827]">
+                                        <p className="text-sm font-black text-[#1D2433]">
                                             {t('feed.noPostsTitle')}
                                         </p>
-                                        <p className="text-xs font-semibold mt-1 max-w-xs text-[#6B7280]">
+                                        <p className="text-xs font-semibold mt-1 max-w-xs text-[#5B6478]">
                                             {t('feed.noPostsSubtitle')}
                                         </p>
                                         <button
                                             type="button"
                                             onClick={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
-                                            className="mt-4 px-5 py-2.5 text-xs bg-[#00D431] hover:bg-[#00FF3E] text-black font-extrabold rounded-xl transition-all shadow-xs cursor-pointer"
+                                            className="mt-4 px-5 py-2.5 text-xs bg-[#00B82E] hover:bg-[#00FF3E] text-black font-extrabold rounded-xl transition-all shadow-xs cursor-pointer"
                                         >
                                             Start a conversation
                                         </button>

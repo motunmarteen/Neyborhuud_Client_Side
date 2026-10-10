@@ -165,7 +165,7 @@ export function DashboardCheckInsPanel() {
               {schedule.status === 'active' && (
                 <p
                   className="mt-0.5 text-xs"
-                  style={{ color: schedule.escalationLevel >= 3 ? '#dc2626' : missed ? '#f97316' : 'var(--neu-text-muted)' }}
+                  style={{ color: schedule.escalationLevel >= 3 ? '#E5484D' : missed ? '#f97316' : 'var(--neu-text-muted)' }}
                 >
                   {schedule.escalationLevel >= 3
                     ? `Missed ${schedule.missedCheckIns} in a row — a silent SOS was sent to your guardians. Check in now if you're okay.`

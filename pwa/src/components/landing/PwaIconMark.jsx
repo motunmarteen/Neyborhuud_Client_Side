@@ -17,7 +17,7 @@ export function PwaIconMark({ variant = "square", sizePx = 512 }) {
         justifyContent: "center",
         boxSizing: "border-box",
         padding: isMaskable ? "12%" : "0%",
-        background: "linear-gradient(155deg, #00d431 0%, #006f35 100%)",
+        background: "linear-gradient(155deg, #00B82E 0%, #0E8A3E 100%)",
       }}
     >
       <span

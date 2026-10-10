@@ -317,7 +317,7 @@ export default function AmbientProfileCard({
       const markerIcon = Leaflet.divIcon({
         html: `<div style="
           width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-          background:#006F35;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+          background:#0E8A3E;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
           border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);
         "><div style="
           width:10px;height:10px;background:#fff;border-radius:50%;
@@ -460,7 +460,7 @@ export default function AmbientProfileCard({
             <div
               className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full"
               style={{
-                background: '#006F35',
+                background: '#0E8A3E',
                 border: '2.5px solid rgba(0,20,10,0.8)',
                 boxShadow: '0 0 8px rgba(34,197,94,0.5)',
               }}
@@ -500,7 +500,7 @@ export default function AmbientProfileCard({
             <div
               className="flex-1 flex flex-col items-center justify-center py-2.5 rounded-2xl backdrop-blur-xl transition-all duration-200 hover:scale-[1.02]"
               style={{
-                background: 'rgba(0,111,53,0.2)',
+                background: 'rgba(14, 138, 62,0.2)',
                 border: '1px solid rgba(52,211,153,0.2)',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
               }}

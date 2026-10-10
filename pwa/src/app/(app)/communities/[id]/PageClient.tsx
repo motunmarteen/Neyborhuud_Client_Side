@@ -99,7 +99,7 @@ export default function CommunityDetailPage() {
           action={
             <Link
               href="/communities"
-              className="inline-flex items-center gap-1.5 rounded-2xl bg-[#00C830] px-5 py-2.5 text-xs font-black text-white shadow-sm shadow-[#00C830]/20 no-underline"
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-[#00B82E] px-5 py-2.5 text-xs font-black text-white shadow-sm shadow-[#00B82E]/20 no-underline"
             >
               Browse Estates
             </Link>
@@ -116,7 +116,7 @@ export default function CommunityDetailPage() {
         <div className="bg-white dark:bg-[#12161A] rounded-3xl border border-black/[0.08] dark:border-white/[0.08] p-5 sm:p-6 shadow-sm space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3.5">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-[#00C830] shadow-sm">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-[#00B82E] shadow-sm">
                 <Users size={28} />
               </div>
               <div className="min-w-0">
@@ -143,7 +143,7 @@ export default function CommunityDetailPage() {
           {/* ELI5 Banner */}
           {showEli5 && (
             <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/40 rounded-2xl p-3.5 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2.5">
-              <Info size={16} className="text-[#00C830] shrink-0 mt-0.5" />
+              <Info size={16} className="text-[#00B82E] shrink-0 mt-0.5" />
               <div className="flex-1">
                 <span className="font-bold">Estate Hub: </span>
                 This is the official digital gate for your neighborhood. Residents
@@ -166,7 +166,7 @@ export default function CommunityDetailPage() {
           {/* BC.Game 3-Chip Info Bar */}
           <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-white/[0.04] text-slate-700 dark:text-slate-300">
-              <Users size={13} className="text-[#00C830]" />
+              <Users size={13} className="text-[#00B82E]" />
               <span>{hub.membersCount.toLocaleString()} verified members</span>
             </span>
 
@@ -198,7 +198,7 @@ export default function CommunityDetailPage() {
               <button
                 type="button"
                 onClick={openChat}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#00C830] hover:bg-[#00B52B] active:scale-95 py-3.5 text-xs font-black text-white shadow-md shadow-[#00C830]/20 transition-all"
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#00B82E] hover:bg-[#00B82E] active:scale-95 py-3.5 text-xs font-black text-white shadow-md shadow-[#00B82E]/20 transition-all"
               >
                 <MessageSquare size={16} />
                 <span>Open Estate Group Chat</span>
@@ -217,7 +217,7 @@ export default function CommunityDetailPage() {
               type="button"
               onClick={() => void handleJoinLeave()}
               disabled={joinMutation.isPending}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#00C830] hover:bg-[#00B52B] active:scale-95 py-3.5 text-xs font-black text-white shadow-md shadow-[#00C830]/20 disabled:opacity-50 transition-all"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#00B82E] hover:bg-[#00B82E] active:scale-95 py-3.5 text-xs font-black text-white shadow-md shadow-[#00B82E]/20 disabled:opacity-50 transition-all"
             >
               <DoorOpen size={16} />
               <span>{joinMutation.isPending ? 'Joining Estate…' : 'Join Estate & Open Chat'}</span>
@@ -236,7 +236,7 @@ export default function CommunityDetailPage() {
             </div>
             <span>View all Estate Chats in Messages</span>
           </span>
-          <ChevronRight size={16} className="text-slate-400 group-hover:text-[#00C830] group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight size={16} className="text-slate-400 group-hover:text-[#00B82E] group-hover:translate-x-0.5 transition-all" />
         </Link>
 
         {/* ── Members Roster ── */}

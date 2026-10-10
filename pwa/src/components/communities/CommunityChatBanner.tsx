@@ -44,7 +44,7 @@ export function CommunityChatBanner({ conversationId }: CommunityChatBannerProps
     <div className="border-b border-black/[0.06] dark:border-white/[0.06] bg-slate-50/90 dark:bg-[#161B20] px-4 py-2.5 backdrop-blur-md">
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         <div className="min-w-0 flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/40 flex items-center justify-center text-[#00C830] shrink-0">
+          <div className="h-8 w-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/40 flex items-center justify-center text-[#00B82E] shrink-0">
             <Users size={16} />
           </div>
           <div className="truncate">
@@ -69,7 +69,7 @@ export function CommunityChatBanner({ conversationId }: CommunityChatBannerProps
         <div className="flex shrink-0 items-center gap-2">
           <Link
             href={`/communities/${hub.id}`}
-            className="rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00C830] transition-colors"
+            className="rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#00B82E] transition-colors"
           >
             Hub Info
           </Link>
@@ -78,7 +78,7 @@ export function CommunityChatBanner({ conversationId }: CommunityChatBannerProps
               type="button"
               disabled={joinMutation.isPending}
               onClick={() => void handleJoin()}
-              className="inline-flex items-center gap-1 rounded-xl bg-[#00C830] hover:bg-[#00B52B] active:scale-95 px-3 py-1.5 text-xs font-black text-white shadow-sm shadow-[#00C830]/20 disabled:opacity-50 transition-all"
+              className="inline-flex items-center gap-1 rounded-xl bg-[#00B82E] hover:bg-[#00B82E] active:scale-95 px-3 py-1.5 text-xs font-black text-white shadow-sm shadow-[#00B82E]/20 disabled:opacity-50 transition-all"
             >
               {joinMutation.isPending ? 'Joining…' : 'Join Estate'}
             </button>
