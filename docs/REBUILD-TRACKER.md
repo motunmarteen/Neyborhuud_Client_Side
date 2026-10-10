@@ -29,8 +29,8 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | Phase | Done | Total | Status |
 |---|---|---|---|
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
-| 1. Infrastructure and accounts | 0 | 12 | ⛔ waiting on AWS |
-| 2. Design foundation | 1 | 12 | 🟡 in progress |
+| 1. Infrastructure and accounts | 2 | 15 | 🟡 in progress |
+| 2. Design foundation | 1 | 13 | ⏸ after Phase 1 |
 | 3. Map home (sky + live map) | 0 | 16 | ⬜ |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
@@ -90,27 +90,42 @@ Kept here so the whole history is in one place.
 
 **Goal:** the API is live again, secure, and every account belongs to the owner.
 
-- [ ] I-01 ⛔ Get an AWS account (reopen within 90 days, or new) — *owner*
-- [ ] I-02 Launch EC2 server with a fixed (Elastic) IP; run setup script; PM2
+- [x] I-01 AWS account ready: account 843256241786, signed in on this computer as profile `neyborhuud`, default Region **eu-west-2 (London)**
+- [x] I-01b AWS tools: AWS CLI 2.36, uv, Agent Toolkit (113 skills; AWS MCP server set to the `neyborhuud` profile; AWS rules in the workspace CLAUDE.md)
+- [ ] I-01c Stop using the root login day to day: create an admin user (IAM Identity Center or IAM) with two-factor sign-in; turn on MFA for root; set a billing alert
+- [ ] I-02 Launch EC2 server (Ubuntu, t3.small, London) with a fixed (Elastic) IP; run `setup-ec2-automated.sh`; PM2. Guide: server repo `docs/AWS_EC2_DEPLOYMENT.md`
+- [ ] I-02b Add a read-only GitHub **deploy key** so the server can download the code (the server repo is now private under motunmarteen)
 - [ ] I-03 Point `api.neyborhuud.com` DNS to the new IP; HTTPS certificate (certbot)
 - [ ] I-04 Push production secrets (`push-secrets.sh`) and deploy (`deploy.sh`); health check passes
 - [ ] I-05 **Rotate leaked secrets**: MongoDB password, Cloudinary secret, API keys, email password (old `.env.staging` in git history)
 - [ ] I-06 Lock former collaborator out of: domain registrar (Namecheap), MongoDB Atlas, Cloudinary, Firebase, Termii, Vercel — *owner*
 - [ ] I-07 Remove former collaborator from the NeyborHuud GitHub org (`gh auth refresh -s admin:org`, then remove)
 - [ ] I-08 Fix GitHub Actions billing on the personal account so server tests run again — *owner*
-- [ ] I-09 Find who hosts neyborhuud.com; move the landing site to the `neyborhuudteam` Vercel team and connect `motunmarteen/neyborhuud-landing`
+- [ ] 🟡 I-09 Landing site: ✅ new `neyborhuud-landing` project in the `neyborhuudteam` Vercel team, deploying from `motunmarteen/neyborhuud-landing` (live at neyborhuud-landing-mrt2kd6is-neyborhuudteam-9782s-projects.vercel.app); ⬜ move the **neyborhuud.com** domain to it from whichever Vercel account holds it now (*owner*)
 - [ ] I-10 Uptime monitoring and alerts for the API (and Sentry check)
 - [ ] I-11 Daily MongoDB Atlas backups confirmed; restore tested once
 - [ ] I-12 Staging environment (separate database) for testing before production
 
 ---
 
+### What the owner needs to do (Phase 1)
+
+1. ✅ **AWS account and sign-in** (done 10 Oct).
+2. **Domain registrar (I-06).** Log in to Namecheap (or wherever neyborhuud.com is registered). Make sure **you** are the only owner, turn on two-factor login, and remove any access for former collaborator.
+3. **MongoDB Atlas, Cloudinary, Firebase, Termii, Vercel (I-06).** In each: Members / Team settings → remove former collaborator → confirm you are owner → turn on two-factor login.
+4. **Rotate secrets (I-05)** in the same dashboards: new MongoDB database user password, new Cloudinary API secret, new Firebase service key, new Termii and other API keys, new email password. Put the new values into `~/.neyborhuud-secrets/production-secrets.env` (never in chat or git).
+5. **GitHub org (I-07).** In a terminal run `gh auth refresh -h github.com -s admin:org`, approve in the browser, then tell me; I'll remove former collaborator from the NeyborHuud org.
+6. **GitHub Actions billing (I-08).** github.com/settings/billing → check Actions limits and payment method so the server's automatic tests run again.
+7. **neyborhuud.com domain (I-09).** Find the Vercel account that holds the domain (alwaysmotun… or former collaborator…). Remove it there, then add it to the **neyborhuud-landing** project in the neyborhuudteam team (Settings → Domains).
+8. **Backups (I-11).** MongoDB Atlas → your cluster → Backup → confirm daily backups are on.
+
 ## Phase 2: Design foundation
 
 **Goal:** the new look in the shared building blocks, so every screen improves at once. Light theme only.
 
 - [ ] F-01 Colour tokens: green `#00B82E` / deep green `#0E8A3E`, navy text `#1D2433`, muted `#5B6478`, background `#EEF2F7`, safety red `#E5484D`, amber, purple; remove dark-mode-only styles
-- [x] F-02 Fonts: **Fredoka** (headings, logo) + **Plus Jakarta Sans** (text), self-hosted for speed (2965456)
+- [x] F-02a Fredoka for headings and logo, self-hosted (2965456)
+- [ ] F-02b Switch headings to **Nunito** and text to **Nunito Sans** (Fredoka can't draw ₦ or Yoruba/Igbo letters); Noto Sans as fallback for Hausa ɓ ɗ ƙ; update mockup and share cards
 - [ ] F-03 Buttons: pill shapes (primary green, white outline, danger); 48 px touch targets
 - [ ] F-04 Cards, chips and filter chips (the map-layer style)
 - [ ] F-05 Bottom sheet component (the slide-up panel used everywhere), with handle and drag-to-close
@@ -442,3 +457,5 @@ Only if the PWA hits limits we can't work around (for example background locatio
 | 2026-10-10 | No trading or selling HuudCredit between users; payouts only through the contributor programme, after legal review |
 | 2026-10-10 | Safety reports never shared publicly and never paid in cash |
 | 2026-10-10 | **PWA first**: no download needed; store apps later and optional |
+| 2026-10-10 | Fonts: **Nunito** (headings) + **Nunito Sans** (text), Noto Sans fallback. Snapchat's fonts (Avenir Next, Graphik) are paid; tested 19 free fonts for ₦ and Nigerian letters |
+| 2026-10-10 | Phase 1 before Phase 2; AWS Region eu-west-2 (London) |
