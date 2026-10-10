@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -30,6 +31,16 @@ export function useBottomSheetDrag({
   const startYRef = useRef<number | null>(null);
   const startTsRef = useRef<number | null>(null);
   const movedRef = useRef(false);
+  // F-05: no slide animation when the phone asks for reduced motion (fade only).
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
 
   const reset = useCallback(() => {
     setDragY(0);
@@ -96,7 +107,7 @@ export function useBottomSheetDrag({
     onPointerUp: onPointerEnd,
     onPointerCancel: onPointerEnd,
     className:
-      'flex shrink-0 cursor-grab touch-none select-none justify-center pt-3 pb-2 active:cursor-grabbing',
+      'flex w-full shrink-0 cursor-grab touch-none select-none justify-center py-3 active:cursor-grabbing',
     role: 'button' as const,
     tabIndex: 0,
     'aria-label': 'Drag down to close',
@@ -109,14 +120,22 @@ export function useBottomSheetDrag({
   };
 
   const getPanelStyle = useCallback(
-    (visible: boolean, hiddenOffset = 480): CSSProperties => ({
-      transform: `translate3d(0, ${(visible ? 0 : hiddenOffset) + dragY}px, 0)`,
-      opacity: visible ? 1 : 0,
-      transitionProperty: dragging ? 'none' : 'transform, opacity',
-      transitionDuration: dragging ? '0ms' : '300ms',
-      transitionTimingFunction: dragging ? 'linear' : 'cubic-bezier(0.22, 1, 0.36, 1)',
-    }),
-    [dragY, dragging],
+    (visible: boolean, hiddenOffset = 480): CSSProperties =>
+      reduceMotion
+        ? {
+            transform: `translate3d(0, ${dragY}px, 0)`,
+            opacity: visible ? 1 : 0,
+            transitionProperty: dragging ? 'none' : 'opacity',
+            transitionDuration: dragging ? '0ms' : '150ms',
+          }
+        : {
+            transform: `translate3d(0, ${(visible ? 0 : hiddenOffset) + dragY}px, 0)`,
+            opacity: visible ? 1 : 0,
+            transitionProperty: dragging ? 'none' : 'transform, opacity',
+            transitionDuration: dragging ? '0ms' : '300ms',
+            transitionTimingFunction: dragging ? 'linear' : 'cubic-bezier(0.22, 1, 0.36, 1)',
+          },
+    [dragY, dragging, reduceMotion],
   );
 
   return {

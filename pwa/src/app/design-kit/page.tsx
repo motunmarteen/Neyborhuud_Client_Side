@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ArrowRight, Plus, Siren, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { CardsAndChipsDemo } from './CardsAndChipsDemo';
+import { SheetDemo } from './SheetDemo';
 
 export const metadata: Metadata = {
   title: 'Design kit',
@@ -112,6 +113,10 @@ export default function DesignKitPage() {
 
         <Section id="cards" title="Cards and chips (F-04)" note="White cards with soft shadows. Filter chips turn navy when on, like the map layers.">
           <CardsAndChipsDemo />
+        </Section>
+
+        <Section id="sheets" title="Bottom sheet (F-05)" note="The slide-up panel. Title, close button, scrolling body, main action pinned at the bottom.">
+          <SheetDemo />
         </Section>
       </div>
     </main>

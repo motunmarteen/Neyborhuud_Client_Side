@@ -12,7 +12,7 @@ type BottomSheetDragHandleProps = {
 export function BottomSheetDragHandle({ handleProps, className = '' }: BottomSheetDragHandleProps) {
   return (
     <div {...handleProps} className={`${handleProps.className} ${className}`.trim()}>
-      <span className="h-1 w-12 rounded-full bg-[var(--neu-text-muted)]/40 " aria-hidden />
+      <span className="h-[5px] w-10 rounded-full bg-line" aria-hidden />
     </div>
   );
 }

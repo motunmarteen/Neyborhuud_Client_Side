@@ -154,7 +154,7 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
       zIndexClass="z-[200]"
       alignClass="items-end justify-center sm:items-center"
       backdropClassName="bg-black/60"
-      panelClassName="w-full max-w-sm rounded-t-2xl bg-brand-black p-6 shadow-2xl sm:rounded-2xl"
+      panelClassName="w-full max-w-sm rounded-t-[24px] bg-white text-navy p-6 shadow-2xl sm:rounded-2xl"
       closeOnBackdrop={state !== 'recording'}
       handleClassName="pt-2 pb-0"
     >
@@ -198,7 +198,7 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
               ))}
             </div>
 
-            <p className="text-2xl font-mono font-bold text-white tabular-nums">{fmt(elapsed)}</p>
+            <p className="text-2xl font-mono font-bold text-navy tabular-nums">{fmt(elapsed)}</p>
             <p className="text-xs text-[var(--neu-text-muted)]">Max 1 min · tap to stop</p>
 
             <button
@@ -219,7 +219,7 @@ export default function VoiceRecorder({ onDone, onClose }: Props) {
             <div className="flex gap-3">
               <button
                 onClick={discard}
-                className="flex-1 rounded-xl bg-brand-black py-3 text-sm font-medium text-[var(--neu-text-muted)] hover:bg-brand-surface transition-colors"
+                className="flex-1 rounded-xl bg-background py-3 text-sm font-medium text-[var(--neu-text-muted)] hover:bg-brand-surface transition-colors"
               >
                 Delete
               </button>

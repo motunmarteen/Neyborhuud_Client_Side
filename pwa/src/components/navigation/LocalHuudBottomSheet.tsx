@@ -25,7 +25,6 @@ export function LocalHuudBottomSheet({ open, onClose }: LocalHuudBottomSheetProp
       panelClassName="max-w-md"
       panelStyle={{
         maxHeight: 'min(82vh, 34rem)',
-        paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)',
       }}
     >
       <header className="shrink-0 px-4 pb-3 text-center">

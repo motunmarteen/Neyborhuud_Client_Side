@@ -53,7 +53,7 @@ export function SharePickerSheet({
       zIndexClass="z-[200]"
       alignClass="items-end justify-center sm:items-center"
       backdropClassName="bg-black/60"
-      panelClassName="w-full max-w-sm rounded-t-2xl bg-brand-black p-5 shadow-2xl sm:rounded-2xl max-h-[75vh] flex flex-col"
+      panelClassName="w-full max-w-sm rounded-t-[24px] bg-white text-navy p-5 shadow-2xl sm:rounded-2xl max-h-[75vh] flex flex-col"
       handleClassName="pt-2 pb-0"
     >
       <div className="mb-3 flex shrink-0 items-center justify-between">
@@ -77,7 +77,7 @@ export function SharePickerSheet({
                 key={item.id ?? `item-${i}`}
                 type="button"
                 onClick={() => onPick(item)}
-                className="flex items-center gap-3 rounded-xl bg-brand-black px-2.5 py-2 text-left hover:bg-white/5 mod-inset"
+                className="flex items-center gap-3 rounded-xl bg-background px-2.5 py-2 text-left hover:bg-background mod-inset"
               >
                 {item.thumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -87,7 +87,7 @@ export function SharePickerSheet({
                     className="h-11 w-11 shrink-0 rounded-lg object-cover"
                   />
                 ) : (
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/5 text-xl">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-background text-xl">
                     {item.icon ?? '📦'}
                   </span>
                 )}
@@ -119,7 +119,7 @@ export function SharePickerSearchInput({
   const [local, setLocal] = useState(value);
   return (
     <input
-      className="mb-3 w-full shrink-0 rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none mod-inset"
+      className="mb-3 w-full shrink-0 rounded-xl bg-background px-3 py-2 text-sm text-navy placeholder:text-[var(--neu-text-muted)] focus:outline-none mod-inset"
       placeholder={placeholder}
       value={local}
       onChange={(e) => {

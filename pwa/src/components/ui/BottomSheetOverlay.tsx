@@ -33,7 +33,7 @@ export function BottomSheetOverlay({
   children,
   zIndexClass = 'z-[200]',
   alignClass = 'items-end justify-center',
-  backdropClassName = 'bg-black/50 backdrop-blur-[2px]',
+  backdropClassName = 'bg-[rgba(15,22,40,0.35)]',
   panelClassName = '',
   panelStyle,
   hiddenOffset = 480,

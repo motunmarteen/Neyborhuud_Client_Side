@@ -123,7 +123,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
       zIndexClass="z-[200]"
       alignClass="items-end justify-center sm:items-center"
       backdropClassName="bg-black/60"
-      panelClassName="w-full max-w-sm rounded-t-2xl bg-brand-black p-5 shadow-2xl sm:rounded-2xl"
+      panelClassName="w-full max-w-sm rounded-t-[24px] bg-white text-navy p-5 shadow-2xl sm:rounded-2xl"
       handleClassName="pt-2 pb-0"
     >
       <div className="mb-4 flex items-center justify-between">
@@ -178,7 +178,7 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
 
   return (
     <Modal title="📍 Send Location" onClose={onClose}>
-      <div className="mb-3 flex gap-2 rounded-xl bg-black/20 p-1">
+      <div className="mb-3 flex gap-2 rounded-xl bg-background p-1">
         <button
           type="button"
           onClick={() => setMode('static')}
@@ -197,10 +197,10 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
       {loading && <p className="text-sm text-[var(--neu-text-muted)]">Detecting location…</p>}
       {error && <p className="text-sm text-brand-red">{error}</p>}
       {loc && (
-        <div className="mb-4 rounded-xl bg-brand-black p-3 text-sm text-[var(--neu-text-muted)]">
+        <div className="mb-4 rounded-xl bg-background p-3 text-sm text-[var(--neu-text-muted)]">
           <p className="font-mono text-xs text-[var(--neu-text-muted)]">{loc.lat.toFixed(5)}, {loc.lng.toFixed(5)}</p>
           <input
-            className="mt-2 w-full rounded bg-brand-black px-3 py-1.5 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
+            className="mt-2 w-full rounded bg-background px-3 py-1.5 text-sm text-navy placeholder:text-[var(--neu-text-muted)] focus:outline-none"
             placeholder="Add address label (optional)"
             defaultValue={loc.address}
             onChange={(e) => setLoc((l) => l ? { ...l, address: e.target.value } : l)}
@@ -216,7 +216,7 @@ function LocationModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
                 key={p.minutes}
                 type="button"
                 onClick={() => setDuration(p.minutes)}
-                className={`flex-1 rounded-lg py-1.5 text-xs font-medium ${duration === p.minutes ? 'bg-brand-blue text-white' : 'bg-black/20 text-[var(--neu-text-muted)]'}`}
+                className={`flex-1 rounded-lg py-1.5 text-xs font-medium ${duration === p.minutes ? 'bg-brand-blue text-white' : 'bg-background text-[var(--neu-text-muted)]'}`}
               >
                 {p.label}
               </button>
@@ -281,7 +281,7 @@ function PollModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onC
   return (
     <Modal title="📊 Create Poll" onClose={onClose}>
       <input
-        className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
+        className="mb-3 w-full rounded-xl bg-background px-3 py-2 text-sm text-navy placeholder:text-[var(--neu-text-muted)] focus:outline-none"
         placeholder="Poll question…"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
@@ -291,7 +291,7 @@ function PollModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onC
         {options.map((o, i) => (
           <div key={i} className="flex gap-2">
             <input
-              className="flex-1 rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
+              className="flex-1 rounded-xl bg-background px-3 py-2 text-sm text-navy placeholder:text-[var(--neu-text-muted)] focus:outline-none"
               placeholder={`Option ${i + 1}`}
               value={o}
               onChange={(e) => setOptions((prev) => prev.map((v, idx) => idx === i ? e.target.value : v))}
@@ -372,7 +372,7 @@ function SOSModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onCl
     <Modal title="🆘 Send SOS Context" onClose={onClose}>
       <p className="mb-3 text-xs text-brand-red300">This shares emergency context with chat participants.</p>
       <input
-        className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
+        className="mb-3 w-full rounded-xl bg-background px-3 py-2 text-sm text-navy placeholder:text-[var(--neu-text-muted)] focus:outline-none"
         placeholder="Emergency ID / Reference (optional)"
         value={ref}
         onChange={(e) => setRef(e.target.value)}
@@ -381,7 +381,7 @@ function SOSModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onCl
       <select
         value={severity}
         onChange={(e) => setSeverity(e.target.value)}
-        className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] focus:outline-none"
+        className="mb-4 w-full rounded-xl bg-background px-3 py-2 text-sm text-[var(--neu-text-muted)] focus:outline-none"
       >
         <option value="low">Low</option>
         <option value="medium">Medium</option>
@@ -411,7 +411,7 @@ function TrackingModal({ onDone, onClose }: { onDone: (r: ActionResult) => void;
   return (
     <Modal title="📡 Share Tracking Session" onClose={onClose}>
       <input
-        className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
+        className="mb-3 w-full rounded-xl bg-background px-3 py-2 text-sm text-navy placeholder:text-[var(--neu-text-muted)] focus:outline-none"
         placeholder="Tracking session ID"
         value={sessionRef}
         onChange={(e) => setSessionRef(e.target.value)}
@@ -446,7 +446,7 @@ function KidnappingModal({ onDone, onClose }: { onDone: (r: ActionResult) => voi
     <Modal title="🚨 Kidnapping Alert" onClose={onClose}>
       <p className="mb-3 text-xs text-brand-red">Only share with verified responders or family contacts.</p>
       <input
-        className="mb-3 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:outline-none"
+        className="mb-3 w-full rounded-xl bg-background px-3 py-2 text-sm text-navy placeholder:text-[var(--neu-text-muted)] focus:outline-none"
         placeholder="Tracking session reference"
         value={sessionRef}
         onChange={(e) => setSessionRef(e.target.value)}
@@ -455,7 +455,7 @@ function KidnappingModal({ onDone, onClose }: { onDone: (r: ActionResult) => voi
       <select
         value={status}
         onChange={(e) => setStatus(e.target.value)}
-        className="mb-4 w-full rounded-xl bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] focus:outline-none"
+        className="mb-4 w-full rounded-xl bg-background px-3 py-2 text-sm text-[var(--neu-text-muted)] focus:outline-none"
       >
         <option value="active">Active / Ongoing</option>
         <option value="suspected">Suspected</option>
@@ -651,7 +651,7 @@ function TripShareModal({ onDone, onClose }: { onDone: (r: ActionResult) => void
           <p className="mb-3 text-xs text-[var(--neu-text-muted)] opacity-70">
             Shares your live trip status so this chat can follow along — they won&apos;t become a Guardian.
           </p>
-          <div className="mb-4 rounded-xl bg-brand-black p-3 text-sm text-[var(--neu-text-muted)]">
+          <div className="mb-4 rounded-xl bg-background p-3 text-sm text-[var(--neu-text-muted)]">
             <p className="font-medium">{(trip as any).originLocation?.address ?? 'Origin'} → {(trip as any).destinationLocation?.address ?? 'Destination'}</p>
             <p className="mt-1 text-xs opacity-70">Status: {trip!.status}</p>
           </div>
