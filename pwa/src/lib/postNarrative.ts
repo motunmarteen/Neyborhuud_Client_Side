@@ -116,10 +116,14 @@ function jobNarrative(post: Post): string | null {
     parts.push(`📋 Type: ${capitalize(jobType.replace('-', ' ').replace('_', ' '))}`);
   }
 
+  // Feed job salaries are typed in naira as free text (not kobo like prices),
+  // so show digits as naira directly instead of dividing by 100.
   const salary = meta.salary;
   if (salary) {
-    const formatted = formatNaira(salary);
-    parts.push(`💰 Salary: ${formatted || salary}`);
+    const s = String(salary).trim();
+    const digits = s.replace(/,/g, "");
+    const formatted = /^\d+(\.\d+)?$/.test(digits) ? `₦${Math.round(Number(digits)).toLocaleString("en-NG")}` : s;
+    parts.push(`💰 Salary: ${formatted}`);
   }
 
   const workMode = meta.workMode;
