@@ -230,8 +230,8 @@ export function XPostCard({
     const elevationClass = hasMedia ? 'feed-card--media' : '';
 
     const cardStyleClass = isSafetyAlert
-        ? 'border-b border-black/5 dark:border-white/5'
-        : 'border-b border-black/5 dark:border-white/5 shadow-none';
+        ? 'border-b border-black/5 '
+        : 'border-b border-black/5  shadow-none';
 
 
     const renderTextContent = () => {
@@ -269,7 +269,7 @@ export function XPostCard({
         return (
             <div className="flex flex-col gap-3">
                 {isSimpleRepost && (
-                    <div className="flex items-center gap-1.5 px-1 pb-0.5 pt-0.5 text-[13px] font-bold text-neu-text-secondary/70 dark:text-white/40">
+                    <div className="flex items-center gap-1.5 px-1 pb-0.5 pt-0.5 text-[13px] font-bold text-neu-text-secondary/70 ">
                         <XRepostIcon size={16} />
                         <span>Reposted</span>
                     </div>
@@ -310,7 +310,7 @@ export function XPostCard({
                     const sharerInitial = (post.repostedBy.name || sharerUsername)[0]?.toUpperCase() || 'N';
                     return (
                         <div
-                            className="flex items-center gap-2 px-1 mb-2 pb-0.5 text-[11px] text-neu-text-secondary/70 dark:text-white/40 font-semibold cursor-pointer w-fit hover:text-brand-green transition-colors group"
+                            className="flex items-center gap-2 px-1 mb-2 pb-0.5 text-[11px] text-neu-text-secondary/70  font-semibold cursor-pointer w-fit hover:text-brand-green transition-colors group"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleOpenRepostChain();
@@ -334,7 +334,7 @@ export function XPostCard({
                 const sharerInitial = (sharer?.name || sharerUsername)[0]?.toUpperCase() || 'N';
                 return (
                     <div
-                        className="flex items-center gap-2 px-1 mb-2 pb-0.5 text-[11px] text-neu-text-secondary/70 dark:text-white/40 font-semibold cursor-pointer w-fit hover:text-primary transition-colors group"
+                        className="flex items-center gap-2 px-1 mb-2 pb-0.5 text-[11px] text-neu-text-secondary/70  font-semibold cursor-pointer w-fit hover:text-primary transition-colors group"
                         onClick={(e) => {
                             e.stopPropagation();
                             handleOpenRepostChain();

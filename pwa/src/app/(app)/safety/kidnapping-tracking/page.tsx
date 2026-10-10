@@ -161,7 +161,7 @@ function LiveTrackingInner() {
         />
 
         {wsAlert ? (
-          <div className="mod-card flex items-start justify-between gap-2 rounded-2xl border border-status-warning/40 bg-status-warning/8 px-4 py-3 text-sm text-status-warning dark:bg-status-warning/12 dark:text-status-warning/90">
+          <div className="mod-card flex items-start justify-between gap-2 rounded-2xl border border-status-warning/40 bg-status-warning/8 px-4 py-3 text-sm text-status-warning  ">
             <span>{wsAlert}</span>
             <button type="button" onClick={() => setWsAlert(null)} className="shrink-0 text-brand-red">
               Dismiss

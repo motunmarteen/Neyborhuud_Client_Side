@@ -337,8 +337,8 @@ export function generatePostNarrative(post: Post): PostNarrative | null {
       if (!text) return null;
       return {
         text,
-        accentBg: 'bg-emerald-50/70 dark:bg-[#0d2a15]/40',
-        accentBorder: 'border-emerald-200/40 dark:border-emerald-800/30',
+        accentBg: 'bg-emerald-50/70 ',
+        accentBorder: 'border-emerald-200/40 ',
         typeLabel: 'Marketplace',
         icon: 'storefront',
       };
@@ -348,8 +348,8 @@ export function generatePostNarrative(post: Post): PostNarrative | null {
       if (!text) return null;
       return {
         text,
-        accentBg: 'bg-purple-50/70 dark:bg-[#1a0e30]/40',
-        accentBorder: 'border-purple-200/40 dark:border-purple-800/30',
+        accentBg: 'bg-purple-50/70 ',
+        accentBorder: 'border-purple-200/40 ',
         typeLabel: 'Job Listing',
         icon: 'work',
       };
@@ -359,8 +359,8 @@ export function generatePostNarrative(post: Post): PostNarrative | null {
       if (!text) return null;
       return {
         text,
-        accentBg: 'bg-teal-50/70 dark:bg-[#0d2a20]/40',
-        accentBorder: 'border-teal-200/40 dark:border-teal-800/30',
+        accentBg: 'bg-teal-50/70 ',
+        accentBorder: 'border-teal-200/40 ',
         typeLabel: 'Service',
         icon: 'handyman',
       };
@@ -370,8 +370,8 @@ export function generatePostNarrative(post: Post): PostNarrative | null {
       if (!text) return null;
       return {
         text,
-        accentBg: 'bg-blue-50/70 dark:bg-[#0d1a30]/40',
-        accentBorder: 'border-blue-200/40 dark:border-blue-800/30',
+        accentBg: 'bg-blue-50/70 ',
+        accentBorder: 'border-blue-200/40 ',
         typeLabel: 'Event',
         icon: 'event',
       };
@@ -381,8 +381,8 @@ export function generatePostNarrative(post: Post): PostNarrative | null {
       if (!text) return null;
       return {
         text,
-        accentBg: 'bg-rose-50/70 dark:bg-[#2a0d0d]/40',
-        accentBorder: 'border-rose-200/40 dark:border-rose-800/30',
+        accentBg: 'bg-rose-50/70 ',
+        accentBorder: 'border-rose-200/40 ',
         typeLabel: 'Help Request',
         icon: 'volunteer_activism',
       };
@@ -392,8 +392,8 @@ export function generatePostNarrative(post: Post): PostNarrative | null {
       if (!text) return null;
       return {
         text,
-        accentBg: 'bg-red-50/80 dark:bg-[#300a0a]/40',
-        accentBorder: 'border-red-200/40 dark:border-red-800/30',
+        accentBg: 'bg-red-50/80 ',
+        accentBorder: 'border-red-200/40 ',
         typeLabel: 'Safety Alert',
         icon: 'warning',
       };
@@ -408,8 +408,8 @@ export function generatePostNarrative(post: Post): PostNarrative | null {
     if (!text) return null;
     return {
       text,
-      accentBg: 'bg-amber-50/70 dark:bg-[#2c1b02]/40',
-      accentBorder: 'border-amber-200/40 dark:border-amber-800/30',
+      accentBg: 'bg-amber-50/70 ',
+      accentBorder: 'border-amber-200/40 ',
       typeLabel: 'Urgent Alert',
       icon: 'warning',
     };

@@ -59,7 +59,7 @@ export default function HuudPassportPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
+    <div className="flex min-h-screen flex-col bg-slate-50 ">
       <TopNav />
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 py-6 sm:px-6">
         <div className="mb-4 flex items-center justify-between">
@@ -73,7 +73,7 @@ export default function HuudPassportPage() {
           </button>
           <div className="flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[18px] text-emerald-600">verified</span>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-800 ">
               Identity Proof
             </span>
           </div>
@@ -87,14 +87,14 @@ export default function HuudPassportPage() {
             </p>
           </div>
         ) : error ? (
-          <div className="my-auto rounded-3xl bg-white p-8 text-center shadow-sm border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+          <div className="my-auto rounded-3xl bg-white p-8 text-center shadow-sm border border-slate-200  ">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600  ">
               <span className="material-symbols-outlined text-[32px]">shield_lock</span>
             </div>
-            <h2 className="mt-4 text-base font-bold text-slate-900 dark:text-white">
+            <h2 className="mt-4 text-base font-bold text-slate-900 ">
               Address Verification Needed
             </h2>
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="mt-2 text-xs text-slate-500  leading-relaxed">
               Your Huud Passport provides portable, verifiable proof of residency powered by the NIPOST National Digital Postcode system.
             </p>
             <div className="mt-6">
@@ -111,11 +111,11 @@ export default function HuudPassportPage() {
           <div className="space-y-4">
             <HuudPassportCard passport={passport} onShare={handleShare} />
 
-            <div className="rounded-2xl bg-white p-4 shadow-sm border border-slate-200/80 dark:bg-slate-900 dark:border-slate-800">
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            <div className="rounded-2xl bg-white p-4 shadow-sm border border-slate-200/80  ">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 ">
                 About Your Huud Passport
               </h4>
-              <ul className="mt-2 space-y-2 text-[11px] text-slate-600 dark:text-slate-400">
+              <ul className="mt-2 space-y-2 text-[11px] text-slate-600 ">
                 <li className="flex items-start gap-2">
                   <span className="material-symbols-outlined text-[14px] text-emerald-600 shrink-0 mt-0.5">check_circle</span>
                   <span><strong>11-Character NDAPS:</strong> Verifies your physical building with Nigeria Postal Service standards.</span>

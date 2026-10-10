@@ -94,19 +94,19 @@ export function DiscoveryChrome({
   children: ReactNode;
 }) {
   return (
-    <div className="bg-white dark:bg-[#1D2433] border-b border-black/5 dark:border-white/5 overflow-hidden w-full max-w-none mx-auto">
+    <div className="bg-white  border-b border-black/5  overflow-hidden w-full max-w-none mx-auto">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-none bg-primary/10 text-primary border border-primary/20">
             <span className="material-symbols-outlined text-[16px] font-black">{icon}</span>
           </span>
           <div className="min-w-0">
-            <p className="text-[13px] font-extrabold text-[var(--neu-text)] dark:text-white leading-tight">{label}</p>
+            <p className="text-[13px] font-extrabold text-[var(--neu-text)]  leading-tight">{label}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           {href && (
-            <Link href={href} className="text-[12px] font-bold text-[var(--neu-text-muted)] dark:text-white/50 hover:text-primary transition-colors">
+            <Link href={href} className="text-[12px] font-bold text-[var(--neu-text-muted)]  hover:text-primary transition-colors">
               View All
             </Link>
           )}
@@ -348,7 +348,7 @@ function NeighborFollowCard({ user, currentUserId }: { user: User; currentUserId
 
   return (
     <div
-      className="horizontal-carousel-item group relative flex flex-col items-center overflow-hidden rounded-none shrink-0 p-3 bg-black/[0.02] dark:bg-[#18231c] transition-transform duration-200 hover:scale-[1.02]"
+      className="horizontal-carousel-item group relative flex flex-col items-center overflow-hidden rounded-none shrink-0 p-3 bg-black/[0.02]  transition-transform duration-200 hover:scale-[1.02]"
       style={{ width: 200 }}
     >
       <Link href={`/profile/${user.username}`} className="flex flex-col items-center w-full">
@@ -358,10 +358,10 @@ function NeighborFollowCard({ user, currentUserId }: { user: User; currentUserId
           fallbackInitial={userInitial}
           size="lg"
         />
-        <h4 className="mt-2.5 text-[12px] font-extrabold text-[var(--neu-text)] dark:text-white leading-tight truncate w-full text-center">
+        <h4 className="mt-2.5 text-[12px] font-extrabold text-[var(--neu-text)]  leading-tight truncate w-full text-center">
           {displayName}
         </h4>
-        <p className="text-[10px] font-medium text-[var(--neu-text-muted)] dark:text-white/60 truncate w-full text-center">
+        <p className="text-[10px] font-medium text-[var(--neu-text-muted)]  truncate w-full text-center">
           @{user.username}
         </p>
       </Link>
@@ -377,7 +377,7 @@ function NeighborFollowCard({ user, currentUserId }: { user: User; currentUserId
           disabled={isPending || !currentUserId}
           className={`mt-3 w-full py-1.5 rounded-none text-[11px] font-black transition-all ${
             isFollowing
-              ? "bg-black/[0.04] text-[var(--neu-text-muted)] dark:bg-white/10 dark:text-white/60 hover:bg-brand-red/10 hover:text-brand-red"
+              ? "bg-black/[0.04] text-[var(--neu-text-muted)]   hover:bg-brand-red/10 hover:text-brand-red"
               : "bg-primary text-black hover:bg-brand-green-dark"
           } disabled:opacity-50`}
         >

@@ -8,10 +8,10 @@ type TripsEscalationBannerProps = {
 
 export function TripsEscalationBanner({ alert, onDismiss, onCheckIn }: TripsEscalationBannerProps) {
   return (
-    <div className="mod-card rounded-2xl border border-amber-400/50 bg-amber-50/80 p-4 dark:bg-amber-950/20">
+    <div className="mod-card rounded-2xl border border-amber-400/50 bg-amber-50/80 p-4 ">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-sm font-bold text-amber-700 dark:text-amber-400">
+          <p className="text-sm font-bold text-amber-700 ">
             Missed check-in — level {alert.level}
           </p>
           <p className="mt-0.5 text-xs" style={{ color: 'var(--neu-text-muted)' }}>

@@ -24,7 +24,7 @@ export default function SafetyError({ error, reset }: ErrorPageProps) {
 
         <div className="flex flex-col gap-2">
           <h1 className="type-display font-black text-white">Safety tools hit a snag</h1>
-          <p className="text-sm text-[var(--text-secondary-light)] dark:text-[var(--text-secondary-dark)]">
+          <p className="text-sm text-[var(--text-secondary-light)] ">
             Something went wrong loading this page. If you&apos;re in an emergency, use the SOS button from the home screen — it doesn&apos;t depend on this page working.
           </p>
           {error.digest && (
@@ -43,7 +43,7 @@ export default function SafetyError({ error, reset }: ErrorPageProps) {
           </button>
           <Link
             href="/sos"
-            className="w-full py-3 rounded-xl border border-border text-charcoal dark:text-[var(--text-primary-dark)] font-bold text-sm text-center transition-colors hover:bg-black/5"
+            className="w-full py-3 rounded-xl border border-border text-charcoal  font-bold text-sm text-center transition-colors hover:bg-black/5"
           >
             Go to SOS
           </Link>

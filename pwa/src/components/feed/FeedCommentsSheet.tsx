@@ -89,10 +89,10 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                 <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
                 <BottomSheetDragHandle handleProps={handleProps} className="pt-2.5 pb-1" />
 
-                <div className="flex items-center justify-between border-b border-black/5 px-3 py-2.5 dark:border-white/5">
-                    <h2 className="text-[15px] font-semibold tracking-tight text-[#050505] dark:text-[#DDE3EC]">Comments</h2>
+                <div className="flex items-center justify-between border-b border-black/5 px-3 py-2.5 ">
+                    <h2 className="text-[15px] font-semibold tracking-tight text-[#050505] ">Comments</h2>
                     <div className="flex items-center gap-3">
-                        <span className="text-[12px] font-bold tabular-nums text-[#5B6478] dark:text-[#9AA3B1]">{commentsCount}</span>
+                        <span className="text-[12px] font-bold tabular-nums text-[#5B6478] ">{commentsCount}</span>
                         <button
                             type="button"
                             onClick={onClose}
@@ -111,7 +111,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                             <button
                                 type="button"
                                 onClick={() => setSortBy((prev) => (prev === 'relevant' ? 'newest' : 'relevant'))}
-                                className="flex items-center gap-1 text-[13px] font-bold text-[#050505] transition-colors hover:text-brand-blue dark:text-[#DDE3EC]"
+                                className="flex items-center gap-1 text-[13px] font-bold text-[#050505] transition-colors hover:text-brand-blue "
                             >
                                 {sortBy === 'relevant' ? 'Most relevant' : 'Newest'}
                                 <ChevronDown size={16} />
@@ -127,7 +127,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                             Unable to load comments for this post.
                         </div>
                     ) : sortedComments.length ? (
-                        <div className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+                        <div className="divide-y divide-black/[0.04] ">
                             {sortedComments.map((comment) => (
                                 <CommentItem key={comment.id} comment={comment} postId={activeTarget.id} />
                             ))}
@@ -140,7 +140,7 @@ export function FeedCommentsSheet({ isOpen, target, onClose, desktopAnchor = nul
                     )}
                 </div>
 
-                <div className="relative z-[1] border-t border-black/5 bg-[var(--neu-bg)]/88 px-3 py-2.5 backdrop-blur-xl dark:border-white/5">
+                <div className="relative z-[1] border-t border-black/5 bg-[var(--neu-bg)]/88 px-3 py-2.5 backdrop-blur-xl ">
                     <CommentForm
                         postId={activeTarget.id}
                         post={postDetails?.content}

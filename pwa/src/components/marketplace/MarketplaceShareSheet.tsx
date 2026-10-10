@@ -73,7 +73,7 @@ export function MarketplaceShareSheet({ open, onClose, productId, title }: Marke
       zIndexClass="z-[75]"
       alignClass="items-end justify-center sm:items-center"
       backdropClassName="doodle-modal-backdrop"
-      panelClassName="doodle-modal-panel relative m-4 w-full max-w-sm overflow-hidden rounded-[28px] border border-[var(--border-light)] p-5 shadow-[0_24px_60px_rgba(14, 138, 62,0.16)] dark:border-[var(--neu-shadow-dark)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)]"
+      panelClassName="doodle-modal-panel relative m-4 w-full max-w-sm overflow-hidden rounded-[28px] border border-[var(--border-light)] p-5 shadow-[0_24px_60px_rgba(14, 138, 62,0.16)]  "
       handleClassName="pt-2 pb-0"
     >
       <div className="doodle-modal-panel-wash z-0" aria-hidden />
@@ -108,7 +108,7 @@ export function MarketplaceShareSheet({ open, onClose, productId, title }: Marke
             <button
               type="button"
               onClick={() => void nativeShare()}
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-primary/35 bg-[#00B82E]/15 py-3 text-sm font-bold text-[#0E8A3E] dark:text-[#00B82E] shadow-[0_8px_24px_rgba(0, 184, 46,0.2)] transition-transform active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-primary/35 bg-[#00B82E]/15 py-3 text-sm font-bold text-[#0E8A3E]  shadow-[0_8px_24px_rgba(0, 184, 46,0.2)] transition-transform active:scale-[0.98]"
             >
               <span className="material-symbols-outlined text-[20px]">ios_share</span>
               Share…

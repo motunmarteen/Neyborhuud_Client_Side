@@ -102,7 +102,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
         <form onSubmit={handleSubmit} className="w-full">
             <div className="flex gap-3">
                 <div className="mt-0.5 shrink-0">
-                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60 dark:border-white/10 bg-white dark:bg-[#1A221C] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
+                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-white/60  bg-white  shadow-[0_2px_8px_rgba(0,0,0,0.06)] ">
                         {user?.avatarUrl || user?.profilePicture ? (
                             <Image
                                 src={(user.avatarUrl || user.profilePicture)!}
@@ -148,14 +148,14 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                             className={`flex-shrink-0 relative overflow-hidden group flex flex-col items-center justify-center w-[76px] h-[84px] rounded-2xl border transition-all duration-300 disabled:opacity-50 active:scale-95 ${
                                                 isActive 
                                                     ? `${a.bgClass} ${a.borderClass} shadow-sm` 
-                                                    : 'bg-[var(--neu-bg)] border-black/5 dark:border-white/5 hover:bg-black/[0.03] dark:hover:bg-white/[0.03]'
+                                                    : 'bg-[var(--neu-bg)] border-black/5  hover:bg-black/[0.03] '
                                             }`}
                                         >
                                             {isActive && (
                                                 <div className={`absolute top-0 left-0 right-0 h-1 ${a.accentClass}`} />
                                             )}
                                             <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 transition-colors ${
-                                                isActive ? `${a.bgClass} ${a.colorClass}` : 'bg-black/5 dark:bg-white/5 text-[var(--neu-text-secondary)] group-hover:bg-black/10 dark:group-hover:bg-white/10'
+                                                isActive ? `${a.bgClass} ${a.colorClass}` : 'bg-black/5  text-[var(--neu-text-secondary)] group-hover:bg-black/10 '
                                             }`}>
                                                 <a.Icon size={18} />
                                             </div>
@@ -166,7 +166,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                     );
                                 })}
                             </div>
-                            <div className="h-px w-full bg-gradient-to-r from-black/5 via-black/10 to-transparent dark:from-white/5 dark:via-white/10 mt-1.5 mb-2" />
+                            <div className="h-px w-full bg-gradient-to-r from-black/5 via-black/10 to-transparent   mt-1.5 mb-2" />
                         </div>
                     )}
 
@@ -234,7 +234,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                     type="button"
                                     onClick={() => insertEmoji(emoji)}
                                     disabled={isCreating}
-                                    className="flex-shrink-0 rounded-full px-1.5 py-0.5 text-[20px] leading-none transition-transform hover:bg-black/5 active:scale-90 disabled:opacity-50 dark:hover:bg-white/5"
+                                    className="flex-shrink-0 rounded-full px-1.5 py-0.5 text-[20px] leading-none transition-transform hover:bg-black/5 active:scale-90 disabled:opacity-50 "
                                     aria-label={`Add ${emoji}`}
                                 >
                                     {emoji}
@@ -244,7 +244,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                     )}
 
                     {/* Pill input — Facebook/Instagram hybrid */}
-                    <div className="flex items-end gap-2 rounded-[24px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 transition-all focus-within:border-black/10 dark:border-white/[0.06] dark:bg-white/[0.04] dark:focus-within:border-white/15">
+                    <div className="flex items-end gap-2 rounded-[24px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 transition-all focus-within:border-black/10   ">
                         <label htmlFor="comment-input" className="sr-only">Write a comment</label>
                         <textarea
                             id="comment-input"
@@ -274,7 +274,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                             <button
                                 type="button"
                                 onClick={() => setShowMediaInput(!showMediaInput)}
-                                className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--neu-text-secondary)] transition-colors hover:bg-black/5 hover:text-primary dark:hover:bg-white/5"
+                                className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--neu-text-secondary)] transition-colors hover:bg-black/5 hover:text-primary "
                                 title="Add photo"
                                 disabled={isCreating}
                             >
@@ -297,7 +297,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                             ) : (
                                 <button
                                     type="button"
-                                    className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--neu-text-secondary)] transition-colors hover:bg-black/5 hover:text-primary dark:hover:bg-white/5"
+                                    className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--neu-text-secondary)] transition-colors hover:bg-black/5 hover:text-primary "
                                     title="Sticker"
                                     disabled={isCreating}
                                 >

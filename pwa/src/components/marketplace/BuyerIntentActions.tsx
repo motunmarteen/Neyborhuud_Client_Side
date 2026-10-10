@@ -71,7 +71,7 @@ function MakeOfferDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="make-offer-title"
-        className="doodle-modal-panel relative z-10 flex max-h-[min(92vh,640px)] w-full max-w-md flex-col overflow-hidden rounded-t-[28px] border border-[var(--border-light)] shadow-[0_24px_60px_rgba(14, 138, 62,0.18)] dark:border-[var(--neu-shadow-dark)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.5)] sm:mx-4 sm:max-h-[85vh] sm:rounded-[28px] sm:rounded-b-[28px]"
+        className="doodle-modal-panel relative z-10 flex max-h-[min(92vh,640px)] w-full max-w-md flex-col overflow-hidden rounded-t-[28px] border border-[var(--border-light)] shadow-[0_24px_60px_rgba(14, 138, 62,0.18)]   sm:mx-4 sm:max-h-[85vh] sm:rounded-[28px] sm:rounded-b-[28px]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="doodle-modal-panel-wash z-0" aria-hidden />
@@ -81,7 +81,7 @@ function MakeOfferDialog({
 
         <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
         <div className="flex shrink-0 justify-center pt-3 pb-1 sm:hidden">
-          <div className="h-1 w-11 rounded-full bg-black/15 dark:bg-white/25" aria-hidden />
+          <div className="h-1 w-11 rounded-full bg-black/15 " aria-hidden />
         </div>
 
         <div className="overflow-y-auto overscroll-contain px-4 pb-4 pt-2 sm:px-6 sm:pb-6 sm:pt-5">
@@ -101,10 +101,10 @@ function MakeOfferDialog({
             </button>
           </div>
 
-          <p className="mb-1 text-sm font-medium text-brand-green-dark/70 dark:text-white/65">
+          <p className="mb-1 text-sm font-medium text-brand-green-dark/70 ">
             Listed price
           </p>
-          <p className="mb-4 text-lg font-extrabold tabular-nums text-[#0E8A3E] dark:text-primary">
+          <p className="mb-4 text-lg font-extrabold tabular-nums text-[#0E8A3E] ">
             {listedPriceLabel}
           </p>
 
@@ -112,7 +112,7 @@ function MakeOfferDialog({
             Your offer amount
           </label>
           <div className="relative">
-            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-semibold text-[#0E8A3E] dark:text-primary">
+            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-semibold text-[#0E8A3E] ">
               ₦
             </span>
             <input
@@ -124,17 +124,17 @@ function MakeOfferDialog({
               value={offerAmount}
               onChange={(e) => onOfferAmountChange(e.target.value)}
               placeholder="0"
-              className="min-h-[52px] w-full rounded-2xl border-2 border-[var(--border-light)] bg-[var(--surface-light)] py-3 pl-10 pr-4 text-base font-semibold tabular-nums text-brand-black shadow-inner placeholder:text-brand-green-dark/70/40 transition-shadow focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 dark:border-white/15 dark:bg-white/5 dark:text-white dark:placeholder:text-white/30 dark:focus:border-primary dark:focus:ring-emerald-400/15"
+              className="min-h-[52px] w-full rounded-2xl border-2 border-[var(--border-light)] bg-[var(--surface-light)] py-3 pl-10 pr-4 text-base font-semibold tabular-nums text-brand-black shadow-inner placeholder:text-brand-green-dark/70/40 transition-shadow focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20      "
               min="0"
               step="1000"
             />
           </div>
-          <p className="mt-2 text-xs leading-relaxed text-brand-green-dark/70 dark:text-white/50">
+          <p className="mt-2 text-xs leading-relaxed text-brand-green-dark/70 ">
             The seller will be notified and can accept, reject, or counter your offer.
           </p>
 
           <label htmlFor="offer-message-input" className="mb-2 mt-4 block text-sm font-semibold" style={{ color: "var(--neu-text)" }}>
-            Add a message <span className="font-normal text-brand-green-dark/60 dark:text-white/40">(optional)</span>
+            Add a message <span className="font-normal text-brand-green-dark/60 ">(optional)</span>
           </label>
           <textarea
             id="offer-message-input"
@@ -143,18 +143,18 @@ function MakeOfferDialog({
             placeholder="e.g. Abeg, can you deliver this week?"
             rows={3}
             maxLength={OFFER_MESSAGE_MAX}
-            className="w-full resize-none rounded-2xl border-2 border-[var(--border-light)] bg-[var(--surface-light)] p-3 text-sm text-brand-black shadow-inner placeholder:text-brand-green-dark/40 transition-shadow focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 dark:border-white/15 dark:bg-white/5 dark:text-white dark:placeholder:text-white/30 dark:focus:border-primary dark:focus:ring-emerald-400/15"
+            className="w-full resize-none rounded-2xl border-2 border-[var(--border-light)] bg-[var(--surface-light)] p-3 text-sm text-brand-black shadow-inner placeholder:text-brand-green-dark/40 transition-shadow focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20      "
           />
-          <p className="mt-1 text-right text-[11px] text-brand-green-dark/50 dark:text-white/35">
+          <p className="mt-1 text-right text-[11px] text-brand-green-dark/50 ">
             {offerMessage.length}/{OFFER_MESSAGE_MAX}
           </p>
         </div>
 
-        <div className="flex shrink-0 flex-col gap-3 border-t border-[var(--border-light)] bg-[var(--neu-bg)]/88 p-4 backdrop-blur-xl safe-area-bottom dark:border-white/10 sm:flex-row sm:justify-end sm:px-6 sm:py-4">
+        <div className="flex shrink-0 flex-col gap-3 border-t border-[var(--border-light)] bg-[var(--neu-bg)]/88 p-4 backdrop-blur-xl safe-area-bottom  sm:flex-row sm:justify-end sm:px-6 sm:py-4">
           <button
             type="button"
             onClick={onClose}
-            className="min-h-[48px] w-full shrink-0 rounded-full border border-[var(--border-light)] bg-white px-4 text-sm font-bold text-brand-black shadow-sm transition-transform active:scale-[0.99] dark:border-white/15 dark:bg-white/10 dark:text-white sm:min-w-0 sm:flex-1"
+            className="min-h-[48px] w-full shrink-0 rounded-full border border-[var(--border-light)] bg-white px-4 text-sm font-bold text-brand-black shadow-sm transition-transform active:scale-[0.99]    sm:min-w-0 sm:flex-1"
           >
             Cancel
           </button>
@@ -268,15 +268,15 @@ export function BuyerIntentActions({
     if (layout === "compact") {
       return (
         <div className="flex w-full flex-col gap-2 sm:flex-row" aria-busy="true" aria-label="Loading account">
-          <div className="min-h-[44px] flex-1 animate-pulse rounded-full bg-[var(--surface-light)] sm:min-h-[40px] dark:bg-white/10" />
-          <div className="min-h-[44px] flex-1 animate-pulse rounded-full bg-[var(--surface-light)] sm:min-h-[40px] dark:bg-white/10" />
+          <div className="min-h-[44px] flex-1 animate-pulse rounded-full bg-[var(--surface-light)] sm:min-h-[40px] " />
+          <div className="min-h-[44px] flex-1 animate-pulse rounded-full bg-[var(--surface-light)] sm:min-h-[40px] " />
         </div>
       );
     }
     return (
       <div className="mt-6 space-y-3" aria-busy="true" aria-label="Loading account">
-        <div className="h-12 w-full animate-pulse rounded-lg bg-brand-surface dark:bg-brand-black" />
-        <div className="h-11 w-full animate-pulse rounded-lg bg-brand-surface dark:bg-brand-black" />
+        <div className="h-12 w-full animate-pulse rounded-lg bg-brand-surface " />
+        <div className="h-11 w-full animate-pulse rounded-lg bg-brand-surface " />
       </div>
     );
   }
@@ -291,7 +291,7 @@ export function BuyerIntentActions({
             e.stopPropagation();
             router.push("/login");
           }}
-          className="w-full rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] py-2.5 text-center text-xs font-semibold text-[#0E8A3E] shadow-[0_2px_12px_rgba(14, 138, 62,0.08)] backdrop-blur-xl transition-transform active:scale-[0.98] hover:bg-white dark:border-white/15 dark:bg-white/[0.08] dark:text-white dark:shadow-[0_0_24px_rgba(0, 184, 46,0.12)] dark:hover:bg-white/[0.12]"
+          className="w-full rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] py-2.5 text-center text-xs font-semibold text-[#0E8A3E] shadow-[0_2px_12px_rgba(14, 138, 62,0.08)] backdrop-blur-xl transition-transform active:scale-[0.98] hover:bg-white     184, 46,0.12)] "
         >
           Log in to buy
         </button>
@@ -437,7 +437,7 @@ export function BuyerIntentActions({
                 handleOffer();
               }}
               disabled={busy}
-              className="flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-primary/35 bg-primary/[0.08] px-3 py-2.5 text-xs font-bold tracking-tight text-[#0E8A3E] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px] dark:border-primary/25 dark:bg-emerald-500/15 dark:text-emerald-100"
+              className="flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-primary/35 bg-primary/[0.08] px-3 py-2.5 text-xs font-bold tracking-tight text-[#0E8A3E] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px]   "
             >
               <span className="material-symbols-outlined shrink-0 text-[16px]">sell</span>
               <span className="truncate">Price am</span>
@@ -453,7 +453,7 @@ export function BuyerIntentActions({
             }}
             disabled={contactingSeller}
             aria-label="Chat with seller"
-            className="flex min-h-[44px] w-11 shrink-0 items-center justify-center rounded-full border border-[var(--border-light)] bg-white/85 text-brand-black shadow-[0_2px_12px_rgba(14, 138, 62,0.06)] transition-transform active:scale-[0.98] disabled:opacity-50 sm:min-h-[40px] dark:border-white/15 dark:bg-white/[0.08] dark:text-white/95"
+            className="flex min-h-[44px] w-11 shrink-0 items-center justify-center rounded-full border border-[var(--border-light)] bg-white/85 text-brand-black shadow-[0_2px_12px_rgba(14, 138, 62,0.06)] transition-transform active:scale-[0.98] disabled:opacity-50 sm:min-h-[40px]   "
           >
             <span className="material-symbols-outlined text-[18px]">
               {contactingSeller ? "progress_activity" : "chat"}
@@ -507,7 +507,7 @@ export function BuyerIntentActions({
             type="button"
             onClick={() => handleOffer()}
             disabled={createOrder.isPending || makeOffer.isPending}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/[0.08] py-4 font-semibold text-[#0E8A3E] transition-colors hover:bg-primary/[0.14] disabled:opacity-50 dark:border-primary/25 dark:bg-emerald-500/15 dark:text-emerald-100"
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/[0.08] py-4 font-semibold text-[#0E8A3E] transition-colors hover:bg-primary/[0.14] disabled:opacity-50   "
           >
             <span className="material-symbols-outlined text-[20px]">sell</span>
             Price am
@@ -519,7 +519,7 @@ export function BuyerIntentActions({
           onClick={() => void handleContactSeller()}
           disabled={contactingSeller}
           aria-label="Chat with seller"
-          className="flex w-14 shrink-0 items-center justify-center rounded-lg border border-[var(--border-light)] bg-white text-brand-black transition-colors hover:bg-brand-surface disabled:opacity-60 dark:border-white/15 dark:bg-white/[0.08] dark:text-white"
+          className="flex w-14 shrink-0 items-center justify-center rounded-lg border border-[var(--border-light)] bg-white text-brand-black transition-colors hover:bg-brand-surface disabled:opacity-60   "
         >
           <span className="material-symbols-outlined text-[22px]">
             {contactingSeller ? "progress_activity" : "chat"}

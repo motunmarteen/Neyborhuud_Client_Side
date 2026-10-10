@@ -81,14 +81,14 @@ export function PanicPinKeypad({ onSubmit, title = 'Enter PIN', onCancel }: Pani
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white dark:bg-black px-6 py-10">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white  px-6 py-10">
       <div className="flex-1" />
 
       <div className="flex flex-col items-center gap-8 w-full max-w-[320px]">
         <div className="text-center">
-          <p className="text-base font-semibold text-gray-800 dark:text-gray-100">{title}</p>
+          <p className="text-base font-semibold text-gray-800 ">{title}</p>
           {message && (
-            <p className="mt-2 text-sm text-gray-400 dark:text-gray-500" role="status">
+            <p className="mt-2 text-sm text-gray-400 " role="status">
               {message}
             </p>
           )}
@@ -98,8 +98,8 @@ export function PanicPinKeypad({ onSubmit, title = 'Enter PIN', onCancel }: Pani
           {DIGIT_PLACEHOLDERS.map((_, i) => (
             <span
               key={i}
-              className={`h-3 w-3 rounded-full border border-gray-300 dark:border-gray-600 ${
-                i < digits.length ? 'bg-gray-700 dark:bg-gray-200 border-transparent' : ''
+              className={`h-3 w-3 rounded-full border border-gray-300  ${
+                i < digits.length ? 'bg-gray-700  border-transparent' : ''
               }`}
             />
           ))}
@@ -112,7 +112,7 @@ export function PanicPinKeypad({ onSubmit, title = 'Enter PIN', onCancel }: Pani
               type="button"
               onClick={() => press(d)}
               disabled={busy}
-              className="aspect-square rounded-full text-xl font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 active:bg-gray-200 dark:active:bg-gray-800 disabled:opacity-40 transition-colors"
+              className="aspect-square rounded-full text-xl font-medium text-gray-700  hover:bg-gray-100  active:bg-gray-200  disabled:opacity-40 transition-colors"
             >
               {d}
             </button>
@@ -120,7 +120,7 @@ export function PanicPinKeypad({ onSubmit, title = 'Enter PIN', onCancel }: Pani
           <button
             type="button"
             onClick={onCancel ?? (() => window.history.back())}
-            className="aspect-square rounded-full text-sm font-medium text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+            className="aspect-square rounded-full text-sm font-medium text-gray-400  hover:bg-gray-100  transition-colors"
           >
             Cancel
           </button>
@@ -128,7 +128,7 @@ export function PanicPinKeypad({ onSubmit, title = 'Enter PIN', onCancel }: Pani
             type="button"
             onClick={() => press('0')}
             disabled={busy}
-            className="aspect-square rounded-full text-xl font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 active:bg-gray-200 dark:active:bg-gray-800 disabled:opacity-40 transition-colors"
+            className="aspect-square rounded-full text-xl font-medium text-gray-700  hover:bg-gray-100  active:bg-gray-200  disabled:opacity-40 transition-colors"
           >
             0
           </button>
@@ -136,7 +136,7 @@ export function PanicPinKeypad({ onSubmit, title = 'Enter PIN', onCancel }: Pani
             type="button"
             onClick={backspace}
             disabled={busy || digits.length === 0}
-            className="aspect-square rounded-full text-sm font-medium text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 disabled:opacity-30 transition-colors"
+            className="aspect-square rounded-full text-sm font-medium text-gray-400  hover:bg-gray-100  disabled:opacity-30 transition-colors"
           >
             ⌫
           </button>
@@ -146,7 +146,7 @@ export function PanicPinKeypad({ onSubmit, title = 'Enter PIN', onCancel }: Pani
           type="button"
           onClick={confirm}
           disabled={busy || digits.length < 4}
-          className="w-full rounded-full bg-gray-800 dark:bg-gray-200 text-white dark:text-black py-3 text-sm font-semibold disabled:opacity-30 transition-opacity"
+          className="w-full rounded-full bg-gray-800  text-white  py-3 text-sm font-semibold disabled:opacity-30 transition-opacity"
         >
           {busy ? 'Checking…' : 'Continue'}
         </button>

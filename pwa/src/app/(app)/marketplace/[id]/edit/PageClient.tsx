@@ -34,18 +34,18 @@ export default function EditProductPage() {
       {isLoading && (
         <div className="space-y-4 animate-pulse py-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-14 rounded-2xl bg-[var(--surface-light)] dark:bg-white/10" />
+            <div key={i} className="h-14 rounded-2xl bg-[var(--surface-light)] " />
           ))}
         </div>
       )}
 
       {error && !isLoading && (
-        <div className="rounded-2xl border border-brand-red/35 bg-brand-red/[0.08] p-6 text-center dark:bg-brand-red/10">
-          <p className="mb-4 font-medium text-status-danger dark:text-brand-red">Failed to load listing details.</p>
+        <div className="rounded-2xl border border-brand-red/35 bg-brand-red/[0.08] p-6 text-center ">
+          <p className="mb-4 font-medium text-status-danger ">Failed to load listing details.</p>
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded-full border border-[var(--border-light)] bg-white px-5 py-2 text-sm font-bold text-brand-black shadow-sm dark:border-white/15 dark:bg-white/10 dark:text-white"
+            className="rounded-full border border-[var(--border-light)] bg-white px-5 py-2 text-sm font-bold text-brand-black shadow-sm   "
           >
             Go back
           </button>

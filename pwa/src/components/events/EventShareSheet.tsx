@@ -180,7 +180,7 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
       panelClassName="neu-modal relative mx-auto mb-0 max-h-[85vh] w-full max-w-md overflow-hidden rounded-t-2xl sm:rounded-2xl"
       handleClassName="pt-3 pb-0"
     >
-        <div className="flex items-start justify-between gap-3 border-b border-black/[0.08] px-4 pb-3 pt-2 dark:border-white/10">
+        <div className="flex items-start justify-between gap-3 border-b border-black/[0.08] px-4 pb-3 pt-2 ">
           <div className="min-w-0 pr-2">
             <h3 className="text-lg font-bold" style={{ color: "var(--neu-text)" }}>
               Share event
@@ -211,7 +211,7 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
           </div>
         ) : isError ? (
           <div className="space-y-4 py-4 text-center">
-            <p className="text-sm font-medium text-status-danger dark:text-brand-red">
+            <p className="text-sm font-medium text-status-danger ">
               Something went wrong while loading share data.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -235,7 +235,7 @@ export default function EventShareSheet({ open, onClose, eventId, fallback }: Ev
         ) : share ? (
           <>
             {share.clientFallback ? (
-              <p className="mb-3 rounded-xl border border-primary/35 bg-primary/[0.12] px-3 py-2 text-xs leading-relaxed text-status-warning dark:text-status-warning/90">
+              <p className="mb-3 rounded-xl border border-primary/35 bg-primary/[0.12] px-3 py-2 text-xs leading-relaxed text-status-warning ">
                 Share service is unavailable (404/503). Showing links built from this page until the API is ready.
               </p>
             ) : null}

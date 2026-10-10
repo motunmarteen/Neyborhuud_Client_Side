@@ -56,7 +56,7 @@ export default function PracticePinPage() {
          glance at the keypad itself still matches the real screen exactly,
          but a user consciously practicing always has a way to confirm
          they're in the safe, simulated flow. */}
-      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[10000] rounded-full bg-gray-900/80 dark:bg-gray-100/80 px-3 py-1 text-[11px] font-semibold text-white dark:text-black">
+      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[10000] rounded-full bg-gray-900/80  px-3 py-1 text-[11px] font-semibold text-white ">
         Practice mode — nothing is sent, no matter what you type
       </div>
     </>

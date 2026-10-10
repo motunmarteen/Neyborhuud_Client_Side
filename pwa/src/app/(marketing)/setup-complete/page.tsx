@@ -126,7 +126,7 @@ export default function SetupCompletePage() {
         </div>
       }
       footerLink={
-        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 dark:border-white/10 pt-3">
+        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8  pt-3">
           A quick welcome on your feed — three tips, then you are in.
         </p>
       }
@@ -143,19 +143,19 @@ export default function SetupCompletePage() {
             return (
               <li
                 key={item.id}
-                className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 dark:bg-primary/10 px-3.5 py-2.5"
+                className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5  px-3.5 py-2.5"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-black font-bold">
                   <ItemIcon size={16} aria-hidden="true" />
                 </span>
-                <span className="text-sm font-semibold text-charcoal dark:text-white">{item.label}</span>
+                <span className="text-sm font-semibold text-charcoal ">{item.label}</span>
                 <Check size={16} className="ml-auto text-primary" aria-hidden="true" />
               </li>
             );
           })}
         </ul>
 
-        <div className="flex flex-col gap-2 rounded-2xl border border-primary/25 bg-primary/10 dark:bg-[#161B22] px-4 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
+        <div className="flex flex-col gap-2 rounded-2xl border border-primary/25 bg-primary/10  px-4 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-1.5">

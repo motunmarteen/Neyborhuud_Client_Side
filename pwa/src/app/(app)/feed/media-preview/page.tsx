@@ -23,17 +23,17 @@ function PreviewSection({
   return (
     <section className="mb-8">
       <div className="mx-4 mb-3">
-        <h2 className="text-base font-black text-neu-text dark:text-white">{title}</h2>
-        <p className="mt-1 text-sm text-neu-text-secondary dark:text-white/60">{description}</p>
+        <h2 className="text-base font-black text-neu-text ">{title}</h2>
+        <p className="mt-1 text-sm text-neu-text-secondary ">{description}</p>
       </div>
-      <div className="flex flex-col border-t border-black/[0.06] dark:border-white/[0.06]">
+      <div className="flex flex-col border-t border-black/[0.06] ">
         {samples.map((sample) => (
           <div key={sample.id} aria-labelledby={`${sample.id}-label`}>
-            <div className="mx-4 my-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] px-3 py-2 border border-black/[0.05] dark:border-white/[0.06]">
-              <p id={`${sample.id}-label`} className="text-[11px] font-black uppercase tracking-wide text-neu-text dark:text-white/90">
+            <div className="mx-4 my-3 rounded-xl bg-black/[0.03]  px-3 py-2 border border-black/[0.05] ">
+              <p id={`${sample.id}-label`} className="text-[11px] font-black uppercase tracking-wide text-neu-text ">
                 {sample.label}
               </p>
-              <p className="text-[11px] text-neu-text-secondary dark:text-white/50 mt-0.5">{sample.hint}</p>
+              <p className="text-[11px] text-neu-text-secondary  mt-0.5">{sample.hint}</p>
             </div>
             <XPostCard
               post={sample.post}
@@ -59,8 +59,8 @@ export default function FeedMediaPreviewPage() {
       <main className="mx-auto w-full max-w-[580px] px-0 md:px-2 pt-2">
         <div className="mx-4 mb-4 rounded-2xl border border-primary/20 bg-primary/[0.06] p-4">
           <p className="text-[10px] font-black uppercase tracking-wider text-primary">Feed preview</p>
-          <h1 className="mt-1 text-lg font-black text-neu-text dark:text-white">Media & repost layouts</h1>
-          <p className="mt-2 text-sm text-neu-text-secondary dark:text-white/65 leading-relaxed">
+          <h1 className="mt-1 text-lg font-black text-neu-text ">Media & repost layouts</h1>
+          <p className="mt-2 text-sm text-neu-text-secondary  leading-relaxed">
             Review samples here before testing on the live feed. Tap the repost icon on any card to open the quote composer.
           </p>
           <Link

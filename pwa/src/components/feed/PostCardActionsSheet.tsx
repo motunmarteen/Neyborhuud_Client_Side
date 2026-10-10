@@ -47,24 +47,24 @@ export function PostCardActionsSheet({
       zIndexClass="z-[320]"
       alignClass="items-end justify-center"
       backdropClassName="bg-black/35 backdrop-blur-[3px]"
-      panelClassName="post-card-actions-sheet mx-auto w-full max-w-[580px] overflow-hidden rounded-t-[1.35rem] border border-white/20 bg-white/92 shadow-[0_-8px_40px_rgba(0,0,0,0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(18,27,20,0.94)]"
+      panelClassName="post-card-actions-sheet mx-auto w-full max-w-[580px] overflow-hidden rounded-t-[1.35rem] border border-white/20 bg-white/92 shadow-[0_-8px_40px_rgba(0,0,0,0.14)] backdrop-blur-2xl  "
       handleClassName="pt-2 pb-0"
     >
       <div className="post-card-actions-sheet__header">
         <div className="post-card-actions-sheet__author">
-          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-glass-border bg-black/[0.04] dark:bg-white/10">
+          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-glass-border bg-black/[0.04] ">
             {authorAvatar ? (
               <Image src={authorAvatar} alt="" fill sizes="36px" className="object-cover" unoptimized />
             ) : (
-              <span className="flex h-full w-full items-center justify-center text-neu-text-secondary dark:text-white/50">
+              <span className="flex h-full w-full items-center justify-center text-neu-text-secondary ">
                 <User size={16} strokeWidth={2} aria-hidden />
               </span>
             )}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-black text-neu-text dark:text-white">{authorName}</p>
+            <p className="truncate text-sm font-black text-neu-text ">{authorName}</p>
             {authorUsername && (
-              <p className="truncate text-[11px] font-medium text-neu-text-secondary dark:text-white/50">
+              <p className="truncate text-[11px] font-medium text-neu-text-secondary ">
                 @{authorUsername}
               </p>
             )}

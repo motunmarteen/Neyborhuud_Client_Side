@@ -464,7 +464,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         {!embedded && (
           <button
             onClick={() => router.back()}
-            className="pointer-events-auto w-11 h-11 rounded-2xl bg-white/95 dark:bg-[#12161A]/95 border border-black/[0.08] dark:border-white/[0.08] flex items-center justify-center text-slate-800 dark:text-white backdrop-blur-md shadow-lg active:scale-95 transition-all"
+            className="pointer-events-auto w-11 h-11 rounded-2xl bg-white/95  border border-black/[0.08]  flex items-center justify-center text-slate-800  backdrop-blur-md shadow-lg active:scale-95 transition-all"
             aria-label="Go back"
           >
             <ArrowLeft size={20} />
@@ -475,7 +475,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         <div
           role="tablist"
           aria-label="Map layer"
-          className={`pointer-events-auto bg-white/95 dark:bg-[#12161A]/95 border border-black/[0.08] dark:border-white/[0.08] rounded-2xl p-1 shadow-lg backdrop-blur-md flex gap-1 ${embedded ? 'mx-auto' : ''}`}
+          className={`pointer-events-auto bg-white/95  border border-black/[0.08]  rounded-2xl p-1 shadow-lg backdrop-blur-md flex gap-1 ${embedded ? 'mx-auto' : ''}`}
         >
           <button
             type="button"
@@ -485,7 +485,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
               layer === 'people'
                 ? 'bg-[#00B82E] text-white shadow-sm shadow-[#00B82E]/20'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                : 'text-slate-600  hover:text-slate-900 '
             }`}
           >
             <Users size={15} />
@@ -499,7 +499,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
               layer === 'places'
                 ? 'bg-[#00B82E] text-white shadow-sm shadow-[#00B82E]/20'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                : 'text-slate-600  hover:text-slate-900 '
             }`}
           >
             <Building2 size={15} />
@@ -512,7 +512,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
           <button
             type="button"
             onClick={() => setShowEli5(!showEli5)}
-            className="pointer-events-auto w-11 h-11 rounded-2xl bg-white/95 dark:bg-[#12161A]/95 border border-black/[0.08] dark:border-white/[0.08] flex items-center justify-center text-slate-700 dark:text-slate-300 backdrop-blur-md shadow-lg active:scale-95 transition-all"
+            className="pointer-events-auto w-11 h-11 rounded-2xl bg-white/95  border border-black/[0.08]  flex items-center justify-center text-slate-700  backdrop-blur-md shadow-lg active:scale-95 transition-all"
             title="Explain Like I'm 5"
             aria-label="Explain Discovery Map"
           >
@@ -523,10 +523,10 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
 
       {/* ─── ELI5 Explanation Card Banner ─── */}
       {showEli5 && (
-        <div className="absolute top-18 left-4 right-4 z-20 bg-emerald-50 dark:bg-emerald-950/90 border border-emerald-200/80 dark:border-emerald-800/60 rounded-3xl p-4 shadow-xl backdrop-blur-md text-xs text-emerald-950 dark:text-emerald-100 flex items-start gap-3">
+        <div className="absolute top-18 left-4 right-4 z-20 bg-emerald-50  border border-emerald-200/80  rounded-3xl p-4 shadow-xl backdrop-blur-md text-xs text-emerald-950  flex items-start gap-3">
           <Info size={18} className="text-[#00B82E] shrink-0 mt-0.5" />
           <div className="flex-1 space-y-1">
-            <p className="font-extrabold text-emerald-900 dark:text-emerald-200 text-sm">
+            <p className="font-extrabold text-emerald-900  text-sm">
               Vector Discovery Radar
             </p>
             <p className="leading-relaxed">
@@ -536,7 +536,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
           <button
             type="button"
             onClick={() => setShowEli5(false)}
-            className="text-xs font-black text-emerald-800 dark:text-emerald-300 hover:underline px-1 py-0.5"
+            className="text-xs font-black text-emerald-800  hover:underline px-1 py-0.5"
           >
             Got it
           </button>

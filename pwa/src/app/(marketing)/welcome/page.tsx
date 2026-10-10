@@ -64,11 +64,11 @@ export default function WelcomePage() {
   const activeFeature = FEATURE_CARDS[activeFeatureIndex];
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between bg-[#EEF2F7] dark:bg-[#0B0E11] text-[#1D2433] dark:text-white transition-colors duration-300 selection:bg-[#00B82E]/20 overflow-x-hidden">
+    <div className="min-h-screen w-full flex flex-col justify-between bg-[#EEF2F7]  text-[#1D2433]  transition-colors duration-300 selection:bg-[#00B82E]/20 overflow-x-hidden">
       {/* Background Ambient Glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-[#00B82E]/15 dark:bg-[#00B82E]/10 rounded-full blur-[120px]" />
-        <div className="absolute top-1/2 -right-40 w-[400px] h-[400px] bg-blue-500/10 dark:bg-blue-600/5 rounded-full blur-[100px]" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-[#00B82E]/15  rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 -right-40 w-[400px] h-[400px] bg-blue-500/10  rounded-full blur-[100px]" />
       </div>
 
       {/* Top Header Bar */}
@@ -78,10 +78,10 @@ export default function WelcomePage() {
             <span className="font-extrabold text-black text-xl tracking-tighter">N</span>
           </div>
           <div>
-            <h1 className="text-base font-extrabold tracking-tight dark:text-white text-[#1D2433]">
+            <h1 className="text-base font-extrabold tracking-tight  text-[#1D2433]">
               Neybor<span className="text-[#00B82E]">Huud</span>
             </h1>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6478] dark:text-white/50">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B6478] ">
               Community Operating System
             </p>
           </div>
@@ -89,7 +89,7 @@ export default function WelcomePage() {
 
         <Link
           href="/login"
-          className="text-xs font-semibold px-4 py-2 rounded-full border border-black/[0.08] dark:border-white/[0.12] bg-white/80 dark:bg-white/[0.06] backdrop-blur-md hover:bg-black/[0.04] dark:hover:bg-white/[0.12] transition-all active:scale-95"
+          className="text-xs font-semibold px-4 py-2 rounded-full border border-black/[0.08]  bg-white/80  backdrop-blur-md hover:bg-black/[0.04]  transition-all active:scale-95"
         >
           Sign In
         </Link>
@@ -102,7 +102,7 @@ export default function WelcomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full aspect-square max-h-[340px] rounded-3xl overflow-hidden p-1 border border-black/[0.06] dark:border-white/[0.1] bg-white/60 dark:bg-[#14181D]/80 backdrop-blur-2xl shadow-2xl shadow-black/10 dark:shadow-black/70 mb-5 group"
+          className="relative w-full aspect-square max-h-[340px] rounded-3xl overflow-hidden p-1 border border-black/[0.06]  bg-white/60  backdrop-blur-2xl shadow-2xl shadow-black/10  mb-5 group"
         >
           <div className="relative w-full h-full rounded-[22px] overflow-hidden">
             <Image
@@ -139,7 +139,7 @@ export default function WelcomePage() {
         {/* Feature Interactive Card Tabs */}
         <div className="w-full mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5B6478] dark:text-white/40">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5B6478] ">
               Platform Pillars
             </span>
             <div className="flex gap-1.5">
@@ -150,7 +150,7 @@ export default function WelcomePage() {
                   className={`h-1.5 rounded-full transition-all duration-300 ${
                     idx === activeFeatureIndex
                       ? 'w-6 bg-[#00B82E]'
-                      : 'w-2 bg-black/15 dark:bg-white/20'
+                      : 'w-2 bg-black/15 '
                   }`}
                   aria-label={`Slide to ${feat.title}`}
                 />
@@ -165,7 +165,7 @@ export default function WelcomePage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
               transition={{ duration: 0.25 }}
-              className={`p-4 rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-white/90 dark:bg-[#14181D]/80 backdrop-blur-xl shadow-lg relative overflow-hidden`}
+              className={`p-4 rounded-2xl border border-black/[0.06]  bg-white/90  backdrop-blur-xl shadow-lg relative overflow-hidden`}
             >
               {/* Subtle ambient gradient splash */}
               <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${activeFeature.gradient} rounded-full blur-2xl pointer-events-none`} />
@@ -180,7 +180,7 @@ export default function WelcomePage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#5B6478] dark:text-white/50">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#5B6478] ">
                         {activeFeature.badge}
                       </span>
                       <Eli5Tooltip
@@ -188,14 +188,14 @@ export default function WelcomePage() {
                         explanation={activeFeature.eli5}
                       />
                     </div>
-                    <h3 className="text-sm font-bold text-[#1D2433] dark:text-white">
+                    <h3 className="text-sm font-bold text-[#1D2433] ">
                       {activeFeature.title}
                     </h3>
                   </div>
                 </div>
               </div>
 
-              <p className="mt-2 text-xs leading-relaxed text-[#5B6478] dark:text-white/70 relative z-10">
+              <p className="mt-2 text-xs leading-relaxed text-[#5B6478]  relative z-10">
                 {activeFeature.description}
               </p>
             </motion.div>
@@ -214,7 +214,7 @@ export default function WelcomePage() {
 
           <Link
             href="/explore"
-            className="w-full py-3 px-6 rounded-2xl border border-black/[0.08] dark:border-white/[0.12] bg-white/70 dark:bg-white/[0.05] backdrop-blur-md text-[#1D2433] dark:text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.1] transition-all active:scale-[0.98]"
+            className="w-full py-3 px-6 rounded-2xl border border-black/[0.08]  bg-white/70  backdrop-blur-md text-[#1D2433]  font-bold text-xs flex items-center justify-center gap-2 hover:bg-black/[0.04]  transition-all active:scale-[0.98]"
           >
             <span>Explore Public Huud Radar</span>
           </Link>
@@ -222,7 +222,7 @@ export default function WelcomePage() {
       </main>
 
       {/* Footer Guarantees */}
-      <footer className="relative z-10 w-full max-w-lg mx-auto px-5 py-4 flex items-center justify-center gap-6 text-[11px] font-semibold text-[#5B6478] dark:text-white/40">
+      <footer className="relative z-10 w-full max-w-lg mx-auto px-5 py-4 flex items-center justify-center gap-6 text-[11px] font-semibold text-[#5B6478] ">
         <div className="flex items-center gap-1.5">
           <CheckCircle2 size={13} strokeWidth={2} className="text-[#00B82E]" />
           <span>₦0.00 Platform Fee</span>

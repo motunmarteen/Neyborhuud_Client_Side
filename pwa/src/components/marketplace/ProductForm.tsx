@@ -196,8 +196,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {!isEditing && myId && (
-        <div className="rounded-2xl border border-black/[0.06] bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.03]">
-          <p className="mb-1.5 text-xs font-semibold text-brand-green-dark/70 dark:text-white/60">
+        <div className="rounded-2xl border border-black/[0.06] bg-black/[0.02] px-4 py-3  ">
+          <p className="mb-1.5 text-xs font-semibold text-brand-green-dark/70 ">
             Your seller status
           </p>
           <SellerBadge sellerId={myId} showProgress />
@@ -217,8 +217,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           maxLength={100}
           className={`${glassField} ${errors.title ? glassFieldError : ""}`}
         />
-        {errors.title && <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.title}</p>}
-        <p className="mt-1 text-xs text-brand-green-dark/70/70 dark:text-white/40">{title.length}/100</p>
+        {errors.title && <p className="mt-1 text-sm font-medium text-status-danger ">{errors.title}</p>}
+        <p className="mt-1 text-xs text-brand-green-dark/70/70 ">{title.length}/100</p>
       </div>
 
       {/* Description */}
@@ -246,7 +246,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             step="0.01"
             className={`${glassField} ${errors.price ? glassFieldError : ""}`}
           />
-          {errors.price && <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.price}</p>}
+          {errors.price && <p className="mt-1 text-sm font-medium text-status-danger ">{errors.price}</p>}
         </div>
 
         <div>
@@ -266,7 +266,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             ))}
           </select>
           {errors.category && (
-            <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.category}</p>
+            <p className="mt-1 text-sm font-medium text-status-danger ">{errors.category}</p>
           )}
         </div>
       </div>
@@ -283,7 +283,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               className={`rounded-2xl border-2 px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
                 condition === cond.value
                   ? "border-transparent bg-[#00B82E] text-black font-extrabold shadow-[0_8px_20px_rgba(0, 184, 46,0.28)]"
-                  : "border-[var(--border-light)] bg-white/75 text-brand-green-dark/70 hover:border-primary/35 dark:border-white/12 dark:bg-white/[0.06] dark:text-white/75"
+                  : "border-[var(--border-light)] bg-white/75 text-brand-green-dark/70 hover:border-primary/35   "
               }`}
             >
               {cond.label}
@@ -307,19 +307,19 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         />
         <label
           htmlFor="product-images"
-          className="block w-full cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-primary/[0.06] px-4 py-8 text-center text-sm font-medium text-brand-green-dark/70 transition-colors hover:border-primary/50 hover:bg-primary/[0.1] dark:border-primary/25 dark:bg-primary/10 dark:text-white/70"
+          className="block w-full cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-primary/[0.06] px-4 py-8 text-center text-sm font-medium text-brand-green-dark/70 transition-colors hover:border-primary/50 hover:bg-primary/[0.1]   "
         >
-          <span className="material-symbols-outlined mx-auto mb-2 block text-4xl text-[#0E8A3E]/60 dark:text-primary/70">
+          <span className="material-symbols-outlined mx-auto mb-2 block text-4xl text-[#0E8A3E]/60 ">
             add_photo_alternate
           </span>
           Click to upload images (max 5)
         </label>
-        {errors.images && <p className="mt-1 text-sm font-medium text-status-danger dark:text-brand-red">{errors.images}</p>}
+        {errors.images && <p className="mt-1 text-sm font-medium text-status-danger ">{errors.images}</p>}
 
         {(images.length > 0 || imageUrls.length > 0) && (
           <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
             {imageUrls.map((url, idx) => (
-              <div key={`url-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] dark:border-white/10">
+              <div key={`url-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] ">
                 <Image src={url} alt={`Product ${idx + 1}`} fill sizes="(max-width: 640px) 33vw, 20vw" className="object-cover" />
                 <button
                   type="button"
@@ -332,7 +332,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               </div>
             ))}
             {images.map((file, idx) => (
-              <div key={`file-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] dark:border-white/10">
+              <div key={`file-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] ">
                 <Image src={URL.createObjectURL(file)} alt={`Upload ${idx + 1}`} fill unoptimized sizes="(max-width: 640px) 33vw, 20vw" className="object-cover" />
                 <button
                   type="button"
@@ -350,14 +350,14 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
       {!isEditing && (
         <div>
-          <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[var(--border-light)] bg-[var(--surface-light)]/80 px-4 py-3 dark:border-white/12 dark:bg-white/[0.05]">
+          <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[var(--border-light)] bg-[var(--surface-light)]/80 px-4 py-3  ">
             <input
               type="checkbox"
               checked={negotiable}
               onChange={(e) => setNegotiable(e.target.checked)}
-              className="h-5 w-5 rounded border-[var(--border-light)] text-primary focus:ring-primary/30 dark:border-white/20 dark:bg-white/10"
+              className="h-5 w-5 rounded border-[var(--border-light)] text-primary focus:ring-primary/30  "
             />
-            <span className="text-sm font-medium text-[#2E502E] dark:text-white/85">Price is negotiable</span>
+            <span className="text-sm font-medium text-[#2E502E] ">Price is negotiable</span>
           </label>
         </div>
       )}
@@ -365,16 +365,16 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       {!isEditing && (
         <div>
           {locationLoading && (
-            <p className="text-sm font-medium text-brand-green-dark/70 dark:text-white/55">Loading your location…</p>
+            <p className="text-sm font-medium text-brand-green-dark/70 ">Loading your location…</p>
           )}
           {!locationLoading && registeredLocation && (
-            <p className="rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3 text-sm font-medium text-[#0E8A3E] dark:border-primary/20 dark:bg-primary/10 dark:text-primary">
+            <p className="rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3 text-sm font-medium text-[#0E8A3E]   ">
               📍 Listed in your registered area{areaLabel ? `: ${areaLabel}` : ""}
             </p>
           )}
           {!locationLoading && !registeredLocation && (
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-red/40 bg-brand-red/[0.08] p-4 dark:bg-brand-red/10">
-              <p className="text-sm font-medium text-status-danger dark:text-brand-red">
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-red/40 bg-brand-red/[0.08] p-4 ">
+              <p className="text-sm font-medium text-status-danger ">
                 No registered location found. Set your home location to list items.
               </p>
               <Link
@@ -385,17 +385,17 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               </Link>
             </div>
           )}
-          {errors.location && <p className="mt-2 text-sm font-medium text-status-danger dark:text-brand-red">{errors.location}</p>}
+          {errors.location && <p className="mt-2 text-sm font-medium text-status-danger ">{errors.location}</p>}
         </div>
       )}
 
-      <div className="flex flex-col gap-3 border-t border-[var(--border-light)] pt-5 dark:border-white/10 sm:flex-row sm:justify-end">
+      <div className="flex flex-col gap-3 border-t border-[var(--border-light)] pt-5  sm:flex-row sm:justify-end">
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="min-h-[48px] w-full shrink-0 rounded-full border border-[var(--border-light)] bg-white px-4 text-sm font-bold text-brand-black shadow-sm transition-transform active:scale-[0.99] disabled:opacity-50 dark:border-white/15 dark:bg-white/10 dark:text-white sm:min-w-0 sm:flex-1"
+            className="min-h-[48px] w-full shrink-0 rounded-full border border-[var(--border-light)] bg-white px-4 text-sm font-bold text-brand-black shadow-sm transition-transform active:scale-[0.99] disabled:opacity-50    sm:min-w-0 sm:flex-1"
           >
             Cancel
           </button>

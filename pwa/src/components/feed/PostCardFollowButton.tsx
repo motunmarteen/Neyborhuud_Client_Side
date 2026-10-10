@@ -24,7 +24,7 @@ export function PostCardFollowButton({
       }}
       disabled={isPending}
       className={`post-card-header__icon-btn disabled:opacity-50 disabled:cursor-not-allowed ${
-        isFollowing ? 'text-primary dark:text-primary hover:text-brand-red' : ''
+        isFollowing ? 'text-primary  hover:text-brand-red' : ''
       }`}
       aria-label={isFollowing ? 'Unfollow' : 'Follow'}
       title={isFollowing ? 'Unfollow' : 'Follow'}

@@ -70,18 +70,18 @@ export function CommunityHubAdminPanel({ hub }: Props) {
   };
 
   return (
-    <div className="bg-white dark:bg-[#12161A] rounded-3xl border border-black/[0.08] dark:border-white/[0.08] p-5 shadow-sm space-y-4">
+    <div className="bg-white  rounded-3xl border border-black/[0.08]  p-5 shadow-sm space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center text-[#00B82E]">
+          <div className="h-8 w-8 rounded-xl bg-emerald-50  border border-emerald-200/80  flex items-center justify-center text-[#00B82E]">
             <ShieldCheck size={18} />
           </div>
           <div>
-            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
+            <h2 className="text-sm font-extrabold text-slate-900 ">
               Estate Gate Admin
             </h2>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] text-slate-500 ">
               Manage member approvals and gate invites
             </p>
           </div>
@@ -90,7 +90,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
         <button
           type="button"
           onClick={() => setShowEli5(!showEli5)}
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200  text-slate-500  transition-colors"
           title="Explain Like I'm 5"
           aria-label="Explain admin functions"
         >
@@ -100,7 +100,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
 
       {/* ELI5 Banner */}
       {showEli5 && (
-        <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/40 rounded-2xl p-3 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2">
+        <div className="bg-emerald-50  border border-emerald-200/70  rounded-2xl p-3 text-xs text-emerald-900  flex items-start gap-2">
           <Info size={15} className="text-[#00B82E] shrink-0 mt-0.5" />
           <div className="flex-1">
             <span className="font-bold">Gatekeeper Info: </span>
@@ -120,7 +120,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
       {hub.settings?.allowMemberInvites !== false && (
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+            <span className="text-xs font-bold text-slate-700 ">
               Estate Share Link
             </span>
             <button
@@ -134,8 +134,8 @@ export function CommunityHubAdminPanel({ hub }: Props) {
           </div>
 
           {inviteUrl && (
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] rounded-2xl p-2.5">
-              <span className="text-xs font-mono text-slate-600 dark:text-slate-400 truncate flex-1 select-all">
+            <div className="flex items-center gap-2 bg-slate-50  border border-black/[0.06]  rounded-2xl p-2.5">
+              <span className="text-xs font-mono text-slate-600  truncate flex-1 select-all">
                 {inviteUrl}
               </span>
               <button
@@ -146,7 +146,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
                   setTimeout(() => setCopied(false), 2000);
                   toast.success('Link copied!');
                 }}
-                className="shrink-0 p-1.5 rounded-xl bg-white dark:bg-[#1a2127] border border-black/[0.08] dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:text-[#00B82E] transition-colors"
+                className="shrink-0 p-1.5 rounded-xl bg-white  border border-black/[0.08]  text-slate-700  hover:text-[#00B82E] transition-colors"
                 title="Copy to clipboard"
               >
                 {copied ? <Check size={14} className="text-[#00B82E]" /> : <Copy size={14} />}
@@ -158,12 +158,12 @@ export function CommunityHubAdminPanel({ hub }: Props) {
 
       {/* Pending Join Requests */}
       {hub.settings?.joinApprovalRequired && requests.length > 0 && (
-        <div className="space-y-2 pt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
+        <div className="space-y-2 pt-2 border-t border-black/[0.06] ">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200">
+            <h3 className="text-xs font-bold text-slate-800 ">
               Pending Resident Verifications
             </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800  ">
               {requests.length} waiting
             </span>
           </div>
@@ -172,14 +172,14 @@ export function CommunityHubAdminPanel({ hub }: Props) {
             {requests.map((r: HubJoinRequestItem) => (
               <li
                 key={r.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-black/[0.06] dark:border-white/[0.06] bg-slate-50/60 dark:bg-white/[0.02] p-3 transition-colors"
+                className="flex items-center justify-between gap-3 rounded-2xl border border-black/[0.06]  bg-slate-50/60  p-3 transition-colors"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-200">
+                  <div className="h-8 w-8 rounded-full bg-slate-200  flex items-center justify-center font-bold text-xs text-slate-700 ">
                     {(r.firstName || r.username || 'U')[0]?.toUpperCase()}
                   </div>
                   <div className="truncate">
-                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    <p className="text-xs font-bold text-slate-900  truncate">
                       {r.firstName || r.username || 'Resident'}
                     </p>
                     {r.username && (
@@ -192,7 +192,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
                   <button
                     type="button"
                     onClick={() => void review(r.id, 'approve')}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 active:scale-95 transition-all"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-100  text-emerald-800  hover:bg-emerald-200 active:scale-95 transition-all"
                   >
                     <CheckCircle2 size={13} />
                     <span>Approve</span>
@@ -200,7 +200,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
                   <button
                     type="button"
                     onClick={() => void review(r.id, 'reject')}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 active:scale-95 transition-all"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-rose-50  text-rose-700  hover:bg-rose-100 active:scale-95 transition-all"
                   >
                     <XCircle size={13} />
                     <span>Decline</span>
@@ -214,7 +214,7 @@ export function CommunityHubAdminPanel({ hub }: Props) {
 
       {/* Large Group Mode Note */}
       {hub.largeGroupMode && (
-        <div className="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-900/40 p-3 flex items-start gap-2 text-xs text-amber-900 dark:text-amber-200">
+        <div className="rounded-2xl bg-amber-50  border border-amber-200/70  p-3 flex items-start gap-2 text-xs text-amber-900 ">
           <Info size={14} className="text-amber-600 shrink-0 mt-0.5" />
           <span>
             <strong>Large Community Active:</strong> Live push alerts are reserved for estate admins and security. All residents can freely participate in chat.
