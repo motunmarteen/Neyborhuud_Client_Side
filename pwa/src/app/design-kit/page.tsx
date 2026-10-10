@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { CardsAndChipsDemo } from './CardsAndChipsDemo';
 import { SheetDemo } from './SheetDemo';
 import { TopBarDemo } from './TopBarDemo';
+import { PostCardDemo } from './PostCardDemo';
 
 export const metadata: Metadata = {
   title: 'Design kit',
@@ -122,6 +123,10 @@ export default function DesignKitPage() {
 
         <Section id="topbar" title="Top bar (F-06)" note="Floats over the map. Logo and your area on the left; HuudCredit, alerts, create and you on the right.">
           <TopBarDemo />
+        </Section>
+
+        <Section id="postcard" title="Post card (proposal)" note="One card for every post type. The detail block and main button change with the type. Tap like, save, the safety buttons and I'm going.">
+          <PostCardDemo />
         </Section>
       </div>
     </main>
