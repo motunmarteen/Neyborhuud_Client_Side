@@ -83,9 +83,9 @@ export function NeyborHuudLogo({
                 isChrome ? 'app-topnav__headline' : 'leading-[0.95]'
             }`.trim()}
             style={{
-                fontFamily: "var(--font-jakarta), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                fontFamily: "var(--font-fredoka), 'Fredoka', var(--font-jakarta), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
                 ...(typeSize != null ? { fontSize: `${typeSize}px` } : {}),
-                letterSpacing: '-0.035em',
+                letterSpacing: '-0.01em',
             }}
             aria-label={BRAND_NAME}
         >

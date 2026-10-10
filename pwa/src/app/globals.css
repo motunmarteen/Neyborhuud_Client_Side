@@ -192,7 +192,15 @@ input:-webkit-autofill:active {
   animation: bc-radar-sweep 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+/* Design foundation F-02: page headings use the rounded display face. */
+h1,
+h2 {
+  font-family: var(--font-fredoka), 'Fredoka', var(--font-jakarta), system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
 @theme inline {
+  --font-heading: var(--font-fredoka), 'Fredoka', 'Plus Jakarta Sans', system-ui, sans-serif;
   /* Official brand palette — Tailwind utility classes */
   --color-primary:          #00D431;
   --color-neon-green:       #00D431;
@@ -239,6 +247,8 @@ input:-webkit-autofill:active {
   --color-text-secondary-light:#3D5A3E;
 
   --font-display: var(--font-jakarta);
+  /* Headings and logo: Fredoka (Tailwind: font-heading) */
+  --font-heading: var(--font-fredoka), 'Fredoka', 'Plus Jakarta Sans', system-ui, sans-serif;
 
   /* Mobile app shell — updated live by AppViewport */
   --app-height: 100svh;

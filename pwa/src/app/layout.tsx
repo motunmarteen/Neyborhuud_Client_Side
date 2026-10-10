@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Fredoka, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import "./simulator.css";
 import { Providers, SrToastAnnouncer } from "@/components/providers";
@@ -28,6 +28,15 @@ const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-jakarta",
   weight: ["400", "500", "600", "700", "800"],
+});
+
+// Rounded, friendly display face for headings and the logo (design foundation F-02).
+// Served from our own domain by next/font, so it is cached by the PWA like the rest.
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  variable: "--font-fredoka",
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -113,7 +122,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${jakarta.variable} app-body font-display text-foreground transition-colors duration-200`}
+        className={`${jakarta.variable} ${fredoka.variable} app-body font-display text-foreground transition-colors duration-200`}
         suppressHydrationWarning
       >
         <AppViewport />
