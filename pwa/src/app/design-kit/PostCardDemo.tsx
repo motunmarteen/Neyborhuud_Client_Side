@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { Copy, MessageCircle, PenLine, Repeat2, Send } from 'lucide-react';
+import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
 import type { Post } from '@/types/api';
 import { PostCard, type EmergencyAction, type PostPoll } from '@/components/feed/PostCard';
 
@@ -39,9 +41,40 @@ const SAMPLES: Post[] = [
   { ...base, id: 'd8', contentType: 'help_request', author: author('Bisi', 'Lawal', 'bisi', 'Bariga'), content: 'Please I need help with my mum hospital bill at LUTH. Anything you fit give, God bless you.', helpCategory: 'medical', targetAmount: 15_000_000, amountReceived: 6_200_000, media: photos(6, 1, 0), likes: 9, comments: 5, createdAt: ago(45) },
 ];
 
+// Sharing inside the app: a plain repost (the original card with a "reposted" line)
+// and a repost with comment (the sharer's words, with the original framed inside).
+const original = (id: string) => SAMPLES.find((p) => p.id === id)!;
+SAMPLES.splice(
+  2,
+  0,
+  { ...original('d3'), id: 'r1', repostedBy: { id: 'u-chidi', name: 'Chidi Nwosu', username: 'chidi' } },
+  {
+    ...base,
+    id: 'r2',
+    contentType: 'post',
+    mood: 'repost',
+    author: author('Kemi', 'Ade', 'kemi', 'Ikeja'),
+    content: 'Abeg if you get family around Pedro, call them make dem stay indoors 🙏🏾',
+    quotedPost: original('d7'),
+    likes: 18,
+    comments: 4,
+    shares: 9,
+    createdAt: ago(1),
+  },
+);
+
+const SHARE_OPTIONS = [
+  { key: 'repost', label: 'Repost', sub: 'Share it to your neighbours as it is', icon: Repeat2 },
+  { key: 'quote', label: 'Repost with comment', sub: 'Add your own words on top', icon: PenLine },
+  { key: 'chat', label: 'Send in a chat', sub: 'To a neighbour or a group', icon: Send },
+  { key: 'whatsapp', label: 'WhatsApp', sub: 'Share the link outside NeyborHuud', icon: MessageCircle },
+  { key: 'copy', label: 'Copy link', sub: 'Paste it anywhere', icon: Copy },
+];
+
 export function PostCardDemo() {
   const [posts, setPosts] = useState(SAMPLES);
   const [going, setGoing] = useState<Record<string, boolean>>({});
+  const [shareFor, setShareFor] = useState<string | null>(null);
   const [following, setFollowing] = useState<Record<string, boolean>>({ 'u-ada': true });
 
   const update = (id: string, fn: (p: Post) => Partial<Post>) =>
@@ -74,7 +107,7 @@ export function PostCardDemo() {
             onRepost={() => update(p.id, (x) => ({ isShared: !x.isShared, shares: x.shares + (x.isShared ? -1 : 1) }))}
             onHelpful={() => update(p.id, (x) => ({ isHelpful: !x.isHelpful, helpfulCount: ((x.helpfulCount as number) ?? 0) + (x.isHelpful ? -1 : 1) }) as Partial<Post>)}
             onComment={() => {}}
-            onShare={() => {}}
+            onShare={() => setShareFor(p.id)}
             onMenu={() => {}}
             onFollow={() => setFollowing((f) => ({ ...f, [authorId]: !f[authorId] }))}
             isFollowing={!!following[authorId]}
@@ -85,6 +118,30 @@ export function PostCardDemo() {
           />
         );
       })}
+
+      <AppBottomSheet open={shareFor !== null} onClose={() => setShareFor(null)} title="Share this post">
+        <div className="flex flex-col gap-1 pb-2">
+          {SHARE_OPTIONS.map((o) => {
+            const Icon = o.icon;
+            return (
+              <button
+                key={o.key}
+                type="button"
+                onClick={() => setShareFor(null)}
+                className="flex min-h-14 items-center gap-3 rounded-2xl px-2 text-left transition-colors hover:bg-background"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-green-soft text-brand-green-dark">
+                  <Icon size={19} aria-hidden />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[15px] font-bold text-navy">{o.label}</span>
+                  <span className="block text-xs text-muted">{o.sub}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </AppBottomSheet>
     </div>
   );
 }
