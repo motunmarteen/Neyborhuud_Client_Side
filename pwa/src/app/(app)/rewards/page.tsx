@@ -138,7 +138,7 @@ export default function RewardsPage() {
               type="button"
               onClick={handleClaimAll}
               disabled={claimableAmount === 0}
-              className="mt-3 w-full py-2.5 px-3 rounded-xl bg-[#00B82E] hover:bg-[#00E536] disabled:opacity-40 text-black font-black text-xs flex items-center justify-center gap-1.5 transition-transform active:scale-95 shadow-md shadow-[#00B82E]/20"
+              className="mt-3 w-full py-2.5 px-3 rounded-full bg-[#00B82E] hover:bg-[#0E8A3E] disabled:opacity-40 text-black font-black text-xs flex items-center justify-center gap-1.5 transition-transform active:scale-95 shadow-md shadow-[#00B82E]/20 min-h-12"
             >
               <Zap size={14} className="stroke-[3]" />
               <span>Claim All</span>

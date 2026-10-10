@@ -115,7 +115,7 @@ export function PaymentReceiptSheet({ paymentId, onClose }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-white active:scale-[0.98] transition-transform"
+              className="w-full rounded-full bg-primary py-3.5 text-sm font-bold text-white active:scale-[0.98] transition-transform"
             >
               Done
             </button>

@@ -308,7 +308,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                 <button
                     onClick={onCreatePost}
                     className={`w-full mt-4 bg-primary hover:bg-primary/90 text-white font-bold text-lg rounded-full py-3 transition-colors shadow-lg hover:shadow-xl ${isCollapsed ? 'px-0' : 'px-6'
-                        }`}
+                        } min-h-12`}
                     title={isCollapsed ? 'Post' : undefined}
                 >
                     {isCollapsed ? <span className="material-symbols-outlined text-xl"  aria-hidden="true">add</span> : 'Post'}

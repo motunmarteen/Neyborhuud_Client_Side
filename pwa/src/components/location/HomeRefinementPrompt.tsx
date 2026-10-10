@@ -73,7 +73,7 @@ export function HomeRefinementPrompt({ hint, currentHome, onDone }: Props) {
           type="button"
           onClick={handleConfirm}
           disabled={confirm.isPending}
-          className="mb-2 w-full rounded-xl bg-primary py-3 text-sm font-bold text-white disabled:opacity-50"
+          className="mb-2 w-full rounded-full bg-primary py-3 text-sm font-bold text-white disabled:opacity-50 min-h-12"
         >
           {confirm.isPending ? "Updating…" : "Yes, update home"}
         </button>

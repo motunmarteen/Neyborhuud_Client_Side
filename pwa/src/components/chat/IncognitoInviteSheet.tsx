@@ -180,7 +180,7 @@ export function IncognitoInviteSheet({ open, onClose, conversationId, invitee }:
             type="button"
             onClick={handleInvite}
             disabled={submitting || !target}
-            className="flex-1 rounded-xl bg-[#00B82E] py-3 text-sm font-bold text-white active:scale-95 disabled:opacity-50"
+            className="flex-1 rounded-full bg-[#00B82E] py-3 text-sm font-bold text-white active:scale-95 disabled:opacity-50"
           >
             {submitting ? 'Sending…' : 'Send invite'}
           </button>

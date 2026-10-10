@@ -71,7 +71,7 @@ export function BoostModal({
           </p>
           <button
             onClick={onClose}
-            className="mt-2 px-6 py-2.5 rounded-xl bg-primary hover:bg-primary text-black font-bold text-sm transition-colors"
+            className="mt-2 px-6 py-2.5 rounded-full bg-primary hover:bg-primary text-black font-bold text-sm transition-colors"
           >
             Done
           </button>
@@ -188,7 +188,7 @@ export function BoostModal({
           <button
             onClick={handleBoost}
             disabled={isPending || !hasEnough}
-            className="w-full py-3 rounded-xl bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-sm transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-full bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-sm transition-colors flex items-center justify-center gap-2 min-h-12"
           >
             {isPending ? (
               <>

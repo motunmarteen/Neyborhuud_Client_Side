@@ -368,7 +368,7 @@ export default function FakeCallPage() {
         type="button"
         onClick={startScheduled}
         disabled={phase === 'waiting'}
-        className="w-full rounded-2xl bg-primary py-3.5 text-base font-bold text-white disabled:opacity-50"
+        className="w-full rounded-full bg-primary py-3.5 text-base font-bold text-white disabled:opacity-50"
       >
         {delayMs === 0 ? 'Ring now' : 'Schedule call'}
       </button>

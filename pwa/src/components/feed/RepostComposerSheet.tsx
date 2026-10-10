@@ -86,7 +86,7 @@ export function RepostComposerSheet({
           type="button"
           disabled={isSubmitting}
           onClick={handleRepost}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-green-dark py-3 text-sm font-black text-white transition-opacity disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-green-dark py-3 text-sm font-black text-white transition-opacity disabled:opacity-50 min-h-12"
         >
           <XRepostIcon size={18} className="text-white" />
           {comment.trim() ? 'Quote repost' : 'Repost'}

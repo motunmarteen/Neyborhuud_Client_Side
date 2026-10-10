@@ -1702,7 +1702,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         <button
                                             type="submit"
                                             disabled={isSubmitting || (!content.trim() && selectedFiles.length === 0)}
-                                            className="px-6 py-3 rounded-xl disabled:opacity-40 flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg text-xs font-black bg-[#00B82E] hover:bg-[#00F53B] text-black active:scale-[0.97] transition-all"
+                                            className="px-6 py-3 rounded-full disabled:opacity-40 flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg text-xs font-black bg-[#00B82E] hover:bg-[#00F53B] text-black active:scale-[0.97] transition-all"
                                         >
                                             {isSubmitting ? (
                                                 <>

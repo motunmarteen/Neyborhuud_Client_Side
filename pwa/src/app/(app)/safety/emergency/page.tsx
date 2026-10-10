@@ -519,7 +519,7 @@ export default function EmergencyPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full rounded-xl bg-brand-red py-3 font-semibold text-white transition-colors hover:bg-brand-red disabled:opacity-50"
+                  className="w-full rounded-full bg-brand-red py-3 font-semibold text-white transition-colors hover:bg-brand-red disabled:opacity-50 min-h-12"
                 >
                   {submitting ? '📡 Getting location & reporting…' : '🚨 Report Emergency'}
                 </button>

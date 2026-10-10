@@ -295,7 +295,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                         />
                     </div>
                     <button type="button" onClick={handleSaveReceived} disabled={updateReceivedMutation.isPending}
-                        className="px-3 py-1.5 rounded-xl text-[12px] font-black text-white bg-primary hover:bg-brand-green-dark transition-all cursor-pointer">
+                        className="px-3 py-1.5 rounded-full text-[12px] font-black text-white bg-primary hover:bg-brand-green-dark transition-all cursor-pointer">
                         {updateReceivedMutation.isPending ? '…' : 'Save'}
                     </button>
                     <button type="button" onClick={(e) => { e.stopPropagation(); setShowUpdateReceived(false); }}

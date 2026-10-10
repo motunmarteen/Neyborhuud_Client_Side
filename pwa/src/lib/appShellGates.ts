@@ -22,6 +22,8 @@ export const ONBOARDING_EXCLUDED_ROUTES = [
   '/info/community-rules',
   '/info/terms-of-service',
   '/info/privacy-policy',
+  // Public design reference (Phase 2 building blocks).
+  '/design-kit',
 ] as const;
 
 export function isOnboardingOrAuthRoute(pathname: string): boolean {

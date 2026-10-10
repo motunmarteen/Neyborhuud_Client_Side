@@ -37,7 +37,7 @@ export default function SafetyError({ error, reset }: ErrorPageProps) {
         <div className="flex flex-col gap-3 w-full">
           <button
             onClick={reset}
-            className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm transition-opacity hover:opacity-90 active:opacity-80"
+            className="w-full py-3 rounded-full bg-primary text-white font-bold text-sm transition-opacity hover:opacity-90 active:opacity-80 min-h-12"
           >
             Try again
           </button>

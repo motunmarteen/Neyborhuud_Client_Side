@@ -3,7 +3,19 @@
 import { forwardRef } from 'react';
 import { Loader } from 'lucide-react';
 
-export type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'outline' | 'success';
+/**
+ * Design foundation F-03: pill buttons.
+ *
+ *   primary   — green, the one main action on a screen
+ *   secondary — white with a line border (the "white outline" button)
+ *   soft      — green tint, for a second positive action
+ *   ghost     — no background, for low-emphasis actions
+ *   danger    — safety red, for SOS and destructive actions
+ *
+ * Heights: sm 40px (tap area still 48px), md 48px, lg 56px.
+ * `outline` and `success` are kept as aliases for older call sites.
+ */
+export type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'ghost' | 'danger' | 'outline' | 'success';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -16,56 +28,36 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: [
-    'bg-brand-blue text-white',
-    'hover:bg-brand-blue/90 hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(59,130,196,0.35)]',
-    'active:translate-y-0 active:shadow-none',
-    'focus-visible:ring-brand-blue focus-visible:ring-offset-brand-black',
-    'disabled:bg-brand-blue/40 disabled:text-white/50',
-  ].join(' '),
-
-  ghost: [
-    'bg-white/8 text-white border border-white/10',
-    'hover:bg-white/12 hover:border-white/20',
-    'active:bg-white/6',
-    'focus-visible:ring-white/40 focus-visible:ring-offset-brand-black',
-    'disabled:bg-white/4 disabled:text-white/30 disabled:border-white/5',
-  ].join(' '),
-
-  outline: [
-    'bg-transparent text-brand-blue border border-brand-blue/50',
-    'hover:bg-brand-blue/8 hover:border-brand-blue hover:-translate-y-px',
-    'active:translate-y-0',
-    'focus-visible:ring-brand-blue focus-visible:ring-offset-brand-black',
-    'disabled:opacity-40',
-  ].join(' '),
-
-  danger: [
-    'bg-status-danger text-white',
-    'hover:bg-status-danger/85 hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(232,39,26,0.35)]',
-    'active:translate-y-0 active:shadow-none',
-    'focus-visible:ring-status-danger focus-visible:ring-offset-brand-black',
-    'disabled:bg-status-danger/40 disabled:text-white/50',
-  ].join(' '),
-
-  success: [
-    'bg-status-success text-brand-black font-bold',
-    'hover:bg-status-success/85 hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(0,184,46,0.30)]',
-    'active:translate-y-0 active:shadow-none',
-    'focus-visible:ring-status-success focus-visible:ring-offset-brand-black',
-    'disabled:bg-status-success/40 disabled:text-brand-black/50',
-  ].join(' '),
+  primary:
+    'bg-primary text-white shadow-[0_6px_16px_rgba(0,184,46,0.28)] hover:bg-brand-green-dark ' +
+    'disabled:bg-primary/40 disabled:shadow-none',
+  secondary:
+    'bg-white text-navy border border-line shadow-xs hover:bg-[#F6F8FB] hover:border-[#C9CFD8] ' +
+    'disabled:text-faint',
+  soft:
+    'bg-green-soft text-brand-green-dark hover:bg-[#D6F1DE] disabled:text-brand-green-dark/40',
+  ghost:
+    'bg-transparent text-navy hover:bg-navy/5 disabled:text-faint',
+  danger:
+    'bg-brand-red text-white shadow-[0_6px_16px_rgba(229,72,77,0.28)] hover:bg-[#D23A40] ' +
+    'disabled:bg-brand-red/40 disabled:shadow-none',
+  outline: '',
+  success: '',
 };
+VARIANT_CLASSES.outline = VARIANT_CLASSES.secondary;
+VARIANT_CLASSES.success = VARIANT_CLASSES.primary;
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: 'px-3.5 py-2 text-xs rounded-xl gap-1.5',
-  md: 'px-5 py-2.5 text-sm rounded-xl gap-2',
-  lg: 'px-6 py-3.5 text-sm rounded-2xl gap-2',
+  sm: 'min-h-10 px-4 text-[13px] gap-1.5 tap-target',
+  md: 'min-h-12 px-5 text-[15px] gap-2',
+  lg: 'min-h-14 px-6 text-base gap-2',
 };
 
 const BASE =
-  'inline-flex items-center justify-center font-semibold transition-all duration-150 select-none ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ' +
+  'relative inline-flex items-center justify-center rounded-full font-bold leading-none select-none ' +
+  'transition-[background-color,border-color,box-shadow,transform] duration-150 ' +
+  'motion-safe:active:scale-[0.97] ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white ' +
   'disabled:cursor-not-allowed disabled:pointer-events-none';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -80,6 +72,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       disabled,
       className = '',
+      type = 'button',
       ...rest
     },
     ref,
@@ -89,7 +82,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        type="button"
+        type={type}
         disabled={isDisabled}
         aria-busy={loading}
         className={[

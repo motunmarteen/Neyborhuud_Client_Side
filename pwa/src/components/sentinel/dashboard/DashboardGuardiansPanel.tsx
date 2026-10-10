@@ -278,7 +278,7 @@ export function DashboardGuardiansPanel({
           <button
             type="submit"
             disabled={!guardianForm.guardianId}
-            className="w-full rounded-full bg-primary py-2.5 text-sm font-bold text-white disabled:opacity-50"
+            className="w-full rounded-full bg-primary py-2.5 text-sm font-bold text-white disabled:opacity-50 min-h-12"
           >
             Send guardian request
           </button>

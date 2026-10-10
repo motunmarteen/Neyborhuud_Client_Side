@@ -104,7 +104,7 @@ export function CoinSpendModal({
             </p>
             <button
               onClick={onClose}
-              className="mt-4 rounded-xl bg-brand-green-dark px-6 py-2 text-sm font-medium text-white hover:bg-brand-green-dark"
+              className="mt-4 rounded-full bg-brand-green-dark px-6 py-2 text-sm font-medium text-white hover:bg-brand-green-dark"
             >
               Close
             </button>
@@ -158,7 +158,7 @@ export function CoinSpendModal({
             <button
               onClick={handleConfirm}
               disabled={!hasEnough || isPending}
-              className="w-full rounded-xl bg-primary py-3 font-semibold text-white transition-colors hover:bg-status-warning/85 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-full bg-primary py-3 font-semibold text-white transition-colors hover:bg-status-warning/85 disabled:cursor-not-allowed disabled:opacity-50 min-h-12"
             >
               {isPending
                 ? "Processing…"

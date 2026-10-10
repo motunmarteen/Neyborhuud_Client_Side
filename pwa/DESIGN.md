@@ -1,5 +1,7 @@
 # NeyborHuud — Design System & Implementation Guide
 
+> **Update (Phase 2 rebuild, October 2026):** colours, fonts and buttons in this file are out of date where they differ from the new foundation. The source of truth for those is the palette block at the top of `src/app/globals.css`, `src/components/ui/Button.tsx`, and the live **/design-kit** page. Tracker: `docs/REBUILD-TRACKER.md` (Phase 2). Palette: green #00B82E, deep green #0E8A3E, navy #1D2433, muted #5B6478, background #EEF2F7, safety red #E5484D, amber #F6C344, purple #7A4FD8. Fonts: Nunito (headings), Nunito Sans (text).
+
 > **This is the single source of truth for every visual, interaction, and engineering decision on the platform.**
 > Before writing any UI code — check here first. If something is not covered, add it here before implementing it.
 

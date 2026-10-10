@@ -464,7 +464,7 @@ export default function GeofencesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 bg-brand-green-dark hover:bg-primary disabled:opacity-50 text-white font-semibold py-2 rounded-lg text-sm transition"
+                  className="flex-1 bg-brand-green-dark hover:bg-primary disabled:opacity-50 text-white font-semibold py-2 rounded-full text-sm transition"
                 >
                   {submitting ? 'Saving…' : editingId ? 'Update Zone' : 'Create Zone'}
                 </button>
