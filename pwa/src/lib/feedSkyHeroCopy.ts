@@ -11,35 +11,40 @@ function getTempTone(temp: number): string {
 /** Branded sky-hero composer — name lives in the greeting above. */
 export function getHuudComposerPrompt(timePeriod: TimePeriod): string {
   if (timePeriod === 'night') {
-    return "What's up in your Huud tonight?";
+    return "Anything happening around you tonight?";
   }
-  return "What's up in your Huud today?";
+  return "Wetin dey happen around you today?";
 }
 
-/** Expressive weather line — warm & local; no repeat of temp (above) or time (in greeting). */
+/** Weather line in everyday Nigerian English; no repeat of temp (above) or time (in greeting). See docs/LANGUAGE.md. */
 export function getExpressiveWeatherLine(params: {
   condition: string;
   temp: number;
   huudName: string;
   ambientWeather: WeatherCondition;
 }): string {
-  const { condition, temp, huudName, ambientWeather } = params;
+  const { temp, huudName, ambientWeather } = params;
   const tone = getTempTone(temp);
-  const conditionLower = condition.toLowerCase();
+  const hot = tone === 'hot' || tone === 'warm';
 
   switch (ambientWeather) {
     case 'rain':
-      return `Rain rolling through ${huudName}. Hope you're staying dry.`;
+      return `Rain don start for ${huudName}. Stay dry o.`;
     case 'storm':
-      return `Storms over ${huudName}. Stay indoors if you can.`;
+      return `Heavy rain for ${huudName}. Stay inside if you can.`;
     case 'fog':
-      return `It's ${tone} and misty in ${huudName}.`;
+      // Fog/haze in Nigeria is usually harmattan dust.
+      return `Harmattan haze for ${huudName}. Drive carefully.`;
     case 'snow':
       return `It's a ${tone}, chilly one in ${huudName}.`;
     case 'cloudy':
-      return `It's ${tone} with ${conditionLower} in ${huudName}.`;
+      return hot
+        ? `Cloudy but hot for ${huudName}. Drink water.`
+        : `Cloudy weather for ${huudName} today.`;
     case 'clear':
     default:
-      return `It's ${tone} with clear skies in ${huudName}.`;
+      return hot
+        ? `Sun dey hot for ${huudName} today. Drink water.`
+        : `Fine weather for ${huudName} today.`;
   }
 }

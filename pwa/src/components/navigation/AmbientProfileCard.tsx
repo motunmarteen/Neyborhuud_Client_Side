@@ -231,12 +231,14 @@ export function getGreeting(time: TimePeriod, firstName?: string, username?: str
   const name = getPersonalizedName(firstName, username);
   const suffix = name ? `, ${name}` : '';
   switch (time) {
-    case 'dawn': return `Good Morning${suffix}`;
-    case 'morning': return `Good Morning${suffix}`;
-    case 'afternoon': return `Good Afternoon${suffix}`;
-    case 'sunset': return `Good Evening${suffix}`;
-    case 'evening': return `Good Evening${suffix}`;
-    case 'night': return `Good Night${suffix}`;
+    // Nigerian usage: "Good night" is a goodbye, so after dark we greet with
+    // "Good evening". See docs/LANGUAGE.md.
+    case 'dawn': return `Good morning${suffix}`;
+    case 'morning': return `Good morning${suffix}`;
+    case 'afternoon': return `Good afternoon${suffix}`;
+    case 'sunset': return `Good evening${suffix}`;
+    case 'evening': return `Good evening${suffix}`;
+    case 'night': return `Good evening${suffix}`;
   }
 }
 

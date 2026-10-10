@@ -119,7 +119,7 @@ function viewMeta(view: HuudView, huudName: string) {
         icon: 'home_pin',
         section: `Nearby in ${huudName}`,
         emptyTitle: 'Nothing in your area yet',
-        emptyDescription: `Be the first to share something in ${huudName}.`,
+        emptyDescription: `Nobody don post for ${huudName} yet. Start the gist!`,
         emptySuffix: `Posts from ${huudName}`,
         ranked: false,
       };

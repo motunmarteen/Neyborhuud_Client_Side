@@ -87,7 +87,7 @@ function MakeOfferDialog({
         <div className="overflow-y-auto overscroll-contain px-4 pb-4 pt-2 sm:px-6 sm:pb-6 sm:pt-5">
           <div className="mb-4 flex items-start justify-between gap-3">
             <h3 id="make-offer-title" className="text-lg font-bold tracking-tight" style={{ color: "var(--neu-text)" }}>
-              Make an offer
+              Price am
             </h3>
             <button
               type="button"
@@ -140,7 +140,7 @@ function MakeOfferDialog({
             id="offer-message-input"
             value={offerMessage}
             onChange={(e) => onOfferMessageChange(e.target.value.slice(0, OFFER_MESSAGE_MAX))}
-            placeholder="e.g. Can you deliver this week?"
+            placeholder="e.g. Abeg, can you deliver this week?"
             rows={3}
             maxLength={OFFER_MESSAGE_MAX}
             className="w-full resize-none rounded-2xl border-2 border-[var(--border-light)] bg-[var(--surface-light)] p-3 text-sm text-brand-black shadow-inner placeholder:text-brand-green-dark/40 transition-shadow focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 dark:border-white/15 dark:bg-white/5 dark:text-white dark:placeholder:text-white/30 dark:focus:border-primary dark:focus:ring-emerald-400/15"
@@ -164,7 +164,7 @@ function MakeOfferDialog({
             disabled={isSubmitting || !offerAmount.trim()}
             className="min-h-[48px] w-full shrink-0 rounded-full bg-[#00D431] hover:bg-[#00F53B] px-4 text-sm font-extrabold text-black shadow-[0_8px_24px_rgba(0,212,49,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-0 sm:flex-1"
           >
-            {isSubmitting ? "Sending…" : "Send offer"}
+            {isSubmitting ? "Sending…" : "Send my price"}
           </button>
         </div>
         </div>
@@ -212,7 +212,7 @@ export function BuyerIntentActions({
         payload;
       const convId = conv?._id ?? conv?.id ?? conv?.conversationId;
       if (!convId) {
-        toast.error("Could not start conversation with seller");
+        toast.error("We couldn't open the chat with the seller. Try again.");
         return false;
       }
       router.push(`/chat/${convId}`);
@@ -230,16 +230,16 @@ export function BuyerIntentActions({
         // 404 here means the route isn't deployed yet — fall back gracefully.
         // Any other status is a real error (400 = own product, 410 = unavailable).
         if (status === 400) {
-          toast.error("You can't message yourself about your own listing.");
+          toast.error("This na your own item. You can't message yourself about it.");
           return;
         }
         if (status === 410) {
-          toast.error("This product is no longer available.");
+          toast.error("Sorry, this item has been sold or removed.");
           return;
         }
         if (status !== 404 && status !== undefined) {
           toast.error(
-            firstErr?.response?.data?.message || firstErr?.message || "Could not contact seller"
+            firstErr?.response?.data?.message || firstErr?.message || "We couldn't reach the seller. Try again."
           );
           return;
         }
@@ -247,13 +247,13 @@ export function BuyerIntentActions({
       }
 
       if (!product.sellerId) {
-        toast.error("Seller information is unavailable.");
+        toast.error("We can't find this seller's details right now.");
         return;
       }
       const res = await chatService.getOrCreateDirectConversation(product.sellerId);
       navigateToConv(res);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || "Could not contact seller");
+      toast.error(err?.response?.data?.message || err?.message || "We couldn't reach the seller. Try again.");
     } finally {
       setContactingSeller(false);
     }
@@ -328,19 +328,19 @@ export function BuyerIntentActions({
         // P2P model: one product = one deal = one chat. If a deal already
         // existed, we're just reopening it — never a dead-end error.
         if (payload?.reused) {
-          toast.message("Reopening your active deal for this item…");
+          toast.message("You already have a deal on this item. Opening it…");
         }
         router.push(`/chat/${convId}`);
       } else {
         // Order created but no conversation id came back — don't strand the
         // buyer; send them to My Deals so they can open the deal chat.
-        toast.success("Order started — opening your deals.");
+        toast.success("Deal started! Opening your deals.");
         router.push("/marketplace/my-deals");
       }
     } catch (err) {
       toast.error(
         (err as { message?: string })?.message ||
-          "Couldn't start the purchase. Please try again.",
+          "We couldn't start this deal. Please try again.",
       );
     }
   };
@@ -382,13 +382,13 @@ export function BuyerIntentActions({
         // offer is normal, not an error.
         toast.success(
           reused
-            ? "You already have an active offer here — reopening it."
-            : `${getOfferToast({ action: 'new', amount, actorRole: 'buyer' }, 'buyer')} You are awaiting the seller's response.`,
+            ? "You don already price this item. Opening your offer…"
+            : `${getOfferToast({ action: 'new', amount, actorRole: 'buyer' }, 'buyer')} Wait small for the seller to reply.`,
         );
         router.push(`/chat/${conversationId}`);
       } else {
         toast.success(
-          `You placed an offer of ${formatNGN(amount)} and are awaiting the seller's response.`,
+          `You priced it at ${formatNGN(amount)}. Wait small for the seller to reply.`,
         );
       }
     } catch (error) {
@@ -425,7 +425,7 @@ export function BuyerIntentActions({
                 shopping_bag
               </span>
             )}
-            <span className="truncate">{createOrder.isPending ? "…" : "Buy now"}</span>
+            <span className="truncate">{createOrder.isPending ? "…" : "Buy am"}</span>
           </button>
 
           {/* OFFER — secondary, only for negotiable products. */}
@@ -440,7 +440,7 @@ export function BuyerIntentActions({
               className="flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-primary/35 bg-primary/[0.08] px-3 py-2.5 text-xs font-bold tracking-tight text-[#006F35] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px] dark:border-primary/25 dark:bg-emerald-500/15 dark:text-emerald-100"
             >
               <span className="material-symbols-outlined shrink-0 text-[16px]">sell</span>
-              <span className="truncate">Offer</span>
+              <span className="truncate">Price am</span>
             </button>
           )}
 
@@ -499,7 +499,7 @@ export function BuyerIntentActions({
           ) : (
             <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: '"FILL" 1' }}>shopping_bag</span>
           )}
-          {createOrder.isPending ? "Processing…" : "Buy now"}
+          {createOrder.isPending ? "Starting your deal…" : "Buy am"}
         </button>
 
         {product.negotiable && (
@@ -510,7 +510,7 @@ export function BuyerIntentActions({
             className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/[0.08] py-4 font-semibold text-[#006F35] transition-colors hover:bg-primary/[0.14] disabled:opacity-50 dark:border-primary/25 dark:bg-emerald-500/15 dark:text-emerald-100"
           >
             <span className="material-symbols-outlined text-[20px]">sell</span>
-            Make offer
+            Price am
           </button>
         )}
 

@@ -731,7 +731,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     Create post
                                                 </p>
                                                 <h2 className="text-base font-black tracking-tight text-[#111827] mt-0.5">
-                                                    What's on your mind today?
+                                                    Wetin dey happen around you today?
                                                 </h2>
                                             </div>
                                             <button
