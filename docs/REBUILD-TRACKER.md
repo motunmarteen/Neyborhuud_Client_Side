@@ -100,7 +100,7 @@ Kept here so the whole history is in one place.
 - [x] I-04d Old unused KMS key `5a022ab4-dcb3-491b-bbb6-df3c0217d16c` scheduled for deletion on 17 Oct 2026 (cancel before then with `aws kms cancel-key-deletion` if ever needed)
 - [ ] I-04b Upgrade the AWS account from the **Free plan** to a paid plan before **11 January 2027** (Free-plan accounts are closed when credits or the plan run out) (*owner*)
 - [ ] I-04c Fix the AWS MCP server in VS Code: fully quit and reopen VS Code so it finds `uvx` (installed during setup)
-- [ ] I-05 **Rotate leaked secrets**: MongoDB password, Cloudinary secret, API keys, email password (old `.env.staging` in git history)
+- [ ] ⏸ I-05 (owner chose to defer 2026-10-10: accounts locked down, no known outside copies; revisit before launch) **Rotate leaked secrets**: MongoDB password, Cloudinary secret, API keys, email password (old `.env.staging` in git history)
 - [x] I-06 (done 2026-10-10 by owner) Lock former collaborator out of: domain registrar (Namecheap), MongoDB Atlas, Cloudinary, Firebase, Termii, Vercel — *owner*
 - [x] I-07 (done 2026-10-10; org now has only motunmarteen, no invites or outside collaborators) Remove former collaborator from the NeyborHuud GitHub org (`gh auth refresh -s admin:org`, then remove)
 - [ ] I-08 Fix GitHub Actions billing on the personal account so server tests run again — *owner*
