@@ -30,7 +30,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 |---|---|---|---|
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 0 | 12 | ⛔ waiting on AWS |
-| 2. Design foundation | 0 | 12 | ⬜ next |
+| 2. Design foundation | 1 | 12 | 🟡 in progress |
 | 3. Map home (sky + live map) | 0 | 16 | ⬜ |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
@@ -110,7 +110,7 @@ Kept here so the whole history is in one place.
 **Goal:** the new look in the shared building blocks, so every screen improves at once. Light theme only.
 
 - [ ] F-01 Colour tokens: green `#00B82E` / deep green `#0E8A3E`, navy text `#1D2433`, muted `#5B6478`, background `#EEF2F7`, safety red `#E5484D`, amber, purple; remove dark-mode-only styles
-- [ ] F-02 Fonts: **Fredoka** (headings, logo) + **Plus Jakarta Sans** (text), self-hosted for speed
+- [x] F-02 Fonts: **Fredoka** (headings, logo) + **Plus Jakarta Sans** (text), self-hosted for speed (2965456)
 - [ ] F-03 Buttons: pill shapes (primary green, white outline, danger); 48 px touch targets
 - [ ] F-04 Cards, chips and filter chips (the map-layer style)
 - [ ] F-05 Bottom sheet component (the slide-up panel used everywhere), with handle and drag-to-close
