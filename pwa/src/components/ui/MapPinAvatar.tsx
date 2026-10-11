@@ -1,5 +1,6 @@
 import React, { useId } from 'react';
 import { useImageOk } from '@/hooks/useImageOk';
+import { PIN_EDGE, PIN_PATH } from '@/components/brand/pinShape';
 
 type PinSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'marker' | '2xl';
 
@@ -52,13 +53,13 @@ export default function MapPinAvatar({
             <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity={0.15} />
           </filter>
           <clipPath id={`teardrop-clip-${uid}`}>
-            <path d="M50 6 C25.6 6 6 25.6 6 50 C6 81.5 50 109 50 109 C50 109 94 81.5 94 50 C94 25.6 74.4 6 50 6 Z" />
+            <path d={PIN_PATH} />
           </clipPath>
         </defs>
         
         {/* Background / Shadow / White Pin Base */}
         <path 
-          d="M50 6 C25.6 6 6 25.6 6 50 C6 81.5 50 109 50 109 C50 109 94 81.5 94 50 C94 25.6 74.4 6 50 6 Z" 
+          d={PIN_PATH} 
           fill="#ffffff" 
           filter={`url(#shadow-${uid})`}
         />
@@ -85,22 +86,22 @@ export default function MapPinAvatar({
             <>
               <rect x="0" y="0" width="100" height="115" fill="#3B82C4" />
               {showInitial ? (
-                <text x="50" y="58" textAnchor="middle" dominantBaseline="middle" fill="#ffffff" fontSize="40" fontWeight="900" fontFamily="var(--font-head)">
+                <text x="50" y="47" textAnchor="middle" dominantBaseline="middle" fill="#ffffff" fontSize="40" fontWeight="900" fontFamily="var(--font-head)">
                   {fallbackInitial}
                 </text>
               ) : (
-                <path d="M50 30a13 13 0 1 1 0 26a13 13 0 1 1 0-26Zm-24 52c2-13 12-20 24-20s22 7 24 20" fill="none" stroke="#ffffff" strokeWidth="6" strokeLinecap="round" />
+                <path transform="translate(0 -10)" d="M50 30a13 13 0 1 1 0 26a13 13 0 1 1 0-26Zm-24 52c2-13 12-20 24-20s22 7 24 20" fill="none" stroke="#ffffff" strokeWidth="6" strokeLinecap="round" />
               )}
             </>
           )}
         </g>
 
-        {/* Crisp White Outer Border Ring */}
+        {/* Hairline white edge (was a thick border; owner asked for a cleaner pin) */}
         <path
-          d="M50 6 C25.6 6 6 25.6 6 50 C6 81.5 50 109 50 109 C50 109 94 81.5 94 50 C94 25.6 74.4 6 50 6 Z"
+          d={PIN_PATH}
           fill="none"
           stroke="#ffffff"
-          strokeWidth="3"
+          strokeWidth={PIN_EDGE}
         />
       </svg>
     </div>

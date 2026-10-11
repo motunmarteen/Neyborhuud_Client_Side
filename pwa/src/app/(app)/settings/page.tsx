@@ -13,7 +13,6 @@ import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { isAdminUser } from '@/lib/adminAccess';
 import { EmailVerificationCard } from '@/components/auth/EmailVerificationCard';
 import { formatProfileBirthday, getZodiacFromBirthday } from '@/lib/profileSnapHelpers';
-import { getStoredTheme, setStoredTheme, applySystemTheme, getSystemPrefersDark } from '@/lib/systemTheme';
 import { savedAccessibility, setSaveData, applyTextSize as setRootTextSize } from '@/lib/calmMode';
 
 type SettingsTab = 'notifications' | 'privacy' | 'account' | 'language' | 'posts';
@@ -218,11 +217,6 @@ export default function SettingsPage() {
         toast.success('Post settings updated.');
     };
     const [consentsLoading, setConsentsLoading] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-        if (typeof window === 'undefined') return false;
-        const stored = getStoredTheme();
-        return stored !== null ? stored === 'dark' : getSystemPrefersDark();
-    });
     const [consentBusy, setConsentBusy] = useState<ConsentType | null>(null);
     const [accessLogOpen, setAccessLogOpen] = useState(false);
     const [accessLogLoading, setAccessLogLoading] = useState(false);
@@ -947,44 +941,6 @@ export default function SettingsPage() {
                       chevron_right
                     </span>
                   </Link>
-                </div>
-              </Section>
-
-              <Section title="Appearance">
-                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`material-symbols-outlined text-[20px] text-blue-600 ${isDarkMode ? 'icon-filled' : 'icon-outlined'}`}
-                      aria-hidden
-                    >
-                      {isDarkMode ? 'dark_mode' : 'light_mode'}
-                    </span>
-                    <div>
-                      <p className="text-sm font-bold text-gray-800">
-                        {isDarkMode ? 'Dark mode' : 'Light mode'}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {isDarkMode ? 'Easy on the eyes at night' : 'Clean and bright'}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isDarkMode ? 'true' : 'false'}
-                    aria-label="Toggle dark mode"
-                    onClick={() => {
-                      const next = !isDarkMode;
-                      setIsDarkMode(next);
-                      setStoredTheme(next ? 'dark' : 'light');
-                      applySystemTheme(next);
-                    }}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus-visible:outline-none ${isDarkMode ? 'bg-blue-600' : 'bg-gray-200'}`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 m-0.5 rounded-full bg-white shadow-md transition-transform duration-200 ${isDarkMode ? 'translate-x-5' : 'translate-x-0'}`}
-                    />
-                  </button>
                 </div>
               </Section>
 

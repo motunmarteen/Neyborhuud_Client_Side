@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { PIN_PATH_2X } from '@/components/brand/pinShape';
 
 interface AvatarAdjusterModalProps {
   file: File;
@@ -20,6 +21,29 @@ export function AvatarAdjusterModal({ file, onSave, onCancel }: AvatarAdjusterMo
   // Viewport aspect ratio matches MapPinAvatar (100 : 115)
   const VIEWPORT_WIDTH = 200;
   const VIEWPORT_HEIGHT = 230;
+
+  // The photo's natural size, once loaded. The preview draws it at exactly the size the saved
+  // crop assumes (cover the pin, times zoom), so what you see is what gets saved.
+  const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
+  const coverSize = (z: number) => {
+    if (!natural) return { w: VIEWPORT_WIDTH * z, h: VIEWPORT_HEIGHT * z };
+    const aspect = natural.w / natural.h;
+    return aspect > VIEWPORT_WIDTH / VIEWPORT_HEIGHT
+      ? { w: VIEWPORT_HEIGHT * z * aspect, h: VIEWPORT_HEIGHT * z }
+      : { w: VIEWPORT_WIDTH * z, h: (VIEWPORT_WIDTH * z) / aspect };
+  };
+  const clampOffset = (o: { x: number; y: number }, z: number) => {
+    const { w, h } = coverSize(z);
+    const mx = Math.max(0, (w - VIEWPORT_WIDTH) / 2);
+    const my = Math.max(0, (h - VIEWPORT_HEIGHT) / 2);
+    return { x: Math.min(mx, Math.max(-mx, o.x)), y: Math.min(my, Math.max(-my, o.y)) };
+  };
+
+  // Zooming out must not leave an empty edge.
+  useEffect(() => {
+    setOffset((o) => clampOffset(o, scale));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scale, natural]);
 
   useEffect(() => {
     const reader = new FileReader();
@@ -170,47 +194,41 @@ export function AvatarAdjusterModal({ file, onSave, onCancel }: AvatarAdjusterMo
           onTouchMove={handlePointerMove}
           onTouchEnd={handlePointerUp}
         >
-          <svg viewBox="0 0 200 230" className="absolute inset-0 w-full h-full select-none">
-            <defs>
-              <clipPath id="avatar-teardrop-clip">
-                <path d="M100 12 C51.2 12 12 51.2 12 100 C12 163 100 218 100 218 C100 218 188 163 188 100 C188 51.2 148.8 12 100 12 Z" />
-              </clipPath>
-            </defs>
-
-            {/* Draggable image inside foreignObject clipped to teardrop */}
-            <g clipPath="url(#avatar-teardrop-clip)">
-              <foreignObject x="0" y="0" width="200" height="230">
-                <div className="w-full h-full flex items-center justify-center pointer-events-none">
-                  <img
-                    ref={imageRef}
-                    src={imageSrc}
-                    alt="Adjust preview"
-                    className="max-w-none origin-center select-none"
-                    style={{
-                      transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                    draggable={false}
-                  />
-                </div>
-              </foreignObject>
-            </g>
-
+          {/* F-15c: the photo is a normal element under the SVG, not inside an SVG foreignObject.
+              Safari does not clip a transformed <img> inside foreignObject, so on iPhone the photo
+              spilled out of the pin. The viewport is 200x230 px = the SVG's units, so offsets and
+              the saved crop are unchanged; the dimmed surround shows what will be cut. */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              ref={imageRef}
+              src={imageSrc}
+              alt="Adjust preview"
+              className="max-w-none origin-center select-none"
+              onLoad={(e) => setNatural({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })}
+              style={{
+                transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
+                width: coverSize(1).w,
+                height: coverSize(1).h,
+                flex: 'none',
+              }}
+              draggable={false}
+            />
+          </div>
+          <svg viewBox="0 0 200 230" className="pointer-events-none absolute inset-0 w-full h-full select-none" aria-hidden>
             {/* Dark semi-transparent background surrounding the teardrop */}
             <path 
-              d="M0 0 H200 V230 H0 Z M100 12 C51.2 12 12 51.2 12 100 C12 163 100 218 100 218 C100 218 188 163 188 100 C188 51.2 148.8 12 100 12 Z" 
+              d={`M0 0 H200 V230 H0 Z ${PIN_PATH_2X}`} 
               fill="rgba(0,0,0,0.5)" 
               fillRule="evenodd"
             />
 
             {/* Teardrop border outline */}
             <path 
-              d="M100 12 C51.2 12 12 51.2 12 100 C12 163 100 218 100 218 C100 218 188 163 188 100 C188 51.2 148.8 12 100 12 Z" 
+              d={PIN_PATH_2X} 
               fill="none" 
-              stroke="#ffffff" 
-              strokeWidth="6" 
+              stroke="#ffffff"
+              strokeWidth="3" 
             />
           </svg>
         </div>

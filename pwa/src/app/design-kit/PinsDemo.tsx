@@ -1,6 +1,8 @@
 'use client';
 
 import { MapPin, PersonPin, SentinelOrb } from '@/components/map/Pins';
+import { BrandPinAvatar } from '@/components/brand/BrandPinAvatar';
+import MapPinAvatar from '@/components/ui/MapPinAvatar';
 
 export function PinsDemo() {
   return (
@@ -17,6 +19,12 @@ export function PinsDemo() {
       <MapPin emoji="🍲" size="sm" label="Mama Put buka" />
       <SentinelOrb mood="advisory" />
       <SentinelOrb mood="calm" />
+      <div className="col-span-4 flex items-end justify-center gap-5 pt-2">
+        <BrandPinAvatar src="/images/auth-hero.jpg" alt="Profile photo pin" size="hero" />
+        <BrandPinAvatar alt="Profile pin without a photo" fallbackInitial="A" size="lg" />
+        <MapPinAvatar src="/images/auth-hero.jpg" alt="Small profile pin" size="md" />
+        <MapPinAvatar alt="Small pin without a photo" fallbackInitial="T" size="md" />
+      </div>
     </div>
   );
 }
