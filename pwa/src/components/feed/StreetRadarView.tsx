@@ -183,15 +183,17 @@ export function StreetRadarView({ onOpenWhoIsInMyHuud, onOpenAskSentinel }: Stre
     fetchRadar();
   }, [selectedCategory]);
 
-  const allSignalsList: RadarSignal[] = radarData
+  // A missing or partial radar reply must never crash the page.
+  const signals = radarData?.signals;
+  const allSignalsList: RadarSignal[] = signals
     ? selectedCategory === 'all'
       ? [
-          ...radarData.signals.safety,
-          ...radarData.signals.traffic,
-          ...radarData.signals.infrastructure,
-          ...radarData.signals.community,
+          ...(signals.safety ?? []),
+          ...(signals.traffic ?? []),
+          ...(signals.infrastructure ?? []),
+          ...(signals.community ?? []),
         ].sort((a, b) => a.approxDistanceMeters - b.approxDistanceMeters)
-      : radarData.signals[selectedCategory] || []
+      : signals[selectedCategory] || []
     : [];
 
   const getCategoryTheme = (cat: RadarSignal['category']) => {

@@ -20,7 +20,7 @@ export function LocalHuudHubHero({ hubId }: { hubId: LocalHuudHubId }) {
   const hub = getLocalHuudHub(hubId);
 
   return (
-    <div className="local-huud-hub-hero mod-card rounded-2xl p-4">
+    <div className="local-huud-hub-hero mod-card rounded-2xl p-3 sm:p-4">
       <div className="flex items-start gap-3">
         <div className="local-huud-hub-hero__icon mod-inset flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
           <span
@@ -86,7 +86,7 @@ export function LocalHuudHubSectionNav({ hubId }: { hubId: LocalHuudHubId }) {
 
 export function LocalHuudHubHeader({ hubId, toolbar, hideSectionNav = false }: LocalHuudHubHeaderProps) {
   return (
-    <div className="local-huud-hub-header space-y-3">
+    <div className="local-huud-hub-header space-y-2">
       <LocalHuudHubHero hubId={hubId} />
       {!hideSectionNav ? <LocalHuudHubSectionNav hubId={hubId} /> : null}
       {toolbar ? <div className="local-huud-hub-toolbar">{toolbar}</div> : null}

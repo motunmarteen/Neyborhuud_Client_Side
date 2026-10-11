@@ -370,16 +370,18 @@ export function FeedSkyHero({ below, onOpenWhoIsInMyHuud, onOpenAskSentinel }: F
   }, [selectedCategory]);
 
   const allSignalsList: RadarSignal[] = useMemo(() => {
-    if (!radarData) return [];
+    // A missing or partial radar reply must never take the whole home feed down.
+    const signals = radarData?.signals;
+    if (!signals) return [];
     if (selectedCategory === 'all') {
       return [
-        ...radarData.signals.safety,
-        ...radarData.signals.traffic,
-        ...radarData.signals.infrastructure,
-        ...radarData.signals.community,
+        ...(signals.safety ?? []),
+        ...(signals.traffic ?? []),
+        ...(signals.infrastructure ?? []),
+        ...(signals.community ?? []),
       ].sort((a, b) => a.approxDistanceMeters - b.approxDistanceMeters);
     }
-    return radarData.signals[selectedCategory] || [];
+    return signals[selectedCategory] || [];
   }, [radarData, selectedCategory]);
 
   const activeSignal = allSignalsList[activeSignalIndex] || allSignalsList[0] || null;

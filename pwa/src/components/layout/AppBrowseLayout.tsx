@@ -40,7 +40,7 @@ export function AppBrowseLayout({
           className="feed-scroll-main flex min-h-0 flex-1 flex-col overflow-y-auto scroll-smooth"
         >
         <div
-          className={`mx-auto flex w-full min-w-0 max-w-full ${widthClass} flex-col gap-4 overflow-x-clip px-4 pt-3 pb-[var(--app-scroll-bottom)] ${className}`.trim()}
+          className={`mx-auto flex w-full min-w-0 max-w-full ${widthClass} flex-col gap-3 overflow-x-clip px-4 pt-0 pb-[var(--app-scroll-bottom)] ${className}`.trim()}
         >
           {header ? <div className="browse-toolbar">{header}</div> : null}
           {children}

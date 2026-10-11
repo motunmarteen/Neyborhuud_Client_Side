@@ -61,6 +61,7 @@ function getRouteTitle(pathname: string) {
     'local-news': 'Local News',
     jobs: 'Jobs',
     notifications: 'Notifications',
+    fyi: 'FYI',
     settings: 'Settings',
     safety: 'Sentinel Radar',
     sentinel: 'Sentinel',
