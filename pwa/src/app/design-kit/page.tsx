@@ -151,7 +151,7 @@ export default function DesignKitPage() {
           <PinsDemo />
         </Section>
 
-        <Section id="map" title="Map (M-01)" note="Real streets across Nigeria from OpenStreetMap (via OpenFreeMap), drawn in the Home Concept colours. Maps open on your own area; without one, on the whole country.">
+        <Section id="map" title="Map (M-01, M-02)" note="Real streets across Nigeria from OpenStreetMap (via OpenFreeMap), in the Home Concept colours, with 3D buildings. Pinch to zoom, twist to turn, drag two fingers up or down to tilt; the compass resets. Calm mode keeps it flat.">
           <MapDemo />
         </Section>
 

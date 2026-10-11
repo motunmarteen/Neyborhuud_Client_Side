@@ -15,12 +15,12 @@ const HuudMap = dynamic(() => import('@/components/map/HuudMap').then((m) => m.H
 // Built for the whole of Nigeria: the same map style everywhere.
 const PLACES = [
   { name: 'Nigeria', lat: NIGERIA_VIEW.center.lat, lng: NIGERIA_VIEW.center.lng, zoom: NIGERIA_VIEW.zoom },
-  { name: 'Kano', lat: 12.0002, lng: 8.5167, zoom: 15 },
-  { name: 'Abuja', lat: 9.0765, lng: 7.4986, zoom: 15 },
+  { name: 'Kano', lat: 12.0105, lng: 8.5341, zoom: 15 },
+  { name: 'Abuja', lat: 9.0563, lng: 7.4894, zoom: 15 },
   { name: 'Enugu', lat: 6.4413, lng: 7.4988, zoom: 15 },
   { name: 'Port Harcourt', lat: 4.8156, lng: 7.0498, zoom: 15 },
   { name: 'Ibadan', lat: 7.3986, lng: 3.9 , zoom: 15 },
-  { name: 'Lagos', lat: 6.5059, lng: 3.3667, zoom: 15 },
+  { name: 'Lagos', lat: 6.4535, lng: 3.3925, zoom: 15 },
 ];
 
 export function MapDemo() {
@@ -28,8 +28,8 @@ export function MapDemo() {
   const [active, setActive] = useState('Nigeria');
   const go = (p: (typeof PLACES)[number]) => {
     setActive(p.name);
-    if (p.name === 'Nigeria') mapRef.current?.fitBounds(NIGERIA_BOUNDS, { padding: 16, animate: false });
-    else mapRef.current?.jumpTo({ center: [p.lng, p.lat], zoom: p.zoom });
+    if (p.name === 'Nigeria') mapRef.current?.fitBounds(NIGERIA_BOUNDS, { padding: 16, animate: false, pitch: 0, bearing: 0 });
+    else mapRef.current?.jumpTo({ center: [p.lng, p.lat], zoom: 16.2, pitch: 55, bearing: -12 });
   };
   return (
     <div className="flex flex-col gap-2">

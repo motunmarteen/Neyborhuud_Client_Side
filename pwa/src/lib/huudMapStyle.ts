@@ -29,6 +29,9 @@ export const HUUD_MAP_COLORS = {
   path: '#EDE3CF',
   building: '#F1EBDD',
   buildingLine: '#D9CFB8',
+  roofZinc: '#8D9BBA',
+  roofTerracotta: '#D08A6E',
+  roofCream: '#F1EBDD',
   label: '#1D2433',
   labelMuted: '#3E4757',
   halo: 'rgba(244,249,238,0.95)',
@@ -107,13 +110,13 @@ export const HUUD_MAP_STYLE: StyleSpecification = {
       paint: { 'line-color': C.water, 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 16, 3] },
     },
 
-    // Buildings (flat here; 3D extrusion is M-02)
+    // Buildings: flat footprints when zoomed out (and in calm mode), 3D from zoom 15 (M-02).
     {
       id: 'building',
       type: 'fill',
       source: 'openmaptiles',
       'source-layer': 'building',
-      minzoom: 14,
+      minzoom: 13,
       paint: { 'fill-color': C.building, 'fill-outline-color': C.buildingLine },
     },
 
@@ -191,6 +194,35 @@ export const HUUD_MAP_STYLE: StyleSpecification = {
       'source-layer': 'transportation',
       filter: roadClass(['rail', 'transit']),
       paint: { 'line-color': C.roadMajor, 'line-width': 1.5, 'line-dasharray': [3, 2] },
+    },
+
+    // 3D buildings (M-02). Most Nigerian buildings have no height in OpenStreetMap, so those
+    // get a one- or two-storey height; roofs vary between zinc, terracotta and cream like the
+    // mockup's streets. Hidden in calm mode (HuudMap) for low-end phones and low data.
+    {
+      id: 'building-3d',
+      type: 'fill-extrusion',
+      source: 'openmaptiles',
+      'source-layer': 'building',
+      minzoom: 15,
+      filter: ['!=', ['get', 'hide_3d'], true],
+      paint: {
+        'fill-extrusion-color': [
+          'match',
+          ['%', ['to-number', ['id'], 0], 3],
+          0, C.roofZinc,
+          1, C.roofTerracotta,
+          C.roofCream,
+        ],
+        'fill-extrusion-height': [
+          'interpolate', ['linear'], ['zoom'],
+          15, 0,
+          16, ['max', ['coalesce', ['get', 'render_height'], 0], ['case', ['==', ['%', ['to-number', ['id'], 0], 2], 0], 4, 7]],
+        ],
+        'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+        'fill-extrusion-opacity': 0.92,
+        'fill-extrusion-vertical-gradient': true,
+      },
     },
 
     // State and LGA boundaries, faint
