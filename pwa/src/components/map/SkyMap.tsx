@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 import { HuudMap, type LngLat } from '@/components/map/HuudMap';
 import { skyAt, skyForHour, type SkyState } from '@/lib/sky';
+import { SkyHorizon } from '@/components/map/SkyHorizon';
 
 /** Height of the sky band above the horizon, in px. */
 const SKY_BAND = 200;
@@ -110,6 +111,19 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
           aria-hidden
         />
       </div>
+
+      {/* Horizon haze: the sky's colour washes over the far land (M-04). */}
+      <div
+        className="pointer-events-none absolute inset-x-0"
+        style={{
+          top: SKY_BAND - 50,
+          height: 160,
+          background: `linear-gradient(180deg, transparent 0%, ${sky.skyBot}cc 30%, ${sky.skyBot}55 62%, transparent 100%)`,
+        }}
+        aria-hidden
+      />
+      {/* Far horizon: bush line and trees (palms in the south, acacias in the north). */}
+      <SkyHorizon color={sky.skyline} lat={center?.lat} top={SKY_BAND - 52} />
     </div>
   );
 }

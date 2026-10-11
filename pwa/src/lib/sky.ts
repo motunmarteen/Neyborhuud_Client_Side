@@ -63,22 +63,22 @@ export function mockupHour(minutes: number, t: SunTimes): number {
   return h >= 24 ? h - 24 : h;
 }
 
-type Key = { h: number; top: string; bot: string; tint: string; a: number; lights: number };
+type Key = { h: number; top: string; bot: string; tint: string; a: number; lights: number; line: string };
 
 // Light at each moment of the day (mockup palette); colours blend smoothly between them.
 const KEYS: Key[] = [
-  { h: 0, top: '#060A1E', bot: '#151F48', tint: '#0A1236', a: 0.62, lights: 1 },
-  { h: 4.5, top: '#0A1130', bot: '#1F2A5C', tint: '#0E1640', a: 0.55, lights: 1 },
-  { h: 5.6, top: '#2A2E6A', bot: '#E59A7A', tint: '#3A3572', a: 0.34, lights: 0.7 },
-  { h: 6.6, top: '#6CA6DC', bot: '#FFD8A6', tint: '#FFA868', a: 0.13, lights: 0.15 },
-  { h: 9, top: '#6BBFF1', bot: '#D3EDFB', tint: '#FFFFFF', a: 0, lights: 0 },
-  { h: 12, top: '#47A6EC', bot: '#BEE3FA', tint: '#FFFFFF', a: 0, lights: 0 },
-  { h: 15.5, top: '#56AFEC', bot: '#CFEBFA', tint: '#FFD9A0', a: 0.05, lights: 0 },
-  { h: 17.4, top: '#6B86C8', bot: '#F5B57D', tint: '#FF9A5A', a: 0.14, lights: 0.1 },
-  { h: 18.6, top: '#4A4C99', bot: '#F7895A', tint: '#C8503C', a: 0.24, lights: 0.45 },
-  { h: 19.6, top: '#212963', bot: '#7A5893', tint: '#1C2260', a: 0.42, lights: 0.9 },
-  { h: 21, top: '#0C1332', bot: '#1C2757', tint: '#0E1640', a: 0.55, lights: 1 },
-  { h: 24, top: '#060A1E', bot: '#151F48', tint: '#0A1236', a: 0.62, lights: 1 },
+  { h: 0, top: '#060A1E', bot: '#151F48', tint: '#0A1236', a: 0.62, lights: 1, line: '#0D1330' },
+  { h: 4.5, top: '#0A1130', bot: '#1F2A5C', tint: '#0E1640', a: 0.55, lights: 1, line: '#121A3E' },
+  { h: 5.6, top: '#2A2E6A', bot: '#E59A7A', tint: '#3A3572', a: 0.34, lights: 0.7, line: '#3A3866' },
+  { h: 6.6, top: '#6CA6DC', bot: '#FFD8A6', tint: '#FFA868', a: 0.13, lights: 0.15, line: '#7C8EB4' },
+  { h: 9, top: '#6BBFF1', bot: '#D3EDFB', tint: '#FFFFFF', a: 0, lights: 0, line: '#8EA9C5' },
+  { h: 12, top: '#47A6EC', bot: '#BEE3FA', tint: '#FFFFFF', a: 0, lights: 0, line: '#86A2C0' },
+  { h: 15.5, top: '#56AFEC', bot: '#CFEBFA', tint: '#FFD9A0', a: 0.05, lights: 0, line: '#8AA4BF' },
+  { h: 17.4, top: '#6B86C8', bot: '#F5B57D', tint: '#FF9A5A', a: 0.14, lights: 0.1, line: '#6E6D92' },
+  { h: 18.6, top: '#4A4C99', bot: '#F7895A', tint: '#C8503C', a: 0.24, lights: 0.45, line: '#4D4470' },
+  { h: 19.6, top: '#212963', bot: '#7A5893', tint: '#1C2260', a: 0.42, lights: 0.9, line: '#262A56' },
+  { h: 21, top: '#0C1332', bot: '#1C2757', tint: '#0E1640', a: 0.55, lights: 1, line: '#111836' },
+  { h: 24, top: '#060A1E', bot: '#151F48', tint: '#0A1236', a: 0.62, lights: 1, line: '#0D1330' },
 ];
 
 function mix(a: string, b: string, t: number): string {
@@ -113,6 +113,8 @@ export type SkyState = {
   /** Colour wash over the map (warm at dawn/sunset, blue at night) and its strength. */
   tint: string;
   tintAlpha: number;
+  /** Far horizon (bush line and trees), coloured by the air at that hour (M-04). */
+  skyline: string;
   /** 0 (day) .. 1 (night): drives stars and night lights (M-06). */
   dark: number;
   starOpacity: number;
@@ -155,6 +157,7 @@ export function skyForHour(h: number): SkyState {
     skyBot: mix(A.bot, B.bot, t),
     tint: mix(A.tint, B.tint, t),
     tintAlpha: A.a + (B.a - A.a) * t,
+    skyline: mix(A.line, B.line, t),
     dark,
     starOpacity: Math.max(0, (dark - 0.5) * 2),
     sun: {

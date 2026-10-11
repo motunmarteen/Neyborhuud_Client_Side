@@ -10,17 +10,25 @@ const SkyMap = dynamic(() => import('@/components/map/SkyMap').then((m) => m.Sky
   loading: () => <div className="h-[520px] w-full animate-pulse rounded-[22px] bg-[#6BBFF1] motion-reduce:animate-none" />,
 });
 
-const ENUGU = { lat: 6.4413, lng: 7.4988 };
+const PLACES = {
+  Enugu: { lat: 6.4413, lng: 7.4988 },
+  Kano: { lat: 12.0105, lng: 8.5341 },
+} as const;
+type Place = keyof typeof PLACES;
 const label = (h: number) => `${Math.floor(h) % 24}:${String(Math.round((h % 1) * 60) % 60).padStart(2, '0')}`;
 
 export function SkyDemo() {
+  const [place, setPlace] = useState<Place>('Enugu');
   const [live, setLive] = useState(true);
   const [hour, setHour] = useState(18.6);
   const [sky, setSky] = useState<SkyState | null>(null);
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <FilterChip active={live} onClick={() => setLive(true)}>Live (real sun, Enugu)</FilterChip>
+        {(Object.keys(PLACES) as Place[]).map((p) => (
+          <FilterChip key={p} active={place === p} onClick={() => setPlace(p)}>{p}</FilterChip>
+        ))}
+        <FilterChip active={live} onClick={() => setLive(true)}>Live sun</FilterChip>
         <FilterChip active={!live} onClick={() => setLive(false)}>Try a time</FilterChip>
         {sky ? <span className="text-sm font-bold text-muted">{sky.phase}</span> : null}
       </div>
@@ -40,7 +48,7 @@ export function SkyDemo() {
         </label>
       ) : null}
       <div className="overflow-hidden rounded-[22px]">
-        <SkyMap center={ENUGU} zoom={16} hour={live ? undefined : hour} className="h-[520px] w-full" label="Map of Enugu under today's sky" onSky={setSky} />
+        <SkyMap key={place} center={PLACES[place]} zoom={16} hour={live ? undefined : hour} className="h-[520px] w-full" label={`Map of ${place} under today's sky`} onSky={setSky} />
       </div>
     </div>
   );
