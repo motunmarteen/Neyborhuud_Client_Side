@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 2 | 16 | 🟡 M-02 done; next M-03 live sky |
+| 3. Map home (sky + live map) | 3 | 16 | 🟡 M-03 done; next M-04 palm-tree horizon, then weather |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -181,8 +181,8 @@ Kept here so the whole history is in one place.
 
 - [x] M-01 (pwa: owner chose OpenFreeMap; lib/huudMapStyle.ts in the mockup palette, components/map/HuudMap.tsx; old maps moved off tile.openstreetmap.org; MapLibre worker served from public/) MapLibre base map with our own style (soft colours, labels), real streets across Nigeria from OpenStreetMap
 - [x] M-02 (pwa: fill-extrusion from zoom 15, default 1-2 storeys where OSM has no height, zinc/terracotta/cream roofs; tilted street views, compass; calm mode flat) 3D buildings from real footprints; tilt and rotate; pinch zoom
-- [ ] M-03 Live sky over the map: time-of-day colours, sun and moon path (east → west), stars
-- [ ] M-04 Horizon blend (land fades into the sky), palm-tree horizon, sunlight on the ground
+- [x] M-03 (pwa: lib/sky.ts real sun times per place (NOAA, WAT) mapped onto the mockup palette; components/map/SkyMap.tsx; tested) Live sky over the map: time-of-day colours, sun and moon path (east → west), stars
+- [ ] 🟡 M-04 (horizon fade and sunlight on the ground done in SkyMap; palm-tree horizon still to do) Horizon blend (land fades into the sky), palm-tree horizon, sunlight on the ground
 - [ ] M-05 Weather on the map: clouds and their shadows, drizzle, rain (current Sky Feed Hero drops), storm with lightning, harmattan haze, puddles
 - [ ] M-06 Night lights: windows, street lamps, glowing billboards
 - [ ] M-07 Pins from Street Radar (`/geo/radar`) with layer chips: Safety, Traffic, Light & water, Market, Work, Events, Help
