@@ -179,7 +179,7 @@ Kept here so the whole history is in one place.
 
 **Goal:** My Huud becomes the live neighbourhood map under the real sky, as in the mockup.
 
-- [x] M-01 (pwa: owner chose OpenFreeMap; lib/huudMapStyle.ts in the mockup palette, components/map/HuudMap.tsx; old maps moved off tile.openstreetmap.org; MapLibre worker served from public/) MapLibre base map with our own style (soft colours, labels), real Lagos streets from OpenStreetMap
+- [x] M-01 (pwa: owner chose OpenFreeMap; lib/huudMapStyle.ts in the mockup palette, components/map/HuudMap.tsx; old maps moved off tile.openstreetmap.org; MapLibre worker served from public/) MapLibre base map with our own style (soft colours, labels), real streets across Nigeria from OpenStreetMap
 - [ ] M-02 3D buildings from real footprints; tilt and rotate; pinch zoom
 - [ ] M-03 Live sky over the map: time-of-day colours, sun and moon path (east → west), stars
 - [ ] M-04 Horizon blend (land fades into the sky), palm-tree horizon, sunlight on the ground
@@ -194,7 +194,7 @@ Kept here so the whole history is in one place.
 - [ ] M-13 Calm view toggle
 - [ ] M-14 Area Champion crown marker
 - [ ] M-15 Low-data mode: flat 2D map, no animation, cached last view
-- [ ] M-16 Performance target: smooth on a ₦60,000 Android phone; map loads in under 3 s on 3G
+- [ ] M-16 Performance target: smooth on a ₦60,000 Android phone; map loads in under 3 s on 3G anywhere in Nigeria
 
 ---
 
