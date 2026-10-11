@@ -30,7 +30,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 |---|---|---|---|
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
-| 2. Design foundation | 14 | 20 | 🟡 in progress: F-08 done; next F-09 empty, loading and error states |
+| 2. Design foundation | 15 | 20 | 🟡 in progress: F-09 done; next F-10 pins and badges |
 | 3. Map home (sky + live map) | 0 | 16 | ⬜ |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
@@ -136,7 +136,7 @@ Kept here so the whole history is in one place.
 - [x] F-06 (TopBar 52px pill: logo + area / back + title; HuudCredit pill only when loaded (no fake 150); bell; avatar opens Me menu; Join free for visitors; fits 320-412px; ＋ and Search stay until F-07) Floating top bar (logo, area, HuudCredit, bell, avatar)
 - [x] F-07 (full-width bar from the mockup; ➕ opens "Wetin you wan share?" with 10 one-tap signals + 8 create types and works from any screen via /feed?compose=; hold Sentinel = silent SOS (moved from the old Home button); Profile → top-bar avatar; ＋ removed from top bar, 🔍 always shown; floating SOS sits above the bar. My Huud → /feed and Gist → /gist until the map home in Phase 3) New bottom bar: My Huud · Gist · ➕ Create · Chats · Sentinel
 - [x] F-08 (pwa 570bc37: navy message toasts; nhToast.thanks white card with gold coin pop + burst and +N only when the server really awarded; wired to safety confirms, signals, first poll vote, L&F, help, reports, check-in, sharing; fixed newest-under-oldest stacking, share +5 claim on reused links, email "50 HC" claim; server eabe809 share points_earned = real award, not yet deployed) Toast and thank-you card (with coin animation)
-- [ ] F-09 Empty states, loading skeletons, error states (Nigerian wording)
+- [x] F-09 (EmptyState / ErrorState with offline wording / Skeleton in components/ui; 18 loading screens redrawn (were a navy flash); BrowseEmptyState (28 files) on EmptyState; 13 raw "Failed to load" states → ErrorState with retry; 4 error pages unified; per-screen inline empty texts move over in Phase 4) Empty states, loading skeletons, error states (Nigerian wording)
 - [ ] F-10 Pins and badges component set (emoji pins, coloured rings, ripple)
 - [ ] F-11 Reduced-motion and low-data modes respected by all animations
 - [x] F-13 **Post card** — one card for every post type (`components/feed/PostCard.tsx`, proposal on /design-kit). Type shown by an icon badge on the avatar corner (only safety alerts pulse); no label row, no coloured edge; follow icon (person+ / person-tick); two-line more icon; Facebook-style photo grid (2 / 3 / 4 / 5+ with +N); full-width cards. Types: post, FYI, lost & found, poll, safety alert, marketplace, job, event, service, help request. ✅ owner approval → ✅ swap into feed, profile, FYI, help request (pwa 5978355: XPostCard wraps PostCard; poll voting, Lost & Found routing, safety buttons, repost chain, menu all browser-tested) → ✅ own pages: owner chose grid tiles in the post card look; BrowseTile under ProductCard / JobCard / ServiceCard / EventCard (all 9 pages)
