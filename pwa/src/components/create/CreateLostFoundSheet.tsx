@@ -89,7 +89,11 @@ export function CreateLostFoundSheet({ open, onClose }: { open: boolean; onClose
         secretDetail: secret.trim(),
         pledge: kind === 'lost' && pledge > 0 ? pledge : undefined,
       });
-      nhToast.success(kind === 'lost' ? 'Posted. Neighbours go help you look.' : 'Posted. The owner can now claim it.', undefined);
+      nhToast.thanks(
+        kind === 'lost'
+          ? { emoji: '🔎', title: 'Posted. Neighbours go help you look', sub: 'We will tell you when someone says they have it.' }
+          : { emoji: '🙏🏾', title: 'Thank you for posting it', sub: 'The owner can now claim it with the private detail.' },
+      );
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['gamification-stats'] });
       reset();

@@ -37,7 +37,7 @@ export function CreatePollSheet({ open, onClose }: { open: boolean; onClose: () 
     setBusy(true);
     try {
       await createPoll({ question: question.trim(), options: cleaned, durationHours: hours });
-      nhToast.success('Poll posted', 'Neighbours in your area can vote now.');
+      nhToast.thanks({ emoji: '📊', title: 'Your poll is live', sub: 'Neighbours in your area can vote now.' });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       reset();
       onClose();

@@ -5,6 +5,7 @@
 
 'use client';
 
+import { nhToast } from '@/lib/toast';
 import { useState, useCallback, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
@@ -79,7 +80,7 @@ function CreateIncidentForm({ onSuccess }: { onSuccess: () => void }) {
         tags: tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean),
       };
       await incidentService.create(payload);
-      toast.success('Incident report filed successfully');
+      nhToast.thanks({ emoji: '📝', title: 'Thank you! Your report is in', sub: 'Neighbours and moderators can now see it.' });
       onSuccess();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to file report');

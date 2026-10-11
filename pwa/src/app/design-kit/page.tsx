@@ -6,6 +6,7 @@ import { SheetDemo } from './SheetDemo';
 import { TopBarDemo } from './TopBarDemo';
 import { PostCardDemo } from './PostCardDemo';
 import { BrowseTilesDemo } from './BrowseTilesDemo';
+import { ToastDemo } from './ToastDemo';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 export const metadata: Metadata = {
@@ -133,6 +134,10 @@ export default function DesignKitPage() {
 
         <Section id="tiles" title="Browse tiles (F-13)" note="Marketplace, jobs, services and events stay two per row, in the post card's look. Tap the heart or bookmark, Apply, or I'm going.">
           <BrowseTilesDemo />
+        </Section>
+
+        <Section id="toasts" title="Toasts and thank-you card (F-08)" note="Navy card for messages. Every useful action gets the white thank-you card; the coin and +amount show only when the server really gave HuudCredit.">
+          <ToastDemo />
         </Section>
 
         <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">

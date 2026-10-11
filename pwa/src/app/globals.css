@@ -9070,14 +9070,16 @@ article.feed-card--emergency {
   --mobile-offset-top: 5.1rem !important;
 }
 
-/* Force light theme colors on Sonner toaster */
+/* F-08 toasts. Two looks, from the Home Concept mockup:
+   - message card: navy, white text, a coloured icon (plain sonner toasts and nhToast.success/error/…)
+   - thank-you card: white, floating, gold coin (nhToast.thanks / signal / reward) */
 [data-sonner-toaster] {
-  --normal-bg: #FFFFFF !important;
-  --normal-border: rgba(15, 23, 42, 0.08) !important;
-  --normal-text: #1D2433 !important;
+  --normal-bg: #1D2433 !important;
+  --normal-border: transparent !important;
+  --normal-text: #FFFFFF !important;
 }
 
-/* Standard Sonner Toast Pill */
+/* Plain sonner toast (toast.success(...) etc.) */
 .nh-toast {
   display: flex;
   align-items: center;
@@ -9086,25 +9088,34 @@ article.feed-card--emergency {
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) var(--y, translateY(0)) !important;
-  width: max-content;
-  max-width: min(92vw, 24rem);
-  padding: 0.75rem 1rem;
+  /* One width for every toast (as in the mockup), so stacked toasts line up. */
+  width: min(92vw, 24rem) !important;
+  max-width: none;
+  padding: 0.75rem 1rem 0.75rem 0.75rem;
   border-radius: 1.25rem;
-  background: #FFFFFF !important;
-  color: #1D2433 !important;
-  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  background: #1D2433 !important;
+  color: #FFFFFF !important;
+  border: none !important;
   font-family: var(--font-body);
   font-size: 0.8125rem;
   line-height: 1.35;
-  box-shadow:
-    0 16px 36px -4px rgba(15, 23, 42, 0.12),
-    0 4px 12px -2px rgba(15, 23, 42, 0.05),
-    0 0 0 1px rgba(15, 23, 42, 0.04) !important;
+  box-shadow: 0 12px 30px rgba(29, 36, 51, 0.3) !important;
   pointer-events: auto;
-  z-index: 99999 !important;
+  /* No z-index here: Sonner layers each toast (newest in front) with its own --z-index;
+     the toaster itself already sits above everything. */
 }
 
-.nh-toast__icon {
+/* Custom-rendered toasts (nhToast.*) carry their own card (Sonner wraps it in .nh-toast__text),
+   so the sonner shell is see-through. */
+.nh-toast:has(.nh-toast-card),
+.nh-toast:has(.nh-thanks) {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.nh-toast__icon,
+.nh-toast-card__icon {
   display: flex;
   flex-shrink: 0;
   align-items: center;
@@ -9112,36 +9123,34 @@ article.feed-card--emergency {
   width: 2rem;
   height: 2rem;
   border-radius: 9999px;
-  background: rgba(0, 184, 46, 0.12) !important;
-  color: #00A628 !important;
-  font-size: 1.1rem;
-  border: 1px solid rgba(0, 184, 46, 0.2) !important;
+  background: rgba(0, 184, 46, 0.22) !important;
+  color: #5BE584 !important;
+  border: none !important;
+  font-size: 1.05rem;
 }
 
-.nh-toast__icon svg {
+.nh-toast__icon svg,
+.nh-toast-card__icon svg {
   width: 1.125rem;
   height: 1.125rem;
 }
 
-/* Error toast icon */
-[data-type='error'] .nh-toast__icon {
-  background: rgba(239, 68, 68, 0.12) !important;
-  color: #E5484D !important;
-  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+[data-type='error'] .nh-toast__icon,
+.nh-toast-card__icon--error {
+  background: rgba(229, 72, 77, 0.26) !important;
+  color: #FF9A9D !important;
 }
 
-/* Info toast icon */
-[data-type='info'] .nh-toast__icon {
-  background: rgba(14, 165, 233, 0.12) !important;
-  color: #0284C7 !important;
-  border: 1px solid rgba(14, 165, 233, 0.2) !important;
+[data-type='info'] .nh-toast__icon,
+.nh-toast-card__icon--info {
+  background: rgba(91, 160, 230, 0.26) !important;
+  color: #A9CFF7 !important;
 }
 
-/* Warning toast icon */
-[data-type='warning'] .nh-toast__icon {
-  background: rgba(245, 158, 11, 0.12) !important;
-  color: #D97706 !important;
-  border: 1px solid rgba(245, 158, 11, 0.2) !important;
+[data-type='warning'] .nh-toast__icon,
+.nh-toast-card__icon--warning {
+  background: rgba(246, 195, 68, 0.26) !important;
+  color: #F6C344 !important;
 }
 
 .nh-toast__text {
@@ -9149,108 +9158,62 @@ article.feed-card--emergency {
   flex: 1;
 }
 
-.nh-toast__title {
+.nh-toast__title,
+.nh-toast-card__title {
+  margin: 0;
   font-weight: 700 !important;
-  letter-spacing: -0.015em;
-  color: #1D2433 !important;
-  font-size: 0.84rem;
+  color: #FFFFFF !important;
+  font-size: 0.85rem !important;
+  line-height: 1.35 !important;
   white-space: normal !important;
-  line-height: 1.35;
 }
 
-.nh-toast__description {
+.nh-toast__description,
+.nh-toast-card__desc {
+  margin: 0;
   font-size: 0.75rem !important;
-  font-weight: 500 !important;
-  color: #475569 !important;
-  line-height: 1.35;
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  line-height: 1.35 !important;
+  word-break: break-word;
 }
 
-.nh-toast__action {
+.nh-toast__action,
+.nh-toast-card__action {
   flex-shrink: 0;
-  margin-left: 0.5rem;
-  padding: 0.25rem 0.65rem;
+  margin-left: 0.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
   border: none;
   border-radius: 9999px;
   background: #00B82E;
   color: #FFFFFF;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.15s ease;
 }
 
-.nh-toast__action:hover {
-  background: #00A628;
+.nh-toast__action:hover,
+.nh-toast-card__action:hover {
+  background: #0E8A3E;
 }
 
-/* ── Unified NeyborHuud Custom Toast Card ───────────────────────────────────── */
+/* nhToast.success / error / info / warning */
 .nh-toast-card {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.75rem;
   width: 100%;
-  min-width: 280px;
+  min-width: 260px;
   max-width: min(92vw, 24rem);
-  padding: 0.8rem 1rem;
-  border-radius: 1.15rem;
-  background: #FFFFFF !important;
-  color: #1D2433 !important;
-  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  padding: 0.75rem 1rem 0.75rem 0.75rem;
+  border-radius: 1.25rem;
+  background: #1D2433 !important;
+  color: #FFFFFF !important;
   font-family: var(--font-body);
-  box-shadow:
-    0 16px 36px -4px rgba(15, 23, 42, 0.14),
-    0 4px 12px -2px rgba(15, 23, 42, 0.06),
-    0 0 0 1px rgba(15, 23, 42, 0.04) !important;
+  box-shadow: 0 12px 30px rgba(29, 36, 51, 0.3) !important;
   pointer-events: auto;
   user-select: none;
-  transition: transform 0.2s ease;
-}
-
-.nh-toast-card__icon {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 2.125rem;
-  height: 2.125rem;
-  border-radius: 9999px;
-  margin-top: 0.1rem;
-}
-
-.nh-toast-card__icon--success {
-  background: #ECFDF5 !important;
-  color: #059669 !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-}
-
-.nh-toast-card__icon--signal {
-  background: #F0FDF4 !important;
-  color: #15803D !important;
-  border: 1px solid rgba(22, 163, 74, 0.2) !important;
-}
-
-.nh-toast-card__icon--reward {
-  background: #ECFDF5 !important;
-  color: #059669 !important;
-  border: 1px solid rgba(16, 185, 129, 0.25) !important;
-}
-
-.nh-toast-card__icon--error {
-  background: #FEF2F2 !important;
-  color: #E5484D !important;
-  border: 1px solid rgba(239, 68, 68, 0.2) !important;
-}
-
-.nh-toast-card__icon--warning {
-  background: #FFFBEB !important;
-  color: #D97706 !important;
-  border: 1px solid rgba(245, 158, 11, 0.2) !important;
-}
-
-.nh-toast-card__icon--info {
-  background: #F0F9FF !important;
-  color: #0284C7 !important;
-  border: 1px solid rgba(14, 165, 233, 0.2) !important;
 }
 
 .nh-toast-card__body {
@@ -9258,60 +9221,111 @@ article.feed-card--emergency {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
 }
 
-.nh-toast-card__title {
-  font-weight: 700 !important;
-  color: #1D2433 !important;
-  font-size: 0.85rem !important;
-  line-height: 1.3 !important;
-  letter-spacing: -0.015em;
-  margin: 0;
-  padding: 0;
-}
-
-.nh-toast-card__desc {
-  font-weight: 500 !important;
-  color: #475569 !important;
-  font-size: 0.75rem !important;
-  line-height: 1.35 !important;
-  margin: 0;
-  padding: 0;
-  word-break: break-word;
-}
-
-.nh-toast-badge {
-  display: inline-flex;
+/* ── Thank-you card ─────────────────────────────────────────────────────────── */
+.nh-thanks {
+  display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.15rem 0.5rem;
+  gap: 0.75rem;
+  width: min(92vw, 24rem);
+  padding: 0.75rem 0.9rem;
+  border-radius: 22px;
+  background: #FFFFFF;
+  color: #1D2433;
+  font-family: var(--font-body);
+  box-shadow: 0 14px 34px rgba(29, 36, 51, 0.25);
+  pointer-events: auto;
+  user-select: none;
+  animation: nh-thanks-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.nh-thanks__coin,
+.nh-thanks__mark {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
   border-radius: 9999px;
-  font-size: 0.72rem;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.nh-thanks__coin {
+  background: radial-gradient(circle at 35% 30%, #FFF3C4 0%, #F6C344 50%, #C98A12 100%);
+  box-shadow: 0 0 20px 4px rgba(246, 195, 68, 0.5);
+  animation: nh-coin-pop 0.7s ease-in-out 0.15s 2;
+}
+
+.nh-thanks__mark {
+  background: var(--color-green-soft, #E3F7E8);
+}
+
+.nh-thanks__spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 11px;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: nh-coin-burst 0.75s ease-out forwards;
+  pointer-events: none;
+}
+
+.nh-thanks__body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nh-thanks__title {
   font-weight: 800;
-  white-space: nowrap;
+  font-size: 14.5px;
+  line-height: 1.3;
 }
 
-.nh-toast-badge--coins {
-  background: rgba(0, 184, 46, 0.12) !important;
-  color: #0E8A3E !important;
-  border: 1px solid rgba(0, 184, 46, 0.22) !important;
+.nh-thanks__sub {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #5B6478;
 }
 
-.nh-toast-card__action {
-  flex-shrink: 0;
-  margin-left: 0.5rem;
-  padding: 0.3rem 0.75rem;
-  border: none;
-  border-radius: 9999px;
-  background: #00B82E;
-  color: #FFFFFF;
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
+.nh-thanks__amount {
+  flex: none;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 20px;
+  color: #A86F0A;
 }
 
-.nh-toast-card__action:hover {
-  background: #00A628;
+@keyframes nh-thanks-in {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes nh-coin-pop {
+  0%, 100% { transform: scale(1) rotate(0); }
+  50% { transform: scale(1.15) rotate(12deg); }
+}
+
+@keyframes nh-coin-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nh-thanks,
+  .nh-thanks__coin {
+    animation: none;
+  }
+  .nh-thanks__spark {
+    display: none;
+  }
 }

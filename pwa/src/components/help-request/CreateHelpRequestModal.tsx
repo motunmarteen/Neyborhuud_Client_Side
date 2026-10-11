@@ -1,5 +1,6 @@
 "use client";
 
+import { nhToast } from "@/lib/toast";
 import { useState } from "react";
 import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -83,7 +84,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
       return contentService.createPost(payload);
     },
     onSuccess: () => {
-      toast.success("Help request posted!");
+      nhToast.thanks({ emoji: "🙏🏾", title: "Your request is up", sub: "Neighbours nearby can offer help now." });
       queryClient.invalidateQueries({ queryKey: ["helpRequest"] });
       queryClient.invalidateQueries({ queryKey: ["locationFeed"] });
       handleClose();

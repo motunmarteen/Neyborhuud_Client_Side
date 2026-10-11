@@ -10,11 +10,17 @@
  *  3. Shows a toast with points earned
  */
 
+import { nhToast } from '@/lib/toast';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
 import apiClient from '@/lib/api-client';
 import { isNativePlatform } from '@/lib/platform';
+
+/** Coins only when the server says it really paid them (it pays once per share, within a daily limit). */
+function thankForSharing(coins: number) {
+  nhToast.thanks({ emoji: '↗️', title: 'Thank you for sharing', sub: 'More neighbours fit join because of you.', coins });
+}
 
 // ─── Platform definitions ──────────────────────────────────────────────────
 
@@ -168,7 +174,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
     const payload = (res as any)?.data?.data ?? (res as any)?.data ?? res;
     return {
       link: payload?.link ?? `${window.location.origin}/post/${postId}`,
-      points_earned: payload?.points_earned ?? 5,
+      points_earned: Number(payload?.points_earned) || 0,
     };
   };
 
@@ -190,7 +196,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
         setTimeout(() => setCopied(false), 3000);
       }
 
-      toast.success(`+${points_earned} HuudCredit earned for sharing! 🎉`, { duration: 3000 });
+      thankForSharing(points_earned);
     } catch {
       toast.error('Could not share right now. Please try again.');
     } finally {
@@ -203,13 +209,13 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
     setLoading('copy');
     try {
       const { link, points_earned } = earnedLink
-        ? { link: earnedLink, points_earned: 5 }
+        ? { link: earnedLink, points_earned: 0 }
         : await getTrackingLink('copy');
       setEarnedLink(link);
       await navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
-      toast.success(`+${points_earned} HuudCredit earned for sharing! 🎉`, { duration: 3000 });
+      thankForSharing(points_earned);
     } catch {
       toast.error('Could not copy link.');
     } finally {
@@ -222,7 +228,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
     setLoading('native');
     try {
       const { link, points_earned } = earnedLink
-        ? { link: earnedLink, points_earned: 5 }
+        ? { link: earnedLink, points_earned: 0 }
         : await getTrackingLink('native');
       setEarnedLink(link);
       const { share } = await import('@/lib/nativeShare');
@@ -232,7 +238,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
         url: link,
       });
       if (shared) {
-        toast.success(`+${points_earned} HuudCredit earned for sharing! 🎉`, { duration: 3000 });
+        thankForSharing(points_earned);
       }
     } catch {
       // user cancelled — no error toast

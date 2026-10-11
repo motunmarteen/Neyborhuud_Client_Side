@@ -77,7 +77,13 @@ export default function HandoverPage() {
     setBusy(true);
     try {
       const out = await confirmReturn(claimId, entry);
-      nhToast.success(out.reward.status === 'held' ? 'Returned! Thank you 🙏🏾' : 'Returned', undefined);
+      const total = (out.reward.amount ?? 0) + (out.reward.pledgeAmount ?? 0);
+      const days = Math.max(1, Math.round((out.reward.releaseInHours ?? 72) / 24));
+      nhToast.thanks(
+        out.reward.status === 'held' && total > 0
+          ? { emoji: '🙏🏾', title: 'Returned! Thank you', sub: `Your ${total} HuudCredit lands in your wallet in ${days} days.` }
+          : { emoji: '🙏🏾', title: 'Returned! Thank you' },
+      );
       setEntry('');
       await load();
     } catch (e) {
@@ -103,7 +109,7 @@ export default function HandoverPage() {
     setBusy(true);
     try {
       await thankHelper(claimId, p.id);
-      nhToast.success(`Thank-you sent to ${p.name}`, '10 HuudCredit for their help.');
+      nhToast.thanks({ emoji: '👏🏾', title: `Thank-you sent to ${p.name}`, sub: 'They get 10 HuudCredit for their help.' });
       setHelperQuery('');
       await load();
     } catch (e) {

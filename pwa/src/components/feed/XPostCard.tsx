@@ -14,6 +14,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { nhToast } from '@/lib/toast';
 import type { Post, PostAuthor } from '@/types/api';
 import { useFollow } from '@/hooks/useFollow';
 import ShareModal from './ShareModal';
@@ -121,8 +122,10 @@ export function XPostCard({
 
   const handleVote = async (optionIndex: number) => {
     try {
+      const before = (pollOverride ?? (post.metadata?.poll as PostPoll | undefined))?.myVote;
       const poll = await votePoll(postId, optionIndex);
       setPollOverride(poll as unknown as PostPoll);
+      if (before == null) nhToast.thanks({ emoji: '📊', title: 'You don vote. Thank you!', sub: 'You can change your vote until the poll closes.' });
     } catch (err) {
       toast.error(apiMessage(err, 'Your vote was not counted. Try again.'));
     }
