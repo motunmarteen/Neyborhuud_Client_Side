@@ -25,7 +25,6 @@
 import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import {
-  BadgeCheck,
   Bookmark,
   Check,
   Heart,
@@ -46,6 +45,7 @@ import { Chip, type ChipTone } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel';
 import { PostCardMenuIcon } from '@/components/feed/PostCardMenuIcon';
+import { PostCardVerificationBadge } from '@/components/feed/PostCardVerificationBadge';
 import { formatNaira } from '@/lib/currency';
 import { renderFormattedText } from '@/lib/renderFormattedText';
 import { resolveUserAvatarUrl } from '@/lib/userAvatar';
@@ -89,6 +89,8 @@ export type PostCardProps = {
   onVote?: (optionIndex: number) => void;
   /** Open the original post inside a repost-with-comment. */
   onOpenQuoted?: () => void;
+  /** Tap "… reposted" to see who shared it along the way. */
+  onOpenRepostChain?: () => void;
   /** Shows the follow icon next to the name when provided (hidden on your own posts). */
   onFollow?: () => void;
   isFollowing?: boolean;
@@ -556,6 +558,7 @@ export function PostCard({
   onEmergencyAction,
   onVote,
   onOpenQuoted,
+  onOpenRepostChain,
   onFollow,
   isFollowing,
   followPending,
@@ -633,9 +636,17 @@ export function PostCard({
                 <Pin size={13} aria-hidden /> Pinned
               </>
             ) : (
-              <span className="inline-flex min-w-0 items-center gap-1 truncate">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenRepostChain?.();
+                }}
+                disabled={!onOpenRepostChain}
+                className="inline-flex min-w-0 items-center gap-1 truncate hover:underline disabled:no-underline"
+              >
                 <Repeat2 size={14} className="shrink-0" aria-hidden /> {post.repostedBy?.name || `@${post.repostedBy?.username}`} reposted
-              </span>
+              </button>
             )}
           </div>
         ) : null}
@@ -666,7 +677,8 @@ export function PostCard({
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-1">
               <span className="truncate text-[15px] font-extrabold text-navy">{isAnonymous ? 'A neighbour' : name}</span>
-              {author?.isVerified ? <BadgeCheck size={16} className="shrink-0 fill-primary text-white" aria-label="Verified" /> : null}
+              {/* Verification level (neighbour, business, responder, leader) with its tooltip, as on the old card. */}
+              <span className="shrink-0"><PostCardVerificationBadge author={author} hidden={isAnonymous} isVerified={author?.isVerified} /></span>
               {onFollow && !isAnonymous ? (
                 <button
                   type="button"
