@@ -20,6 +20,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { Eli5Tooltip } from '@/components/ui/Eli5Tooltip';
+import { DEMO_MODE } from '@/lib/demoMode';
 
 const QUICK_CATEGORIES = [
   { label: 'Marketplace', href: '/marketplace', Icon: ShoppingBag, color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -110,10 +111,13 @@ export function FeedBcActionRibbon() {
             </p>
           </div>
 
-          <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[#0E8A3E]">
-            <Users size={12} />
-            <span>48 Verified Neighbors</span>
-          </div>
+          {/* The count was a fixed "48" shown to everyone: sample data only until it comes from the server. */}
+          {DEMO_MODE ? (
+            <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[#0E8A3E]">
+              <Users size={12} />
+              <span>48 Verified Neighbors</span>
+            </div>
+          ) : null}
         </Link>
 
         {/* Right Card: Zero-Escrow Marketplace */}
@@ -170,7 +174,9 @@ export function FeedBcActionRibbon() {
         })}
       </div>
 
-      {/* 3. LIVE NEIGHBORHOOD ACTIVITY / HEARTBEAT TICKER */}
+      {/* 3. LIVE NEIGHBORHOOD ACTIVITY — the rows below are written into the app (not real people
+          or real activity), so they only show in demo mode. Real activity: tracker Phase 3. */}
+      {DEMO_MODE ? (
       <div className="rounded-2xl bg-white border border-black/[0.08] p-3.5 shadow-xs">
         <div className="flex items-center justify-between pb-2 border-b border-black/[0.05]">
           <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
@@ -214,6 +220,7 @@ export function FeedBcActionRibbon() {
           ))}
         </div>
       </div>
+      ) : null}
     </div>
   );
 }

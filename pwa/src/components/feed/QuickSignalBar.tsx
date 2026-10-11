@@ -43,7 +43,7 @@ export function QuickSignalBar() {
 
   const handleShareToWhatsApp = () => {
     const locationName = huudName ? huudName : 'My Neighborhood';
-    const text = `🛡️ *NeyborHuud Live Street Radar — ${locationName}*\n\n⚡ *Power & Grid:* Real-time street monitoring\n🚦 *Traffic & Roads:* Live flood & gridlock check\n🛡️ *Huud Watch:* Active community safety\n\n👉 *View live street radar or log an alert (Earn +15 HC):*\nhttps://neyborhuud.com/feed`;
+    const text = `🛡️ *NeyborHuud Live Street Radar — ${locationName}*\n\n⚡ *Power & Grid:* Real-time street monitoring\n🚦 *Traffic & Roads:* Live flood & gridlock check\n🛡️ *Huud Watch:* Active community safety\n\n👉 *View live street radar or log an alert for your street:*\nhttps://neyborhuud.com/feed`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -82,7 +82,7 @@ export function QuickSignalBar() {
 
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50  border border-emerald-500/20 text-[11px] font-extrabold text-emerald-700  shrink-0">
               <Sparkles size={11} className="text-emerald-500" />
-              <span>+15 HC each</span>
+              <span>1 tap, no typing</span>
             </div>
           </div>
 
@@ -240,7 +240,7 @@ export function QuickSignalBar() {
                   </div>
 
                   <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-700  text-[11px] font-black group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                    <span>+15 HC</span>
+                    <span>Send</span>
                   </div>
                 </button>
               ))}

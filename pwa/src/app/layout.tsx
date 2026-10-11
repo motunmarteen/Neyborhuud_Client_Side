@@ -70,7 +70,11 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    // "default" = iOS keeps its own status bar strip (clock, battery) and the app starts
+    // below it. "black-translucent" drew the app UNDER the clock with nothing leaving
+    // room for it, so the top bar and content collided on iPhone (Android never overlays).
+    // Revisit when the full-screen map/sky home handles safe-area spacing (Phase 3).
+    statusBarStyle: "default",
     title: BRAND_NAME,
   },
   formatDetection: {
