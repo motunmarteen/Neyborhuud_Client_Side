@@ -17,6 +17,7 @@ import { HelpRequestCard } from '@/components/help-request/HelpRequestCard';
 import { useHelpRequestList } from '@/hooks/useHelpRequest';
 import { Post } from '@/types/api';
 import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 function HelpRequestPageInner() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -83,20 +84,7 @@ function HelpRequestPageInner() {
         )}
 
         {isError && (
-          <BrowseEmptyState
-            icon="warning"
-            title="Failed to load help requests"
-            description={error instanceof Error ? error.message : undefined}
-            action={
-              <button
-                type="button"
-                onClick={() => refetch()}
-                className="mod-chip mod-chip-active rounded-xl px-5 py-2.5 text-sm font-bold text-primary"
-              >
-                Retry
-              </button>
-            }
-          />
+          <ErrorState onRetry={() => refetch()} homeHref={null} />
         )}
 
         {!isLoading && !isError && posts.length === 0 && (

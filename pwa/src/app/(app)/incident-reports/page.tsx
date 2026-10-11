@@ -28,6 +28,7 @@ import {
 } from '@/types/incident';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -545,19 +546,7 @@ function IncidentReportsInner() {
       )}
 
       {!loading && error && (
-        <BrowseEmptyState
-          icon="error"
-          title={error}
-          action={
-            <button
-              type="button"
-              onClick={() => load(1, true)}
-              className="mod-chip mod-chip-active rounded-xl px-5 py-2.5 text-sm font-bold text-primary"
-            >
-              Retry
-            </button>
-          }
-        />
+        <ErrorState onRetry={() => load(1, true)} homeHref={null} />
       )}
 
       {!loading && !error && incidents.length === 0 && (

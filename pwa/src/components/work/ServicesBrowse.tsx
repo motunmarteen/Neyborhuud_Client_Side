@@ -12,6 +12,8 @@ import { BrowseEmptyState } from "@/components/layout/BrowseEmptyState";
 import { LocalHuudHubPrimaryAction } from "@/components/local-huud/LocalHuudHubHeader";
 import ServiceCard from "@/components/services/ServiceCard";
 import { useServices, useFavoriteService } from "@/hooks/useServices";
+import { ErrorState } from '@/components/ui/ErrorState';
+import { SkeletonTiles } from '@/components/ui/Skeleton';
 
 export const SERVICE_CATEGORIES = [
   "All",
@@ -122,28 +124,13 @@ export function ServicesBrowse({ category = "All", minRating }: ServicesBrowsePr
   return (
     <>
       {isLoading && (
-        <div className="grid grid-cols-2 gap-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="mod-card aspect-[4/5] animate-pulse rounded-2xl" />
-          ))}
+        <div role="status" aria-label="Loading">
+          <SkeletonTiles count={4} />
         </div>
       )}
 
       {error && !isLoading && (
-        <BrowseEmptyState
-          icon="error"
-          title="Failed to load services"
-          action={
-            <button
-              type="button"
-              onClick={() => refetch()}
-              className="mod-chip rounded-xl px-5 py-2.5 text-sm font-bold"
-              style={{ color: "var(--neu-text)" }}
-            >
-              Try again
-            </button>
-          }
-        />
+        <ErrorState onRetry={() => refetch()} homeHref={null} />
       )}
 
       {!isLoading && services.length > 0 && (

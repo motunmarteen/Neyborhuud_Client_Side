@@ -13,6 +13,8 @@ import { useMarketplaceProducts, useMyDeals } from "@/hooks/useMarketplace";
 import { useMarketplaceSocket } from "@/hooks/useMarketplaceSocket";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { ProductCard } from "@/components/marketplace";
+import { ErrorState } from '@/components/ui/ErrorState';
+import { SkeletonTiles } from '@/components/ui/Skeleton';
 
 const CATEGORIES = [
   "All",
@@ -113,28 +115,13 @@ function MarketplacePageInner() {
       }
     >
       {isLoading && (
-        <div className="grid grid-cols-2 gap-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="mod-card aspect-[4/5] animate-pulse rounded-2xl" />
-          ))}
+        <div role="status" aria-label="Loading">
+          <SkeletonTiles count={6} />
         </div>
       )}
 
       {error && (
-        <BrowseEmptyState
-          icon="error"
-          title="Failed to load products"
-          action={
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="mod-chip rounded-xl px-5 py-2.5 text-sm font-bold"
-              style={{ color: "var(--neu-text)" }}
-            >
-              Retry
-            </button>
-          }
-        />
+        <ErrorState onRetry={() => window.location.reload()} homeHref={null} />
       )}
 
       {!isLoading && !error && products.length > 0 && (

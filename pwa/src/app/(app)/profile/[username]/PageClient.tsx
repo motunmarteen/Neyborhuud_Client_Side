@@ -69,6 +69,7 @@ import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
 import { getGeolocation } from '@/lib/nativeGeolocation';
 import { fromKobo } from '@/lib/currency';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 type ProfileTab = 'overview' | 'posts' | 'trust' | 'listings' | 'saved' | 'economy' | 'street_radar';
 
@@ -1602,20 +1603,7 @@ export default function ProfilePage() {
                 )}
 
                 {isErrorPosts && !isLoadingPosts && (
-                  <BrowseEmptyState
-                    icon="error"
-                    title="Failed to load posts"
-                    description={postsError?.message || 'Something went wrong. Please try again.'}
-                    action={
-                      <button
-                        onClick={() => window.location.reload()}
-                        className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white px-5 py-2 text-xs font-bold hover:bg-slate-800 transition"
-                        type="button"
-                      >
-                        Retry
-                      </button>
-                    }
-                  />
+                  <ErrorState onRetry={() => window.location.reload()} homeHref={null} />
                 )}
 
                 {!isLoadingPosts && !isErrorPosts && posts.length === 0 && (

@@ -24,6 +24,7 @@ import { buildGistSectionList } from '@/lib/huudGistConfig';
 import { huudGistService } from '@/services/huudGist.service';
 import type { GistSection, GistSectionId } from '@/types/huudGist';
 import { gistPostId, type HuudGistPost } from '@/types/huudGist';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 const ACCENT_PALETTE = [
   { color: 'bg-blue-600', text: 'text-blue-600', bgSoft: 'bg-blue-50' },
@@ -206,22 +207,7 @@ function GistInner() {
                 ))}
               </div>
             ) : gistIsError && !gistAuthRequired ? (
-              <BrowseEmptyState
-                icon="wifi_off"
-                title="Could not load Huud Gist"
-                description="Something went wrong. Tap refresh to try again."
-                filledIcon
-                className="flex flex-col items-center justify-center text-center gap-3 !border-none !bg-transparent !shadow-none !px-6 !my-0 py-10"
-                action={
-                  <button
-                    type="button"
-                    onClick={() => void refetchGist()}
-                    className="rounded-full bg-slate-100 hover:bg-slate-200 transition-colors px-4 py-2 text-xs font-bold text-slate-700"
-                  >
-                    Retry
-                  </button>
-                }
-              />
+              <ErrorState onRetry={() => void refetchGist()} homeHref={null} />
             ) : gistAuthRequired ? (
               <BrowseEmptyState
                 icon="login"

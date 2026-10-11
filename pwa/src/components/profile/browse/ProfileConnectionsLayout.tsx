@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 import TopNav from '@/components/navigation/TopNav';
 import { BottomNav } from '@/components/feed/BottomNav';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 type ConnectionTab = 'followers' | 'following';
 
@@ -100,21 +101,7 @@ export function ProfileConnectionsLayout({
             </div>
           ) : error ? (
             <div className="flex items-center justify-center py-10">
-              <BrowseEmptyState
-                icon="error"
-                title="Could not load list"
-                description="Something went wrong. Please try again."
-                className="!border-0 !shadow-none !bg-white"
-                action={
-                  <button
-                    type="button"
-                    onClick={() => router.back()}
-                    className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800 px-5 py-2 text-xs font-bold shadow-sm transition"
-                  >
-                    Go back
-                  </button>
-                }
-              />
+              <ErrorState onRetry={() => window.location.reload()} homeHref={null} />
             </div>
           ) : (
             <>
