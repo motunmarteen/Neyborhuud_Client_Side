@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 5 | 16 | 🟡 M-05 done; next M-06 night lights |
+| 3. Map home (sky + live map) | 6 | 16 | 🟡 M-06 done; next M-07 pins from Street Radar |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -184,7 +184,7 @@ Kept here so the whole history is in one place.
 - [x] M-03 (pwa: lib/sky.ts real sun times per place (NOAA, WAT) mapped onto the mockup palette; components/map/SkyMap.tsx; tested) Live sky over the map: time-of-day colours, sun and moon path (east → west), stars
 - [x] M-04 (SkyMap fade + haze + sunlight on the ground; SkyHorizon: palms in the south, savanna acacias north of ~10°N) Horizon blend (land fades into the sky), palm-tree horizon, sunlight on the ground
 - [x] M-05 (lib/mapWeather.ts + hooks/useMapWeather.ts; real weather every 15 min; harmattan = haze/dust/fog Nov-Mar; unknown = none; calm mode: no rain/lightning) Weather on the map: clouds and their shadows, drizzle, rain (current Sky Feed Hero drops), storm with lightning, harmattan haze, puddles
-- [ ] M-06 Night lights: windows, street lamps, glowing billboards
+- [x] M-06 (lib/mapNight.ts: night palette inside MapLibre, lit-window pattern on walls, street lamps from dusk; billboard glow comes with billboards in Phase 10) Night lights: windows, street lamps, glowing billboards
 - [ ] M-07 Pins from Street Radar (`/geo/radar`) with layer chips: Safety, Traffic, Light & water, Market, Work, Events, Help
 - [ ] M-08 Live pins via socket (appear and ripple instantly)
 - [ ] M-09 Pin panels (bottom sheet) for every type, with actions and "Ask Sentinel about this"
