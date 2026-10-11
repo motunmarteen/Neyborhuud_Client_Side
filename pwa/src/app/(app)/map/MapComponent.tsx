@@ -24,7 +24,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { MapSelectionSheet } from '@/components/map/MapSelectionSheet';
-import { cdnImage, escapeAttr } from '@/lib/media';
+import { cdnImage } from '@/lib/media';
+import { mapPinHtml, personPinHtml } from '@/components/map/Pins';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -272,27 +273,14 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
 
     // 1. User's Own Location Blue Dot
     if (userCoords) {
+      const myName = [authUser?.firstName, authUser?.lastName].filter(Boolean).join(' ') || authUser?.username || 'You';
       const selfIcon = Leaflet.divIcon({
-        html: `
-          <div class="relative flex items-center justify-center" style="width: 24px; height: 24px;">
-            <style>
-              @keyframes bluePulse {
-                0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 0, 255, 0.6); }
-                70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 0, 255, 0); }
-                100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 0, 255, 0); }
-              }
-              .self-map-marker {
-                animation: bluePulse 2.5s infinite;
-              }
-            </style>
-            <div class="self-map-marker w-4.5 h-4.5 rounded-full bg-brand-blue border-2 border-white shadow-md"></div>
-          </div>
-        `,
+        html: personPinHtml({ name: myName, me: true }),
         className: '',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
+        iconSize: [46, 46],
+        iconAnchor: [23, 23],
       });
-      Leaflet.marker([userCoords.lat, userCoords.lng], { icon: selfIcon }).addTo(markersGroup);
+      Leaflet.marker([userCoords.lat, userCoords.lng], { icon: selfIcon, zIndexOffset: 1000 }).addTo(markersGroup);
     }
 
     // 2. Render layer elements
@@ -310,37 +298,13 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         const { lat, lng } = coords;
         placed += 1;
 
-        const initials = `${(u.firstName || '')[0] || ''}${(u.lastName || '')[0] || ''}`.toUpperCase() || (u.username || '?')[0].toUpperCase();
+        const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || 'Neighbour';
         const avatarSrc = u.avatarUrl || u.profilePicture;
-
-        const markerHtml = avatarSrc
-          ? `<div class="user-map-marker relative w-10 h-10 rounded-full border-2 border-primary overflow-hidden bg-white shadow-lg flex items-center justify-center">
-               <img src="${escapeAttr(cdnImage(avatarSrc, 96))}" alt="${escapeAttr(String(u.username ?? ''))}" class="w-full h-full object-cover" />
-             </div>`
-          : `<div class="user-map-marker relative w-10 h-10 rounded-full border-2 border-primary bg-gradient-to-br from-primary to-brand-green-dark text-white text-[11px] font-extrabold flex items-center justify-center shadow-lg">
-               ${initials}
-             </div>`;
-
         const icon = Leaflet.divIcon({
-          html: `
-            <div class="relative flex items-center justify-center" style="width: 40px; height: 40px;">
-              <style>
-                @keyframes mapPulse {
-                  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,184,46, 0.7); }
-                  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0,184,46, 0); }
-                  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,184,46, 0); }
-                }
-                .user-map-marker {
-                  animation: mapPulse 2s infinite;
-                  border-radius: 50%;
-                }
-              </style>
-              ${markerHtml}
-            </div>
-          `,
+          html: personPinHtml({ name, avatarUrl: avatarSrc ? cdnImage(avatarSrc, 96) : null }),
           className: '',
-          iconSize: [40, 40],
-          iconAnchor: [20, 20],
+          iconSize: [44, 44],
+          iconAnchor: [22, 22],
         });
 
         const marker = Leaflet.marker([lat, lng], { icon });
@@ -360,18 +324,17 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         const [lng, lat] = p.sampleCoords;
         if (lat === 0 && lng === 0) return;
 
-        const hue = Array.from(p.lga).reduce((s, c) => s + c.charCodeAt(0), 0) % 360;
-
         const icon = Leaflet.divIcon({
-          html: `
-            <div class="flex items-center justify-center rounded-2xl text-white border-2 border-black/[0.08] shadow-xl hover:scale-105 transition-transform" 
-                 style="width: 38px; height: 38px; background: linear-gradient(135deg, hsl(${hue},60%,35%), hsl(${(hue + 30) % 360},70%,22%));">
-              <span class="material-symbols-outlined text-[20px] fill-1 text-white">location_city</span>
-            </div>
-          `,
+          html: mapPinHtml({
+            emoji: '🏘️',
+            label: `${p.lga}: ${p.userCount} neighbours`,
+            tag: p.lga,
+            count: p.userCount,
+            ring: p.isFollowing ? 'green' : undefined,
+          }),
           className: '',
-          iconSize: [38, 38],
-          iconAnchor: [19, 19],
+          iconSize: [44, 44],
+          iconAnchor: [22, 22],
         });
 
         const marker = Leaflet.marker([lat, lng], { icon });
@@ -382,7 +345,7 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
         marker.addTo(markersGroup);
       });
     }
-  }, [userCoords, layer, nearbyUsersData, placesData, authUserId]);
+  }, [userCoords, layer, nearbyUsersData, placesData, authUserId, authUser?.firstName, authUser?.lastName, authUser?.username]);
 
   // Sync markers when Leaflet is ready or dataset updates
   useEffect(() => {

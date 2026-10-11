@@ -9329,3 +9329,163 @@ article.feed-card--emergency {
     display: none;
   }
 }
+
+/* ── F-10 Map pins and badges (Home Concept mockup) ─────────────────────────────
+   One look for every map (Leaflet divIcon HTML and MapLibre/React markers):
+   .nh-pin            white 44px circle with an emoji; data-ring adds a coloured ring
+   .nh-pin__ripple    expanding ring, only for live safety pins
+   .nh-pin__tag       navy pill under a pin (price, name, "3 going")
+   .nh-pin__count     small bubble on the corner (how many in this spot)
+   .nh-pin--person    a neighbour's photo or initials; --me is you (green); --champion is gold with a crown
+   .nh-orb            the Sentinel orb; data-mood rings and pulses green / amber / red */
+.nh-pin {
+  --ring: transparent;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  color: #1D2433;
+  font-size: 21px;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(29, 36, 51, 0.25);
+  cursor: pointer;
+}
+.nh-pin--sm { width: 36px; height: 36px; font-size: 17px; }
+.nh-pin[data-ring] { box-shadow: 0 0 0 4px var(--ring), 0 4px 10px rgba(29, 36, 51, 0.25); }
+.nh-pin[data-ring='red'] { --ring: #E5484D; box-shadow: 0 0 0 4px var(--ring), 0 6px 14px rgba(229, 72, 77, 0.4); }
+.nh-pin[data-ring='amber'] { --ring: #F0A93B; }
+.nh-pin[data-ring='blue'] { --ring: #3B82C4; }
+.nh-pin[data-ring='purple'] { --ring: #8B5CF6; }
+.nh-pin[data-ring='green'] { --ring: #00B82E; }
+.nh-pin:focus-visible { outline: 3px solid #1D2433; outline-offset: 4px; }
+
+.nh-pin__ripple {
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--ring, #E5484D);
+  border-radius: 9999px;
+  pointer-events: none;
+  animation: nh-ripple 2s ease-out infinite;
+}
+@keyframes nh-ripple {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+.nh-pin__tag {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 8px;
+  border-radius: 9999px;
+  background: #1D2433;
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.nh-pin__count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 2px solid #FFFFFF;
+  border-radius: 9999px;
+  background: #1D2433;
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+}
+.nh-pin[data-ring='red'] .nh-pin__count { background: #E5484D; }
+
+.nh-pin--person {
+  overflow: visible;
+  border: 2px solid #FFFFFF;
+  background: #F2C6A0;
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 800;
+}
+.nh-pin--person img {
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+.nh-pin--me {
+  width: 46px;
+  height: 46px;
+  border: 3px solid #FFFFFF;
+  background: #00B82E;
+  color: #FFFFFF;
+  font-size: 18px;
+  box-shadow: 0 6px 14px rgba(0, 184, 46, 0.5);
+}
+.nh-pin--champion {
+  border: 3px solid #F6C344;
+  box-shadow: 0 0 18px 4px rgba(246, 195, 68, 0.55);
+}
+.nh-pin__crown {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.nh-orb {
+  --mood: #00B82E;
+  position: relative;
+  display: block;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.nh-orb[data-mood='advisory'] { --mood: #F0A93B; }
+.nh-orb[data-mood='alert'] { --mood: #E5484D; }
+.nh-orb__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--mood);
+  animation: nh-orb-pulse 2.4s ease-out infinite;
+}
+.nh-orb__core {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 3px solid #FFFFFF;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, #B9FFD0 0%, #2BD46A 38%, #0E8A3E 72%, #0A5F2C 100%);
+  box-shadow: 0 0 0 3px var(--mood), 0 8px 18px rgba(14, 138, 62, 0.45);
+}
+@keyframes nh-orb-pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nh-pin__ripple,
+  .nh-orb__pulse { animation: none; opacity: 0; }
+}
