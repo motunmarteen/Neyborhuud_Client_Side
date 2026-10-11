@@ -9042,6 +9042,22 @@ article.feed-card--emergency {
   z-index: 99999 !important;
 }
 
+/* Centring fix (measured: every toast sat exactly 16px right of centre, touching the
+   right edge). On phones Sonner gives the toaster left: var(--mobile-offset-left) (16px)
+   AND width: 100%, so the container itself hangs 16px off the right side; centring each
+   toast inside it carried the same 16px shift. Pin the toaster to the full screen width
+   with no side offsets, so left: 50% on .nh-toast is the true middle of the screen. */
+[data-sonner-toaster][data-x-position='center'] {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  transform: none !important;
+  --mobile-offset-left: 0px !important;
+  --mobile-offset-right: 0px !important;
+  --offset-left: 0px !important;
+  --offset-right: 0px !important;
+}
+
 [data-sonner-toaster][data-y-position='top'] {
   top: 4.85rem !important;
   --offset-top: 4.85rem !important;
