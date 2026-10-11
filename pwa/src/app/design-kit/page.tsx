@@ -10,6 +10,7 @@ import { ToastDemo } from './ToastDemo';
 import { StatesDemo } from './StatesDemo';
 import { PinsDemo } from './PinsDemo';
 import { MapDemo } from './MapDemo';
+import { SkyDemo } from './SkyDemo';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 export const metadata: Metadata = {
@@ -153,6 +154,10 @@ export default function DesignKitPage() {
 
         <Section id="map" title="Map (M-01, M-02)" note="Real streets across Nigeria from OpenStreetMap (via OpenFreeMap), in the Home Concept colours, with 3D buildings. Pinch to zoom, twist to turn, drag two fingers up or down to tilt; the compass resets. Calm mode keeps it flat.">
           <MapDemo />
+        </Section>
+
+        <Section id="sky" title="Live sky (M-03)" note="The sky follows the real sun for the place on the map: sunrise, noon and sunset are worked out for that town and date, so Maiduguri wakes before Lagos. Stars at night, sun and moon cross east to west, warm light at dawn and sunset.">
+          <SkyDemo />
         </Section>
 
         <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">

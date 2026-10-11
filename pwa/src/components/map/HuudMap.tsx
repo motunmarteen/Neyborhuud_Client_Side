@@ -32,10 +32,12 @@ type HuudMapProps = {
   tilt?: boolean;
   /** Small compass to reset north and tilt. */
   compass?: boolean;
+  /** Where the compass sits (the sky scene keeps the top clear). */
+  compassPosition?: 'top-right' | 'bottom-right';
 };
 
 /** Without a centre the map fits all of Nigeria; screens pass the person's area (startView). */
-export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', className = '', onReady, tilt = true, compass = true }: HuudMapProps) {
+export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', className = '', onReady, tilt = true, compass = true, compassPosition = 'top-right' }: HuudMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [failed, setFailed] = useState(false);
@@ -71,7 +73,7 @@ export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', class
     }
     if (calm) map.touchZoomRotate.disableRotation();
     if (compass && !calm) {
-      map.addControl(new maplibregl.NavigationControl({ showZoom: false, showCompass: true, visualizePitch: true }), 'top-right');
+      map.addControl(new maplibregl.NavigationControl({ showZoom: false, showCompass: true, visualizePitch: true }), compassPosition);
     }
     mapRef.current = map;
     map.on('load', () => {

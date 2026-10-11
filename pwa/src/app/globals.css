@@ -9530,3 +9530,10 @@ html .animate-spin {
   animation-duration: 1s !important;
   animation-iteration-count: infinite !important;
 }
+
+/* M-03 sky: stars twinkle (stopped in calm mode by the F-11 rules). */
+.nh-twinkle { animation: nh-twinkle 3s ease-in-out infinite; }
+@keyframes nh-twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
