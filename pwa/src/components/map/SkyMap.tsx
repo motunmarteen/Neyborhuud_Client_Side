@@ -10,7 +10,7 @@
  * ripples (CSS) and skips falling rain and lightning.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 import { HuudMap, type LngLat } from '@/components/map/HuudMap';
 import { skyAt, skyForHour, type SkyState } from '@/lib/sky';
@@ -18,6 +18,7 @@ import { SkyHorizon } from '@/components/map/SkyHorizon';
 import { cloudColor, weatherLook, type MapWeather, type WeatherLook } from '@/lib/mapWeather';
 import { useMapWeather } from '@/hooks/useMapWeather';
 import { useCalm } from '@/hooks/useCalm';
+import { applyMapLight } from '@/lib/mapNight';
 
 /** Unknown weather: no clouds, rain or haze (never a made-up look). */
 const NO_WEATHER: WeatherLook = { ...weatherLook('clear'), cloudOpacity: 0, shadows: 0 };
@@ -65,6 +66,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
   const wx = weather === undefined ? liveWx : weather;
   useEffect(() => onWeather?.(wx), [wx, onWeather]);
   const look = wx ? weatherLook(wx) : NO_WEATHER;
+  const mapRef = useRef<maplibregl.Map | null>(null);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     if (hour != null) return;
@@ -74,6 +76,17 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
 
   const sky = useMemo(() => (hour != null ? skyForHour(hour) : skyAt(now, center)), [hour, now, center]);
   useEffect(() => onSky?.(sky), [sky, onSky]);
+
+  // Night lights (M-06): the map's own colours follow the sky; windows and lamps glow.
+  const darkStep = Math.round(sky.dark * 50) / 50;
+  useEffect(() => {
+    if (mapRef.current) applyMapLight(mapRef.current, darkStep);
+  }, [darkStep]);
+  const handleReady = (map: maplibregl.Map) => {
+    mapRef.current = map;
+    applyMapLight(map, darkStep);
+    onReady?.(map);
+  };
 
   const arcTop = (arc: number) => SKY_BAND - 26 - arc * (SKY_BAND - 70);
   const clouds = wx ? cloudColor(wx, sky.dark, sky.skyBot) : '#FFFFFF';
@@ -141,11 +154,12 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
           maskImage: `linear-gradient(180deg, transparent 0, transparent ${SKY_BAND - 70}px, #000 ${SKY_BAND + 30}px)`,
         }}
       >
-        <HuudMap center={center} zoom={zoom} label={label} className="h-full w-full" onReady={onReady} compassPosition="bottom-right" />
+        <HuudMap center={center} zoom={zoom} label={label} className="h-full w-full" onReady={handleReady} compassPosition="bottom-right" />
         {/* Time-of-day light over the land: warm at dawn and sunset, blue at night. */}
         <div
           className="pointer-events-none absolute inset-0"
-          style={{ background: sky.tint, opacity: sky.tintAlpha, mixBlendMode: 'multiply' }}
+          // Dawn and sunset warmth; eases off at night, when the map's own night colours take over.
+          style={{ background: sky.tint, opacity: sky.tintAlpha * (1 - sky.dark * 0.8), mixBlendMode: 'multiply' }}
           aria-hidden
         />
         {/* Sunlight falling on the land, from the sun's side. */}
