@@ -8,6 +8,7 @@ import { PostCardDemo } from './PostCardDemo';
 import { BrowseTilesDemo } from './BrowseTilesDemo';
 import { ToastDemo } from './ToastDemo';
 import { StatesDemo } from './StatesDemo';
+import { PinsDemo } from './PinsDemo';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 export const metadata: Metadata = {
@@ -143,6 +144,10 @@ export default function DesignKitPage() {
 
         <Section id="states" title="Empty, error and loading (F-09)" note="Say what is missing and what to do next. Errors reassure and offer Try again; offline says so. Loading shows light shapes of what is coming, never a dark flash.">
           <StatesDemo />
+        </Section>
+
+        <Section id="pins" title="Map pins and badges (F-10)" note="White emoji pins. Ring colour means: red safety, amber light or advisory, blue FYI, purple help, green yours. Only live safety pins ripple. You are the green pin; the Area Champion wears a crown; the Sentinel orb's ring is your area's mood.">
+          <PinsDemo />
         </Section>
 
         <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">
