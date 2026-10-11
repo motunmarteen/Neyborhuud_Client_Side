@@ -7,6 +7,7 @@ import { TopBarDemo } from './TopBarDemo';
 import { PostCardDemo } from './PostCardDemo';
 import { BrowseTilesDemo } from './BrowseTilesDemo';
 import { ToastDemo } from './ToastDemo';
+import { StatesDemo } from './StatesDemo';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 export const metadata: Metadata = {
@@ -138,6 +139,10 @@ export default function DesignKitPage() {
 
         <Section id="toasts" title="Toasts and thank-you card (F-08)" note="Navy card for messages. Every useful action gets the white thank-you card; the coin and +amount show only when the server really gave HuudCredit.">
           <ToastDemo />
+        </Section>
+
+        <Section id="states" title="Empty, error and loading (F-09)" note="Say what is missing and what to do next. Errors reassure and offer Try again; offline says so. Loading shows light shapes of what is coming, never a dark flash.">
+          <StatesDemo />
         </Section>
 
         <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">

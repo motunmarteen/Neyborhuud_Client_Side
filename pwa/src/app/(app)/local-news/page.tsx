@@ -33,6 +33,7 @@ import { NewsFxStrip } from '@/components/news/NewsFxStrip';
 import type { GistSection, GistSectionId } from '@/types/huudGist';
 import type { NewsSource, RssArticle } from '@/types/incident';
 import { gistPostId, type HuudGistPost } from '@/types/huudGist';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 function sourcesForRegion(
   tab: LocalNewsTab,
@@ -328,21 +329,7 @@ function LocalNewsInner() {
                 ))}
               </div>
             ) : gistIsError && !gistAuthRequired ? (
-              <BrowseEmptyState
-                icon="wifi_off"
-                title="Could not load Huud Gist"
-                description="Something went wrong. Tap refresh to try again."
-                filledIcon
-                action={
-                  <button
-                    type="button"
-                    onClick={() => void refetchGist()}
-                    className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary"
-                  >
-                    Retry
-                  </button>
-                }
-              />
+              <ErrorState onRetry={() => void refetchGist()} homeHref={null} />
             ) : gistAuthRequired ? (
               <BrowseEmptyState
                 icon="login"
@@ -406,7 +393,7 @@ function LocalNewsInner() {
             ))}
           </div>
         ) : rssError ? (
-          <BrowseEmptyState icon="wifi_off" title="Could not load news" description={rssError} filledIcon />
+          <ErrorState homeHref={null} />
         ) : articles.length === 0 ? (
           <BrowseEmptyState
             icon="newspaper"

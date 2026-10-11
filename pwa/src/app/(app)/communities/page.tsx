@@ -16,6 +16,7 @@ import { useHubCommunitiesList, useJoinHubCommunity } from '@/hooks/useHubCommun
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import { unwrapApiData } from '@/lib/apiPayload';
 import type { HubCategory } from '@/types/hubCommunity';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 export const dynamic = 'force-dynamic';
 
@@ -211,20 +212,7 @@ export default function CommunitiesPage() {
               ))}
             </div>
           ) : isError ? (
-            <BrowseEmptyState
-              icon="wifi_off"
-              title="Could not load communities"
-              description="Check your connection and try again."
-              action={
-                <button
-                  type="button"
-                  onClick={() => void refetch()}
-                  className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary"
-                >
-                  Retry
-                </button>
-              }
-            />
+            <ErrorState onRetry={() => void refetch()} homeHref={null} />
           ) : hubs.length === 0 ? (
             <BrowseEmptyState
               icon="groups"

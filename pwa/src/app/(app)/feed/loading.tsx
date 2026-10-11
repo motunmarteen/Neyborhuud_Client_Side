@@ -1,9 +1,9 @@
-import { FeedSkeleton } from '@/components/feed/PostSkeleton';
+import { SkeletonCards, SkeletonPage } from '@/components/ui/Skeleton';
 
 export default function FeedLoading() {
   return (
-    <div className="flex flex-col gap-5 pt-[var(--app-topnav-offset)]">
-      <FeedSkeleton count={2} />
-    </div>
+    <SkeletonPage label="Loading posts">
+      <SkeletonCards count={3} />
+    </SkeletonPage>
   );
 }

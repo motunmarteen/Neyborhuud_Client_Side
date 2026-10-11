@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -16,39 +16,14 @@ export default function SafetyError({ error, reset }: ErrorPageProps) {
   }, [error]);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center px-6 py-12 bg-soft-bg">
-      <div className="flex flex-col items-center gap-6 max-w-sm text-center">
-        <div className="w-20 h-20 rounded-2xl bg-status-danger/8 flex items-center justify-center">
-          <span className="material-symbols-outlined text-[42px] text-brand-red">error</span>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <h1 className="type-display font-black text-white">Safety tools hit a snag</h1>
-          <p className="text-sm text-[var(--text-secondary-light)] ">
-            Something went wrong loading this page. If you&apos;re in an emergency, use the SOS button from the home screen — it doesn&apos;t depend on this page working.
-          </p>
-          {error.digest && (
-            <p className="text-[11px] font-mono text-[var(--neu-text-muted)] mt-1">
-              Error ID: {error.digest}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-3 w-full">
-          <button
-            onClick={reset}
-            className="w-full py-3 rounded-full bg-primary text-white font-bold text-sm transition-opacity hover:opacity-90 active:opacity-80 min-h-12"
-          >
-            Try again
-          </button>
-          <Link
-            href="/sos"
-            className="w-full py-3 rounded-xl border border-border text-charcoal  font-bold text-sm text-center transition-colors hover:bg-black/5"
-          >
-            Go to SOS
-          </Link>
-        </div>
-      </div>
-    </div>
+    <ErrorState
+      fullPage
+      onRetry={reset}
+      digest={error.digest}
+      title="This safety page no load"
+      description="In an emergency, use the red SOS button or hold Sentinel. They work even when this page does not."
+      homeHref="/sos"
+      homeLabel="Go to SOS"
+    />
   );
 }

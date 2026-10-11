@@ -22,6 +22,7 @@ import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
 import { usePostMutations } from '@/hooks/usePosts';
 import { ReportModal } from '@/components/feed/ReportModal';
 import { contentService } from '@/services/content.service';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 function FYIPageInner() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -107,20 +108,7 @@ function FYIPageInner() {
         )}
 
         {isError && (
-          <BrowseEmptyState
-            icon="warning"
-            title="Failed to load bulletins"
-            description={error instanceof Error ? error.message : undefined}
-            action={
-              <button
-                type="button"
-                onClick={() => refetch()}
-                className="mod-chip mod-chip-active rounded-xl px-5 py-2.5 text-sm font-bold text-primary"
-              >
-                Retry
-              </button>
-            }
-          />
+          <ErrorState onRetry={() => refetch()} homeHref={null} />
         )}
 
         {!isLoading && !isError && posts.length === 0 && (

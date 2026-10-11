@@ -14,6 +14,8 @@ import JobCard from "@/components/jobs/JobCard";
 import JobFilters, { JobsFilterState } from "@/components/jobs/JobFilters";
 import ApplyModal from "@/components/jobs/ApplyModal";
 import { useJobs, useSaveJob } from "@/hooks/useJobs";
+import { ErrorState } from '@/components/ui/ErrorState';
+import { SkeletonTiles } from '@/components/ui/Skeleton';
 
 const DEFAULT_FILTERS: JobsFilterState = { type: "All", workMode: "All", category: "All" };
 
@@ -64,28 +66,13 @@ export function JobsBrowse({ filters: controlledFilters }: JobsBrowseProps) {
   return (
     <>
       {isLoading && (
-        <div className="grid grid-cols-2 gap-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="mod-card aspect-[4/5] animate-pulse rounded-2xl" />
-          ))}
+        <div role="status" aria-label="Loading">
+          <SkeletonTiles count={4} />
         </div>
       )}
 
       {error && !isLoading && (
-        <BrowseEmptyState
-          icon="warning"
-          title="Could not load jobs"
-          description="Check your connection and try again."
-          action={
-            <button
-              type="button"
-              onClick={() => refetch()}
-              className="mod-chip mod-chip-active rounded-xl px-5 py-2.5 text-sm font-bold text-primary"
-            >
-              Retry
-            </button>
-          }
-        />
+        <ErrorState onRetry={() => refetch()} homeHref={null} />
       )}
 
       {!isLoading && !error && jobs.length > 0 && (

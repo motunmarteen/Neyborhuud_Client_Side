@@ -23,6 +23,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { contentService } from '@/services/content.service';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 // ── Types (inline — mirrors CreateCommunityEmergencyPayload) ──────────────────
 
@@ -457,19 +458,7 @@ function CommunityEmergencyInner({
       )}
 
       {!loading && error && (
-        <BrowseEmptyState
-          icon="error"
-          title={error}
-          action={
-            <button
-              type="button"
-              onClick={() => loadPosts(1)}
-              className="mod-chip mod-chip-active rounded-xl px-5 py-2.5 text-sm font-bold text-primary"
-            >
-              Retry
-            </button>
-          }
-        />
+        <ErrorState onRetry={() => loadPosts(1)} homeHref={null} />
       )}
 
       {!loading && !error && posts.length === 0 && (
