@@ -231,7 +231,7 @@ export function FeedInfoCards() {
   useEffect(() => {
     const geo = getGeolocation();
     if (!geo) {
-      setWeather({ temp: 32, condition: 'Sunny', city: 'Lagos', wmoCode: 0 });
+      setWeather(null); // no made-up weather (was a fixed Lagos reading)
       setWeatherLoading(false);
       return;
     }
@@ -322,7 +322,7 @@ export function FeedInfoCards() {
           setWeather({ temp: 31, condition: 'Partly Cloudy', city: cityName, wmoCode: 2 });
         }
       } catch {
-        setWeather({ temp: 31, condition: 'Partly Cloudy', city: 'Your Area', wmoCode: 2 });
+        setWeather(null); // no made-up weather (was a fixed Lagos reading)
       } finally {
         setWeatherLoading(false);
       }
@@ -331,7 +331,7 @@ export function FeedInfoCards() {
     const watchId = geo.watchPosition(
       (pos) => updateWeather(pos.coords.latitude, pos.coords.longitude),
       () => {
-        setWeather({ temp: 31, condition: 'Partly Cloudy', city: 'Lagos', wmoCode: 2 });
+        setWeather(null); // no made-up weather (was a fixed Lagos reading)
         setWeatherLoading(false);
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },

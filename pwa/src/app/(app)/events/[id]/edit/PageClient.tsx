@@ -252,7 +252,7 @@ export default function EditEventPage() {
               <input
                 value={venue}
                 onChange={(e) => setVenue(e.target.value)}
-                placeholder="e.g. Community Centre, Lagos Island"
+                placeholder="e.g. Town hall, GRA Phase 2"
                 className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>

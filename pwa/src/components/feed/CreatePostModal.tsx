@@ -1008,7 +1008,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         value={venueAddress}
                                                         onChange={(e) => setVenueAddress(e.target.value)}
                                                         disabled={isSubmitting}
-                                                        placeholder="e.g. 15 Broad Street, Lagos"
+                                                        placeholder="e.g. 15 Ogui Road, Enugu"
                                                         className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5  bg-black/[0.02]  focus:border-primary/50 focus:bg-white  transition-all"
                                                     />
                                                 </div>
@@ -1409,7 +1409,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         value={serviceArea}
                                                         onChange={(e) => setServiceArea(e.target.value)}
                                                         disabled={isSubmitting}
-                                                        placeholder="e.g. Ikeja, Lekki Phase 1, Yaba"
+                                                        placeholder="e.g. Wuse 2, Rumuola, Bodija"
                                                         className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5  bg-black/[0.02]  focus:border-primary/50 focus:bg-white  transition-all"
                                                     />
                                                 </div>
@@ -1569,7 +1569,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setIncidentLocation(e.target.value)}
                                                         disabled={isSubmitting}
                                                         required
-                                                        placeholder="e.g. Near Ikeja City Mall gate, Herbert Macaulay Way"
+                                                        placeholder="e.g. Near the market gate, Zaria Road"
                                                         className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5  bg-black/[0.02]  focus:border-primary/50 focus:bg-white  transition-all"
                                                     />
                                                 </div>
@@ -1630,7 +1630,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         onChange={(e) => setAffectedArea(e.target.value)}
                                                         disabled={isSubmitting}
                                                         required
-                                                        placeholder="e.g. Yaba LGA, whole of Lagos Mainland"
+                                                        placeholder="e.g. Port Harcourt LGA, whole of Nsukka"
                                                         className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none border border-black/5  bg-black/[0.02]  focus:border-primary/50 focus:bg-white  transition-all"
                                                     />
                                                 </div>

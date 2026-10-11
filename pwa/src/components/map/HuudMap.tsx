@@ -13,11 +13,10 @@ import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { HUUD_MAP_STYLE } from '@/lib/huudMapStyle';
 import { ensureMaplibreWorker } from '@/lib/maplibreWorker';
+import { NIGERIA_BOUNDS } from '@/lib/nigeriaView';
 
 export type LngLat = { lat: number; lng: number };
 
-/** Lagos (Ojuelegba / Surulere) when we do not know where someone is yet. */
-export const LAGOS_CENTER: LngLat = { lat: 6.5059, lng: 3.3667 };
 
 type HuudMapProps = {
   center?: LngLat;
@@ -29,7 +28,8 @@ type HuudMapProps = {
   onReady?: (map: maplibregl.Map) => void;
 };
 
-export function HuudMap({ center = LAGOS_CENTER, zoom = 15.5, label = 'Map of your area', className = '', onReady }: HuudMapProps) {
+/** Without a centre the map fits all of Nigeria; screens pass the person's area (startView). */
+export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', className = '', onReady }: HuudMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [failed, setFailed] = useState(false);
@@ -42,9 +42,10 @@ export function HuudMap({ center = LAGOS_CENTER, zoom = 15.5, label = 'Map of yo
       map = new maplibregl.Map({
         container: containerRef.current,
         style: HUUD_MAP_STYLE,
-        center: [center.lng, center.lat],
-        zoom,
-        minZoom: 9,
+        ...(center
+          ? { center: [center.lng, center.lat] as [number, number], zoom }
+          : { bounds: NIGERIA_BOUNDS, fitBoundsOptions: { padding: 16 } }),
+        minZoom: 4,
         maxZoom: 19,
         attributionControl: { compact: true },
         // No rotation or tilt until M-02 adds 3D buildings.
