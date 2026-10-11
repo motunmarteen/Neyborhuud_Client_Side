@@ -5,6 +5,7 @@ import { CardsAndChipsDemo } from './CardsAndChipsDemo';
 import { SheetDemo } from './SheetDemo';
 import { TopBarDemo } from './TopBarDemo';
 import { PostCardDemo } from './PostCardDemo';
+import { BottomNav } from '@/components/feed/BottomNav';
 
 export const metadata: Metadata = {
   title: 'Design kit',
@@ -50,7 +51,7 @@ function Section({ id, title, note, children }: { id: string; title: string; not
 
 export default function DesignKitPage() {
   return (
-    <main className="min-h-screen bg-background px-4 pb-16 pt-8 text-navy">
+    <main className="min-h-screen bg-background px-4 pb-32 pt-8 text-navy">
       <div className="mx-auto flex max-w-xl flex-col gap-5">
         <header>
           <p className="text-xs font-bold uppercase tracking-wider text-brand-green-dark">NeyborHuud · Phase 2</p>
@@ -128,7 +129,18 @@ export default function DesignKitPage() {
         <Section id="postcard" title="Post card (proposal)" note="One card for every post type. The icon on the avatar shows what each post is (only safety alerts pulse). Try like, follow, vote, the safety buttons and I'm going.">
           <PostCardDemo />
         </Section>
+
+        <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">
+          <ul className="flex flex-col gap-1.5 text-sm text-navy">
+            <li>🏠 <b>My Huud</b> — your area (the map home in Phase 3)</li>
+            <li>📰 <b>Gist</b> — what neighbours are saying</li>
+            <li>➕ <b>Create</b> — one-tap signals, or post, sell, event, job, help…</li>
+            <li>💬 <b>Chats</b> — messages and groups</li>
+            <li>🛡️ <b>Sentinel</b> — safety tools and Ask Sentinel (search). Press and hold for a silent SOS.</li>
+          </ul>
+        </Section>
       </div>
+      <BottomNav />
     </main>
   );
 }

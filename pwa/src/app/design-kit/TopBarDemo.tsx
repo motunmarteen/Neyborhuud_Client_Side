@@ -23,7 +23,7 @@ export function TopBarDemo() {
           </div>
         </div>
       ))}
-      <p className="text-xs text-muted">Tap ＋ to see the create menu. Search shows on phones 400px and wider.</p>
+      <p className="text-xs text-muted">🔍 opens Search / Ask Sentinel. Create (➕) is in the bottom bar.</p>
     </div>
   );
 }

@@ -1,19 +1,11 @@
 'use client';
 
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Search,
   ChevronLeft,
-  Plus,
-  PenSquare,
-  Megaphone,
-  ShieldAlert,
-  BarChart2,
-  Calendar,
-  HandHeart,
-  ShoppingBag,
   Bell,
 } from 'lucide-react';
 
@@ -29,7 +21,7 @@ type TopNavOrigin = 'page' | 'global';
 /*
  * Design foundation F-06: floating top bar (matches the home mockup).
  *
- *   [ NeyborHuud      ]          [🪙 120] [🔔•] [+] [T]
+ *   [ NeyborHuud      ]          [🪙 120] [🔍] [🔔•] [T]
  *   [ ● Somolu        ]
  *
  * Home: logo + your area. Other pages: back arrow + page title.
@@ -37,7 +29,7 @@ type TopNavOrigin = 'page' | 'global';
  * notifications, create, and your avatar, which opens the "Me" menu.
  * Visitors (not signed in) see "Join free" instead.
  *
- * Create (+) and Search stay here until the new bottom bar (F-07) gives them a home.
+ * Create (➕) lives in the bottom bar (F-07). 🔍 opens Search / Ask Sentinel (SSAA).
  */
 
 function titleCaseFromSegment(segment: string) {
@@ -48,16 +40,6 @@ function titleCaseFromSegment(segment: string) {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
 }
-
-const CREATE_MENU_OPTIONS = [
-  { key: 'post', label: 'Post', subtitle: 'Share photos, news or thoughts', icon: PenSquare, color: 'text-[#2B6AA6] bg-blue-soft' },
-  { key: 'fyi', label: 'FYI Alert', subtitle: 'Power, road or water notice', icon: Megaphone, color: 'text-amber-ink bg-amber-soft' },
-  { key: 'emergency', label: 'Safety Report', subtitle: 'Urgent incident or hazard', icon: ShieldAlert, color: 'text-[#C2353A] bg-red-soft' },
-  { key: 'poll', label: 'Community Poll', subtitle: 'Ask neighbours to vote', icon: BarChart2, color: 'text-brand-green-dark bg-green-soft' },
-  { key: 'event', label: 'Huud Event', subtitle: 'Plan a meeting, patrol or party', icon: Calendar, color: 'text-[#5E3BB8] bg-purple-soft' },
-  { key: 'help_request', label: 'Help Request', subtitle: 'Ask for a tool, a ride or a hand', icon: HandHeart, color: 'text-[#C2353A] bg-red-soft' },
-  { key: 'marketplace', label: 'Marketplace', subtitle: 'Buy, sell or give away', icon: ShoppingBag, color: 'text-brand-green-dark bg-green-soft' },
-];
 
 function getRouteTitle(pathname: string) {
   const parts = pathname.split('?')[0].split('#')[0].split('/').filter(Boolean);
@@ -139,30 +121,6 @@ export function TopBar({
   onSearch,
   onMe,
 }: TopBarProps) {
-  const [createMenuOpen, setCreateMenuOpen] = useState(false);
-  const createMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!createMenuOpen) return;
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (createMenuRef.current && !createMenuRef.current.contains(e.target as Node)) setCreateMenuOpen(false);
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setCreateMenuOpen(false);
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [createMenuOpen]);
-
-  const handleSelectCreateType = (contentType?: string) => {
-    setCreateMenuOpen(false);
-    window.dispatchEvent(new CustomEvent('open-create-post', { detail: { contentType } }));
-  };
-
   return (
     <div
       className={`pointer-events-none sticky top-2 z-40 w-full px-3 transition-transform duration-200 motion-reduce:transition-none sm:top-3 sm:px-4 ${
@@ -219,7 +177,7 @@ export function TopBar({
                 <span className="hidden h-[34px] w-14 animate-pulse rounded-full bg-[#F3F5F9] motion-reduce:animate-none min-[350px]:block" aria-hidden />
               )}
 
-              <button type="button" onClick={onSearch} className={`${ICON_BTN} hidden min-[400px]:grid`} aria-label="Search">
+              <button type="button" onClick={onSearch} className={ICON_BTN} aria-label="Search or ask Sentinel">
                 <Search size={17} />
               </button>
 
@@ -233,52 +191,6 @@ export function TopBar({
                   <span className="absolute right-[7px] top-1.5 h-2 w-2 rounded-full border-2 border-white bg-brand-red" aria-hidden />
                 ) : null}
               </Link>
-
-              <div className="relative" ref={createMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setCreateMenuOpen((prev) => !prev)}
-                  className={`${ICON_BTN} bg-green-soft text-brand-green-dark hover:bg-[#D6F1DE] ${createMenuOpen ? 'ring-2 ring-primary/40' : ''}`}
-                  aria-label="Create post or alert"
-                  aria-expanded={createMenuOpen}
-                  aria-haspopup="menu"
-                >
-                  <Plus size={19} strokeWidth={2.6} />
-                </button>
-
-                {createMenuOpen ? (
-                  <div
-                    className="absolute right-0 top-full z-50 mt-2 w-64 select-none rounded-[22px] bg-white p-1.5 text-navy shadow-[0_14px_34px_rgba(29,36,51,0.22)]"
-                    role="menu"
-                  >
-                    <div className="mb-1 border-b border-line px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-faint">
-                      Create
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      {CREATE_MENU_OPTIONS.map((item) => {
-                        const Icon = item.icon;
-                        return (
-                          <button
-                            key={item.key}
-                            type="button"
-                            onClick={() => handleSelectCreateType(item.key)}
-                            className="flex min-h-12 w-full items-center gap-3 rounded-2xl px-2.5 text-left transition-colors hover:bg-background"
-                            role="menuitem"
-                          >
-                            <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${item.color}`}>
-                              <Icon size={16} />
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="block text-sm font-bold leading-tight">{item.label}</span>
-                              <span className="mt-0.5 block truncate text-[11px] leading-tight text-muted">{item.subtitle}</span>
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
 
               <button
                 type="button"
