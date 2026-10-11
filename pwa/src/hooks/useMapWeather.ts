@@ -1,0 +1,38 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { fetchCurrentWeather } from '@/lib/weatherClient';
+import { mapWeatherFromWmo, type MapWeather } from '@/lib/mapWeather';
+
+/**
+ * Real weather for the place on the map (M-05), refreshed every 15 minutes.
+ * null = unknown (no place, or the weather service failed): the map shows no weather
+ * effects rather than a made-up one.
+ */
+export function useMapWeather(place?: { lat: number; lng: number } | null): MapWeather | null {
+  const [wx, setWx] = useState<MapWeather | null>(null);
+  const lat = place?.lat;
+  const lng = place?.lng;
+  useEffect(() => {
+    if (lat == null || lng == null) {
+      setWx(null);
+      return;
+    }
+    let alive = true;
+    const load = async () => {
+      try {
+        const w = await fetchCurrentWeather(lat, lng);
+        if (alive) setWx(mapWeatherFromWmo(w.wmoCode, new Date().getMonth()));
+      } catch {
+        if (alive) setWx(null);
+      }
+    };
+    void load();
+    const id = window.setInterval(load, 15 * 60_000);
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+    };
+  }, [lat, lng]);
+  return wx;
+}
