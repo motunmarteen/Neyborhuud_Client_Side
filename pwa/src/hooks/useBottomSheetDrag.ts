@@ -9,6 +9,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from 'react';
+import { useCalm } from "@/hooks/useCalm";
 
 type UseBottomSheetDragOptions = {
   onDismiss: () => void;
@@ -32,15 +33,8 @@ export function useBottomSheetDrag({
   const startTsRef = useRef<number | null>(null);
   const movedRef = useRef(false);
   // F-05: no slide animation when the phone asks for reduced motion (fade only).
-  const [reduceMotion, setReduceMotion] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduceMotion(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
-    mq.addEventListener?.("change", onChange);
-    return () => mq.removeEventListener?.("change", onChange);
-  }, []);
+  // F-11: calm mode covers reduced motion, Data Saver and the Save data setting.
+  const reduceMotion = useCalm();
 
   const reset = useCallback(() => {
     setDragY(0);

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { useCalm } from '@/hooks/useCalm';
 
 const LANDING_VIDEO = '/video/background-video.mp4';
 const LANDING_POSTER = '/video/landing-poster.jpg';
@@ -14,6 +15,8 @@ export function AuthFlowBackdrop({ sheetCollapsed = false }: { sheetCollapsed?: 
     const videoRef = useRef<HTMLVideoElement>(null);
     const [videoReady, setVideoReady] = useState(false);
     const [posterOk, setPosterOk] = useState(true);
+    // F-11: calm mode (reduced motion / save data) keeps the still picture, no background video.
+    const calm = useCalm();
 
     useEffect(() => {
         const video = videoRef.current;
@@ -61,7 +64,7 @@ export function AuthFlowBackdrop({ sheetCollapsed = false }: { sheetCollapsed?: 
                 />
             ) : null}
 
-            <video
+            {calm ? null : <video
                 ref={videoRef}
                 className={`landing-video absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
                     videoReady ? 'opacity-100' : 'opacity-0'
@@ -74,7 +77,7 @@ export function AuthFlowBackdrop({ sheetCollapsed = false }: { sheetCollapsed?: 
                 aria-hidden
             >
                 <source src={LANDING_VIDEO} type="video/mp4" />
-            </video>
+            </video>}
 
             <div className="landing-glow-top absolute inset-0" aria-hidden />
             <div className="landing-glow-bottom absolute inset-0" aria-hidden />

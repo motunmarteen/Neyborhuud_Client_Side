@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { isCalm } from '@/lib/calmMode';
 
 export type CarouselItem = { url: string; type?: string; thumbnailUrl?: string };
 
@@ -25,11 +26,10 @@ const AUTO_MS = 4000;
 
 const isVideo = (m: CarouselItem) => m.type === 'video' || /\.(mp4|webm|mov|m3u8)(\?|$)/i.test(m.url);
 
+/** Reduced motion, Data Saver or the Save data setting (F-11 calm mode). */
 function prefersCalm(): boolean {
   if (typeof window === 'undefined') return true;
-  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-  return Boolean(reduce || saveData);
+  return isCalm();
 }
 
 /** Pill-and-dots indicator from the owner's reference. */

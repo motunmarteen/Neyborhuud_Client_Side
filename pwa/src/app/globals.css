@@ -7,8 +7,9 @@
 html { color-scheme: light; }
 
 /* ── Accessibility — font size tiers ── */
-.text-size-sm { font-size: 14px; }
-.text-size-lg { font-size: 18px; }
+/* Text size from Settings (on <html>, so every rem-sized thing follows). */
+html[data-text-size='small'] { font-size: 87.5%; }
+html[data-text-size='large'] { font-size: 112.5%; }
 
 /* ── Leaflet Map — fix Tailwind reset breaking tiles ── */
 .leaflet-container {
@@ -9488,4 +9489,37 @@ article.feed-card--emergency {
 @media (prefers-reduced-motion: reduce) {
   .nh-pin__ripple,
   .nh-orb__pulse { animation: none; opacity: 0; }
+}
+
+/* ── F-11 Calm mode: reduced motion, Data Saver, or the Save data setting ───────────
+   <html data-calm> (set before first paint by CALM_BOOT_SCRIPT) and the OS setting both
+   stop animations and transitions. Things land in their final state at once; ripples and
+   pings, which end invisible, simply do not show. Loading spinners keep turning so people
+   still see that something is happening. */
+html[data-calm] *,
+html[data-calm] *::before,
+html[data-calm] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0s !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+html[data-calm] .animate-spin,
+html .animate-spin {
+  animation-duration: 1s !important;
+  animation-iteration-count: infinite !important;
 }

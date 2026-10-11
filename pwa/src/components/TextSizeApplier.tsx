@@ -1,26 +1,16 @@
 'use client';
 
 import { useEffect } from 'react';
+import { applyTextSize, savedAccessibility } from '@/lib/calmMode';
 
-const SIZE_CLASS: Record<string, string> = {
-  small: 'text-size-sm',
-  medium: '',
-  large: 'text-size-lg',
-};
-
+/**
+ * Re-applies the Settings text size after the app starts (the early CALM_BOOT_SCRIPT sets
+ * it before the first paint; this covers a size that arrived later with the user record).
+ */
 export default function TextSizeApplier() {
   useEffect(() => {
-    const stored = localStorage.getItem('neyborhuud_user');
-    if (!stored) return;
-    try {
-      const user = JSON.parse(stored);
-      const size: string = user?.settings?.accessibility?.textSize ?? 'medium';
-      const cls = SIZE_CLASS[size] ?? '';
-
-      // Remove any existing size class, then add the new one
-      document.body.classList.remove('text-size-sm', 'text-size-lg');
-      if (cls) document.body.classList.add(cls);
-    } catch { /* ignore */ }
+    const size = savedAccessibility().textSize;
+    if (size) applyTextSize(size);
   }, []);
 
   return null;

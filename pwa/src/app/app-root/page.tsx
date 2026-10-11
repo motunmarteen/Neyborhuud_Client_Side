@@ -9,6 +9,7 @@ import { resolvePostAuthRoute, validateStoredSession } from "@/lib/authSession";
 import { SocialProofBadge } from "@/components/landing/SocialProofBadge";
 import { BRAND_NAME } from "@/lib/brand";
 import { NeyborHuudLogo } from "@/components/brand/NeyborHuudLogo";
+import { useCalm } from "@/hooks/useCalm";
 
 const LANDING_VIDEO = "/video/background-video.mp4";
 const LANDING_POSTER = "/video/landing-poster.jpg";
@@ -50,6 +51,8 @@ export default function AppRootPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [posterOk, setPosterOk] = useState(true);
+  // F-11: calm mode (reduced motion / save data) keeps the still picture, no background video.
+  const calm = useCalm();
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -220,7 +223,7 @@ export default function AppRootPage() {
           />
         ) : null}
 
-        <video
+        {calm ? null : <video
           ref={videoRef}
           className={`landing-video absolute inset-0 h-full w-full transition-opacity duration-700 ${
             videoReady ? "opacity-100" : "opacity-0"
@@ -232,7 +235,7 @@ export default function AppRootPage() {
           preload="auto"
         >
           <source src={LANDING_VIDEO} type="video/mp4" />
-        </video>
+        </video>}
 
         <div className="landing-glow-top absolute inset-0" />
         <div className="landing-glow-bottom absolute inset-0" />
