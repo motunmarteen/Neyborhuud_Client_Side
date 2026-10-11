@@ -141,7 +141,7 @@ const CONDITION: Record<string, string> = { new: 'Brand new', used: 'Tokunbo (us
 const DELIVERY: Record<string, string> = { pickup: 'Pickup', delivery: 'Delivery', both: 'Pickup or delivery' };
 
 /** Icon badge per type: what the post is, shown on the avatar corner. */
-const KIND_BADGE: Partial<Record<PostKind, { icon: string; label: string; bg: string }>> = {
+export const KIND_BADGE: Partial<Record<PostKind, { icon: string; label: string; bg: string }>> = {
   fyi: { icon: '📢', label: 'FYI', bg: 'bg-amber-soft' },
   lost_found: { icon: '🔎', label: 'Lost and found', bg: 'bg-blue-soft' },
   poll: { icon: '📊', label: 'Poll', bg: 'bg-green-soft' },

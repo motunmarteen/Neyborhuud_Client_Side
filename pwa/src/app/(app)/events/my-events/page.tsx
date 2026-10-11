@@ -95,9 +95,9 @@ export default function MyEventsPage() {
         )}
 
         {!activeQuery.isLoading && activeList.length > 0 && (
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
             {activeList.map((event: any) => (
-              <div key={event.id ?? event._id} className="relative">
+              <div key={event.id ?? event._id} className="flex flex-col gap-2">
                 <EventCard
                   event={event}
                   onAttend={(eventId) =>
@@ -111,9 +111,9 @@ export default function MyEventsPage() {
                 {tab === "organizing" && (
                   <button
                     onClick={() => setBoostingEventId(event._id ?? event.id)}
-                    className="absolute bottom-4 left-4 z-10 flex items-center gap-1.5 rounded-full border border-status-warning/30 bg-primary/25 px-3 py-1.5 text-xs font-bold text-status-warning/90 shadow-lg backdrop-blur-md transition-all hover:bg-primary/35"
+                    className="tap-target inline-flex min-h-10 items-center justify-center gap-1 rounded-full bg-amber-soft px-3 text-[13px] font-bold text-amber-ink transition-colors hover:bg-amber-soft/70"
                   >
-                    Boost
+                    🚀 Boost
                     {event.isBoosted && event.boostedUntil && (
                       <span className="ml-1 opacity-80">· active</span>
                     )}
@@ -123,7 +123,7 @@ export default function MyEventsPage() {
             ))}
 
             {activeQuery.hasNextPage && (
-              <div ref={loadMoreRef} className="flex justify-center py-4">
+              <div ref={loadMoreRef} className="col-span-full flex justify-center py-4">
                 {activeQuery.isFetchingNextPage && (
                   <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 )}

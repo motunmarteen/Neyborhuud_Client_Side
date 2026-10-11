@@ -33,7 +33,7 @@ function prefersCalm(): boolean {
 }
 
 /** Pill-and-dots indicator from the owner's reference. */
-function Indicator({ count, active, progressKey, running, onPick }: { count: number; active: number; progressKey: number; running: boolean; onPick: (i: number) => void }) {
+export function PhotoDots({ count, active, progressKey, running, onPick }: { count: number; active: number; progressKey: number; running: boolean; onPick: (i: number) => void }) {
   return (
     <div className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-1.5 backdrop-blur-sm" role="tablist" aria-label="Photos">
       {Array.from({ length: count }, (_, i) =>
@@ -227,7 +227,7 @@ export function PhotoCarousel({ items, alt }: { items: CarouselItem[]; alt: stri
             {index + 1}/{count}
           </span>
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-            <Indicator
+            <PhotoDots
               count={count}
               active={index}
               progressKey={index * 1000 + cycle}

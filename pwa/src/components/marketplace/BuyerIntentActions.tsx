@@ -267,9 +267,9 @@ export function BuyerIntentActions({
   if (authPending) {
     if (layout === "compact") {
       return (
-        <div className="flex w-full flex-col gap-2 sm:flex-row" aria-busy="true" aria-label="Loading account">
-          <div className="min-h-[44px] flex-1 animate-pulse rounded-full bg-[var(--surface-light)] sm:min-h-[40px] " />
-          <div className="min-h-[44px] flex-1 animate-pulse rounded-full bg-[var(--surface-light)] sm:min-h-[40px] " />
+        <div className="flex w-full gap-2" aria-busy="true" aria-label="Loading account">
+          <div className="min-h-10 flex-1 animate-pulse rounded-full bg-background" />
+          <div className="min-h-10 flex-1 animate-pulse rounded-full bg-background" />
         </div>
       );
     }
@@ -291,7 +291,7 @@ export function BuyerIntentActions({
             e.stopPropagation();
             router.push("/login");
           }}
-          className="w-full rounded-full border border-[var(--border-light)] bg-[var(--surface-light)] py-2.5 text-center text-xs font-semibold text-[#0E8A3E] shadow-[0_2px_12px_rgba(14,138,62,0.08)] backdrop-blur-xl transition-transform active:scale-[0.98] hover:bg-white     184, 46,0.12)] "
+          className="min-h-10 w-full rounded-full bg-green-soft text-center text-[13px] font-bold text-brand-green-dark transition-transform hover:bg-[#D6F1DE] motion-safe:active:scale-[0.97]"
         >
           Log in to buy
         </button>
@@ -407,7 +407,7 @@ export function BuyerIntentActions({
     const busy = createOrder.isPending || makeOffer.isPending;
     return (
       <Fragment>
-        <div className="flex w-full min-w-0 items-stretch gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex w-full min-w-0 flex-wrap items-stretch gap-2" onClick={(e) => e.stopPropagation()}>
           {/* BUY — primary, always present (buy at asking price directly). */}
           <button
             type="button"
@@ -416,16 +416,13 @@ export function BuyerIntentActions({
               void handleBuyNow();
             }}
             disabled={busy}
-            className="relative flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full bg-[#00B82E] hover:bg-[#00F53B] px-3 py-2.5 text-xs font-black tracking-tight text-black shadow-[0_4px_18px_rgba(0,184,46,0.28)] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px]"
+            className="relative flex min-h-10 min-w-0 flex-1 items-center justify-center gap-1 overflow-hidden rounded-full bg-primary px-2 text-[13px] font-bold text-white shadow-[0_6px_16px_rgba(0,184,46,0.28)] transition-transform hover:bg-brand-green-dark motion-safe:active:scale-[0.97] disabled:opacity-45"
           >
             {createOrder.isPending ? (
               <span className="material-symbols-outlined animate-spin shrink-0 text-[18px]">progress_activity</span>
             ) : (
-              <span className="material-symbols-outlined shrink-0 text-[16px]" style={{ fontVariationSettings: '"FILL" 1' }}>
-                shopping_bag
-              </span>
+              <span className="truncate">Buy am</span>
             )}
-            <span className="truncate">{createOrder.isPending ? "…" : "Buy am"}</span>
           </button>
 
           {/* OFFER — secondary, only for negotiable products. */}
@@ -437,7 +434,7 @@ export function BuyerIntentActions({
                 handleOffer();
               }}
               disabled={busy}
-              className="flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-primary/35 bg-primary/[0.08] px-3 py-2.5 text-xs font-bold tracking-tight text-[#0E8A3E] transition-transform active:scale-[0.98] disabled:opacity-45 sm:min-h-[40px]   "
+              className="order-last flex min-h-10 min-w-0 basis-full items-center justify-center gap-1 rounded-full bg-green-soft px-2 text-[13px] font-bold text-brand-green-dark transition-transform hover:bg-[#D6F1DE] motion-safe:active:scale-[0.97] disabled:opacity-45"
             >
               <span className="material-symbols-outlined shrink-0 text-[16px]">sell</span>
               <span className="truncate">Price am</span>
@@ -453,7 +450,7 @@ export function BuyerIntentActions({
             }}
             disabled={contactingSeller}
             aria-label="Chat with seller"
-            className="flex min-h-[44px] w-11 shrink-0 items-center justify-center rounded-full border border-[var(--border-light)] bg-white/85 text-brand-black shadow-[0_2px_12px_rgba(14,138,62,0.06)] transition-transform active:scale-[0.98] disabled:opacity-50 sm:min-h-[40px]   "
+            className="flex min-h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-white text-navy transition-transform hover:bg-background motion-safe:active:scale-[0.97] disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-[18px]">
               {contactingSeller ? "progress_activity" : "chat"}
