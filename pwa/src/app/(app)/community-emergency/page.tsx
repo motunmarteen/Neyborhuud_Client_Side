@@ -11,6 +11,7 @@
 
 'use client';
 
+import { nhToast } from '@/lib/toast';
 import { useState, useEffect, useCallback, useRef, Suspense, type Dispatch, type SetStateAction } from 'react';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
@@ -108,7 +109,7 @@ function CreateEmergencyForm({ onSuccess }: { onSuccess: () => void }) {
           lga: lga.trim() || undefined,
         },
       });
-      toast.success('Emergency alert posted to your community');
+      nhToast.thanks({ emoji: '🚨', title: 'Alert sent. Your neighbours go see am', sub: 'They can confirm it, mark safe, or say they are nearby.' });
       onSuccess();
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? 'Failed to post alert';

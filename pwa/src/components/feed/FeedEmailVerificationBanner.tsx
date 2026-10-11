@@ -1,10 +1,10 @@
 'use client';
 
+import { nhToast } from '@/lib/toast';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Gift, X, Sparkles, CheckCircle2 } from 'lucide-react';
 import { EmailVerificationCard } from '@/components/auth/EmailVerificationCard';
-import { toast } from 'sonner';
 
 export function FeedEmailVerificationBanner() {
   const { user } = useAuth();
@@ -44,7 +44,7 @@ export function FeedEmailVerificationBanner() {
   const handleVerifiedSuccess = () => {
     setShowModal(false);
     setDismissed(true);
-    toast.success('Email verified! 50 HuudCredit unlocked. 🎉');
+    nhToast.thanks({ emoji: '✉️', title: 'Email verified. Thank you!', sub: 'Your account is safer now.' });
   };
 
   return (

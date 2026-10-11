@@ -1,7 +1,7 @@
 "use client";
 
+import { nhToast } from "@/lib/toast";
 import { useState, useEffect } from "react";
-import { toast } from "sonner";
 import { useCheckIn, useMyStreak } from "@/hooks/useGamification";
 import { emitCoinsUpdated, localDayKey } from "@/lib/gamification-events";
 
@@ -40,7 +40,7 @@ export default function DailyCheckInModal() {
     });
     if (data?.coinsEarned) {
       emitCoinsUpdated({ totalHuudCoins: data?.totalHuudCoins });
-      toast.success(`+${data.coinsEarned} HuudCredit added to your wallet`);
+      nhToast.thanks({ title: 'You don check in today', sub: 'See you tomorrow. Keep your streak going.', coins: data.coinsEarned });
     }
   });
 

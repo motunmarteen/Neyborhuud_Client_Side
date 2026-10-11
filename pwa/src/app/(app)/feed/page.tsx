@@ -1,5 +1,6 @@
 'use client';
 
+import { nhToast } from '@/lib/toast';
 import React, { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -390,6 +391,23 @@ function XFeedInner() {
                 case 'dispute':
                     await contentService.confirmOrDispute(post.id, 'dispute');
                     break;
+            }
+            const turnedOn =
+                action === 'confirm' || action === 'dispute'
+                    ? post.confirmDisputeAction !== action
+                    : action === 'safe'
+                      ? !post.isSafe
+                      : action === 'nearby'
+                        ? !post.isNearby
+                        : false;
+            if (turnedOn) {
+                const THANKS: Record<string, { emoji: string; title: string; sub: string }> = {
+                    confirm: { emoji: '✅', title: 'Thank you! Neighbours go know say e true', sub: 'Your confirmation helps the alert reach more people.' },
+                    dispute: { emoji: '🔍', title: 'Thank you for checking', sub: 'If more neighbours say not true, the alert gets marked.' },
+                    safe: { emoji: '🙋🏾', title: 'Glad you are safe', sub: 'Neighbours can see you marked yourself safe.' },
+                    nearby: { emoji: '📍', title: 'Thank you for looking out', sub: 'Only go closer if it is safe for you.' },
+                };
+                nhToast.thanks(THANKS[action]);
             }
             // Background revalidate to sync with server state
             queryClient.invalidateQueries({ queryKey: ['locationFeed'] });

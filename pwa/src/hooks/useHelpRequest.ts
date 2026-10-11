@@ -3,6 +3,7 @@
  * React Query hooks for Help Request posts and offer management.
  */
 
+import { nhToast } from "@/lib/toast";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { helpRequestService } from "@/services/help-request.service";
 import { Post } from "@/types/api";
@@ -130,7 +131,7 @@ export function useSubmitHelpOffer(postId: string) {
     mutationFn: (data: { message: string; offeredAmount?: number }) =>
       helpRequestService.submitOffer(postId, data),
     onSuccess: () => {
-      toast.success("Your offer has been sent to the requestor!");
+      nhToast.thanks({ emoji: "🙏🏾", title: "Thank you for offering help", sub: "We sent your offer. They will reply in chat." });
       qc.invalidateQueries({ queryKey: ["helpRequest", "offers", postId] });
     },
     onError: (err: any) => {

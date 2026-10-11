@@ -101,7 +101,7 @@ export function useQuickSignal() {
         }
 
         // Confirm only what the server accepted.
-        nhToast.signal({ emoji: preset.emoji, title: 'Signal sent!', signalLabel: preset.label, locationName, coinsEarned: 0 });
+        nhToast.signal({ emoji: preset.emoji, title: 'Well done! Your neighbours go see am', signalLabel: preset.label, locationName, coinsEarned: 0 });
         queryClient.invalidateQueries({ queryKey: ['feed'] });
         queryClient.invalidateQueries({ queryKey: ['radar'] });
         queryClient.invalidateQueries({ queryKey: ['gamification-stats'] });
