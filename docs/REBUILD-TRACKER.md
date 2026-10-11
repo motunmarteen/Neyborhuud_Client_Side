@@ -30,7 +30,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 |---|---|---|---|
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
-| 2. Design foundation | 1 | 13 | ⏸ after Phase 1 |
+| 2. Design foundation | 12 | 19 | 🟡 in progress: server deploy, then F-13d |
 | 3. Map home (sky + live map) | 0 | 16 | ⬜ |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
@@ -143,8 +143,8 @@ Kept here so the whole history is in one place.
 - [x] F-13b (server 9a2044d: /api/v1/polls, area-only one vote each, changeable until close, creator +2 HC at 10 voters; also fixed the HuudCredit daily-limit race) **Feed polls on the server**: polls today exist only in chat (PollVote). Add poll posts (question, 2-4 options, end date), one vote per person, results, and the ➕ "Community Poll" option that has no backend yet
 - [x] F-13c (server db7d78f: /api/v1/lost-found with private detail, claims, 4-digit handover code, 50 HC finder reward held 72h, ≤500 HC pledges, anti-gaming rules, flags + moderator decisions) **Lost & Found fields**
 - [ ] F-13d **App screens for polls and Lost & Found**: create poll, create lost/found (with private detail and pledge), claims inbox for the poster, handover code screen (owner) and code entry (finder), helper thank-you, flag a return. ⚠️ Deploy the new server only together with these screens: the old FYI status buttons can no longer mark Lost & Found posts returned: lost or found, item name, last seen place and time, optional reward (kobo) in the FYI create form and API (today Lost & Found is only an FYI subtype label)
-- [ ] F-14 **Sentinel screen = Ask Sentinel (SSAA) + safety + Explore** (owner decision 2026-10-11): one "Ask Sentinel or search anything…" box at the top; answer area (answer, mood, sources, follow-ups) above grouped results (people, places, posts, market, events, artisans, jobs, bulletins); area safety status + SOS / Trip / Check-in; then Explore (quick questions, 8 tiles, trending, news). Top-bar 🔍 and a floating Sentinel button on the map open it; /explore redirects here. AI only for questions/requests; names/words/#tags return instant results with "Ask Sentinel about this"
-- [ ] F-14b **Server: one ask/search endpoint** that runs search + AssistantService together, decides question vs keyword, and fixes the 5 search calls the app makes that do not exist (/search/events, /jobs, /marketplace, /services, /history)
+- [x] F-14 (/sentinel; Sentinel tab + top-bar 🔍 open it; /explore and #tag links redirect with the query; tested with canned API replies: empty state, name search, question answer; falls back to GET /search while the new server is not deployed) **Sentinel screen = Ask Sentinel (SSAA) + safety + Explore** (owner decision 2026-10-11): one "Ask Sentinel or search anything…" box at the top; answer area (answer, mood, sources, follow-ups) above grouped results (people, places, posts, market, events, artisans, jobs, bulletins); area safety status + SOS / Trip / Check-in; then Explore (quick questions, 8 tiles, trending, news). Top-bar 🔍 and a floating Sentinel button on the map open it; /explore redirects here. AI only for questions/requests; names/words/#tags return instant results with "Ask Sentinel about this"
+- [x] F-14b (server e84d860 POST /api/v1/sentinel/ask, 22 tests; GET /search no longer returns deleted posts/users; the 5 dead client calls removed — they were never used) **Server: one ask/search endpoint** that runs search + AssistantService together, decides question vs keyword, and fixes the 5 search calls the app makes that do not exist (/search/events, /jobs, /marketplace, /services, /history)
 - [ ] F-12 Visual check of 10 key screens after the switch (no broken layouts)
 
 ---

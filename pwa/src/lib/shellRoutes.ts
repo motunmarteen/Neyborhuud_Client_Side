@@ -8,6 +8,7 @@ export const PAGE_OWNED_TOP_NAV_PREFIXES = [
   '/feed',
   '/friendship',
   '/explore',
+  '/sentinel',
   '/marketplace',
   '/jobs',
   '/events',
