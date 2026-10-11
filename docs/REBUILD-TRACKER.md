@@ -153,6 +153,23 @@ Kept here so the whole history is in one place.
 
 ---
 
+## Safety and civic upgrades (from the N-Alert research, owner decisions 2026-10-11)
+
+**Order (owner):** finish the current work (F-13d Poll and Lost & Found screens, F-13 post card in the feed), then alarms → danger zones → complaints → rumour check. **Election mode comes after the current work but has a hard deadline:** presidential election **16 January 2027**, governorship **6 February 2027**. To be live and learnt by mid-December, election mode must start **by mid-November 2026 at the latest**.
+
+- [ ] S-01 **Danger alarm**: urgent alarm sound + full-screen alert when danger is reported near you (app open); stronger emergency push (Android: urgent, stays on screen, strong vibration). Note: a web app cannot play its own siren while closed; the phone plays its notification sound
+- [ ] S-02 **SOS siren**: loud siren you switch on during SOS to scare an attacker and alert people nearby (max volume, flashing screen)
+- [ ] S-03 **Voice / audio report**: speak a report (English, Pidgin, Yoruba, Igbo, Hausa) or record sound as evidence on safety reports
+- [ ] S-04 **Danger zones**: zones formed from neighbour-confirmed reports (radius, reason, expiry), shown on the map, warning when you enter one with a safer route. Today: EmergencyZone model + read endpoint exist but nothing creates zones; red-zone LGA alerts and personal geofences exist
+- [ ] S-04b Check that Sentinel red-zone alerts also go out as push notifications (code read shows a live socket fan-out; push not confirmed)
+- [ ] S-05 **Complaint system** (FixMyStreet style): bad road, waste, light billing, gate; photo + location, neighbours add "me too", status received → in progress → fixed, routed to estate / LGA / utility. Today: nothing (no complaint code)
+- [ ] S-06 **"Is it true?" rumour check**: ask about a claim; neighbours nearby + Sentinel weigh in; label confirmed / false / not yet known
+- [ ] S-07 **Election mode (non-partisan)**: my polling unit + what to bring (PVC) + INEC links; election incident reports tagged to the polling unit (violence, vote buying, intimidation, ballot snatching, late materials, BVAS failure) with photo/video, anonymous option, neighbour confirmation; election-day safety map + avoid alerts; "I have voted, I am safe" check-in; election rumour check. **Never tally or announce results** — link to INEC IReV. Lawyer review: political ads, candidate polls. Deadline above
+- [ ] S-08 **SOS by SMS** when there is no data (promised on the home canvas; not built), then offline reports that send when signal returns
+- [ ] S-09 **Send to responders** (estate security, vigilante, police division) — needs partner agreements first (*owner*)
+
+---
+
 ## Phase 3: Map home (the sky + live map)
 
 **Goal:** My Huud becomes the live neighbourhood map under the real sky, as in the mockup.
