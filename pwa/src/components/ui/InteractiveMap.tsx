@@ -4,7 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { OSM_MAP_STYLE } from '@/lib/map-style';
+import { HUUD_MAP_STYLE } from '@/lib/huudMapStyle';
+import { ensureMaplibreWorker } from '@/lib/maplibreWorker';
 
 interface MapLocation {
     lat: number;
@@ -109,9 +110,10 @@ export function InteractiveMap({
 
         let map: maplibregl.Map;
         try {
+            ensureMaplibreWorker();
             map = new maplibregl.Map({
                 container: containerRef.current,
-                style: OSM_MAP_STYLE,
+                style: HUUD_MAP_STYLE,
                 center: [center.lng, center.lat],
                 zoom,
                 attributionControl: showAttribution ? { compact: true } : false,

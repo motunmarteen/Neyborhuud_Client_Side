@@ -4,7 +4,9 @@ import React, { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Geofence, GeofenceType } from '@/services/safety.service';
-import { OSM_MAP_STYLE, GEOFENCE_COLORS } from '@/lib/map-style';
+import { GEOFENCE_COLORS } from '@/lib/map-style';
+import { HUUD_MAP_STYLE } from '@/lib/huudMapStyle';
+import { ensureMaplibreWorker } from '@/lib/maplibreWorker';
 
 function circleRing(lng: number, lat: number, radiusMeters: number, steps = 64): GeoJSON.Polygon {
     const coords: [number, number][] = [];
@@ -74,12 +76,14 @@ export default function GeofenceMap({
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
 
+        ensureMaplibreWorker();
         const map = new maplibregl.Map({
             container: containerRef.current,
-            style: OSM_MAP_STYLE,
+            style: HUUD_MAP_STYLE,
             center: [3.3792, 6.5244],
             zoom: 13,
-            attributionControl: false,
+            // The OpenStreetMap licence requires the credit line.
+            attributionControl: { compact: true },
         });
         map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
