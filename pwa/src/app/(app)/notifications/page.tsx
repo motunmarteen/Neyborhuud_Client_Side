@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { Notification } from '@/types/api';
 import { useRouter } from 'next/navigation';
 import {
-  ChevronLeft,
   Trash2,
   Check,
   Shield,
@@ -19,7 +18,6 @@ import {
   ExternalLink,
   Inbox,
 } from 'lucide-react';
-import { Eli5Tooltip } from '@/components/ui/Eli5Tooltip';
 
 type NotificationCategory = 'all' | 'alerts' | 'trade' | 'system';
 
@@ -90,28 +88,7 @@ function NotificationsPageInner() {
   const totalUnread = rawNotifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="min-h-screen bg-[#F6F8F6] text-[#1D2433] flex flex-col select-none">
-      {/* 1. TOP HEADER */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-white/95 backdrop-blur-md border-b border-black/[0.08]">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="p-1.5 rounded-xl hover:bg-black/[0.04] transition-colors text-[#5B6478] hover:text-[#1D2433]"
-            aria-label="Back"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <h1 className="text-xs sm:text-[13px] font-black tracking-tight text-[#1D2433]">Notifications</h1>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <Eli5Tooltip
-            term="Notifications"
-            explanation="Neighborhood safety notices, order updates from the market, and local community alerts."
-          />
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#F6F8F6] text-[#1D2433] flex flex-col select-none pt-[var(--app-topnav-offset)]">
 
       {/* 2. SEGMENTED PILL SELECTOR */}
       <div className="px-4 py-2.5 bg-white border-b border-black/[0.08]">

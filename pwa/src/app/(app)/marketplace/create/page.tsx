@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { ProductForm } from "@/components/marketplace";
 import { Product } from "@/services/marketplace.service";
 import { GlassFormPage } from "@/components/ui/GlassFormPage";
-import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
 import { PostCreationSuccessSheet } from "@/components/shared/PostCreationSuccessSheet";
 
 export default function CreateProductPage() {
@@ -27,7 +26,7 @@ export default function CreateProductPage() {
   };
 
   return (
-    <LocalHuudSubpageShell hubId="marketplace" maxWidth="920">
+    <>
       <GlassFormPage
         wide
         title="Create listing"
@@ -40,6 +39,6 @@ export default function CreateProductPage() {
       {createdProduct && (
         <PostCreationSuccessSheet type="marketplace" onDismiss={handleDismiss} />
       )}
-    </LocalHuudSubpageShell>
+    </>
   );
 }

@@ -57,16 +57,18 @@ export function ProfileBrowseHero({
   onVouch,
   hasVouched = false,
 }: ProfileBrowseHeroProps) {
-  const handle = username.trim().toLowerCase();
+  // Missing profile fields must not take the whole profile page down.
+  const handle = (username ?? '').trim().toLowerCase();
+  const nameTrim = (displayName ?? '').trim();
   const initial = resolveProfileAvatarInitial({ displayName, username: handle }, handle);
   const resolved = resolveUserAvatarUrl({ profilePicture, avatarUrl });
   const center = mapCenter ?? PROFILE_MAP_DEFAULT;
 
   const resolvedName =
-    personalName.trim() ||
-    (displayName.trim().toLowerCase() !== handle &&
-    displayName.trim().toLowerCase() !== `@${handle}`
-      ? displayName.trim()
+    (personalName ?? '').trim() ||
+    (nameTrim.toLowerCase() !== handle &&
+    nameTrim.toLowerCase() !== `@${handle}`
+      ? nameTrim
       : '');
   const hasFullName = resolvedName.length > 0;
   const primaryLabel = hasFullName ? resolvedName : `@${handle}`;

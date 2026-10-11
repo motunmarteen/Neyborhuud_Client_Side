@@ -18,6 +18,7 @@ import { chatThreadPath, isCommunityChat } from '@/lib/chatPaths';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { useCall } from '@/contexts/CallContext';
 import { toast } from '@/lib/toast';
+import { DEMO_MODE } from '@/lib/demoMode';
 import type { Conversation } from '@/types/api';
 
 // ── Conversation row helpers (mirrors FriendshipChatInbox) ──────────────────
@@ -145,8 +146,8 @@ export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
       });
     }
 
-    // If account has no active conversations, populate demo conversations for live testing
-    if (byKey.size === 0) {
+    // Demo builds only: real people never see made-up conversations.
+    if (DEMO_MODE && byKey.size === 0) {
       for (const d of DEMO_CONVERSATIONS) {
         byKey.set(d.key, d);
       }
@@ -187,7 +188,8 @@ export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
 
   return (
     <div className="select-none">
-      {/* ── Phase 3 Live Test Suite Bar ── */}
+      {/* ── Phase 3 Live Test Suite Bar (demo builds only) ── */}
+      {DEMO_MODE ? (
       <div className="border-b border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white px-4 py-3">
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-1.5">
@@ -225,6 +227,7 @@ export function ChatsStream({ currentUserId, search }: ChatsStreamProps) {
           </button>
         </div>
       </div>
+      ) : null}
 
       {/* ── Chats / Groups tabs ── */}
       <div role="tablist" aria-label="Filter conversations" className="flex gap-2 border-b border-black/[0.04] bg-white px-4 py-2.5">
