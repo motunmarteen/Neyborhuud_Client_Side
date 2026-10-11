@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 1 | 16 | 🟡 M-01 done; next M-02 3D buildings |
+| 3. Map home (sky + live map) | 2 | 16 | 🟡 M-02 done; next M-03 live sky |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -180,7 +180,7 @@ Kept here so the whole history is in one place.
 **Goal:** My Huud becomes the live neighbourhood map under the real sky, as in the mockup.
 
 - [x] M-01 (pwa: owner chose OpenFreeMap; lib/huudMapStyle.ts in the mockup palette, components/map/HuudMap.tsx; old maps moved off tile.openstreetmap.org; MapLibre worker served from public/) MapLibre base map with our own style (soft colours, labels), real streets across Nigeria from OpenStreetMap
-- [ ] M-02 3D buildings from real footprints; tilt and rotate; pinch zoom
+- [x] M-02 (pwa: fill-extrusion from zoom 15, default 1-2 storeys where OSM has no height, zinc/terracotta/cream roofs; tilted street views, compass; calm mode flat) 3D buildings from real footprints; tilt and rotate; pinch zoom
 - [ ] M-03 Live sky over the map: time-of-day colours, sun and moon path (east → west), stars
 - [ ] M-04 Horizon blend (land fades into the sky), palm-tree horizon, sunlight on the ground
 - [ ] M-05 Weather on the map: clouds and their shadows, drizzle, rain (current Sky Feed Hero drops), storm with lightning, harmattan haze, puddles
