@@ -175,7 +175,7 @@ export function TripsStartForm({ onStart, onPlan, disabled }: TripsStartFormProp
                 setForm((p) => ({ ...p, originText: e.target.value }));
                 setOriginCoords(null);
               }}
-              placeholder="Starting from (e.g. Home, Ikeja)"
+              placeholder="Starting from (e.g. Home, Wuse 2)"
               className="mod-inset flex-1 rounded-xl px-3 py-2.5 text-sm"
               required
               disabled={disabled}
@@ -204,7 +204,7 @@ export function TripsStartForm({ onStart, onPlan, disabled }: TripsStartFormProp
               setDestCoords(null);
             }}
             onBlur={handleDestinationBlur}
-            placeholder="Going to (e.g. Work, Lekki)"
+            placeholder="Going to (e.g. Work, Bodija)"
             className="mod-inset w-full rounded-xl px-3 py-2.5 text-sm"
             required
             disabled={disabled}

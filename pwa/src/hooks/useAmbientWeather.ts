@@ -35,7 +35,6 @@ function withHuudCity(
   return weather;
 }
 
-const DEFAULT_COORDS = { lat: 6.5244, lng: 3.3792 }; // Lagos centroid fallback
 
 export function useAmbientWeather() {
   const { user } = useAuth();
@@ -60,18 +59,9 @@ export function useAmbientWeather() {
       try {
         publish(await fetchCurrentWeather(latitude, longitude));
       } catch {
-        const fallbackCity = resolveHuudDisplayName(user);
-        publish({
-          temp: 28,
-          condition: 'Rain Showers',
-          city: fallbackCity !== 'Your Huud' ? fallbackCity : 'Your Area',
-          wmoCode: 80,
-          forecast: [
-            { dayName: getWeekdayName(-1), temp: 28, isToday: false },
-            { dayName: getWeekdayName(0), temp: 28, isToday: true },
-            { dayName: getWeekdayName(1), temp: 29, isToday: false },
-          ],
-        });
+        // Weather service failed: show none rather than an invented reading.
+        setWeather(null);
+        setLoading(false);
       }
     };
 
@@ -87,7 +77,7 @@ export function useAmbientWeather() {
     const geo = getGeolocation();
     if (!geo) {
       if (!tryProfileCoords()) {
-        void updateWeather(DEFAULT_COORDS.lat, DEFAULT_COORDS.lng, true);
+        setLoading(false); // no location: no weather rather than another city's
       }
       return;
     }
@@ -95,9 +85,7 @@ export function useAmbientWeather() {
     const watchId = geo.watchPosition(
       (pos) => updateWeather(pos.coords.latitude, pos.coords.longitude),
       () => {
-        if (!tryProfileCoords()) {
-          void updateWeather(DEFAULT_COORDS.lat, DEFAULT_COORDS.lng, true);
-        }
+        if (!tryProfileCoords()) setLoading(false); // no location: no weather rather than another city's
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 120000 },
     );

@@ -417,15 +417,15 @@ function PickCommunityContent() {
             </div>
 
             <PremiumInput
-              label="State (e.g. Lagos, Abuja, Oyo)"
-              placeholder="Lagos"
+              label="State (e.g. Kano, Enugu, Lagos, FCT)"
+              placeholder="e.g. Kano"
               value={manualState}
               onChange={(e) => setManualState(e.target.value)}
             />
 
             <PremiumInput
               label="Local Government Area (LGA)"
-              placeholder="Ikeja"
+              placeholder="e.g. Nassarawa"
               value={manualLga}
               onChange={(e) => setManualLga(e.target.value)}
             />

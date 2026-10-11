@@ -199,7 +199,7 @@ export default function CreateEventForm() {
         <input
           value={venue}
           onChange={(e) => setVenue(e.target.value)}
-          placeholder="e.g. Community Centre, Lagos Island"
+          placeholder="e.g. Town hall, GRA Phase 2"
           className={glassField}
         />
       </div>

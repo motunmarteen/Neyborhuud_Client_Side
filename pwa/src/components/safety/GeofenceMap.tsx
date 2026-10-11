@@ -7,6 +7,7 @@ import type { Geofence, GeofenceType } from '@/services/safety.service';
 import { GEOFENCE_COLORS } from '@/lib/map-style';
 import { HUUD_MAP_STYLE } from '@/lib/huudMapStyle';
 import { ensureMaplibreWorker } from '@/lib/maplibreWorker';
+import { NIGERIA_VIEW } from '@/lib/nigeriaView';
 
 function circleRing(lng: number, lat: number, radiusMeters: number, steps = 64): GeoJSON.Polygon {
     const coords: [number, number][] = [];
@@ -80,8 +81,9 @@ export default function GeofenceMap({
         const map = new maplibregl.Map({
             container: containerRef.current,
             style: HUUD_MAP_STYLE,
-            center: [3.3792, 6.5244],
-            zoom: 13,
+            // The person's area if known, otherwise all of Nigeria (never a Lagos default).
+            center: [NIGERIA_VIEW.center.lng, NIGERIA_VIEW.center.lat],
+            zoom: NIGERIA_VIEW.zoom,
             // The OpenStreetMap licence requires the credit line.
             attributionControl: { compact: true },
         });

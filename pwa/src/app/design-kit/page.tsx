@@ -151,7 +151,7 @@ export default function DesignKitPage() {
           <PinsDemo />
         </Section>
 
-        <Section id="map" title="Map (M-01)" note="Real Lagos streets from OpenStreetMap (via OpenFreeMap), drawn in the Home Concept colours: green ground, grey roads with white edges, teal lagoon, cream buildings.">
+        <Section id="map" title="Map (M-01)" note="Real streets across Nigeria from OpenStreetMap (via OpenFreeMap), drawn in the Home Concept colours. Maps open on your own area; without one, on the whole country.">
           <MapDemo />
         </Section>
 

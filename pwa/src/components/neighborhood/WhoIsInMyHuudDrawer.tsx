@@ -15,6 +15,8 @@ import {
   Lock,
 } from 'lucide-react';
 import apiClient from '@/lib/api-client';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 interface DensityData {
   communityId: string;
@@ -47,6 +49,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
   const [loading, setLoading] = useState(true);
   const [showEli5, setShowEli5] = useState(false);
 
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!isOpen) return;
 
@@ -55,35 +58,16 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
         setLoading(true);
         const res = await apiClient.get<DensityData>('/geo/huud/density');
         if (res && res.data) setData(res.data);
-      } catch (err) {
-        // Fallback realistic baseline
-        setData({
-          communityId: 'default',
-          communityName: 'Lekki Phase 1 Community',
-          lga: 'Eti-Osa',
-          state: 'Lagos',
-          anchorPostcode: 'LA 08 B04 KT 01',
-          counts: {
-            totalResidents: 480,
-            verifiedResidents: 395,
-            totalBuildings: 64,
-            verifiedBuildings: 52,
-            verifiedBusinesses: 28,
-            activeWatchers: 14,
-            securityPersonnel: 8,
-            medicalResponders: 4,
-            communityLeaders: 6,
-          },
-          verificationRatio: 0.82,
-          shieldStrengthLevel: 'Gold',
-        });
+      } catch {
+        // No invented community on failure (it showed "Lekki Phase 1, 480 residents" to everyone).
+        setData(null);
       } finally {
         setLoading(false);
       }
     }
 
     loadDensity();
-  }, [isOpen]);
+  }, [isOpen, attempt]);
 
   if (!isOpen) return null;
 
@@ -116,7 +100,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
     }
   };
 
-  const shield = getShieldBadge(data?.shieldStrengthLevel || 'Gold');
+  const shield = getShieldBadge(data?.shieldStrengthLevel ?? '');
 
   return (
     <div
@@ -146,7 +130,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
                 </button>
               </div>
               <p className="text-[11px] font-medium text-slate-500">
-                {data?.communityName} · {data?.lga}
+                {data ? `${data.communityName} · ${data.lga}` : 'Your area'}
               </p>
             </div>
           </div>
@@ -175,6 +159,19 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
           </div>
         )}
 
+        {loading ? (
+          <div role="status" aria-label="Loading" className="my-4 flex flex-col gap-2.5">
+            <Skeleton className="h-16 w-full rounded-2xl" />
+            <div className="grid grid-cols-2 gap-2.5">
+              {Array.from({ length: 4 }, (_, i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+              ))}
+            </div>
+          </div>
+        ) : !data ? (
+          <ErrorState onRetry={() => setAttempt((a) => a + 1)} homeHref={null} />
+        ) : (
+        <>
         {/* ── Shield Strength Card ── */}
         <div className={`mt-4 p-3.5 rounded-2xl border ${shield.bg} flex items-center justify-between shadow-2xs`}>
           <div className="flex items-center gap-3">
@@ -182,10 +179,10 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black uppercase tracking-wider">
-                  {data?.shieldStrengthLevel || 'Gold'} Shield
+                  {data.shieldStrengthLevel} Shield
                 </span>
                 <span className="text-[10px] font-extrabold bg-white/80 px-2 py-0.5 rounded-full border border-black/[0.05]">
-                  {Math.round((data?.verificationRatio || 0.8) * 100)}% Verified
+                  {Math.round((data.verificationRatio ?? 0) * 100)}% Verified
                 </span>
               </div>
               <p className="text-[11px] text-slate-600 mt-0.5">{shield.desc}</p>
@@ -201,7 +198,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
               <Users size={16} className="text-blue-600" />
             </div>
             <p className="text-xl font-extrabold text-slate-900">
-              {data?.counts.verifiedResidents || 0}
+              {data.counts.verifiedResidents ?? 0}
             </p>
             <p className="text-[10px] font-semibold text-emerald-700 mt-0.5">
               Verified & Vouched
@@ -214,7 +211,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
               <Building2 size={16} className="text-purple-600" />
             </div>
             <p className="text-xl font-extrabold text-slate-900">
-              {data?.counts.verifiedBuildings || 0}
+              {data.counts.verifiedBuildings ?? 0}
             </p>
             <p className="text-[10px] font-semibold text-slate-500 mt-0.5">
               NIPOST NDAPS Anchored
@@ -227,7 +224,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
               <Store size={16} className="text-amber-600" />
             </div>
             <p className="text-xl font-extrabold text-slate-900">
-              {data?.counts.verifiedBusinesses || 0}
+              {data.counts.verifiedBusinesses ?? 0}
             </p>
             <p className="text-[10px] font-semibold text-slate-500 mt-0.5">
               Estate Registered
@@ -240,7 +237,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
               <Eye size={16} className="text-emerald-600" />
             </div>
             <p className="text-xl font-extrabold text-slate-900">
-              {data?.counts.activeWatchers || 0}
+              {data.counts.activeWatchers ?? 0}
             </p>
             <p className="text-[10px] font-semibold text-emerald-700 mt-0.5">
               Active Street Eyes
@@ -253,14 +250,17 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
           <div className="flex items-center gap-2">
             <Shield size={16} className="text-[#00B82E]" />
             <span className="text-xs font-bold text-emerald-950">
-              Security Patrol: {data?.counts.securityPersonnel || 8} Guards
+              Security Patrol: {data.counts.securityPersonnel ?? 0} Guards
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
             <Activity size={14} className="text-rose-500" />
-            <span>Medics: {data?.counts.medicalResponders || 4}</span>
+            <span>Medics: {data.counts.medicalResponders ?? 0}</span>
           </div>
         </div>
+
+        </>
+        )}
 
         {/* ── Privacy Guarantee Footer ── */}
         <div className="mt-auto pt-3 border-t border-black/[0.05] flex items-center justify-between text-[11px] text-slate-500">
@@ -269,7 +269,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
             Differential Privacy Active
           </span>
           <span className="font-mono text-emerald-700 font-bold">
-            {data?.anchorPostcode}
+            {data?.anchorPostcode ?? ''}
           </span>
         </div>
       </div>

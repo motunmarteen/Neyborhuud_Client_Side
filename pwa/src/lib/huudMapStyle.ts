@@ -199,7 +199,8 @@ export const HUUD_MAP_STYLE: StyleSpecification = {
       type: 'line',
       source: 'openmaptiles',
       'source-layer': 'boundary',
-      filter: ['<=', ['get', 'admin_level'], 6],
+      // States only at country level; LGA lines appear once you zoom into an area.
+      filter: ['any', ['<=', ['get', 'admin_level'], 4], ['all', ['<=', ['get', 'admin_level'], 6], ['>=', ['zoom'], 9]]],
       paint: { 'line-color': C.boundary, 'line-width': 1, 'line-dasharray': [4, 3], 'line-opacity': 0.5 },
     },
 

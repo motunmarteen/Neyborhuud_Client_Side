@@ -26,6 +26,7 @@ import {
 import { MapSelectionSheet } from '@/components/map/MapSelectionSheet';
 import { cdnImage } from '@/lib/media';
 import { mapPinHtml, personPinHtml } from '@/components/map/Pins';
+import { NIGERIA_VIEW } from '@/lib/nigeriaView';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -137,8 +138,9 @@ export default function MapComponent({ embedded = false }: { embedded?: boolean 
       })
       .catch((error) => {
         console.error('Error getting location:', error);
-        // Default to Lagos Centroid if browser location fails
-        setUserCoords({ lat: 6.5244, lng: 3.3792 });
+        // GPS failed: use the area on the person's profile; never a Lagos default.
+        const home = authUser ? extractUserMapCoords(authUser as never) : null;
+        setUserCoords(home ?? NIGERIA_VIEW.center);
         setLocationStatus('error');
       });
   }, []);
