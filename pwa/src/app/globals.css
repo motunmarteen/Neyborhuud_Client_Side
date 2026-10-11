@@ -274,7 +274,7 @@ h2 {
   --app-topnav-text-size: 1.125rem;
   --app-topnav-logo-size: 1.4375rem;
   --app-topnav-logo-tracking: -0.05em;
-  --app-nav-bottom: calc(4.25rem + var(--safe-bottom));
+  --app-nav-bottom: calc(4.75rem + var(--safe-bottom)); /* F-07 bottom bar: 70px + 6px */
   --app-scroll-bottom: calc(var(--app-nav-bottom) + var(--viewport-bottom-inset));
   --app-topnav-offset: calc(var(--app-topnav-height) + var(--safe-top));
 

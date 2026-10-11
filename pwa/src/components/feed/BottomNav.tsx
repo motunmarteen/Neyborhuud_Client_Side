@@ -1,264 +1,174 @@
 'use client';
 
-import React, { useRef, useSyncExternalStore, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter, usePathname } from 'next/navigation';
-import { LayoutGrid, Compass, Home, Shield, MessagesSquare, Siren, User } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { usePathname } from 'next/navigation';
+import { Home, MessagesSquare, Newspaper, Plus, Shield, Siren } from 'lucide-react';
 import { useScrollHideBottomNav, scrollToTop } from '@/hooks/useScrollHideBottomNav';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { useSos } from '@/hooks/useSos';
 import { useSentinelBottomSheet } from '@/contexts/SentinelBottomSheetContext';
-import { LocalHuudBottomSheet } from '@/components/navigation/LocalHuudBottomSheet';
-import { UserProfileDrawer } from '@/components/navigation/UserProfileDrawer';
-import { resolveUserAvatarUrl, resolveProfileAvatarInitial } from '@/lib/userAvatar';
+import { CreateSheet } from '@/components/navigation/CreateSheet';
+
+/**
+ * Design foundation F-07: the bottom bar from the home mockup.
+ *
+ *   My Huud · Gist · ➕ · Chats · Sentinel
+ *
+ * - ➕ opens "Wetin you wan share?" (quick signals + create) on every screen
+ * - Sentinel opens safety + Ask Sentinel (SSAA). Press and hold it for a silent SOS
+ *   (moved here from the old centre Home button, so the habit still works).
+ * - Profile is the avatar in the top bar; search/explore become part of Sentinel.
+ */
 
 interface BottomNavProps {
   /** Set true only when the nav should be fully hidden (e.g. map overlay). */
   hidden?: boolean;
 }
 
-function useIsClient() {
-  return useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
+const SOS_HOLD_MS = 600;
+
+function Tab({
+  label,
+  active,
+  children,
+  badge,
+}: {
+  label: string;
+  active: boolean;
+  children: React.ReactNode;
+  badge?: number;
+}) {
+  return (
+    <span className={`relative flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-bold ${active ? 'text-brand-green-dark' : 'text-muted'}`}>
+      <span className="relative">
+        {children}
+        {badge && badge > 0 ? (
+          <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-red px-1 text-[9px] font-black text-white ring-2 ring-white">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        ) : null}
+      </span>
+      {label}
+    </span>
   );
 }
 
 export function BottomNav({ hidden = false }: BottomNavProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { user } = useAuth();
+  const pathname = usePathname() || '/';
   const scrollHidden = useScrollHideBottomNav();
   const { openSheet: openSentinelSheet } = useSentinelBottomSheet();
   const { phase: sosPhase, triggerSos } = useSos();
-  const [localHuudOpen, setLocalHuudOpen] = useState(false);
-  const [userDrawerOpen, setUserDrawerOpen] = useState(false);
-
-  const isClient = useIsClient();
   const { data: messageUnreadCount = 0 } = useUnreadCount('message');
+  const [createOpen, setCreateOpen] = useState(false);
 
-  const resolvedAvatar = isClient ? resolveUserAvatarUrl(user) : null;
-  const initial = isClient ? resolveProfileAvatarInitial(user, user?.username) : 'N';
-
-  // SOS activation logic
-  const sosLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const sosLongPressFired = useRef(false);
-
-  const clearSosLongPressTimer = () => {
-    if (sosLongPressTimer.current) {
-      clearTimeout(sosLongPressTimer.current);
-      sosLongPressTimer.current = null;
-    }
+  // Press-and-hold Sentinel = silent SOS.
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdFired = useRef(false);
+  const clearHold = () => {
+    if (holdTimer.current) clearTimeout(holdTimer.current);
+    holdTimer.current = null;
   };
-
-  const startSosLongPress = () => {
-    sosLongPressFired.current = false;
-    clearSosLongPressTimer();
-    sosLongPressTimer.current = setTimeout(() => {
-      sosLongPressFired.current = true;
-      if (sosPhase === 'idle') {
-        void triggerSos({ silent: true });
-      }
-    }, 600);
+  const startHold = () => {
+    holdFired.current = false;
+    clearHold();
+    holdTimer.current = setTimeout(() => {
+      holdFired.current = true;
+      if (sosPhase === 'idle') void triggerSos({ silent: true });
+    }, SOS_HOLD_MS);
   };
-
-  const cancelSosLongPress = () => {
-    clearSosLongPressTimer();
-  };
-
-  const handleCenterClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (sosLongPressFired.current) {
-      sosLongPressFired.current = false;
+  const onSentinelClick = () => {
+    if (holdFired.current) {
+      holdFired.current = false;
       return;
     }
-    if (pathname === '/feed' || pathname === '/') {
-      scrollToTop();
-    } else {
-      router.push('/feed');
-    }
+    openSentinelSheet();
   };
 
   const sosActive = sosPhase !== 'idle';
-  const isFeed = pathname === '/feed' || pathname === '/';
-  const isExplore = pathname.startsWith('/map') || pathname.startsWith('/explore');
-  const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel');
-  const isChat = pathname.startsWith('/friendship') || pathname.startsWith('/chat');
-  const isProfile = pathname.startsWith('/profile') || userDrawerOpen;
+  const isHome = pathname === '/feed' || pathname === '/';
+  const isGist = pathname.startsWith('/gist') || pathname.startsWith('/gossip');
+  const isChats = pathname.startsWith('/friendship') || pathname.startsWith('/chat') || pathname.startsWith('/messages');
+  const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel') || pathname.startsWith('/explore');
+
+  const tabClass = 'flex flex-1 justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
 
   return (
     <>
       <nav
-        className="fixed bottom-0 inset-x-0 z-40 pointer-events-none flex justify-center pb-safe mb-1.5 px-2.5 sm:px-3 select-none"
-        role="navigation"
+        className={`fixed inset-x-0 bottom-0 z-40 select-none border-t border-[#E6EAF0] bg-white/[0.98] pb-[max(6px,env(safe-area-inset-bottom))] transition-transform duration-300 ease-out motion-reduce:transition-none ${
+          hidden || scrollHidden ? 'translate-y-full' : 'translate-y-0'
+        }`}
         aria-label="Main navigation"
       >
-        <div
-          className={`pointer-events-auto transition-transform duration-300 ease-out ${
-            hidden || scrollHidden ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'
-          }`}
-        >
-          {/* Frosted Curved Bottom Dock — Daylight Light Theme */}
-          <div className="flex items-center gap-0.5 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-3xl bg-white/95 backdrop-blur-2xl border border-black/10 shadow-[0_12px_40px_rgba(0,0,0,0.12)]">
-            {/* 1. MENU */}
+        <div className="mx-auto flex h-[70px] max-w-xl items-center justify-around px-1">
+          <Link
+            href="/feed"
+            onClick={(e) => {
+              if (isHome) {
+                e.preventDefault();
+                scrollToTop();
+              }
+            }}
+            className={tabClass}
+            aria-current={isHome ? 'page' : undefined}
+          >
+            <Tab label="My Huud" active={isHome}>
+              <Home size={22} strokeWidth={isHome ? 2.5 : 2} aria-hidden />
+            </Tab>
+          </Link>
+
+          <Link href="/gist" className={tabClass} aria-current={isGist ? 'page' : undefined}>
+            <Tab label="Gist" active={isGist}>
+              <Newspaper size={22} strokeWidth={isGist ? 2.5 : 2} aria-hidden />
+            </Tab>
+          </Link>
+
+          <div className="flex flex-1 justify-center">
             <button
               type="button"
-              onClick={() => setLocalHuudOpen(true)}
-              className="flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl text-[#5B6478] hover:text-[#1D2433] transition-all active:scale-95 group relative cursor-pointer"
-              aria-label="Community Menu"
+              onClick={() => setCreateOpen(true)}
+              aria-label="Create: post, alert, sell, event and more"
+              aria-haspopup="dialog"
+              className="-mt-7 grid h-[58px] w-[58px] place-items-center rounded-full border-4 border-white bg-primary text-white shadow-[0_8px_18px_rgba(0,184,46,0.4)] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-safe:active:scale-95"
             >
-              <LayoutGrid size={19} className="transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-bold tracking-tight mt-0.5">Menu</span>
-            </button>
-
-            {/* 2. EXPLORE */}
-            <Link
-              href="/map"
-              className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative ${
-                isExplore ? 'text-[#0E8A3E] font-bold' : 'text-[#5B6478] hover:text-[#1D2433]'
-              }`}
-              aria-label="Explore & Street Radar"
-              aria-current={isExplore ? 'page' : undefined}
-            >
-              <Compass size={19} className="transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-bold tracking-tight mt-0.5">Explore</span>
-              {isExplore && (
-                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#0E8A3E]" />
-              )}
-            </Link>
-
-            {/* 3. CENTER HIGHLIGHTED BEACON (FEED / SOS) */}
-            <div className="relative -top-2 px-0.5 sm:px-1">
-              <button
-                type="button"
-                onClick={handleCenterClick}
-                onPointerDown={startSosLongPress}
-                onPointerUp={cancelSosLongPress}
-                onPointerLeave={clearSosLongPressTimer}
-                onContextMenu={(e) => e.preventDefault()}
-                className={`relative w-12 sm:w-13 h-12 sm:h-13 rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-lg cursor-pointer ${
-                  sosActive
-                    ? 'bg-red-600 text-white shadow-red-600/50 animate-pulse'
-                    : isFeed
-                      ? 'bg-[#00B82E] text-black shadow-[#00B82E]/40'
-                      : 'bg-[#F0F4F1] text-black border border-black/10 hover:border-[#0E8A3E]/40'
-                }`}
-                aria-label="Home Feed (Long press for SOS)"
-              >
-                {sosActive ? (
-                  <Siren size={23} className="stroke-[2.5]" />
-                ) : (
-                  <Home size={21} className={isFeed ? 'stroke-[2.5]' : 'stroke-2'} />
-                )}
-                {/* Ambient halo glow */}
-                <span
-                  className={`absolute -inset-1 rounded-2xl -z-10 blur-sm opacity-40 transition-opacity ${
-                    sosActive
-                      ? 'bg-red-500'
-                      : isFeed
-                        ? 'bg-[#00B82E]'
-                        : 'bg-transparent'
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* 4. SAFETY / SENTINEL */}
-            <button
-              type="button"
-              onClick={() => openSentinelSheet()}
-              className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative cursor-pointer ${
-                isSentinel ? 'text-[#0E8A3E] font-bold' : 'text-[#5B6478] hover:text-[#1D2433]'
-              }`}
-              aria-label="Sentinel Safety Toolkit"
-              aria-current={isSentinel ? 'page' : undefined}
-            >
-              <Shield size={19} className="transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-bold tracking-tight mt-0.5">Sentinel</span>
-              {isSentinel && (
-                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#0E8A3E]" />
-              )}
-            </button>
-
-            {/* 5. CHAT */}
-            <Link
-              href="/friendship"
-              className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative ${
-                isChat ? 'text-[#0E8A3E] font-bold' : 'text-[#5B6478] hover:text-[#1D2433]'
-              }`}
-              aria-label="Chat & Messages"
-              aria-current={isChat ? 'page' : undefined}
-            >
-              <div className="relative">
-                <MessagesSquare size={19} className="transition-transform group-hover:scale-110" />
-                {messageUnreadCount > 0 && (
-                  <span className="absolute -top-1 -right-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-black text-white shadow-sm ring-2 ring-white">
-                    {messageUnreadCount > 99 ? '99+' : messageUnreadCount}
-                  </span>
-                )}
-              </div>
-              <span className="text-[10px] font-bold tracking-tight mt-0.5">Chat</span>
-              {isChat && (
-                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#0E8A3E]" />
-              )}
-            </Link>
-
-            {/* 6. PROFILE */}
-            <button
-              type="button"
-              onClick={() => setUserDrawerOpen(true)}
-              className={`flex flex-col items-center justify-center w-11 sm:w-13 h-12 rounded-2xl transition-all active:scale-95 group relative cursor-pointer ${
-                isProfile ? 'text-[#0E8A3E] font-bold' : 'text-[#5B6478] hover:text-[#1D2433]'
-              }`}
-              aria-label="Resident Profile"
-              aria-current={isProfile ? 'page' : undefined}
-            >
-              <div className="relative">
-                <div
-                  className={`w-5 h-5 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-black transition-all ${
-                    isProfile
-                      ? 'ring-2 ring-[#0E8A3E] bg-emerald-100 text-[#0E8A3E]'
-                      : 'ring-1 ring-black/15 bg-slate-100 text-slate-700'
-                  }`}
-                >
-                  {resolvedAvatar ? (
-                    <Image
-                      src={resolvedAvatar}
-                      alt={user?.firstName || 'Profile'}
-                      width={20}
-                      height={20}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : initial ? (
-                    <span>{initial}</span>
-                  ) : (
-                    <User size={13} className="stroke-[2.2]" />
-                  )}
-                </div>
-              </div>
-              <span className="text-[10px] font-bold tracking-tight mt-0.5">Profile</span>
-              {isProfile && (
-                <span className="absolute bottom-1 w-3 h-0.5 rounded-full bg-[#0E8A3E]" />
-              )}
+              <Plus size={28} strokeWidth={2.6} aria-hidden />
             </button>
           </div>
+
+          <Link href="/friendship" className={tabClass} aria-current={isChats ? 'page' : undefined}>
+            <Tab label="Chats" active={isChats} badge={messageUnreadCount}>
+              <MessagesSquare size={22} strokeWidth={isChats ? 2.5 : 2} aria-hidden />
+            </Tab>
+          </Link>
+
+          <button
+            type="button"
+            onClick={onSentinelClick}
+            onPointerDown={startHold}
+            onPointerUp={clearHold}
+            onPointerLeave={clearHold}
+            onPointerCancel={clearHold}
+            onContextMenu={(e) => e.preventDefault()}
+            className={`${tabClass} ${sosActive ? 'text-brand-red' : ''}`}
+            aria-label={sosActive ? 'Sentinel: SOS is active' : 'Sentinel: safety and Ask Sentinel. Press and hold for silent SOS'}
+            aria-current={isSentinel ? 'page' : undefined}
+          >
+            {sosActive ? (
+              <span className="flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-black text-brand-red motion-safe:animate-pulse">
+                <Siren size={22} strokeWidth={2.5} aria-hidden />
+                SOS on
+              </span>
+            ) : (
+              <Tab label="Sentinel" active={isSentinel}>
+                <Shield size={22} strokeWidth={isSentinel ? 2.5 : 2} aria-hidden />
+              </Tab>
+            )}
+          </button>
         </div>
       </nav>
 
-      {/* Local Huud Community Services Bottom Sheet */}
-      <LocalHuudBottomSheet
-        open={localHuudOpen}
-        onClose={() => setLocalHuudOpen(false)}
-      />
-
-      {/* User Profile Drawer */}
-      <UserProfileDrawer
-        isOpen={userDrawerOpen}
-        onClose={() => setUserDrawerOpen(false)}
-      />
+      <CreateSheet open={createOpen} onClose={() => setCreateOpen(false)} />
     </>
   );
 }

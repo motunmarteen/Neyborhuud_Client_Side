@@ -15,143 +15,15 @@ import {
   Lightbulb,
   Radio,
 } from 'lucide-react';
-import { nhToast } from '@/lib/toast';
-import { useQueryClient } from '@tanstack/react-query';
-import { contentService } from '@/services/content.service';
-import { incidentService } from '@/services/incident.service';
 import { useAuth } from '@/hooks/useAuth';
-import { useHuudDisplayName } from '@/hooks/useHuudDisplayName';
-import { getCurrentLocation } from '@/lib/geolocation';
-
-type SignalCategory = 'power' | 'traffic' | 'safety';
-
-interface SignalPreset {
-  id: string;
-  emoji: string;
-  label: string;
-  sub: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  type: 'fyi' | 'incident';
-  category: 'infrastructure' | 'traffic' | 'safety';
-  defaultTitle: string;
-}
-
-const POWER_SIGNALS: SignalPreset[] = [
-  {
-    id: 'p_outage',
-    emoji: '⚡',
-    label: 'No Light (Outage)',
-    sub: 'DisCo power is off in the area',
-    severity: 'medium',
-    type: 'fyi',
-    category: 'infrastructure',
-    defaultTitle: 'Power Outage (Light Off)',
-  },
-  {
-    id: 'p_restored',
-    emoji: '💡',
-    label: 'Light Don Come!',
-    sub: 'Grid power restored to our street',
-    severity: 'low',
-    type: 'fyi',
-    category: 'infrastructure',
-    defaultTitle: 'Power Restored (Light is Back)',
-  },
-  {
-    id: 'p_fault',
-    emoji: '⚠️',
-    label: 'Transformer / Cable Fault',
-    sub: 'Sparking wire, blown fuse or pole issue',
-    severity: 'high',
-    type: 'incident',
-    category: 'infrastructure',
-    defaultTitle: 'Transformer / Electrical Fault',
-  },
-];
-
-const TRAFFIC_SIGNALS: SignalPreset[] = [
-  {
-    id: 't_gridlock',
-    emoji: '🚗',
-    label: 'Heavy Gridlock',
-    sub: 'Stationary or moving very slowly',
-    severity: 'medium',
-    type: 'fyi',
-    category: 'traffic',
-    defaultTitle: 'Heavy Traffic Gridlock',
-  },
-  {
-    id: 't_flood',
-    emoji: '🌊',
-    label: 'Street Flooded',
-    sub: 'High standing water, risky for small cars',
-    severity: 'high',
-    type: 'incident',
-    category: 'traffic',
-    defaultTitle: 'Road Flooded / High Water',
-  },
-  {
-    id: 't_gate',
-    emoji: '🚧',
-    label: 'Gate Locked / Blocked',
-    sub: 'Estate gate restricted or closed early',
-    severity: 'medium',
-    type: 'fyi',
-    category: 'traffic',
-    defaultTitle: 'Estate Gate Access Locked',
-  },
-  {
-    id: 't_checkpoint',
-    emoji: '🛑',
-    label: 'Security Checkpoint',
-    sub: 'Stop-and-search causing delay',
-    severity: 'low',
-    type: 'fyi',
-    category: 'traffic',
-    defaultTitle: 'Security Checkpoint Active',
-  },
-];
-
-const SAFETY_SIGNALS: SignalPreset[] = [
-  {
-    id: 's_suspicious',
-    emoji: '👁️',
-    label: 'Suspicious Movement',
-    sub: 'Unidentified prowler or loitering vehicle',
-    severity: 'high',
-    type: 'incident',
-    category: 'safety',
-    defaultTitle: 'Suspicious Activity Reported',
-  },
-  {
-    id: 's_disturbance',
-    emoji: '🚨',
-    label: 'Security Disturbance',
-    sub: 'Urgent dispute or threat requiring watch',
-    severity: 'critical',
-    type: 'incident',
-    category: 'safety',
-    defaultTitle: 'Urgent Security Incident',
-  },
-  {
-    id: 's_hazard',
-    emoji: '🔥',
-    label: 'Fire / Hazard Threat',
-    sub: 'Open fire, fallen pole, or hazard',
-    severity: 'critical',
-    type: 'incident',
-    category: 'safety',
-    defaultTitle: 'Fire / Physical Hazard Alert',
-  },
-];
+import { signalsIn, useQuickSignal, type SignalCategory, type SignalPreset } from '@/hooks/useQuickSignal';
 
 export function QuickSignalBar() {
   const { user } = useAuth();
-  const huudName = useHuudDisplayName();
-  const queryClient = useQueryClient();
+  const { send, submittingId, areaName } = useQuickSignal();
+  const huudName = areaName;
 
   const [activeCategory, setActiveCategory] = useState<SignalCategory | null>(null);
-  const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [recentSignal, setRecentSignal] = useState<string | null>(null);
 
   const handleOpenSheet = (cat: SignalCategory) => {
@@ -163,97 +35,14 @@ export function QuickSignalBar() {
   };
 
   const handleSendSignal = async (preset: SignalPreset) => {
-    setSubmittingId(preset.id);
-
-    try {
-      // 1. Real GPS only. A safety signal pinned to a made-up default
-      // location would send neighbours to the wrong place.
-      let lat: number | null = null;
-      let lng: number | null = null;
-      try {
-        const coords = await getCurrentLocation();
-        // getCurrentLocation() returns { lat, lng } — reading .latitude here
-        // used to silently pin every signal to a hard-coded Lagos default.
-        if (coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng)) {
-          lat = coords.lat;
-          lng = coords.lng;
-        }
-      } catch {
-        // handled below
-      }
-      if (lat === null || lng === null) {
-        nhToast.error('Location needed', 'Turn on location so neighbours know where this is happening.');
-        return;
-      }
-
-      const locationName = huudName && huudName !== 'your neighborhood' ? huudName : 'your area';
-
-      // 2. Send to the server. Only a confirmed server write counts as
-      // "logged" — the server also awards any HuudCredit for it.
-      try {
-        if (preset.type === 'incident') {
-          await incidentService.create({
-            title: `${preset.defaultTitle} — ${locationName}`,
-            description: `${preset.sub}. Reported via 1-Tap Quick Signal near ${locationName}.`,
-            category: (preset.category === 'traffic' ? 'traffic_accident' : preset.category === 'safety' ? 'other' : 'utility_outage') as any,
-            severity: preset.severity as any,
-            incidentDate: new Date().toISOString(),
-            location: {
-              latitude: lat,
-              longitude: lng,
-              landmark: locationName,
-            },
-          });
-        } else {
-          // POST /content/posts contract (createPostApiSchema): { type,
-          // content, contentType, visibility, location{latitude,longitude} }.
-          await contentService.createPost({
-            type: 'text',
-            content: `${preset.defaultTitle} — ${locationName}
-${preset.sub}. Reported via 1-Tap Quick Signal.`,
-            contentType: 'fyi',
-            visibility: 'neighborhood',
-            location: {
-              latitude: lat,
-              longitude: lng,
-            },
-          });
-        }
-      } catch (networkErr: any) {
-        nhToast.error(
-          'Signal not sent',
-          networkErr?.message || 'Please check your connection and try again.',
-        );
-        return;
-      }
-
-      // 3. Confirm only what the server accepted
+    if (await send(preset)) {
       setRecentSignal(preset.label);
-      nhToast.signal({
-        emoji: preset.emoji,
-        title: 'Signal Logged!',
-        signalLabel: preset.label,
-        locationName,
-        coinsEarned: 0,
-      });
-
-      // 5. Refresh radar & feed
-      queryClient.invalidateQueries({ queryKey: ['feed'] });
-      queryClient.invalidateQueries({ queryKey: ['radar'] });
-      queryClient.invalidateQueries({ queryKey: ['gamification-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['gamification', 'wallet'] });
-
       handleClose();
-    } catch (err: any) {
-      console.error('Signal logging error:', err);
-      nhToast.error('Could not log signal', 'Please check your connection and try again.');
-    } finally {
-      setSubmittingId(null);
     }
   };
 
   const handleShareToWhatsApp = () => {
-    const locationName = huudName && huudName !== 'your neighborhood' ? huudName : 'My Neighborhood';
+    const locationName = huudName ? huudName : 'My Neighborhood';
     const text = `🛡️ *NeyborHuud Live Street Radar — ${locationName}*\n\n⚡ *Power & Grid:* Real-time street monitoring\n🚦 *Traffic & Roads:* Live flood & gridlock check\n🛡️ *Huud Watch:* Active community safety\n\n👉 *View live street radar or log an alert (Earn +15 HC):*\nhttps://neyborhuud.com/feed`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -261,11 +50,11 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
   const getPresetsForCategory = () => {
     switch (activeCategory) {
       case 'power':
-        return POWER_SIGNALS;
+        return signalsIn('power');
       case 'traffic':
-        return TRAFFIC_SIGNALS;
+        return signalsIn('traffic');
       case 'safety':
-        return SAFETY_SIGNALS;
+        return signalsIn('safety');
       default:
         return [];
     }
@@ -461,7 +250,7 @@ ${preset.sub}. Reported via 1-Tap Quick Signal.`,
             <div className="flex items-center justify-between text-[11px] text-slate-400  px-1">
               <span className="flex items-center gap-1">
                 <MapPin size={12} className="text-emerald-500" />
-                <span>Tagged to {huudName && huudName !== 'your neighborhood' ? huudName : 'your live area'}</span>
+                <span>Tagged to {huudName ? huudName : 'your live area'}</span>
               </span>
               <span>Anonymous to neighbors</span>
             </div>

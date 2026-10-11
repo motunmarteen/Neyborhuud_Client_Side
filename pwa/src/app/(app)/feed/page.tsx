@@ -166,6 +166,17 @@ function XFeedInner() {
         return () => window.removeEventListener('open-create-post', handler);
     }, []);
 
+    // The ➕ sheet on other screens sends people here with ?compose=<type>:
+    // open the create form for that type, then drop the param so Back works.
+    const composeParam = searchParams.get('compose');
+    useEffect(() => {
+        if (!composeParam) return;
+        setCreatePostFocusMedia(false);
+        setCreatePostDefaultContentType(composeParam as ContentType);
+        setIsCreatePostOpen(true);
+        router.replace('/feed', { scroll: false });
+    }, [composeParam, router]);
+
     // Fetch departments for filter dropdown
     const { data: departments = [] } = useDepartments();
 

@@ -79,7 +79,8 @@ export function FloatingSosButton() {
     <div 
       className={`fixed right-4 z-[40] w-14 h-14`} 
       style={{ 
-        bottom: scrollHidden ? '1.5rem' : '4.5rem',
+        // Float just above the bottom bar (F-07), or near the edge when the bar hides on scroll.
+        bottom: scrollHidden ? 'calc(1.5rem + var(--safe-bottom))' : 'calc(var(--app-nav-bottom) + 0.75rem)',
         transition: 'bottom 400ms cubic-bezier(0.34, 1.56, 0.64, 1)'
       }}
     >
