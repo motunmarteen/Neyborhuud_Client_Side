@@ -77,7 +77,7 @@ function getRouteTitle(pathname: string) {
     profile: 'Profile',
     gamification: 'Huud Economy',
     'huud-economy': 'Huud Economy',
-    rewards: 'Rewards & Streaks',
+    rewards: 'Rewards',
   };
 
   if (map[segment]) return map[segment];

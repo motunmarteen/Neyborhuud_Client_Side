@@ -139,7 +139,8 @@ function SidebarContent({
   const resolvedAvatar = resolveUserAvatarUrl(authUser);
   const displayName = authUser ? resolveProfileDisplayName(authUser, handle) : getGuestDisplayName();
   const initial = resolveProfileAvatarInitial(authUser, handle);
-  const huudCoins = stats?.totalHuudCoins ?? 150;
+  // Real balance only; nothing shown until it loads (no made-up number).
+  const huudCoins: number | undefined = stats?.totalHuudCoins;
 
   const isActive = (href: string) => {
     if (href === '/feed') return pathname === '/feed' || pathname === '/';
@@ -227,12 +228,12 @@ function SidebarContent({
             <span suppressHydrationWarning className="inline-flex items-center gap-1 font-bold text-[#0E8A3E]">
               <MapPin size={11} />
               <span suppressHydrationWarning className="truncate max-w-[110px]">
-                {huudName !== 'your neighborhood' && huudName ? huudName : 'Lekki Phase 1'}
+                {huudName !== 'your neighborhood' && huudName ? huudName : 'Your area'}
               </span>
             </span>
 
             <span suppressHydrationWarning className="font-extrabold text-[#1D2433] tabular-nums">
-              {huudCoins} HC
+              {typeof huudCoins === 'number' ? `${huudCoins.toLocaleString('en-NG')} HC` : '…'}
             </span>
           </div>
         </Link>
