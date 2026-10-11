@@ -1,5 +1,5 @@
-import React, { useId, useState } from 'react';
-import Image from 'next/image';
+import React, { useId } from 'react';
+import { useImageOk } from '@/hooks/useImageOk';
 
 type PinSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'marker' | '2xl';
 
@@ -33,10 +33,9 @@ export default function MapPinAvatar({
   const uid = useId();
   const s = SIZE_MAP[size];
 
-  const [imgError, setImgError] = useState(false);
-
   const resolvedSrc = src && src.trim() !== '' ? src.trim() : null;
-  const showImage = !!(resolvedSrc && !imgError);
+  // Show the photo only once it has really loaded; otherwise the initial (or person icon).
+  const showImage = useImageOk(resolvedSrc);
   const showInitial = !showImage && !!fallbackInitial;
 
   return (
@@ -47,7 +46,7 @@ export default function MapPinAvatar({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      <svg viewBox="0 0 100 115" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 100 115" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label={alt} overflow="hidden">
         <defs>
           <filter id={`shadow-${uid}`} x="-20%" y="-20%" width="140%" height="140%">
             <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity={0.15} />
@@ -65,31 +64,37 @@ export default function MapPinAvatar({
         />
         
         {/* Image / Fallback Masked into Inset Teardrop */}
+        {/*
+          Native SVG drawing only. The photo used to sit in a <foreignObject> with an
+          absolutely positioned <img>; Safari (iPhone) ignores the clip there and paints
+          the photo full size over the page. <image> + clipPath clips correctly everywhere.
+        */}
         <g clipPath={`url(#teardrop-clip-${uid})`}>
-          <foreignObject x="0" y="0" width="100" height="115">
-            {showImage ? (
-              <div className="relative w-full h-full">
-                <Image
-                  src={resolvedSrc!}
-                  alt={alt}
-                  fill
-                  sizes={`${s.w}px`}
-                  className="object-cover object-center"
-                  onError={() => setImgError(true)}
-                />
-              </div>
-            ) : (
-              <div className="w-full h-full bg-brand-blue flex items-center justify-center pt-2 text-white">
-                {showInitial ? (
-                  <span className="font-black" style={{ fontSize: '36px' }}>{fallbackInitial}</span>
-                ) : (
-                  <span className="material-symbols-outlined" style={{ fontSize: '44px' }}>person</span>
-                )}
-              </div>
-            )}
-          </foreignObject>
+          {showImage ? (
+            <image
+              href={resolvedSrc!}
+              x="0"
+              y="0"
+              width="100"
+              height="115"
+              preserveAspectRatio="xMidYMid slice"
+            >
+              <title>{alt}</title>
+            </image>
+          ) : (
+            <>
+              <rect x="0" y="0" width="100" height="115" fill="#3B82C4" />
+              {showInitial ? (
+                <text x="50" y="58" textAnchor="middle" dominantBaseline="middle" fill="#ffffff" fontSize="40" fontWeight="900" fontFamily="var(--font-head)">
+                  {fallbackInitial}
+                </text>
+              ) : (
+                <path d="M50 30a13 13 0 1 1 0 26a13 13 0 1 1 0-26Zm-24 52c2-13 12-20 24-20s22 7 24 20" fill="none" stroke="#ffffff" strokeWidth="6" strokeLinecap="round" />
+              )}
+            </>
+          )}
         </g>
-        
+
         {/* Crisp White Outer Border Ring */}
         <path
           d="M50 6 C25.6 6 6 25.6 6 50 C6 81.5 50 109 50 109 C50 109 94 81.5 94 50 C94 25.6 74.4 6 50 6 Z"

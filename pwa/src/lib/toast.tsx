@@ -167,14 +167,15 @@ export const nhToast = {
 
   /**
    * 1-Tap Signal Bar / Sentinel Radar Logged Toast
-   * Beautiful daylight feedback with emoji badge, clear typography, and +15 HC reward chip.
+   * Daylight feedback with emoji badge. The HuudCredit chip shows only when the server
+   * really awarded HuudCredit (pass coinsEarned); it never assumes an amount.
    */
   signal: ({
     emoji = '📡',
     title = 'Signal Logged!',
     signalLabel,
     locationName,
-    coinsEarned = 15,
+    coinsEarned = 0,
     duration = 4500,
   }: SignalToastProps) => {
     return sonnerToast.custom(

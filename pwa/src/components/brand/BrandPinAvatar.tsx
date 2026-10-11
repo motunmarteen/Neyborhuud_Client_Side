@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, useId } from 'react';
-import Image from 'next/image';
+import { useId } from 'react';
+import { useImageOk } from '@/hooks/useImageOk';
 import { resolveMediaUrl } from '@/lib/userAvatar';
 
 type BrandPinSize = 'hero' | 'lg' | 'md' | 'marker' | 'sm' | 'xs';
@@ -36,15 +36,10 @@ export function BrandPinAvatar({
 }: BrandPinAvatarProps) {
   const uid = useId();
   const s = SIZE_MAP[size];
-  const [imgError, setImgError] = useState(false);
-
   const resolvedSrc = src?.trim() ? resolveMediaUrl(src.trim()) : null;
-  const showPhoto = !!(resolvedSrc && !imgError);
+  // Show the photo only once it has really loaded; otherwise the initial (or person icon).
+  const showPhoto = useImageOk(resolvedSrc);
   const showInitial = !showPhoto && !!fallbackInitial;
-
-  useEffect(() => {
-    setImgError(false);
-  }, [resolvedSrc]);
 
   const shellClass = `relative inline-flex shrink-0 ${className}`;
   const shellStyle = { width: s.w, height: s.h };
@@ -69,29 +64,30 @@ export function BrandPinAvatar({
       
       {/* Image / Fallback Masked into Inset Teardrop */}
       <g clipPath={`url(#brand-clip-${uid})`}>
-        <foreignObject x="0" y="0" width="100" height="115">
-          {showPhoto ? (
-            <div className="relative w-full h-full">
-              <Image
-                src={resolvedSrc!}
-                alt={alt}
-                fill
-                priority={priority}
-                sizes={`${s.w}px`}
-                className="object-cover object-center"
-                onError={() => setImgError(true)}
-              />
-            </div>
-          ) : (
-            <div className="w-full h-full bg-brand-blue flex items-center justify-center pt-2 text-white">
-              {showInitial ? (
-                <span className="font-black" style={{ fontSize: '36px' }}>{fallbackInitial}</span>
-              ) : (
-                <span className="material-symbols-outlined" style={{ fontSize: '44px' }}>person</span>
-              )}
-            </div>
-          )}
-        </foreignObject>
+        {/* Native SVG only: Safari (iPhone) does not clip a positioned <img> inside <foreignObject>. */}
+        {showPhoto ? (
+          <image
+            href={resolvedSrc!}
+            x="0"
+            y="0"
+            width="100"
+            height="115"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            <title>{alt}</title>
+          </image>
+        ) : (
+          <>
+            <rect x="0" y="0" width="100" height="115" fill="#3B82C4" />
+            {showInitial ? (
+              <text x="50" y="58" textAnchor="middle" dominantBaseline="middle" fill="#ffffff" fontSize="40" fontWeight="900" fontFamily="var(--font-head)">
+                {fallbackInitial}
+              </text>
+            ) : (
+              <path d="M50 30a13 13 0 1 1 0 26a13 13 0 1 1 0-26Zm-24 52c2-13 12-20 24-20s22 7 24 20" fill="none" stroke="#ffffff" strokeWidth="6" strokeLinecap="round" />
+            )}
+          </>
+        )}
       </g>
       
       {/* Crisp White Outer Border Ring */}
