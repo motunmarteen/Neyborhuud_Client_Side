@@ -21,6 +21,8 @@ import { BRAND_NAME } from "@/lib/brand";
 import AutoTopNav from "@/components/navigation/AutoTopNav";
 import AutoLeftSidebar from "@/components/navigation/AutoLeftSidebar";
 import { FloatingSosButton } from "@/components/sentinel/FloatingSosButton";
+import { CALM_BOOT_SCRIPT } from '@/lib/calmMode';
+import { CalmMotion } from '@/components/CalmMotion';
 
 const BRAND_TITLE = `${BRAND_NAME} — Your Huud Operating System`;
 
@@ -139,6 +141,11 @@ export default function RootLayout({
         />
         <script
           dangerouslySetInnerHTML={{
+            __html: CALM_BOOT_SCRIPT,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
             __html: `(function(){var EXT='nkbihfbeogaeaoehlefnkodbefgpgknn';var isNoise=function(v){var s=String(v||'');return s.indexOf('MetaMask')!==-1||s.indexOf('Failed to connect to MetaMask')!==-1||s.indexOf(EXT)!==-1||s.indexOf('chrome-extension://'+EXT)!==-1;};window.addEventListener('error',function(event){var parts=[event&&event.message,event&&event.filename,event&&event.error&&event.error.message,event&&event.error&&event.error.stack].filter(Boolean).join(' ');if(isNoise(parts)){event.preventDefault();if(event.stopImmediatePropagation){event.stopImmediatePropagation();}}},true);window.addEventListener('unhandledrejection',function(event){var reason=event&&event.reason;var parts=[reason&&reason.message,reason&&reason.stack,reason].filter(Boolean).join(' ');if(isNoise(parts)){event.preventDefault();if(event.stopImmediatePropagation){event.stopImmediatePropagation();}}},true);}());`,
           }}
         />
@@ -152,6 +159,7 @@ export default function RootLayout({
         <CapacitorInit />
         <SpaRouteRescue />
         <Providers>
+          <CalmMotion>
           <a href="#main-content" className="skip-to-content">
             Skip to main content
           </a>
@@ -213,6 +221,7 @@ export default function RootLayout({
               {children}
             </div>
           </DesktopPhoneFrame>
+          </CalmMotion>
         </Providers>
       </body>
     </html>

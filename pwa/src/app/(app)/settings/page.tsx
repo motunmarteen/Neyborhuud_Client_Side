@@ -14,6 +14,7 @@ import { isAdminUser } from '@/lib/adminAccess';
 import { EmailVerificationCard } from '@/components/auth/EmailVerificationCard';
 import { formatProfileBirthday, getZodiacFromBirthday } from '@/lib/profileSnapHelpers';
 import { getStoredTheme, setStoredTheme, applySystemTheme, getSystemPrefersDark } from '@/lib/systemTheme';
+import { savedAccessibility, setSaveData, applyTextSize as setRootTextSize } from '@/lib/calmMode';
 
 type SettingsTab = 'notifications' | 'privacy' | 'account' | 'language' | 'posts';
 
@@ -281,14 +282,15 @@ export default function SettingsPage() {
     // Accessibility
     const [textSize, setTextSize] = useState<'small' | 'medium' | 'large'>('medium');
     const [liteMode, setLiteMode] = useState(false);
-    const SIZE_CLASS: Record<string, string> = { small: 'text-size-sm', medium: '', large: 'text-size-lg' };
+    // F-11: this phone's own Save data / text size choices win over the server copy.
+    useEffect(() => {
+        const local = savedAccessibility();
+        if (local.liteMode !== undefined) setLiteMode(local.liteMode);
+        if (local.textSize) setTextSize(local.textSize);
+    }, []);
     const applyTextSize = (size: 'small' | 'medium' | 'large') => {
         setTextSize(size);
-        if (typeof document !== 'undefined') {
-            document.body.classList.remove('text-size-sm', 'text-size-lg');
-            const cls = SIZE_CLASS[size];
-            if (cls) document.body.classList.add(cls);
-        }
+        setRootTextSize(size);
         fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ accessibility: { textSize: size } }) }).catch(() => {});
         if (typeof window !== 'undefined') {
             const stored = localStorage.getItem('neyborhuud_user');
@@ -311,6 +313,8 @@ export default function SettingsPage() {
                     localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), liteMode: enabled } } }));
                 } catch { /* ignore corrupt data */ }
             }
+            // F-11: takes effect at once (stops moving effects and self-playing videos).
+            setSaveData(enabled);
         }
     };
 
@@ -358,10 +362,10 @@ export default function SettingsPage() {
               setPrivacy((prev) => ({ ...prev, ...parsed.settings.privacy }));
             }
             if (parsed.settings?.accessibility?.textSize) {
-              setTextSize(parsed.settings.accessibility.textSize);
+              setTextSize(savedAccessibility().textSize ?? parsed.settings.accessibility.textSize);
             }
             if (parsed.settings?.accessibility?.liteMode !== undefined) {
-              setLiteMode(!!parsed.settings.accessibility.liteMode);
+              setLiteMode(savedAccessibility().liteMode ?? !!parsed.settings.accessibility.liteMode);
             }
           }
         } catch {
@@ -385,10 +389,10 @@ export default function SettingsPage() {
                 setPrivacy((prev) => ({ ...prev, ...(u as any).settings.privacy }));
               }
               if ((u as any).settings?.accessibility?.textSize) {
-                setTextSize((u as any).settings.accessibility.textSize);
+                setTextSize(savedAccessibility().textSize ?? (u as any).settings.accessibility.textSize);
               }
               if ((u as any).settings?.accessibility?.liteMode !== undefined) {
-                setLiteMode(!!(u as any).settings.accessibility.liteMode);
+                setLiteMode(savedAccessibility().liteMode ?? !!(u as any).settings.accessibility.liteMode);
               }
             }
           } catch {
@@ -1124,8 +1128,8 @@ export default function SettingsPage() {
                 <ToggleSwitch
                   enabled={liteMode}
                   onChange={applyLiteMode}
-                  label="Lite mode"
-                  description="Reduce animations and heavy visuals to save data"
+                  label="Save data"
+                  description="Stops moving effects and videos playing by themselves. Good when data is low. Also on when your phone asks for less motion or Data Saver is on."
                 />
               </Section>
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Volume2, VolumeX, ImageOff } from 'lucide-react';
 import { cdnImage, cdnVideo, cdnVideoPoster } from '@/lib/media';
+import { useCalm } from '@/hooks/useCalm';
 
 export type PostCardMediaItem = {
   url: string;
@@ -30,6 +31,8 @@ export function PostCardMediaSlider({
   const trackRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
   const [activeIndex, setActiveIndex] = useState(0);
+  // F-11: in calm mode videos wait for a tap instead of playing by themselves.
+  const calm = useCalm();
   const [failedUrls, setFailedUrls] = useState<Set<string>>(() => new Set());
   const [mutedVideos, setMutedVideos] = useState<Record<number, boolean>>({});
 
@@ -70,14 +73,14 @@ export function PostCardMediaSlider({
 
   useEffect(() => {
     videoRefs.current.forEach((video, index) => {
-      if (index === activeIndex) {
+      if (index === activeIndex && !calm) {
         video.play().catch(() => {});
       } else {
         video.pause();
         video.currentTime = 0;
       }
     });
-  }, [activeIndex]);
+  }, [activeIndex, calm]);
 
   if (count === 0) return null;
 
@@ -128,7 +131,8 @@ export function PostCardMediaSlider({
           muted={muted}
           loop
           playsInline
-          autoPlay={index === activeIndex}
+          autoPlay={index === activeIndex && !calm}
+          controls={calm}
           preload={index <= 1 ? 'metadata' : 'none'}
           aria-label={`${altPrefix} video ${index + 1}`}
         />
