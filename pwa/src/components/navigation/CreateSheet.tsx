@@ -4,11 +4,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
 import { QUICK_SIGNALS, useQuickSignal } from '@/hooks/useQuickSignal';
+import { CreatePollSheet } from '@/components/create/CreatePollSheet';
+import { CreateLostFoundSheet } from '@/components/create/CreateLostFoundSheet';
+import { useState } from 'react';
 
 /**
  * ➕ "Wetin you wan share?" — the bottom bar's create sheet (home mockup).
  * Quick signals send in one tap; "Or create" opens the full form for that type.
- * Poll and Lost & Found join this list with their new screens (tracker F-13d).
+ * Poll and Lost & Found open their own sheets (tracker F-13d).
  */
 
 const CREATE_OPTIONS: { type: string; icon: string; label: string }[] = [
@@ -20,15 +23,22 @@ const CREATE_OPTIONS: { type: string; icon: string; label: string }[] = [
   { type: 'help_request', icon: '🙋🏾', label: 'Ask for help' },
   { type: 'job', icon: '💼', label: 'Post a job' },
   { type: 'services', icon: '🔧', label: 'Offer a service' },
+  { type: 'poll', icon: '🗳️', label: 'Poll' },
+  { type: 'lost_found', icon: '🔎', label: 'Lost & Found' },
 ];
 
 export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const { send, submittingId } = useQuickSignal();
+  const [sub, setSub] = useState<'poll' | 'lost_found' | null>(null);
 
   const openCreate = (type: string) => {
     onClose();
+    if (type === 'poll' || type === 'lost_found') {
+      setSub(type);
+      return;
+    }
     if (pathname === '/feed') {
       window.dispatchEvent(new CustomEvent('open-create-post', { detail: { contentType: type } }));
     } else {
@@ -37,6 +47,7 @@ export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => v
   };
 
   return (
+    <>
     <AppBottomSheet open={open} onClose={onClose} title="Wetin you wan share?" panelStyle={{ maxHeight: '88svh' }}>
       <div className="flex flex-col gap-4 pb-2">
         <section aria-labelledby="quick-signal-title">
@@ -86,5 +97,8 @@ export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => v
         </section>
       </div>
     </AppBottomSheet>
+    <CreatePollSheet open={sub === 'poll'} onClose={() => setSub(null)} />
+    <CreateLostFoundSheet open={sub === 'lost_found'} onClose={() => setSub(null)} />
+    </>
   );
 }

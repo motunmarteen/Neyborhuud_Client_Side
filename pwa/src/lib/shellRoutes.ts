@@ -9,6 +9,7 @@ export const PAGE_OWNED_TOP_NAV_PREFIXES = [
   '/friendship',
   '/explore',
   '/sentinel',
+  '/lost-found',
   '/marketplace',
   '/jobs',
   '/events',

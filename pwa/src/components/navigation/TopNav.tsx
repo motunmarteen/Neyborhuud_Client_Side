@@ -64,6 +64,7 @@ function getRouteTitle(pathname: string) {
     settings: 'Settings',
     safety: 'Sentinel Radar',
     sentinel: 'Sentinel',
+    'lost-found': 'Lost & Found',
     map: 'Discovery',
     explore: 'Explore',
     popular: 'My Huud',
