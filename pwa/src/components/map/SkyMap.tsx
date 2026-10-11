@@ -5,8 +5,9 @@
  * tilted map in front fading into it at the horizon, and the time-of-day light over the land.
  *
  * The sky follows the real sun for the place on the map (lib/sky.ts). It refreshes every
- * minute. `hour` pins a moment instead (design-kit slider). Stars twinkle only outside calm
- * mode (CSS stops animations there).
+ * minute. `hour` pins a moment instead (design-kit slider). Weather (M-05) follows the real
+ * weather there (useMapWeather); `weather` pins a look. Calm mode stops twinkle, drift and
+ * ripples (CSS) and skips falling rain and lightning.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -14,6 +15,25 @@ import type * as maplibregl from 'maplibre-gl';
 import { HuudMap, type LngLat } from '@/components/map/HuudMap';
 import { skyAt, skyForHour, type SkyState } from '@/lib/sky';
 import { SkyHorizon } from '@/components/map/SkyHorizon';
+import { cloudColor, weatherLook, type MapWeather, type WeatherLook } from '@/lib/mapWeather';
+import { useMapWeather } from '@/hooks/useMapWeather';
+import { useCalm } from '@/hooks/useCalm';
+
+/** Unknown weather: no clouds, rain or haze (never a made-up look). */
+const NO_WEATHER: WeatherLook = { ...weatherLook('clear'), cloudOpacity: 0, shadows: 0 };
+
+/** Rain drops: spread across the scene with varied length, speed and start. */
+function drops(look: WeatherLook) {
+  return Array.from({ length: look.drops }, (_, i) => ({
+    left: ((i * 13 + 5) % 100) + '%',
+    height: look.dropLength[0] + ((i * 7 + 3) % (look.dropLength[1] - look.dropLength[0] + 1)),
+    dur: look.dropSpeed + ((i * 11) % 6) / 10,
+    delay: ((i * 7) % 22) / 10,
+  }));
+}
+
+/** Where puddles ripple on the land (fractions of the scene below the horizon). */
+const PUDDLES = [[0.22, 0.38, 1.6], [0.62, 0.55, 1.3], [0.85, 0.36, 1.9], [0.3, 0.72, 1.4], [0.66, 0.8, 1.7]] as const;
 
 /** Height of the sky band above the horizon, in px. */
 const SKY_BAND = 200;
@@ -33,9 +53,18 @@ type SkyMapProps = {
   onReady?: (map: maplibregl.Map) => void;
   /** Reports the sky so screens can show the phase ("Sunset") or match colours. */
   onSky?: (sky: SkyState) => void;
+  /** Pin a weather look instead of the real weather (design kit). null = no weather. */
+  weather?: MapWeather | null;
+  /** Reports the real weather in use (null when unknown). */
+  onWeather?: (wx: MapWeather | null) => void;
 };
 
-export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky }: SkyMapProps) {
+export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather }: SkyMapProps) {
+  const calm = useCalm();
+  const liveWx = useMapWeather(weather === undefined ? center : null);
+  const wx = weather === undefined ? liveWx : weather;
+  useEffect(() => onWeather?.(wx), [wx, onWeather]);
+  const look = wx ? weatherLook(wx) : NO_WEATHER;
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     if (hour != null) return;
@@ -47,6 +76,8 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
   useEffect(() => onSky?.(sky), [sky, onSky]);
 
   const arcTop = (arc: number) => SKY_BAND - 26 - arc * (SKY_BAND - 70);
+  const clouds = wx ? cloudColor(wx, sky.dark, sky.skyBot) : '#FFFFFF';
+  const rain = calm ? [] : drops(look);
 
   return (
     <div
@@ -55,7 +86,9 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
     >
       {/* Sky: stars, sun (east → west), moon. Decorative. */}
       <div className="pointer-events-none absolute inset-x-0 top-0" style={{ height: SKY_BAND }} aria-hidden>
-        <div className="absolute inset-0" style={{ opacity: sky.starOpacity }}>
+        {/* Weather wash over the sky: cloud cover, harmattan dust, storm. */}
+        <div className="absolute inset-0" style={{ background: look.skyWash }} />
+        <div className="absolute inset-0" style={{ opacity: look.hidesStars ? 0 : sky.starOpacity }}>
           {STARS.map(([x, y], i) => (
             <span
               key={i}
@@ -69,7 +102,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
           style={{
             left: `${6 + sky.sun.x * 88}%`,
             top: arcTop(sky.sun.arc),
-            opacity: sky.sun.opacity,
+            opacity: sky.sun.opacity * look.sunOpacity,
             background: `radial-gradient(circle at 40% 40%, #FFFBE8 0%, ${sky.sun.color} 65%)`,
             boxShadow: `0 0 40px 14px ${sky.sun.glow}`,
           }}
@@ -79,7 +112,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
           style={{
             left: `${6 + sky.moon.x * 88}%`,
             top: arcTop(sky.moon.arc),
-            opacity: sky.moon.opacity,
+            opacity: sky.moon.opacity * look.moonOpacity,
             background: 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #DCDDEA 100%)',
             boxShadow: '0 0 26px 6px rgba(220,225,255,.35)',
           }}
@@ -87,6 +120,17 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
           <span className="absolute left-[9px] top-[12px] h-1.5 w-1.5 rounded-full bg-[rgba(150,155,180,.35)]" />
           <span className="absolute left-[19px] top-[19px] h-1 w-1 rounded-full bg-[rgba(150,155,180,.35)]" />
         </span>
+        {/* Clouds drifting across the sky. */}
+        <svg viewBox="0 0 390 200" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" style={{ opacity: look.cloudOpacity }}>
+          <g className="nh-drift" fill={clouds}>
+            <ellipse cx="70" cy="110" rx="38" ry="15" /><circle cx="56" cy="101" r="15" /><circle cx="80" cy="94" r="19" />
+            <ellipse cx="300" cy="150" rx="46" ry="16" /><circle cx="284" cy="140" r="17" /><circle cx="312" cy="132" r="22" />
+          </g>
+          <g className="nh-drift-slow" fill={clouds} opacity=".85">
+            <ellipse cx="190" cy="60" rx="34" ry="12" /><circle cx="178" cy="52" r="13" /><circle cx="200" cy="47" r="16" />
+            <ellipse cx="360" cy="40" rx="28" ry="10" /><circle cx="350" cy="34" r="11" />
+          </g>
+        </svg>
       </div>
 
       {/* The map, its far edge fading into the sky (horizon). */}
@@ -107,9 +151,33 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
         {/* Sunlight falling on the land, from the sun's side. */}
         <div
           className="pointer-events-none absolute inset-0"
-          style={{ background: `radial-gradient(ellipse 75% 42% at ${6 + sky.sun.x * 88}% ${SKY_BAND + 20}px, ${sky.sunGround}, transparent 72%)` }}
+          style={{ background: `radial-gradient(ellipse 75% 42% at ${6 + sky.sun.x * 88}% ${SKY_BAND + 20}px, ${look.sunOpacity < 1 ? 'transparent' : sky.sunGround}, transparent 72%)` }}
           aria-hidden
         />
+        {/* Weather haze over the land, harmattan dust, drifting cloud shadows. */}
+        <div className="pointer-events-none absolute inset-0" style={{ background: look.mapHaze, opacity: look.mapHazeAlpha }} aria-hidden />
+        <div className="pointer-events-none absolute inset-0" style={{ background: '#D9C09A', opacity: look.dust }} aria-hidden />
+        <div
+          className="nh-drift-slow pointer-events-none absolute inset-0"
+          style={{
+            opacity: look.shadows,
+            background:
+              'radial-gradient(ellipse 120px 50px at 25% 55%, rgba(20,30,50,.32), transparent 70%), radial-gradient(ellipse 150px 60px at 75% 75%, rgba(20,30,50,.28), transparent 70%), radial-gradient(ellipse 110px 46px at 65% 45%, rgba(20,30,50,.22), transparent 70%)',
+          }}
+          aria-hidden
+        />
+        {/* Rain puddles ripple on the ground. */}
+        {look.puddles > 0 ? (
+          <div className="pointer-events-none absolute inset-0" style={{ opacity: look.puddles }} aria-hidden>
+            {PUDDLES.map(([x, y, d], i) => (
+              <span
+                key={i}
+                className="nh-puddle absolute rounded-[50%] border-[3px] border-white"
+                style={{ left: `${x * 100}%`, top: `calc(${SKY_BAND}px + ${y} * (100% - ${SKY_BAND}px))`, animationDuration: `${d}s` }}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {/* Horizon haze: the sky's colour washes over the far land (M-04). */}
@@ -124,6 +192,21 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
       />
       {/* Far horizon: bush line and trees (palms in the south, acacias in the north). */}
       <SkyHorizon color={sky.skyline} lat={center?.lat} top={SKY_BAND - 52} />
+
+      {/* Rain: glowing drops falling at a slant (not in calm mode). */}
+      {rain.length ? (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" style={{ transform: 'rotate(8deg) scale(1.15)' }} aria-hidden>
+          {rain.map((d, i) => (
+            <span
+              key={i}
+              className="nh-drop absolute -top-8 rounded-[2px]"
+              style={{ left: d.left, width: look.dropWidth, height: d.height, animationDuration: `${d.dur}s`, animationDelay: `${d.delay}s` }}
+            />
+          ))}
+        </div>
+      ) : null}
+      {/* Lightning flashes now and then in a storm (not in calm mode). */}
+      {look.lightning && !calm ? <div className="nh-flash pointer-events-none absolute inset-0 bg-white" aria-hidden /> : null}
     </div>
   );
 }

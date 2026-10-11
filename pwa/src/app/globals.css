@@ -9537,3 +9537,18 @@ html .animate-spin {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 1; }
 }
+
+/* M-05 weather on the map (all stop in calm mode via the F-11 rules). */
+.nh-drift { animation: nh-drift 60s linear infinite alternate; }
+.nh-drift-slow { animation: nh-drift 90s linear infinite alternate; }
+@keyframes nh-drift { from { transform: translateX(-60px); } to { transform: translateX(60px); } }
+.nh-drop {
+  background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(115,180,255,.95), rgba(70,140,240,.75));
+  box-shadow: 0 0 2px rgba(90,160,255,.45);
+  animation: nh-fall 0.7s linear infinite;
+}
+@keyframes nh-fall { from { transform: translateY(0); } to { transform: translateY(110vh); } }
+.nh-flash { animation: nh-flash 6s linear infinite; opacity: 0; }
+@keyframes nh-flash { 0%, 91%, 95%, 100% { opacity: 0; } 92%, 94% { opacity: .75; } 93% { opacity: .25; } }
+.nh-puddle { width: 8px; height: 4px; transform: translate(-50%, -50%); animation: nh-puddle 1.6s ease-out infinite; }
+@keyframes nh-puddle { 0% { width: 8px; height: 4px; opacity: .8; } 100% { width: 52px; height: 16px; opacity: 0; } }

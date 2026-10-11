@@ -6,7 +6,7 @@
  * Drawn from a fixed seed, so the horizon looks the same every visit. Decorative only.
  */
 
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 
 const W = 400;
 const H = 44;
@@ -63,6 +63,8 @@ type SkyHorizonProps = {
 
 export function SkyHorizon({ color, lat = 9, top, seed = 7 }: SkyHorizonProps) {
   const savanna = lat >= 10;
+  // useId can contain ':' or '«', which break url(#…) in SVG.
+  const fadeId = 'horizon-fade-' + useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const shapes = useMemo(() => {
     const r = rng(seed + (savanna ? 101 : 0));
     const bush = bushLine(r);
@@ -87,8 +89,15 @@ export function SkyHorizon({ color, lat = 9, top, seed = 7 }: SkyHorizonProps) {
       style={{ top, height: H }}
       aria-hidden
     >
+      {/* The bush line fades out at the bottom, so it melts into the haze over the land. */}
+      <defs>
+        <linearGradient id={fadeId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="55%" stopColor={color} stopOpacity="1" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
       <g fill={color} stroke={color}>
-        <path d={shapes.bush} stroke="none" />
+        <path d={shapes.bush} stroke="none" fill={`url(#${fadeId})`} />
         {shapes.trees.map((t, i) => (
           <g key={i}>
             {t.lines.map((d, k) => (

@@ -156,7 +156,7 @@ export default function DesignKitPage() {
           <MapDemo />
         </Section>
 
-        <Section id="sky" title="Live sky and horizon (M-03, M-04)" note="The sky follows the real sun for the place on the map, so Maiduguri wakes before Lagos. Stars at night, sun and moon cross east to west, warm light at dawn and sunset. The far horizon has palms in the south and savanna acacias in the north, coloured by the air at that hour.">
+        <Section id="sky" title="Live sky, horizon and weather (M-03 to M-05)" note="Weather follows the real weather there (harmattan haze from November to March). The sky follows the real sun for the place on the map, so Maiduguri wakes before Lagos. Stars at night, sun and moon cross east to west, warm light at dawn and sunset. The far horizon has palms in the south and savanna acacias in the north, coloured by the air at that hour.">
           <SkyDemo />
         </Section>
 
