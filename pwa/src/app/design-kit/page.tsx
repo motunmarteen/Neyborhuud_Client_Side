@@ -156,7 +156,7 @@ export default function DesignKitPage() {
           <MapDemo />
         </Section>
 
-        <Section id="sky" title="Live sky (M-03)" note="The sky follows the real sun for the place on the map: sunrise, noon and sunset are worked out for that town and date, so Maiduguri wakes before Lagos. Stars at night, sun and moon cross east to west, warm light at dawn and sunset.">
+        <Section id="sky" title="Live sky and horizon (M-03, M-04)" note="The sky follows the real sun for the place on the map, so Maiduguri wakes before Lagos. Stars at night, sun and moon cross east to west, warm light at dawn and sunset. The far horizon has palms in the south and savanna acacias in the north, coloured by the air at that hour.">
           <SkyDemo />
         </Section>
 
