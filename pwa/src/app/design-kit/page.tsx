@@ -9,6 +9,7 @@ import { BrowseTilesDemo } from './BrowseTilesDemo';
 import { ToastDemo } from './ToastDemo';
 import { StatesDemo } from './StatesDemo';
 import { PinsDemo } from './PinsDemo';
+import { MapDemo } from './MapDemo';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 export const metadata: Metadata = {
@@ -148,6 +149,10 @@ export default function DesignKitPage() {
 
         <Section id="pins" title="Map pins and badges (F-10)" note="White emoji pins. Ring colour means: red safety, amber light or advisory, blue FYI, purple help, green yours. Only live safety pins ripple. You are the green pin; the Area Champion wears a crown; the Sentinel orb's ring is your area's mood.">
           <PinsDemo />
+        </Section>
+
+        <Section id="map" title="Map (M-01)" note="Real Lagos streets from OpenStreetMap (via OpenFreeMap), drawn in the Home Concept colours: green ground, grey roads with white edges, teal lagoon, cream buildings.">
+          <MapDemo />
         </Section>
 
         <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">
