@@ -38,7 +38,7 @@ export default function SavedJobsPage() {
       )}
 
       {!isLoading && savedItems.length > 0 && (
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {savedItems.map((item: any, idx: number) => {
             const job = item.jobId ?? item;
             const jobId = job._id ?? job.id;
@@ -50,7 +50,7 @@ export default function SavedJobsPage() {
               />
             );
           })}
-          <div ref={ref} className="py-2 flex justify-center">
+          <div ref={ref} className="col-span-full flex justify-center py-2">
             {isFetchingNextPage && (
               <div className="flex items-center gap-2 text-sm" style={{ color: "var(--neu-text-muted)" }}>
                 <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />

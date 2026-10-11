@@ -80,7 +80,7 @@ export default function EventsPage() {
       )}
 
       {!isLoading && events.length > 0 && (
-        <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {events.map((event: any) => (
             <EventCard
               key={event.id ?? event._id}

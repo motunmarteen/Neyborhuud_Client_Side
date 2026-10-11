@@ -5,6 +5,7 @@ import { CardsAndChipsDemo } from './CardsAndChipsDemo';
 import { SheetDemo } from './SheetDemo';
 import { TopBarDemo } from './TopBarDemo';
 import { PostCardDemo } from './PostCardDemo';
+import { BrowseTilesDemo } from './BrowseTilesDemo';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 export const metadata: Metadata = {
@@ -128,6 +129,10 @@ export default function DesignKitPage() {
 
         <Section id="postcard" title="Post card (proposal)" note="One card for every post type. The icon on the avatar shows what each post is (only safety alerts pulse). Try like, follow, vote, the safety buttons and I'm going.">
           <PostCardDemo />
+        </Section>
+
+        <Section id="tiles" title="Browse tiles (F-13)" note="Marketplace, jobs, services and events stay two per row, in the post card's look. Tap the heart or bookmark, Apply, or I'm going.">
+          <BrowseTilesDemo />
         </Section>
 
         <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">

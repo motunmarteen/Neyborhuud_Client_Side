@@ -91,7 +91,7 @@ export default function NearbyEventsPage() {
       )}
 
       {!isLoading && !geoLoading && events.length > 0 && (
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {events.map((event: any) => (
             <EventCard
               key={event.id ?? event._id}
@@ -106,7 +106,7 @@ export default function NearbyEventsPage() {
             />
           ))}
           {hasNextPage && (
-            <div ref={loadMoreRef} className="flex justify-center py-4">
+            <div ref={loadMoreRef} className="col-span-full flex justify-center py-4">
               {isFetchingNextPage && (
                 <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               )}
