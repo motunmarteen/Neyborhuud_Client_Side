@@ -30,7 +30,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 |---|---|---|---|
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
-| 2. Design foundation | 13 | 19 | 🟡 in progress: F-13 done; next F-08 toasts and thank-you card |
+| 2. Design foundation | 14 | 20 | 🟡 in progress: F-08 done; next F-09 empty, loading and error states |
 | 3. Map home (sky + live map) | 0 | 16 | ⬜ |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
@@ -135,7 +135,7 @@ Kept here so the whole history is in one place.
 - [x] F-05 (AppBottomSheet: title/close/footer, 90svh, safe area; handle 40x5; navy-tint backdrop; reduced motion = fade; 3 dark chat sheets made light; drag/Esc/backdrop tested; ~36 custom sheets move over screen by screen) Bottom sheet component (the slide-up panel used everywhere), with handle and drag-to-close
 - [x] F-06 (TopBar 52px pill: logo + area / back + title; HuudCredit pill only when loaded (no fake 150); bell; avatar opens Me menu; Join free for visitors; fits 320-412px; ＋ and Search stay until F-07) Floating top bar (logo, area, HuudCredit, bell, avatar)
 - [x] F-07 (full-width bar from the mockup; ➕ opens "Wetin you wan share?" with 10 one-tap signals + 8 create types and works from any screen via /feed?compose=; hold Sentinel = silent SOS (moved from the old Home button); Profile → top-bar avatar; ＋ removed from top bar, 🔍 always shown; floating SOS sits above the bar. My Huud → /feed and Gist → /gist until the map home in Phase 3) New bottom bar: My Huud · Gist · ➕ Create · Chats · Sentinel
-- [ ] F-08 Toast and thank-you card (with coin animation)
+- [x] F-08 (pwa 570bc37: navy message toasts; nhToast.thanks white card with gold coin pop + burst and +N only when the server really awarded; wired to safety confirms, signals, first poll vote, L&F, help, reports, check-in, sharing; fixed newest-under-oldest stacking, share +5 claim on reused links, email "50 HC" claim; server eabe809 share points_earned = real award, not yet deployed) Toast and thank-you card (with coin animation)
 - [ ] F-09 Empty states, loading skeletons, error states (Nigerian wording)
 - [ ] F-10 Pins and badges component set (emoji pins, coloured rings, ripple)
 - [ ] F-11 Reduced-motion and low-data modes respected by all animations
@@ -149,6 +149,7 @@ Kept here so the whole history is in one place.
 - [ ] F-15b Real live activity for the home ("Live Huud Pulse") and a real verified-neighbours count from the server (Phase 3 map home)
 - [ ] F-15c Check the photo editor (AvatarAdjusterModal, also uses SVG foreignObject) on an iPhone
 - [ ] F-15d Production marketplace has test-looking listings (e.g. "55\" LG Smart TV — #7820", "Iphone ₦12,000" with a jewellery photo): owner to decide whether to remove them (*owner*)
+- [ ] F-15e The /rewards page is fake: "Claim ₦500" claims nothing, any promo code "redeems" +50 HuudCredit without the server, balance falls back to a made-up 150 and trust to 88. Hide the fake parts until Phase 7 (*owner OK*)
 - [ ] F-12 Visual check of 10 key screens after the switch (no broken layouts)
 
 ---
