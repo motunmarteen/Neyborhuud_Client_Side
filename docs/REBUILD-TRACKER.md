@@ -158,6 +158,8 @@ Kept here so the whole history is in one place.
 
 ## Safety and civic upgrades (from the N-Alert research, owner decisions 2026-10-11)
 
+**Deferred (owner, 2026-10-11):** all S-items, including election mode, wait until the platform build is finished; Phase 3 starts now. The election date does not move, so election mode is at risk if the build runs past mid-November.
+
 **Order (owner):** finish the current work (F-13d Poll and Lost & Found screens, F-13 post card in the feed), then alarms → danger zones → complaints → rumour check. **Election mode comes after the current work but has a hard deadline:** presidential election **16 January 2027**, governorship **6 February 2027**. To be live and learnt by mid-December, election mode must start **by mid-November 2026 at the latest**.
 
 - [ ] S-01 **Danger alarm**: urgent alarm sound + full-screen alert when danger is reported near you (app open); stronger emergency push (Android: urgent, stays on screen, strong vibration). Note: a web app cannot play its own siren while closed; the phone plays its notification sound
