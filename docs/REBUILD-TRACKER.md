@@ -30,7 +30,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 |---|---|---|---|
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
-| 2. Design foundation | 21 | 23 | ✅ done except F-15d (owner to approve test listing removal) and F-15b (moves to Phase 3 map home) |
+| 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
 | 3. Map home (sky + live map) | 0 | 16 | ⬜ |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
@@ -148,7 +148,7 @@ Kept here so the whole history is in one place.
 - [x] F-15 (f4e7e05, 3724eb2) iPhone fixes from the owner's iPhone 13 Pro: status bar overlap (iOS status bar now "default"), giant profile photos on posts (pin avatars drew a positioned <img> in SVG foreignObject, which Safari does not clip; now SVG <image>), made-up "Live Huud Pulse" + "48 Verified Neighbors" now demo-only, untrue "+15 HC each" removed, Sentinel screen shows all 15 safety tools
 - [ ] F-15b Real live activity for the home ("Live Huud Pulse") and a real verified-neighbours count from the server (Phase 3 map home)
 - [x] F-15c (pwa 9fcfeff: photo moved out of SVG foreignObject; preview now matches the saved crop; editor guide uses the new pin shape) Check the photo editor (AvatarAdjusterModal, also uses SVG foreignObject) on an iPhone
-- [ ] F-15d (2026-10-11: listed for the owner: 36 live listings, 35 look like test data (30 seeded "#NNNN" items from 3 accounts on 2026-05-02, plus Test Item, john doe, 15 pro, 12 pro max, Iphone); waiting for the owner to approve removal) Production marketplace has test-looking listings (e.g. "55\" LG Smart TV — #7820", "Iphone ₦12,000" with a jewellery photo): owner to decide whether to remove them (*owner*)
+- [x] F-15d (2026-10-11: owner confirmed all 36 were test data; archived like the app's Delete (status archived), run by the owner via Session Manager; live marketplace now 0 listings. Listed for the owner: 36 live listings, 35 look like test data (30 seeded "#NNNN" items from 3 accounts on 2026-05-02, plus Test Item, john doe, 15 pro, 12 pro max, Iphone); waiting for the owner to approve removal) Production marketplace has test-looking listings (e.g. "55\" LG Smart TV — #7820", "Iphone ₦12,000" with a jewellery photo): owner to decide whether to remove them (*owner*)
 - [x] F-15e (pwa 7aa3178, owner: hide the fake parts: real balance, streak and ways to earn only; also fake 150 HC and "Lekki Phase 1" in the side menu; unused fake drawer deleted) The /rewards page is fake: "Claim ₦500" claims nothing, any promo code "redeems" +50 HuudCredit without the server, balance falls back to a made-up 150 and trust to 88. Hide the fake parts until Phase 7 (*owner OK*)
 - [x] F-15f (pwa 9fcfeff) Settings still has a Dark mode switch although the app is light only since F-01 (remove it in the Settings restyle)
 - [x] F-12 (pwa fc2dc02: 12 key screens + all 68 static routes checked for one top bar; fixed: double space under the top bar on every screen (owner report), 2 bars on /gist /work /events/create /marketplace/create, none on /lost-found, old header on /notifications; feed crash on a reply without radar signals; profile crash on missing username; developer test panel and fake chats in Chats now demo only) Visual check of 10 key screens after the switch (no broken layouts)
