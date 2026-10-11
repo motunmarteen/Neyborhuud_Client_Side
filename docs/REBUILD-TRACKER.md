@@ -30,7 +30,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 |---|---|---|---|
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
-| 2. Design foundation | 16 | 20 | 🟡 in progress: F-10 done; next F-11 reduced motion and low data |
+| 2. Design foundation | 17 | 21 | 🟡 in progress: F-11 done; next F-12 visual check of 10 key screens |
 | 3. Map home (sky + live map) | 0 | 16 | ⬜ |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
@@ -138,7 +138,7 @@ Kept here so the whole history is in one place.
 - [x] F-08 (pwa 570bc37: navy message toasts; nhToast.thanks white card with gold coin pop + burst and +N only when the server really awarded; wired to safety confirms, signals, first poll vote, L&F, help, reports, check-in, sharing; fixed newest-under-oldest stacking, share +5 claim on reused links, email "50 HC" claim; server eabe809 share points_earned = real award, not yet deployed) Toast and thank-you card (with coin animation)
 - [x] F-09 (EmptyState / ErrorState with offline wording / Skeleton in components/ui; 18 loading screens redrawn (were a navy flash); BrowseEmptyState (28 files) on EmptyState; 13 raw "Failed to load" states → ErrorState with retry; 4 error pages unified; per-screen inline empty texts move over in Phase 4) Empty states, loading skeletons, error states (Nigerian wording)
 - [x] F-10 (components/map/Pins.tsx + .nh-pin/.nh-orb CSS: MapPin rings/ripple/tag/count, PersonPin me/champion, SentinelOrb mood, Leaflet HTML helpers; /map uses them) Pins and badges component set (emoji pins, coloured rings, ripple)
-- [ ] F-11 Reduced-motion and low-data modes respected by all animations
+- [x] F-11 (calm mode <html data-calm>: OS reduced motion, Data Saver, or Settings "Save data"; all CSS animations/transitions stop except spinners; framer-motion MotionConfig; feed videos wait for a tap, background videos not loaded; also fixed text size setting) Reduced-motion and low-data modes respected by all animations
 - [x] F-13 **Post card** — one card for every post type (`components/feed/PostCard.tsx`, proposal on /design-kit). Type shown by an icon badge on the avatar corner (only safety alerts pulse); no label row, no coloured edge; follow icon (person+ / person-tick); two-line more icon; Facebook-style photo grid (2 / 3 / 4 / 5+ with +N); full-width cards. Types: post, FYI, lost & found, poll, safety alert, marketplace, job, event, service, help request. ✅ owner approval → ✅ swap into feed, profile, FYI, help request (pwa 5978355: XPostCard wraps PostCard; poll voting, Lost & Found routing, safety buttons, repost chain, menu all browser-tested) → ✅ own pages: owner chose grid tiles in the post card look; BrowseTile under ProductCard / JobCard / ServiceCard / EventCard (all 9 pages)
 - [x] F-13b (server 9a2044d: /api/v1/polls, area-only one vote each, changeable until close, creator +2 HC at 10 voters; also fixed the HuudCredit daily-limit race) **Feed polls on the server**: polls today exist only in chat (PollVote). Add poll posts (question, 2-4 options, end date), one vote per person, results, and the ➕ "Community Poll" option that has no backend yet
 - [x] F-13c (server db7d78f: /api/v1/lost-found with private detail, claims, 4-digit handover code, 50 HC finder reward held 72h, ≤500 HC pledges, anti-gaming rules, flags + moderator decisions) **Lost & Found fields**
@@ -150,6 +150,7 @@ Kept here so the whole history is in one place.
 - [ ] F-15c Check the photo editor (AvatarAdjusterModal, also uses SVG foreignObject) on an iPhone
 - [ ] F-15d Production marketplace has test-looking listings (e.g. "55\" LG Smart TV — #7820", "Iphone ₦12,000" with a jewellery photo): owner to decide whether to remove them (*owner*)
 - [ ] F-15e The /rewards page is fake: "Claim ₦500" claims nothing, any promo code "redeems" +50 HuudCredit without the server, balance falls back to a made-up 150 and trust to 88. Hide the fake parts until Phase 7 (*owner OK*)
+- [ ] F-15f Settings still has a Dark mode switch although the app is light only since F-01 (remove it in the Settings restyle)
 - [ ] F-12 Visual check of 10 key screens after the switch (no broken layouts)
 
 ---
