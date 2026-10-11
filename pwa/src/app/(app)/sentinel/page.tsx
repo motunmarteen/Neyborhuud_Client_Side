@@ -26,17 +26,27 @@ import { searchService } from '@/services/search.service';
 import { newsService } from '@/services/news.service';
 import type { RssArticle } from '@/types/incident';
 import { WhoIsInMyHuudDrawer } from '@/components/neighborhood/WhoIsInMyHuudDrawer';
+import { SENTINEL_FEATURES } from '@/lib/sentinel-catalog';
 
-const SAFETY_TOOLS = [
-  { href: '/sos', icon: '🆘', label: 'SOS', strong: true },
-  { href: '/safety/emergency', icon: '🚨', label: 'Report emergency' },
-  { href: '/safety/trips', icon: '🚗', label: 'Safe trips' },
-  { href: '/safety/kidnapping-tracking', icon: '📍', label: 'Live tracking' },
-  { href: '/safety/manage#checkins', icon: '✅', label: 'Check-ins' },
-  { href: '/safety/manage#guardians', icon: '👥', label: 'Guardians' },
-  { href: '/safety/fake-call', icon: '📞', label: 'Fake call' },
-  { href: '/safety/panic-pin', icon: '🔢', label: 'Panic PIN' },
-];
+// Every safety tool comes from the Sentinel catalogue (lib/sentinel-catalog.ts), so a new
+// tool can never be left off this screen. The first 8 show; the rest open with "More".
+const TOOL_EMOJI: Record<string, string> = {
+  'sos-center': '🆘', emergency: '🚨', trips: '🚗', tracking: '📍', checkins: '✅', guardians: '👥',
+  'fake-call': '📞', 'panic-pin': '🔢', geofences: '🗺️', circle: '🫂', status: '📡',
+  'sentinel-ai': '🤖', 'trip-log': '🧾', incidents: '📋', dashboard: '📊',
+};
+const SHORT_LABEL: Record<string, string> = { 'sos-center': 'SOS', emergency: 'Report emergency' };
+const FIRST_TOOLS = ['sos-center', 'emergency', 'trips', 'tracking', 'checkins', 'guardians', 'fake-call', 'panic-pin'];
+const toolOf = (f: (typeof SENTINEL_FEATURES)[number]) => ({
+  id: f.id,
+  href: f.href,
+  icon: TOOL_EMOJI[f.id] ?? '🛡️',
+  label: SHORT_LABEL[f.id] ?? f.label,
+  strong: f.id === 'sos-center',
+  badge: f.badge,
+});
+const SAFETY_TOOLS = FIRST_TOOLS.map((id) => SENTINEL_FEATURES.find((f) => f.id === id)).filter(Boolean).map((f) => toolOf(f!));
+const MORE_TOOLS = SENTINEL_FEATURES.filter((f) => !FIRST_TOOLS.includes(f.id)).map(toolOf);
 
 const EXPLORE_TILES = [
   { href: '/map', icon: '🗺️', label: 'Map', sub: 'Pins, safe zones, places' },
@@ -46,7 +56,7 @@ const EXPLORE_TILES = [
   { href: '/jobs', icon: '💼', label: 'Jobs', sub: 'Work around you' },
   { href: '/fyi', icon: '📢', label: 'Bulletins', sub: 'Light, roads, notices' },
   { href: '/communities', icon: '🏘️', label: 'Estates', sub: 'Your estate and ward' },
-  { href: '/local-news', icon: '📰', label: 'News', sub: 'Lagos and Nigeria' },
+  { href: '/help-request', icon: '🙏', label: 'Help requests', sub: 'Lend a hand nearby' },
 ];
 
 const TYPE_ICON: Record<string, string> = {
@@ -90,6 +100,7 @@ function SentinelScreen() {
   const [trending, setTrending] = useState<string[]>([]);
   const [news, setNews] = useState<RssArticle[]>([]);
   const [whoOpen, setWhoOpen] = useState(false);
+  const [moreTools, setMoreTools] = useState(false);
   const runId = useRef(0);
 
   const mode = classifyQuery(query);
@@ -226,22 +237,28 @@ function SentinelScreen() {
             <Card>
               <p className="text-[11px] font-black uppercase tracking-wider text-faint">Your safety{area ? ` · ${area}` : ''}</p>
               <div className="mt-3 grid grid-cols-4 gap-2">
-                {SAFETY_TOOLS.map((t) => (
+                {(moreTools ? [...SAFETY_TOOLS, ...MORE_TOOLS] : SAFETY_TOOLS).map((t) => (
                   <Link
-                    key={t.href}
+                    key={t.id}
                     href={t.href}
-                    className={`flex min-h-[72px] flex-col items-center justify-center gap-1 rounded-2xl px-1 text-center text-[11px] font-bold leading-tight ${
+                    className={`relative flex min-h-[72px] flex-col items-center justify-center gap-1 rounded-2xl px-1 text-center text-[11px] font-bold leading-tight ${
                       t.strong ? 'bg-brand-red text-white' : 'bg-background text-navy hover:bg-[#E6EAF0]'
                     }`}
                   >
+                    {t.badge ? <span className="absolute right-1.5 top-1.5 rounded-full bg-purple px-1 text-[9px] font-black text-white">{t.badge}</span> : null}
                     <span className="text-xl" aria-hidden>{t.icon}</span>
                     {t.label}
                   </Link>
                 ))}
               </div>
-              <Link href="/safety/manage" className="mt-3 block text-center text-sm font-extrabold text-brand-green-dark hover:underline">
-                All safety tools
-              </Link>
+              <div className="mt-3 flex flex-col gap-2">
+                <Button variant="ghost" size="sm" fullWidth aria-expanded={moreTools} onClick={() => setMoreTools((v) => !v)}>
+                  {moreTools ? 'Fewer tools' : `More safety tools (${MORE_TOOLS.length})`}
+                </Button>
+                <Link href="/safety/sentinel/settings" className="block text-center text-sm font-extrabold text-brand-green-dark hover:underline">
+                  Manage Sentinel
+                </Link>
+              </div>
             </Card>
 
             <section aria-labelledby="try-title">
