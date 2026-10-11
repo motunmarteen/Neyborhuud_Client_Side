@@ -22,6 +22,7 @@ const PREFIX_FALLBACKS: Array<[prefix: string, href: string]> = [
   ['/admin', '/feed'],
   ['/incident-reports', '/incident-reports'],
   ['/explore', '/feed'],
+  ['/sentinel', '/feed'],
   ['/notifications', '/feed'],
   ['/communities', '/feed'],
   ['/neighborhood', '/feed'],

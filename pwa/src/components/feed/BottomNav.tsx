@@ -2,12 +2,11 @@
 
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Home, MessagesSquare, Newspaper, Plus, Shield, Siren } from 'lucide-react';
 import { useScrollHideBottomNav, scrollToTop } from '@/hooks/useScrollHideBottomNav';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { useSos } from '@/hooks/useSos';
-import { useSentinelBottomSheet } from '@/contexts/SentinelBottomSheetContext';
 import { CreateSheet } from '@/components/navigation/CreateSheet';
 
 /**
@@ -16,7 +15,7 @@ import { CreateSheet } from '@/components/navigation/CreateSheet';
  *   My Huud · Gist · ➕ · Chats · Sentinel
  *
  * - ➕ opens "Wetin you wan share?" (quick signals + create) on every screen
- * - Sentinel opens safety + Ask Sentinel (SSAA). Press and hold it for a silent SOS
+ * - Sentinel opens the Sentinel screen: Ask Sentinel (SSAA) + safety + Explore. Press and hold for a silent SOS
  *   (moved here from the old centre Home button, so the habit still works).
  * - Profile is the avatar in the top bar; search/explore become part of Sentinel.
  */
@@ -57,7 +56,7 @@ function Tab({
 export function BottomNav({ hidden = false }: BottomNavProps) {
   const pathname = usePathname() || '/';
   const scrollHidden = useScrollHideBottomNav();
-  const { openSheet: openSentinelSheet } = useSentinelBottomSheet();
+  const router = useRouter();
   const { phase: sosPhase, triggerSos } = useSos();
   const { data: messageUnreadCount = 0 } = useUnreadCount('message');
   const [createOpen, setCreateOpen] = useState(false);
@@ -82,7 +81,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
       holdFired.current = false;
       return;
     }
-    openSentinelSheet();
+    router.push('/sentinel');
   };
 
   const sosActive = sosPhase !== 'idle';

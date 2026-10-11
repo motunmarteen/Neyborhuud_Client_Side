@@ -7,12 +7,6 @@ import apiClient from "@/lib/api-client";
 import {
   PaginatedResponse,
   SearchResult,
-  User,
-  Post,
-  Event,
-  Job,
-  MarketplaceItem,
-  Service,
 } from "@/types/api";
 import { SearchParams, SearchResponse } from "@/types/search";
 
@@ -76,44 +70,9 @@ export const searchService = {
     return this.search({ q: query, type: "locations", page, limit });
   },
 
-  /**
-   * Search events
-   */
-  async searchEvents(query: string, page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<Event>>("/search/events", {
-      params: { q: query, page, limit },
-    });
-  },
-
-  /**
-   * Search jobs
-   */
-  async searchJobs(query: string, page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<Job>>("/search/jobs", {
-      params: { q: query, page, limit },
-    });
-  },
-
-  /**
-   * Search marketplace items
-   */
-  async searchMarketplace(query: string, page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<MarketplaceItem>>(
-      "/search/marketplace",
-      {
-        params: { q: query, page, limit },
-      },
-    );
-  },
-
-  /**
-   * Search services
-   */
-  async searchServices(query: string, page = 1, limit = 20) {
-    return await apiClient.get<PaginatedResponse<Service>>("/search/services", {
-      params: { q: query, page, limit },
-    });
-  },
+  // Events, jobs, marketplace and services are found through the main search (contentType)
+  // and Ask Sentinel (/sentinel/ask). The old /search/events|jobs|marketplace|services
+  // calls pointed at endpoints the server never had and were not used anywhere.
 
   /**
    * Get search suggestions
@@ -137,19 +96,5 @@ export const searchService = {
       .slice(0, limit);
   },
 
-  /**
-   * Get search history
-   */
-  async getSearchHistory(limit = 20) {
-    return await apiClient.get<string[]>("/search/history", {
-      params: { limit },
-    });
-  },
-
-  /**
-   * Clear search history
-   */
-  async clearSearchHistory() {
-    return await apiClient.delete("/search/history");
-  },
+  // Recent searches are kept on the phone (no /search/history endpoint on the server).
 };

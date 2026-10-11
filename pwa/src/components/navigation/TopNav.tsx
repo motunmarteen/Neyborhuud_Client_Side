@@ -63,7 +63,7 @@ function getRouteTitle(pathname: string) {
     notifications: 'Notifications',
     settings: 'Settings',
     safety: 'Sentinel Radar',
-    sentinel: 'Sentinel Radar',
+    sentinel: 'Sentinel',
     map: 'Discovery',
     explore: 'Explore',
     popular: 'My Huud',
@@ -246,7 +246,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
       scrollHidden={scrollHidden}
       origin={origin}
       onBack={() => router.back()}
-      onSearch={() => router.push('/explore')}
+      onSearch={() => router.push('/sentinel?focus=1')}
       onMe={() => window.dispatchEvent(new CustomEvent('toggle-mobile-sidebar'))}
     />
   );
