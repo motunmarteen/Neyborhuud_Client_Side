@@ -190,7 +190,7 @@ Kept here so the whole history is in one place.
 - [ ] M-09 Pin panels (bottom sheet) for every type, with actions and "Ask Sentinel about this"
 - [ ] M-10 Moving traffic driven by real go-slow reports (calm when no data)
 - [ ] M-11 Neighbour activity as area pulses (never exact homes)
-- [ ] M-17 **Living map** (owner, 2026-10-12: "the map has to be real"): moving danfos, kekes, okadas and cars on real roads; people walking on real streets and paths; kids playing football on real pitches; crowds at real markets; density by time of day (rush hours busy, late night quiet) and weather (fewer people in rain), headlights at night; traffic speed from real go-slow reports (M-10). Decoration only, never real tracked people; off in calm mode
+- [ ] 🟡 M-17 (first version live: vehicles, people, kids football, market crowds on real geometry; next: denser, go-slow speeds from reports) **Living map** (owner, 2026-10-12: "the map has to be real"): moving danfos, kekes, okadas and cars on real roads; people walking on real streets and paths; kids playing football on real pitches; crowds at real markets; density by time of day (rush hours busy, late night quiet) and weather (fewer people in rain), headlights at night; traffic speed from real go-slow reports (M-10). Decoration only, never real tracked people; off in calm mode
 - [ ] M-12 Pulse ticker: news + exchange rates + weather; "Today's Pulse" panel
 - [ ] M-13 Calm view toggle
 - [ ] M-14 Area Champion crown marker
