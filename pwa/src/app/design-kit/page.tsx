@@ -12,6 +12,7 @@ import { PinsDemo } from './PinsDemo';
 import { MapDemo } from './MapDemo';
 import { SkyDemo } from './SkyDemo';
 import { LivePinsDemo } from './LivePinsDemo';
+import { MapAdsDemo } from './MapAdsDemo';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 export const metadata: Metadata = {
@@ -163,6 +164,10 @@ export default function DesignKitPage() {
 
         <Section id="livepins" title="Live pins (M-07)" note="What is happening around you, in seven layers you can switch on and off. A pin shows the area (about one street block), never an exact spot; several things in one block share a pin with a count. Fresh safety reports ripple. These are sample pins; in the app they come live from your neighbours.">
           <LivePinsDemo />
+        </Section>
+
+        <Section id="mapads" title="Map ads" note="Businesses can book a billboard at a real place, a plot on their area's Ad Wall, or a sponsored pin. Billboards light up at night. Every ad says “Ad”, is checked before it goes live, and never sits on safety alerts. Paid with HuudCredit or naira. These are sample ads.">
+          <MapAdsDemo />
         </Section>
 
         <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">

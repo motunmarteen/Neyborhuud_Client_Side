@@ -49,6 +49,9 @@ function getRouteTitle(pathname: string) {
   if (segment === 'huud-economy' && parts[1] === 'score') return 'Huud Score';
   if (segment === 'huud-economy') return 'Huud Economy';
   if (segment === 'local-news' && parts[1] === 'gist') return 'HuudGist';
+  if (segment === 'ads' && parts[1] === 'wall') return 'Ad Wall';
+  if (segment === 'ads' && parts[1] === 'new') return 'Book an ad';
+  if (segment === 'ads' && parts[1] === 'mine') return 'My ads';
 
   const map: Record<string, string> = {
     feed: 'Huud Feed',
@@ -79,6 +82,7 @@ function getRouteTitle(pathname: string) {
     gamification: 'Huud Economy',
     'huud-economy': 'Huud Economy',
     rewards: 'Rewards',
+    ads: 'Map ads',
   };
 
   if (map[segment]) return map[segment];
