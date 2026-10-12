@@ -9552,3 +9552,7 @@ html .animate-spin {
 @keyframes nh-flash { 0%, 91%, 95%, 100% { opacity: 0; } 92%, 94% { opacity: .75; } 93% { opacity: .25; } }
 .nh-puddle { width: 8px; height: 4px; transform: translate(-50%, -50%); animation: nh-puddle 1.6s ease-out infinite; }
 @keyframes nh-puddle { 0% { width: 8px; height: 4px; opacity: .8; } 100% { width: 52px; height: 16px; opacity: 0; } }
+
+/* M-07: a map pin is a button around the F-10 pin drawing. */
+.nh-pin-btn { display: block; padding: 0; border: 0; background: none; cursor: pointer; }
+.nh-pin-btn:focus-visible { outline: 3px solid #1D2433; outline-offset: 4px; border-radius: 9999px; }

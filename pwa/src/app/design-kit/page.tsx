@@ -11,6 +11,7 @@ import { StatesDemo } from './StatesDemo';
 import { PinsDemo } from './PinsDemo';
 import { MapDemo } from './MapDemo';
 import { SkyDemo } from './SkyDemo';
+import { LivePinsDemo } from './LivePinsDemo';
 import { BottomNav } from '@/components/feed/BottomNav';
 
 export const metadata: Metadata = {
@@ -158,6 +159,10 @@ export default function DesignKitPage() {
 
         <Section id="sky" title="Live sky, horizon and weather (M-03 to M-05)" note="Weather follows the real weather there (harmattan haze from November to March). The sky follows the real sun for the place on the map, so Maiduguri wakes before Lagos. Stars at night, sun and moon cross east to west, warm light at dawn and sunset. The far horizon has palms in the south and savanna acacias in the north, coloured by the air at that hour.">
           <SkyDemo />
+        </Section>
+
+        <Section id="livepins" title="Live pins (M-07)" note="What is happening around you, in seven layers you can switch on and off. A pin shows the area (about one street block), never an exact spot; several things in one block share a pin with a count. Fresh safety reports ripple. These are sample pins; in the app they come live from your neighbours.">
+          <LivePinsDemo />
         </Section>
 
         <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">
