@@ -9,6 +9,7 @@ const adminNavItems = [
   { href: '/admin',         icon: 'dashboard',      label: 'Dashboard' },
   { href: '/admin/users',   icon: 'manage_accounts', label: 'Users' },
   { href: '/admin/reports', icon: 'flag',            label: 'Reports' },
+  { href: '/admin/ads',     icon: 'campaign',        label: 'Map ads' },
 ];
 
 export default function AdminLayout({

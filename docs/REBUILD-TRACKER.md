@@ -38,7 +38,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 7. Gamification backend | 0 | 18 | ⬜ waiting on your OK |
 | 8. Sharing and virality | 0 | 10 | ⬜ |
 | 9. Growth features | 0 | 9 | ⬜ |
-| 10. Ads, billboards and payouts | 0 | 9 | ⬜ |
+| 10. Ads, billboards and payouts | 0 | 9 | 🟡 map ads built (server + app); waiting on Bachs keys, prices and the map home |
 | 11. Quality, performance, accessibility | 0 | 10 | ⬜ |
 | 12. PWA: works from a link, no download | 0 | 12 | ⬜ |
 | 14. Store apps (later, optional) | 0 | 6 | ⏸ later |
@@ -184,7 +184,7 @@ Kept here so the whole history is in one place.
 - [x] M-03 (pwa: lib/sky.ts real sun times per place (NOAA, WAT) mapped onto the mockup palette; components/map/SkyMap.tsx; tested) Live sky over the map: time-of-day colours, sun and moon path (east → west), stars
 - [x] M-04 (SkyMap fade + haze + sunlight on the ground; SkyHorizon: palms in the south, savanna acacias north of ~10°N) Horizon blend (land fades into the sky), palm-tree horizon, sunlight on the ground
 - [x] M-05 (lib/mapWeather.ts + hooks/useMapWeather.ts; real weather every 15 min; harmattan = haze/dust/fog Nov-Mar; unknown = none; calm mode: no rain/lightning) Weather on the map: clouds and their shadows, drizzle, rain (current Sky Feed Hero drops), storm with lightning, harmattan haze, puddles
-- [x] M-06 (lib/mapNight.ts: night palette inside MapLibre, lit-window pattern on walls, street lamps from dusk; billboard glow comes with billboards in Phase 10) Night lights: windows, street lamps, glowing billboards
+- [x] M-06 (lib/mapNight.ts: night palette inside MapLibre, lit-window pattern on walls, street lamps from dusk; billboard glow done with map ads, 2026-10-12) Night lights: windows, street lamps, glowing billboards
 - [x] M-07 (server 57ec2d2 /geo/map-pins: 7 layers, ~110 m grid, no fake positions, max ~27 km box; radar now searches by area and drops items without a location; pwa: useMapPins + MapLayerChips + /feed?post deep link) Pins from Street Radar (`/geo/radar`) with layer chips: Safety, Traffic, Light & water, Market, Work, Events, Help
 - [ ] M-08 Live pins via socket (appear and ripple instantly)
 - [ ] M-09 Pin panels (bottom sheet) for every type, with actions and "Ask Sentinel about this"
@@ -410,9 +410,9 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 ## Phase 10: Ads, billboards and payouts
 
-**Moved up (owner, 2026-10-12, inspired by Lagos Life):** map ads in all three formats, paid with HuudCredit or naira through **Bachs (bachs.io), not Paystack**. Server done (1d7abe1); app screens next.
+**Moved up (owner, 2026-10-12, inspired by Lagos Life):** map ads in all three formats, paid with HuudCredit or naira through **Bachs (bachs.io), not Paystack**. Server done (1d7abe1); app screens done 2026-10-12 (/ads hub, /ads/new booking, /ads/wall, /ads/mine, /admin/ads, billboards + sponsored pins layer `useMapAds`, design-kit demo). Billboards show on the real map once the map home is built (Phase 3).
 
-- [ ] 🟡 A-01 (server 1d7abe1: Ad model, 2 billboards / 3 sponsored pins per ~1 km cell, 12x12 wall per LGA, 30-min holds, moderation, expiry; app next) Billboard spots on the map (limited per area), booking flow, moderation queue, "Ad" label, night glow; **ad wall of plots per area** (Lagos Life sea plots)
+- [ ] 🟡 A-01 (server 1d7abe1: Ad model, 2 billboards / 3 sponsored pins per ~1 km cell, 12x12 wall per LGA, 30-min holds, moderation, expiry; app screens + map layer done 2026-10-12; left: mount on the map home) Billboard spots on the map (limited per area), booking flow, moderation queue, "Ad" label, night glow; **ad wall of plots per area** (Lagos Life sea plots)
 - [ ] 🟡 A-02 (server: HuudCredit atomic spend; Bachs hosted checkout + signed webhook; needs owner Bachs account + BACHS_API_KEY / BACHS_WEBHOOK_SECRET in Secrets Manager; prices to confirm) Pay for ads with HuudCredit or naira (**Bachs**)
 - [ ] A-03 Buy HuudCredit with naira (one way in)
 - [ ] 🟡 A-04 (sponsored pins in Market/Work/Events done on the server) Sponsored pins, sponsored Gist cards, featured services, boosted events
@@ -493,6 +493,8 @@ Only if the PWA hits limits we can't work around (for example background locatio
 | 2026-10-10 | Currency name: **HuudCredit** |
 | 2026-10-10 | Two meters: Impact + HuudCredit; 6-level ladder; pay on confirmation |
 | 2026-10-10 | Billboards on the map (HuudCredit or naira); gifting with limits |
+| 2026-10-12 | Map ads in three formats (billboards, Ad Wall plots, sponsored pins); naira through **Bachs**, not Paystack |
+| 2026-10-12 | Idea parked: HuudCredit as a discount coin (owner deferred; revisit before launch) |
 | 2026-10-10 | No trading or selling HuudCredit between users; payouts only through the contributor programme, after legal review |
 | 2026-10-10 | Safety reports never shared publicly and never paid in cash |
 | 2026-10-10 | **PWA first**: no download needed; store apps later and optional |

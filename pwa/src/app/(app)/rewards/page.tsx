@@ -82,11 +82,28 @@ export default function RewardsPage() {
           </p>
         </section>
 
+        {/* Spend: map ads are live (2026-10-12) */}
+        <Link
+          href="/ads"
+          className="flex items-center gap-3 rounded-[22px] bg-white p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)] transition-colors hover:bg-background"
+        >
+          <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-amber-soft text-lg">
+            🪧
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="text-sm font-bold text-navy">Spend it on a map ad</span>
+            <span className="text-xs font-semibold text-muted">A billboard, an Ad Wall plot or a sponsored pin</span>
+          </span>
+          <span aria-hidden className="material-symbols-outlined text-muted">
+            chevron_right
+          </span>
+        </Link>
+
         {/* Honest about what is not here yet */}
         <section className="flex flex-col gap-1 rounded-[22px] bg-amber-soft p-4">
           <h2 className="font-heading text-base font-extrabold text-navy">Coming soon</h2>
           <p className="text-sm text-navy">
-            Weekly quests, levels, Area Champion, and things to spend HuudCredit on (map skins, shout-outs, billboards).
+            Weekly quests, levels, Area Champion, and more things to spend HuudCredit on (map skins, shout-outs).
           </p>
         </section>
       </main>

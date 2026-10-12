@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   MapPin,
   TrendingUp,
+  Presentation,
 } from 'lucide-react';
 import { AnimatedNeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { useAuth } from '@/hooks/useAuth';
@@ -60,6 +61,7 @@ const NAV_DISCOVER: NavItem[] = [
 
 const NAV_FINANCE: NavItem[] = [
   { icon: Wallet, label: 'Huud Economy', href: '/huud-economy' },
+  { icon: Presentation, label: 'Advertise on the map', href: '/ads' },
 ];
 
 const NAV_BOTTOM: NavItem[] = [
