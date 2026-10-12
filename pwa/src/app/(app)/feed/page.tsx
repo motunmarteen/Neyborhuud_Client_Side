@@ -178,6 +178,15 @@ function XFeedInner() {
         router.replace('/feed', { scroll: false });
     }, [composeParam, router]);
 
+    // ?post=<id> opens that post's details (map pins, shared links); then drop the param.
+    const postParam = searchParams.get('post');
+    useEffect(() => {
+        if (!postParam) return;
+        setSelectedPostId(postParam);
+        setIsPostDetailsOpen(true);
+        router.replace('/feed', { scroll: false });
+    }, [postParam, router]);
+
     // Fetch departments for filter dropdown
     const { data: departments = [] } = useDepartments();
 
