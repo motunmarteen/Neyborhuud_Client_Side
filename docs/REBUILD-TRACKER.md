@@ -410,10 +410,12 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 ## Phase 10: Ads, billboards and payouts
 
-- [ ] A-01 Billboard spots on the map (limited per area), booking flow, moderation queue, "Ad" label, night glow
-- [ ] A-02 Pay for billboards with HuudCredit or naira (Paystack or Flutterwave)
+**Moved up (owner, 2026-10-12, inspired by Lagos Life):** map ads in all three formats, paid with HuudCredit or naira through **Bachs (bachs.io), not Paystack**. Server done (1d7abe1); app screens next.
+
+- [ ] 🟡 A-01 (server 1d7abe1: Ad model, 2 billboards / 3 sponsored pins per ~1 km cell, 12x12 wall per LGA, 30-min holds, moderation, expiry; app next) Billboard spots on the map (limited per area), booking flow, moderation queue, "Ad" label, night glow; **ad wall of plots per area** (Lagos Life sea plots)
+- [ ] 🟡 A-02 (server: HuudCredit atomic spend; Bachs hosted checkout + signed webhook; needs owner Bachs account + BACHS_API_KEY / BACHS_WEBHOOK_SECRET in Secrets Manager; prices to confirm) Pay for ads with HuudCredit or naira (**Bachs**)
 - [ ] A-03 Buy HuudCredit with naira (one way in)
-- [ ] A-04 Sponsored pins, sponsored Gist cards, featured services, boosted events
+- [ ] 🟡 A-04 (sponsored pins in Market/Work/Events done on the server) Sponsored pins, sponsored Gist cards, featured services, boosted events
 - [ ] A-05 Business profile and ad dashboard (views, taps)
 - [ ] A-06 ⛔ Legal check with a Nigerian fintech/tax lawyer (payouts, withholding tax, AML records)
 - [ ] A-07 Contributor programme: eligibility, monthly pool from ad revenue, split by verified Impact
