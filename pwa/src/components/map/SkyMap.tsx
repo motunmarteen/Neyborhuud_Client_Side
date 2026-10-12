@@ -19,6 +19,8 @@ import { cloudColor, weatherLook, type MapWeather, type WeatherLook } from '@/li
 import { useMapWeather } from '@/hooks/useMapWeather';
 import { useCalm } from '@/hooks/useCalm';
 import { applyMapLight } from '@/lib/mapNight';
+import { useLivingMap } from '@/hooks/useLivingMap';
+import { watMinutes } from '@/lib/sky';
 
 /** Unknown weather: no clouds, rain or haze (never a made-up look). */
 const NO_WEATHER: WeatherLook = { ...weatherLook('clear'), cloudOpacity: 0, shadows: 0 };
@@ -58,15 +60,18 @@ type SkyMapProps = {
   weather?: MapWeather | null;
   /** Reports the real weather in use (null when unknown). */
   onWeather?: (wx: MapWeather | null) => void;
+  /** Street life: vehicles, people, kids playing football (M-17). Off in calm mode. */
+  living?: boolean;
 };
 
-export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather }: SkyMapProps) {
+export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true }: SkyMapProps) {
   const calm = useCalm();
   const liveWx = useMapWeather(weather === undefined ? center : null);
   const wx = weather === undefined ? liveWx : weather;
   useEffect(() => onWeather?.(wx), [wx, onWeather]);
   const look = wx ? weatherLook(wx) : NO_WEATHER;
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const [mapObj, setMapObj] = useState<maplibregl.Map | null>(null);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     if (hour != null) return;
@@ -84,12 +89,21 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
   }, [darkStep]);
   const handleReady = (map: maplibregl.Map) => {
     mapRef.current = map;
+    setMapObj(map);
     applyMapLight(map, darkStep);
     onReady?.(map);
   };
 
   const arcTop = (arc: number) => SKY_BAND - 26 - arc * (SKY_BAND - 70);
   const clouds = wx ? cloudColor(wx, sky.dark, sky.skyBot) : '#FFFFFF';
+
+  // Street life follows the local clock (or the pinned hour) and the weather.
+  useLivingMap(mapObj, {
+    hour: hour ?? watMinutes(now) / 60,
+    weather: wx,
+    dark: sky.dark,
+    enabled: living && !calm,
+  });
   const rain = calm ? [] : drops(look);
 
   return (
