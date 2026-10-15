@@ -5,11 +5,16 @@
  * the map stops moving, and keeps the markers in step (adds, updates, removes only what
  * changed). Each pin is a real button with a spoken label. `sample` shows given pins instead
  * of fetching (the public design kit, which has no signed-in neighbour to ask for).
+ *
+ * Live (M-08): with `live`, the map tells the server which area is on screen ("map:watch");
+ * when something new is saved there the server sends "map:changed" (no content), the pins
+ * reload, and pins that were not there before ripple for a few seconds.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import { mapPinHtml } from '@/components/map/Pins';
+import socketService from '@/lib/socket';
 import { fetchMapPins, LAYER_META, MAX_SPAN_DEG, pinLabel, shortNaira, type BBox, type MapLayer, type MapPin } from '@/lib/mapPins';
 
 export type MapPinsStatus = 'idle' | 'loading' | 'ready' | 'zoom-in' | 'error';
@@ -17,23 +22,33 @@ export type MapPinsStatus = 'idle' | 'loading' | 'ready' | 'zoom-in' | 'error';
 type Options = {
   sample?: MapPin[];
   onOpen?: (pin: MapPin) => void;
+  /** Refresh at once when neighbours post something new in the area on screen (M-08). */
+  live?: boolean;
 };
 
-function pinMarkup(p: MapPin): string {
+/** How long a newly arrived pin ripples. */
+const FRESH_MS = 10_000;
+/** Wait after a nudge before reloading (several posts at once become one reload). */
+const LIVE_RELOAD_MS = 1_200;
+
+function pinMarkup(p: MapPin, fresh = false): string {
   const meta = LAYER_META[p.layer];
   return mapPinHtml({
     emoji: meta.emoji,
     label: pinLabel(p),
-    ring: meta.ring,
-    ripple: p.layer === 'safety' && p.live,
+    ring: meta.ring ?? (fresh ? 'green' : undefined),
+    ripple: (p.layer === 'safety' && p.live) || fresh,
     count: p.count,
     tag: p.layer === 'market' ? shortNaira(p.top.price) : undefined,
   });
 }
 
-export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sample, onOpen }: Options = {}) {
+export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sample, onOpen, live = false }: Options = {}) {
   const [status, setStatus] = useState<MapPinsStatus>('idle');
   const [pins, setPins] = useState<MapPin[]>([]);
+  const [fresh, setFresh] = useState<Set<string>>(() => new Set());
+  const [liveTick, setLiveTick] = useState(0);
+  const lastLive = useRef(0);
   const markers = useRef(new Map<string, { marker: maplibregl.Marker; html: string; pin: MapPin }>());
   const openRef = useRef(onOpen);
   openRef.current = onOpen;
@@ -57,11 +72,23 @@ export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sam
         setStatus(layers.length === 0 ? 'ready' : 'zoom-in');
         return;
       }
-      setStatus('loading');
+      const fromLive = lastLive.current;
+      lastLive.current = 0;
+      if (!fromLive) setStatus('loading');
       try {
         const next = await fetchMapPins(bbox, layers);
         if (alive) {
-          setPins(next);
+          if (fromLive) {
+            // Ripple only what arrived with this nudge (not what a pan brought into view).
+            setPins((prev) => {
+              const had = new Set(prev.map((p) => `${p.id}|${p.count}|${p.top.id}`));
+              const arrived = next.filter((p) => !had.has(`${p.id}|${p.count}|${p.top.id}`)).map((p) => p.id);
+              if (arrived.length) setFresh(new Set(arrived));
+              return next;
+            });
+          } else {
+            setPins(next);
+          }
           setStatus('ready');
         }
       } catch {
@@ -79,9 +106,49 @@ export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sam
       window.clearTimeout(timer);
       map.off('moveend', onMove);
     };
-    // layers is represented by layerKey
+    // layers is represented by layerKey; liveTick reloads after a live nudge
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, layerKey, sample]);
+  }, [map, layerKey, sample, liveTick]);
+
+  // Live: watch the area on screen, reload on "map:changed".
+  useEffect(() => {
+    if (!map || sample || !live) return;
+    const socket = socketService.connect() ?? socketService.getSocket();
+    if (!socket) return;
+    let reloadTimer: number | undefined;
+    const watch = () => {
+      const b = map.getBounds();
+      const box = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].map((n) => n.toFixed(5)).join(',');
+      socket.emit('map:watch', { bbox: box });
+    };
+    const onChanged = () => {
+      window.clearTimeout(reloadTimer);
+      reloadTimer = window.setTimeout(() => {
+        lastLive.current = Date.now();
+        setLiveTick((t) => t + 1);
+      }, LIVE_RELOAD_MS);
+    };
+    watch();
+    map.on('moveend', watch);
+    socket.on('authenticated', watch);
+    socket.on('connect', watch);
+    socket.on('map:changed', onChanged);
+    return () => {
+      window.clearTimeout(reloadTimer);
+      map.off('moveend', watch);
+      socket.off('authenticated', watch);
+      socket.off('connect', watch);
+      socket.off('map:changed', onChanged);
+      socket.emit('map:unwatch');
+    };
+  }, [map, sample, live]);
+
+  // New pins stop rippling after a while.
+  useEffect(() => {
+    if (fresh.size === 0) return;
+    const id = window.setTimeout(() => setFresh(new Set()), FRESH_MS);
+    return () => window.clearTimeout(id);
+  }, [fresh]);
 
   // Keep the markers in step with the pins.
   useEffect(() => {
@@ -89,7 +156,7 @@ export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sam
     const seen = new Set<string>();
     for (const p of pins) {
       seen.add(p.id);
-      const html = pinMarkup(p);
+      const html = pinMarkup(p, fresh.has(p.id));
       const existing = markers.current.get(p.id);
       if (existing) {
         existing.pin = p;
@@ -128,7 +195,7 @@ export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sam
         markers.current.delete(id);
       }
     }
-  }, [map, pins]);
+  }, [map, pins, fresh]);
 
   // Remove every marker when the map goes away.
   useEffect(() => {
