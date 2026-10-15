@@ -83,7 +83,7 @@ export function FloatingSosButton() {
         pathname === '/huud'
           ? // My Huud map (agreed mockup): SOS sits in the right column under Sentinel, Me and Calm view,
             // clear of the bottom sheet.
-            { top: 'calc(var(--safe-top) + var(--app-topnav-height) + 17.5rem)' }
+            { top: 'calc(var(--safe-top) + var(--app-topnav-height) + 20.75rem)' }
           : {
               // Float just above the bottom bar (F-07), or near the edge when the bar hides on scroll.
               bottom: scrollHidden ? 'calc(1.5rem + var(--safe-bottom))' : 'calc(var(--app-nav-bottom) + 0.75rem)',

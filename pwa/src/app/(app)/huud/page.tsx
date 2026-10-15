@@ -30,6 +30,7 @@ import { WEATHER_WORDS } from '@/lib/mapWeather';
 import { userArea } from '@/lib/adsApi';
 import { nhToast } from '@/lib/toast';
 import { isAdminUser } from '@/lib/adminAccess';
+import { AmbientSound, buzzForAlert, setSoundPreferred, soundPreferred } from '@/lib/ambientSound';
 import { houseMapAds, previewSamplesOn, sampleMapAds } from '@/lib/houseAds';
 import { MapLayerChips } from '@/components/map/MapLayerChips';
 import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
@@ -109,17 +110,45 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     return () => window.clearInterval(id);
   }, []);
 
-  const { status, pins } = useMapPins(map, layers, { onOpen: setPin, live: true });
+  const { status, pins, fresh } = useMapPins(map, layers, { onOpen: setPin, live: true });
+
+  // Sound and vibration (owner, 2026-10-15): off until turned on. Browsers only start sound
+  // after a tap, so a saved "on" waits for the first touch on the page.
+  const [soundOn, setSoundOn] = useState(false);
+  const [sound] = useState(() => new AmbientSound());
+  useEffect(() => {
+    if (!soundPreferred()) return;
+    const go = () => {
+      sound.start();
+      setSoundOn(true);
+    };
+    window.addEventListener('pointerdown', go, { once: true });
+    return () => window.removeEventListener('pointerdown', go);
+  }, [sound]);
+  useEffect(() => () => sound.stop(), [sound]);
+  const toggleSound = () => {
+    if (soundOn) {
+      sound.stop();
+      setSoundOn(false);
+      setSoundPreferred(false);
+    } else {
+      sound.start();
+      setSoundOn(true);
+      setSoundPreferred(true);
+    }
+  };
+  // A new nearby safety alert buzzes the phone (when sound is on).
+  useEffect(() => {
+    if (soundOn && pins.some((p) => p.layer === 'safety' && fresh.has(p.id))) buzzForAlert();
+  }, [fresh, pins, soundOn]);
   // Ads: real ones; NeyborHuud's "Your ad here" when there are none; sample ads for preview.
   const isAdmin = isAdminUser(user as Parameters<typeof isAdminUser>[0]);
   const [samplesOn, setSamplesOn] = useState(false);
   useEffect(() => setSamplesOn(previewSamplesOn(isAdmin)), [isAdmin]);
   const adArea = userArea(user);
-  const houseAds = useMemo(() => (knowsArea && adArea ? houseMapAds(view.center, adArea) : []), [knowsArea, adArea?.lga, view.center]);
-  const sampleAds = useMemo(
-    () => (knowsArea && adArea && samplesOn ? sampleMapAds(view.center, adArea) : []),
-    [knowsArea, adArea?.lga, samplesOn, view.center],
-  );
+  // useMapAds compares ads by id, so new arrays each render are fine here.
+  const houseAds = knowsArea && adArea ? houseMapAds(view.center, adArea) : [];
+  const sampleAds = knowsArea && adArea && samplesOn ? sampleMapAds(view.center, adArea) : [];
   useMapAds(map, { dark: sky?.dark ?? 0, onOpen: setAd, fallback: houseAds, extra: sampleAds });
 
   const counts = useMemo(() => {
@@ -148,19 +177,24 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       ? 'advisory'
       : 'calm';
 
+  useEffect(() => {
+    if (soundOn) sound.update(sky?.dark ?? 0, wx);
+  }, [soundOn, sound, sky?.dark, wx]);
+
   const weatherWords = wx ? WEATHER_WORDS[wx] : null;
   const weatherLine = [weatherWords ? `${weatherWords.icon} ${weatherWords.label}` : null, area?.lga ?? null].filter(Boolean).join(' · ');
   const openCreate = () => window.dispatchEvent(new CustomEvent(OPEN_CREATE_SHEET));
 
   // Pulse (mockup): the weather now and reported go-slows in this area come first.
+  const areaLga = area?.lga;
   const pulseLocal = useMemo<PulseLocalItem[]>(() => {
     const out: PulseLocalItem[] = [];
-    if (weatherWords) out.push({ text: `${weatherWords.icon} ${weatherWords.label} now${area?.lga ? ` in ${area.lga}` : ''}` });
+    if (weatherWords) out.push({ text: `${weatherWords.icon} ${weatherWords.label} now${areaLga ? ` in ${areaLga}` : ''}` });
     for (const p of pins.filter((x) => x.layer === 'traffic').slice(0, 3)) {
       out.push({ text: `🚧 ${p.top.title}`, href: pinHref(p) });
     }
     return out;
-  }, [weatherWords, area?.lga, pins]);
+  }, [weatherWords, areaLga, pins]);
   const shareToday = async () => {
     const where = area?.lga ?? 'my area';
     const text = `See what is happening in ${where} today on NeyborHuud.`;
@@ -205,6 +239,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         label={knowsArea ? 'Live map of your area' : 'Live map of Nigeria'}
         onReady={setMap}
         onSky={setSky}
+        cinematic={!hasFocus}
       />
 
       {/* Under the top bar: layer chips, then the ⚡ PULSE ribbon (news + exchange rates). */}
@@ -237,6 +272,18 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
               {calm ? 'play_circle' : 'self_improvement'}
             </span>
             {calm ? 'Live view' : 'Calm view'}
+          </button>
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-pressed={soundOn}
+            className={FLOAT_BTN}
+            title="Street and rain sounds, and a buzz for new alerts nearby"
+          >
+            <span aria-hidden className="material-symbols-outlined text-[18px]">
+              {soundOn ? 'volume_up' : 'volume_off'}
+            </span>
+            {soundOn ? 'Sound on' : 'Sound'}
           </button>
         </div>
       </div>
