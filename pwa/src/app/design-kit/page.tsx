@@ -170,10 +170,10 @@ export default function DesignKitPage() {
           <MapAdsDemo />
         </Section>
 
-        <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Gist · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">
+        <Section id="bottombar" title="Bottom bar (F-07)" note="My Huud · Feed · ➕ · Chats · Sentinel. It is live at the bottom of this page: tap ➕ for quick signals and create, hold Sentinel for a silent SOS.">
           <ul className="flex flex-col gap-1.5 text-sm text-navy">
             <li>🏠 <b>My Huud</b> — your area (the map home in Phase 3)</li>
-            <li>📰 <b>Gist</b> — what neighbours are saying</li>
+            <li>📰 <b>Feed</b> — everything neighbours post, under the same live sky</li>
             <li>➕ <b>Create</b> — one-tap signals, or post, sell, event, job, help…</li>
             <li>💬 <b>Chats</b> — messages and groups</li>
             <li>🛡️ <b>Sentinel</b> — safety tools and Ask Sentinel (search). Press and hold for a silent SOS.</li>

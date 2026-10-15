@@ -21,6 +21,13 @@ export interface CurrentWeather {
   condition: string;
   city: string;
   wmoCode: number;
+  /**
+   * False when no weather service answered and these are placeholder values.
+   * Screens must not show placeholder weather as if it were real (owner: no fake data).
+   */
+  real: boolean;
+  /** False when the temperature was not in the answer (only the sky condition is real). */
+  tempKnown: boolean;
 }
 
 export function getWeekdayName(offset: number): string {
@@ -201,18 +208,15 @@ export async function fetchCurrentWeather(
           const location = w.location as { name?: string } | undefined;
           const temperature = w.temperature as { current?: number } | undefined;
           const city = cityName !== 'Your Area' ? cityName : (location?.name || cityName);
+          const current = typeof temperature?.current === 'number' ? Math.round(temperature.current) : null;
+          // No made-up highs, lows or forecast: the server only gives the current reading.
           return {
-            temp: temperature?.current ?? 28,
-            tempMin: (temperature?.current ?? 28) - 4, // Mock tempMin for backend if unavailable
-            tempMax: (temperature?.current ?? 28) + 4, // Mock tempMax for backend if unavailable
-            forecast: [
-              { dayName: getWeekdayName(-1), temp: (temperature?.current ?? 28) - 1, isToday: false },
-              { dayName: getWeekdayName(0), temp: (temperature?.current ?? 28), isToday: true },
-              { dayName: getWeekdayName(1), temp: (temperature?.current ?? 28) + 1, isToday: false },
-            ],
+            temp: current ?? 0,
             condition,
             city,
             wmoCode,
+            real: true,
+            tempKnown: current != null,
           };
         }
       }
@@ -305,20 +309,11 @@ export async function fetchCurrentWeather(
       condition: interpretWeatherCode(code),
       city: cityName,
       wmoCode: code,
+      real: true,
+      tempKnown: true,
     };
   }
 
-  return { 
-    temp: 31, 
-    tempMin: 27, 
-    tempMax: 35, 
-    forecast: [
-      { dayName: getWeekdayName(-1), temp: 30, isToday: false },
-      { dayName: getWeekdayName(0), temp: 31, isToday: true },
-      { dayName: getWeekdayName(1), temp: 32, isToday: false },
-    ],
-    condition: 'Partly Cloudy', 
-    city: cityName, 
-    wmoCode: 2 
-  };
+  // Every weather service failed: say so instead of inventing weather.
+  return { temp: 0, condition: 'Unknown', city: cityName, wmoCode: -1, real: false, tempKnown: false };
 }

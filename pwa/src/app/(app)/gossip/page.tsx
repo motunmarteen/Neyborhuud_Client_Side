@@ -1,6 +1,6 @@
-import { redirect } from 'next/navigation';
+import { RedirectTo } from '@/components/navigation/RedirectTo';
 
-/** Legacy /gossip — Huud Gist now lives at its own /gist pillar. */
-export default function GossipPage() {
-  redirect('/gist');
+/** Gist was removed (owner, 2026-10-15): the Feed replaced it. Old links open the Feed. */
+export default function GistRemovedPage() {
+  return <RedirectTo href="/feed" />;
 }

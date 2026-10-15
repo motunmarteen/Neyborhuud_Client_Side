@@ -57,7 +57,13 @@ export function useAmbientWeather() {
       lastCoords.current = { lat: latitude, lon: longitude };
 
       try {
-        publish(await fetchCurrentWeather(latitude, longitude));
+        const w = await fetchCurrentWeather(latitude, longitude);
+        // Placeholder (every service failed) is never shown as weather.
+        if (w.real) publish(w);
+        else {
+          setWeather(null);
+          setLoading(false);
+        }
       } catch {
         // Weather service failed: show none rather than an invented reading.
         setWeather(null);

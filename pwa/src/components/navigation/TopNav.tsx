@@ -48,7 +48,6 @@ function getRouteTitle(pathname: string) {
   if ((segment === 'gamification' || segment === 'huud-economy') && parts[1] === 'wallet') return 'Huud Wallet';
   if (segment === 'huud-economy' && parts[1] === 'score') return 'Huud Score';
   if (segment === 'huud-economy') return 'Huud Economy';
-  if (segment === 'local-news' && parts[1] === 'gist') return 'HuudGist';
   if (segment === 'ads' && parts[1] === 'wall') return 'Ad Wall';
   if (segment === 'ads' && parts[1] === 'new') return 'Book an ad';
   if (segment === 'ads' && parts[1] === 'mine') return 'My ads';
@@ -72,8 +71,8 @@ function getRouteTitle(pathname: string) {
     map: 'Discovery',
     explore: 'Explore',
     popular: 'My Huud',
-    gossip: 'HuudGist',
-    gist: 'HuudGist',
+    gossip: 'Feed',
+    gist: 'Feed',
     messages: 'Messages',
     chat: 'Chat',
     info: 'Info',

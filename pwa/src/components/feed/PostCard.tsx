@@ -151,7 +151,7 @@ export const KIND_BADGE: Partial<Record<PostKind, { icon: string; label: string;
   event: { icon: '🎉', label: 'Event', bg: 'bg-purple-soft' },
   services: { icon: '🛠️', label: 'Service', bg: 'bg-blue-soft' },
   help_request: { icon: '🙏', label: 'Needs help', bg: 'bg-red-soft' },
-  gossip: { icon: '💬', label: 'Gist', bg: 'bg-background' },
+  gossip: { icon: '💬', label: 'Talk', bg: 'bg-background' },
 };
 
 function InfoRow({ icon, children }: { icon: ReactNode; children: ReactNode }) {

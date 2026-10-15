@@ -20,7 +20,6 @@ export const PAGE_OWNED_TOP_NAV_PREFIXES = [
   '/community-emergency',
   '/premium',
   '/fyi',
-  '/gist',
   '/work',
   '/info/nigeria-postal-codes',
   '/chat',

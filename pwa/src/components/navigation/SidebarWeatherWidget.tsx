@@ -226,7 +226,7 @@ export default function SidebarWeatherWidget() {
                 className="text-2xl font-extrabold leading-none shrink-0"
                 style={{ color: theme.textColor, textShadow: '0 1px 4px rgba(0,0,0,0.35)' }}
               >
-                {weather.temp}°
+                {weather.tempKnown ? `${weather.temp}°` : null}
               </p>
               <p
                 className="text-[11px] font-medium leading-tight line-clamp-2"
