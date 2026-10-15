@@ -108,6 +108,8 @@ export function useMapAds(map: maplibregl.Map | null, { dark = 0, sample, onOpen
       const marker = new maplibregl.Marker({ element: wrap, anchor: ad.kind === 'billboard' ? 'bottom' : 'center' })
         .setLngLat([ad.location.lng, ad.location.lat])
         .addTo(map);
+      // Under every pin: an ad never covers a safety alert or a neighbour's post.
+      marker.getElement().style.zIndex = '1';
       markers.current.set(ad._id, { marker, html, ad });
       if (!sample && !seenThisVisit.has(ad._id)) {
         seenThisVisit.add(ad._id);

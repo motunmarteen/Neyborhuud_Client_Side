@@ -82,6 +82,7 @@ function getRouteTitle(pathname: string) {
     gamification: 'Huud Economy',
     'huud-economy': 'Huud Economy',
     rewards: 'Rewards',
+    huud: 'My Huud',
     ads: 'Map ads',
   };
 
@@ -241,7 +242,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
 
   return (
     <TopBar
-      isHome={pathname === '/feed' || pathname === '/'}
+      isHome={pathname === '/feed' || pathname === '/huud' || pathname === '/'}
       title={title}
       area={huudName && huudName !== HUUD_NAME_FALLBACK ? huudName : null}
       signedIn={Boolean(user)}

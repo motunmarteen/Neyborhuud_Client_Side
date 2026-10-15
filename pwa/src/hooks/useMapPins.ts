@@ -118,6 +118,8 @@ export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sam
       });
       wrap.appendChild(btn);
       const marker = new maplibregl.Marker({ element: wrap, anchor: 'center' }).setLngLat([p.lng, p.lat]).addTo(map);
+      // Pins stay above map ads; safety pins above everything (an ad never hides an alert).
+      marker.getElement().style.zIndex = p.layer === 'safety' ? '3' : '2';
       markers.current.set(p.id, { marker, html, pin: p });
     }
     for (const [id, m] of markers.current) {

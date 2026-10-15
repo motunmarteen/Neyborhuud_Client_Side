@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, MessagesSquare, Newspaper, Plus, Shield, Siren } from 'lucide-react';
-import { useScrollHideBottomNav, scrollToTop } from '@/hooks/useScrollHideBottomNav';
+import { useScrollHideBottomNav } from '@/hooks/useScrollHideBottomNav';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { useSos } from '@/hooks/useSos';
 import { CreateSheet } from '@/components/navigation/CreateSheet';
@@ -85,7 +85,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   };
 
   const sosActive = sosPhase !== 'idle';
-  const isHome = pathname === '/feed' || pathname === '/';
+  const isHome = pathname === '/huud' || pathname === '/feed' || pathname === '/';
   const isGist = pathname.startsWith('/gist') || pathname.startsWith('/gossip');
   const isChats = pathname.startsWith('/friendship') || pathname.startsWith('/chat') || pathname.startsWith('/messages');
   const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel') || pathname.startsWith('/explore');
@@ -102,12 +102,10 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
       >
         <div className="mx-auto flex h-[70px] max-w-xl items-center justify-around px-1">
           <Link
-            href="/feed"
+            href="/huud"
             onClick={(e) => {
-              if (isHome) {
-                e.preventDefault();
-                scrollToTop();
-              }
+              // Already on the map: stay. From the feed (or anywhere else) go to the map.
+              if (pathname === '/huud') e.preventDefault();
             }}
             className={tabClass}
             aria-current={isHome ? 'page' : undefined}
