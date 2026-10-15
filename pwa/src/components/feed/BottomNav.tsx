@@ -19,9 +19,9 @@ import { CreateSheet } from '@/components/navigation/CreateSheet';
  *   (moved here from the old centre Home button, so the habit still works).
  * - Profile is the avatar in the top bar; search/explore become part of Sentinel.
  *
- * Look (owner, 2026-10-15, from the meetdubai.app reference): a floating dark navy pill with
- * space around it, the active tab in green with a short underline, and a raised round ➕ in
- * the middle set in a navy ring so it looks cut into the bar.
+ * Look (owner, 2026-10-15, from the meetdubai.app reference): a floating pill with space
+ * around it, the active tab in green with a short underline, and a raised round ➕ in the
+ * middle set in a ring so it looks cut into the bar. Light theme (owner: white, not dark).
  */
 
 interface BottomNavProps {
@@ -43,18 +43,18 @@ function Tab({
   badge?: number;
 }) {
   return (
-    <span className={`relative flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-bold ${active ? 'text-[#3DDC6A]' : 'text-white/65'}`}>
+    <span className={`relative flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-bold ${active ? 'text-brand-green-dark' : 'text-muted'}`}>
       <span className="relative">
         {children}
         {badge && badge > 0 ? (
-          <span className="absolute -right-3 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand-red px-1 text-[9px] font-black text-white ring-2 ring-navy">
+          <span className="absolute -right-3 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand-red px-1 text-[9px] font-black text-white ring-2 ring-white">
             {badge > 9 ? '9+' : badge}
           </span>
         ) : null}
       </span>
       {label}
       {/* Short underline under the active tab. */}
-      <span aria-hidden className={`h-[3px] w-4 rounded-full ${active ? 'bg-[#3DDC6A]' : 'bg-transparent'}`} />
+      <span aria-hidden className={`h-[3px] w-4 rounded-full ${active ? 'bg-primary' : 'bg-transparent'}`} />
     </span>
   );
 }
@@ -96,7 +96,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const isChats = pathname.startsWith('/friendship') || pathname.startsWith('/chat') || pathname.startsWith('/messages');
   const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel') || pathname.startsWith('/explore');
 
-  const tabClass = 'flex flex-1 justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80';
+  const tabClass = 'flex flex-1 justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
 
   return (
     <>
@@ -106,7 +106,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
         }`}
         aria-label="Main navigation"
       >
-        <div className="pointer-events-auto mx-auto flex h-16 max-w-xl items-center justify-around rounded-[28px] bg-navy px-1 shadow-[0_10px_28px_rgba(29,36,51,0.38)]">
+        <div className="pointer-events-auto mx-auto flex h-16 max-w-xl items-center justify-around rounded-[28px] border border-[#E6EAF0] bg-white px-1 shadow-[0_10px_28px_rgba(29,36,51,0.16)]">
           <Link
             href="/huud"
             onClick={(e) => {
@@ -133,11 +133,11 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
               onClick={() => setCreateOpen(true)}
               aria-label="Create: post, alert, sell, event and more"
               aria-haspopup="dialog"
-              className="-mt-9 grid h-[62px] w-[62px] place-items-center rounded-full border-[5px] border-navy bg-[radial-gradient(circle_at_35%_30%,#3DDC6A_0%,#00B82E_60%,#009A26_100%)] text-white shadow-[0_8px_20px_rgba(0,184,46,0.45)] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white motion-safe:active:scale-95"
+              className="-mt-9 grid h-[62px] w-[62px] place-items-center rounded-full border-[5px] border-white bg-[radial-gradient(circle_at_35%_30%,#3DDC6A_0%,#00B82E_60%,#009A26_100%)] text-white shadow-[0_8px_20px_rgba(0,184,46,0.45)] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-safe:active:scale-95"
             >
               <Plus size={30} strokeWidth={2.8} aria-hidden />
             </button>
-            <span aria-hidden className="mt-0.5 text-[11px] font-bold text-white/65">
+            <span aria-hidden className="mt-0.5 text-[11px] font-bold text-muted">
               Create
             </span>
           </div>
@@ -161,7 +161,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             aria-current={isSentinel ? 'page' : undefined}
           >
             {sosActive ? (
-              <span className="flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-black text-[#FF6B6F] motion-safe:animate-pulse">
+              <span className="flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-black text-brand-red motion-safe:animate-pulse">
                 <Siren size={22} strokeWidth={2.5} aria-hidden />
                 SOS on
               </span>
