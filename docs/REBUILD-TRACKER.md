@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 8 | 17 | 🟡 map home live at /huud (My Huud tab), M-09 pin panels done; next M-08 live pins via socket |
+| 3. Map home (sky + live map) | 9 | 17 | 🟡 map home live at /huud; pin panels and live pins done; next M-10 go-slow traffic |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -188,7 +188,7 @@ Kept here so the whole history is in one place.
 - [x] M-05 (lib/mapWeather.ts + hooks/useMapWeather.ts; real weather every 15 min; harmattan = haze/dust/fog Nov-Mar; unknown = none; calm mode: no rain/lightning) Weather on the map: clouds and their shadows, drizzle, rain (current Sky Feed Hero drops), storm with lightning, harmattan haze, puddles
 - [x] M-06 (lib/mapNight.ts: night palette inside MapLibre, lit-window pattern on walls, street lamps from dusk; billboard glow done with map ads, 2026-10-12) Night lights: windows, street lamps, glowing billboards
 - [x] M-07 (server 57ec2d2 /geo/map-pins: 7 layers, ~110 m grid, no fake positions, max ~27 km box; radar now searches by area and drops items without a location; pwa: useMapPins + MapLayerChips + /feed?post deep link) Pins from Street Radar (`/geo/radar`) with layer chips: Safety, Traffic, Light & water, Market, Work, Events, Help
-- [ ] M-08 Live pins via socket (appear and ripple instantly)
+- [x] M-08 (server modules/geo/mapLive.ts: phones join ~5 km area rooms for the box on screen (signed-in sockets only); MongoDB change streams on posts, incident reports, products, jobs, events send "map:changed" with no content or position, max 1 per room every 2 s; app reloads pins through the normal privacy rules and new pins ripple for 10 s) Live pins via socket (appear and ripple instantly)
 - [x] M-09 (pwa /huud: bottom sheet for every pin type: what, how fresh, price, "happening now", count on the block, Open / See the report, Ask Sentinel; ad panel with Visit) Pin panels (bottom sheet) for every type, with actions and "Ask Sentinel about this"
 - [ ] M-10 Moving traffic driven by real go-slow reports (calm when no data)
 - [ ] M-11 Neighbour activity as area pulses (never exact homes)

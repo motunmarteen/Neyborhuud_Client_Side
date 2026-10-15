@@ -61,7 +61,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   const [ad, setAd] = useState<Ad | null>(null);
   const [locating, setLocating] = useState(false);
 
-  const { status, pins } = useMapPins(map, layers, { onOpen: setPin });
+  const { status, pins } = useMapPins(map, layers, { onOpen: setPin, live: true });
   useMapAds(map, { dark: sky?.dark ?? 0, onOpen: setAd });
 
   const counts = useMemo(() => {

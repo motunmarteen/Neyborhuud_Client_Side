@@ -9343,7 +9343,7 @@ article.feed-card--emergency {
 /* ── F-10 Map pins and badges (Home Concept mockup) ─────────────────────────────
    One look for every map (Leaflet divIcon HTML and MapLibre/React markers):
    .nh-pin            white 44px circle with an emoji; data-ring adds a coloured ring
-   .nh-pin__ripple    expanding ring, only for live safety pins
+   .nh-pin__ripple    expanding ring: live safety pins, and any pin that just arrived (M-08)
    .nh-pin__tag       navy pill under a pin (price, name, "3 going")
    .nh-pin__count     small bubble on the corner (how many in this spot)
    .nh-pin--person    a neighbour's photo or initials; --me is you (green); --champion is gold with a crown
