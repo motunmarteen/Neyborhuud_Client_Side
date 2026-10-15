@@ -32,4 +32,14 @@ describe('placeFeedAds', () => {
     expect(placeFeedAds(3, ['a'], never).size).toBe(0);
     expect(placeFeedAds(4, ['a'], never).get(2)).toBe('a');
   });
+
+  it('at the end of a short feed, still shows one ad after the last post', () => {
+    expect([...placeFeedAds(1, ['a', 'b'], never, true).entries()]).toEqual([[0, 'a']]);
+    expect([...placeFeedAds(2, ['a'], never, true).entries()]).toEqual([[1, 'a']]);
+    expect(placeFeedAds(0, ['a'], never, true).size).toBe(0);
+  });
+
+  it('never after a safety post, even at the end', () => {
+    expect(placeFeedAds(1, ['a'], () => true, true).size).toBe(0);
+  });
 });

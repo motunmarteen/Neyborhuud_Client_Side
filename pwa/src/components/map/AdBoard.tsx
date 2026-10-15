@@ -15,7 +15,9 @@ export function boardInk(colour: string): string {
   return colour.toUpperCase() === '#E8892B' ? '#1D2433' : '#FFFFFF';
 }
 
-type BoardContent = { title: string; line?: string; colour: string };
+type BoardContent = { title: string; line?: string; colour: string; _id?: string };
+
+const chipText = (ad: { _id?: string }) => (ad._id?.startsWith('sample-') ? 'Sample' : 'Ad');
 
 export function billboardLabel({ title, line }: BoardContent): string {
   return `Ad: ${title}${line ? `. ${line}` : ''}`;
@@ -26,7 +28,7 @@ export function billboardHtml(ad: BoardContent, night = false): string {
   return (
     `<div class="nh-bb"${night ? ' data-night=""' : ''} role="img" aria-label="${esc(billboardLabel(ad))}">` +
     `<div class="nh-bb__face" style="background:${esc(ad.colour)};color:${boardInk(ad.colour)}">` +
-    `<span class="nh-bb__ad">Ad</span>` +
+    `<span class="nh-bb__ad">${chipText(ad)}</span>` +
     `<span class="nh-bb__title">${esc(ad.title)}</span>` +
     (ad.line ? `<span class="nh-bb__line">${esc(ad.line)}</span>` : '') +
     `</div><div class="nh-bb__posts" aria-hidden="true"><i></i><i></i></div></div>`
@@ -50,7 +52,8 @@ export function AdBoard({ title, line, colour, night = false }: BoardContent & {
 }
 
 /** Sponsored pin: the usual pin for its layer, gold ring, "Ad · name" tag. */
-export function sponsoredPinHtml(ad: { title: string; pinLayer?: 'market' | 'work' | 'events' }): string {
+export function sponsoredPinHtml(ad: { title: string; pinLayer?: 'market' | 'work' | 'events'; _id?: string }): string {
   const meta = LAYER_META[ad.pinLayer ?? 'market'];
-  return mapPinHtml({ emoji: meta.emoji, label: `Ad: ${ad.title}`, ring: 'amber', tag: `Ad · ${ad.title}` });
+  const chip = chipText(ad);
+  return mapPinHtml({ emoji: meta.emoji, label: `${chip}: ${ad.title}`, ring: 'amber', tag: `${chip} · ${ad.title}` });
 }

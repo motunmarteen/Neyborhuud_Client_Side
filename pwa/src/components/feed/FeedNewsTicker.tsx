@@ -9,9 +9,13 @@ import type { RssArticle } from '@/types/incident';
 
 type PulseItem =
   | { kind: 'news'; text: string }
-  | { kind: 'fx'; currency: string; symbol: string; rate: number };
+  | { kind: 'fx'; currency: string; symbol: string; rate: number }
+  | { kind: 'local'; text: string; href?: string };
 
-export function FeedNewsTicker() {
+/** Something from the person's own area for the front of the ribbon (weather now, go-slows). */
+export type PulseLocalItem = { text: string; href?: string };
+
+export function FeedNewsTicker({ local = [] }: { local?: PulseLocalItem[] } = {}) {
   const [articles, setArticles] = useState<RssArticle[]>([]);
   const [paused, setPaused] = useState(false);
   const router = useRouter();
@@ -40,13 +44,13 @@ export function FeedNewsTicker() {
   const headlines = articles.map((a) => a.title).filter(Boolean);
 
   // Nothing to show yet
-  if (headlines.length === 0 && rates.length === 0) return null;
+  if (headlines.length === 0 && rates.length === 0 && local.length === 0) return null;
 
-  // Interleave: 3 headlines, then 1 FX rate, repeat
-  const items: PulseItem[] = [];
+  // Local first (weather, go-slows), then 3 headlines, then 1 FX rate, repeat
+  const items: PulseItem[] = local.map((l) => ({ kind: 'local' as const, text: l.text, href: l.href }));
   let h = 0;
   let f = 0;
-  const total = headlines.length + rates.length;
+  const total = items.length + headlines.length + rates.length;
   while (items.length < total) {
     for (let k = 0; k < 3 && h < headlines.length; k++) {
       items.push({ kind: 'news', text: headlines[h++] });
@@ -59,6 +63,19 @@ export function FeedNewsTicker() {
   }
 
   const renderItem = (item: PulseItem, key: number): ReactNode => {
+    if (item.kind === 'local') {
+      return (
+        <button
+          key={key}
+          type="button"
+          className="feed-news-ticker__item"
+          onClick={() => (item.href ? router.push(item.href) : undefined)}
+        >
+          <span className="font-extrabold">{item.text}</span>
+          <span className="feed-news-ticker__dot" aria-hidden>•</span>
+        </button>
+      );
+    }
     if (item.kind === 'fx') {
       return (
         <button
@@ -97,7 +114,7 @@ export function FeedNewsTicker() {
       onTouchStart={() => setPaused(true)}
       onTouchEnd={() => setPaused(false)}
       role="marquee"
-      aria-label="Local news and exchange rates"
+      aria-label="Pulse: your area, news and exchange rates"
     >
       <div className="feed-news-ticker__label" aria-hidden>
         <Zap size={13} className="feed-news-ticker__label-icon text-primary fill-primary" />

@@ -470,7 +470,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
                 {/* Views action */}
                 <div className="post-card-action-bar__btn flex items-center gap-1.5 px-2 py-1 text-neu-text-secondary " aria-label="Views">
                     <XViewIcon size={18} />
-                    <span className="tabular-nums">{post.views ? formatCompactCount(post.views) : '1.2K'}</span>
+                    <span className="tabular-nums">{formatCompactCount(post.views ?? 0)}</span>
                 </div>
 
                 {/* Save action */}

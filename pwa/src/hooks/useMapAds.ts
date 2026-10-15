@@ -7,7 +7,7 @@
  * and a tap when opened. `sample` shows given ads instead of fetching (the design kit).
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import { billboardHtml, billboardLabel, sponsoredPinHtml } from '@/components/map/AdBoard';
 import { countAd, fetchMapAds, type Ad } from '@/lib/adsApi';
@@ -18,6 +18,10 @@ type Options = {
   dark?: number;
   sample?: Ad[];
   onOpen?: (ad: Ad) => void;
+  /** Shown only when no real ads are on screen (NeyborHuud's own "Your ad here"). */
+  fallback?: Ad[];
+  /** Always shown, e.g. sample ads for the owner's preview (marked "Sample"). */
+  extra?: Ad[];
 };
 
 const seenThisVisit = new Set<string>();
@@ -26,8 +30,16 @@ function markup(ad: Ad, night: boolean) {
   return ad.kind === 'billboard' ? billboardHtml(ad, night) : sponsoredPinHtml(ad);
 }
 
-export function useMapAds(map: maplibregl.Map | null, { dark = 0, sample, onOpen }: Options = {}) {
-  const [ads, setAds] = useState<Ad[]>([]);
+export function useMapAds(map: maplibregl.Map | null, { dark = 0, sample, onOpen, fallback, extra }: Options = {}) {
+  const [fetched, setAds] = useState<Ad[]>([]);
+  const fallbackKey = (fallback ?? []).map((a) => a._id).join(',');
+  const extraKey = (extra ?? []).map((a) => a._id).join(',');
+  const ads = useMemo(
+    () => [...fetched, ...(fetched.length === 0 ? fallback ?? [] : []), ...(extra ?? [])],
+    // keys stand for the arrays' contents
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fetched, fallbackKey, extraKey],
+  );
   const markers = useRef(new Map<string, { marker: maplibregl.Marker; html: string; ad: Ad }>());
   const openRef = useRef(onOpen);
   useEffect(() => {

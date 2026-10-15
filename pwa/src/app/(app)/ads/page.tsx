@@ -5,7 +5,11 @@
  * server, never hard-coded here), and the way in to booking, the Ad Wall and "My ads".
  */
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
+import { isAdminUser } from '@/lib/adminAccess';
+import { previewSamplesOn, setPreviewSamples } from '@/lib/houseAds';
 import { useQuery } from '@tanstack/react-query';
 import { AD_KINDS, fetchAdPricing, priceText } from '@/lib/adsApi';
 import { AdBoard } from '@/components/map/AdBoard';
@@ -20,6 +24,10 @@ const SOFT_BTN =
 
 export default function AdsHubPage() {
   const { data: pricing, isLoading, isError, refetch } = useQuery({ queryKey: ['ads', 'pricing'], queryFn: fetchAdPricing, staleTime: 10 * 60_000 });
+  const { user } = useAuth();
+  const isAdmin = isAdminUser(user ?? undefined);
+  const [samples, setSamples] = useState(false);
+  useEffect(() => setSamples(previewSamplesOn(isAdmin)), [isAdmin]);
 
   return (
     <div className="min-h-screen bg-background pb-[calc(var(--app-bottomnav-h)+1.5rem)] pt-[var(--app-topnav-offset)]">
@@ -100,6 +108,25 @@ export default function AdsHubPage() {
             chevron_right
           </span>
         </Link>
+
+        <label htmlFor="preview-samples" className={`${CARD} flex cursor-pointer items-center gap-3 p-4`}>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="text-sm font-bold text-navy">Preview sample ads</span>
+            <span className="text-xs font-semibold text-muted">
+              See example billboards and Feed posts (marked &ldquo;Sample&rdquo;) on your map and Feed. Only you see them.
+            </span>
+          </span>
+          <input
+            id="preview-samples"
+            type="checkbox"
+            className="h-6 w-6 shrink-0 accent-[#00B82E]"
+            checked={samples}
+            onChange={(e) => {
+              setSamples(e.target.checked);
+              setPreviewSamples(e.target.checked);
+            }}
+          />
+        </label>
 
         <section className="flex flex-col gap-1 rounded-[22px] bg-amber-soft p-4">
           <h2 className="font-heading text-base font-extrabold text-navy">Rules</h2>
