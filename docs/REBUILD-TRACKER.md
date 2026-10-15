@@ -416,6 +416,14 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 - [ ] 🟡 A-01 (server 1d7abe1: Ad model, 2 billboards / 3 sponsored pins per ~1 km cell, 12x12 wall per LGA, 30-min holds, moderation, expiry; app screens + map layer done 2026-10-12; on the map home 2026-10-15; left: Bachs keys + prices) Billboard spots on the map (limited per area), booking flow, moderation queue, "Ad" label, night glow; **ad wall of plots per area** (Lagos Life sea plots)
 - [ ] 🟡 A-02 (server: HuudCredit atomic spend; Bachs hosted checkout + signed webhook; needs owner Bachs account + BACHS_API_KEY / BACHS_WEBHOOK_SECRET in Secrets Manager; prices to confirm) Pay for ads with HuudCredit or naira (**Bachs**)
+- [ ] 🟡 A-07 **Feed ads, like X's promoted posts** (owner, 2026-10-15). Plan and status:
+  - [x] New ad type **Feed post**: business name, up to 280 characters, optional picture (uploaded in the app; server only accepts our Cloudinary uploads), optional button (Visit / Shop now / Call / Book / Learn more, needs a link), reach **my area / my state / all Nigeria**
+  - [x] Price (to confirm): ₦2,000 or 600 HuudCredit a week for your area; ×4 for your state (₦8,000); ×15 for all Nigeria (₦30,000)
+  - [x] Server: `GET /ads/feed?lga&state` returns live feed posts for the area, state and Nigeria-wide, plus the **street ads** (billboards, sponsored pins) of the person's LGA, random order, max 6 per load; same booking, payment, review, refunds and expiry as map ads; tests
+  - [x] App: sponsored cards in the feed (first after 3 posts, then every 6; each once; **never next to a safety or emergency post**); "Sponsored" label; hide (X) remembered on the device; one view per visit when half on screen, taps counted; booking screen, preview, moderator view, ads page
+  - [ ] Deploy the server change (needs owner OK), then check live
+  - [ ] Owner: confirm feed post prices
+  - [ ] Next: sponsored cards in Gist and Marketplace lists; "Report this ad"; per-person limit across visits; reach numbers on My ads
 - [ ] A-03 Buy HuudCredit with naira (one way in)
 - [ ] 🟡 A-04 (sponsored pins in Market/Work/Events done on the server) Sponsored pins, sponsored Gist cards, featured services, boosted events
 - [ ] A-05 Business profile and ad dashboard (views, taps)
@@ -497,6 +505,8 @@ Only if the PWA hits limits we can't work around (for example background locatio
 | 2026-10-10 | Billboards on the map (HuudCredit or naira); gifting with limits |
 | 2026-10-12 | Map ads in three formats (billboards, Ad Wall plots, sponsored pins); naira through **Bachs**, not Paystack |
 | 2026-10-12 | Idea parked: HuudCredit as a discount coin (owner deferred; revisit before launch) |
+| 2026-10-15 | Feed ads like X: sponsored posts (area / state / all Nigeria) and the area's street ads shown in the feed; never next to safety posts |
+| 2026-10-15 | Bottom bar: floating light pill with raised ➕ (owner's reference); top bar clears the notch |
 | 2026-10-10 | No trading or selling HuudCredit between users; payouts only through the contributor programme, after legal review |
 | 2026-10-10 | Safety reports never shared publicly and never paid in cash |
 | 2026-10-10 | **PWA first**: no download needed; store apps later and optional |

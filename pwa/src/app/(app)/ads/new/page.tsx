@@ -4,6 +4,8 @@
  * Book a map ad (owner, 2026-10-12): pick the kind, design it (name, a short line, colour,
  * optional link), place it (billboards and sponsored pins: move the map under the marker;
  * plots: chosen on the Ad Wall), choose weeks and how to pay, see the preview, then pay.
+ * Feed posts (2026-10-15) have no place: instead the person writes the post, adds a picture and
+ * a button, and picks who sees it (their area, their state or all of Nigeria).
  * HuudCredit pays at once; naira goes to the Bachs checkout and comes back to "My ads".
  */
 
@@ -17,15 +19,23 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMyGamificationStats } from '@/hooks/useGamification';
 import {
   AD_KINDS,
+  CTA_LABELS,
+  REACHES,
+  adPrice,
   createAd,
+  uploadAdImage,
   fetchAdPricing,
   payAdWithCredit,
   payAdWithNaira,
   priceText,
   userArea,
+  type Ad,
+  type AdCta,
   type AdCurrency,
   type AdKind,
+  type AdReach,
 } from '@/lib/adsApi';
+import { SponsoredCard } from '@/components/feed/SponsoredCard';
 import { AdBoard, boardInk, sponsoredPinHtml } from '@/components/map/AdBoard';
 import { startView, STREET_ZOOM } from '@/lib/nigeriaView';
 import { getErrorMessage } from '@/lib/error-handler';
@@ -48,7 +58,7 @@ const LABEL = 'text-sm font-bold text-navy';
 const CHIP = 'min-h-11 rounded-full border px-4 text-sm font-bold transition-colors';
 const chipClass = (on: boolean) => `${CHIP} ${on ? 'border-navy bg-navy text-white' : 'border-line bg-white text-navy hover:bg-background'}`;
 
-const KINDS: AdKind[] = ['billboard', 'plot', 'sponsored_pin'];
+const KINDS: AdKind[] = ['billboard', 'plot', 'sponsored_pin', 'feed_post'];
 const PIN_LAYERS = [
   { key: 'market', label: 'Market' },
   { key: 'work', label: 'Work' },
@@ -86,6 +96,11 @@ function NewAd() {
   const [colour, setColour] = useState('#E8892B');
   const [target, setTarget] = useState('');
   const [pinLayer, setPinLayer] = useState<'market' | 'work' | 'events'>('market');
+  const [body, setBody] = useState('');
+  const [cta, setCta] = useState<AdCta | ''>('');
+  const [reach, setReach] = useState<AdReach>('area');
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [weeks, setWeeks] = useState(1);
   const [payWith, setCurrency] = useState<AdCurrency>('HC');
   const [spot, setSpot] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
@@ -132,10 +147,25 @@ function NewAd() {
   const p = pricing.data;
   // Naira only while Bachs is set up on the server.
   const currency: AdCurrency = p.naira ? payWith : 'HC';
-  const total = p.prices[kind][currency] * weeks;
-  const placed = kind === 'plot' ? !!plot : !!spot && spot.zoom >= PLACE_ZOOM;
+  const isFeed = kind === 'feed_post';
+  const total = adPrice(p, kind, weeks, currency, reach);
+  const placed = isFeed ? true : kind === 'plot' ? !!plot : !!spot && spot.zoom >= PLACE_ZOOM;
   const shortOfCredit = currency === 'HC' && typeof balance === 'number' && balance < total;
-  const ready = title.trim().length > 0 && placed && !shortOfCredit && !busy;
+  const feedOk = !isFeed || (body.trim().length > 0 && (!cta || target.trim().length > 0));
+  const ready = total > 0 && title.trim().length > 0 && placed && feedOk && !shortOfCredit && !busy && !uploading;
+
+  const pickImage = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      setImageUrl(await uploadAdImage(file));
+    } catch (e) {
+      setError(getErrorMessage(e));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const submit = async () => {
     if (!area || !ready) return;
@@ -145,13 +175,17 @@ function NewAd() {
       const ad = await createAd({
         kind,
         title: title.trim(),
-        line: line.trim() || undefined,
+        line: isFeed ? undefined : line.trim() || undefined,
         colour,
         target: target.trim() || undefined,
         pinLayer: kind === 'sponsored_pin' ? pinLayer : undefined,
         lga: area.lga,
         state: area.state,
-        ...(kind === 'plot' ? { row: plot!.row, col: plot!.col } : { lat: spot!.lat, lng: spot!.lng }),
+        ...(isFeed
+          ? { body: body.trim(), cta: cta || undefined, reach, imageUrl: imageUrl ?? undefined }
+          : kind === 'plot'
+            ? { row: plot!.row, col: plot!.col }
+            : { lat: spot!.lat, lng: spot!.lng }),
         weeks,
         currency,
       });
@@ -176,7 +210,7 @@ function NewAd() {
       <section className={`${CARD} flex flex-col gap-3 p-4`}>
         <h1 className="font-heading text-lg font-extrabold text-navy">Book an ad</h1>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Kind of ad">
-          {AD_KINDS.map((k) => (
+          {AD_KINDS.filter((k) => p.prices[k.kind]).map((k) => (
             <button key={k.kind} type="button" aria-pressed={kind === k.kind} className={chipClass(kind === k.kind)} onClick={() => setKind(k.kind)}>
               <span aria-hidden>{k.icon}</span> {k.name}
             </button>
@@ -192,11 +226,50 @@ function NewAd() {
           <input id="ad-title" className={INPUT} value={title} maxLength={28} onChange={(e) => setTitle(e.target.value)} placeholder="Mama Bisi's Kitchen" />
           <span className="text-xs text-muted">{title.length}/28</span>
         </label>
-        <label htmlFor="ad-line" className="flex flex-col gap-1.5">
-          <span className={LABEL}>Short line (optional)</span>
-          <input id="ad-line" className={INPUT} value={line} maxLength={44} onChange={(e) => setLine(e.target.value)} placeholder="Hot amala till 9pm" />
-          <span className="text-xs text-muted">{line.length}/44</span>
-        </label>
+        {isFeed ? (
+          <>
+            <label htmlFor="ad-body" className="flex flex-col gap-1.5">
+              <span className={LABEL}>Your post</span>
+              <textarea
+                id="ad-body"
+                className={`${INPUT} min-h-[110px] py-3`}
+                value={body}
+                maxLength={p.feedBodyMax ?? 280}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Fresh fabrics just arrived. 10% off this week for neighbours!"
+              />
+              <span className="text-xs text-muted">
+                {body.length}/{p.feedBodyMax ?? 280}
+              </span>
+            </label>
+            <div className="flex flex-col gap-1.5">
+              <span className={LABEL}>Picture (optional)</span>
+              {imageUrl ? (
+                <div className="flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={imageUrl} alt="" className="h-16 w-16 rounded-xl object-cover" />
+                  <button type="button" className="text-sm font-bold text-[#C8102E]" onClick={() => setImageUrl(null)}>
+                    Remove picture
+                  </button>
+                </div>
+              ) : (
+                <label htmlFor="ad-image" className={`${CHIP} inline-flex cursor-pointer items-center gap-2 self-start border-line bg-white text-navy hover:bg-background`}>
+                  <span aria-hidden className="material-symbols-outlined text-[18px]">
+                    {uploading ? 'progress_activity' : 'add_photo_alternate'}
+                  </span>
+                  {uploading ? 'Uploading…' : 'Add a picture'}
+                  <input id="ad-image" type="file" accept="image/*" className="sr-only" onChange={(e) => void pickImage(e.target.files?.[0])} />
+                </label>
+              )}
+            </div>
+          </>
+        ) : (
+          <label htmlFor="ad-line" className="flex flex-col gap-1.5">
+            <span className={LABEL}>Short line (optional)</span>
+            <input id="ad-line" className={INPUT} value={line} maxLength={44} onChange={(e) => setLine(e.target.value)} placeholder="Hot amala till 9pm" />
+            <span className="text-xs text-muted">{line.length}/44</span>
+          </label>
+        )}
         <fieldset className="flex flex-col gap-1.5">
           <legend className={`${LABEL} mb-1.5`}>Colour</legend>
           <div className="flex flex-wrap gap-2">
@@ -226,6 +299,22 @@ function NewAd() {
           />
           <span className="text-xs text-muted">Where people go when they tap your ad. Must start with https://</span>
         </label>
+        {isFeed ? (
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className={`${LABEL} mb-1.5`}>Button</legend>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" aria-pressed={cta === ''} className={chipClass(cta === '')} onClick={() => setCta('')}>
+                No button
+              </button>
+              {(Object.keys(CTA_LABELS) as AdCta[]).map((c) => (
+                <button key={c} type="button" aria-pressed={cta === c} className={chipClass(cta === c)} onClick={() => setCta(c)}>
+                  {CTA_LABELS[c]}
+                </button>
+              ))}
+            </div>
+            {cta && !target.trim() ? <p className="text-xs font-bold text-[#A86F0A]">Add a link above for the button.</p> : null}
+          </fieldset>
+        ) : null}
         {kind === 'sponsored_pin' ? (
           <fieldset className="flex flex-col gap-1.5">
             <legend className={`${LABEL} mb-1.5`}>Show it in</legend>
@@ -242,8 +331,30 @@ function NewAd() {
 
       {/* 3. Place */}
       <section className={`${CARD} flex flex-col gap-3 p-4`}>
-        <h2 className="font-heading text-base font-extrabold text-navy">Where</h2>
-        {kind === 'plot' ? (
+        <h2 className="font-heading text-base font-extrabold text-navy">{isFeed ? 'Who sees it' : 'Where'}</h2>
+        {isFeed ? (
+          <div className="flex flex-col gap-2" role="group" aria-label="Who sees it">
+            {REACHES.map((r) => (
+              <button
+                key={r.reach}
+                type="button"
+                aria-pressed={reach === r.reach}
+                onClick={() => setReach(r.reach)}
+                className={`flex min-h-12 items-center justify-between rounded-[14px] border px-4 text-left text-sm font-bold ${
+                  reach === r.reach ? 'border-navy bg-navy text-white' : 'border-line bg-white text-navy hover:bg-background'
+                }`}
+              >
+                <span>
+                  {r.label}
+                  <span className="ml-1 font-semibold opacity-75">
+                    {r.reach === 'area' ? `(${area?.lga})` : r.reach === 'state' ? `(${area?.state})` : ''}
+                  </span>
+                </span>
+                <span>{priceText(adPrice(p, 'feed_post', 1, currency, r.reach), currency)}/week</span>
+              </button>
+            ))}
+          </div>
+        ) : kind === 'plot' ? (
           plot ? (
             <p className="text-sm text-navy">
               Plot {plot.row + 1}-{plot.col + 1} on the {area?.lga} Ad Wall.{' '}
@@ -320,6 +431,11 @@ function NewAd() {
       {/* 5. Preview and pay */}
       <section className={`${CARD} flex flex-col gap-3 p-4`}>
         <h2 className="font-heading text-base font-extrabold text-navy">Preview</h2>
+        {isFeed ? (
+          <div className="rounded-[16px] bg-background p-2">
+            <SponsoredCard preview ad={previewAd({ title, body, colour, imageUrl, target, cta, area })} />
+          </div>
+        ) : (
         <div className="flex min-h-[120px] items-end justify-center rounded-[16px] bg-[linear-gradient(180deg,#9ED3F5,#E9F3E1)] px-4 pb-4 pt-8">
           {kind === 'billboard' ? (
             <AdBoard title={title.trim()} line={line.trim() || undefined} colour={colour} />
@@ -334,6 +450,7 @@ function NewAd() {
             </div>
           )}
         </div>
+        )}
         <div className="flex items-baseline justify-between">
           <span className="text-sm font-bold text-muted">Total</span>
           <span className="font-heading text-xl font-black text-navy">{priceText(total, currency)}</span>
@@ -350,6 +467,33 @@ function NewAd() {
       </section>
     </Shell>
   );
+}
+
+/** What the feed card will look like, before booking. */
+function previewAd(f: {
+  title: string;
+  body: string;
+  colour: string;
+  imageUrl: string | null;
+  target: string;
+  cta: AdCta | '';
+  area: { lga: string; state: string } | null;
+}): Ad {
+  return {
+    _id: 'preview',
+    kind: 'feed_post',
+    title: f.title.trim() || 'Your business',
+    body: f.body.trim() || 'Your post appears here.',
+    colour: f.colour,
+    imageUrl: f.imageUrl ?? undefined,
+    target: f.target.trim() || undefined,
+    cta: f.cta || undefined,
+    area: f.area ?? { lga: '', state: '' },
+    weeks: 1,
+    price: { currency: 'HC', amount: 0 },
+    status: 'awaiting_payment',
+    createdAt: '',
+  };
 }
 
 function Shell({ children }: { children: React.ReactNode }) {

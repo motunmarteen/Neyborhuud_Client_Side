@@ -2,9 +2,12 @@ import apiClient from '@/lib/api-client';
 
 /**
  * Map ads (owner, 2026-10-12): billboards at real places, an ad wall of plots per area, and
- * sponsored pins. Paid with HuudCredit or naira (Bachs). Server: /api/v1/ads.
+ * sponsored pins. Plus feed posts (owner, 2026-10-15, "like X"): sponsored posts in the feed
+ * with no map place. Paid with HuudCredit or naira (Bachs). Server: /api/v1/ads.
  */
-export type AdKind = 'billboard' | 'plot' | 'sponsored_pin';
+export type AdKind = 'billboard' | 'plot' | 'sponsored_pin' | 'feed_post';
+export type AdReach = 'area' | 'state' | 'nigeria';
+export type AdCta = 'visit' | 'shop' | 'call' | 'book' | 'learn';
 export type AdStatus = 'awaiting_payment' | 'in_review' | 'active' | 'rejected' | 'expired' | 'cancelled';
 export type AdCurrency = 'HC' | 'NGN';
 
@@ -17,6 +20,9 @@ export type Ad = {
   imageUrl?: string;
   target?: string;
   pinLayer?: 'market' | 'work' | 'events';
+  body?: string;
+  cta?: AdCta;
+  reach?: AdReach;
   area: { lga: string; state: string };
   location?: { lat: number; lng: number };
   plot?: { areaKey: string; row: number; col: number };
@@ -38,6 +44,8 @@ export type AdPricing = {
   colours: string[];
   wallSize: number;
   spotsPerArea: { billboard: number; sponsored_pin: number };
+  reachMultiplier: Record<AdReach, number>;
+  feedBodyMax: number;
   /** Naira payments open (Bachs keys set on the server). */
   naira: boolean;
 };
@@ -50,7 +58,21 @@ export const AD_KINDS: { kind: AdKind; icon: string; name: string; what: string 
   { kind: 'billboard', icon: '🪧', name: 'Billboard', what: 'A big board on the map at your place. Glows at night.' },
   { kind: 'plot', icon: '🧱', name: 'Ad wall plot', what: "A tile on your area's ad wall. Cheap and fun to browse." },
   { kind: 'sponsored_pin', icon: '📍', name: 'Sponsored pin', what: 'Your shop, job or event stands out on the map.' },
+  { kind: 'feed_post', icon: '📣', name: 'Feed post', what: 'A sponsored post in the feed, in your area, your state or all of Nigeria.' },
 ];
+
+export const REACHES: { reach: AdReach; label: string }[] = [
+  { reach: 'area', label: 'My area' },
+  { reach: 'state', label: 'My state' },
+  { reach: 'nigeria', label: 'All Nigeria' },
+];
+
+export const CTA_LABELS: Record<AdCta, string> = { visit: 'Visit', shop: 'Shop now', call: 'Call', book: 'Book', learn: 'Learn more' };
+
+/** Price for one booking (feed posts cost more the further they reach). */
+export function adPrice(p: AdPricing, kind: AdKind, weeks: number, currency: AdCurrency, reach: AdReach = 'area'): number {
+  return (p.prices[kind]?.[currency] ?? 0) * weeks * (kind === 'feed_post' ? p.reachMultiplier?.[reach] ?? 1 : 1);
+}
 
 export const STATUS_WORDS: Record<AdStatus, { label: string; tone: 'green' | 'amber' | 'neutral' | 'red' | 'blue' }> = {
   awaiting_payment: { label: 'Waiting for payment', tone: 'amber' },
@@ -65,6 +87,17 @@ export const fetchAdPricing = async () => data<AdPricing>(await apiClient.get('/
 export const fetchMapAds = async (bbox: [number, number, number, number]) =>
   data<{ ads: Ad[] }>(await apiClient.get('/ads/map', { params: { bbox: bbox.map((n) => n.toFixed(5)).join(',') } })).ads ?? [];
 export const fetchWall = async (lga: string, state: string) => data<{ size: number; plots: WallPlot[] }>(await apiClient.get('/ads/wall', { params: { lga, state } }));
+export const fetchFeedAds = async (lga: string, state: string) =>
+  data<{ ads: Ad[] }>(await apiClient.get('/ads/feed', { params: { lga, state } })).ads ?? [];
+
+/** Upload an ad picture through the app's media upload (the server only accepts these). */
+export async function uploadAdImage(file: File): Promise<string> {
+  const res = await apiClient.uploadFiles<{ files: { url: string }[] }>('/media/upload', [file]);
+  const url = data<{ files?: { url: string }[] }>(res).files?.[0]?.url;
+  if (!url) throw new Error('Upload failed. Try another picture.');
+  return url;
+}
+
 export const fetchMyAds = async () => data<{ ads: Ad[] }>(await apiClient.get('/ads/mine')).ads ?? [];
 
 export type CreateAdInput = {
@@ -74,6 +107,10 @@ export type CreateAdInput = {
   colour: string;
   target?: string;
   pinLayer?: 'market' | 'work' | 'events';
+  body?: string;
+  cta?: AdCta;
+  reach?: AdReach;
+  imageUrl?: string;
   lga: string;
   state: string;
   lat?: number;
