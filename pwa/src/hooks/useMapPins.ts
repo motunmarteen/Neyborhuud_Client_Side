@@ -51,7 +51,9 @@ export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sam
   const lastLive = useRef(0);
   const markers = useRef(new Map<string, { marker: maplibregl.Marker; html: string; pin: MapPin }>());
   const openRef = useRef(onOpen);
-  openRef.current = onOpen;
+  useEffect(() => {
+    openRef.current = onOpen;
+  }, [onOpen]);
   const layerKey = layers.join(',');
 
   // Fetch for the area on screen.
