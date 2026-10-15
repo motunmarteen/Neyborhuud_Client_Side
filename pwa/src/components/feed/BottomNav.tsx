@@ -18,6 +18,10 @@ import { CreateSheet } from '@/components/navigation/CreateSheet';
  * - Sentinel opens the Sentinel screen: Ask Sentinel (SSAA) + safety + Explore. Press and hold for a silent SOS
  *   (moved here from the old centre Home button, so the habit still works).
  * - Profile is the avatar in the top bar; search/explore become part of Sentinel.
+ *
+ * Look (owner, 2026-10-15, from the meetdubai.app reference): a floating dark navy pill with
+ * space around it, the active tab in green with a short underline, and a raised round ➕ in
+ * the middle set in a navy ring so it looks cut into the bar.
  */
 
 interface BottomNavProps {
@@ -39,16 +43,18 @@ function Tab({
   badge?: number;
 }) {
   return (
-    <span className={`relative flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-bold ${active ? 'text-brand-green-dark' : 'text-muted'}`}>
+    <span className={`relative flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-bold ${active ? 'text-[#3DDC6A]' : 'text-white/65'}`}>
       <span className="relative">
         {children}
         {badge && badge > 0 ? (
-          <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-red px-1 text-[9px] font-black text-white ring-2 ring-white">
-            {badge > 99 ? '99+' : badge}
+          <span className="absolute -right-3 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand-red px-1 text-[9px] font-black text-white ring-2 ring-navy">
+            {badge > 9 ? '9+' : badge}
           </span>
         ) : null}
       </span>
       {label}
+      {/* Short underline under the active tab. */}
+      <span aria-hidden className={`h-[3px] w-4 rounded-full ${active ? 'bg-[#3DDC6A]' : 'bg-transparent'}`} />
     </span>
   );
 }
@@ -90,17 +96,17 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const isChats = pathname.startsWith('/friendship') || pathname.startsWith('/chat') || pathname.startsWith('/messages');
   const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel') || pathname.startsWith('/explore');
 
-  const tabClass = 'flex flex-1 justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
+  const tabClass = 'flex flex-1 justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80';
 
   return (
     <>
       <nav
-        className={`fixed inset-x-0 bottom-0 z-40 select-none border-t border-[#E6EAF0] bg-white/[0.98] pb-[max(6px,env(safe-area-inset-bottom))] transition-transform duration-300 ease-out motion-reduce:transition-none ${
-          hidden || scrollHidden ? 'translate-y-full' : 'translate-y-0'
+        className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 select-none px-3 pb-[max(10px,env(safe-area-inset-bottom))] transition-transform duration-300 ease-out motion-reduce:transition-none ${
+          hidden || scrollHidden ? 'translate-y-[calc(100%+1.5rem)]' : 'translate-y-0'
         }`}
         aria-label="Main navigation"
       >
-        <div className="mx-auto flex h-[70px] max-w-xl items-center justify-around px-1">
+        <div className="pointer-events-auto mx-auto flex h-16 max-w-xl items-center justify-around rounded-[28px] bg-navy px-1 shadow-[0_10px_28px_rgba(29,36,51,0.38)]">
           <Link
             href="/huud"
             onClick={(e) => {
@@ -121,16 +127,19 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             </Tab>
           </Link>
 
-          <div className="flex flex-1 justify-center">
+          <div className="flex flex-1 flex-col items-center">
             <button
               type="button"
               onClick={() => setCreateOpen(true)}
               aria-label="Create: post, alert, sell, event and more"
               aria-haspopup="dialog"
-              className="-mt-7 grid h-[58px] w-[58px] place-items-center rounded-full border-4 border-white bg-primary text-white shadow-[0_8px_18px_rgba(0,184,46,0.4)] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-safe:active:scale-95"
+              className="-mt-9 grid h-[62px] w-[62px] place-items-center rounded-full border-[5px] border-navy bg-[radial-gradient(circle_at_35%_30%,#3DDC6A_0%,#00B82E_60%,#009A26_100%)] text-white shadow-[0_8px_20px_rgba(0,184,46,0.45)] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white motion-safe:active:scale-95"
             >
-              <Plus size={28} strokeWidth={2.6} aria-hidden />
+              <Plus size={30} strokeWidth={2.8} aria-hidden />
             </button>
+            <span aria-hidden className="mt-0.5 text-[11px] font-bold text-white/65">
+              Create
+            </span>
           </div>
 
           <Link href="/friendship" className={tabClass} aria-current={isChats ? 'page' : undefined}>
@@ -147,12 +156,12 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             onPointerLeave={clearHold}
             onPointerCancel={clearHold}
             onContextMenu={(e) => e.preventDefault()}
-            className={`${tabClass} ${sosActive ? 'text-brand-red' : ''}`}
+            className={tabClass}
             aria-label={sosActive ? 'Sentinel: SOS is active' : 'Sentinel: safety and Ask Sentinel. Press and hold for silent SOS'}
             aria-current={isSentinel ? 'page' : undefined}
           >
             {sosActive ? (
-              <span className="flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-black text-brand-red motion-safe:animate-pulse">
+              <span className="flex min-h-12 min-w-14 flex-col items-center justify-center gap-[3px] text-[11px] font-black text-[#FF6B6F] motion-safe:animate-pulse">
                 <Siren size={22} strokeWidth={2.5} aria-hidden />
                 SOS on
               </span>
