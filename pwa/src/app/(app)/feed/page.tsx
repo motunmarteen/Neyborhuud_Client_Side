@@ -464,7 +464,7 @@ function XFeedInner() {
                   style={{ paddingTop: 0 }}
                 >
                     {/* Floating Island Capsule Nav — Floats directly on top of the Sky Hero */}
-                    <div className="sticky top-2 sm:top-3 z-40 w-full pointer-events-none mb-[-56px] sm:mb-[-62px]">
+                    <div className="sticky top-[calc(var(--safe-top)+0.5rem)] sm:top-[calc(var(--safe-top)+0.75rem)] z-40 w-full pointer-events-none mb-[-56px] sm:mb-[-62px]">
                       <TopNav />
                     </div>
 

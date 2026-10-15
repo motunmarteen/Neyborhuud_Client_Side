@@ -18,7 +18,7 @@ export default function BlockedUsersPage() {
     return (
         <AppBrowseLayout
             header={
-                <header className="sticky top-0 z-30 backdrop-blur-xl border-b px-4 py-3 flex items-center gap-3" style={{ borderColor: 'var(--neu-shadow-dark)', background: 'var(--neu-bg)' }}>
+                <header className="sticky top-0 z-30 backdrop-blur-xl border-b px-4 pb-3 pt-[calc(var(--safe-top)+0.75rem)] flex items-center gap-3" style={{ borderColor: 'var(--neu-shadow-dark)', background: 'var(--neu-bg)' }}>
                     <button onClick={() => router.back()} className="p-1.5 rounded-full hover:opacity-70 transition-opacity">
                         <span className="material-symbols-outlined text-[22px]" style={{ color: 'var(--neu-text)' }}>arrow_back</span>
                     </button>

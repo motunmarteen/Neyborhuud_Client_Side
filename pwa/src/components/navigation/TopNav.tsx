@@ -130,8 +130,9 @@ export function TopBar({
 }: TopBarProps) {
   return (
     <div
-      className={`pointer-events-none sticky top-2 z-40 w-full px-3 transition-transform duration-200 motion-reduce:transition-none sm:top-3 sm:px-4 ${
-        scrollHidden ? '-translate-y-24' : 'translate-y-0'
+      // Below the notch / Dynamic Island / status bar (--safe-top), never under it.
+      className={`pointer-events-none sticky top-[calc(var(--safe-top)+0.5rem)] z-40 w-full px-3 transition-transform duration-200 motion-reduce:transition-none sm:top-[calc(var(--safe-top)+0.75rem)] sm:px-4 ${
+        scrollHidden ? '-translate-y-[calc(100%+var(--safe-top)+1rem)]' : 'translate-y-0'
       }`}
       data-topnav-host="1"
     >
