@@ -421,8 +421,8 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
   - [x] Price (to confirm): ₦2,000 or 600 HuudCredit a week for your area; ×4 for your state (₦8,000); ×15 for all Nigeria (₦30,000)
   - [x] Server: `GET /ads/feed?lga&state` returns live feed posts for the area, state and Nigeria-wide, plus the **street ads** (billboards, sponsored pins) of the person's LGA, random order, max 6 per load; same booking, payment, review, refunds and expiry as map ads; tests
   - [x] App: sponsored cards in the feed (first after 3 posts, then every 6; each once; **never next to a safety or emergency post**); "Sponsored" label; hide (X) remembered on the device; one view per visit when half on screen, taps counted; booking screen, preview, moderator view, ads page
-  - [ ] Deploy the server change (needs owner OK), then check live
-  - [ ] Owner: confirm feed post prices
+  - [x] Server deployed 2026-10-15 (ea98b5f): /ads/feed live, feed post prices live; event pins now open the event page
+  - [x] Owner confirmed feed post prices (2026-10-15): ₦2,000 / ₦8,000 / ₦30,000 a week
   - [ ] Next: sponsored cards in Gist and Marketplace lists; "Report this ad"; per-person limit across visits; reach numbers on My ads
 - [ ] A-03 Buy HuudCredit with naira (one way in)
 - [ ] 🟡 A-04 (sponsored pins in Market/Work/Events done on the server) Sponsored pins, sponsored Gist cards, featured services, boosted events
