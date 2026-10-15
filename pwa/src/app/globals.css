@@ -268,8 +268,8 @@ h2 {
   --safe-right: env(safe-area-inset-right, 0px);
   --viewport-bottom-inset: 0px;
   --app-bottomnav-inner-height: 3.75rem;
-  /* Full height of the bottom tab bar (70px row + safe-area padding, see BottomNav). */
-  --app-bottomnav-h: calc(70px + max(6px, env(safe-area-inset-bottom, 0px)));
+  /* Full height of the floating bottom bar (64px pill + bottom gap/safe area, see BottomNav). */
+  --app-bottomnav-h: calc(64px + max(10px, env(safe-area-inset-bottom, 0px)));
   --app-bottomnav-sos-size: 4.25rem;
   --app-bottomnav-sos-icon-size: 2rem;
   --app-topnav-height: 4.25rem;
@@ -277,7 +277,7 @@ h2 {
   --app-topnav-text-size: 1.125rem;
   --app-topnav-logo-size: 1.4375rem;
   --app-topnav-logo-tracking: -0.05em;
-  --app-nav-bottom: calc(4.75rem + var(--safe-bottom)); /* F-07 bottom bar: 70px + 6px */
+  --app-nav-bottom: calc(var(--app-bottomnav-h) + 0.5rem); /* floating bottom bar + a little air */
   --app-scroll-bottom: calc(var(--app-nav-bottom) + var(--viewport-bottom-inset));
   /* Space between the top bar and the page. The F-06 bar is sticky, so it already takes its own
      height in the page; this is only a small gap (was the full bar height again, which doubled it). */
