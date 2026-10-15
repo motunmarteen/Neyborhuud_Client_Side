@@ -268,6 +268,8 @@ h2 {
   --safe-right: env(safe-area-inset-right, 0px);
   --viewport-bottom-inset: 0px;
   --app-bottomnav-inner-height: 3.75rem;
+  /* Full height of the bottom tab bar (70px row + safe-area padding, see BottomNav). */
+  --app-bottomnav-h: calc(70px + max(6px, env(safe-area-inset-bottom, 0px)));
   --app-bottomnav-sos-size: 4.25rem;
   --app-bottomnav-sos-icon-size: 2rem;
   --app-topnav-height: 4.25rem;

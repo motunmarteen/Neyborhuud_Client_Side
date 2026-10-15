@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 7 | 17 | 🟡 M-07 live (server 1d7abe1 deployed 2026-10-12); M-17 living map first version; map ads next |
+| 3. Map home (sky + live map) | 8 | 17 | 🟡 map home live at /huud (My Huud tab), M-09 pin panels done; next M-08 live pins via socket |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -179,6 +179,8 @@ Kept here so the whole history is in one place.
 
 **Goal:** My Huud becomes the live neighbourhood map under the real sky, as in the mockup.
 
+**2026-10-15:** the map home is live at `/huud` and the My Huud tab opens it: real sky and weather, street life, 7 pin layers, billboards and sponsored pins (safety pins always drawn above ads), pin panels, "Me" (go to where I am) and "List" (the feed). After sign-in the app still lands on `/feed`; switch the landing to `/huud` once the owner has tried it.
+
 - [x] M-01 (pwa: owner chose OpenFreeMap; lib/huudMapStyle.ts in the mockup palette, components/map/HuudMap.tsx; old maps moved off tile.openstreetmap.org; MapLibre worker served from public/) MapLibre base map with our own style (soft colours, labels), real streets across Nigeria from OpenStreetMap
 - [x] M-02 (pwa: fill-extrusion from zoom 15, default 1-2 storeys where OSM has no height, zinc/terracotta/cream roofs; tilted street views, compass; calm mode flat) 3D buildings from real footprints; tilt and rotate; pinch zoom
 - [x] M-03 (pwa: lib/sky.ts real sun times per place (NOAA, WAT) mapped onto the mockup palette; components/map/SkyMap.tsx; tested) Live sky over the map: time-of-day colours, sun and moon path (east → west), stars
@@ -187,7 +189,7 @@ Kept here so the whole history is in one place.
 - [x] M-06 (lib/mapNight.ts: night palette inside MapLibre, lit-window pattern on walls, street lamps from dusk; billboard glow done with map ads, 2026-10-12) Night lights: windows, street lamps, glowing billboards
 - [x] M-07 (server 57ec2d2 /geo/map-pins: 7 layers, ~110 m grid, no fake positions, max ~27 km box; radar now searches by area and drops items without a location; pwa: useMapPins + MapLayerChips + /feed?post deep link) Pins from Street Radar (`/geo/radar`) with layer chips: Safety, Traffic, Light & water, Market, Work, Events, Help
 - [ ] M-08 Live pins via socket (appear and ripple instantly)
-- [ ] M-09 Pin panels (bottom sheet) for every type, with actions and "Ask Sentinel about this"
+- [x] M-09 (pwa /huud: bottom sheet for every pin type: what, how fresh, price, "happening now", count on the block, Open / See the report, Ask Sentinel; ad panel with Visit) Pin panels (bottom sheet) for every type, with actions and "Ask Sentinel about this"
 - [ ] M-10 Moving traffic driven by real go-slow reports (calm when no data)
 - [ ] M-11 Neighbour activity as area pulses (never exact homes)
 - [ ] 🟡 M-17 (first version live: vehicles, people, kids football, market crowds on real geometry; next: denser, go-slow speeds from reports) **Living map** (owner, 2026-10-12: "the map has to be real"): moving danfos, kekes, okadas and cars on real roads; people walking on real streets and paths; kids playing football on real pitches; crowds at real markets; density by time of day (rush hours busy, late night quiet) and weather (fewer people in rain), headlights at night; traffic speed from real go-slow reports (M-10). Decoration only, never real tracked people; off in calm mode
@@ -410,9 +412,9 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 ## Phase 10: Ads, billboards and payouts
 
-**Moved up (owner, 2026-10-12, inspired by Lagos Life):** map ads in all three formats, paid with HuudCredit or naira through **Bachs (bachs.io), not Paystack**. Server done (1d7abe1); app screens done 2026-10-12 (/ads hub, /ads/new booking, /ads/wall, /ads/mine, /admin/ads, billboards + sponsored pins layer `useMapAds`, design-kit demo). Billboards show on the real map once the map home is built (Phase 3).
+**Moved up (owner, 2026-10-12, inspired by Lagos Life):** map ads in all three formats, paid with HuudCredit or naira through **Bachs (bachs.io), not Paystack**. Server done (1d7abe1); app screens done 2026-10-12 (/ads hub, /ads/new booking, /ads/wall, /ads/mine, /admin/ads, billboards + sponsored pins layer `useMapAds`, design-kit demo). Billboards show on the map home (`/huud`) since 2026-10-15.
 
-- [ ] 🟡 A-01 (server 1d7abe1: Ad model, 2 billboards / 3 sponsored pins per ~1 km cell, 12x12 wall per LGA, 30-min holds, moderation, expiry; app screens + map layer done 2026-10-12; left: mount on the map home) Billboard spots on the map (limited per area), booking flow, moderation queue, "Ad" label, night glow; **ad wall of plots per area** (Lagos Life sea plots)
+- [ ] 🟡 A-01 (server 1d7abe1: Ad model, 2 billboards / 3 sponsored pins per ~1 km cell, 12x12 wall per LGA, 30-min holds, moderation, expiry; app screens + map layer done 2026-10-12; on the map home 2026-10-15; left: Bachs keys + prices) Billboard spots on the map (limited per area), booking flow, moderation queue, "Ad" label, night glow; **ad wall of plots per area** (Lagos Life sea plots)
 - [ ] 🟡 A-02 (server: HuudCredit atomic spend; Bachs hosted checkout + signed webhook; needs owner Bachs account + BACHS_API_KEY / BACHS_WEBHOOK_SECRET in Secrets Manager; prices to confirm) Pay for ads with HuudCredit or naira (**Bachs**)
 - [ ] A-03 Buy HuudCredit with naira (one way in)
 - [ ] 🟡 A-04 (sponsored pins in Market/Work/Events done on the server) Sponsored pins, sponsored Gist cards, featured services, boosted events

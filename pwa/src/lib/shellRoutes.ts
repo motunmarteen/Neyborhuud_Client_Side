@@ -6,6 +6,7 @@ import { routeUsesBrowseShell } from '@/lib/browseShellRoutes';
  */
 export const PAGE_OWNED_TOP_NAV_PREFIXES = [
   '/feed',
+  '/huud',
   '/friendship',
   '/explore',
   '/sentinel',
@@ -59,7 +60,7 @@ export function shouldRenderGlobalTopNav(pathname: string): boolean {
  */
 export function routeHasPageOwnedSidebar(pathname: string): boolean {
   const path = normalizePath(pathname);
-  if (path === '/' || path === '/feed' || routeUsesBrowseShell(path)) return true;
+  if (path === '/' || path === '/feed' || path === '/huud' || routeUsesBrowseShell(path)) return true;
   if (path.startsWith('/safety') || path.startsWith('/sos')) return true;
   if (path === '/events/create' || path === '/marketplace/create') return true;
   if (/^\/marketplace\/[^/]+\/edit$/.test(path)) return true;
