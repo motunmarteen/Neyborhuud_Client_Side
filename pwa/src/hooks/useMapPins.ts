@@ -208,5 +208,5 @@ export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sam
     };
   }, [map]);
 
-  return { status, pins };
+  return { status, pins, fresh };
 }

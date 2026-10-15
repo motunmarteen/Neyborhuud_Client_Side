@@ -61,6 +61,8 @@ const width = (base: number): ExpressionSpecification => [
 export const HUUD_MAP_STYLE: StyleSpecification = {
   version: 8,
   name: 'NeyborHuud',
+  // Warm sun from the west-south-west: lit walls on one side, shade on the other.
+  light: { anchor: 'map', color: '#FFF3DC', intensity: 0.55, position: [1.4, 245, 35] },
   glyphs: GLYPHS_URL,
   sources: {
     openmaptiles: {
@@ -204,7 +206,7 @@ export const HUUD_MAP_STYLE: StyleSpecification = {
       type: 'fill-extrusion',
       source: 'openmaptiles',
       'source-layer': 'building',
-      minzoom: 15,
+      minzoom: 14.5,
       filter: ['!=', ['get', 'hide_3d'], true],
       paint: {
         'fill-extrusion-color': [
@@ -214,13 +216,20 @@ export const HUUD_MAP_STYLE: StyleSpecification = {
           1, C.roofTerracotta,
           C.roofCream,
         ],
+        // Immersive (owner, 2026-10-15): one to four storeys where OSM has no height, now and
+        // then a taller block, so streets have a skyline instead of a flat carpet.
         'fill-extrusion-height': [
           'interpolate', ['linear'], ['zoom'],
-          15, 0,
-          16, ['max', ['coalesce', ['get', 'render_height'], 0], ['case', ['==', ['%', ['to-number', ['id'], 0], 2], 0], 4, 7]],
+          14.5, 0,
+          15.5,
+          [
+            'max',
+            ['coalesce', ['get', 'render_height'], 0],
+            ['match', ['%', ['to-number', ['id'], 0], 11], 0, 16, 1, 12, 2, 9, 3, 9, 4, 7, 5, 7, 6, 7, 7, 4, 8, 4, 9, 4, 4],
+          ],
         ],
         'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
-        'fill-extrusion-opacity': 0.92,
+        'fill-extrusion-opacity': 0.95,
         'fill-extrusion-vertical-gradient': true,
       },
     },

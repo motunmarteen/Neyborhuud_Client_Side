@@ -62,9 +62,11 @@ type SkyMapProps = {
   onWeather?: (wx: MapWeather | null) => void;
   /** Street life: vehicles, people, kids playing football (M-17). Off in calm mode. */
   living?: boolean;
+  /** Map home: swoop-down opening and slow circling (see HuudMap). */
+  cinematic?: boolean;
 };
 
-export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true }: SkyMapProps) {
+export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true, cinematic = false }: SkyMapProps) {
   const calm = useCalm();
   const liveWx = useMapWeather(weather === undefined ? center : null);
   const wx = weather === undefined ? liveWx : weather;
@@ -168,7 +170,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
           maskImage: `linear-gradient(180deg, transparent 0, transparent ${SKY_BAND - 70}px, #000 ${SKY_BAND + 30}px)`,
         }}
       >
-        <HuudMap center={center} zoom={zoom} label={label} className="h-full w-full" onReady={handleReady} compassPosition="bottom-right" />
+        <HuudMap center={center} zoom={zoom} label={label} className="h-full w-full" onReady={handleReady} compassPosition="bottom-right" cinematic={cinematic} />
         {/* Time-of-day light over the land: warm at dawn and sunset, blue at night. */}
         <div
           className="pointer-events-none absolute inset-0"

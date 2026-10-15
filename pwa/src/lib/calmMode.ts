@@ -53,9 +53,48 @@ export function dataSaverOn(): boolean {
   return !!(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
 }
 
+/**
+ * Battery (owner, 2026-10-15: "identify users on battery save or data save"). Browsers do not
+ * tell a web page whether battery-saver mode is on; Android Chrome does tell the level and
+ * whether it is charging, so below 20% and not charging counts as saving battery.
+ * iPhone Safari gives nothing, so there it never triggers.
+ */
+let batteryLow = false;
+let batteryWatched = false;
+const LOW_BATTERY = 0.2;
+
+export function lowBatteryOn(): boolean {
+  return batteryLow;
+}
+
+function watchBattery() {
+  if (batteryWatched || typeof navigator === 'undefined') return;
+  batteryWatched = true;
+  const nav = navigator as Navigator & {
+    getBattery?: () => Promise<EventTarget & { level: number; charging: boolean }>;
+  };
+  if (!nav.getBattery) return;
+  void nav
+    .getBattery()
+    .then((b) => {
+      const check = () => {
+        const low = b.level < LOW_BATTERY && !b.charging;
+        if (low !== batteryLow) {
+          batteryLow = low;
+          applyCalm();
+        }
+      };
+      check();
+      b.addEventListener('levelchange', check);
+      b.addEventListener('chargingchange', check);
+    })
+    .catch(() => undefined);
+}
+
 export function isCalm(): boolean {
   if (typeof window === 'undefined') return false;
-  return prefersReducedMotion() || dataSaverOn() || !!storedAccessibility().liteMode;
+  watchBattery();
+  return prefersReducedMotion() || dataSaverOn() || batteryLow || !!storedAccessibility().liteMode;
 }
 
 /** Re-read every source and update <html data-calm>; tell listeners. */
