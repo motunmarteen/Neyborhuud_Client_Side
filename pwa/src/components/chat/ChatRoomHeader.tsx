@@ -42,7 +42,7 @@ export function ChatRoomHeader({
   onVideoCall,
 }: ChatRoomHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-2xl border-b border-black/[0.06] shadow-xs select-none">
+    <header className="sticky top-0 z-40 w-full bg-white/95 pt-[var(--safe-top)] backdrop-blur-2xl border-b border-black/[0.06] shadow-xs select-none">
       <div className="mx-auto flex w-full max-w-[600px] px-2 sm:px-3 h-14 items-center justify-between gap-2 sm:gap-3">
         {/* Back Button */}
         {onBack ? (

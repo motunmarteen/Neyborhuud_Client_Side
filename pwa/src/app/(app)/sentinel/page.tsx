@@ -180,7 +180,7 @@ function SentinelScreen() {
     <AppBrowseLayout
       className="!px-0 !pt-0"
       header={
-        <div className="sticky top-0 z-30 bg-background/95 px-4 pb-3 pt-3 backdrop-blur">
+        <div className="sticky top-[var(--safe-top)] z-30 bg-background/95 px-4 pb-3 pt-3 backdrop-blur">
           <form
             onSubmit={(e) => {
               e.preventDefault();
