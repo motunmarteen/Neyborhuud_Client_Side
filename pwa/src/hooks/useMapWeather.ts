@@ -22,7 +22,7 @@ export function useMapWeather(place?: { lat: number; lng: number } | null): MapW
     const load = async () => {
       try {
         const w = await fetchCurrentWeather(lat, lng);
-        if (alive) setWx(mapWeatherFromWmo(w.wmoCode, new Date().getMonth()));
+        if (alive) setWx(w.real ? mapWeatherFromWmo(w.wmoCode, new Date().getMonth()) : null);
       } catch {
         if (alive) setWx(null);
       }

@@ -54,7 +54,7 @@ export const GROUP_LABEL: Record<ResultGroup, string> = {
   help: '🙏 Help requests',
   bulletins: '📢 Bulletins',
   posts: '✏️ Posts',
-  gist: '💬 Gist',
+  gist: '💬 Talk',
 };
 
 // Kept in step with the server's ask.rules.ts so the screen knows when a query is a

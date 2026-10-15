@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, MessagesSquare, Newspaper, Plus, Shield, Siren } from 'lucide-react';
@@ -12,7 +12,7 @@ import { CreateSheet } from '@/components/navigation/CreateSheet';
 /**
  * Design foundation F-07: the bottom bar from the home mockup.
  *
- *   My Huud · Gist · ➕ · Chats · Sentinel
+ *   My Huud · Feed · ➕ · Chats · Sentinel   (Gist removed 2026-10-15: the Feed replaced it)
  *
  * - ➕ opens "Wetin you wan share?" (quick signals + create) on every screen
  * - Sentinel opens the Sentinel screen: Ask Sentinel (SSAA) + safety + Explore. Press and hold for a silent SOS
@@ -30,6 +30,9 @@ interface BottomNavProps {
 }
 
 const SOS_HOLD_MS = 600;
+
+/** Window event that opens the ➕ Create sheet from anywhere. */
+export const OPEN_CREATE_SHEET = 'nh-open-create-sheet';
 
 function Tab({
   label,
@@ -67,6 +70,13 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const { data: messageUnreadCount = 0 } = useUnreadCount('message');
   const [createOpen, setCreateOpen] = useState(false);
 
+  // Other screens (the map's "Wetin dey happen?" and "Report") open the same Create sheet.
+  useEffect(() => {
+    const open = () => setCreateOpen(true);
+    window.addEventListener(OPEN_CREATE_SHEET, open);
+    return () => window.removeEventListener(OPEN_CREATE_SHEET, open);
+  }, []);
+
   // Press-and-hold Sentinel = silent SOS.
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const holdFired = useRef(false);
@@ -91,8 +101,8 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   };
 
   const sosActive = sosPhase !== 'idle';
-  const isHome = pathname === '/huud' || pathname === '/feed' || pathname === '/';
-  const isGist = pathname.startsWith('/gist') || pathname.startsWith('/gossip');
+  const isHome = pathname === '/huud' || pathname === '/';
+  const isFeed = pathname === '/feed' || pathname.startsWith('/feed/');
   const isChats = pathname.startsWith('/friendship') || pathname.startsWith('/chat') || pathname.startsWith('/messages');
   const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel') || pathname.startsWith('/explore');
 
@@ -110,7 +120,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
           <Link
             href="/huud"
             onClick={(e) => {
-              // Already on the map: stay. From the feed (or anywhere else) go to the map.
+              // Already on the map: stay.
               if (pathname === '/huud') e.preventDefault();
             }}
             className={tabClass}
@@ -121,9 +131,9 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             </Tab>
           </Link>
 
-          <Link href="/gist" className={tabClass} aria-current={isGist ? 'page' : undefined}>
-            <Tab label="Gist" active={isGist}>
-              <Newspaper size={22} strokeWidth={isGist ? 2.5 : 2} aria-hidden />
+          <Link href="/feed" className={tabClass} aria-current={isFeed ? 'page' : undefined}>
+            <Tab label="Feed" active={isFeed}>
+              <Newspaper size={22} strokeWidth={isFeed ? 2.5 : 2} aria-hidden />
             </Tab>
           </Link>
 

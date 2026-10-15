@@ -6,7 +6,7 @@ export function generateStaticParams() {
   return capStaticParams('id');
 }
 
-/** Legacy URLs — redirect old gossip detail paths to Huud Gist threads. */
+/** Legacy URLs (old Huud Gist threads, removed 2026-10-15) open the news list. */
 export default function LegacyLocalNewsDetailPage() {
   return <LocalNewsLegacyRedirectClient />;
 }

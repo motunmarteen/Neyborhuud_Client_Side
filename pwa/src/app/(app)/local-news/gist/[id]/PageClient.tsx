@@ -1,26 +1,8 @@
 'use client';
 
-/** Legacy gist detail path — Huud Gist now lives at /gist/[id]. Redirects, preserving the id. */
+import { RedirectTo } from '@/components/navigation/RedirectTo';
 
-import { Suspense, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-
-function GistDetailRedirect() {
-  const params = useParams();
-  const router = useRouter();
-  const threadId = params.id as string;
-
-  useEffect(() => {
-    router.replace(threadId ? `/gist/${threadId}` : '/gist');
-  }, [router, threadId]);
-
-  return null;
-}
-
-export default function LegacyGistDetailPage() {
-  return (
-    <Suspense fallback={null}>
-      <GistDetailRedirect />
-    </Suspense>
-  );
+/** Gist was removed (owner, 2026-10-15): the Feed replaced it. Old links open the Feed. */
+export default function GistRemovedPage() {
+  return <RedirectTo href="/feed" />;
 }

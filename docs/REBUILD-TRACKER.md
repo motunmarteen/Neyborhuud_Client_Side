@@ -179,6 +179,9 @@ Kept here so the whole history is in one place.
 
 **Goal:** My Huud becomes the live neighbourhood map under the real sky, as in the mockup.
 
+**2026-10-15 (owner): back to the agreed mockup.** Gist is out of the system; the **Feed** replaces it (bottom bar: My Huud · Feed · ➕ · Chats · Sentinel). The Feed's top is the slim live sky from the mockup (title + real weather line), then "Wetin dey happen around you? + Post" and the tabs For you · Safety · FYI · Posts · Market · Work · Events · Help · Polls · News. The old sky hero, radar, greeting and Pulse moved to My Huud. My Huud (mockup): ⚡ PULSE ribbon, Sentinel orb (ring = real area mood), Me, Calm view, SOS in the right column, bottom sheet with greeting + weather, "Ask Sentinel anything…", "Wetin dey happen?", "Report", "Share today in <area>". Gestures: **swipe up on the sheet → Feed; swipe down on the Feed's sky → map.** Old /gist, /gossip and Gist-thread links open the Feed. Weather: no more invented forecasts or 28°/31° placeholders; unknown weather is not shown.
+- [ ] Still from the mockup: "📍 See on map" on feed cards; Pulse adds weather and go-slows; first-time tour (3 steps); visitor "look around" sheet; quiet-street sheet; share card with your sky; go-slow traffic; area pulses; Area Champion crown
+
 **2026-10-15:** the map home is live at `/huud` and the My Huud tab opens it: real sky and weather, street life, 7 pin layers, billboards and sponsored pins (safety pins always drawn above ads), pin panels, "Me" (go to where I am) and "List" (the feed). After sign-in the app still lands on `/feed`; switch the landing to `/huud` once the owner has tried it.
 
 - [x] M-01 (pwa: owner chose OpenFreeMap; lib/huudMapStyle.ts in the mockup palette, components/map/HuudMap.tsx; old maps moved off tile.openstreetmap.org; MapLibre worker served from public/) MapLibre base map with our own style (soft colours, labels), real streets across Nigeria from OpenStreetMap
@@ -193,8 +196,8 @@ Kept here so the whole history is in one place.
 - [ ] M-10 Moving traffic driven by real go-slow reports (calm when no data)
 - [ ] M-11 Neighbour activity as area pulses (never exact homes)
 - [ ] 🟡 M-17 (first version live: vehicles, people, kids football, market crowds on real geometry; next: denser, go-slow speeds from reports) **Living map** (owner, 2026-10-12: "the map has to be real"): moving danfos, kekes, okadas and cars on real roads; people walking on real streets and paths; kids playing football on real pitches; crowds at real markets; density by time of day (rush hours busy, late night quiet) and weather (fewer people in rain), headlights at night; traffic speed from real go-slow reports (M-10). Decoration only, never real tracked people; off in calm mode
-- [ ] M-12 Pulse ticker: news + exchange rates + weather; "Today's Pulse" panel
-- [ ] M-13 Calm view toggle
+- [ ] 🟡 M-12 (2026-10-15: ⚡ PULSE ribbon on the map under the layer chips: real news headlines + exchange rates; next: weather and go-slows in the ribbon, "Today's Pulse" panel) Pulse ticker: news + exchange rates + weather; "Today's Pulse" panel
+- [x] M-13 (2026-10-15: "Calm view / Live view" on the map, same setting as Save data: flat map, no motion) Calm view toggle
 - [ ] M-14 Area Champion crown marker
 - [ ] M-15 Low-data mode: flat 2D map, no animation, cached last view
 - [ ] M-16 Performance target: smooth on a ₦60,000 Android phone; map loads in under 3 s on 3G anywhere in Nigeria
@@ -507,6 +510,7 @@ Only if the PWA hits limits we can't work around (for example background locatio
 | 2026-10-12 | Idea parked: HuudCredit as a discount coin (owner deferred; revisit before launch) |
 | 2026-10-15 | Feed ads like X: sponsored posts (area / state / all Nigeria) and the area's street ads shown in the feed; never next to safety posts |
 | 2026-10-15 | Bottom bar: floating light pill with raised ➕ (owner's reference); top bar clears the notch |
+| 2026-10-15 | **Gist removed; Feed replaces it.** Feed top = the mockup's slim live sky; the hero, Pulse, greeting, Sentinel and report move to My Huud; swipe up on the map sheet for the Feed, down on the Feed's sky for the map |
 | 2026-10-10 | No trading or selling HuudCredit between users; payouts only through the contributor programme, after legal review |
 | 2026-10-10 | Safety reports never shared publicly and never paid in cash |
 | 2026-10-10 | **PWA first**: no download needed; store apps later and optional |

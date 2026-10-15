@@ -1,38 +1,26 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useInView } from 'react-intersection-observer';
-import type { AxiosError } from 'axios';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 import { BrowseFilterChip } from '@/components/layout/BrowseFilterChip';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
-import { CreateHuudGistModal } from '@/components/huud-gist/CreateHuudGistModal';
-import { HuudGistRow } from '@/components/huud-gist/HuudGistRow';
 import { NewsArticleRow } from '@/components/news/NewsArticleRow';
-import { useHuudGistList } from '@/hooks/useHuudGist';
-import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import {
   LOCAL_NEWS_TABS,
   NEWS_TOPICS,
   NIGERIA_SOURCES,
   INTERNATIONAL_SOURCES,
-  parseGistSection,
   parseLocalNewsTab,
   parseNewsTopic,
   filterArticlesByTopic,
   type LocalNewsTab,
   type NewsTopicId,
 } from '@/lib/localNewsConfig';
-import { buildGistSectionList } from '@/lib/huudGistConfig';
-import { huudGistService } from '@/services/huudGist.service';
 import { newsService } from '@/services/news.service';
 import { NewsFxStrip } from '@/components/news/NewsFxStrip';
-import type { GistSection, GistSectionId } from '@/types/huudGist';
 import type { NewsSource, RssArticle } from '@/types/incident';
-import { gistPostId, type HuudGistPost } from '@/types/huudGist';
 import { ErrorState } from '@/components/ui/ErrorState';
 
 function sourcesForRegion(
@@ -48,26 +36,12 @@ function sourcesForRegion(
 function LocalNewsInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useClientAuthUser();
   const [activeTab, setActiveTab] = useState<LocalNewsTab>(() =>
     parseLocalNewsTab(searchParams.get('tab')),
   );
 
-  // Huud Gist is now its own pillar — redirect any legacy ?tab=huud-gist access.
-  useEffect(() => {
-    if (activeTab === 'huud-gist') {
-      const section = searchParams.get('section');
-      router.replace(section ? `/gist?section=${section}` : '/gist');
-    }
-  }, [activeTab, searchParams, router]);
-  const [gistSection, setGistSection] = useState<GistSectionId>(() =>
-    parseGistSection(searchParams.get('section')),
-  );
   const [newsTopic, setNewsTopic] = useState<NewsTopicId>(() =>
     parseNewsTopic(searchParams.get('topic')),
-  );
-  const [gistSections, setGistSections] = useState<GistSection[]>(() =>
-    buildGistSectionList([]),
   );
   const [newsTopics, setNewsTopics] = useState<Array<{ id: NewsTopicId; label: string }>>([
     ...NEWS_TOPICS.map(({ id, label }) => ({ id, label })),
@@ -79,17 +53,11 @@ function LocalNewsInner() {
   const [articles, setArticles] = useState<RssArticle[]>([]);
   const [rssLoading, setRssLoading] = useState(false);
   const [rssError, setRssError] = useState<string | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
     void (async () => {
       try {
-        const [categoriesRes, sections] = await Promise.all([
-          newsService.getCategories(),
-          huudGistService.getSections(),
-        ]);
-
-        setGistSections(sections);
+        const categoriesRes = await newsService.getCategories();
 
         const categories = categoriesRes.data?.categories;
         if (categories?.length) {
@@ -109,44 +77,11 @@ function LocalNewsInner() {
     })();
   }, []);
 
-  const gistFilters = useMemo(
-    () => ({ section: gistSection === 'all' ? undefined : gistSection }),
-    [gistSection],
-  );
-  const {
-    data: gistPages,
-    isLoading: gistLoading,
-    isError: gistIsError,
-    error: gistError,
-    refetch: refetchGist,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useHuudGistList(gistFilters);
-  const gistThreads = useMemo(
-    () => gistPages?.pages.flatMap((p) => p?.gossip ?? []) ?? [],
-    [gistPages],
-  );
-  const gistAuthRequired =
-    gistIsError && (gistError as AxiosError)?.response?.status === 401;
-
-  const { ref: gistLoadMoreRef, inView: gistLoadMoreInView } = useInView({
-    threshold: 0,
-    rootMargin: '400px',
-  });
-
-  useEffect(() => {
-    if (gistLoadMoreInView && hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage();
-    }
-  }, [gistLoadMoreInView, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
   const syncUrl = useCallback(
-    (tab: LocalNewsTab, section: GistSectionId, topic: NewsTopicId) => {
+    (tab: LocalNewsTab, topic: NewsTopicId) => {
       const params = new URLSearchParams();
       params.set('tab', tab);
-      if (tab === 'huud-gist' && section !== 'all') params.set('section', section);
-      if (tab !== 'huud-gist' && topic !== 'all') params.set('topic', topic);
+      if (topic !== 'all') params.set('topic', topic);
       router.replace(`/local-news?${params.toString()}`, { scroll: false });
     },
     [router],
@@ -186,7 +121,6 @@ function LocalNewsInner() {
 
   useEffect(() => {
     setActiveTab(parseLocalNewsTab(searchParams.get('tab')));
-    setGistSection(parseGistSection(searchParams.get('section')));
     setNewsTopic(parseNewsTopic(searchParams.get('topic')));
   }, [searchParams]);
 
@@ -202,7 +136,7 @@ function LocalNewsInner() {
   const setTab = (tab: LocalNewsTab) => {
     setActiveTab(tab);
     setSelectedSourceIds([]);
-    syncUrl(tab, gistSection, newsTopic);
+    syncUrl(tab, newsTopic);
     if (tab === 'nigeria' || tab === 'international') loadRss(tab, newsTopic, []);
   };
 
@@ -219,16 +153,13 @@ function LocalNewsInner() {
             trailing={
               <button
                 type="button"
-                onClick={() => {
-                  if (activeTab === 'huud-gist') void refetchGist();
-                  else loadRss(activeTab, newsTopic, selectedSourceIds);
-                }}
-                disabled={activeTab === 'huud-gist' ? gistLoading : rssLoading}
+                onClick={() => loadRss(activeTab, newsTopic, selectedSourceIds)}
+                disabled={rssLoading}
                 className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary disabled:opacity-50"
                 aria-label="Refresh"
               >
                 <span
-                  className={`material-symbols-outlined text-[18px] ${gistLoading || rssLoading ? 'animate-spin' : ''}`}
+                  className={`material-symbols-outlined text-[18px] ${rssLoading ? 'animate-spin' : ''}`}
                 >
                   refresh
                 </span>
@@ -237,23 +168,7 @@ function LocalNewsInner() {
             }
           />
 
-          {activeTab === 'huud-gist' ? (
-            <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
-              {gistSections.map((section) => (
-                <BrowseFilterChip
-                  key={section.id}
-                  active={gistSection === section.id}
-                  onClick={() => {
-                    setGistSection(section.id);
-                    syncUrl(activeTab, section.id, newsTopic);
-                  }}
-                >
-                  {section.label}
-                </BrowseFilterChip>
-              ))}
-            </div>
-          ) : (
-            <>
+          <>
               <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
                 {newsTopics.map((topic) => (
                   <BrowseFilterChip
@@ -261,7 +176,7 @@ function LocalNewsInner() {
                     active={newsTopic === topic.id}
                     onClick={() => {
                       setNewsTopic(topic.id);
-                      syncUrl(activeTab, gistSection, topic.id);
+                      syncUrl(activeTab, topic.id);
                       loadRss(activeTab, topic.id, selectedSourceIds);
                     }}
                   >
@@ -295,98 +210,12 @@ function LocalNewsInner() {
                   </BrowseFilterChip>
                 ))}
               </div>
-            </>
-          )}
+          </>
         </>
       }
     >
       <div className="space-y-5">
-        {activeTab === 'huud-gist' ? (
-          <>
-            {user ? (
-              <button
-                type="button"
-                onClick={() => setCreateOpen(true)}
-                className="mod-chip mod-chip-active inline-flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-primary"
-              >
-                <span className="material-symbols-outlined text-[18px]">edit_square</span>
-                Start a Huud Gist thread
-              </button>
-            ) : (
-              <Link
-                href="/login?redirect=/local-news?tab=huud-gist"
-                className="mod-card flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold no-underline"
-              >
-                <span className="material-symbols-outlined text-[18px] text-primary">login</span>
-                Sign in to start a Huud Gist thread
-              </Link>
-            )}
-
-            {gistLoading ? (
-              <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="mod-inset h-[4.5rem] animate-pulse rounded-xl" />
-                ))}
-              </div>
-            ) : gistIsError && !gistAuthRequired ? (
-              <ErrorState onRetry={() => void refetchGist()} homeHref={null} />
-            ) : gistAuthRequired ? (
-              <BrowseEmptyState
-                icon="login"
-                title="Sign in to view Huud Gist"
-                description="Your session may have expired. Sign in again to browse and join threads."
-                action={
-                  <Link
-                    href="/login?redirect=/local-news?tab=huud-gist"
-                    className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary no-underline"
-                  >
-                    Sign in
-                  </Link>
-                }
-              />
-            ) : gistThreads.length === 0 ? (
-              <BrowseEmptyState
-                icon="forum"
-                title="No Huud Gist threads yet"
-                description="Start the conversation — local gist, questions, business talk, and more."
-                filledIcon
-                action={
-                  user ? (
-                    <button
-                      type="button"
-                      onClick={() => setCreateOpen(true)}
-                      className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary"
-                    >
-                      Start a thread
-                    </button>
-                  ) : undefined
-                }
-              />
-            ) : (
-              <>
-                <div
-                  className="mod-card divide-y overflow-hidden rounded-2xl"
-                  style={{ borderColor: 'var(--neu-shadow-dark)' }}
-                >
-                  {gistThreads.map((post: HuudGistPost, index) => (
-                    <HuudGistRow key={gistPostId(post) || `gist-${index}`} post={post} />
-                  ))}
-                </div>
-                {hasNextPage ? (
-                  <div ref={gistLoadMoreRef} className="flex justify-center py-4">
-                    {isFetchingNextPage ? (
-                      <span className="text-sm font-semibold text-[var(--neu-text-muted)]">
-                        Loading more…
-                      </span>
-                    ) : (
-                      <div className="h-6" />
-                    )}
-                  </div>
-                ) : null}
-              </>
-            )}
-          </>
-        ) : rssLoading ? (
+        {rssLoading ? (
           <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="mod-inset h-[4.5rem] animate-pulse rounded-xl" />
@@ -419,12 +248,6 @@ function LocalNewsInner() {
         ) : null}
       </div>
 
-      <CreateHuudGistModal
-        isOpen={createOpen}
-        onClose={() => setCreateOpen(false)}
-        sections={gistSections}
-        defaultSection={gistSection}
-      />
     </AppBrowseLayout>
   );
 }

@@ -11,7 +11,6 @@ import {
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
 import RightSidebar from '@/components/navigation/RightSidebar';
-import { FeedSkyHero } from '@/components/feed/FeedSkyHero';
 import { XPostCard } from '@/components/feed/XPostCard';
 import { ReportModal } from '@/components/feed/ReportModal';
 import { FeedSkeleton } from '@/components/feed/PostSkeleton';
@@ -34,7 +33,7 @@ import { FeedTab, Post, ContentType } from '@/types/api';
 import { useInView } from 'react-intersection-observer';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePinPost } from '@/hooks/useGamification';
-import { Shield, AlertTriangle, MapPinOff, X } from 'lucide-react';
+import { Shield, AlertTriangle, MapPinOff } from 'lucide-react';
 import { BoostModal } from '@/components/gamification/BoostModal';
 import { FeedCommentsSheet } from '@/components/feed/FeedCommentsSheet';
 import { FeedDiscoveryBlock } from '@/components/feed/FeedDiscoveryBlock';
@@ -43,81 +42,16 @@ import { mergeDiscoveryIntoFeed, type BaseFeedItem, type DiscoveryFeedItem } fro
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
 import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
 import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
-import { FeedNewsTicker } from '@/components/feed/FeedNewsTicker';
-import { FeedSentinelRow } from '@/components/feed/FeedSentinelRow';
 import { RedZoneBanner } from '@/components/feed/RedZoneBanner';
 import { StreetRadarView } from '@/components/feed/StreetRadarView';
-import { FeedBcActionRibbon } from '@/components/feed/FeedBcActionRibbon';
 import { WhoIsInMyHuudDrawer } from '@/components/neighborhood/WhoIsInMyHuudDrawer';
 import { AskMyHuudDrawer } from '@/components/assistant/AskMyHuudDrawer';
 import { FeedEmailVerificationBanner } from '@/components/feed/FeedEmailVerificationBanner';
-import { QuickSignalBar } from '@/components/feed/QuickSignalBar';
 import { SponsoredCard } from '@/components/feed/SponsoredCard';
+import { FeedSkyBand } from '@/components/feed/FeedSkyBand';
+import { FeedComposer, FeedTabs } from '@/components/feed/FeedTabs';
 import { useFeedAds } from '@/hooks/useFeedAds';
 import { placeFeedAds } from '@/lib/feedAds';
-
-const getFilterBannerData = (type: string) => {
-    switch (type) {
-        case 'marketplace':
-            return {
-                imageSrc: '/illustration_marketplace.png',
-                title: 'Local Marketplace',
-                desc: 'Browse items offered by neighbors in your area. Secure transactions and direct handovers.',
-                borderCls: 'border-primary/20',
-                bgCls: 'bg-primary/5',
-            };
-        case 'emergency':
-            return {
-                imageSrc: '/illustration_safety.png',
-                title: 'Sentinel Safety Watch',
-                desc: 'Active neighborhood safety watches, incident reports, and real-time security alerts.',
-                borderCls: 'border-brand-red/25',
-                bgCls: 'bg-brand-red/5 text-brand-red',
-            };
-        case 'incident_report':
-            return {
-                imageSrc: '/illustration_safety.png',
-                title: 'Incident Reports',
-                desc: 'View and track neighborhood incident reports, security updates, and witness accounts.',
-                borderCls: 'border-brand-red/25',
-                bgCls: 'bg-brand-red/5 text-brand-red',
-            };
-        case 'job':
-            return {
-                imageSrc: '/illustration_jobs.png',
-                title: 'Local Careers & Opportunities',
-                desc: 'Find part-time work, gig jobs, co-working alerts, and local service hiring nearby.',
-                borderCls: 'border-brand-blue/20',
-                bgCls: 'bg-brand-blue/5',
-            };
-        case 'event':
-            return {
-                imageSrc: '/illustration_events.png',
-                title: 'Gatherings & Events',
-                desc: 'Neighborhood block parties, community cleanup drives, and fun gatherings near you.',
-                borderCls: 'border-status-warning/20',
-                bgCls: 'bg-status-warning/5',
-            };
-        case 'services':
-            return {
-                imageSrc: '/illustration_services.png',
-                title: 'Huud Services & Experts',
-                desc: 'Find handymen, plumbers, technicians, and local service providers recommended by neighbors.',
-                borderCls: 'border-primary/20',
-                bgCls: 'bg-primary/5',
-            };
-        case 'help_request':
-            return {
-                imageSrc: '/illustration_help.png',
-                title: 'Mutual Help & Requests',
-                desc: 'Neighbors helping neighbors. Offer a hand or request assistance from local volunteers.',
-                borderCls: 'border-brand-blue/20',
-                bgCls: 'bg-brand-blue/5',
-            };
-        default:
-            return null;
-    }
-};
 
 function XFeedInner() {
     const router = useRouter();
@@ -151,10 +85,10 @@ function XFeedInner() {
             ? (typeParam as ContentType)
             : undefined;
 
-    // Legacy gossip filter → Huud Gist pillar
+    // Legacy ?type=gossip (Gist was removed 2026-10-15): show the whole feed.
     useEffect(() => {
         if (typeParam === 'gossip') {
-            router.replace('/gist');
+            router.replace('/feed');
         }
     }, [typeParam, router]);
 
@@ -247,7 +181,7 @@ function XFeedInner() {
     };
 
     /** Mixed marketplace / events / jobs when not using a content-type sidebar filter */
-    const discoveryEnabled = !contentTypeFilter;
+    const discoveryEnabled = !contentTypeFilter && typeParam !== 'poll';
 
     // Flatten posts from all pages (deduplicate by ID to avoid duplicate React keys
     // when backend returns overlapping results across paginated pages)
@@ -262,11 +196,13 @@ function XFeedInner() {
         });
     }, [feedData?.pages]);
 
+    const pollsOnly = typeParam === 'poll';
     const mergedFeed: BaseFeedItem[] = useMemo(
         () => posts
-                .filter(p => !(discoveryEnabled && p.contentType === 'help_request'))
+                .filter(p => !(discoveryEnabled && !pollsOnly && p.contentType === 'help_request'))
+                .filter(p => !pollsOnly || p.type === 'poll' || Boolean((p as { poll?: unknown }).poll))
                 .map((p) => ({ _type: 'post' as const, data: p })),
-        [posts, discoveryEnabled],
+        [posts, discoveryEnabled, pollsOnly],
     );
     const missedAlerts = feedData?.pages?.[0]?.meta?.missedAlerts ?? null;
     const placeContext = feedData?.pages?.[0]?.meta?.placeContext ?? null;
@@ -484,45 +420,15 @@ function XFeedInner() {
 
                     <div className="feed-page-scroll flex flex-col pb-[var(--app-scroll-bottom)] relative bg-white">
                         <div className="feed-hero-stack shrink-0">
-                          <FeedSkyHero
-                            below={
-                              <>
-                                <FeedNewsTicker />
-                              </>
-                            }
-                            onOpenWhoIsInMyHuud={() => setIsWhoIsInMyHuudOpen(true)}
-                            onOpenAskSentinel={() => setIsAskSentinelOpen(true)}
-                          />
+                          {/* Agreed mockup: the same live sky continues at the top of the Feed. */}
+                          <FeedSkyBand />
                         </div>
                         <div className="feed-sky-feed-body flex flex-col gap-3 sm:gap-3.5 pt-3 sm:pt-3.5">
-
-                            {/* Active content-type filter chip */}
-                            {contentTypeFilter && (() => {
-                                const banner = getFilterBannerData(contentTypeFilter);
-                                if (!banner) return null;
-                                return (
-                                    <div className="w-full">
-                                        <div className={`p-4 flex gap-4 items-center border-b border-gray-100 bg-white w-full`}>
-                                            <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-black/[0.02] border border-gray-100">
-                                                <Image src={banner.imageSrc} alt={banner.title} fill sizes="80px" className="object-cover" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="text-sm font-black text-neu-text  leading-tight flex items-center gap-1.5 flex-wrap">
-                                                    {banner.title}
-                                                    <button
-                                                        onClick={() => router.replace('/feed')}
-                                                        className="ml-auto flex items-center justify-center h-6 w-6 rounded-full bg-black/5  hover:bg-black/10 text-neu-text-secondary  cursor-pointer text-xs"
-                                                        aria-label="Clear filter"
-                                                    >
-                                                        <X size={14} />
-                                                    </button>
-                                                </h3>
-                                                <p className="text-[11px] font-medium text-neu-text-secondary  mt-1.5 leading-snug">{banner.desc}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })()}
+                            <FeedComposer
+                              initial={(currentAuthUser?.firstName || currentAuthUser?.username || 'Y').charAt(0).toUpperCase()}
+                              onOpen={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
+                            />
+                            <FeedTabs />
 
                             <FeedEmailVerificationBanner />
 
@@ -548,13 +454,7 @@ function XFeedInner() {
                                 </div>
                             )}
 
-                            {/* 1-Tap Waze-Style Street Signal Bar (Power, Traffic, Safety) */}
-                            <QuickSignalBar />
-
-                            {/* BC.Game Luxury Spotlight Cards, Categories & Live Pulse */}
-                            <FeedBcActionRibbon />
-
-                            <FeedSentinelRow />
+                            {/* Safety first: a red-zone warning stays on the Feed. */}
                             <RedZoneBanner />
 
 
