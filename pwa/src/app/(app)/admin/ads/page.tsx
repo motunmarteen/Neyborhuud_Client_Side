@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AD_KINDS, approveAd, fetchReviewQueue, priceText, rejectAd, type Ad } from '@/lib/adsApi';
 import { AdBoard, boardInk, sponsoredPinHtml } from '@/components/map/AdBoard';
+import { SponsoredCard } from '@/components/feed/SponsoredCard';
 import { getErrorMessage } from '@/lib/error-handler';
 import { nhToast } from '@/lib/toast';
 
@@ -67,6 +68,11 @@ function ReviewCard({ ad }: { ad: Ad }) {
 
   return (
     <li className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#13132a] p-4 sm:flex-row">
+      {ad.kind === 'feed_post' ? (
+        <div className="shrink-0 rounded-xl bg-background p-2 sm:w-72">
+          <SponsoredCard preview ad={ad} />
+        </div>
+      ) : (
       <div className="flex min-h-[110px] shrink-0 items-end justify-center rounded-xl bg-[linear-gradient(180deg,#9ED3F5,#E9F3E1)] p-3 sm:w-44">
         {ad.kind === 'billboard' ? (
           <AdBoard title={ad.title} line={ad.line} colour={ad.colour} />
@@ -78,6 +84,7 @@ function ReviewCard({ ad }: { ad: Ad }) {
           </div>
         )}
       </div>
+      )}
       <div className="flex min-w-0 flex-1 flex-col gap-2 text-sm">
         <p className="font-bold text-white">
           {kind?.icon} {kind?.name} · {ad.title}
@@ -86,6 +93,7 @@ function ReviewCard({ ad }: { ad: Ad }) {
         <p className="text-white/50">
           {ad.area.lga}, {ad.area.state} · {ad.weeks} week{ad.weeks > 1 ? 's' : ''} · {priceText(ad.price.amount, ad.price.currency)}
           {ad.plot ? ` · plot ${ad.plot.row + 1}-${ad.plot.col + 1}` : ''}
+          {ad.reach ? ` · reach: ${ad.reach === 'area' ? 'their area' : ad.reach === 'state' ? 'their state' : 'all Nigeria'}` : ''}
         </p>
         {ad.location ? (
           <a

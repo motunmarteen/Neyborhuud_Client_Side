@@ -52,6 +52,9 @@ import { WhoIsInMyHuudDrawer } from '@/components/neighborhood/WhoIsInMyHuudDraw
 import { AskMyHuudDrawer } from '@/components/assistant/AskMyHuudDrawer';
 import { FeedEmailVerificationBanner } from '@/components/feed/FeedEmailVerificationBanner';
 import { QuickSignalBar } from '@/components/feed/QuickSignalBar';
+import { SponsoredCard } from '@/components/feed/SponsoredCard';
+import { useFeedAds } from '@/hooks/useFeedAds';
+import { placeFeedAds } from '@/lib/feedAds';
 
 const getFilterBannerData = (type: string) => {
     switch (type) {
@@ -276,6 +279,17 @@ function XFeedInner() {
     const timeline: DiscoveryFeedItem[] = useMemo(
         () => mergeDiscoveryIntoFeed(mergedFeed, discoveryPools, discoveryEnabled),
         [mergedFeed, discoveryPools, discoveryEnabled],
+    );
+
+    // Sponsored cards (2026-10-15): never next to a safety / emergency post.
+    const { ads: feedAds, hide: hideFeedAd } = useFeedAds(currentAuthUser);
+    const adSlots = useMemo(
+        () =>
+            placeFeedAds(timeline.length, feedAds, (i) => {
+                const it = timeline[i] as { _type?: string; data?: Post };
+                return it?._type === 'post' && it.data?.contentType === 'emergency';
+            }),
+        [timeline, feedAds],
     );
 
     // Infinite scroll
@@ -727,9 +741,11 @@ function XFeedInner() {
                                     );
                                 };
 
+                                const ad = adSlots.get(index);
                                 return (
                                     <React.Fragment key={(item as any).data?.repostId ?? (item as any).key ?? (item as any).data?.id ?? `feed-item-${index}`}>
                                         {renderItem()}
+                                        {ad ? <SponsoredCard ad={ad} onHide={hideFeedAd} /> : null}
                                     </React.Fragment>
                                 );
                             })}

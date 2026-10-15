@@ -45,13 +45,13 @@ export default function AdsHubPage() {
 
         <section aria-labelledby="formats-heading" className="flex flex-col gap-2">
           <h2 id="formats-heading" className="px-1 font-heading text-lg font-extrabold text-navy">
-            Three ways to show up
+            Four ways to show up
           </h2>
           {isError ? (
             <ErrorState onRetry={() => void refetch()} homeHref={null} />
           ) : (
             <ul className={`${CARD} divide-y divide-line overflow-hidden`}>
-              {AD_KINDS.map((k) => {
+              {AD_KINDS.filter((k) => !pricing || pricing.prices[k.kind]).map((k) => {
                 const p = pricing?.prices[k.kind];
                 return (
                   <li key={k.kind}>
@@ -68,7 +68,10 @@ export default function AdsHubPage() {
                           <Skeleton className="h-4 w-16 rounded-full" />
                         ) : (
                           <>
-                            <span className="font-heading text-sm font-black text-navy">{priceText(p.NGN, 'NGN')}</span>
+                            <span className="font-heading text-sm font-black text-navy">
+                              {k.kind === 'feed_post' ? 'from ' : ''}
+                              {priceText(p.NGN, 'NGN')}
+                            </span>
                             <span className="text-[11px] font-bold text-[#A86F0A]">or {priceText(p.HC, 'HC')}</span>
                             <span className="text-[11px] font-semibold text-muted">a week</span>
                           </>
