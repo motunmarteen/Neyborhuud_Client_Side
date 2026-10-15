@@ -572,6 +572,13 @@ export function PostCard({
   const isAnonymous = !author?.id || author.id === 'anonymous';
   const avatar = resolveUserAvatarUrl(author);
   const area = (post.location as { lga?: string } | undefined)?.lga || author?.location?.lga || '';
+  const loc = post.location as { latitude?: number; longitude?: number; lat?: number; lng?: number } | undefined;
+  const plat = loc?.latitude ?? loc?.lat;
+  const plng = loc?.longitude ?? loc?.lng;
+  const mapLink =
+    typeof plat === 'number' && typeof plng === 'number' && (plat !== 0 || plng !== 0)
+      ? `/huud?lat=${plat.toFixed(3)}&lng=${plng.toFixed(3)}`
+      : null;
 
   const kind = getPostKind(post);
   const badge = KIND_BADGE[kind];
@@ -778,6 +785,19 @@ export function PostCard({
             >
               {primary.action === 'going' && isGoing ? '✓ You’re going' : primary.label}
             </Button>
+          </div>
+        ) : null}
+
+        {/* Mockup: "📍 See on map". Street block only (~110 m), like the map pins; never for anonymous posts. */}
+        {mapLink && !isAnonymous ? (
+          <div className="px-4 pt-2">
+            <a
+              href={mapLink}
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex min-h-9 items-center gap-1 rounded-full bg-green-soft px-3 text-xs font-extrabold text-brand-green-dark"
+            >
+              📍 See on map
+            </a>
           </div>
         ) : null}
 

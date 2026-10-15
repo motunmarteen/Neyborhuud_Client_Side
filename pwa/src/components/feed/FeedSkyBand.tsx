@@ -10,9 +10,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { useVerticalSwipe } from '@/hooks/useSwipe';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCalm } from '@/hooks/useCalm';
 import { useMapWeather } from '@/hooks/useMapWeather';
@@ -24,11 +22,8 @@ import { userArea } from '@/lib/adsApi';
 
 /** Sky band height below the floating top bar. */
 const BAND = 112;
-/** How far down a swipe must go to open the map. */
-const SWIPE_PX = 70;
 
 export function FeedSkyBand() {
-  const router = useRouter();
   const calm = useCalm();
   const { user } = useAuth();
   const place = useMemo(() => (user ? extractUserMapCoords(user as unknown as MapUserLike) : null), [user]);
@@ -45,13 +40,11 @@ export function FeedSkyBand() {
   const words = wx ? WEATHER_WORDS[wx] : null;
   const weatherLine = [words ? `${words.icon} ${words.label}` : null, area?.lga ?? null].filter(Boolean).join(' · ');
 
-  // Swipe down on the sky to go back to the map.
-  const onPointerDown = useVerticalSwipe('down', SWIPE_PX, () => router.push('/huud'));
+  // Pulling down from the top of the Feed (this sky included) goes back to the map: see feed/page.tsx.
 
   return (
     <section
       aria-label="Feed"
-      onPointerDown={onPointerDown}
       className="relative overflow-hidden"
       style={{
         height: `calc(var(--safe-top) + var(--app-topnav-height) + ${BAND}px)`,

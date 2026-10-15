@@ -124,7 +124,8 @@ export const createAd = async (input: CreateAdInput) => data<{ ad: Ad }>(await a
 export const payAdWithCredit = async (id: string) => data<{ ad: Ad }>(await apiClient.post(`/ads/${id}/pay`, { method: 'huudcredit' })).ad;
 export const payAdWithNaira = async (id: string) => data<{ checkoutUrl: string }>(await apiClient.post(`/ads/${id}/pay`, { method: 'naira' })).checkoutUrl;
 
-export const countAd = (id: string, what: 'view' | 'tap') => apiClient.post(`/ads/${id}/${what}`).catch(() => undefined);
+export const countAd = (id: string, what: 'view' | 'tap') =>
+  id.startsWith('house-') || id.startsWith('sample-') ? Promise.resolve(undefined) : apiClient.post(`/ads/${id}/${what}`).catch(() => undefined);
 
 export const fetchReviewQueue = async () => data<{ ads: Ad[] }>(await apiClient.get('/ads/review')).ads ?? [];
 export const approveAd = async (id: string) => data<{ ad: Ad }>(await apiClient.post(`/ads/${id}/approve`)).ad;

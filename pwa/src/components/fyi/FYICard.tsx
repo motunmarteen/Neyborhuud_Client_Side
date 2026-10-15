@@ -375,7 +375,7 @@ export function FYICard({
                 {/* Views action */}
                 <div className="post-card-action-bar__btn flex flex-1 min-w-0 items-center justify-center gap-1 py-1 text-neu-text-secondary " aria-label="Views">
                     <XViewIcon size={18} />
-                    <span className="tabular-nums">{post.views ? formatCompactCount(post.views) : '1.2K'}</span>
+                    <span className="tabular-nums">{formatCompactCount(post.views ?? 0)}</span>
                 </div>
 
                 {/* Save action */}

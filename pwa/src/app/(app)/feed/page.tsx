@@ -52,6 +52,7 @@ import { FeedSkyBand } from '@/components/feed/FeedSkyBand';
 import { FeedComposer, FeedTabs } from '@/components/feed/FeedTabs';
 import { useFeedAds } from '@/hooks/useFeedAds';
 import { placeFeedAds } from '@/lib/feedAds';
+import { useVerticalSwipes } from '@/hooks/useSwipe';
 
 function XFeedInner() {
     const router = useRouter();
@@ -199,7 +200,8 @@ function XFeedInner() {
     const pollsOnly = typeParam === 'poll';
     const mergedFeed: BaseFeedItem[] = useMemo(
         () => posts
-                .filter(p => !(discoveryEnabled && !pollsOnly && p.contentType === 'help_request'))
+                // Help requests show in the Feed like every post (owner, 2026-10-15: "I posted a help
+                // post but I can't find it"); they used to live only in a carousel that needs 3+ posts.
                 .filter(p => !pollsOnly || p.type === 'poll' || Boolean((p as { poll?: unknown }).poll))
                 .map((p) => ({ _type: 'post' as const, data: p })),
         [posts, discoveryEnabled, pollsOnly],
@@ -217,6 +219,9 @@ function XFeedInner() {
         [mergedFeed, discoveryPools, discoveryEnabled],
     );
 
+    // Pull down from the top of the Feed (like pull-to-refresh) goes back to the map (owner, 2026-10-15).
+    const onFeedPull = useVerticalSwipes(90, { onDown: () => router.push('/huud') });
+
     // Sponsored cards (2026-10-15): never next to a safety / emergency post.
     const { ads: feedAds, hide: hideFeedAd } = useFeedAds(currentAuthUser);
     const adSlots = useMemo(
@@ -224,8 +229,8 @@ function XFeedInner() {
             placeFeedAds(timeline.length, feedAds, (i) => {
                 const it = timeline[i] as { _type?: string; data?: Post };
                 return it?._type === 'post' && it.data?.contentType === 'emergency';
-            }),
-        [timeline, feedAds],
+            }, !hasNextPage),
+        [timeline, feedAds, hasNextPage],
     );
 
     // Infinite scroll
@@ -410,6 +415,9 @@ function XFeedInner() {
                 {/* Main scroll area — FeedSkyHero takes the whole top of the screen */}
                 <main
                   ref={mainRef}
+                  onPointerDown={(e) => {
+                    if ((mainRef.current?.scrollTop ?? 0) <= 2) onFeedPull(e);
+                  }}
                   className="feed-scroll-main feed-scroll-main--sky-feed min-h-0 flex-1 overflow-y-auto scroll-smooth bg-white !pt-0 relative"
                   style={{ paddingTop: 0 }}
                 >

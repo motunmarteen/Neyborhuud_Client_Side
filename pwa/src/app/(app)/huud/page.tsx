@@ -13,15 +13,15 @@
  * (or tap "Feed") to open the Feed.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useVerticalSwipe } from '@/hooks/useSwipe';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { useVerticalSwipes } from '@/hooks/useSwipe';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import type * as maplibregl from 'maplibre-gl';
 import TopNav from '@/components/navigation/TopNav';
 import { BottomNav, OPEN_CREATE_SHEET } from '@/components/feed/BottomNav';
-import { FeedNewsTicker } from '@/components/feed/FeedNewsTicker';
+import { FeedNewsTicker, type PulseLocalItem } from '@/components/feed/FeedNewsTicker';
 import { SentinelOrb, type AreaMood } from '@/components/map/Pins';
 import { useCalm } from '@/hooks/useCalm';
 import { useMapWeather } from '@/hooks/useMapWeather';
@@ -29,6 +29,8 @@ import { setSaveData } from '@/lib/calmMode';
 import { WEATHER_WORDS } from '@/lib/mapWeather';
 import { userArea } from '@/lib/adsApi';
 import { nhToast } from '@/lib/toast';
+import { isAdminUser } from '@/lib/adminAccess';
+import { houseMapAds, previewSamplesOn, sampleMapAds } from '@/lib/houseAds';
 import { MapLayerChips } from '@/components/map/MapLayerChips';
 import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
 import { useAuth } from '@/hooks/useAuth';
@@ -67,7 +69,13 @@ export default function HuudMapHomePage() {
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#9ED3F5]">
       <TopNav />
-      {isLoading ? <div className="h-full w-full animate-pulse bg-[#9ED3F5] motion-reduce:animate-none" /> : <MapHome user={user} />}
+      {isLoading ? (
+        <div className="h-full w-full animate-pulse bg-[#9ED3F5] motion-reduce:animate-none" />
+      ) : (
+        <Suspense fallback={<div className="h-full w-full bg-[#9ED3F5]" />}>
+          <MapHome user={user} />
+        </Suspense>
+      )}
       <BottomNav />
     </div>
   );
@@ -75,7 +83,15 @@ export default function HuudMapHomePage() {
 
 function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   const router = useRouter();
-  const view = useMemo(() => startView(user), [user]);
+  // "📍 See on map" from a Feed post opens the map on that street block (?lat=&lng=, 3 decimals).
+  const params = useSearchParams();
+  const focusLat = Number(params.get('lat'));
+  const focusLng = Number(params.get('lng'));
+  const hasFocus = params.has('lat') && params.has('lng') && Number.isFinite(focusLat) && Number.isFinite(focusLng);
+  const view = useMemo(
+    () => (hasFocus ? { center: { lat: focusLat, lng: focusLng }, zoom: STREET_ZOOM + 1 } : startView(user)),
+    [user, hasFocus, focusLat, focusLng],
+  );
   const knowsArea = view.zoom >= STREET_ZOOM;
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [sky, setSky] = useState<SkyState | null>(null);
@@ -94,7 +110,17 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   }, []);
 
   const { status, pins } = useMapPins(map, layers, { onOpen: setPin, live: true });
-  useMapAds(map, { dark: sky?.dark ?? 0, onOpen: setAd });
+  // Ads: real ones; NeyborHuud's "Your ad here" when there are none; sample ads for preview.
+  const isAdmin = isAdminUser(user as Parameters<typeof isAdminUser>[0]);
+  const [samplesOn, setSamplesOn] = useState(false);
+  useEffect(() => setSamplesOn(previewSamplesOn(isAdmin)), [isAdmin]);
+  const adArea = userArea(user);
+  const houseAds = useMemo(() => (knowsArea && adArea ? houseMapAds(view.center, adArea) : []), [knowsArea, adArea?.lga, view.center]);
+  const sampleAds = useMemo(
+    () => (knowsArea && adArea && samplesOn ? sampleMapAds(view.center, adArea) : []),
+    [knowsArea, adArea?.lga, samplesOn, view.center],
+  );
+  useMapAds(map, { dark: sky?.dark ?? 0, onOpen: setAd, fallback: houseAds, extra: sampleAds });
 
   const counts = useMemo(() => {
     const c: Partial<Record<MapLayer, number>> = {};
@@ -125,6 +151,16 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   const weatherWords = wx ? WEATHER_WORDS[wx] : null;
   const weatherLine = [weatherWords ? `${weatherWords.icon} ${weatherWords.label}` : null, area?.lga ?? null].filter(Boolean).join(' · ');
   const openCreate = () => window.dispatchEvent(new CustomEvent(OPEN_CREATE_SHEET));
+
+  // Pulse (mockup): the weather now and reported go-slows in this area come first.
+  const pulseLocal = useMemo<PulseLocalItem[]>(() => {
+    const out: PulseLocalItem[] = [];
+    if (weatherWords) out.push({ text: `${weatherWords.icon} ${weatherWords.label} now${area?.lga ? ` in ${area.lga}` : ''}` });
+    for (const p of pins.filter((x) => x.layer === 'traffic').slice(0, 3)) {
+      out.push({ text: `🚧 ${p.top.title}`, href: pinHref(p) });
+    }
+    return out;
+  }, [weatherWords, area?.lga, pins]);
   const shareToday = async () => {
     const where = area?.lga ?? 'my area';
     const text = `See what is happening in ${where} today on NeyborHuud.`;
@@ -141,7 +177,13 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   };
 
   // Swipe the sheet up to open the Feed.
-  const onSheetDown = useVerticalSwipe('up', SWIPE_UP_PX, () => router.push('/feed'));
+  // The card is open by default; swipe down (or ✕) hides it to see the whole map.
+  const [cardOpen, setCardOpen] = useState(true);
+  const onSheetDown = useVerticalSwipes(SWIPE_UP_PX, {
+    onUp: () => router.push('/feed'),
+    onDown: () => setCardOpen(false),
+  });
+  const onTabDown = useVerticalSwipes(SWIPE_UP_PX, { onUp: () => setCardOpen(true) });
 
   const hint =
     status === 'zoom-in'
@@ -171,7 +213,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           <MapLayerChips active={layers} onChange={setLayers} counts={counts} />
         </div>
         <div className="nh-map-pulse pointer-events-auto mx-auto w-full max-w-xl overflow-hidden rounded-full shadow-[0_4px_14px_rgba(29,36,51,0.16)]">
-          <FeedNewsTicker />
+          <FeedNewsTicker local={pulseLocal} />
         </div>
         {/* Right side: Sentinel orb (area mood), Me, Calm view. */}
         <div className="pointer-events-none mx-auto flex w-full max-w-xl flex-col items-end gap-2 pt-1">
@@ -199,7 +241,9 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         </div>
       </div>
 
-      {/* Bottom sheet (mockup): greeting + weather, Ask Sentinel, post, report, share. Swipe up for the Feed. */}
+      {/* Bottom sheet (mockup): greeting + weather, Ask Sentinel, post, report, share.
+          Swipe up for the Feed; swipe down or ✕ to hide it and see the whole map. */}
+      {cardOpen ? (
       <section
         aria-label="Your area today"
         onPointerDown={onSheetDown}
@@ -207,10 +251,22 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         style={{ touchAction: 'pan-x' }}
       >
         <div className="mx-auto flex max-w-xl flex-col gap-2.5 rounded-[24px] bg-white/95 px-4 pb-3.5 pt-2 shadow-[0_-4px_24px_rgba(29,36,51,0.18)] backdrop-blur">
-          <Link href="/feed" className="flex flex-col items-center gap-0.5 pt-0.5" aria-label="Open the Feed. You can also swipe this card up.">
-            <span aria-hidden className="h-1.5 w-10 rounded-full bg-line" />
-            <span className="text-[11px] font-extrabold text-muted">Swipe up for the Feed</span>
-          </Link>
+          <div className="relative flex justify-center">
+            <Link href="/feed" className="flex flex-col items-center gap-0.5 pt-0.5" aria-label="Open the Feed. You can also swipe this card up.">
+              <span aria-hidden className="h-1.5 w-10 rounded-full bg-line" />
+              <span className="text-[11px] font-extrabold text-muted">Swipe up for the Feed · down to hide</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setCardOpen(false)}
+              aria-label="Hide this card and see the whole map"
+              className="absolute -right-2 -top-1 grid h-10 w-10 place-items-center rounded-full text-muted transition-colors hover:bg-background"
+            >
+              <span aria-hidden className="material-symbols-outlined text-[20px]">
+                close
+              </span>
+            </button>
+          </div>
           <p aria-live="polite" className={`text-center text-xs font-bold text-[#8A5A00] ${hint ? '' : 'sr-only'}`}>
             {hint ?? (status === 'loading' ? 'Loading what is happening…' : `${pins.length} things happening on the map`)}
           </p>
@@ -243,13 +299,29 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           </button>
         </div>
       </section>
+      ) : (
+        <div className="absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+0.5rem)] z-10 flex justify-center px-3" onPointerDown={onTabDown}>
+          <button
+            type="button"
+            onClick={() => setCardOpen(true)}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/95 px-4 text-sm font-extrabold text-navy shadow-[0_4px_14px_rgba(29,36,51,0.18)]"
+          >
+            <span aria-hidden className="material-symbols-outlined text-[18px]">
+              expand_less
+            </span>
+            Show card
+          </button>
+        </div>
+      )}
 
       <PinPanel pin={pin} onClose={() => setPin(null)} />
 
       <AppBottomSheet open={!!ad} onClose={() => setAd(null)} title={ad?.title ?? 'Ad'}>
         {ad ? (
           <div className="flex flex-col gap-3 pb-2">
-            <span className="self-start rounded-full bg-background px-2 py-0.5 text-[11px] font-extrabold text-navy">Ad</span>
+            <span className="self-start rounded-full bg-background px-2 py-0.5 text-[11px] font-extrabold text-navy">
+              {ad._id.startsWith('sample-') ? 'Sample ad · preview, not a real business' : 'Ad'}
+            </span>
             {ad.line ? <p className="text-[15px] text-navy">{ad.line}</p> : null}
             <div className="flex gap-2">
               {ad.target ? (

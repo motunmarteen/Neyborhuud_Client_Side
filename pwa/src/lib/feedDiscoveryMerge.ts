@@ -67,7 +67,6 @@ export function mergeDiscoveryIntoFeed(
     pools.marketplace.length > 0 || 
     pools.events.length > 0 || 
     pools.jobs.length > 0 ||
-    pools.helpRequests.length > 0 ||
     pools.services.length > 0 ||
     pools.news.length > 0 ||
     pools.neighbors.length > 0;
@@ -92,7 +91,8 @@ export function mergeDiscoveryIntoFeed(
     if (kind === "marketplace") return pools.marketplace;
     if (kind === "event") return pools.events;
     if (kind === "job") return pools.jobs;
-    if (kind === "help") return pools.helpRequests;
+    // Help requests are normal Feed posts now (2026-10-15), never a separate carousel.
+    if (kind === "help") return [];
     if (kind === "service") return pools.services;
     if (kind === "news") return pools.news;
     return pools.neighbors;

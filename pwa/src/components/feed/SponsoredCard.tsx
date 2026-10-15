@@ -63,7 +63,11 @@ export function SponsoredCard({ ad, onHide, preview = false }: { ad: Ad; onHide?
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-[15px] font-bold text-navy">{ad.title}</span>
             <span className="text-xs font-semibold text-muted">
-              Sponsored{where ? ` · ${where} in ${ad.area.lga}` : ''}
+              {ad._id.startsWith('sample-') ? (
+                <span className="font-extrabold text-[#8A5A00]">Sample ad · preview, not a real business</span>
+              ) : (
+                <>Sponsored{where ? ` · ${where} in ${ad.area.lga}` : ''}</>
+              )}
             </span>
           </span>
           {onHide ? (
