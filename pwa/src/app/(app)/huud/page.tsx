@@ -217,6 +217,11 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   // How tall the card (or the "Show card" tab) is, so the ⋯ and SOS buttons sit just above it.
   const dockRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
+    // Card hidden: "Show card" sits in the same row as ⋯ and SOS, right above the tab bar.
+    if (!cardOpen) {
+      document.documentElement.style.setProperty('--huud-dock', '0px');
+      return;
+    }
     const el = dockRef.current;
     if (!el) return;
     const set = () => document.documentElement.style.setProperty('--huud-dock', `${Math.round(el.getBoundingClientRect().height)}px`);
@@ -387,11 +392,15 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         </div>
       </section>
       ) : (
-        <div ref={dockRef} className="absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+0.5rem)] z-10 flex justify-center px-3" onPointerDown={onTabDown}>
+        // Same row as ⋯ (left) and SOS (right): same bottom, same 56 px height, centred.
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+1rem)] z-10 flex h-14 items-center justify-center px-20"
+          onPointerDown={onTabDown}
+        >
           <button
             type="button"
             onClick={() => setCardOpen(true)}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/95 px-4 text-sm font-extrabold text-navy shadow-[0_4px_14px_rgba(29,36,51,0.18)]"
+            className="pointer-events-auto inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/95 px-4 text-sm font-extrabold text-navy shadow-[0_4px_14px_rgba(29,36,51,0.18)]"
           >
             <span aria-hidden className="material-symbols-outlined text-[18px]">
               expand_less
