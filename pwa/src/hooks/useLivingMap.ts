@@ -22,7 +22,7 @@ const TOY_LAYER = 'toy-world';
 const SOURCE = 'living';
 const MIN_ZOOM = 15;
 const FRAME_MS = 50;
-const VEHICLES = new Set(['car', 'danfo', 'keke', 'okada']);
+const VEHICLES = new Set(['car', 'danfo', 'keke', 'okada', 'brt']);
 
 type Options = { hour: number; weather: string | null | undefined; dark: number; enabled: boolean };
 
@@ -58,12 +58,14 @@ function readScene(map: maplibregl.Map): Scene {
   const tr = map.querySourceFeatures('openmaptiles', { sourceLayer: 'transportation' }) as unknown as Feature[];
   const roads: LngLat[][] = [];
   const walkways: LngLat[][] = [];
+  const busways: LngLat[][] = [];
   for (const f of tr) {
     const cls = String(f.properties?.class ?? '');
     for (const path of lines(f)) {
       if (!touches(path)) continue;
       if (['primary', 'secondary', 'tertiary', 'trunk', 'minor'].includes(cls)) roads.push(path);
       if (['minor', 'service', 'path', 'track'].includes(cls)) walkways.push(path);
+      if (cls === 'busway' || cls === 'bus_guideway') busways.push(path);
     }
   }
 
@@ -92,7 +94,7 @@ function readScene(map: maplibregl.Map): Scene {
       if (inView(p)) markets.push(p);
     }
   }
-  return { roads, walkways, pitches, markets };
+  return { roads, busways, walkways, pitches, markets };
 }
 
 function toGeoJSON(agents: Agent[], night: boolean): GeoJSON.FeatureCollection {

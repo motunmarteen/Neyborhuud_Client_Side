@@ -8,7 +8,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 - Update the **progress table** and **last updated** line at the end of each work session.
 - Status for tasks in progress: put `🟡` at the start of the line. Blocked: `⛔` plus the reason.
 
-**Last updated:** 16 October 2026
+**Last updated:** 17 October 2026
 
 > **PWA first.** NeyborHuud runs in the phone's browser from a link: no download, no app store, lowest barrier to entry. Installing ("Add to home screen") is optional. Store apps come later, only if needed.
 
@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 9 | 17 | 🟡 map home live at /huud; pin panels, live pins, toy-world 3D buildings and 3D street life done; next M-18 step 3, M-10 go-slow traffic |
+| 3. Map home (sky + live map) | 9 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards done; next M-10 go-slow traffic |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -203,7 +203,7 @@ Kept here so the whole history is in one place.
 - [x] M-13 (2026-10-15: "Calm view / Live view" on the map, same setting as Save data: flat map, no motion) Calm view toggle
 - [ ] M-14 Area Champion crown marker
 - [ ] M-15 Low-data mode: flat 2D map, no animation, cached last view
-- [ ] 🟡 M-18 **Toy-world 3D** (owner, 2026-10-16, WareTrack reference): three.js layer inside MapLibre. Step 1 done: real OSM footprints become styled models (kiosk, bungalow with zinc/terracotta/green hip or gable roof, house, storey, plaza, warehouse with sawtooth roof, tall blocks), windows/doors, ground shadows, lit windows at night; **filler buildings along real roads where OSM has no outlines** (owner chose "fill in, plus help map Nigeria"; never on roads, water, parks, pitches or real buildings; real outlines win). Igando test: 0 → 577 buildings. Step 2 done: street life as 3D models (danfos, kekes, okadas with riders, cars in several paints, people, kids and the football) on the same simulation and real roads; palm trees on empty lots. Next: BRT buses on BRT routes, 3D billboards, vehicle lights at night; then "help map Nigeria" (invite neighbours to add their buildings to OpenStreetMap so real outlines replace fillers)
+- [ ] 🟡 M-18 **Toy-world 3D** (owner, 2026-10-16, WareTrack reference): three.js layer inside MapLibre. Step 1 done: real OSM footprints become styled models (kiosk, bungalow with zinc/terracotta/green hip or gable roof, house, storey, plaza, warehouse with sawtooth roof, tall blocks), windows/doors, ground shadows, lit windows at night; **filler buildings along real roads where OSM has no outlines** (owner chose "fill in, plus help map Nigeria"; never on roads, water, parks, pitches or real buildings; real outlines win). Igando test: 0 → 577 buildings. Step 2 done: street life as 3D models (danfos, kekes, okadas with riders, cars in several paints, people, kids and the football) on the same simulation and real roads; palm trees on empty lots. Step 3 done (2026-10-17): **BRT buses** (Lagos blue / Primero red) run only on real BRT lanes from OpenStreetMap (`busway`; few are mapped yet, e.g. Ikorodu Road at Anthony), one per ~180 m so they never bunch; **head and tail lights** and a pool of light on the road for every vehicle after dusk; **3D billboards**: each map billboard ad stands on two posts at its spot, faces you, stays readable at any zoom, self-lit at night with lamps, tap opens the ad (2D board kept for screen readers). Next: "help map Nigeria" (invite neighbours to add their buildings to OpenStreetMap so real outlines replace fillers)
 - [ ] M-16 Performance target: smooth on a ₦60,000 Android phone; map loads in under 3 s on 3G anywhere in Nigeria
 
 ---

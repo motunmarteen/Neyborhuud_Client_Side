@@ -9575,6 +9575,11 @@ html .animate-spin {
 .nh-bb__posts i { display: block; width: 5px; height: 18px; border-radius: 0 0 2px 2px; background: #5B6170; }
 .nh-bb[data-night] .nh-bb__face { box-shadow: 0 0 18px 4px rgba(255, 214, 120, 0.55), inset 0 0 12px rgba(255, 255, 255, 0.25); }
 .nh-bb[data-night] { filter: drop-shadow(0 0 10px rgba(255, 200, 90, 0.45)); }
+/* Street zoom on the toy-world map: the 3D billboard stands in for the 2D one. Hidden from
+   sight only; the button stays for screen readers and keyboards (M-18 step 3).
+   (The inner button: MapLibre sets an inline opacity on the marker itself.) */
+[data-toy3d="on"] .nh-ad-marker[data-kind="billboard"] > * { opacity: 0; pointer-events: none; }
+[data-toy3d="on"] .nh-ad-marker[data-kind="billboard"] > :focus-visible { opacity: 1; }
 
 /* Ad wall: a grid of plots for an area. */
 .nh-wall { display: grid; gap: 3px; padding: 6px; border-radius: 16px; background: #E4DDCF; }

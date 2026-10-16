@@ -5,11 +5,16 @@
  * for the area on screen when the map stops moving and keeps one marker per ad. Billboards
  * glow at night (`dark` from the sky). Each ad counts one view per visit when it first shows,
  * and a tap when opened. `sample` shows given ads instead of fetching (the design kit).
+ *
+ * On the toy-world map (street zoom), billboards also stand in 3D (lib/toyWorld/billboards):
+ * the 2D board is then hidden from sight by CSS but kept for screen readers, and a tap on
+ * the 3D board opens the ad.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
-import { billboardHtml, billboardLabel, sponsoredPinHtml } from '@/components/map/AdBoard';
+import { billboardHtml, billboardLabel, boardInk, sponsoredPinHtml } from '@/components/map/AdBoard';
+import { TOY_LAYER_ID, type ToyWorldLayer } from '@/lib/toyWorld/toyWorldLayer';
 import { countAd, fetchMapAds, type Ad } from '@/lib/adsApi';
 import { MAX_SPAN_DEG } from '@/lib/mapPins';
 
@@ -25,6 +30,11 @@ type Options = {
 };
 
 const seenThisVisit = new Set<string>();
+
+function toyLayer(map: maplibregl.Map): ToyWorldLayer | undefined {
+  if (!map.getStyle()) return undefined;
+  return (map.getLayer(TOY_LAYER_ID) as unknown as { implementation?: ToyWorldLayer } | undefined)?.implementation;
+}
 
 function markup(ad: Ad, night: boolean) {
   return ad.kind === 'billboard' ? billboardHtml(ad, night) : sponsoredPinHtml(ad);
@@ -103,6 +113,8 @@ export function useMapAds(map: maplibregl.Map | null, { dark = 0, sample, onOpen
         continue;
       }
       const wrap = document.createElement('div');
+      wrap.className = 'nh-ad-marker';
+      wrap.dataset.kind = ad.kind;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'nh-pin-btn';
@@ -135,6 +147,38 @@ export function useMapAds(map: maplibregl.Map | null, { dark = 0, sample, onOpen
       }
     }
   }, [map, ads, night, sample]);
+
+  // 3D billboards: hand them to the toy-world layer (again when the layer appears later).
+  useEffect(() => {
+    if (!map) return;
+    const boards = ads
+      .filter((ad) => ad.kind === 'billboard' && ad.location)
+      .map((ad) => ({
+        id: ad._id,
+        lng: ad.location!.lng,
+        lat: ad.location!.lat,
+        title: ad.title,
+        line: ad.line,
+        colour: ad.colour,
+        ink: boardInk(ad.colour),
+        chip: ad._id.startsWith('sample-') ? 'Sample' : 'Ad',
+      }));
+    const push = () => toyLayer(map)?.setBillboards(boards);
+    push();
+    map.on('idle', push);
+    const onClick = (e: maplibregl.MapMouseEvent) => {
+      const id = toyLayer(map)?.pickBillboard(e.point);
+      const cur = id ? markers.current.get(id)?.ad : undefined;
+      if (!cur) return;
+      if (!sample) void countAd(cur._id, 'tap');
+      openRef.current?.(cur);
+    };
+    map.on('click', onClick);
+    return () => {
+      map.off('idle', push);
+      map.off('click', onClick);
+    };
+  }, [map, ads, sample]);
 
   useEffect(() => {
     const all = markers.current;
