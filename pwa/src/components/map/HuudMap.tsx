@@ -15,7 +15,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { HUUD_MAP_STYLE } from '@/lib/huudMapStyle';
 import { ensureMaplibreWorker } from '@/lib/maplibreWorker';
 import { NIGERIA_BOUNDS } from '@/lib/nigeriaView';
-import { isCalm } from '@/lib/calmMode';
+import { CALM_EVENT, isCalm } from '@/lib/calmMode';
+import { TOY_LAYER_ID, createToyWorldLayer } from '@/lib/toyWorld/toyWorldLayer';
 
 export type LngLat = { lat: number; lng: number };
 
@@ -40,14 +41,26 @@ type HuudMapProps = {
    * Never in calm mode.
    */
   cinematic?: boolean;
+  /**
+   * Map home only (owner, 2026-10-16): real buildings drawn as styled 3D models (three.js).
+   * Off in calm mode / light mode, switched live when calm changes.
+   */
+  toyWorld?: boolean;
 };
+
+/** Put the toy-world models under the labels, pins and street life. */
+function addToyWorld(map: maplibregl.Map) {
+  if (map.getLayer(TOY_LAYER_ID)) return;
+  const firstSymbol = map.getStyle().layers.find((l) => l.type === 'symbol')?.id;
+  map.addLayer(createToyWorldLayer(), firstSymbol);
+}
 
 const INTRO_KEY = 'nh_map_intro_done';
 /** Slow circling speed after the swoop, degrees per second. */
 const ORBIT_DEG_PER_S = 2.2;
 
 /** Without a centre the map fits all of Nigeria; screens pass the person's area (startView). */
-export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', className = '', onReady, tilt = true, compass = true, compassPosition = 'top-right', cinematic = false }: HuudMapProps) {
+export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', className = '', onReady, tilt = true, compass = true, compassPosition = 'top-right', cinematic = false, toyWorld = false }: HuudMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [failed, setFailed] = useState(false);
@@ -89,10 +102,21 @@ export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', class
     map.on('load', () => {
       // Calm mode: flat footprints only (lighter on old phones and data).
       if (calm && map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none');
+      if (toyWorld && !calm) addToyWorld(map);
       onReady?.(map);
       if (cinematic && center && tilt && !calm) startCinematic(map, zoom);
     });
+    // Calm view / light mode switched while the map is open: drop or bring back the models.
+    const onCalm = () => {
+      if (!toyWorld || !map.isStyleLoaded()) return;
+      if (isCalm()) {
+        if (map.getLayer(TOY_LAYER_ID)) map.removeLayer(TOY_LAYER_ID);
+        if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none');
+      } else addToyWorld(map);
+    };
+    window.addEventListener(CALM_EVENT, onCalm);
     return () => {
+      window.removeEventListener(CALM_EVENT, onCalm);
       map.remove();
       mapRef.current = null;
     };

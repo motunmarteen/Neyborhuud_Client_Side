@@ -20,6 +20,13 @@ import { useMapWeather } from '@/hooks/useMapWeather';
 import { useCalm } from '@/hooks/useCalm';
 import { applyMapLight } from '@/lib/mapNight';
 import { useLivingMap } from '@/hooks/useLivingMap';
+import { TOY_LAYER_ID, type ToyWorldLayer } from '@/lib/toyWorld/toyWorldLayer';
+
+/** Night for the toy-world models: lit windows, dimmer sun. */
+function toyDark(map: maplibregl.Map, dark: number) {
+  const layer = map.getLayer(TOY_LAYER_ID) as unknown as { implementation?: ToyWorldLayer } | undefined;
+  layer?.implementation?.setDark(dark);
+}
 import { watMinutes } from '@/lib/sky';
 
 /** Unknown weather: no clouds, rain or haze (never a made-up look). */
@@ -64,9 +71,11 @@ type SkyMapProps = {
   living?: boolean;
   /** Map home: swoop-down opening and slow circling (see HuudMap). */
   cinematic?: boolean;
+  /** Map home: real buildings as styled 3D models (see HuudMap). */
+  toyWorld?: boolean;
 };
 
-export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true, cinematic = false }: SkyMapProps) {
+export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true, cinematic = false, toyWorld = false }: SkyMapProps) {
   const calm = useCalm();
   const liveWx = useMapWeather(weather === undefined ? center : null);
   const wx = weather === undefined ? liveWx : weather;
@@ -87,12 +96,16 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
   // Night lights (M-06): the map's own colours follow the sky; windows and lamps glow.
   const darkStep = Math.round(sky.dark * 50) / 50;
   useEffect(() => {
-    if (mapRef.current) applyMapLight(mapRef.current, darkStep);
+    if (mapRef.current) {
+      applyMapLight(mapRef.current, darkStep);
+      toyDark(mapRef.current, darkStep);
+    }
   }, [darkStep]);
   const handleReady = (map: maplibregl.Map) => {
     mapRef.current = map;
     setMapObj(map);
     applyMapLight(map, darkStep);
+    toyDark(map, darkStep);
     onReady?.(map);
   };
 
@@ -170,7 +183,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
           maskImage: `linear-gradient(180deg, transparent 0, transparent ${SKY_BAND - 70}px, #000 ${SKY_BAND + 30}px)`,
         }}
       >
-        <HuudMap center={center} zoom={zoom} label={label} className="h-full w-full" onReady={handleReady} compassPosition="bottom-right" cinematic={cinematic} />
+        <HuudMap center={center} zoom={zoom} label={label} className="h-full w-full" onReady={handleReady} compassPosition="bottom-right" cinematic={cinematic} toyWorld={toyWorld} />
         {/* Time-of-day light over the land: warm at dawn and sunset, blue at night. */}
         <div
           className="pointer-events-none absolute inset-0"
