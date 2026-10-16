@@ -11,7 +11,7 @@
  */
 
 export type LngLat = [number, number];
-export type VehicleKind = 'danfo' | 'keke' | 'okada' | 'car';
+export type VehicleKind = 'danfo' | 'keke' | 'okada' | 'car' | 'brt';
 export type AgentKind = VehicleKind | 'person' | 'kid' | 'ball';
 
 export type Agent = {
@@ -111,12 +111,16 @@ export function rng(seed: number) {
   };
 }
 
+/** Lane metres per BRT bus. */
+const BRT_GAP_M = 180;
+
 // Speeds in m/s, a little faster than life so the street reads as moving on a phone.
 const SPEED: Record<VehicleKind | 'person', [number, number]> = {
   danfo: [7, 11],
   car: [8, 13],
   keke: [5, 8],
   okada: [8, 12],
+  brt: [8, 12],
   person: [1.1, 1.7],
 };
 
@@ -132,6 +136,8 @@ function pickVehicle(r: () => number): VehicleKind {
 export type Scene = {
   /** Roads cars can drive on, as polylines. */
   roads: LngLat[][];
+  /** Real BRT lanes (OpenStreetMap busways). Only here do BRT buses run. */
+  busways?: LngLat[][];
   /** Streets and paths people walk on. */
   walkways: LngLat[][];
   /** Pitches and playgrounds (centre and rough radius in metres). */
@@ -168,6 +174,24 @@ export function populate(scene: Scene, mood: Mood, seed = 1): Agent[] {
     const dir: 1 | -1 = r() < 0.5 ? 1 : -1;
     const at = along(path, cum, s);
     agents.push({ id: id++, kind, variant: Math.floor(r() * 5), path, cum, s, dir, speed: lo + r() * (hi - lo), pos: at.pos, bearing: dir === 1 ? at.bearing : (at.bearing + 180) % 360 });
+  }
+
+  // BRT buses only on real BRT lanes, never invented on ordinary roads. At most one bus per
+  // BRT_GAP_M of lane, spread out along it, so they never bunch up.
+  const lanes = (scene.busways ?? [])
+    .filter((p) => p.length >= 2)
+    .map((path) => ({ path, cum: cumulative(path) }))
+    .filter((l) => l.cum[l.cum.length - 1] >= 40);
+  for (const { path, cum } of lanes) {
+    const len = cum[cum.length - 1];
+    const nBrt = Math.min(Math.floor(len / BRT_GAP_M) + 1, Math.round(6 * act * wf.vehicles * density));
+    for (let i = 0; i < nBrt; i++) {
+      const [lo, hi] = SPEED.brt;
+      const s = ((i + 0.2 + r() * 0.6) / nBrt) * len;
+      const dir: 1 | -1 = r() < 0.5 ? 1 : -1;
+      const at = along(path, cum, s);
+      agents.push({ id: id++, kind: 'brt', variant: Math.floor(r() * 2), path, cum, s, dir, speed: lo + r() * (hi - lo), pos: at.pos, bearing: dir === 1 ? at.bearing : (at.bearing + 180) % 360 });
+    }
   }
 
   const walk = scene.walkways.filter((p) => p.length >= 2);

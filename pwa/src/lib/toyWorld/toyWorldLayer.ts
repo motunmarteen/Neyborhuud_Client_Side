@@ -22,10 +22,11 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import * as maplibregl from 'maplibre-gl';
 import { openings, orientedBox, planBuilding, ringArea, roofTriangles, type Pt } from './shapes';
 import { fillAlongRoads, type Road } from './fill';
-import { ballModel, carModel, danfoModel, kekeModel, okadaModel, palmModel, personModel, VARIANT_COLOURS } from './models';
+import { ballModel, brtModel, carModel, danfoModel, kekeModel, okadaModel, palmModel, personModel, VARIANT_COLOURS } from './models';
 import { livingAgents } from '@/lib/livingRegistry';
 import type { AgentKind } from '@/lib/livingMap';
 import { hash01 } from './shapes';
+import { createBillboards, type ToyBillboard } from './billboards';
 
 export const TOY_LAYER_ID = 'toy-world';
 const RADIUS_M = 450;
@@ -35,11 +36,32 @@ const MIN_ZOOM = 15;
 const REBUILD_M = 220;
 /** Figures a bit larger than life so they read on a phone. */
 const AGENT_SCALE = 3.2;
-const CAPACITY: Record<AgentKind, number> = { danfo: 150, keke: 150, okada: 150, car: 250, person: 500, kid: 60, ball: 6 };
+/** A 12 m bus at full toy scale would be nearly 40 m long, so long models are scaled down. */
+const KIND_SCALE: Partial<Record<AgentKind, number>> = { brt: 0.55 };
+const CAPACITY: Record<AgentKind, number> = { danfo: 150, keke: 150, okada: 150, car: 250, brt: 30, person: 500, kid: 60, ball: 6 };
+
+/**
+ * Where each vehicle's lamps sit, in model metres (front is +x): half its length, how far
+ * apart the two headlamps are (0 = one lamp in the middle) and how high.
+ */
+const LAMPS: Partial<Record<AgentKind, { half: number; apart: number; y: number }>> = {
+  danfo: { half: 2.5, apart: 0.75, y: 0.95 },
+  car: { half: 2.1, apart: 0.65, y: 0.8 },
+  keke: { half: 1.1, apart: 0, y: 0.85 },
+  okada: { half: 0.9, apart: 0, y: 0.95 },
+  brt: { half: 6, apart: 0.95, y: 1.0 },
+};
+const LAMP_CAPACITY = Object.entries(LAMPS).reduce((n, [k]) => n + CAPACITY[k as AgentKind], 0);
 
 type Built = { origin: maplibregl.MercatorCoordinate; scale: number; count: number };
 
-export type ToyWorldLayer = maplibregl.CustomLayerInterface & { setDark: (dark: number) => void };
+export type ToyWorldLayer = maplibregl.CustomLayerInterface & {
+  setDark: (dark: number) => void;
+  /** Map billboard ads to stand in 3D (useMapAds). */
+  setBillboards: (list: ToyBillboard[]) => void;
+  /** The 3D billboard under a point in the map canvas (CSS px), if any. */
+  pickBillboard: (point: { x: number; y: number }) => string | null;
+};
 
 export function createToyWorldLayer(): ToyWorldLayer {
   let map: maplibregl.Map | null = null;
@@ -75,6 +97,7 @@ export function createToyWorldLayer(): ToyWorldLayer {
     keke: kekeModel(),
     okada: okadaModel(),
     car: carModel(),
+    brt: brtModel(),
     person: personModel(1.7),
     kid: personModel(1.25),
     ball: ballModel(),
@@ -90,6 +113,42 @@ export function createToyWorldLayer(): ToyWorldLayer {
     life[kind] = mesh;
     lifeGroup.add(mesh);
   }
+  // Night lights: unlit (always bright) head and tail lamps, and a soft pool of light on
+  // the road ahead. Shown from dusk with the sky (setDark), like the 2D street life.
+  const headMat = new THREE.MeshBasicMaterial({ color: '#FFF4C8' });
+  const tailMat = new THREE.MeshBasicMaterial({ color: '#FF2A2A' });
+  const beamMat = new THREE.MeshBasicMaterial({
+    color: '#FFE7A0',
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide,
+  });
+  const lampGeo = new THREE.BoxGeometry(0.12, 0.2, 0.32);
+  const beamGeo = new THREE.BufferGeometry();
+  // A widening wedge on the ground, starting at the bumper (x = 0) and reaching 4 m ahead.
+  beamGeo.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute([0, 0.04, -0.6, 4, 0.04, -1.6, 4, 0.04, 1.6, 0, 0.04, -0.6, 4, 0.04, 1.6, 0, 0.04, 0.6], 3),
+  );
+  const lampMesh = (geo: THREE.BufferGeometry, mat: THREE.Material, cap: number) => {
+    const mesh = new THREE.InstancedMesh(geo, mat, cap);
+    mesh.count = 0;
+    mesh.frustumCulled = false;
+    mesh.renderOrder = 5;
+    lifeGroup.add(mesh);
+    return mesh;
+  };
+  const heads = lampMesh(lampGeo, headMat, LAMP_CAPACITY * 2);
+  const tails = lampMesh(lampGeo, tailMat, LAMP_CAPACITY * 2);
+  const beams = lampMesh(beamGeo, beamMat, LAMP_CAPACITY);
+  const tmpL = new THREE.Matrix4();
+  const tmpO = new THREE.Matrix4();
+
+  const billboards = createBillboards();
+  scene.add(billboards.root);
+
   const palmGeo = palmModel();
   const tmpM = new THREE.Matrix4();
   const tmpQ = new THREE.Quaternion();
@@ -103,6 +162,14 @@ export function createToyWorldLayer(): ToyWorldLayer {
     const counts = {} as Record<AgentKind, number>;
     for (const k of Object.keys(life) as AgentKind[]) counts[k] = 0;
     const { origin, scale } = built;
+    const lightsOn = dark > 0.4;
+    let nHead = 0;
+    let nTail = 0;
+    let nBeam = 0;
+    const lamp = (mesh: THREE.InstancedMesh, i: number, x: number, y: number, z: number) => {
+      tmpL.multiplyMatrices(tmpM, tmpO.makeTranslation(x, y, z));
+      mesh.setMatrixAt(i, tmpL);
+    };
     for (const a of livingAgents(map)) {
       const mesh = life[a.kind];
       if (!mesh || counts[a.kind] >= CAPACITY[a.kind]) continue;
@@ -113,12 +180,26 @@ export function createToyWorldLayer(): ToyWorldLayer {
       // Map bearing (clockwise from north) to a turn about "up"; models face +x.
       tmpQ.setFromAxisAngle(UP, Math.PI / 2 - (a.bearing * Math.PI) / 180);
       tmpP.set(x, 0, z);
-      tmpS.setScalar(AGENT_SCALE);
+      tmpS.setScalar(AGENT_SCALE * (KIND_SCALE[a.kind] ?? 1));
       tmpM.compose(tmpP, tmpQ, tmpS);
       const i = counts[a.kind]++;
       mesh.setMatrixAt(i, tmpM);
       const palette = VARIANT_COLOURS[a.kind] ?? ['#FFFFFF'];
       mesh.setColorAt(i, tmpC.set(palette[a.variant % palette.length]));
+
+      const spec = lightsOn ? LAMPS[a.kind] : undefined;
+      if (spec) {
+        const sides = spec.apart ? [-spec.apart, spec.apart] : [0];
+        for (const zOff of sides) {
+          lamp(heads, nHead++, spec.half + 0.04, spec.y, zOff);
+          lamp(tails, nTail++, -spec.half - 0.04, spec.y, zOff);
+        }
+        lamp(beams, nBeam++, spec.half, 0, 0);
+      }
+    }
+    for (const [mesh, n] of [[heads, nHead], [tails, nTail], [beams, nBeam]] as const) {
+      mesh.count = n;
+      mesh.instanceMatrix.needsUpdate = true;
     }
     for (const k of Object.keys(life) as AgentKind[]) {
       const mesh = life[k];
@@ -309,6 +390,8 @@ export function createToyWorldLayer(): ToyWorldLayer {
     ambient.intensity = 0.95 - 0.6 * dark;
     sun.intensity = 1.15 * (1 - dark) + 0.08;
     sun.color.set(dark > 0.5 ? '#9DB4FF' : '#FFF3DC');
+    beamMat.opacity = Math.min(0.32, Math.max(0, (dark - 0.4) * 0.8));
+    billboards.setDark(dark);
     // Lit windows at night.
     windowMat.color.set(dark > 0.5 ? '#FFD27A' : '#2B3A55');
     windowMat.emissive.set(dark > 0.5 ? '#B8860B' : '#000000');
@@ -316,13 +399,18 @@ export function createToyWorldLayer(): ToyWorldLayer {
 
   const onIdle = () => {
     if (!map) return;
-    if (map.getZoom() < MIN_ZOOM) {
+    // Tells the page's CSS to hide the 2D billboards while the 3D ones stand in their place.
+    const show = map.getZoom() >= MIN_ZOOM;
+    map.getContainer().dataset.toy3d = show ? 'on' : 'off';
+    if (!show) {
       group.visible = false;
       lifeGroup.visible = false;
+      billboards.root.visible = false;
       return;
     }
     group.visible = true;
     lifeGroup.visible = true;
+    billboards.root.visible = true;
     const count = map.querySourceFeatures('openmaptiles', { sourceLayer: 'building' }).length;
     if (!built) return build();
     const c = maplibregl.MercatorCoordinate.fromLngLat(map.getCenter(), 0);
@@ -349,6 +437,10 @@ export function createToyWorldLayer(): ToyWorldLayer {
       window.clearInterval(timer);
       clear();
       for (const mesh of Object.values(life)) mesh.geometry.dispose();
+      lampGeo.dispose();
+      beamGeo.dispose();
+      billboards.dispose();
+      delete m.getContainer().dataset.toy3d;
       palmGeo.dispose();
       if (m.getLayer('building-3d')) m.setLayoutProperty('building-3d', 'visibility', 'visible');
       renderer?.dispose();
@@ -364,9 +456,19 @@ export function createToyWorldLayer(): ToyWorldLayer {
         .scale(new THREE.Vector3(scale, -scale, scale))
         .multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
       camera.projectionMatrix = proj.multiply(model);
+      if (map) billboards.update(map, origin, scale, camera.projectionMatrix);
       updateLife();
       renderer.resetState();
       renderer.render(scene, camera);
+    },
+    setBillboards(list: ToyBillboard[]) {
+      billboards.set(list);
+      map?.triggerRepaint();
+    },
+    pickBillboard(point) {
+      if (!map || !billboards.root.visible) return null;
+      const c = map.getCanvas();
+      return billboards.pick(point, c.clientWidth, c.clientHeight);
     },
     setDark(d: number) {
       dark = d;

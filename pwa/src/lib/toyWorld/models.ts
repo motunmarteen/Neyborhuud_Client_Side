@@ -81,6 +81,18 @@ export function okadaModel() {
   ]);
 }
 
+/** BRT bus: 12 m, instance colour body, long window band, white roof, three axles. */
+export function brtModel() {
+  return model([
+    { w: 12, h: 2.6, d: 2.5, x: 0, y: 1.65, z: 0, colour: TINT },
+    { w: 11.2, h: 0.9, d: 2.54, x: -0.2, y: 2.15, z: 0, colour: GLASS },
+    { w: 0.06, h: 1.3, d: 2.1, x: 6.02, y: 2.0, z: 0, colour: GLASS },
+    { w: 11.6, h: 0.12, d: 2.3, x: 0, y: 3.0, z: 0, colour: '#F4F6F8' },
+    { w: 12.02, h: 0.18, d: 2.52, x: 0, y: 0.75, z: 0, colour: DARK },
+    ...wheels(12, 2.5, 0.5, [-3.8, 0.6, 4.2]),
+  ]);
+}
+
 /** Car: body in the instance colour, darker cabin glass. */
 export function carModel() {
   return model([
@@ -136,6 +148,7 @@ export const VARIANT_COLOURS: Record<string, string[]> = {
   keke: ['#F2C230', '#2F9E57', '#F2C230', '#3B82C4', '#F2C230'],
   okada: ['#C8102E', '#2B6AA6', '#0E8A3E', '#E8892B', '#8B5CF6'],
   car: ['#FFFFFF', '#C8102E', '#2B6AA6', '#1D2433', '#9AA3AF'],
+  brt: ['#1E5AA8', '#C8102E'],
   person: ['#E8892B', '#2B6AA6', '#0E8A3E', '#C8102E', '#8B5CF6', '#F2C230'],
   kid: ['#C8102E', '#2B6AA6'],
   ball: ['#FFFFFF'],

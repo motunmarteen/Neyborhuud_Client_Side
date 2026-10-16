@@ -47,6 +47,7 @@ function round(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: 
 const SIZE: Record<string, [number, number]> = {
   car: [10, 34],
   danfo: [12, 38],
+  brt: [13, 64],
   keke: [10, 30],
   okada: [6, 28],
   person: [8, 16],
@@ -78,6 +79,21 @@ const danfo: Draw = (g, night) => {
   round(g, 1.5, 16, 9, 4, 1);
   if (night) tail(g, 12, 36);
 };
+
+/** BRT bus: long, Lagos BRT blue or Primero red, a row of windows. */
+const BRT_COLOURS = ['#1E5AA8', '#C8102E'];
+function brt(colour: string): Draw {
+  return (g, night) => {
+    if (night) headlights(g, 13, 14);
+    g.fillStyle = colour;
+    round(g, 0, 14, 13, 48, 2);
+    g.fillStyle = 'rgba(30,40,60,0.75)';
+    round(g, 1.5, 16, 10, 4, 1); // windscreen
+    g.fillStyle = '#FFFFFF';
+    g.fillRect(5.5, 22, 2, 38); // roof stripe
+    if (night) tail(g, 13, 62);
+  };
+}
 
 const keke: Draw = (g, night) => {
   if (night) headlights(g, 10, 14);
@@ -159,6 +175,7 @@ export function ensureLivingSprites(map: maplibregl.Map) {
       add(`danfo-${v}${n}`, 'danfo', danfo, night);
       add(`keke-${v}${n}`, 'keke', keke, night);
       add(`okada-${v}${n}`, 'okada', okada, night);
+      add(`brt-${v}${n}`, 'brt', brt(BRT_COLOURS[v % BRT_COLOURS.length]), night);
     }
   }
   for (let v = 0; v < 6; v++) add(`person-${v}`, 'person', person(CLOTHES[v], SKIN[v % SKIN.length], 16, 8));
