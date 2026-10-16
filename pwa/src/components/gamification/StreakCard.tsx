@@ -1,8 +1,12 @@
 "use client";
 
 interface Props {
+  /** The streak the person really has today (0 after a missed day). */
   streak: number;
   lastCheckIn?: string;
+  /** Next day that pays a streak bonus, from GET /gamification/streak. */
+  nextMilestone?: number;
+  /** That day's bonus, from the server. */
   nextReward?: number;
   onCheckIn: () => void;
   checkInPending?: boolean;
@@ -10,32 +14,31 @@ interface Props {
   streakBroken?: boolean;
 }
 
-function getNextMilestone(streak: number): { target: number; coins: number } {
-  const milestones = [
-    { target: 7, coins: 50 },
-    { target: 14, coins: 100 },
-    { target: 30, coins: 200 },
-    { target: 60, coins: 200 },
-    { target: 100, coins: 0 },
-    { target: 365, coins: 0 },
-  ];
-  return milestones.find((m) => m.target > streak) ?? { target: streak + 7, coins: 50 };
-}
-
+/**
+ * Daily check-in streak. Every number comes from the server: the card once
+ * kept its own milestone list and promised "+0" on days 100 and 365.
+ */
 export default function StreakCard({
   streak,
   lastCheckIn,
+  nextMilestone,
   nextReward,
   onCheckIn,
   checkInPending,
   checkedInToday,
   streakBroken,
 }: Props) {
-  const milestone = getNextMilestone(streak);
-  const daysLeft = Math.max(0, milestone.target - streak);
-  const coins = nextReward ?? milestone.coins;
-  const progressPct =
-    milestone.target > 0 ? Math.min(100, Math.round((streak / milestone.target) * 100)) : 0;
+  const hasNext = typeof nextMilestone === "number" && nextMilestone > streak && (nextReward ?? 0) > 0;
+  const daysLeft = hasNext ? nextMilestone - streak : 0;
+  const progressPct = hasNext ? Math.min(100, Math.round((streak / nextMilestone) * 100)) : 0;
+
+  const status = streakBroken
+    ? "You missed a day. Check in to start again"
+    : checkedInToday
+      ? `Come back tomorrow for day ${streak + 1}`
+      : streak > 0
+        ? `Check in today for day ${streak + 1}`
+        : "Check in every day to build a streak";
 
   return (
     <div className="mod-card rounded-2xl bg-gradient-to-br from-brand-red/10 via-[var(--neu-bg)] to-primary/5 p-5">
@@ -48,48 +51,54 @@ export default function StreakCard({
             <p className="text-2xl font-extrabold tabular-nums" style={{ color: "var(--neu-text)" }}>
               {streak}
               <span className="ml-1 text-base font-semibold text-brand-red">
-                day{streak !== 1 ? "s" : ""}
+                day{streak !== 1 ? "s" : ""} in a row
               </span>
             </p>
-            <p className="text-xs text-[var(--neu-text-muted)]">
-              {streakBroken ? "Streak broken — check in to restart" : "Current streak"}
-            </p>
+            <p className="text-xs text-[var(--neu-text-muted)]">{status}</p>
           </div>
         </div>
 
-        <div className="text-right">
-          <p className="text-xs text-[var(--neu-text-muted)]">Next bonus</p>
-          <p className="text-sm font-bold text-primary">+{coins} 🪙</p>
-          <p className="text-[11px] text-[var(--neu-text-muted)]">
-            {daysLeft} day{daysLeft !== 1 ? "s" : ""} away
-          </p>
-        </div>
+        {hasNext ? (
+          <div className="text-right">
+            <p className="text-xs text-[var(--neu-text-muted)]">Day {nextMilestone} bonus</p>
+            <p className="text-sm font-bold text-primary">+{nextReward} 🪙</p>
+            <p className="text-[11px] text-[var(--neu-text-muted)]">
+              {daysLeft} day{daysLeft !== 1 ? "s" : ""} away
+            </p>
+          </div>
+        ) : null}
       </div>
 
-      <div className="mb-4">
-        <div className="mb-1 flex justify-between text-[10px] text-[var(--neu-text-muted)]">
-          <span>Day {streak}</span>
-          <span>Day {milestone.target}</span>
+      {hasNext ? (
+        <div className="mb-4">
+          <div className="mb-1 flex justify-between text-[10px] text-[var(--neu-text-muted)]">
+            <span>Day {streak}</span>
+            <span>Day {nextMilestone}</span>
+          </div>
+          <div className="mod-inset h-2 overflow-hidden rounded-full">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-brand-red to-primary transition-all duration-500"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
         </div>
-        <div className="mod-inset h-2 overflow-hidden rounded-full">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-brand-red to-primary transition-all duration-500"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-      </div>
+      ) : null}
 
-      {lastCheckIn && (
-        <p className="mb-3 text-[11px] text-[var(--neu-text-muted)]">
-          Last check-in:{" "}
-          {new Date(lastCheckIn).toLocaleDateString("en-NG", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-            timeZone: "Africa/Lagos",
-          })}
-        </p>
-      )}
+      <p className="mb-3 text-[11px] text-[var(--neu-text-muted)]">
+        Every check-in pays 10 HuudCredit. Days 7, 14, 21… and every 30th day pay extra.
+        {lastCheckIn ? (
+          <>
+            {" "}Last check-in:{" "}
+            {new Date(lastCheckIn).toLocaleDateString("en-NG", {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+              timeZone: "Africa/Lagos",
+            })}
+            .
+          </>
+        ) : null}
+      </p>
 
       <button
         type="button"
@@ -102,12 +111,12 @@ export default function StreakCard({
         }`}
       >
         {checkedInToday
-          ? "✓ Checked In Today"
+          ? "✓ Checked in today"
           : checkInPending
             ? "Checking in…"
             : streakBroken
-              ? "🔥 Restart Streak"
-              : "🔥 Check In Today"}
+              ? "🔥 Start a new streak"
+              : "🔥 Check in today"}
       </button>
     </div>
   );

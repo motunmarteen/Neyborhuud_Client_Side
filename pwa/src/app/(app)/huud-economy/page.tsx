@@ -94,6 +94,7 @@ export default function HuudEconomyOverviewPage() {
             lastCheckIn={streakData?.lastCheckIn as string | undefined}
             checkedInToday={Boolean((streakData as { checkedInToday?: boolean })?.checkedInToday)}
             streakBroken={Boolean((streakData as { streakBroken?: boolean })?.streakBroken)}
+            nextMilestone={(streakData as { nextMilestone?: number })?.nextMilestone}
             nextReward={Number((streakData as { nextMilestoneReward?: number })?.nextMilestoneReward ?? 0)}
             onCheckIn={() => checkIn.mutate()}
             checkInPending={checkIn.isPending}

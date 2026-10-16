@@ -49,6 +49,11 @@ export default function CompleteProfilePage() {
         typeof gamificationStats?.totalHuudCoins === 'number'
             ? gamificationStats.totalHuudCoins
             : null;
+    // The 100 is paid once ever. People who gave their name at sign-up got it
+    // then, so the screen must not promise it again.
+    const profileRewardPaid = gamificationStats?.onceRewards?.complete_profile === true;
+    const [rewardPaidBeforeSubmit, setRewardPaidBeforeSubmit] = useState<boolean | null>(null);
+    const earnedProfileReward = rewardPaidBeforeSubmit === false && profileRewardPaid;
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -118,6 +123,8 @@ export default function CompleteProfilePage() {
 
         submittingRef.current = true;
         setLoading(true);
+        // Unknown (stats not loaded) stays null, so we never claim a +100 we cannot confirm.
+        setRewardPaidBeforeSubmit(gamificationStats ? profileRewardPaid : null);
 
         try {
             const response = await authService.completeProfile(formData);
@@ -243,21 +250,23 @@ export default function CompleteProfilePage() {
                                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary">HuudCredit</p>
                                 <Eli5Tooltip 
                                     term="HuudCredit" 
-                                    explanation="Community tokens earned by helping neighbors, participating in cleanups, or reporting local hazards. Can be redeemed for rewards." 
+                                    explanation="NeyborHuud's own credit. You earn it by checking in, posting and helping neighbours, and spend it on things like map ads. It can't be changed to naira." 
                                 />
                             </div>
-                            <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Profile completion reward</p>
+                            <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">
+                                {earnedProfileReward ? 'Profile completion reward' : 'Your balance'}
+                            </p>
                         </div>
                         <div className="flex items-center gap-2 text-primary">
                             <span className="text-3xl font-black leading-none">
-                                {profileCoinBalance ?? '100'}
+                                {earnedProfileReward ? '+100' : profileCoinBalance ?? '…'}
                             </span>
                             <Coins size={22} className="text-primary shrink-0" aria-hidden="true" />
                         </div>
                     </div>
-                    {profileCoinBalance === null ? (
+                    {earnedProfileReward && profileCoinBalance !== null ? (
                         <p className="text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
-                            Reward will appear in your wallet shortly
+                            You now have {profileCoinBalance.toLocaleString('en-NG')} HuudCredit
                         </p>
                     ) : null}
                 </div>
@@ -301,7 +310,7 @@ export default function CompleteProfilePage() {
                                     </>
                                 ) : (
                                     <>
-                                        <span>Claim 100 HuudCredit</span>
+                                        <span>{profileRewardPaid ? 'Save my profile' : 'Claim 100 HuudCredit'}</span>
                                         <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                                     </>
                                 )}
@@ -323,9 +332,9 @@ export default function CompleteProfilePage() {
             >
                 <AuthSheetStageHeader
                     icon="badge"
-                    eyebrow="Unlock your reward"
+                    eyebrow={profileRewardPaid ? 'Finish your profile' : 'Unlock your reward'}
                     title={displayName}
-                    meta="100 HuudCredit when you finish"
+                    meta={profileRewardPaid ? 'Your neighbours can trust a full profile' : '100 HuudCredit when you finish'}
                     signal="Tier 1 Neyborh"
                     badge=""
                 />
