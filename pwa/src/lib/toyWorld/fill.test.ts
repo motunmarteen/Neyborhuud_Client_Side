@@ -54,4 +54,15 @@ describe('filler buildings along roads', () => {
   it('ignores paths and tracks', () => {
     expect(fillAlongRoads([{ cls: 'path', pts: street.pts }], [], [], 400, 500)).toHaveLength(0);
   });
+
+  it('plants palms on empty lots, never on the road or a building', () => {
+    const trees: Pt[] = [];
+    const f = fillAlongRoads([street], [], [], 400, 500, trees);
+    expect(trees.length).toBeGreaterThan(0);
+    const half = roadHalfWidth('residential')!;
+    for (const t of trees) {
+      expect(Math.abs(t.z)).toBeGreaterThanOrEqual(half);
+      for (const b of f) expect(pointInRing(t, b.ring)).toBe(false);
+    }
+  });
 });

@@ -11,12 +11,21 @@
  *
  * Where OpenStreetMap has no outlines (much of Nigeria), filler buildings line the real roads
  * (fill.ts, owner 2026-10-16). Real outlines always win.
+ *
+ * Street life in 3D (owner, 2026-10-16): the living map's figures (same real roads, same
+ * time-of-day and weather rules) are drawn as low-poly models: danfos, kekes, okadas, cars,
+ * people, kids and the football; palm trees grow on the empty lots. A little larger than life
+ * (AGENT_SCALE) so they read on a phone, like a toy world.
  */
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import * as maplibregl from 'maplibre-gl';
 import { openings, orientedBox, planBuilding, ringArea, roofTriangles, type Pt } from './shapes';
 import { fillAlongRoads, type Road } from './fill';
+import { ballModel, carModel, danfoModel, kekeModel, okadaModel, palmModel, personModel, VARIANT_COLOURS } from './models';
+import { livingAgents } from '@/lib/livingRegistry';
+import type { AgentKind } from '@/lib/livingMap';
+import { hash01 } from './shapes';
 
 export const TOY_LAYER_ID = 'toy-world';
 const RADIUS_M = 450;
@@ -24,6 +33,9 @@ const MAX_BUILDINGS = 700;
 const MIN_ZOOM = 15;
 /** Rebuild when the map centre moves this far from where the scene was built. */
 const REBUILD_M = 220;
+/** Figures a bit larger than life so they read on a phone. */
+const AGENT_SCALE = 3.2;
+const CAPACITY: Record<AgentKind, number> = { danfo: 150, keke: 150, okada: 150, car: 250, person: 500, kid: 60, ball: 6 };
 
 type Built = { origin: maplibregl.MercatorCoordinate; scale: number; count: number };
 
@@ -53,6 +65,68 @@ export function createToyWorldLayer(): ToyWorldLayer {
   let built: Built | null = null;
   let dark = 0;
   let timer = 0;
+
+  // Moving figures: one instanced mesh per kind, filled every frame from the living map.
+  const lifeMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
+  const lifeGroup = new THREE.Group();
+  scene.add(lifeGroup);
+  const geoms: Record<AgentKind, THREE.BufferGeometry> = {
+    danfo: danfoModel(),
+    keke: kekeModel(),
+    okada: okadaModel(),
+    car: carModel(),
+    person: personModel(1.7),
+    kid: personModel(1.25),
+    ball: ballModel(),
+  };
+  const life = {} as Record<AgentKind, THREE.InstancedMesh>;
+  for (const kind of Object.keys(geoms) as AgentKind[]) {
+    const mesh = new THREE.InstancedMesh(geoms[kind], lifeMat, CAPACITY[kind]);
+    mesh.count = 0;
+    mesh.frustumCulled = false;
+    mesh.renderOrder = 4;
+    const palette = VARIANT_COLOURS[kind] ?? ['#FFFFFF'];
+    for (let i = 0; i < CAPACITY[kind]; i++) mesh.setColorAt(i, new THREE.Color(palette[0]));
+    life[kind] = mesh;
+    lifeGroup.add(mesh);
+  }
+  const palmGeo = palmModel();
+  const tmpM = new THREE.Matrix4();
+  const tmpQ = new THREE.Quaternion();
+  const tmpP = new THREE.Vector3();
+  const tmpS = new THREE.Vector3();
+  const tmpC = new THREE.Color();
+  const UP = new THREE.Vector3(0, 1, 0);
+
+  const updateLife = () => {
+    if (!map || !built) return;
+    const counts = {} as Record<AgentKind, number>;
+    for (const k of Object.keys(life) as AgentKind[]) counts[k] = 0;
+    const { origin, scale } = built;
+    for (const a of livingAgents(map)) {
+      const mesh = life[a.kind];
+      if (!mesh || counts[a.kind] >= CAPACITY[a.kind]) continue;
+      const m = maplibregl.MercatorCoordinate.fromLngLat(a.pos, 0);
+      const x = (m.x - origin.x) / scale;
+      const z = (m.y - origin.y) / scale;
+      if (Math.hypot(x, z) > RADIUS_M + 150) continue;
+      // Map bearing (clockwise from north) to a turn about "up"; models face +x.
+      tmpQ.setFromAxisAngle(UP, Math.PI / 2 - (a.bearing * Math.PI) / 180);
+      tmpP.set(x, 0, z);
+      tmpS.setScalar(AGENT_SCALE);
+      tmpM.compose(tmpP, tmpQ, tmpS);
+      const i = counts[a.kind]++;
+      mesh.setMatrixAt(i, tmpM);
+      const palette = VARIANT_COLOURS[a.kind] ?? ['#FFFFFF'];
+      mesh.setColorAt(i, tmpC.set(palette[a.variant % palette.length]));
+    }
+    for (const k of Object.keys(life) as AgentKind[]) {
+      const mesh = life[k];
+      mesh.count = counts[k];
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    }
+  };
 
   const clear = () => {
     for (const child of [...group.children]) {
@@ -136,7 +210,8 @@ export function createToyWorldLayer(): ToyWorldLayer {
     addPolys('park', () => true);
     addPolys('landuse', (c) => ['pitch', 'playground', 'stadium', 'cemetery', 'grass', 'school'].includes(c));
     const realRings = [...byId.values()].map((b) => b.ring);
-    const fillers = fillAlongRoads(roads, realRings, open, RADIUS_M, Math.max(0, MAX_BUILDINGS - byId.size));
+    const trees: Pt[] = [];
+    const fillers = fillAlongRoads(roads, realRings, open, RADIUS_M, Math.max(0, MAX_BUILDINGS - byId.size), trees);
     for (const f of fillers) byId.set(f.id, { ring: f.ring, area: ringArea(f.ring), height: null });
 
     clear();
@@ -210,6 +285,19 @@ export function createToyWorldLayer(): ToyWorldLayer {
     place(winList, windowMat);
     place(doorList, doorMat);
 
+    // Palm trees on the empty lots.
+    if (trees.length) {
+      const palms = new THREE.InstancedMesh(palmGeo, solid, trees.length);
+      trees.forEach((t, i) => {
+        const r = hash01(`${Math.round(t.x)}:${Math.round(t.z)}`);
+        tmpQ.setFromAxisAngle(UP, r * Math.PI * 2);
+        tmpM.compose(tmpP.set(t.x, 0, t.z), tmpQ, tmpS.setScalar(1.2 + r * 0.6));
+        palms.setMatrixAt(i, tmpM);
+      });
+      palms.renderOrder = 2;
+      group.add(palms);
+    }
+
     built = { origin, scale, count: feats.length };
     // How many buildings were modelled (read by tests and handy when checking an area's map data).
     document.documentElement.dataset.toyBuildings = String(Math.min(n, MAX_BUILDINGS));
@@ -230,9 +318,11 @@ export function createToyWorldLayer(): ToyWorldLayer {
     if (!map) return;
     if (map.getZoom() < MIN_ZOOM) {
       group.visible = false;
+      lifeGroup.visible = false;
       return;
     }
     group.visible = true;
+    lifeGroup.visible = true;
     const count = map.querySourceFeatures('openmaptiles', { sourceLayer: 'building' }).length;
     if (!built) return build();
     const c = maplibregl.MercatorCoordinate.fromLngLat(map.getCenter(), 0);
@@ -258,6 +348,8 @@ export function createToyWorldLayer(): ToyWorldLayer {
       m.off('idle', onIdle);
       window.clearInterval(timer);
       clear();
+      for (const mesh of Object.values(life)) mesh.geometry.dispose();
+      palmGeo.dispose();
       if (m.getLayer('building-3d')) m.setLayoutProperty('building-3d', 'visibility', 'visible');
       renderer?.dispose();
       renderer = null;
@@ -272,6 +364,7 @@ export function createToyWorldLayer(): ToyWorldLayer {
         .scale(new THREE.Vector3(scale, -scale, scale))
         .multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
       camera.projectionMatrix = proj.multiply(model);
+      updateLife();
       renderer.resetState();
       renderer.render(scene, camera);
     },
