@@ -368,7 +368,7 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 **Waiting on your go-ahead.** It changes how real users earn. See GAMIFICATION-REVIEW.md.
 
 **2026-10-16 audit and bug fixes (no change to what anyone earns):**
-- [ ] 🟡 Fixed in code, tested, **not yet deployed**:
+- [x] Fixed, tested and **deployed 2026-10-16** (server 01e76c2, app 23ce041; today's check-in limit reset for the 2 people the old login bonus had blocked):
   - **Check-in paid nothing.** Signing in gave a hidden 5 HC "login bonus" that used the check-in's one-a-day slot, so the check-in then failed to pay while the streak still moved. The login bonus is removed; the check-in is the one daily reward.
   - Daily limits now reset at midnight Nigeria time, not UTC, matching the streak (an 00:30 check-in used to count for the day before).
   - Check-in is all-or-nothing: if paying fails, the streak goes back so a retry works. Two taps at once can't both count.
