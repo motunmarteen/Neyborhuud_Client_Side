@@ -234,7 +234,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     <>
       <SkyMap
         center={knowsArea ? view.center : undefined}
-        zoom={view.zoom}
+        // Closer street view so the 3D buildings read (owner, 2026-10-16).
+        zoom={knowsArea ? Math.max(view.zoom, 16.4) : view.zoom}
         // Full screen, notch area included: the sky runs up behind the status bar (owner, 2026-10-16).
         className="absolute inset-0 h-full w-full"
         label={knowsArea ? 'Live map of your area' : 'Live map of Nigeria'}
