@@ -235,11 +235,13 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       <SkyMap
         center={knowsArea ? view.center : undefined}
         zoom={view.zoom}
-        className="h-full w-full"
+        // Full screen, notch area included: the sky runs up behind the status bar (owner, 2026-10-16).
+        className="absolute inset-0 h-full w-full"
         label={knowsArea ? 'Live map of your area' : 'Live map of Nigeria'}
         onReady={setMap}
         onSky={setSky}
         cinematic={!hasFocus}
+        toyWorld
       />
 
       {/* Under the top bar: layer chips, then the ⚡ PULSE ribbon (news + exchange rates). */}
