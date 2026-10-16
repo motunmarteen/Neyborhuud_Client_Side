@@ -8,11 +8,15 @@
  * the height. Windows and doors on the long sides, soft shadows on the ground, lit windows at
  * night. Only near the centre (RADIUS) and only from street zoom, so cheap phones cope; calm
  * mode never adds this layer (HuudMap).
+ *
+ * Where OpenStreetMap has no outlines (much of Nigeria), filler buildings line the real roads
+ * (fill.ts, owner 2026-10-16). Real outlines always win.
  */
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import * as maplibregl from 'maplibre-gl';
 import { openings, orientedBox, planBuilding, ringArea, roofTriangles, type Pt } from './shapes';
+import { fillAlongRoads, type Road } from './fill';
 
 export const TOY_LAYER_ID = 'toy-world';
 const RADIUS_M = 450;
@@ -33,10 +37,11 @@ export function createToyWorldLayer(): ToyWorldLayer {
   const group = new THREE.Group();
   scene.add(group);
 
-  const ambient = new THREE.AmbientLight('#FFFFFF', 0.62);
-  const sun = new THREE.DirectionalLight('#FFF3DC', 0.95);
+  // Bright and clean, like the owner's reference: strong ambient, warm sun, cool fill.
+  const ambient = new THREE.AmbientLight('#FFFFFF', 0.95);
+  const sun = new THREE.DirectionalLight('#FFF6E6', 1.15);
   sun.position.set(-60, 120, 80);
-  const fill = new THREE.DirectionalLight('#DCE8FF', 0.25);
+  const fill = new THREE.DirectionalLight('#DCE8FF', 0.4);
   fill.position.set(80, 60, -60);
   scene.add(ambient, sun, fill);
 
@@ -101,6 +106,38 @@ export function createToyWorldLayer(): ToyWorldLayer {
       const prev = byId.get(id);
       if (!prev || area > prev.area) byId.set(id, { ring, area, height: Number.isFinite(rh) && rh > 9 ? rh : null });
     }
+
+    // Fill empty streets: real roads, kept clear of real buildings, water, parks and pitches.
+    const lineOf = (coords: number[][]) => coords.map(([lng, lat]) => toLocal(lng, lat));
+    const near = (pts: Pt[]) => pts.some((p) => Math.hypot(p.x, p.z) < RADIUS_M + 60);
+    const roads: Road[] = [];
+    for (const f of map.querySourceFeatures('openmaptiles', { sourceLayer: 'transportation' })) {
+      const cls = String((f.properties as { class?: string } | null)?.class ?? '');
+      const g = f.geometry;
+      const lines = g.type === 'LineString' ? [g.coordinates] : g.type === 'MultiLineString' ? g.coordinates : [];
+      for (const l of lines) {
+        const pts = lineOf(l as number[][]);
+        if (pts.length > 1 && near(pts)) roads.push({ pts, cls });
+      }
+    }
+    const open: Pt[][] = [];
+    const addPolys = (layer: string, keep: (cls: string) => boolean) => {
+      for (const f of map!.querySourceFeatures('openmaptiles', { sourceLayer: layer })) {
+        if (!keep(String((f.properties as { class?: string } | null)?.class ?? ''))) continue;
+        const g = f.geometry;
+        const polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+        for (const poly of polys) {
+          const ring = lineOf(poly[0] as number[][]);
+          if (ring.length > 2 && near(ring)) open.push(ring);
+        }
+      }
+    };
+    addPolys('water', () => true);
+    addPolys('park', () => true);
+    addPolys('landuse', (c) => ['pitch', 'playground', 'stadium', 'cemetery', 'grass', 'school'].includes(c));
+    const realRings = [...byId.values()].map((b) => b.ring);
+    const fillers = fillAlongRoads(roads, realRings, open, RADIUS_M, Math.max(0, MAX_BUILDINGS - byId.size));
+    for (const f of fillers) byId.set(f.id, { ring: f.ring, area: ringArea(f.ring), height: null });
 
     clear();
     const walls: THREE.BufferGeometry[] = [];
@@ -181,8 +218,8 @@ export function createToyWorldLayer(): ToyWorldLayer {
   };
 
   const applyDark = () => {
-    ambient.intensity = 0.62 - 0.4 * dark;
-    sun.intensity = 0.95 * (1 - dark) + 0.08;
+    ambient.intensity = 0.95 - 0.6 * dark;
+    sun.intensity = 1.15 * (1 - dark) + 0.08;
     sun.color.set(dark > 0.5 ? '#9DB4FF' : '#FFF3DC');
     // Lit windows at night.
     windowMat.color.set(dark > 0.5 ? '#FFD27A' : '#2B3A55');

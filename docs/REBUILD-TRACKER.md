@@ -202,6 +202,7 @@ Kept here so the whole history is in one place.
 - [x] M-13 (2026-10-15: "Calm view / Live view" on the map, same setting as Save data: flat map, no motion) Calm view toggle
 - [ ] M-14 Area Champion crown marker
 - [ ] M-15 Low-data mode: flat 2D map, no animation, cached last view
+- [ ] 🟡 M-18 **Toy-world 3D** (owner, 2026-10-16, WareTrack reference): three.js layer inside MapLibre. Step 1 done: real OSM footprints become styled models (kiosk, bungalow with zinc/terracotta/green hip or gable roof, house, storey, plaza, warehouse with sawtooth roof, tall blocks), windows/doors, ground shadows, lit windows at night; **filler buildings along real roads where OSM has no outlines** (owner chose "fill in, plus help map Nigeria"; never on roads, water, parks, pitches or real buildings; real outlines win). Igando test: 0 → 577 buildings. Next: 3D danfos/kekes/okadas/cars/BRT, people, palm trees, 3D billboards; then "help map Nigeria" (invite neighbours to add their buildings to OpenStreetMap so real outlines replace fillers)
 - [ ] M-16 Performance target: smooth on a ₦60,000 Android phone; map loads in under 3 s on 3G anywhere in Nigeria
 
 ---
