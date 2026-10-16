@@ -48,6 +48,17 @@ const PUDDLES = [[0.22, 0.38, 1.6], [0.62, 0.55, 1.3], [0.85, 0.36, 1.9], [0.3, 
 /** Height of the sky band above the horizon, in px. */
 const SKY_BAND = 200;
 
+/** The phone's top safe area (notch / Dynamic Island) in px; CSS env() is not readable from JS directly. */
+function safeTopPx(): number {
+  if (typeof document === 'undefined') return 0;
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;left:0;width:1px;visibility:hidden;pointer-events:none;height:var(--safe-top, 0px)';
+  document.body.appendChild(probe);
+  const h = probe.getBoundingClientRect().height;
+  probe.remove();
+  return h;
+}
+
 const STARS = [
   [9, 30], [24, 62], [38, 22], [52, 54], [64, 34], [84, 66], [16, 86], [73, 90], [45, 78], [92, 28], [30, 44], [58, 14],
 ] as const;
@@ -73,9 +84,26 @@ type SkyMapProps = {
   cinematic?: boolean;
   /** Map home: real buildings as styled 3D models (see HuudMap). */
   toyWorld?: boolean;
+  /**
+   * Extra sky height in px above the usual band (owner, 2026-10-16: the notch should show
+   * the sky, not a flat strip). The map home lifts the sky by the notch plus its top
+   * controls, so clouds, sun and stars sit behind the status bar and the horizon shows
+   * just under the Pulse ribbon. 'safe-top' adds the phone's notch height automatically.
+   */
+  skyLift?: number | { safeTopPlus: number };
 };
 
-export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true, cinematic = false, toyWorld = false }: SkyMapProps) {
+export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true, cinematic = false, toyWorld = false, skyLift = 0 }: SkyMapProps) {
+  const liftPlus = typeof skyLift === 'number' ? null : skyLift.safeTopPlus;
+  const [lift, setLift] = useState(typeof skyLift === 'number' ? skyLift : 0);
+  useEffect(() => {
+    if (liftPlus == null) return;
+    const measure = () => setLift(Math.round(safeTopPx() + liftPlus));
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [liftPlus]);
+  const band = SKY_BAND + lift;
   const calm = useCalm();
   const liveWx = useMapWeather(weather === undefined ? center : null);
   const wx = weather === undefined ? liveWx : weather;
@@ -109,7 +137,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
     onReady?.(map);
   };
 
-  const arcTop = (arc: number) => SKY_BAND - 26 - arc * (SKY_BAND - 70);
+  const arcTop = (arc: number) => band - 26 - arc * (band - 70);
   const clouds = wx ? cloudColor(wx, sky.dark, sky.skyBot) : '#FFFFFF';
 
   // Street life follows the local clock (or the pinned hour) and the weather.
@@ -124,10 +152,10 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
   return (
     <div
       className={`relative overflow-hidden ${className}`}
-      style={{ background: `linear-gradient(180deg, ${sky.skyTop} 0%, ${sky.skyBot} ${SKY_BAND}px, ${sky.skyBot} 100%)` }}
+      style={{ background: `linear-gradient(180deg, ${sky.skyTop} 0%, ${sky.skyBot} ${band}px, ${sky.skyBot} 100%)` }}
     >
       {/* Sky: stars, sun (east → west), moon. Decorative. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0" style={{ height: SKY_BAND }} aria-hidden>
+      <div className="pointer-events-none absolute inset-x-0 top-0" style={{ height: band }} aria-hidden>
         {/* Weather wash over the sky: cloud cover, harmattan dust, storm. */}
         <div className="absolute inset-0" style={{ background: look.skyWash }} />
         <div className="absolute inset-0" style={{ opacity: look.hidesStars ? 0 : sky.starOpacity }}>
@@ -179,8 +207,8 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
       <div
         className="absolute inset-0"
         style={{
-          WebkitMaskImage: `linear-gradient(180deg, transparent 0, transparent ${SKY_BAND - 70}px, #000 ${SKY_BAND + 30}px)`,
-          maskImage: `linear-gradient(180deg, transparent 0, transparent ${SKY_BAND - 70}px, #000 ${SKY_BAND + 30}px)`,
+          WebkitMaskImage: `linear-gradient(180deg, transparent 0, transparent ${band - 70}px, #000 ${band + 30}px)`,
+          maskImage: `linear-gradient(180deg, transparent 0, transparent ${band - 70}px, #000 ${band + 30}px)`,
         }}
       >
         <HuudMap center={center} zoom={zoom} label={label} className="h-full w-full" onReady={handleReady} compassPosition="bottom-right" cinematic={cinematic} toyWorld={toyWorld} />
@@ -194,7 +222,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
         {/* Sunlight falling on the land, from the sun's side. */}
         <div
           className="pointer-events-none absolute inset-0"
-          style={{ background: `radial-gradient(ellipse 75% 42% at ${6 + sky.sun.x * 88}% ${SKY_BAND + 20}px, ${look.sunOpacity < 1 ? 'transparent' : sky.sunGround}, transparent 72%)` }}
+          style={{ background: `radial-gradient(ellipse 75% 42% at ${6 + sky.sun.x * 88}% ${band + 20}px, ${look.sunOpacity < 1 ? 'transparent' : sky.sunGround}, transparent 72%)` }}
           aria-hidden
         />
         {/* Weather haze over the land, harmattan dust, drifting cloud shadows. */}
@@ -216,7 +244,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
               <span
                 key={i}
                 className="nh-puddle absolute rounded-[50%] border-[3px] border-white"
-                style={{ left: `${x * 100}%`, top: `calc(${SKY_BAND}px + ${y} * (100% - ${SKY_BAND}px))`, animationDuration: `${d}s` }}
+                style={{ left: `${x * 100}%`, top: `calc(${band}px + ${y} * (100% - ${band}px))`, animationDuration: `${d}s` }}
               />
             ))}
           </div>
@@ -227,14 +255,14 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
       <div
         className="pointer-events-none absolute inset-x-0"
         style={{
-          top: SKY_BAND - 50,
+          top: band - 50,
           height: 160,
           background: `linear-gradient(180deg, transparent 0%, ${sky.skyBot}cc 30%, ${sky.skyBot}55 62%, transparent 100%)`,
         }}
         aria-hidden
       />
       {/* Far horizon: bush line and trees (palms in the south, acacias in the north). */}
-      <SkyHorizon color={sky.skyline} lat={center?.lat} top={SKY_BAND - 52} />
+      <SkyHorizon color={sky.skyline} lat={center?.lat} top={band - 52} />
 
       {/* Rain: glowing drops falling at a slant (not in calm mode). */}
       {rain.length ? (

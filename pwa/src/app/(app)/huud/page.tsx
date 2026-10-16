@@ -13,7 +13,7 @@
  * (or tap "Feed") to open the Feed.
  */
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useVerticalSwipes } from '@/hooks/useSwipe';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ import type * as maplibregl from 'maplibre-gl';
 import TopNav from '@/components/navigation/TopNav';
 import { BottomNav, OPEN_CREATE_SHEET } from '@/components/feed/BottomNav';
 import { FeedNewsTicker, type PulseLocalItem } from '@/components/feed/FeedNewsTicker';
-import { SentinelOrb, type AreaMood } from '@/components/map/Pins';
+import type { AreaMood } from '@/components/map/Pins';
 import { useCalm } from '@/hooks/useCalm';
 import { useMapWeather } from '@/hooks/useMapWeather';
 import { setSaveData } from '@/lib/calmMode';
@@ -52,8 +52,8 @@ const MAIN_BTN =
   'inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-primary px-5 text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(0,184,46,0.28)] transition-colors hover:bg-brand-green-dark';
 const SOFT_BTN =
   'inline-flex min-h-12 flex-1 items-center justify-center rounded-full border border-line bg-white px-5 text-[15px] font-bold text-navy transition-colors hover:bg-background';
-const FLOAT_BTN =
-  'pointer-events-auto inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/95 px-3.5 text-sm font-extrabold text-navy shadow-[0_4px_14px_rgba(29,36,51,0.18)] transition-colors hover:bg-white disabled:opacity-60';
+const MENU_ITEM =
+  'flex min-h-12 items-center gap-3 px-4 text-left text-[15px] font-bold text-navy transition-colors hover:bg-background disabled:opacity-60';
 const SHEET_BTN =
   'inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-white px-3 text-sm font-bold text-navy transition-colors hover:bg-background';
 /** How far up a swipe on the sheet must go to open the Feed. */
@@ -213,6 +213,24 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   // Swipe the sheet up to open the Feed.
   // The card is open by default; swipe down (or ✕) hides it to see the whole map.
   const [cardOpen, setCardOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  // How tall the card (or the "Show card" tab) is, so the ⋯ and SOS buttons sit just above it.
+  const dockRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = dockRef.current;
+    if (!el) return;
+    const set = () => document.documentElement.style.setProperty('--huud-dock', `${Math.round(el.getBoundingClientRect().height)}px`);
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [cardOpen]);
+  useEffect(
+    () => () => {
+      document.documentElement.style.removeProperty('--huud-dock');
+    },
+    [],
+  );
   const onSheetDown = useVerticalSwipes(SWIPE_UP_PX, {
     onUp: () => router.push('/feed'),
     onDown: () => setCardOpen(false),
@@ -232,18 +250,23 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
 
   return (
     <>
-      <SkyMap
-        center={knowsArea ? view.center : undefined}
-        // Closer street view so the 3D buildings read (owner, 2026-10-16).
-        zoom={knowsArea ? Math.max(view.zoom, 16.4) : view.zoom}
-        // Full screen, notch area included: the sky runs up behind the status bar (owner, 2026-10-16).
-        className="absolute inset-0 h-full w-full"
-        label={knowsArea ? 'Live map of your area' : 'Live map of Nigeria'}
-        onReady={setMap}
-        onSky={setSky}
-        cinematic={!hasFocus}
-        toyWorld
-      />
+      {/* Full screen, notch area included, so the sky runs up behind the status bar
+          (owner, 2026-10-16). SkyMap's own box is position: relative, hence this wrapper. */}
+      <div className="absolute inset-0">
+        <SkyMap
+          center={knowsArea ? view.center : undefined}
+          // Closer street view so the 3D buildings read (owner, 2026-10-16).
+          zoom={knowsArea ? Math.max(view.zoom, 16.4) : view.zoom}
+          className="h-full w-full"
+          label={knowsArea ? 'Live map of your area' : 'Live map of Nigeria'}
+          onReady={setMap}
+          onSky={setSky}
+          cinematic={!hasFocus}
+          toyWorld
+          // Sky reaches up behind the notch and the top bar; the horizon stays just under the controls.
+          skyLift={{ safeTopPlus: 60 }}
+        />
+      </div>
 
       {/* Under the top bar: layer chips, then the ⚡ PULSE ribbon (news + exchange rates). */}
       <div className="pointer-events-none absolute inset-x-0 top-[calc(var(--app-topnav-height)+var(--safe-top,0px)+0.25rem)] z-10 flex flex-col gap-2 px-3">
@@ -253,48 +276,53 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         <div className="nh-map-pulse pointer-events-auto mx-auto w-full max-w-xl overflow-hidden rounded-full shadow-[0_4px_14px_rgba(29,36,51,0.16)]">
           <FeedNewsTicker local={pulseLocal} />
         </div>
-        {/* Right side: Sentinel orb (area mood), Me, Calm view. */}
-        <div className="pointer-events-none mx-auto flex w-full max-w-xl flex-col items-end gap-2 pt-1">
-          <span className="pointer-events-auto">
-            <SentinelOrb mood={mood} onClick={() => router.push('/sentinel')} />
+      </div>
+
+      {/* ⋯ map menu (owner, 2026-10-16): on the left, opposite SOS, just above the card;
+          both follow the card down when it is hidden (--huud-dock, set below). */}
+      <div
+        className="absolute left-3 z-20 transition-[bottom] duration-300 ease-out motion-reduce:transition-none"
+        style={{ bottom: 'calc(var(--app-bottomnav-h) + 1rem + var(--huud-dock, 0px))' }}
+      >
+        {menuOpen ? (
+          <div
+            role="menu"
+            aria-label="Map options"
+            className="absolute bottom-full left-0 mb-2 flex w-48 flex-col overflow-hidden rounded-[18px] bg-white py-1 shadow-[0_8px_24px_rgba(29,36,51,0.22)]"
+          >
+            <button type="button" role="menuitem" className={MENU_ITEM} disabled={!map || locating} onClick={() => { setMenuOpen(false); locate(); }}>
+              <span aria-hidden className="material-symbols-outlined text-[20px]">{locating ? 'progress_activity' : 'my_location'}</span>
+              {locating ? 'Finding you…' : 'Go to where I am'}
+            </button>
+            <button type="button" role="menuitemcheckbox" aria-checked={calm} className={MENU_ITEM} onClick={() => { setMenuOpen(false); setSaveData(!calm); }}>
+              <span aria-hidden className="material-symbols-outlined text-[20px]">{calm ? 'play_circle' : 'self_improvement'}</span>
+              {calm ? 'Live view' : 'Calm view'}
+            </button>
+            <button type="button" role="menuitemcheckbox" aria-checked={soundOn} className={MENU_ITEM} onClick={() => { setMenuOpen(false); toggleSound(); }}>
+              <span aria-hidden className="material-symbols-outlined text-[20px]">{soundOn ? 'volume_up' : 'volume_off'}</span>
+              {soundOn ? 'Sound on' : 'Sound off'}
+            </button>
+          </div>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          aria-label="Map options: go to where I am, calm view, sound"
+          className="grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] transition-colors hover:bg-background"
+        >
+          <span aria-hidden className="material-symbols-outlined text-[26px] text-navy">
+            more_horiz
           </span>
-          <button type="button" onClick={locate} className={FLOAT_BTN} aria-label="Go to where I am" disabled={!map || locating}>
-            <span aria-hidden className="material-symbols-outlined text-[18px]">
-              {locating ? 'progress_activity' : 'my_location'}
-            </span>
-            {locating ? 'Finding you…' : 'Me'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setSaveData(!calm)}
-            aria-pressed={calm}
-            className={FLOAT_BTN}
-            title="Calm view: no movement, a flat map, less data"
-          >
-            <span aria-hidden className="material-symbols-outlined text-[18px]">
-              {calm ? 'play_circle' : 'self_improvement'}
-            </span>
-            {calm ? 'Live view' : 'Calm view'}
-          </button>
-          <button
-            type="button"
-            onClick={toggleSound}
-            aria-pressed={soundOn}
-            className={FLOAT_BTN}
-            title="Street and rain sounds, and a buzz for new alerts nearby"
-          >
-            <span aria-hidden className="material-symbols-outlined text-[18px]">
-              {soundOn ? 'volume_up' : 'volume_off'}
-            </span>
-            {soundOn ? 'Sound on' : 'Sound'}
-          </button>
-        </div>
+        </button>
       </div>
 
       {/* Bottom sheet (mockup): greeting + weather, Ask Sentinel, post, report, share.
           Swipe up for the Feed; swipe down or ✕ to hide it and see the whole map. */}
       {cardOpen ? (
       <section
+        ref={dockRef as unknown as React.Ref<HTMLElement>}
         aria-label="Your area today"
         onPointerDown={onSheetDown}
         className="absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+0.5rem)] z-10 px-3"
@@ -331,10 +359,19 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             href="/sentinel"
             className="flex min-h-12 items-center gap-2.5 rounded-full bg-background px-3 text-[15px] font-semibold text-muted transition-colors hover:bg-[#E9EDF3]"
           >
-            <span aria-hidden className="grid h-8 w-8 place-items-center rounded-full bg-brand-green-dark text-white">
+            <span aria-hidden className="relative grid h-8 w-8 place-items-center rounded-full bg-brand-green-dark text-white">
               <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+              {/* The area's mood (was the Sentinel orb's ring): amber for reports, red for a live alert. */}
+              {mood !== 'calm' ? (
+                <span
+                  className={`absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full ring-2 ring-background ${mood === 'alert' ? 'bg-brand-red motion-safe:animate-pulse' : 'bg-[#F0A93B]'}`}
+                />
+              ) : null}
             </span>
             Ask Sentinel anything…
+            {mood !== 'calm' ? (
+              <span className="sr-only">{mood === 'alert' ? '. There is an alert in your area' : '. Your area is on advisory'}</span>
+            ) : null}
           </Link>
           <div className="flex gap-2">
             <button type="button" onClick={openCreate} className={SHEET_BTN}>
@@ -350,7 +387,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         </div>
       </section>
       ) : (
-        <div className="absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+0.5rem)] z-10 flex justify-center px-3" onPointerDown={onTabDown}>
+        <div ref={dockRef} className="absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+0.5rem)] z-10 flex justify-center px-3" onPointerDown={onTabDown}>
           <button
             type="button"
             onClick={() => setCardOpen(true)}
