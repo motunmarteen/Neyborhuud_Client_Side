@@ -182,8 +182,33 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   }, [soundOn, sound, sky?.dark, wx]);
 
   const weatherWords = wx ? WEATHER_WORDS[wx] : null;
-  const weatherLine = [weatherWords ? `${weatherWords.icon} ${weatherWords.label}` : null, area?.lga ?? null].filter(Boolean).join(' · ');
   const openCreate = () => window.dispatchEvent(new CustomEvent(OPEN_CREATE_SHEET));
+
+  // One live line under the greeting: an alert first, then what is going on, then quiet.
+  const where = area?.lga ?? 'your area';
+  const firstAlert = pins.find((p) => p.layer === 'safety' && p.live) ?? null;
+  const safetyCount = pins.filter((p) => p.layer === 'safety').reduce((n, p) => n + p.count, 0);
+  const allCount = pins.reduce((n, p) => n + p.count, 0);
+  const statusLine =
+    status === 'zoom-in'
+      ? knowsArea
+        ? 'Zoom in to see what is happening'
+        : 'Zoom in to your area to see what is happening'
+      : status === 'error'
+        ? 'Could not load what is happening'
+        : status === 'loading' && pins.length === 0
+          ? 'Checking your area…'
+          : firstAlert
+            ? safetyCount > 1
+              ? `${safetyCount} safety alerts nearby`
+              : '1 safety alert nearby'
+            : allCount > 0
+              ? `${allCount} ${allCount === 1 ? 'thing' : 'things'} happening nearby`
+              : `All quiet in ${where}`;
+  const openStatus = () => {
+    if (firstAlert) setPin(firstAlert);
+    else router.push('/feed');
+  };
 
   // Pulse (mockup): the weather now and reported go-slows in this area come first.
   const areaLga = area?.lga;
@@ -219,7 +244,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   useEffect(() => {
     // Card hidden: "Show card" sits in the same row as ⋯ and SOS, right above the tab bar.
     if (!cardOpen) {
-      document.documentElement.style.setProperty('--huud-dock', '0px');
+      // Buttons at bar + 2.25rem, like the "Show card" row (3rem - 0.75rem).
+      document.documentElement.style.setProperty('--huud-dock', '-0.75rem');
       return;
     }
     const el = dockRef.current;
@@ -241,17 +267,6 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     onDown: () => setCardOpen(false),
   });
   const onTabDown = useVerticalSwipes(SWIPE_UP_PX, { onUp: () => setCardOpen(true) });
-
-  const hint =
-    status === 'zoom-in'
-      ? knowsArea
-        ? 'Zoom in to see what is happening'
-        : 'Zoom in to your area to see what is happening'
-      : status === 'error'
-        ? 'Could not load what is happening here'
-        : status === 'ready' && pins.length === 0 && layers.length > 0
-          ? 'All quiet here right now'
-          : null;
 
   return (
     <>
@@ -287,7 +302,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           both follow the card down when it is hidden (--huud-dock, set below). */}
       <div
         className="absolute left-3 z-20 transition-[bottom] duration-300 ease-out motion-reduce:transition-none"
-        style={{ bottom: 'calc(var(--app-bottomnav-h) + 1rem + var(--huud-dock, 0px))' }}
+        style={{ bottom: 'calc(var(--app-bottomnav-h) + 3rem + var(--huud-dock, 0px))' }}
       >
         {menuOpen ? (
           <div
@@ -323,78 +338,85 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         </button>
       </div>
 
-      {/* Bottom sheet (mockup): greeting + weather, Ask Sentinel, post, report, share.
-          Swipe up for the Feed; swipe down or ✕ to hide it and see the whole map. */}
+      {/* Area card (redesigned, owner 2026-10-16: no repeats). One job per line:
+          handle (drag up = Feed, drag down or tap = hide), greeting + one live status line,
+          Ask Sentinel, then Post and Share. Weather and area are already in Pulse and the top bar;
+          Report lives in the Create sheet that Post opens. */}
       {cardOpen ? (
       <section
         ref={dockRef as unknown as React.Ref<HTMLElement>}
-        aria-label="Your area today"
+        aria-label="Your area now"
         onPointerDown={onSheetDown}
-        className="absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+0.5rem)] z-10 px-3"
+        // Clear of the raised ➕ on the tab bar (it rises ~36 px above the bar).
+        className="absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+2.5rem)] z-10 px-3"
         style={{ touchAction: 'pan-x' }}
       >
-        <div className="mx-auto flex max-w-xl flex-col gap-2.5 rounded-[24px] bg-white/95 px-4 pb-3.5 pt-2 shadow-[0_-4px_24px_rgba(29,36,51,0.18)] backdrop-blur">
-          <div className="relative flex justify-center">
-            <Link href="/feed" className="flex flex-col items-center gap-0.5 pt-0.5" aria-label="Open the Feed. You can also swipe this card up.">
-              <span aria-hidden className="h-1.5 w-10 rounded-full bg-line" />
-              <span className="text-[11px] font-extrabold text-muted">Swipe up for the Feed · down to hide</span>
-            </Link>
+        <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-[24px] bg-white/95 px-4 pb-4 pt-1.5 shadow-[0_-4px_24px_rgba(29,36,51,0.18)] backdrop-blur">
+          <div className="relative flex h-6 items-center justify-center">
             <button
               type="button"
               onClick={() => setCardOpen(false)}
-              aria-label="Hide this card and see the whole map"
-              className="absolute -right-2 -top-1 grid h-10 w-10 place-items-center rounded-full text-muted transition-colors hover:bg-background"
+              aria-label="Hide this card and see the whole map. Drag it up to open the Feed."
+              className="grid h-6 w-16 place-items-center rounded-full"
             >
-              <span aria-hidden className="material-symbols-outlined text-[20px]">
-                close
-              </span>
+              <span aria-hidden className="h-1.5 w-10 rounded-full bg-line" />
             </button>
+            <Link
+              href="/feed"
+              className="absolute right-0 top-0 inline-flex h-6 items-center gap-0.5 rounded-full px-2 text-[11px] font-extrabold text-muted hover:text-navy"
+            >
+              Feed
+              <span aria-hidden className="material-symbols-outlined text-[16px]">
+                expand_less
+              </span>
+            </Link>
           </div>
-          <p aria-live="polite" className={`text-center text-xs font-bold text-[#8A5A00] ${hint ? '' : 'sr-only'}`}>
-            {hint ?? (status === 'loading' ? 'Loading what is happening…' : `${pins.length} things happening on the map`)}
-          </p>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="font-heading text-lg font-extrabold text-navy">
+
+          <div className="flex flex-col gap-0.5">
+            <h2 className="font-heading text-lg font-extrabold leading-tight text-navy">
               {greetingFor(now)}
               {firstName ? `, ${firstName}` : ''}
-            </span>
-            {weatherLine ? <span className="truncate text-xs font-bold text-muted">{weatherLine}</span> : null}
+            </h2>
+            <button
+              type="button"
+              onClick={openStatus}
+              aria-live="polite"
+              className="inline-flex items-center gap-2 self-start text-left text-sm font-bold text-muted hover:text-navy"
+            >
+              <span
+                aria-hidden
+                className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                  mood === 'alert' ? 'bg-brand-red motion-safe:animate-pulse' : mood === 'advisory' ? 'bg-[#F0A93B]' : 'bg-primary'
+                }`}
+              />
+              <span className={mood === 'alert' ? 'text-[#C8102E]' : undefined}>{statusLine}</span>
+            </button>
           </div>
+
           <Link
             href="/sentinel"
             className="flex min-h-12 items-center gap-2.5 rounded-full bg-background px-3 text-[15px] font-semibold text-muted transition-colors hover:bg-[#E9EDF3]"
           >
-            <span aria-hidden className="relative grid h-8 w-8 place-items-center rounded-full bg-brand-green-dark text-white">
+            <span aria-hidden className="grid h-8 w-8 place-items-center rounded-full bg-brand-green-dark text-white">
               <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-              {/* The area's mood (was the Sentinel orb's ring): amber for reports, red for a live alert. */}
-              {mood !== 'calm' ? (
-                <span
-                  className={`absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full ring-2 ring-background ${mood === 'alert' ? 'bg-brand-red motion-safe:animate-pulse' : 'bg-[#F0A93B]'}`}
-                />
-              ) : null}
             </span>
             Ask Sentinel anything…
-            {mood !== 'calm' ? (
-              <span className="sr-only">{mood === 'alert' ? '. There is an alert in your area' : '. Your area is on advisory'}</span>
-            ) : null}
           </Link>
+
           <div className="flex gap-2">
             <button type="button" onClick={openCreate} className={SHEET_BTN}>
-              ✏️ Wetin dey happen?
+              <span aria-hidden>✏️</span> Post
             </button>
-            <button type="button" onClick={openCreate} className={SHEET_BTN}>
-              ⚠️ Report
+            <button type="button" onClick={() => void shareToday()} className={SHEET_BTN}>
+              <span aria-hidden>📸</span> Share today
             </button>
           </div>
-          <button type="button" onClick={() => void shareToday()} className="text-sm font-bold text-brand-green-dark">
-            📸 Share today in {area?.lga ?? 'your area'}
-          </button>
         </div>
       </section>
       ) : (
         // Same row as ⋯ (left) and SOS (right): same bottom, same 56 px height, centred.
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+1rem)] z-10 flex h-14 items-center justify-center px-20"
+          className="pointer-events-none absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+2.25rem)] z-10 flex h-14 items-center justify-center px-20"
           onPointerDown={onTabDown}
         >
           <button
