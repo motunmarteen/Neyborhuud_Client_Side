@@ -83,7 +83,7 @@ export function FloatingSosButton() {
         pathname === '/huud'
           ? // My Huud map (owner, 2026-10-16): just above the card on the right, opposite the ⋯ menu;
             // follows the card down when it is hidden.
-            { bottom: 'calc(var(--app-bottomnav-h) + 1rem + var(--huud-dock, 0px))', transition: 'bottom 300ms ease-out' }
+            { bottom: 'calc(var(--app-bottomnav-h) + 3rem + var(--huud-dock, 0px))', transition: 'bottom 300ms ease-out' }
           : {
               // Float just above the bottom bar (F-07), or near the edge when the bar hides on scroll.
               bottom: scrollHidden ? 'calc(1.5rem + var(--safe-bottom))' : 'calc(var(--app-nav-bottom) + 0.75rem)',
