@@ -109,7 +109,15 @@ function nearRing(p: Pt, ring: Pt[], d: number): boolean {
  * - open: water, parks, pitches (kept free)
  * - radius: only within this distance of the centre (0, 0)
  */
-export function fillAlongRoads(roads: Road[], real: Pt[][], open: Pt[][], radius: number, max: number): Filler[] {
+export function fillAlongRoads(
+  roads: Road[],
+  real: Pt[][],
+  open: Pt[][],
+  radius: number,
+  max: number,
+  /** Filled with palm tree spots: the empty lots between houses. */
+  trees?: Pt[],
+): Filler[] {
   const grid = new Grid();
   for (const r of real) grid.addRing(r);
   for (const o of open) grid.addRing(o);
@@ -163,15 +171,22 @@ export function fillAlongRoads(roads: Road[], real: Pt[][], open: Pt[][], radius
           d += 3;
           continue;
         }
-        if (hash01(`${seed}:skip`) < 0.1) {
-          d += front * 0.6 + gap;
-          continue;
-        }
         const ux = (p1.x - p0.x) / chord;
         const uz = (p1.z - p0.z) / chord;
         const nx = -uz;
         const nz = ux;
         const P = (u: number, v: number): Pt => ({ x: p0.x + ux * u + nx * v, z: p0.z + uz * u + nz * v });
+        if (hash01(`${seed}:skip`) < 0.1) {
+          // An empty lot, like a real street: a palm grows there.
+          const t = P(front * 0.3, side * (half + 3));
+          const spot = [P(front * 0.3 - 1, side * (half + 2)), P(front * 0.3 + 1, side * (half + 2)), P(front * 0.3 + 1, side * (half + 4)), P(front * 0.3 - 1, side * (half + 4))];
+          if (trees && Math.hypot(t.x, t.z) <= radius && !grid.takenRing(spot)) {
+            grid.addRing(spot);
+            trees.push(t);
+          }
+          d += front * 0.6 + gap;
+          continue;
+        }
         let v = half + 1.5 + hash01(`${seed}:sb`) * 2;
         for (let row = 0; row < rows; row++) {
           const rd = row === 0 ? depth : 7 + hash01(`${seed}:r${row}`) * 6;

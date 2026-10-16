@@ -14,6 +14,10 @@ import { useEffect, useRef } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 import { populate, rng, step, type Agent, type LngLat, type Scene } from '@/lib/livingMap';
 import { ensureLivingSprites } from '@/lib/livingSprites';
+import { registerLiving, unregisterLiving } from '@/lib/livingRegistry';
+
+/** The toy-world 3D layer draws the figures as models when it is on (see toyWorldLayer). */
+const TOY_LAYER = 'toy-world';
 
 const SOURCE = 'living';
 const MIN_ZOOM = 15;
@@ -167,6 +171,8 @@ export function useLivingMap(map: maplibregl.Map | null, { hour, weather, dark, 
       return;
     }
     ensureLayers(map);
+    registerLiving(map, () => agents.current);
+    let showingIcons = true;
 
     const rebuild = () => {
       if (map.getZoom() < MIN_ZOOM) {
@@ -198,6 +204,18 @@ export function useLivingMap(map: maplibregl.Map | null, { hour, weather, dark, 
       acc = 0;
       if (!agents.current.length) return;
       step(agents.current, dt, r);
+      // With the 3D scene on, the figures are 3D models: hide the flat icons, just redraw.
+      const toy = !!map.getLayer(TOY_LAYER);
+      if (toy === showingIcons) {
+        showingIcons = !toy;
+        for (const id of ['living-vehicles', 'living-people']) {
+          if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', toy ? 'none' : 'visible');
+        }
+      }
+      if (toy) {
+        map.triggerRepaint();
+        return;
+      }
       const src = map.getSource(SOURCE) as maplibregl.GeoJSONSource | undefined;
       src?.setData(toGeoJSON(agents.current, mood.current.dark > 0.55));
     };
@@ -220,6 +238,7 @@ export function useLivingMap(map: maplibregl.Map | null, { hour, weather, dark, 
       window.clearTimeout(timer);
       map.off('idle', onIdle);
       map.off('moveend', onMoveEnd);
+      unregisterLiving(map);
       clear();
     };
   }, [map, enabled]);
