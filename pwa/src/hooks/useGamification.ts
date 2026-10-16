@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { nhToast } from "@/lib/toast";
 import { gamificationService } from "@/services/gamification.service";
 import { getErrorMessage } from "@/lib/error-handler";
 import apiClient from "@/lib/api-client";
@@ -84,7 +85,12 @@ export function useMyStreak() {
 
 // ── Mutations ──────────────────────────────────────────────────
 
-export function useCheckIn(onSuccess?: (data: any) => void) {
+/**
+ * Daily check-in. Says what was paid wherever it is tapped (streak cards
+ * used to stay silent). Pass `showToast: false` when the screen shows its own
+ * celebration, like the daily check-in pop-up.
+ */
+export function useCheckIn(onSuccess?: (data: any) => void, { showToast = true }: { showToast?: boolean } = {}) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => gamificationService.checkIn(),
@@ -98,6 +104,14 @@ export function useCheckIn(onSuccess?: (data: any) => void) {
         emitCoinsUpdated({ totalHuudCoins: data.totalHuudCoins });
       } else {
         emitCoinsUpdated();
+      }
+      if (showToast) {
+        if (data?.alreadyCheckedIn) {
+          nhToast.info("You don check in today already", "Come back tomorrow to keep your streak.");
+        } else if (data?.coinsEarned > 0) {
+          const bonus = data?.bonusCoins > 0 ? ` (with +${data.bonusCoins} streak bonus)` : "";
+          nhToast.thanks({ emoji: "🔥", title: `Day ${data.streak} check-in`, sub: `See you tomorrow${bonus}.`, coins: data.coinsEarned });
+        }
       }
       onSuccess?.(data);
     },
@@ -117,12 +131,15 @@ export function useClaimAchievement() {
         queryKey: ["gamification", "my-achievements"],
       });
       queryClient.invalidateQueries({ queryKey: ["gamification", "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification", "transactions"] });
       const data = (res as any)?.data ?? res;
-      const points = data?.reward?.points ?? data?.points;
-      if (points) {
-        toast.success(`+${points} points claimed! 🎉`);
+      emitCoinsUpdated(data?.totalHuudCoins != null ? { totalHuudCoins: data.totalHuudCoins } : undefined);
+      const coins = data?.reward?.points ?? 0;
+      if (coins > 0) {
+        nhToast.thanks({ emoji: "🏆", title: "Reward claimed", sub: "Well done!", coins });
       } else {
-        toast.success("Reward claimed!");
+        nhToast.thanks({ emoji: "🏆", title: "Reward claimed", sub: "Well done!" });
       }
     },
     onError: (err) => {
@@ -171,11 +188,14 @@ export function useTransactions(page = 1) {
     queryFn: async () => {
       const res = await gamificationService.getTransactions(page);
       const raw = (res as any)?.data ?? res;
+      // The server puts paging under `pagination`; reading the top level
+      // left the history stuck on page 1.
+      const paging = raw?.pagination ?? raw;
       return {
         transactions: Array.isArray(raw?.transactions) ? raw.transactions : Array.isArray(raw) ? raw : [],
-        total: raw?.total ?? 0,
-        page: raw?.page ?? page,
-        totalPages: raw?.totalPages ?? 1,
+        total: paging?.total ?? 0,
+        page: paging?.page ?? page,
+        totalPages: paging?.totalPages ?? 1,
       };
     },
     staleTime: 30_000,
@@ -189,7 +209,10 @@ export function useTipUser() {
     mutationFn: ({ recipientId, amount }: { recipientId: string; amount: 50 | 100 | 200 | 500 }) =>
       gamificationService.tipUser(recipientId, amount),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["gamification", "wallet"] });
+      for (const key of ["wallet", "stats", "transactions"]) {
+        queryClient.invalidateQueries({ queryKey: ["gamification", key] });
+      }
+      emitCoinsUpdated();
     },
   });
 }

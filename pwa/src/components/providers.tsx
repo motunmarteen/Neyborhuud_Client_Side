@@ -31,6 +31,7 @@ import { ClientRouteGuard } from '@/components/auth/ClientRouteGuard';
 import { CallProvider } from '@/contexts/CallContext';
 import { IncomingCallModal } from '@/components/chat/IncomingCallModal';
 import { ActiveCallView } from '@/components/chat/ActiveCallView';
+import { HuudCreditListener } from '@/components/gamification/HuudCreditListener';
 
 const METAMASK_EXTENSION_SUBSTRING = 'nkbihfbeogaeaoehlefnkodbefgpgknn';
 
@@ -324,6 +325,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <SentinelBottomSheetProvider>
       <CallProvider>
       <SocketAuthenticator />
+      <HuudCreditListener />
       <IncognitoInviteListener />
       <SmartLocationSync />
       <LocationSyncOrchestrator />

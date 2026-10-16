@@ -14,13 +14,23 @@ import { useMyGamificationStats } from '@/hooks/useGamification';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 
-// Amounts the server really pays today (checked against the server rules).
+// Amounts and daily limits the server really pays today (checked against the
+// server's award calls and huudcoin.ledger DAILY_CAPS, 2026-10-16).
 const WAYS_TO_EARN: { icon: string; title: string; detail: string; amount: string }[] = [
-  { icon: '📅', title: 'Check in every day', detail: 'More on long streaks', amount: '10+' },
+  { icon: '📅', title: 'Check in every day', detail: 'Extra on days 7, 14, 21… (+50 to +100) and every 30th day (+200)', amount: '10+' },
+  { icon: '📝', title: 'Post in the Feed', detail: 'Up to 5 posts a day', amount: '10' },
+  { icon: '💬', title: 'Comment on a post', detail: 'Up to 20 a day', amount: '2' },
+  { icon: '↗️', title: 'Share a post outside the app', detail: 'Up to 10 a day', amount: '5' },
+  { icon: '🎉', title: 'Create an event', detail: 'Up to 2 a day', amount: '15' },
+  { icon: '💼', title: 'Post a job', detail: 'Up to 2 a day', amount: '10' },
+  { icon: '🛍️', title: 'List an item for sale', detail: 'Up to 3 a day', amount: '10' },
+  { icon: '🤝🏾', title: 'Finish a marketplace deal', detail: 'Buyer and seller, up to 5 a day', amount: '10' },
+  { icon: '🙋🏾', title: 'Help a neighbour who asked', detail: 'When they confirm you helped', amount: '5' },
+  { icon: '🚨', title: 'Report an emergency neighbours confirm', detail: 'Paid only after they confirm it', amount: '15' },
   { icon: '🔎', title: 'Return a lost item', detail: 'After the owner confirms with the code', amount: '50' },
   { icon: '🙌🏾', title: 'Help someone find their item', detail: 'When they thank you for the tip', amount: '10' },
-  { icon: '📊', title: 'Post a poll 10 neighbours vote on', detail: 'Once per poll', amount: '2' },
-  { icon: '↗️', title: 'Share a post outside the app', detail: 'Up to a daily limit', amount: '5' },
+  { icon: '📊', title: 'Post a poll 10 neighbours vote on', detail: 'Once a day', amount: '2' },
+  { icon: '👤', title: 'Complete your profile', detail: 'Once', amount: '100' },
   { icon: '✉️', title: 'Verify your email', detail: 'Once', amount: '10' },
 ];
 

@@ -8,7 +8,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 - Update the **progress table** and **last updated** line at the end of each work session.
 - Status for tasks in progress: put `🟡` at the start of the line. Blocked: `⛔` plus the reason.
 
-**Last updated:** 10 October 2026
+**Last updated:** 16 October 2026
 
 > **PWA first.** NeyborHuud runs in the phone's browser from a link: no download, no app store, lowest barrier to entry. Installing ("Add to home screen") is optional. Store apps come later, only if needed.
 
@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 9 | 17 | 🟡 map home live at /huud; pin panels and live pins done; next M-10 go-slow traffic |
+| 3. Map home (sky + live map) | 9 | 17 | 🟡 map home live at /huud; pin panels, live pins, toy-world 3D buildings and 3D street life done; next M-18 step 3, M-10 go-slow traffic |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -366,6 +366,21 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 ## Phase 7: Gamification backend
 
 **Waiting on your go-ahead.** It changes how real users earn. See GAMIFICATION-REVIEW.md.
+
+**2026-10-16 audit and bug fixes (no change to what anyone earns):**
+- [ ] 🟡 Fixed in code, tested, **not yet deployed**:
+  - **Check-in paid nothing.** Signing in gave a hidden 5 HC "login bonus" that used the check-in's one-a-day slot, so the check-in then failed to pay while the streak still moved. The login bonus is removed; the check-in is the one daily reward.
+  - Daily limits now reset at midnight Nigeria time, not UTC, matching the streak (an 00:30 check-in used to count for the day before).
+  - Check-in is all-or-nothing: if paying fails, the streak goes back so a retry works. Two taps at once can't both count.
+  - **Rewards now show when they land**: the server tells the app after every payment and a "+N HuudCredit" card appears (posts, comments, deals, help, Lost & Found, tips…). Streak cards now say what they paid.
+  - Streak cards and the check-in pop-up use the server's real next bonus day. They used to promise "+0" on days 100 and 365.
+  - Complete-profile: "Claim 100 HuudCredit" shows only if it hasn't been paid yet (sign-up with a name already pays it). The success screen showed the whole balance labelled as the reward.
+  - Achievement claims can't pay twice. Streak goals count your best run. "Earn N in total" goals and levels count what you've earned, so spending on an ad no longer lowers your level.
+  - 15 achievements nobody could finish (no reward exists for attending events, follows, likes, ratings, safety reports, FYI, identity) are hidden until Phase 7.
+  - Tips: limited to 500 HC a day (G-15 limit); a tip the recipient can't receive is refunded instead of vanishing.
+  - Product likes were filed as comments and used up the comment limit. The wallet history was stuck on page 1. Rewards page "How to earn" now lists what the server really pays.
+  - **Emergency reports pay on confirmation (owner, 2026-10-16):** 15 HC once neighbours confirm (3 "I'm nearby" or 5 confirms), not for posting; paid once per report; the reporter can't confirm or vote on their own post.
+- Owner (2026-10-16): levels keep showing until the Phase 7 ladder replaces them.
 
 - [ ] G-01 Separate **Impact** from HuudCredit in the database and API
 - [ ] G-02 6-level ladder (New Neighbour → Huud Elder) with unlocks; migrate existing users (nobody goes down; Legacy marks)

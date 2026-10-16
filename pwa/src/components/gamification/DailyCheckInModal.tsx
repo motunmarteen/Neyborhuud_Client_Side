@@ -1,9 +1,8 @@
 "use client";
 
-import { nhToast } from "@/lib/toast";
 import { useState, useEffect } from "react";
 import { useCheckIn, useMyStreak } from "@/hooks/useGamification";
-import { emitCoinsUpdated, localDayKey } from "@/lib/gamification-events";
+import { localDayKey } from "@/lib/gamification-events";
 
 const DISMISS_KEY = "neyborhuud_checkin_dismissed_day";
 
@@ -14,14 +13,19 @@ type StreakData = {
   streakBroken?: boolean;
   nextMilestone?: number;
   nextMilestoneReward?: number;
+  /** What checking in right now pays (base + any bonus due today). */
+  todayCoins?: number;
 };
 
 export default function DailyCheckInModal() {
   const [open, setOpen] = useState(false);
   const [rewardData, setRewardData] = useState<{
-    coins?: number;
+    coins: number;
+    bonus: number;
     streak?: number;
     totalHuudCoins?: number;
+    nextMilestone?: number;
+    nextMilestoneReward?: number;
   } | null>(null);
 
   const { data: streakData, isSuccess } = useMyStreak();
@@ -31,18 +35,24 @@ export default function DailyCheckInModal() {
   const streakCount = streak?.effectiveStreak ?? streak?.streak ?? 0;
   const nextMilestone = streak?.nextMilestone;
   const nextMilestoneReward = streak?.nextMilestoneReward ?? 0;
+  const todayCoins = streak?.todayCoins;
 
+  // This pop-up is the celebration, so no extra toast.
   const checkIn = useCheckIn((data) => {
+    if (data?.alreadyCheckedIn) {
+      // Checked in on another screen or phone: nothing to claim here.
+      setOpen(false);
+      return;
+    }
     setRewardData({
-      coins: data?.coinsEarned ?? data?.coins ?? 10,
+      coins: data?.coinsEarned ?? 0,
+      bonus: data?.bonusCoins ?? 0,
       streak: data?.effectiveStreak ?? data?.streak ?? streakCount + 1,
       totalHuudCoins: data?.totalHuudCoins,
+      nextMilestone: data?.nextMilestone,
+      nextMilestoneReward: data?.nextMilestoneReward,
     });
-    if (data?.coinsEarned) {
-      emitCoinsUpdated({ totalHuudCoins: data?.totalHuudCoins });
-      nhToast.thanks({ title: 'You don check in today', sub: 'See you tomorrow. Keep your streak going.', coins: data.coinsEarned });
-    }
-  });
+  }, { showToast: false });
 
   useEffect(() => {
     if (typeof window === "undefined" || !isSuccess) return;
@@ -77,7 +87,7 @@ export default function DailyCheckInModal() {
 
   const claimed = !!rewardData;
   const currentStreak = rewardData?.streak ?? (streakBroken ? 0 : streakCount);
-  const coins = rewardData?.coins ?? 10 + nextMilestoneReward;
+  const coins = rewardData?.coins ?? 0;
 
   return (
     <div
@@ -111,22 +121,31 @@ export default function DailyCheckInModal() {
         {claimed ? (
           <>
             <h2 className="mb-1 text-xl font-extrabold" style={{ color: "var(--neu-text)" }}>
-              Day {currentStreak} Check-In!
+              🔥 Day {currentStreak} done!
             </h2>
-            <p className="mb-1 text-2xl font-bold text-status-warning">+{coins} HuudCredit</p>
+            <p className="mb-1 text-2xl font-bold text-status-warning">+{coins.toLocaleString()} HuudCredit</p>
+            {rewardData && rewardData.bonus > 0 ? (
+              <p className="mb-1 text-xs font-semibold text-brand-red">
+                Includes +{rewardData.bonus} streak bonus
+              </p>
+            ) : null}
             {rewardData?.totalHuudCoins != null && (
               <p className="mb-2 text-xs" style={{ color: "var(--neu-text-muted)" }}>
-                Wallet balance: {rewardData.totalHuudCoins.toLocaleString()} coins
+                You now have {rewardData.totalHuudCoins.toLocaleString()} HuudCredit
               </p>
             )}
-            <div className="mb-5 flex items-center justify-center gap-2 text-lg font-semibold text-brand-red">
-              🔥 {currentStreak}-day streak!
-            </div>
+            {rewardData?.nextMilestone && rewardData.nextMilestoneReward ? (
+              <p className="mb-5 text-xs" style={{ color: "var(--neu-text-muted)" }}>
+                Check in every day: day {rewardData.nextMilestone} pays +{rewardData.nextMilestoneReward} extra.
+              </p>
+            ) : (
+              <div className="mb-5" />
+            )}
             <button
               onClick={handleDismiss}
               className="w-full rounded-full bg-primary py-3 text-sm font-bold text-white transition-colors hover:bg-primary/90 min-h-12"
             >
-              Awesome! 🎊
+              See you tomorrow
             </button>
           </>
         ) : (
@@ -136,23 +155,26 @@ export default function DailyCheckInModal() {
             </h2>
             <p className="mb-3 text-sm" style={{ color: "var(--neu-text-secondary)" }}>
               {streakBroken
-                ? "Your streak reset — check in today to start fresh at day 1!"
-                : "You haven't checked in today yet!"}
+                ? "You missed a day, so your streak starts again at day 1."
+                : streakCount > 0
+                  ? `Check in to make it day ${streakCount + 1}.`
+                  : "Check in every day to build a streak."}
             </p>
             <div className="mb-1 flex items-center justify-center gap-2 text-lg font-semibold text-brand-red">
               🔥 {streakBroken ? 0 : streakCount}-day streak
             </div>
             <p className="mb-5 text-xs" style={{ color: "var(--neu-text-muted)" }}>
+              {todayCoins ? `Check in now: +${todayCoins} HuudCredit. ` : ""}
               {nextMilestone && nextMilestoneReward > 0
-                ? `Day ${nextMilestone} milestone: +${nextMilestoneReward} bonus HuudCredit`
-                : "Keep your streak alive and earn HuudCredit"}
+                ? `Day ${nextMilestone} pays +${nextMilestoneReward} extra.`
+                : ""}
             </p>
             <button
               onClick={handleClaim}
               disabled={checkIn.isPending}
               className="mb-2 w-full rounded-full bg-brand-red py-3 text-sm font-bold text-white transition-colors hover:bg-brand-red disabled:opacity-50 min-h-12"
             >
-              {checkIn.isPending ? "Claiming…" : "Claim Daily Bonus 🔥"}
+              {checkIn.isPending ? "Checking in…" : todayCoins ? `Check in · +${todayCoins} 🪙` : "Check in 🔥"}
             </button>
             <button
               onClick={handleDismiss}

@@ -265,6 +265,7 @@ export default function HuudScorePage() {
                     lastCheckIn={streakData?.lastCheckIn}
                     checkedInToday={(streakData as any)?.checkedInToday}
                     streakBroken={(streakData as any)?.streakBroken}
+                    nextMilestone={(streakData as any)?.nextMilestone}
                     nextReward={(streakData as any)?.nextMilestoneReward ?? 0}
                     onCheckIn={() => checkIn.mutate()}
                     checkInPending={checkIn.isPending}
