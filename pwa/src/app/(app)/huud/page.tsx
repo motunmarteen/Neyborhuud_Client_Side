@@ -59,9 +59,6 @@ const MENU_ITEM =
   'flex min-h-12 items-center gap-3 px-4 text-left text-[15px] font-bold text-navy transition-colors hover:bg-background disabled:opacity-60';
 const SHEET_BTN =
   'inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-white px-3 text-sm font-bold text-navy transition-colors hover:bg-background';
-/** How far the map runs on below the screen's bottom edge (matches --map-bleed in CSS). */
-const MAP_BLEED_PX = 120;
-
 /** How far up a swipe on the sheet must go to open the Feed. */
 const SWIPE_UP_PX = 60;
 
@@ -74,8 +71,7 @@ export default function HuudMapHomePage() {
   const { user, isLoading } = useAuth();
   // Wait for the profile so the map opens on the person's own area, not a jump from Nigeria.
   return (
-    // Not overflow-hidden: the map bleeds past the bottom edge (see .huud-map-bleed).
-    <div className="fixed inset-0 overflow-visible bg-[#9ED3F5]">
+    <div className="fixed inset-0 overflow-hidden bg-[#9ED3F5]">
       <TopNav />
       {isLoading ? (
         <div className="h-full w-full animate-pulse bg-[#9ED3F5] motion-reduce:animate-none" />
@@ -118,10 +114,6 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   }, []);
 
   const { status, pins, fresh } = useMapPins(map, layers, { onOpen: setPin, live: true });
-  // The map is taller than the screen by MAP_BLEED_PX: keep its centre in the visible part.
-  useEffect(() => {
-    map?.setPadding({ top: 0, left: 0, right: 0, bottom: MAP_BLEED_PX });
-  }, [map]);
 
   // M-10: fresh traffic reports (go-slows, road blocks, accidents, floods) make the street
   // life crawl and queue there. Kept while the Traffic chip is off: hiding pins clears no road.
@@ -307,9 +299,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     <>
       {/* Full screen, notch area included, so the sky runs up behind the status bar
           (owner, 2026-10-16). SkyMap's own box is position: relative, hence this wrapper.
-          It also runs on past the bottom edge, so the phone's home-indicator strip shows map,
-          not a white band (owner, 2026-10-17). */}
-      <div className="huud-map-bleed">
+          Compass and map credit sit top-right, under the ⚡ ribbon, not under the bottom bar. */}
+      <div className="huud-map-home absolute inset-0">
         <SkyMap
           center={knowsArea ? view.center : undefined}
           // Closer street view so the 3D buildings read (owner, 2026-10-16).
@@ -320,6 +311,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           onSky={setSky}
           cinematic={!hasFocus}
           toyWorld
+          controlsPosition="top-right"
           jams={jams}
           // Sky reaches up behind the notch and the top bar; the horizon stays just under the controls.
           skyLift={{ safeTopPlus: 60 }}

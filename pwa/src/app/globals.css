@@ -9582,21 +9582,8 @@ html .animate-spin {
 .nh-wall__plot[data-state='free']:hover, .nh-wall__plot[data-state='free'][aria-pressed='true'] { background: #DDF5E3; box-shadow: inset 0 0 0 2px #00B82E; }
 .nh-wall__plot:focus-visible { outline: 3px solid #1D2433; outline-offset: 1px; z-index: 1; }
 
-/* Map home (owner, 2026-10-17): the map runs on below the screen's bottom edge, so the
-   strip under the bottom bar (the iPhone home-indicator area, which can sit outside the
-   page's box) shows map instead of a white band. Map controls are lifted back by the same
-   amount, and the page underneath takes the land colour in case a sliver still shows. */
-.huud-map-bleed {
-  --map-bleed: 120px; /* MAP_BLEED_PX in the map home page */
-  position: absolute;
-  inset: 0;
-  bottom: calc(-1 * var(--map-bleed));
-}
-.huud-map-bleed .maplibregl-ctrl-bottom-left,
-.huud-map-bleed .maplibregl-ctrl-bottom-right {
-  bottom: var(--map-bleed);
-}
-html:has(.huud-map-bleed),
-html:has(.huud-map-bleed) body {
-  background-color: #B9D99B;
+/* Map home (owner, 2026-10-17): compass and the folded map credit (ⓘ) sit top-right under
+   the layer chips and the ⚡ ribbon, where they are not hidden by the bottom bar. */
+.huud-map-home .maplibregl-ctrl-top-right {
+  top: calc(var(--safe-top, 0px) + var(--app-topnav-height) + 6.5rem);
 }

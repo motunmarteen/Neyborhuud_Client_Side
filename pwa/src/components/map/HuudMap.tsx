@@ -35,6 +35,8 @@ type HuudMapProps = {
   compass?: boolean;
   /** Where the compass sits (the sky scene keeps the top clear). */
   compassPosition?: 'top-right' | 'bottom-right';
+  /** Where the map credit (ⓘ) sits. It must stay on the map (OpenStreetMap / OpenFreeMap licence). */
+  attributionPosition?: 'top-right' | 'bottom-right';
   /**
    * Map home only (owner, 2026-10-15, "immersive"): once per visit the camera swoops down from
    * the sky onto the street, then slowly circles until the person touches the map.
@@ -60,7 +62,7 @@ const INTRO_KEY = 'nh_map_intro_done';
 const ORBIT_DEG_PER_S = 2.2;
 
 /** Without a centre the map fits all of Nigeria; screens pass the person's area (startView). */
-export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', className = '', onReady, tilt = true, compass = true, compassPosition = 'top-right', cinematic = false, toyWorld = false }: HuudMapProps) {
+export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', className = '', onReady, tilt = true, compass = true, compassPosition = 'top-right', attributionPosition = 'bottom-right', cinematic = false, toyWorld = false }: HuudMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [failed, setFailed] = useState(false);
@@ -83,7 +85,7 @@ export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', class
         // Street views start tilted toward the horizon, like the mockup; calm mode stays flat.
         pitch: center && tilt && !calm ? 60 : 0,
         bearing: center && tilt && !calm ? -12 : 0,
-        attributionControl: { compact: true },
+        attributionControl: false,
         // Two fingers: pinch to zoom, twist to turn, drag up/down to tilt.
         dragRotate: !calm,
         pitchWithRotate: !calm,
@@ -95,6 +97,12 @@ export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', class
       return;
     }
     if (calm) map.touchZoomRotate.disableRotation();
+    // The credit shows in full for a moment, then folds into a small ⓘ that opens it again.
+    const attribution = new maplibregl.AttributionControl({ compact: true });
+    map.addControl(attribution, attributionPosition);
+    window.setTimeout(() => {
+      map.getContainer().querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
+    }, 4000);
     if (compass && !calm) {
       map.addControl(new maplibregl.NavigationControl({ showZoom: false, showCompass: true, visualizePitch: true }), compassPosition);
     }
