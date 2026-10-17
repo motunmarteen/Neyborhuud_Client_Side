@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import { nhToast } from '@/lib/toast';
 import type { Post, PostAuthor } from '@/types/api';
 import { useFollow } from '@/hooks/useFollow';
-import ShareModal from './ShareModal';
+import ShareModal, { alertShareStatus } from './ShareModal';
 import { PostCardActionsSheet } from '@/components/feed/PostCardActionsSheet';
 import { usePostCardMenuActions } from '@/hooks/usePostCardMenuActions';
 import { RepostComposerSheet } from '@/components/feed/RepostComposerSheet';
@@ -179,7 +179,9 @@ export function XPostCard({
         followPending={isFollowPending}
       />
 
-      {showShare ? <ShareModal postId={postId} postContent={post.content ?? ''} onClose={() => setShowShare(false)} /> : null}
+      {showShare ? (
+        <ShareModal postId={postId} postContent={post.content ?? ''} onClose={() => setShowShare(false)} alert={alertShareStatus(post)} />
+      ) : null}
       <RepostComposerSheet open={showRepostComposer} sourcePost={post} onClose={() => setShowRepostComposer(false)} onReposted={onReposted} />
       {chainModalOpen ? <PostRepostChainModal postId={postId} open={chainModalOpen} onClose={() => setChainModalOpen(false)} /> : null}
       <PostCardActionsSheet

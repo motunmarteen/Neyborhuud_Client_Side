@@ -24,4 +24,4 @@ export function signupHref(): string {
 }
 
 /** Pages a visitor may open without signing in. */
-export const VISITOR_ROUTES = ['/huud'];
+export const VISITOR_ROUTES = ['/huud', '/alert'];

@@ -472,7 +472,12 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
 
           {visitor ? (
             <VisitorWelcome
-              area={areaWelcome?.lga ?? null}
+              area={
+                areaWelcome?.neighbourhood && areaWelcome.lga
+                  ? `${areaWelcome.neighbourhood}, ${areaWelcome.lga}`
+                  : areaWelcome?.lga ?? null
+              }
+              lga={areaWelcome?.lga ?? null}
               neighbours={areaWelcome?.neighbours ?? 0}
               joinHref={joinHref}
               onTour={tour.start}

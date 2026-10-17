@@ -8,7 +8,10 @@
 import Link from 'next/link';
 
 type Props = {
+  /** "Egbeda, Alimosho" (owner 2026-10-17), or just the LGA. */
   area: string | null;
+  /** Members are counted per LGA, so the count line names the LGA. */
+  lga?: string | null;
   neighbours: number;
   joinHref: string;
   onTour: () => void;
@@ -17,7 +20,7 @@ type Props = {
   locating?: boolean;
 };
 
-export function VisitorWelcome({ area, neighbours, joinHref, onTour, onShowMyArea, locating }: Props) {
+export function VisitorWelcome({ area, lga, neighbours, joinHref, onTour, onShowMyArea, locating }: Props) {
   return (
     <>
       <div className="flex flex-col gap-0.5">
@@ -33,10 +36,10 @@ export function VisitorWelcome({ area, neighbours, joinHref, onTour, onShowMyAre
       {area && neighbours > 0 ? (
         <p className="text-sm font-bold text-navy">
           {neighbours.toLocaleString('en-NG')} {neighbours === 1 ? 'neighbour' : 'neighbours'}{' '}
-          <span className="font-semibold text-muted">already dey {area}</span>
+          <span className="font-semibold text-muted">already dey {lga ?? area}</span>
         </p>
       ) : area ? (
-        <p className="text-sm font-semibold text-muted">Be one of the first neighbours in {area}.</p>
+        <p className="text-sm font-semibold text-muted">Be one of the first neighbours in {lga ?? area}.</p>
       ) : null}
       {!area && onShowMyArea ? (
         <button
