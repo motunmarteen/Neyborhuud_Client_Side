@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 10 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic done; next M-11 area pulses, M-12 Pulse panel |
+| 3. Map home (sky + live map) | 11 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses done; next M-12 Pulse panel |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -198,7 +198,7 @@ Kept here so the whole history is in one place.
 - [x] M-09 (pwa /huud: bottom sheet for every pin type: what, how fresh, price, "happening now", count on the block, Open / See the report, Ask Sentinel; ad panel with Visit) Pin panels (bottom sheet) for every type, with actions and "Ask Sentinel about this"
 - [x] M-10 (2026-10-17: fresh traffic reports (go-slow, road block, accident, flood) make vehicles crawl and queue there; full for an hour, gone by 3 hours; minor reports slow less; expressways now carry street traffic too; normal flow when nothing is reported) Moving traffic driven by real go-slow reports (calm when no data)
 - [x] 2026-10-17 (owner): **your own pins**: 🏠 your registered home (only on your phone, nobody else sees it) and the green "You are here" pin that follows you; never asks for location by itself (starts on "Me" or if already allowed)
-- [ ] M-11 Neighbour activity as area pulses (never exact homes)
+- [x] M-11 (2026-10-17: server /geo/area-pulses: ~440 m cells where 2+ different people posted or reported in the last 2 h, cell centre only; app: green dot with a growing ripple, bigger where busier, still dot in Calm view) Neighbour activity as area pulses (never exact homes)
 - [ ] 🟡 M-17 (first version live: vehicles, people, kids football, market crowds on real geometry; next: denser, go-slow speeds from reports) **Living map** (owner, 2026-10-12: "the map has to be real"): moving danfos, kekes, okadas and cars on real roads; people walking on real streets and paths; kids playing football on real pitches; crowds at real markets; density by time of day (rush hours busy, late night quiet) and weather (fewer people in rain), headlights at night; traffic speed from real go-slow reports (M-10). Decoration only, never real tracked people; off in calm mode
 - [ ] 🟡 M-12 (2026-10-15: ⚡ PULSE ribbon on the map under the layer chips: real news headlines + exchange rates; next: weather and go-slows in the ribbon, "Today's Pulse" panel) Pulse ticker: news + exchange rates + weather; "Today's Pulse" panel
 - [x] M-13 (2026-10-15: "Calm view / Live view" on the map, same setting as Save data: flat map, no motion) Calm view toggle
