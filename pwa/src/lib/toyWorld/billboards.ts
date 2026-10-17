@@ -14,18 +14,8 @@
 import * as THREE from 'three';
 import * as maplibregl from 'maplibre-gl';
 
-export type ToyBillboard = {
-  id: string;
-  lng: number;
-  lat: number;
-  title: string;
-  line?: string;
-  colour: string;
-  /** Text colour that reads on `colour` (see boardInk). */
-  ink: string;
-  /** "Ad", or "Sample" for previews. */
-  chip: string;
-};
+export type { ToyBillboard } from './constants';
+import type { ToyBillboard } from './constants';
 
 /** Face width in model metres; the whole board is scaled so this is ~FACE_PX on screen. */
 const FACE_W = 12;

@@ -50,13 +50,24 @@ const withPWA = withPWAInit({
         expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 },
       },
     },
+    // The app's code files have a unique name per version (a new deploy = new names, found
+    // through the fresh HTML above), so a saved copy is always right: use it at once (M-16).
+    // NetworkFirst made every return visit on 3G wait up to 5 s per file before the cache.
     {
       urlPattern: /\/_next\/static\/.*\.(?:js|css)$/i,
-      handler: "NetworkFirst",
+      handler: "CacheFirst",
       options: {
         cacheName: "next-static-js-css",
-        networkTimeoutSeconds: 5,
-        expiration: { maxEntries: 128, maxAgeSeconds: 7 * 24 * 60 * 60 },
+        expiration: { maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true },
+      },
+    },
+    // The map's tile worker (142 KB), versioned by ?v=<MapLibre version>.
+    {
+      urlPattern: /\/maplibre\/maplibre-gl-worker\.mjs/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "map-worker",
+        expiration: { maxEntries: 4, maxAgeSeconds: 60 * 24 * 60 * 60 },
       },
     },
     // Low-data mode (M-15): map tiles are kept on the phone. Tile URLs carry the map's

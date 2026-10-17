@@ -21,13 +21,10 @@ import { useCalm } from '@/hooks/useCalm';
 import { applyMapLight } from '@/lib/mapNight';
 import { useLivingMap } from '@/hooks/useLivingMap';
 import type { Jam } from '@/lib/livingMap';
-import { TOY_LAYER_ID, type ToyWorldLayer } from '@/lib/toyWorld/toyWorldLayer';
+import { setToyDark } from '@/lib/toyWorld/constants';
 
-/** Night for the toy-world models: lit windows, dimmer sun. */
-function toyDark(map: maplibregl.Map, dark: number) {
-  const layer = map.getLayer(TOY_LAYER_ID) as unknown as { implementation?: ToyWorldLayer } | undefined;
-  layer?.implementation?.setDark(dark);
-}
+/** Night for the toy-world models: lit windows, dimmer sun (remembered for a late layer). */
+const toyDark = setToyDark;
 import { watMinutes } from '@/lib/sky';
 
 /** Unknown weather: no clouds, rain or haze (never a made-up look). */
