@@ -70,7 +70,8 @@ function readScene(map: maplibregl.Map): Scene {
     const cls = String(f.properties?.class ?? '');
     for (const path of lines(f)) {
       if (!touches(path)) continue;
-      if (['primary', 'secondary', 'tertiary', 'trunk', 'minor'].includes(cls)) roads.push(path);
+      // Expressways too: that is where most Lagos go-slows are.
+      if (['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor'].includes(cls)) roads.push(path);
       if (['minor', 'service', 'path', 'track'].includes(cls)) walkways.push(path);
       if (cls === 'busway' || cls === 'bus_guideway') busways.push(path);
     }
