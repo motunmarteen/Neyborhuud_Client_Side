@@ -26,11 +26,11 @@ import { ballModel, brtModel, carModel, danfoModel, kekeModel, okadaModel, palmM
 import { livingAgents } from '@/lib/livingRegistry';
 import type { AgentKind } from '@/lib/livingMap';
 import { hash01 } from './shapes';
-import { createBillboards, type ToyBillboard } from './billboards';
+import { createBillboards } from './billboards';
+import { TOY_LAYER_ID, toyDarkOf, type ToyBillboard, type ToyWorldLayer } from './constants';
 
-export const TOY_LAYER_ID = 'toy-world';
-const RADIUS_M = 450;
-const MAX_BUILDINGS = 700;
+export { TOY_LAYER_ID, type ToyWorldLayer } from './constants';
+
 const MIN_ZOOM = 15;
 /** Rebuild when the map centre moves this far from where the scene was built. */
 const REBUILD_M = 220;
@@ -55,15 +55,14 @@ const LAMP_CAPACITY = Object.entries(LAMPS).reduce((n, [k]) => n + CAPACITY[k as
 
 type Built = { origin: maplibregl.MercatorCoordinate; scale: number; count: number };
 
-export type ToyWorldLayer = maplibregl.CustomLayerInterface & {
-  setDark: (dark: number) => void;
-  /** Map billboard ads to stand in 3D (useMapAds). */
-  setBillboards: (list: ToyBillboard[]) => void;
-  /** The 3D billboard under a point in the map canvas (CSS px), if any. */
-  pickBillboard: (point: { x: number; y: number }) => string | null;
-};
 
-export function createToyWorldLayer(): ToyWorldLayer {
+/**
+ * `lite` (low-end phones, M-16): a smaller circle of models and no antialiasing, so a cheap
+ * Android keeps up.
+ */
+export function createToyWorldLayer({ lite = false }: { lite?: boolean } = {}): ToyWorldLayer {
+  const RADIUS_M = lite ? 300 : 450;
+  const MAX_BUILDINGS = lite ? 350 : 700;
   let map: maplibregl.Map | null = null;
   let renderer: THREE.WebGLRenderer | null = null;
   const scene = new THREE.Scene();
@@ -424,7 +423,10 @@ export function createToyWorldLayer(): ToyWorldLayer {
     renderingMode: '3d',
     onAdd(m, gl) {
       map = m;
-      renderer = new THREE.WebGLRenderer({ canvas: m.getCanvas(), context: gl, antialias: true });
+      renderer = new THREE.WebGLRenderer({ canvas: m.getCanvas(), context: gl, antialias: !lite });
+      // Lighting as the sky says now (the layer may load after the sky has set it).
+      dark = toyDarkOf(m);
+      applyDark();
       renderer.autoClear = false;
       // The plain extruded blocks are replaced by the models.
       if (m.getLayer('building-3d')) m.setLayoutProperty('building-3d', 'visibility', 'none');

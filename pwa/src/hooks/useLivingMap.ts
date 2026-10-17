@@ -15,6 +15,9 @@ import type * as maplibregl from 'maplibre-gl';
 import { populate, rng, step, type Agent, type Jam, type LngLat, type Scene } from '@/lib/livingMap';
 import { ensureLivingSprites } from '@/lib/livingSprites';
 import { registerLiving, unregisterLiving } from '@/lib/livingRegistry';
+import { isLowEndDevice } from '@/lib/deviceTier';
+
+const lowEnd = typeof window !== 'undefined' && isLowEndDevice();
 
 /** The toy-world 3D layer draws the figures as models when it is on (see toyWorldLayer). */
 const TOY_LAYER = 'toy-world';
@@ -193,7 +196,8 @@ export function useLivingMap(map: maplibregl.Map | null, { hour, weather, dark, 
       const c = map.getCenter();
       const seed = Math.floor(c.lng * 1000) * 31 + Math.floor(c.lat * 1000);
       // Fewer figures when zoomed in on a small patch, so it never looks crowded.
-      const density = Math.min(1, Math.max(0.35, (map.getZoom() < 16.5 ? 1 : 0.7)));
+      // Cheap phones (M-16) get fewer figures, so the street keeps moving smoothly.
+      const density = Math.min(1, Math.max(0.35, (map.getZoom() < 16.5 ? 1 : 0.7))) * (lowEnd ? 0.6 : 1);
       agents.current = populate(scene, { hour: mood.current.hour, weather: mood.current.weather, density, jams: mood.current.jams }, seed);
     };
 

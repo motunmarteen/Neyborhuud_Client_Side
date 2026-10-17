@@ -14,7 +14,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import { billboardHtml, billboardLabel, boardInk, sponsoredPinHtml } from '@/components/map/AdBoard';
-import { TOY_LAYER_ID, type ToyWorldLayer } from '@/lib/toyWorld/toyWorldLayer';
+import { toyLayerOf } from '@/lib/toyWorld/constants';
 import { countAd, fetchMapAds, type Ad } from '@/lib/adsApi';
 import { MAX_SPAN_DEG } from '@/lib/mapPins';
 
@@ -31,10 +31,7 @@ type Options = {
 
 const seenThisVisit = new Set<string>();
 
-function toyLayer(map: maplibregl.Map): ToyWorldLayer | undefined {
-  if (!map.getStyle()) return undefined;
-  return (map.getLayer(TOY_LAYER_ID) as unknown as { implementation?: ToyWorldLayer } | undefined)?.implementation;
-}
+const toyLayer = toyLayerOf;
 
 function markup(ad: Ad, night: boolean) {
   return ad.kind === 'billboard' ? billboardHtml(ad, night) : sponsoredPinHtml(ad);

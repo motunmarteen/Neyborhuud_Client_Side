@@ -16,7 +16,8 @@ import { HUUD_MAP_STYLE } from '@/lib/huudMapStyle';
 import { ensureMaplibreWorker } from '@/lib/maplibreWorker';
 import { NIGERIA_BOUNDS } from '@/lib/nigeriaView';
 import { CALM_EVENT, isCalm } from '@/lib/calmMode';
-import { TOY_LAYER_ID, createToyWorldLayer } from '@/lib/toyWorld/toyWorldLayer';
+import { TOY_LAYER_ID } from '@/lib/toyWorld/constants';
+import { isLowEndDevice } from '@/lib/deviceTier';
 
 export type LngLat = { lat: number; lng: number };
 
@@ -50,11 +51,20 @@ type HuudMapProps = {
   toyWorld?: boolean;
 };
 
-/** Put the toy-world models under the labels, pins and street life. */
+/**
+ * Put the toy-world models under the labels, pins and street life. three.js (~120 KB) is
+ * fetched here, after the map shows, never up front (M-16); Calm view never fetches it.
+ */
 function addToyWorld(map: maplibregl.Map) {
   if (map.getLayer(TOY_LAYER_ID)) return;
-  const firstSymbol = map.getStyle().layers.find((l) => l.type === 'symbol')?.id;
-  map.addLayer(createToyWorldLayer(), firstSymbol);
+  void import('@/lib/toyWorld/toyWorldLayer')
+    .then(({ createToyWorldLayer }) => {
+      // The map may have closed, Calm view come on, or another call won meanwhile.
+      if (!map.getStyle() || isCalm() || map.getLayer(TOY_LAYER_ID)) return;
+      const firstSymbol = map.getStyle().layers.find((l) => l.type === 'symbol')?.id;
+      map.addLayer(createToyWorldLayer({ lite: isLowEndDevice() }), firstSymbol);
+    })
+    .catch(() => undefined);
 }
 
 const INTRO_KEY = 'nh_map_intro_done';
@@ -76,6 +86,9 @@ export function HuudMap({ center, zoom = 15.5, label = 'Map of your area', class
       map = new maplibregl.Map({
         container: containerRef.current,
         style: HUUD_MAP_STYLE,
+        // Cheap phones (M-16): draw at 1.5x at most instead of the screen's 2-3x. Far less work
+        // per frame; on a small screen the difference is hard to see.
+        ...(isLowEndDevice() ? { pixelRatio: Math.min(window.devicePixelRatio || 1, 1.5) } : {}),
         ...(center
           ? { center: [center.lng, center.lat] as [number, number], zoom }
           : { bounds: NIGERIA_BOUNDS, fitBoundsOptions: { padding: 16 } }),
