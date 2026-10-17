@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Users, Zap, ShieldCheck, Plus, LogIn, Search } from 'lucide-react';
@@ -79,6 +79,10 @@ export default function CommunitiesPage() {
   const [viewTab, setViewTab] = useState<ViewTab>('all');
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [createOpen, setCreateOpen] = useState(false);
+  // "Set up my estate" on a quiet map (?create=1) opens the create form straight away.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('create') === '1') setCreateOpen(true);
+  }, []);
   const [pendingJoinId, setPendingJoinId] = useState<string | null>(null);
 
   const joinedFilter =

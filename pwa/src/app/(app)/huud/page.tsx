@@ -41,6 +41,8 @@ import { useMapAds } from '@/hooks/useMapAds';
 import { useMyPins } from '@/hooks/useMyPins';
 import { useAreaPulses } from '@/hooks/useAreaPulses';
 import { MapTour, useMapTour } from '@/components/map/MapTour';
+import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
+import type { ShareRow } from '@/lib/shareCard';
 import { extractUserHomeCoords } from '@/lib/mapUserLocation';
 import { jamStrength, type Jam } from '@/lib/livingMap';
 import { LAYERS, LAYER_META, pinHref, shortNaira, type MapLayer, type MapPin } from '@/lib/mapPins';
@@ -240,6 +242,23 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             : allCount > 0
               ? `${allCount} ${allCount === 1 ? 'thing' : 'things'} happening nearby`
               : `All quiet in ${where}`;
+  // Quiet street (mockup): nothing reported here yet. Honest, and still useful.
+  const quiet = knowsArea && status === 'ready' && allCount === 0;
+  const username = (user as { username?: string } | null)?.username;
+  const inviteNeighbours = async () => {
+    const url = `${window.location.origin}/signup${username ? `?ref=${encodeURIComponent(username)}` : ''}`;
+    const text = `Join me on NeyborHuud so we can look out for each other in ${where}.`;
+    try {
+      if (navigator.share) await navigator.share({ title: 'NeyborHuud', text, url });
+      else {
+        await navigator.clipboard.writeText(`${text} ${url}`);
+        nhToast.success('Invite copied', 'Paste it in your street WhatsApp group.');
+      }
+    } catch {
+      /* closed the share sheet */
+    }
+  };
+
   const openStatus = () => {
     if (firstAlert) setPin(firstAlert);
     else router.push('/feed');
@@ -255,20 +274,37 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     }
     return out;
   }, [weatherWords, areaLga, pins]);
-  const shareToday = async () => {
-    const where = area?.lga ?? 'my area';
-    const text = `See what is happening in ${where} today on NeyborHuud.`;
-    const url = `${window.location.origin}/huud`;
-    try {
-      if (navigator.share) await navigator.share({ title: `Today in ${where}`, text, url });
-      else {
-        await navigator.clipboard.writeText(`${text} ${url}`);
-        nhToast.success('Link copied', 'Paste it in WhatsApp or anywhere.');
-      }
-    } catch {
-      /* closed the share sheet */
-    }
-  };
+  // Share today (mockup share card 1): the live sky over the area plus today's real items.
+  // Safety alerts never go on it (safety reports are not shared publicly).
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareCard = useMemo(() => {
+    if (!sky) return null;
+    const rows: ShareRow[] = pins
+      .filter((p) => p.layer === 'traffic')
+      .slice(0, 2)
+      .map((p) => ({ icon: '🚧', text: p.top.title }));
+    const add = (n: number | undefined, icon: string, text: (n: number) => string) => {
+      if (n && n > 0) rows.push({ icon, text: text(n) });
+    };
+    add(counts.light_water, '💡', (n) => `${n} light & water ${n === 1 ? 'update' : 'updates'}`);
+    add(counts.market, '🛒', (n) => `${n} ${n === 1 ? 'thing' : 'things'} for sale near you`);
+    add(counts.events, '🎉', (n) => `${n} ${n === 1 ? 'event' : 'events'} coming up`);
+    add(counts.help, '🙋🏾', (n) => `${n} ${n === 1 ? 'neighbour' : 'neighbours'} asking for help`);
+    add(counts.work, '💼', (n) => `${n} jobs and services nearby`);
+    if (!rows.length) rows.push({ icon: '🏘️', text: 'Quiet street today. Be the first to post' });
+    return {
+      area: area?.lga ?? 'my area',
+      date: now,
+      sky,
+      weather: weatherWords ? `${weatherWords.icon} ${weatherWords.label} now` : null,
+      rows,
+    };
+  }, [sky, pins, counts, area?.lga, now, weatherWords]);
+  // Worked out after the page starts in the browser (the server does not know the address),
+  // so the first render matches the server's.
+  const [origin, setOrigin] = useState('');
+  useEffect(() => setOrigin(window.location.origin), []);
+  const shareLink = origin ? `${origin}/signup${username ? `?ref=${encodeURIComponent(username)}` : ''}` : '';
 
   // Swipe the sheet up to open the Feed.
   // The card is open by default; swipe down (or ✕) hides it to see the whole map.
@@ -435,6 +471,28 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             </button>
           </div>
 
+          {quiet ? (
+            <div className="flex flex-col gap-2 rounded-2xl bg-background p-3">
+              <p className="font-heading text-base font-extrabold text-navy">Your street dey wait for you 🏘️</p>
+              <p className="text-sm font-semibold text-muted">
+                Nobody don post for {where} yet.{pulseLocal.length ? ' Here’s what we know already:' : ''}
+              </p>
+              {pulseLocal.slice(0, 3).map((l) => (
+                <p key={l.text} className="text-sm font-bold text-navy">
+                  {l.text}
+                </p>
+              ))}
+              <div className="mt-1 flex gap-2">
+                <button type="button" onClick={() => void inviteNeighbours()} className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-3 text-sm font-bold text-white">
+                  <span aria-hidden>🙌🏾</span> Invite neighbours
+                </button>
+                <Link href="/communities?create=1" className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-white px-3 text-sm font-bold text-navy">
+                  <span aria-hidden>🏘️</span> Set up my estate
+                </Link>
+              </div>
+            </div>
+          ) : null}
+
           <Link
             href="/sentinel"
             className="flex min-h-12 items-center gap-2.5 rounded-full bg-background px-3 text-[15px] font-semibold text-muted transition-colors hover:bg-[#E9EDF3]"
@@ -449,7 +507,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             <button type="button" onClick={openCreate} className={SHEET_BTN}>
               <span aria-hidden>✏️</span> Post
             </button>
-            <button type="button" onClick={() => void shareToday()} className={SHEET_BTN}>
+            <button type="button" onClick={() => setShareOpen(true)} className={SHEET_BTN}>
               <span aria-hidden>📸</span> Share today
             </button>
           </div>
@@ -475,6 +533,9 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       )}
 
       <PinPanel pin={pin} onClose={() => setPin(null)} />
+      {shareLink ? (
+        <ShareTodaySheet open={shareOpen} onClose={() => setShareOpen(false)} card={shareCard} link={shareLink} />
+      ) : null}
       {tour.step >= 0 ? <MapTour step={tour.step} onNext={tour.next} onSkip={tour.finish} /> : null}
       <TodaysPulseSheet
         open={pulseOpen}
