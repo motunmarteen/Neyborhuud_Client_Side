@@ -37,6 +37,7 @@ import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
 import { useAuth } from '@/hooks/useAuth';
 import { useMapPins } from '@/hooks/useMapPins';
 import { useMapAds } from '@/hooks/useMapAds';
+import { jamStrength, type Jam } from '@/lib/livingMap';
 import { LAYERS, LAYER_META, pinHref, shortNaira, type MapLayer, type MapPin } from '@/lib/mapPins';
 import { openAdTarget, type Ad } from '@/lib/adsApi';
 import { startView, STREET_ZOOM } from '@/lib/nigeriaView';
@@ -111,6 +112,25 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   }, []);
 
   const { status, pins, fresh } = useMapPins(map, layers, { onOpen: setPin, live: true });
+
+  // M-10: fresh traffic reports (go-slows, road blocks, accidents, floods) make the street
+  // life crawl and queue there. Kept while the Traffic chip is off: hiding pins clears no road.
+  const [trafficPins, setTrafficPins] = useState<MapPin[]>([]);
+  useEffect(() => {
+    if (layers.includes('traffic')) setTrafficPins(pins.filter((p) => p.layer === 'traffic'));
+  }, [pins, layers]);
+  const jams = useMemo<Jam[]>(
+    () =>
+      trafficPins
+        .map((p) => ({
+          centre: [p.lng, p.lat] as [number, number],
+          // A pin stands for one ~110 m block; the queue reaches the roads around it.
+          radiusM: 220,
+          strength: jamStrength(p.top.createdAt, p.top.severity, now.getTime()) * (p.count > 1 ? 1 : 0.85),
+        }))
+        .filter((j) => j.strength > 0),
+    [trafficPins, now],
+  );
 
   // Sound and vibration (owner, 2026-10-15): off until turned on. Browsers only start sound
   // after a tap, so a saved "on" waits for the first touch on the page.
@@ -283,6 +303,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           onSky={setSky}
           cinematic={!hasFocus}
           toyWorld
+          jams={jams}
           // Sky reaches up behind the notch and the top bar; the horizon stays just under the controls.
           skyLift={{ safeTopPlus: 60 }}
         />

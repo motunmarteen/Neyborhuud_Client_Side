@@ -20,6 +20,7 @@ import { useMapWeather } from '@/hooks/useMapWeather';
 import { useCalm } from '@/hooks/useCalm';
 import { applyMapLight } from '@/lib/mapNight';
 import { useLivingMap } from '@/hooks/useLivingMap';
+import type { Jam } from '@/lib/livingMap';
 import { TOY_LAYER_ID, type ToyWorldLayer } from '@/lib/toyWorld/toyWorldLayer';
 
 /** Night for the toy-world models: lit windows, dimmer sun. */
@@ -80,6 +81,8 @@ type SkyMapProps = {
   onWeather?: (wx: MapWeather | null) => void;
   /** Street life: vehicles, people, kids playing football (M-17). Off in calm mode. */
   living?: boolean;
+  /** Reported go-slows: street traffic crawls and queues there (M-10). */
+  jams?: Jam[];
   /** Map home: swoop-down opening and slow circling (see HuudMap). */
   cinematic?: boolean;
   /** Map home: real buildings as styled 3D models (see HuudMap). */
@@ -93,7 +96,7 @@ type SkyMapProps = {
   skyLift?: number | { safeTopPlus: number };
 };
 
-export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true, cinematic = false, toyWorld = false, skyLift = 0 }: SkyMapProps) {
+export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true, jams, cinematic = false, toyWorld = false, skyLift = 0 }: SkyMapProps) {
   const liftPlus = typeof skyLift === 'number' ? null : skyLift.safeTopPlus;
   const [lift, setLift] = useState(typeof skyLift === 'number' ? skyLift : 0);
   useEffect(() => {
@@ -146,6 +149,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
     weather: wx,
     dark: sky.dark,
     enabled: living && !calm,
+    jams,
   });
   const rain = calm ? [] : drops(look);
 
