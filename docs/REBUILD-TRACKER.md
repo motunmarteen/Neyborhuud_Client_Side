@@ -534,5 +534,6 @@ Only if the PWA hits limits we can't work around (for example background locatio
 | 2026-10-10 | No trading or selling HuudCredit between users; payouts only through the contributor programme, after legal review |
 | 2026-10-10 | Safety reports never shared publicly and never paid in cash |
 | 2026-10-10 | **PWA first**: no download needed; store apps later and optional |
+| 2026-10-17 | iPhone home-screen app: the strip under the bottom bar stays (owner). It comes from iOS shrinking the app by the status-bar height; the only fixes are the full-screen status bar (white clock) or a store app (Phase 14) |
 | 2026-10-10 | Fonts: **Nunito** (headings) + **Nunito Sans** (text), Noto Sans fallback. Snapchat's fonts (Avenir Next, Graphik) are paid; tested 19 free fonts for ₦ and Nigerian letters |
 | 2026-10-10 | Phase 1 before Phase 2; AWS Region eu-west-2 (London) |
