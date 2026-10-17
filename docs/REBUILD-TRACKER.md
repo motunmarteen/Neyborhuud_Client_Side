@@ -187,7 +187,8 @@ Kept here so the whole history is in one place.
 - [x] 2026-10-17 first-time tour (mockup, 3 steps: your street live, the chips, SOS), once per phone after the swoop; replay from ⋯ "Show me around". SOS text made truthful: tap opens SOS, press-and-hold sends a silent alert, no network = sends when back online (no automatic SMS)
 - [x] 2026-10-17 quiet street (mockup): when nothing is reported in your area the map card says "Your street dey wait for you", shows what is known (weather, go-slows), Invite neighbours (your invite link) and Set up my estate (opens Create community)
 - [x] 2026-10-17 share card with your sky (mockup card 1): "Share today" makes a 1080x1920 picture of your live sky over your area with today's real items (go-slows, light & water, for sale, events, help; never safety), shared through the phone (WhatsApp, Instagram…), saved, or the link copied; the link carries your invite code
-- [ ] Still from the mockup: visitor "look around" (needs owner decision: open the map to people not signed in); Area Champion crown (Phase 7); other share cards (light don come, for sale, event, invite, level, champion, area ranking)
+- [x] 2026-10-17 (owner: "let them see the map") **visitors**: /huud opens without sign-in: map, sky, street life, billboards, area pulses and pins except safety (server hides the safety layer from visitors); welcome card "Welcome to <area> 👋🏾 · look around, no sign-up needed" with the real member count, Show my area, Join free (keeps the sharer's invite code) and Show me around; "Share today" links now open the live map of the area (~1 km), not the sign-up form
+- [ ] Still from the mockup: Area Champion crown (Phase 7); other share cards (light don come, for sale, event, invite, level, champion, area ranking)
 
 **2026-10-15:** the map home is live at `/huud` and the My Huud tab opens it: real sky and weather, street life, 7 pin layers, billboards and sponsored pins (safety pins always drawn above ads), pin panels, "Me" (go to where I am) and "List" (the feed). After sign-in the app still lands on `/feed`; switch the landing to `/huud` once the owner has tried it.
 
@@ -360,8 +361,8 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 ## Phase 6: Sentinel AI upgrades
 
 - [x] 2026-10-17 (owner) **How it works for everything in Sentinel**: new guide `/safety/how-it-works` (16 sections: SOS, Panic PIN, Live Tracking, Fake Call, Safe Trips, check-ins, safe zones, guardians, Circle and status, emergency report, community emergency, incident reports, recap, how Sentinel watches, Ask Sentinel, what Sentinel never does), checked against today's code; every safety screen's How it works box links to its section; boxes added to Community emergency and Incident reports; links from the Sentinel tab and the hub. Corrected: Sentinel page said it reads chats (it never does), Live Tracking said agencies are alerted (they are not), Trips now states the 3-miss silent SOS
-- [x] 2026-10-17 Ask Sentinel honesty (server 6692a39, **not yet deployed**): "no reports" is never turned into "clear road", "power stable" or "calm"; no Lagos default area; no claims that DisCo / Huud Watch were notified
-- [ ] Owner decision recorded 2026-10-10 but not enforced: "safety reports never shared publicly". The Share button still shows on safety/emergency posts (WhatsApp etc.). Hide it on those posts?
+- [x] 2026-10-17 Ask Sentinel honesty (server 6692a39, deployed): "no reports" is never turned into "clear road", "power stable" or "calm"; no Lagos default area; no claims that DisCo / Huud Watch were notified
+- [ ] Owner 2026-10-17: keep Share on safety posts (do not hide it). Proposed "share safely": confirmed alerts share freely; unconfirmed ones ask first and carry an "Unconfirmed" label; the shared link always shows age, confirmed/disputed and "This alert has ended" after expiry; never the reporter or the exact spot. Waiting on owner OK
 
 - [ ] S-01 Sentinel orb on the map; ring colour from area mood (safe / advisory / alert)
 - [ ] S-02 "Ask Sentinel" bar on home and "Ask about this" on pins, with suggested questions

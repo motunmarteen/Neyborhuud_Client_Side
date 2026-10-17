@@ -42,6 +42,9 @@ import { useMyPins } from '@/hooks/useMyPins';
 import { useAreaPulses } from '@/hooks/useAreaPulses';
 import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
+import { VisitorWelcome } from '@/components/map/VisitorWelcome';
+import { useAreaWelcome } from '@/hooks/useAreaWelcome';
+import { rememberRef, signupHref } from '@/lib/visitor';
 import type { ShareRow } from '@/lib/shareCard';
 import { extractUserHomeCoords } from '@/lib/mapUserLocation';
 import { jamStrength, type Jam } from '@/lib/livingMap';
@@ -188,10 +191,21 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   // Your home (only you see it) and "You are here".
   const home = useMemo(() => (user ? extractUserHomeCoords(user as Parameters<typeof extractUserHomeCoords>[0]) : null), [user]);
   const { showHere } = useMyPins(map, { home, name: firstName ?? 'You' });
+  // Visitors (not signed in, owner 2026-10-17): the map with a welcome card instead of the
+  // member card; "Join free" keeps the sharer's invite code from the link.
+  const visitor = !user;
+  const areaWelcome = useAreaWelcome(map, visitor);
+  const [joinHref, setJoinHref] = useState('/signup');
+  useEffect(() => {
+    rememberRef(params.get('ref'));
+    setJoinHref(signupHref());
+  }, [params]);
+
   // M-11: where neighbours are active now (busy areas, never people or homes).
   useAreaPulses(map);
   // First-time tour (mockup): three steps, once per phone; replay from the ⋯ menu.
-  const tour = useMapTour(!!map && !hasFocus);
+  // Members only, on their own area; visitors can tap "Show me around".
+  const tour = useMapTour(!!map && !hasFocus && !!user);
 
   const locate = useCallback(() => {
     if (!map || !('geolocation' in navigator)) return;
@@ -304,7 +318,13 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   // so the first render matches the server's.
   const [origin, setOrigin] = useState('');
   useEffect(() => setOrigin(window.location.origin), []);
-  const shareLink = origin ? `${origin}/signup${username ? `?ref=${encodeURIComponent(username)}` : ''}` : '';
+  // The shared link opens the live map of this area (rounded to ~1 km, never someone's home),
+  // so a WhatsApp contact lands on the street, not a sign-up form; it carries the invite code.
+  const shareCentre = map?.getCenter() ?? (knowsArea ? view.center : null);
+  const shareLink =
+    origin && shareCentre
+      ? `${origin}/huud?lat=${shareCentre.lat.toFixed(2)}&lng=${shareCentre.lng.toFixed(2)}${username ? `&ref=${encodeURIComponent(username)}` : ''}`
+      : '';
 
   // Swipe the sheet up to open the Feed.
   // The card is open by default; swipe down (or ✕) hides it to see the whole map.
@@ -450,6 +470,17 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             </Link>
           </div>
 
+          {visitor ? (
+            <VisitorWelcome
+              area={areaWelcome?.lga ?? null}
+              neighbours={areaWelcome?.neighbours ?? 0}
+              joinHref={joinHref}
+              onTour={tour.start}
+              onShowMyArea={locate}
+              locating={locating}
+            />
+          ) : (
+          <>
           <div className="flex flex-col gap-0.5">
             <h2 className="font-heading text-lg font-extrabold leading-tight text-navy">
               {greetingFor(now)}
@@ -511,6 +542,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
               <span aria-hidden>📸</span> Share today
             </button>
           </div>
+          </>
+          )}
         </div>
       </section>
       ) : (

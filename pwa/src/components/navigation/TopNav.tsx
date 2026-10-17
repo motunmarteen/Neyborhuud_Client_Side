@@ -1,6 +1,7 @@
 'use client';
+import { rememberRef, signupHref } from '@/lib/visitor';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -99,6 +100,8 @@ export type TopBarProps = {
   /** Your area, e.g. "Somolu"; null hides the line. */
   area: string | null;
   signedIn: boolean;
+  /** Where "Join free" goes (keeps a shared link's invite code). */
+  joinHref?: string;
   /** HuudCredit balance; null while loading (shows a placeholder, never a guess). */
   credit: number | null;
   unreadCount: number;
@@ -117,6 +120,7 @@ export function TopBar({
   title,
   area,
   signedIn,
+  joinHref = '/signup',
   credit,
   unreadCount,
   initial,
@@ -164,7 +168,7 @@ export function TopBar({
         <div className="flex shrink-0 items-center gap-1 min-[380px]:gap-1.5">
           {!signedIn ? (
             <Link
-              href="/signup"
+              href={joinHref}
               className="tap-target inline-flex h-[38px] items-center rounded-full bg-primary px-4 text-[13px] font-extrabold text-white"
             >
               Join free
@@ -230,6 +234,12 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
   const { data: stats } = useMyGamificationStats();
   const scrollHidden = useScrollHideBottomNav();
   const huudName = useHuudDisplayName(user);
+  // After the page starts (the invite code lives in this visit's storage).
+  const [joinHref, setJoinHref] = useState('/signup');
+  useEffect(() => {
+    rememberRef(new URLSearchParams(window.location.search).get('ref'));
+    setJoinHref(signupHref());
+  }, [pathname]);
 
   const me = user as {
     firstName?: string | null;
@@ -246,6 +256,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
       title={title}
       area={huudName && huudName !== HUUD_NAME_FALLBACK ? huudName : null}
       signedIn={Boolean(user)}
+      joinHref={joinHref}
       credit={typeof stats?.totalHuudCoins === 'number' ? stats.totalHuudCoins : null}
       unreadCount={unreadCount}
       initial={displayName.trim().charAt(0).toUpperCase() || '🙂'}
