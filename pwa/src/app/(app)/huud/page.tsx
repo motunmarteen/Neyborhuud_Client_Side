@@ -43,6 +43,7 @@ import { useAreaPulses } from '@/hooks/useAreaPulses';
 import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
 import { VisitorWelcome } from '@/components/map/VisitorWelcome';
+import { HelpMapSheet } from '@/components/map/HelpMapSheet';
 import { useAreaWelcome } from '@/hooks/useAreaWelcome';
 import { rememberRef, signupHref } from '@/lib/visitor';
 import type { ShareRow } from '@/lib/shareCard';
@@ -200,6 +201,43 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     rememberRef(params.get('ref'));
     setJoinHref(signupHref());
   }, [params]);
+
+  // Help map Nigeria (M-18): when most buildings here are stand-ins (OpenStreetMap has no
+  // outlines yet), invite people to add the real ones. Hidden for a week per area once closed.
+  const [mapGap, setMapGap] = useState({ real: 0, filler: 0 });
+  const [helpMapOpen, setHelpMapOpen] = useState(false);
+  const [helpMapHiddenAt, setHelpMapHiddenAt] = useState<string | null>(null);
+  useEffect(() => {
+    if (!map) return;
+    const el = map.getContainer();
+    const onBuilt = (ev: Event) => {
+      const e = (ev as CustomEvent<{ real?: number; filler?: number }>).detail ?? {};
+      setMapGap({ real: e.real ?? 0, filler: e.filler ?? 0 });
+      const c = map.getCenter();
+      const key = `nh_helpmap_${c.lat.toFixed(2)}_${c.lng.toFixed(2)}`;
+      try {
+        const until = Number(localStorage.getItem(key));
+        setHelpMapHiddenAt(until > Date.now() ? key : null);
+      } catch {
+        setHelpMapHiddenAt(null);
+      }
+    };
+    el.addEventListener('toyworld:built', onBuilt);
+    return () => el.removeEventListener('toyworld:built', onBuilt);
+  }, [map]);
+  const helpMapShown =
+    mapGap.filler >= 20 && mapGap.filler >= mapGap.real && !helpMapHiddenAt;
+  const dismissHelpMap = () => {
+    if (!map) return;
+    const c = map.getCenter();
+    const key = `nh_helpmap_${c.lat.toFixed(2)}_${c.lng.toFixed(2)}`;
+    try {
+      localStorage.setItem(key, String(Date.now() + 7 * 864e5));
+    } catch {
+      /* private mode: hidden for this visit only */
+    }
+    setHelpMapHiddenAt(key);
+  };
 
   // M-11: where neighbours are active now (busy areas, never people or homes).
   useAreaPulses(map);
@@ -390,6 +428,23 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         <div className="nh-map-pulse pointer-events-auto mx-auto w-full max-w-xl overflow-hidden rounded-full shadow-[0_4px_14px_rgba(29,36,51,0.16)]">
           <FeedNewsTicker local={pulseLocal} onOpen={() => setPulseOpen(true)} />
         </div>
+        {helpMapShown ? (
+          <div className="pointer-events-auto mx-auto flex w-full max-w-xl justify-center">
+            <div className="inline-flex items-center gap-1 rounded-full bg-white/95 py-1 pl-3 pr-1 text-xs font-extrabold text-navy shadow-[0_4px_14px_rgba(29,36,51,0.16)]">
+              <button type="button" onClick={() => setHelpMapOpen(true)} className="inline-flex min-h-8 items-center gap-1">
+                <span aria-hidden>🗺️</span> This street isn&apos;t fully mapped. Help map it
+              </button>
+              <button
+                type="button"
+                onClick={dismissHelpMap}
+                aria-label="Hide for a week"
+                className="grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-background"
+              >
+                <span aria-hidden className="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* ⋯ map menu (owner, 2026-10-16): on the left, opposite SOS, just above the card;
@@ -571,6 +626,13 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       )}
 
       <PinPanel pin={pin} onClose={() => setPin(null)} />
+      <HelpMapSheet
+        open={helpMapOpen}
+        onClose={() => setHelpMapOpen(false)}
+        centre={map ? { lat: map.getCenter().lat, lng: map.getCenter().lng } : null}
+        realCount={mapGap.real}
+        fillerCount={mapGap.filler}
+      />
       {shareLink ? (
         <ShareTodaySheet open={shareOpen} onClose={() => setShareOpen(false)} card={shareCard} link={shareLink} />
       ) : null}

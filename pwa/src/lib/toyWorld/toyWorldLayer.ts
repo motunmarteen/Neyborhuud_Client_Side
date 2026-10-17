@@ -292,6 +292,10 @@ export function createToyWorldLayer({ lite = false }: { lite?: boolean } = {}): 
     const realRings = [...byId.values()].map((b) => b.ring);
     const trees: Pt[] = [];
     const fillers = fillAlongRoads(roads, realRings, open, RADIUS_M, Math.max(0, MAX_BUILDINGS - byId.size), trees);
+    // How much of this street is really mapped (for "Help map Nigeria" on the map home).
+    map.getContainer().dispatchEvent(
+      new CustomEvent('toyworld:built', { detail: { real: realRings.length, filler: fillers.length } }),
+    );
     for (const f of fillers) byId.set(f.id, { ring: f.ring, area: ringArea(f.ring), height: null });
 
     clear();
