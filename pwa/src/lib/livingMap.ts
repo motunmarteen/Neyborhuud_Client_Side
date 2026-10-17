@@ -35,6 +35,14 @@ export type Agent = {
   bearing: number;
 };
 
+/**
+ * A reported go-slow, road block, accident or flood (M-10). Vehicles crawl near it and queue
+ * up on the roads through it. Strength 0–1 comes from how fresh and serious the report is.
+ */
+export type Jam = { centre: LngLat; radiusM: number; strength: number };
+
+const VEHICLE_KINDS = new Set<AgentKind>(['danfo', 'keke', 'okada', 'car', 'brt']);
+
 const M_PER_DEG_LAT = 111_320;
 const mPerDegLng = (lat: number) => 111_320 * Math.cos((lat * Math.PI) / 180);
 
@@ -99,6 +107,49 @@ export function weatherFactor(wx: string | null | undefined): { people: number; 
   }
 }
 
+/**
+ * How much a traffic report still slows the street: full for the first hour, fading to
+ * nothing at 3 hours (go-slows clear; the pin itself stays on the map longer). Minor
+ * reports slow traffic less.
+ */
+export function jamStrength(createdAt: string | Date, severity?: string, now: number = Date.now()): number {
+  const hours = (now - new Date(createdAt).getTime()) / 3_600_000;
+  if (!(hours >= 0) || hours >= 3) return 0;
+  const fresh = hours <= 1 ? 1 : 1 - (hours - 1) / 2;
+  const weight = severity === 'low' ? 0.6 : 1;
+  return fresh * weight;
+}
+
+/** Speed multiplier at a point: 1 when the road is clear, down to a crawl at a strong jam. */
+export function jamFactor(pos: LngLat, jams: Jam[] | undefined): number {
+  if (!jams?.length) return 1;
+  let f = 1;
+  for (const j of jams) {
+    if (j.strength <= 0) continue;
+    const d = metres(pos, j.centre);
+    if (d >= j.radiusM) continue;
+    // Slowest in the middle, easing off towards the edge of the jam.
+    const closeness = Math.min(1, (1 - d / j.radiusM) * 1.6);
+    f = Math.min(f, 1 - 0.88 * j.strength * closeness);
+  }
+  return f;
+}
+
+/** The point on a path nearest to p: how far along it (s) and how far away (d), in metres. */
+export function nearestOnPath(path: LngLat[], cum: number[], p: LngLat): { at: number; d: number } {
+  const kx = mPerDegLng(p[1]);
+  let best = { at: 0, d: Infinity };
+  for (let i = 1; i < path.length; i++) {
+    const [ax, ay] = [(path[i - 1][0] - p[0]) * kx, (path[i - 1][1] - p[1]) * M_PER_DEG_LAT];
+    const [bx, by] = [(path[i][0] - p[0]) * kx, (path[i][1] - p[1]) * M_PER_DEG_LAT];
+    const len2 = (bx - ax) ** 2 + (by - ay) ** 2 || 1;
+    const t = Math.min(1, Math.max(0, -(ax * (bx - ax) + ay * (by - ay)) / len2));
+    const d = Math.hypot(ax + (bx - ax) * t, ay + (by - ay) * t);
+    if (d < best.d) best = { at: cum[i - 1] + (cum[i] - cum[i - 1]) * t, d };
+  }
+  return best;
+}
+
 /** Small deterministic random, so a street looks the same each time it is opened. */
 export function rng(seed: number) {
   let a = seed >>> 0;
@@ -151,6 +202,8 @@ export type Mood = {
   weather: string | null | undefined;
   /** Scale with the visible area so a tiny view is not crowded. */
   density?: number;
+  /** Reported go-slows on screen; none means traffic flows normally. */
+  jams?: Jam[];
 };
 
 /** Build the cast for a scene and a moment. */
@@ -174,6 +227,29 @@ export function populate(scene: Scene, mood: Mood, seed = 1): Agent[] {
     const dir: 1 | -1 = r() < 0.5 ? 1 : -1;
     const at = along(path, cum, s);
     agents.push({ id: id++, kind, variant: Math.floor(r() * 5), path, cum, s, dir, speed: lo + r() * (hi - lo), pos: at.pos, bearing: dir === 1 ? at.bearing : (at.bearing + 180) % 360 });
+  }
+
+  // Queues at reported go-slows: extra vehicles on the roads through each jam, bunched near it.
+  for (const jam of mood.jams ?? []) {
+    if (jam.strength <= 0) continue;
+    const through = usableRoads
+      .map((path) => {
+        const cum = cumulative(path);
+        return { path, cum, ...nearestOnPath(path, cum, jam.centre) };
+      })
+      .filter((x) => x.d < jam.radiusM && x.cum[x.cum.length - 1] >= 25);
+    if (!through.length) continue;
+    const queue = Math.round(14 * jam.strength * density);
+    for (let i = 0; i < queue; i++) {
+      const { path, cum, at } = through[i % through.length];
+      const total = cum[cum.length - 1];
+      const s = Math.min(total, Math.max(0, at + (r() - 0.5) * jam.radiusM * 1.2));
+      const kind = pickVehicle(r);
+      const [lo, hi] = SPEED[kind];
+      const dir: 1 | -1 = r() < 0.5 ? 1 : -1;
+      const p = along(path, cum, s);
+      agents.push({ id: id++, kind, variant: Math.floor(r() * 5), path, cum, s, dir, speed: lo + r() * (hi - lo), pos: p.pos, bearing: dir === 1 ? p.bearing : (p.bearing + 180) % 360 });
+    }
   }
 
   // BRT buses only on real BRT lanes, never invented on ordinary roads. At most one bus per
@@ -245,15 +321,16 @@ function scatter(c: LngLat, radiusM: number, r: () => number): LngLat {
   return [c[0] + (Math.sin(a) * d) / mPerDegLng(c[1]), c[1] + (Math.cos(a) * d) / M_PER_DEG_LAT];
 }
 
-/** Move everyone forward by dt seconds. Mutates and returns the agents. */
-export function step(agents: Agent[], dt: number, r: () => number = Math.random): Agent[] {
+/** Move everyone forward by dt seconds; vehicles crawl through jams. Mutates and returns the agents. */
+export function step(agents: Agent[], dt: number, r: () => number = Math.random, jams?: Jam[]): Agent[] {
   const ball = new Map<string, Agent>();
   for (const a of agents) if (a.kind === 'ball' && a.home) ball.set(a.home.join(','), a);
 
   for (const a of agents) {
     if (a.path && a.cum && a.s != null && a.dir) {
       const total = a.cum[a.cum.length - 1];
-      a.s += a.speed * dt * a.dir;
+      const slow = VEHICLE_KINDS.has(a.kind) ? jamFactor(a.pos, jams) : 1;
+      a.s += a.speed * slow * dt * a.dir;
       if (a.s > total || a.s < 0) {
         // Turn around at the end of the street (the next street comes with the next scene).
         a.dir = a.dir === 1 ? -1 : 1;

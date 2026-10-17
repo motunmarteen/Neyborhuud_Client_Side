@@ -12,7 +12,7 @@
 
 import { useEffect, useRef } from 'react';
 import type * as maplibregl from 'maplibre-gl';
-import { populate, rng, step, type Agent, type LngLat, type Scene } from '@/lib/livingMap';
+import { populate, rng, step, type Agent, type Jam, type LngLat, type Scene } from '@/lib/livingMap';
 import { ensureLivingSprites } from '@/lib/livingSprites';
 import { registerLiving, unregisterLiving } from '@/lib/livingRegistry';
 
@@ -24,7 +24,14 @@ const MIN_ZOOM = 15;
 const FRAME_MS = 50;
 const VEHICLES = new Set(['car', 'danfo', 'keke', 'okada', 'brt']);
 
-type Options = { hour: number; weather: string | null | undefined; dark: number; enabled: boolean };
+type Options = {
+  hour: number;
+  weather: string | null | undefined;
+  dark: number;
+  enabled: boolean;
+  /** Reported go-slows (M-10): traffic crawls and queues there. */
+  jams?: Jam[];
+};
 
 type Feature = GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString | GeoJSON.Polygon | GeoJSON.MultiPolygon | GeoJSON.Point>;
 
@@ -156,10 +163,10 @@ function ensureLayers(map: maplibregl.Map) {
   );
 }
 
-export function useLivingMap(map: maplibregl.Map | null, { hour, weather, dark, enabled }: Options) {
+export function useLivingMap(map: maplibregl.Map | null, { hour, weather, dark, enabled, jams }: Options) {
   const agents = useRef<Agent[]>([]);
-  const mood = useRef({ hour, weather, dark });
-  mood.current = { hour, weather, dark };
+  const mood = useRef({ hour, weather, dark, jams });
+  mood.current = { hour, weather, dark, jams };
 
   useEffect(() => {
     if (!map) return;
@@ -186,7 +193,7 @@ export function useLivingMap(map: maplibregl.Map | null, { hour, weather, dark, 
       const seed = Math.floor(c.lng * 1000) * 31 + Math.floor(c.lat * 1000);
       // Fewer figures when zoomed in on a small patch, so it never looks crowded.
       const density = Math.min(1, Math.max(0.35, (map.getZoom() < 16.5 ? 1 : 0.7)));
-      agents.current = populate(scene, { hour: mood.current.hour, weather: mood.current.weather, density }, seed);
+      agents.current = populate(scene, { hour: mood.current.hour, weather: mood.current.weather, density, jams: mood.current.jams }, seed);
     };
 
     let raf = 0;
@@ -205,7 +212,7 @@ export function useLivingMap(map: maplibregl.Map | null, { hour, weather, dark, 
       const dt = Math.min(acc, 250) / 1000;
       acc = 0;
       if (!agents.current.length) return;
-      step(agents.current, dt, r);
+      step(agents.current, dt, r, mood.current.jams);
       // With the 3D scene on, the figures are 3D models: hide the flat icons, just redraw.
       const toy = !!map.getLayer(TOY_LAYER);
       if (toy === showingIcons) {
@@ -245,10 +252,11 @@ export function useLivingMap(map: maplibregl.Map | null, { hour, weather, dark, 
     };
   }, [map, enabled]);
 
-  // A new hour or weather changes how busy the street is.
+  // A new hour, the weather or a new go-slow report changes how busy the street is.
   const hourBucket = Math.floor(hour * 2) / 2;
+  const jamKey = (jams ?? []).map((j) => `${j.centre.join(',')}:${j.strength.toFixed(1)}`).join(';');
   useEffect(() => {
     if (!map || !enabled || map.getZoom() < MIN_ZOOM) return;
     map.fire('moveend');
-  }, [map, enabled, hourBucket, weather]);
+  }, [map, enabled, hourBucket, weather, jamKey]);
 }
