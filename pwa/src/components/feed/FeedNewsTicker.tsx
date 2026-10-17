@@ -15,12 +15,76 @@ type PulseItem =
 /** Something from the person's own area for the front of the ribbon (weather now, go-slows). */
 export type PulseLocalItem = { text: string; href?: string };
 
+/** Scroll speed in px per second, the same however long the ribbon is. */
+const SPEED_PX_S = 40;
+
+const calmNow = () =>
+  document.documentElement.hasAttribute('data-calm') || !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
 export function FeedNewsTicker({ local = [] }: { local?: PulseLocalItem[] } = {}) {
   const [articles, setArticles] = useState<RssArticle[]>([]);
-  const [paused, setPaused] = useState(false);
   const router = useRouter();
   const trackRef = useRef<HTMLDivElement>(null);
+  const anim = useRef<Animation | null>(null);
+  const held = useRef(false);
   const { rates } = useExchangeRates();
+  // The ribbon only renders once there is something to show; start scrolling then.
+  const hasContent = articles.length > 0 || rates.length > 0 || local.length > 0;
+
+  /*
+   * The scroll is driven from here (Web Animations), not by a CSS animation:
+   *  - a fixed 350 s loop crawled at ~1 px/s when only a short weather line was there, so the
+   *    ribbon looked frozen; now the speed is steady and the loop length follows the content;
+   *  - it restarts when the content changes, when the app comes back to the front (phones
+   *    freeze animations in the background) and when Calm view is switched off;
+   *  - a finger only pauses it while pressing, so a tap can no longer leave it paused
+   *    (phones fire "mouse enter" on tap and never "mouse leave").
+   */
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || typeof track.animate !== 'function') return;
+    const start = () => {
+      const prev = anim.current;
+      const progress = prev && prev.effect ? Number(prev.currentTime ?? 0) / Number(prev.effect.getTiming().duration || 1) : 0;
+      prev?.cancel();
+      anim.current = null;
+      if (calmNow()) return;
+      const half = track.scrollWidth / 2;
+      if (half < 1) return;
+      const duration = (half / SPEED_PX_S) * 1000;
+      const a = track.animate([{ transform: 'translate3d(0,0,0)' }, { transform: `translate3d(${-half}px,0,0)` }], {
+        duration,
+        iterations: Infinity,
+      });
+      a.currentTime = (progress % 1) * duration;
+      if (held.current) a.pause();
+      anim.current = a;
+    };
+    start();
+    const ro = new ResizeObserver(() => start());
+    ro.observe(track);
+    const onFront = () => {
+      if (document.visibilityState === 'visible') start();
+    };
+    document.addEventListener('visibilitychange', onFront);
+    window.addEventListener('pageshow', onFront);
+    const calmWatch = new MutationObserver(() => start());
+    calmWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-calm'] });
+    return () => {
+      ro.disconnect();
+      calmWatch.disconnect();
+      document.removeEventListener('visibilitychange', onFront);
+      window.removeEventListener('pageshow', onFront);
+      anim.current?.cancel();
+      anim.current = null;
+    };
+  }, [hasContent]);
+
+  const hold = (on: boolean) => {
+    held.current = on;
+    if (on) anim.current?.pause();
+    else anim.current?.play();
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -109,23 +173,21 @@ export function FeedNewsTicker({ local = [] }: { local?: PulseLocalItem[] } = {}
   return (
     <div
       className="feed-news-ticker"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onTouchStart={() => setPaused(true)}
-      onTouchEnd={() => setPaused(false)}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && hold(true)}
+      onPointerLeave={() => hold(false)}
+      onPointerDown={() => hold(true)}
+      onPointerUp={() => hold(false)}
+      onPointerCancel={() => hold(false)}
       role="marquee"
       aria-label="Pulse: your area, news and exchange rates"
     >
+      {/* Just the ⚡ (owner, 2026-10-17: no "PULSE" word). */}
       <div className="feed-news-ticker__label" aria-hidden>
-        <Zap size={13} className="feed-news-ticker__label-icon text-primary fill-primary" />
-        <span>PULSE</span>
+        <Zap size={15} className="feed-news-ticker__label-icon text-primary fill-primary" />
       </div>
 
       <div className="feed-news-ticker__viewport">
-        <div
-          ref={trackRef}
-          className={`feed-news-ticker__track${paused ? ' feed-news-ticker__track--paused' : ''}`}
-        >
+        <div ref={trackRef} className="feed-news-ticker__track">
           {items.map((it, i) => renderItem(it, i))}
           {/* Duplicate for seamless loop */}
           {items.map((it, i) => renderItem(it, i + items.length))}
