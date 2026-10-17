@@ -107,7 +107,7 @@ export default function SentinelSettingsPage() {
       icon="tune"
       iconAccent="blue"
     >
-      <SentinelHowItWorks>
+      <SentinelHowItWorks guide="sentinel-watch">
         Sentinel scores every post the same way for everyone in your area — that consistency is
         what makes a red-zone advisory trustworthy. These settings only control which of those
         already-triggered advisories get delivered to you.

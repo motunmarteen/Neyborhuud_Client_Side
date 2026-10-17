@@ -1,3 +1,4 @@
+import { SafetyGuideLink } from '@/components/sentinel/SentinelHowItWorks';
 const STEPS = [
   {
     icon: 'touch_app',
@@ -41,6 +42,9 @@ export function SosHowItWorks() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="px-6 pb-4">
+        <SafetyGuideLink section="sos" />
       </div>
     </div>
   );

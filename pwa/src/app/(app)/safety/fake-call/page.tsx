@@ -289,7 +289,7 @@ export default function FakeCallPage() {
       icon="phone_in_talk"
       iconAccent="primary"
     >
-      <SentinelHowItWorks>
+      <SentinelHowItWorks guide="fake-call">
         Pick who is calling and when the phone should ring. After the delay, a full-screen incoming
         call appears — accept to keep the conversation going, or decline to return here. Nothing
         leaves your device. Tip: next time, long-press the Sentinel tab from anywhere in the app to

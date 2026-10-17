@@ -258,6 +258,9 @@ function SentinelScreen() {
                 <Link href="/safety/sentinel/settings" className="block text-center text-sm font-extrabold text-brand-green-dark hover:underline">
                   Manage Sentinel
                 </Link>
+                <Link href="/safety/how-it-works" className="block text-center text-sm font-extrabold text-brand-green-dark hover:underline">
+                  How Sentinel keeps you safe
+                </Link>
               </div>
             </Card>
 

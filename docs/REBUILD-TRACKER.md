@@ -359,6 +359,10 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 ## Phase 6: Sentinel AI upgrades
 
+- [x] 2026-10-17 (owner) **How it works for everything in Sentinel**: new guide `/safety/how-it-works` (16 sections: SOS, Panic PIN, Live Tracking, Fake Call, Safe Trips, check-ins, safe zones, guardians, Circle and status, emergency report, community emergency, incident reports, recap, how Sentinel watches, Ask Sentinel, what Sentinel never does), checked against today's code; every safety screen's How it works box links to its section; boxes added to Community emergency and Incident reports; links from the Sentinel tab and the hub. Corrected: Sentinel page said it reads chats (it never does), Live Tracking said agencies are alerted (they are not), Trips now states the 3-miss silent SOS
+- [x] 2026-10-17 Ask Sentinel honesty (server 6692a39, **not yet deployed**): "no reports" is never turned into "clear road", "power stable" or "calm"; no Lagos default area; no claims that DisCo / Huud Watch were notified
+- [ ] Owner decision recorded 2026-10-10 but not enforced: "safety reports never shared publicly". The Share button still shows on safety/emergency posts (WhatsApp etc.). Hide it on those posts?
+
 - [ ] S-01 Sentinel orb on the map; ring colour from area mood (safe / advisory / alert)
 - [ ] S-02 "Ask Sentinel" bar on home and "Ask about this" on pins, with suggested questions
 - [ ] S-03 Answers show their sources and end with an action (start safe trip, show route, chat service)

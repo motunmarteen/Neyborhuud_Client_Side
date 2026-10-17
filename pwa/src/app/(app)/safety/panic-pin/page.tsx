@@ -125,7 +125,7 @@ export default function PanicPinPage() {
       icon="pin"
       iconAccent="red"
     >
-      <SentinelHowItWorks>
+      <SentinelHowItWorks guide="panic-pin">
         When you (or someone forcing you) enter this PIN at <code>/safety/panic-pin/enter</code>,
         that screen behaves like an ordinary PIN gate — but a <strong>silent SOS</strong> fires in
         the background and your guardians are notified. Use a PIN you will remember under stress,

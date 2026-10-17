@@ -249,7 +249,7 @@ function GuardianTrackingViewPageInner({ sessionId }: { sessionId: string }) {
       iconAccent="red"
       backFallback={{ href: '/safety/kidnapping-tracking', label: 'Live tracking' }}
     >
-      <SentinelHowItWorks>
+      <SentinelHowItWorks guide="live-tracking">
         This updates as new location pings arrive from their device. If the status changes to
         &quot;lost signal,&quot; reach out to them directly and consider contacting emergency
         services.

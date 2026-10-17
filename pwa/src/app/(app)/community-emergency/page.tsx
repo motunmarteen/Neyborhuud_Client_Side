@@ -24,6 +24,7 @@ import { contentService } from '@/services/content.service';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
 
 // ── Types (inline — mirrors CreateCommunityEmergencyPayload) ──────────────────
 
@@ -519,6 +520,14 @@ function CommunityEmergencyPageContent() {
         />
       }
     >
+      <div className="mb-4">
+        <SentinelHowItWorks guide="community-emergency">
+          Warn your neighbours fast about a danger in the area. Your alert goes to the Feed and the
+          map nearby; neighbours tap &ldquo;I&apos;m nearby&rdquo; or confirm it. It disappears by itself
+          after 6, 12 or 24 hours depending on how serious it is. You earn HuudCredit only after
+          neighbours confirm it. This does not call the police: use SOS or Report an emergency for that.
+        </SentinelHowItWorks>
+      </div>
       <CommunityEmergencyInner showCreate={showCreate} setShowCreate={setShowCreate} />
     </AppBrowseLayout>
   );
