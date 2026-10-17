@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 12 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; next M-14 Area Champion crown, M-15 low-data mode |
+| 3. Map home (sky + live map) | 13 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; low-data mode done; next M-16 speed on cheap phones (M-14 waits on Phase 7) |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -203,7 +203,7 @@ Kept here so the whole history is in one place.
 - [x] M-12 (2026-10-15 ⚡ ribbon; 2026-10-17: just the ⚡, steady scrolling that never freezes; tap ⚡ for **Today's Pulse**: around you (weather now, go-slows), the real 7-day forecast, today's naira rates with the time checked, news; no made-up fallback rates anywhere) Pulse ticker: news + exchange rates + weather; "Today's Pulse" panel
 - [x] M-13 (2026-10-15: "Calm view / Live view" on the map, same setting as Save data: flat map, no motion) Calm view toggle
 - [ ] M-14 Area Champion crown marker
-- [ ] M-15 Low-data mode: flat 2D map, no animation, cached last view
+- [x] M-15 (2026-10-17: flat, still map and no 3D/street life already came with Calm view / Save data; now map tiles are kept on the phone for 30 days (cache first, ~1,500 tiles), so revisits cost almost no data and the map shows offline; 2G or slower turns the light map on by itself unless Live view was chosen) Low-data mode: flat 2D map, no animation, cached last view
 - [ ] 🟡 M-18 **Toy-world 3D** (owner, 2026-10-16, WareTrack reference): three.js layer inside MapLibre. Step 1 done: real OSM footprints become styled models (kiosk, bungalow with zinc/terracotta/green hip or gable roof, house, storey, plaza, warehouse with sawtooth roof, tall blocks), windows/doors, ground shadows, lit windows at night; **filler buildings along real roads where OSM has no outlines** (owner chose "fill in, plus help map Nigeria"; never on roads, water, parks, pitches or real buildings; real outlines win). Igando test: 0 → 577 buildings. Step 2 done: street life as 3D models (danfos, kekes, okadas with riders, cars in several paints, people, kids and the football) on the same simulation and real roads; palm trees on empty lots. Step 3 done (2026-10-17): **BRT buses** (Lagos blue / Primero red) run only on real BRT lanes from OpenStreetMap (`busway`; few are mapped yet, e.g. Ikorodu Road at Anthony), one per ~180 m so they never bunch; **head and tail lights** and a pool of light on the road for every vehicle after dusk; **3D billboards**: each map billboard ad stands on two posts at its spot, faces you, stays readable at any zoom, self-lit at night with lamps, tap opens the ad (2D board kept for screen readers). Next: "help map Nigeria" (invite neighbours to add their buildings to OpenStreetMap so real outlines replace fillers)
 - [ ] M-16 Performance target: smooth on a ₦60,000 Android phone; map loads in under 3 s on 3G anywhere in Nigeria
 

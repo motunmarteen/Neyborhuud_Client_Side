@@ -59,6 +59,29 @@ const withPWA = withPWAInit({
         expiration: { maxEntries: 128, maxAgeSeconds: 7 * 24 * 60 * 60 },
       },
     },
+    // Low-data mode (M-15): map tiles are kept on the phone. Tile URLs carry the map's
+    // version (planet/<date>/z/x/y.pbf) so a saved tile never goes stale: cache first, so
+    // a second visit to an area costs almost no data and the map still shows offline.
+    // Glyph fonts (.pbf too) never change either. ~1,500 tiles is roughly 30-60 MB at most.
+    {
+      urlPattern: /^https:\/\/tiles\.openfreemap\.org\/.*\.pbf$/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "map-tiles",
+        expiration: { maxEntries: 1500, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true },
+        cacheableResponse: { statuses: [0, 200] },
+      },
+    },
+    // The map's index (which version is newest), sprites: use the saved copy, refresh behind.
+    {
+      urlPattern: /^https:\/\/tiles\.openfreemap\.org\/(?!.*\.pbf$)/i,
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "map-style",
+        expiration: { maxEntries: 40, maxAgeSeconds: 7 * 24 * 60 * 60 },
+        cacheableResponse: { statuses: [0, 200] },
+      },
+    },
     {
       urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico|woff2?|ttf)$/i,
       handler: "StaleWhileRevalidate",
