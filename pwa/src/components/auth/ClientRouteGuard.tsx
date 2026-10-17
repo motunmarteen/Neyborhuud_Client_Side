@@ -4,6 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
 import { isOnboardingOrAuthRoute } from '@/lib/appShellGates';
+import { VISITOR_ROUTES } from '@/lib/visitor';
+
+/** Visitors may look at these without signing in (the map home). */
+const visitorOk = (pathname: string) => VISITOR_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
 
 export function ClientRouteGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/';
@@ -18,7 +22,7 @@ export function ClientRouteGuard({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
 
     // Check if the route is a private route (not onboarding, auth, or marketing)
-    const isPrivate = !isOnboardingOrAuthRoute(pathname);
+    const isPrivate = !isOnboardingOrAuthRoute(pathname) && !visitorOk(pathname);
     const isAuthed = apiClient.isAuthenticated();
 
     if (isPrivate && !isAuthed) {
@@ -36,7 +40,7 @@ export function ClientRouteGuard({ children }: { children: React.ReactNode }) {
   // Gating on `mounted` instead of the window check keeps the very first
   // client render byte-for-byte identical to the server's, which is what
   // hydration actually requires.
-  const isPrivate = !isOnboardingOrAuthRoute(pathname);
+  const isPrivate = !isOnboardingOrAuthRoute(pathname) && !visitorOk(pathname);
   const isAuthed = mounted && apiClient.isAuthenticated();
 
   if (mounted && isPrivate && !isAuthed) {
