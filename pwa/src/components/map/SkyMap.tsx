@@ -87,6 +87,8 @@ type SkyMapProps = {
   cinematic?: boolean;
   /** Map home: real buildings as styled 3D models (see HuudMap). */
   toyWorld?: boolean;
+  /** Where the compass and the map credit sit (the map home puts them top-right). */
+  controlsPosition?: 'top-right' | 'bottom-right';
   /**
    * Extra sky height in px above the usual band (owner, 2026-10-16: the notch should show
    * the sky, not a flat strip). The map home lifts the sky by the notch plus its top
@@ -96,7 +98,7 @@ type SkyMapProps = {
   skyLift?: number | { safeTopPlus: number };
 };
 
-export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true, jams, cinematic = false, toyWorld = false, skyLift = 0 }: SkyMapProps) {
+export function SkyMap({ center, zoom, hour, label, className = '', onReady, onSky, weather, onWeather, living = true, jams, cinematic = false, toyWorld = false, skyLift = 0, controlsPosition = 'bottom-right' }: SkyMapProps) {
   const liftPlus = typeof skyLift === 'number' ? null : skyLift.safeTopPlus;
   const [lift, setLift] = useState(typeof skyLift === 'number' ? skyLift : 0);
   useEffect(() => {
@@ -215,7 +217,7 @@ export function SkyMap({ center, zoom, hour, label, className = '', onReady, onS
           maskImage: `linear-gradient(180deg, transparent 0, transparent ${band - 70}px, #000 ${band + 30}px)`,
         }}
       >
-        <HuudMap center={center} zoom={zoom} label={label} className="h-full w-full" onReady={handleReady} compassPosition="bottom-right" cinematic={cinematic} toyWorld={toyWorld} />
+        <HuudMap center={center} zoom={zoom} label={label} className="h-full w-full" onReady={handleReady} compassPosition={controlsPosition} attributionPosition={controlsPosition} cinematic={cinematic} toyWorld={toyWorld} />
         {/* Time-of-day light over the land: warm at dawn and sunset, blue at night. */}
         <div
           className="pointer-events-none absolute inset-0"
