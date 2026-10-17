@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Zap } from 'lucide-react';
-import { newsService } from '@/services/news.service';
+import { usePulseNews } from '@/hooks/usePulseNews';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
-import type { RssArticle } from '@/types/incident';
 
 type PulseItem =
   | { kind: 'news'; text: string }
@@ -21,8 +20,8 @@ const SPEED_PX_S = 40;
 const calmNow = () =>
   document.documentElement.hasAttribute('data-calm') || !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-export function FeedNewsTicker({ local = [] }: { local?: PulseLocalItem[] } = {}) {
-  const [articles, setArticles] = useState<RssArticle[]>([]);
+export function FeedNewsTicker({ local = [], onOpen }: { local?: PulseLocalItem[]; onOpen?: () => void } = {}) {
+  const articles = usePulseNews();
   const router = useRouter();
   const trackRef = useRef<HTMLDivElement>(null);
   const anim = useRef<Animation | null>(null);
@@ -86,24 +85,6 @@ export function FeedNewsTicker({ local = [] }: { local?: PulseLocalItem[] } = {}
     else anim.current?.play();
   };
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const items = await newsService.getArticles({ region: 'nigeria', limit: 8 });
-        if (!cancelled && items.length > 0) setArticles(items);
-      } catch {
-        try {
-          const fallback = await newsService.getMultipleFeeds(
-            [{ id: 'punch', name: 'Punch' }, { id: 'vanguard', name: 'Vanguard' }],
-            8,
-          );
-          if (!cancelled && fallback.length > 0) setArticles(fallback);
-        } catch { /* silent */ }
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   const headlines = articles.map((a) => a.title).filter(Boolean);
 
@@ -181,10 +162,16 @@ export function FeedNewsTicker({ local = [] }: { local?: PulseLocalItem[] } = {}
       role="marquee"
       aria-label="Pulse: your area, news and exchange rates"
     >
-      {/* Just the ⚡ (owner, 2026-10-17: no "PULSE" word). */}
-      <div className="feed-news-ticker__label" aria-hidden>
-        <Zap size={15} className="feed-news-ticker__label-icon text-primary fill-primary" />
-      </div>
+      {/* Just the ⚡ (owner, 2026-10-17: no "PULSE" word). Tapping it opens Today's Pulse. */}
+      {onOpen ? (
+        <button type="button" className="feed-news-ticker__label" onClick={onOpen} aria-label="Open today's pulse">
+          <Zap size={15} className="feed-news-ticker__label-icon text-primary fill-primary" aria-hidden />
+        </button>
+      ) : (
+        <div className="feed-news-ticker__label" aria-hidden>
+          <Zap size={15} className="feed-news-ticker__label-icon text-primary fill-primary" />
+        </div>
+      )}
 
       <div className="feed-news-ticker__viewport">
         <div ref={trackRef} className="feed-news-ticker__track">

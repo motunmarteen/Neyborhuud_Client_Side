@@ -22,6 +22,7 @@ import type * as maplibregl from 'maplibre-gl';
 import TopNav from '@/components/navigation/TopNav';
 import { BottomNav, OPEN_CREATE_SHEET } from '@/components/feed/BottomNav';
 import { FeedNewsTicker, type PulseLocalItem } from '@/components/feed/FeedNewsTicker';
+import { TodaysPulseSheet } from '@/components/feed/TodaysPulseSheet';
 import type { AreaMood } from '@/components/map/Pins';
 import { useCalm } from '@/hooks/useCalm';
 import { useMapWeather } from '@/hooks/useMapWeather';
@@ -103,6 +104,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   const [layers, setLayers] = useState<MapLayer[]>(LAYERS.map((l) => l.key));
   const [pin, setPin] = useState<MapPin | null>(null);
   const [ad, setAd] = useState<Ad | null>(null);
+  const [pulseOpen, setPulseOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const calm = useCalm();
   const area = userArea(user);
@@ -327,7 +329,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           <MapLayerChips active={layers} onChange={setLayers} counts={counts} />
         </div>
         <div className="nh-map-pulse pointer-events-auto mx-auto w-full max-w-xl overflow-hidden rounded-full shadow-[0_4px_14px_rgba(29,36,51,0.16)]">
-          <FeedNewsTicker local={pulseLocal} />
+          <FeedNewsTicker local={pulseLocal} onOpen={() => setPulseOpen(true)} />
         </div>
       </div>
 
@@ -466,6 +468,13 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       )}
 
       <PinPanel pin={pin} onClose={() => setPin(null)} />
+      <TodaysPulseSheet
+        open={pulseOpen}
+        onClose={() => setPulseOpen(false)}
+        center={map ? { lat: map.getCenter().lat, lng: map.getCenter().lng } : knowsArea ? view.center : null}
+        areaName={area?.lga}
+        local={pulseLocal}
+      />
 
       <AppBottomSheet open={!!ad} onClose={() => setAd(null)} title={ad?.title ?? 'Ad'}>
         {ad ? (
