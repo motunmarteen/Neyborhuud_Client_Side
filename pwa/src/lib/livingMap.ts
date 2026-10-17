@@ -239,11 +239,12 @@ export function populate(scene: Scene, mood: Mood, seed = 1): Agent[] {
       })
       .filter((x) => x.d < jam.radiusM && x.cum[x.cum.length - 1] >= 25);
     if (!through.length) continue;
-    const queue = Math.round(14 * jam.strength * density);
+    const queue = Math.round(26 * jam.strength * density);
     for (let i = 0; i < queue; i++) {
       const { path, cum, at } = through[i % through.length];
       const total = cum[cum.length - 1];
-      const s = Math.min(total, Math.max(0, at + (r() - 0.5) * jam.radiusM * 1.2));
+      // Bunched close to the report, nose to tail.
+      const s = Math.min(total, Math.max(0, at + (r() - 0.5) * jam.radiusM * 0.7));
       const kind = pickVehicle(r);
       const [lo, hi] = SPEED[kind];
       const dir: 1 | -1 = r() < 0.5 ? 1 : -1;

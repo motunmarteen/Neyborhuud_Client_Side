@@ -31,7 +31,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 0. Already done (before this tracker) | 24 | 24 | ✅ |
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
-| 3. Map home (sky + live map) | 9 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards done; next M-10 go-slow traffic |
+| 3. Map home (sky + live map) | 10 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic done; next M-11 area pulses, M-12 Pulse panel |
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
@@ -196,7 +196,7 @@ Kept here so the whole history is in one place.
 - [x] M-07 (server 57ec2d2 /geo/map-pins: 7 layers, ~110 m grid, no fake positions, max ~27 km box; radar now searches by area and drops items without a location; pwa: useMapPins + MapLayerChips + /feed?post deep link) Pins from Street Radar (`/geo/radar`) with layer chips: Safety, Traffic, Light & water, Market, Work, Events, Help
 - [x] M-08 (server modules/geo/mapLive.ts: phones join ~5 km area rooms for the box on screen (signed-in sockets only); MongoDB change streams on posts, incident reports, products, jobs, events send "map:changed" with no content or position, max 1 per room every 2 s; app reloads pins through the normal privacy rules and new pins ripple for 10 s) Live pins via socket (appear and ripple instantly)
 - [x] M-09 (pwa /huud: bottom sheet for every pin type: what, how fresh, price, "happening now", count on the block, Open / See the report, Ask Sentinel; ad panel with Visit) Pin panels (bottom sheet) for every type, with actions and "Ask Sentinel about this"
-- [ ] M-10 Moving traffic driven by real go-slow reports (calm when no data)
+- [x] M-10 (2026-10-17: fresh traffic reports (go-slow, road block, accident, flood) make vehicles crawl and queue there; full for an hour, gone by 3 hours; minor reports slow less; expressways now carry street traffic too; normal flow when nothing is reported) Moving traffic driven by real go-slow reports (calm when no data)
 - [ ] M-11 Neighbour activity as area pulses (never exact homes)
 - [ ] 🟡 M-17 (first version live: vehicles, people, kids football, market crowds on real geometry; next: denser, go-slow speeds from reports) **Living map** (owner, 2026-10-12: "the map has to be real"): moving danfos, kekes, okadas and cars on real roads; people walking on real streets and paths; kids playing football on real pitches; crowds at real markets; density by time of day (rush hours busy, late night quiet) and weather (fewer people in rain), headlights at night; traffic speed from real go-slow reports (M-10). Decoration only, never real tracked people; off in calm mode
 - [ ] 🟡 M-12 (2026-10-15: ⚡ PULSE ribbon on the map under the layer chips: real news headlines + exchange rates; next: weather and go-slows in the ribbon, "Today's Pulse" panel) Pulse ticker: news + exchange rates + weather; "Today's Pulse" panel
