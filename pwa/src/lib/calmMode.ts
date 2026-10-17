@@ -5,6 +5,7 @@
  *   - the phone asks for reduced motion (prefers-reduced-motion)
  *   - the phone's Data Saver is on (navigator.connection.saveData)
  *   - the person turned on "Save data" in Settings (settings.accessibility.liteMode)
+ *   - the network is 2G or slower (M-15 low-data mode), unless the person chose Live view
  *
  * It sets <html data-calm>, which globals.css uses to stop animations and transitions
  * (loading spinners keep turning), and JS-driven motion (framer-motion, photo sliders,
@@ -54,6 +55,30 @@ export function dataSaverOn(): boolean {
 }
 
 /**
+ * Very slow network (M-15): on 2G the light map turns on by itself. Only when the person has
+ * not chosen Live view on purpose (Save data set to off on this phone).
+ */
+type NetInfo = EventTarget & { effectiveType?: string; saveData?: boolean };
+let netWatched = false;
+
+export function slowNetworkOn(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const type = (navigator as Navigator & { connection?: NetInfo }).connection?.effectiveType;
+  if (type !== '2g' && type !== 'slow-2g') return false;
+  try {
+    return localStorage.getItem(SAVE_DATA_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+function watchNetwork() {
+  if (netWatched || typeof navigator === 'undefined') return;
+  netWatched = true;
+  (navigator as Navigator & { connection?: NetInfo }).connection?.addEventListener?.('change', () => applyCalm());
+}
+
+/**
  * Battery (owner, 2026-10-15: "identify users on battery save or data save"). Browsers do not
  * tell a web page whether battery-saver mode is on; Android Chrome does tell the level and
  * whether it is charging, so below 20% and not charging counts as saving battery.
@@ -94,7 +119,8 @@ function watchBattery() {
 export function isCalm(): boolean {
   if (typeof window === 'undefined') return false;
   watchBattery();
-  return prefersReducedMotion() || dataSaverOn() || batteryLow || !!storedAccessibility().liteMode;
+  watchNetwork();
+  return prefersReducedMotion() || dataSaverOn() || slowNetworkOn() || batteryLow || !!storedAccessibility().liteMode;
 }
 
 /** Re-read every source and update <html data-calm>; tell listeners. */
@@ -126,7 +152,7 @@ export function applyTextSize(size: 'small' | 'medium' | 'large') {
  * Runs in <head> before the first paint, so a calm or large-text page never flashes the
  * default first. Kept in sync with isCalm() / applyTextSize() above.
  */
-export const CALM_BOOT_SCRIPT = `(function(){try{var a={};try{var r=localStorage.getItem('${USER_KEY}');a=(r&&JSON.parse(r).settings&&JSON.parse(r).settings.accessibility)||{};}catch(e){}try{var sd=localStorage.getItem('${SAVE_DATA_KEY}');if(sd!==null){a.liteMode=sd==='1';}var ts=localStorage.getItem('${TEXT_SIZE_KEY}');if(ts){a.textSize=ts;}}catch(e){}var m=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;var s=navigator.connection&&navigator.connection.saveData;if(m||s||a.liteMode){document.documentElement.setAttribute('data-calm','');}if(a.textSize==='small'||a.textSize==='large'){document.documentElement.setAttribute('data-text-size',a.textSize);}}catch(e){}})();`;
+export const CALM_BOOT_SCRIPT = `(function(){try{var a={};try{var r=localStorage.getItem('${USER_KEY}');a=(r&&JSON.parse(r).settings&&JSON.parse(r).settings.accessibility)||{};}catch(e){}try{var sd=localStorage.getItem('${SAVE_DATA_KEY}');if(sd!==null){a.liteMode=sd==='1';}var ts=localStorage.getItem('${TEXT_SIZE_KEY}');if(ts){a.textSize=ts;}}catch(e){}var m=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;var c=navigator.connection||{};var s=c.saveData;var slow=(c.effectiveType==='2g'||c.effectiveType==='slow-2g')&&localStorage.getItem('${SAVE_DATA_KEY}')!=='0';if(m||s||slow||a.liteMode){document.documentElement.setAttribute('data-calm','');}if(a.textSize==='small'||a.textSize==='large'){document.documentElement.setAttribute('data-text-size',a.textSize);}}catch(e){}})();`;
 
 /** What this phone remembers for Settings to show (undefined = never set here). */
 export function savedAccessibility(): StoredAccessibility {
