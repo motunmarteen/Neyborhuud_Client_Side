@@ -11,6 +11,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { ageWords, areaName, fetchPublicAlert, statusWords, type PublicAlert } from '@/lib/publicAlert';
 import { rememberRef, signupHref } from '@/lib/visitor';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
+import { resolveDynamicParam } from '@/lib/staticExportParams';
 
 const TONES = {
   green: 'bg-green-soft text-brand-green-dark',
@@ -19,7 +20,7 @@ const TONES = {
 };
 
 export default function PageClient() {
-  const { id } = useParams<{ id: string }>();
+  const id = resolveDynamicParam(useParams<{ id: string }>().id);
   const params = useSearchParams();
   const [alert, setAlert] = useState<PublicAlert | null | undefined>(undefined);
   const [failed, setFailed] = useState(false);

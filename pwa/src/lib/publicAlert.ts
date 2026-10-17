@@ -22,9 +22,16 @@ export type LiveAlert = {
 
 export type PublicAlert = { state: 'ended' } | LiveAlert;
 
-/** null = no such alert (not a safety alert, or a bad link). */
-export async function fetchPublicAlert(id: string): Promise<PublicAlert | null> {
-  const res = await fetch(`${getApiBaseUrl()}/content/${encodeURIComponent(id)}/alert`, { cache: 'no-store' });
+/**
+ * null = no such alert (not a safety alert, or a bad link).
+ * `forPreview`: the server-side link preview may reuse an answer for 60 s. The page is
+ * pre-built and filled on first visit, and Next.js refuses a never-reuse fetch there (500).
+ */
+export async function fetchPublicAlert(id: string, { forPreview = false }: { forPreview?: boolean } = {}): Promise<PublicAlert | null> {
+  const res = await fetch(
+    `${getApiBaseUrl()}/content/${encodeURIComponent(id)}/alert`,
+    forPreview ? { next: { revalidate: 60 } } : { cache: 'no-store' },
+  );
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`alert ${res.status}`);
   return ((await res.json()) as { data: PublicAlert }).data;
