@@ -317,3 +317,21 @@ export async function fetchCurrentWeather(
   // Every weather service failed: say so instead of inventing weather.
   return { temp: 0, condition: 'Unknown', city: cityName, wmoCode: -1, real: false, tempKnown: false };
 }
+
+export type DayForecast = { date: string; code: number; max: number; min: number };
+
+/** The real 7-day forecast for a place (Open-Meteo, no key). Throws when unavailable. */
+export async function fetchWeekForecast(latitude: number, longitude: number): Promise<DayForecast[]> {
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitude.toFixed(3)}&longitude=${longitude.toFixed(3)}&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=7&timezone=auto`,
+    { signal: AbortSignal.timeout(8000) },
+  );
+  if (!res.ok) throw new Error(`forecast ${res.status}`);
+  const d = (await res.json())?.daily as
+    | { time?: string[]; weather_code?: number[]; temperature_2m_max?: number[]; temperature_2m_min?: number[] }
+    | undefined;
+  const days = d?.time ?? [];
+  return days
+    .map((date, i) => ({ date, code: d?.weather_code?.[i] ?? NaN, max: d?.temperature_2m_max?.[i] ?? NaN, min: d?.temperature_2m_min?.[i] ?? NaN }))
+    .filter((x) => Number.isFinite(x.code) && Number.isFinite(x.max) && Number.isFinite(x.min));
+}

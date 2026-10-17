@@ -16,18 +16,15 @@ const CURRENCIES: Omit<ExchangeRate, 'rate'>[] = [
   { currency: 'CNY', symbol: '元' },
 ];
 
-const FALLBACK_RATES: ExchangeRate[] = [
-  { currency: 'USD', symbol: '$', rate: 1352.24 },
-  { currency: 'GBP', symbol: '£', rate: 1834.16 },
-  { currency: 'EUR', symbol: '€', rate: 1594.37 },
-  { currency: 'JPY', symbol: '¥', rate: 8.47 },
-  { currency: 'CNY', symbol: '元', rate: 197.53 },
-];
+// No made-up fallback rates: when every source fails, nothing is shown rather than old
+// numbers dressed up as today's (owner rule: real figures only).
 
 export function useExchangeRates(cycleMs = 3000) {
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [rateIndex, setRateIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  /** When the shown rates were fetched (null until then). */
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -54,8 +51,10 @@ export function useExchangeRates(cycleMs = 3000) {
             return { ...c, rate };
           });
 
-          if (parsed.some((p) => p.rate > 0)) {
-            setRates(parsed);
+          const live = parsed.filter((p) => p.rate > 0);
+          if (live.length) {
+            setRates(live);
+            setUpdatedAt(new Date());
             setLoading(false);
             return;
           }
@@ -64,7 +63,7 @@ export function useExchangeRates(cycleMs = 3000) {
         }
       }
 
-      setRates(FALLBACK_RATES);
+      // Keep the last real rates if a refresh fails; show none if there never were any.
       setLoading(false);
     };
 
@@ -86,5 +85,6 @@ export function useExchangeRates(cycleMs = 3000) {
     rates,
     currentRate: rates[rateIndex],
     loading,
+    updatedAt,
   };
 }
