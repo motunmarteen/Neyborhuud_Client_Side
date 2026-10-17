@@ -38,6 +38,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMapPins } from '@/hooks/useMapPins';
 import { useMapAds } from '@/hooks/useMapAds';
 import { useMyPins } from '@/hooks/useMyPins';
+import { useAreaPulses } from '@/hooks/useAreaPulses';
 import { extractUserHomeCoords } from '@/lib/mapUserLocation';
 import { jamStrength, type Jam } from '@/lib/livingMap';
 import { LAYERS, LAYER_META, pinHref, shortNaira, type MapLayer, type MapPin } from '@/lib/mapPins';
@@ -182,6 +183,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   // Your home (only you see it) and "You are here".
   const home = useMemo(() => (user ? extractUserHomeCoords(user as Parameters<typeof extractUserHomeCoords>[0]) : null), [user]);
   const { showHere } = useMyPins(map, { home, name: firstName ?? 'You' });
+  // M-11: where neighbours are active now (busy areas, never people or homes).
+  useAreaPulses(map);
 
   const locate = useCallback(() => {
     if (!map || !('geolocation' in navigator)) return;
