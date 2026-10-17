@@ -184,7 +184,8 @@ Kept here so the whole history is in one place.
 - [x] 2026-10-15 (later): map card hides (swipe down / ✕, "Show card"); Feed pull-down → map; help posts in the Feed; house ads + "Sample" preview ads (admins / Ads page switch); Pulse adds weather + go-slows; "📍 See on map"; fake "1.2K" views removed; **Gist deleted on the server** (API removed, 10 threads + 2 comments dropped, 57 Feed posts untouched)
 - [x] 2026-10-16 (owner): Sentinel orb removed from the map (the card's "Ask Sentinel anything…" does the same; the area's mood is now a small amber/red dot on it); Me, Calm view and Sound moved into a ⋯ menu on the left, opposite SOS; both sit just above the card and follow it down when it is hidden; the map fills the notch area so the sky (sun, clouds) runs up behind the status bar (the blue strip was the page background showing above the map)
 - [ ] Check: sign-up "complete profile" shows "100" coins while the balance loads (is 100 the real reward?)
-- [ ] Still from the mockup: first-time tour (3 steps); visitor "look around" sheet; quiet-street sheet; share card with your sky; go-slow traffic; area pulses; Area Champion crown
+- [x] 2026-10-17 first-time tour (mockup, 3 steps: your street live, the chips, SOS), once per phone after the swoop; replay from ⋯ "Show me around". SOS text made truthful: tap opens SOS, press-and-hold sends a silent alert, no network = sends when back online (no automatic SMS)
+- [ ] Still from the mockup: visitor "look around" sheet; quiet-street sheet; share card with your sky; Area Champion crown (Phase 7)
 
 **2026-10-15:** the map home is live at `/huud` and the My Huud tab opens it: real sky and weather, street life, 7 pin layers, billboards and sponsored pins (safety pins always drawn above ads), pin panels, "Me" (go to where I am) and "List" (the feed). After sign-in the app still lands on `/feed`; switch the landing to `/huud` once the owner has tried it.
 

@@ -40,6 +40,7 @@ import { useMapPins } from '@/hooks/useMapPins';
 import { useMapAds } from '@/hooks/useMapAds';
 import { useMyPins } from '@/hooks/useMyPins';
 import { useAreaPulses } from '@/hooks/useAreaPulses';
+import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { extractUserHomeCoords } from '@/lib/mapUserLocation';
 import { jamStrength, type Jam } from '@/lib/livingMap';
 import { LAYERS, LAYER_META, pinHref, shortNaira, type MapLayer, type MapPin } from '@/lib/mapPins';
@@ -187,6 +188,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   const { showHere } = useMyPins(map, { home, name: firstName ?? 'You' });
   // M-11: where neighbours are active now (busy areas, never people or homes).
   useAreaPulses(map);
+  // First-time tour (mockup): three steps, once per phone; replay from the ⋯ menu.
+  const tour = useMapTour(!!map && !hasFocus);
 
   const locate = useCallback(() => {
     if (!map || !('geolocation' in navigator)) return;
@@ -325,7 +328,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
 
       {/* Under the top bar: layer chips, then the ⚡ PULSE ribbon (news + exchange rates). */}
       <div className="pointer-events-none absolute inset-x-0 top-[calc(var(--app-topnav-height)+var(--safe-top,0px)+0.25rem)] z-10 flex flex-col gap-2 px-3">
-        <div className="pointer-events-auto mx-auto w-full max-w-xl">
+        <div className="pointer-events-auto mx-auto w-full max-w-xl" data-tour="chips">
           <MapLayerChips active={layers} onChange={setLayers} counts={counts} />
         </div>
         <div className="nh-map-pulse pointer-events-auto mx-auto w-full max-w-xl overflow-hidden rounded-full shadow-[0_4px_14px_rgba(29,36,51,0.16)]">
@@ -353,6 +356,10 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
               <span aria-hidden className="material-symbols-outlined text-[20px]">{calm ? 'play_circle' : 'self_improvement'}</span>
               {calm ? 'Live view' : 'Calm view'}
             </button>
+            <button type="button" role="menuitem" className={MENU_ITEM} onClick={() => { setMenuOpen(false); tour.start(); }}>
+              <span aria-hidden className="material-symbols-outlined text-[20px]">explore</span>
+              Show me around
+            </button>
             <button type="button" role="menuitemcheckbox" aria-checked={soundOn} className={MENU_ITEM} onClick={() => { setMenuOpen(false); toggleSound(); }}>
               <span aria-hidden className="material-symbols-outlined text-[20px]">{soundOn ? 'volume_up' : 'volume_off'}</span>
               {soundOn ? 'Sound on' : 'Sound off'}
@@ -364,7 +371,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           onClick={() => setMenuOpen((v) => !v)}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
-          aria-label="Map options: go to where I am, calm view, sound"
+          aria-label="Map options: go to where I am, calm view, show me around, sound"
           className="grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] transition-colors hover:bg-background"
         >
           <span aria-hidden className="material-symbols-outlined text-[26px] text-navy">
@@ -468,6 +475,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       )}
 
       <PinPanel pin={pin} onClose={() => setPin(null)} />
+      {tour.step >= 0 ? <MapTour step={tour.step} onNext={tour.next} onSkip={tour.finish} /> : null}
       <TodaysPulseSheet
         open={pulseOpen}
         onClose={() => setPulseOpen(false)}
