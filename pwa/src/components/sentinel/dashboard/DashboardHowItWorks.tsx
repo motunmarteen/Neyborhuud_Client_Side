@@ -1,3 +1,4 @@
+import { SafetyGuideLink } from '@/components/sentinel/SentinelHowItWorks';
 const STEPS = [
   {
     icon: 'group_add',
@@ -31,6 +32,7 @@ export function DashboardHowItWorks() {
           </li>
         ))}
       </ul>
+      <SafetyGuideLink section="guardians" />
     </div>
   );
 }

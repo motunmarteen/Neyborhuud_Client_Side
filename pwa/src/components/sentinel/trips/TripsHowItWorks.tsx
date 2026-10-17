@@ -1,3 +1,4 @@
+import { SafetyGuideLink } from '@/components/sentinel/SentinelHowItWorks';
 const STEPS = [
   {
     icon: 'play_circle',
@@ -12,7 +13,7 @@ const STEPS = [
   {
     icon: 'flag',
     title: 'Arrive safely',
-    body: 'Mark arrived to close the trip. Missed check-ins escalate — severe misses can auto-trigger SOS.',
+    body: 'Mark arrived to close the trip. Miss 3 check-ins in a row and a silent SOS is sent for you automatically.',
   },
 ] as const;
 
@@ -34,6 +35,7 @@ export function TripsHowItWorks() {
           </li>
         ))}
       </ul>
+      <SafetyGuideLink section="trips" />
     </div>
   );
 }

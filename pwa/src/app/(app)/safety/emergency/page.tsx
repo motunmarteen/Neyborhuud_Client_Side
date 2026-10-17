@@ -308,9 +308,9 @@ export default function EmergencyPage() {
       icon="local_police"
       iconAccent="red"
     >
-      <SentinelHowItWorks>
-        Choose the emergency type and severity. We&apos;ll show you the correct number to call
-        for your situation and location. <strong>Automatic notification of NPF, NEMA, DSS, or Fire
+      <SentinelHowItWorks guide="emergency-report">
+        Choose the emergency type and severity. We&apos;ll show you the correct number for your
+        situation and location, with a ready message: one tap calls or texts them. <strong>Automatic notification of NPF, NEMA, DSS, or Fire
         Service is not yet connected</strong> — call the number shown yourself for anything urgent.
         You can still replay location history and keep a record here.
       </SentinelHowItWorks>

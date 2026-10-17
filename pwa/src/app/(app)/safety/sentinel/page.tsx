@@ -143,10 +143,10 @@ export default function SentinelAiPage() {
         <RecentRedZoneAlerts />
       </section>
 
-      <SentinelHowItWorks>
+      <SentinelHowItWorks guide="sentinel-watch">
         <ol className="list-decimal space-y-2 pl-4 text-sm">
-          <li>Sentinel reviews signals from chat, feed, and location (with your privacy settings).</li>
-          <li>High-risk items appear here and in notifications — you choose what to act on.</li>
+          <li>Sentinel scores public posts, listings and comments in your area for signs of danger (0 to 10). It never reads your chats.</li>
+          <li>A score of 8 or more sends a Red Zone alert to people in that area. You choose which alerts reach you in Sentinel settings.</li>
           <li>
             For immediate danger, use{' '}
             <Link href="/sos" className="font-semibold text-brand-red hover:underline">

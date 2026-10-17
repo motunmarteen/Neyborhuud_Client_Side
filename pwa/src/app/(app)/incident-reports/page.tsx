@@ -29,6 +29,7 @@ import {
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -523,6 +524,14 @@ function IncidentReportsInner() {
         />
       }
     >
+      <div className="mb-4">
+        <SentinelHowItWorks guide="incident-reports">
+          Report something that happened near you: crime, fire, flood, a broken pipe, a missing
+          person. You can report without showing your name. Neighbours mark &ldquo;I saw it&rdquo;,
+          confirm or dispute it; 3 confirmations with no disputes (or 10 confirmations) make it
+          community confirmed. In danger right now? Use SOS.
+        </SentinelHowItWorks>
+      </div>
       {showCreate ? (
         <div className="mod-card mb-4 rounded-2xl p-4">
           <h2 className="mb-4 text-base font-bold" style={{ color: 'var(--neu-text)' }}>

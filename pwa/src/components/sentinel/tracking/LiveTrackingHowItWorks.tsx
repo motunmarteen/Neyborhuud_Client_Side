@@ -1,8 +1,9 @@
+import { SafetyGuideLink } from '@/components/sentinel/SentinelHowItWorks';
 const STEPS = [
   {
     icon: 'play_circle',
     title: 'Start a session',
-    body: 'Choose emergency type and ping interval. Guardians and agencies can be alerted immediately.',
+    body: 'Choose the type of danger and how often to send your location. Your guardians are alerted at once (emergency services are not called for you).',
   },
   {
     icon: 'my_location',
@@ -35,6 +36,7 @@ export function LiveTrackingHowItWorks() {
           </li>
         ))}
       </ul>
+      <SafetyGuideLink section="live-tracking" />
     </div>
   );
 }

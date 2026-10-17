@@ -252,7 +252,7 @@ export default function GeofencesPage() {
         </button>
       }
     >
-      <SentinelHowItWorks>
+      <SentinelHowItWorks guide="geofences">
         Tap the map to place a pin, set radius and zone type, then save. Safe zones confirm arrivals;
         alert zones warn on unfamiliar areas; restricted zones can notify guardians and trigger SOS.
       </SentinelHowItWorks>

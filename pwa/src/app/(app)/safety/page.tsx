@@ -133,6 +133,23 @@ export default function SentinelHubPage() {
 
               <PanicPinHint />
 
+              {/* The full guide to every tool and to Sentinel AI (owner, 2026-10-17). */}
+              <Link
+                href="/safety/how-it-works"
+                className="group flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-3.5 no-underline transition-colors hover:bg-primary/10"
+              >
+                <span className="mod-inset flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary">
+                  <span className="material-symbols-outlined text-[22px]">menu_book</span>
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-primary">How Sentinel keeps you safe</p>
+                  <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
+                    Every safety tool and Sentinel AI, in plain words
+                  </p>
+                </div>
+                <span className="material-symbols-outlined text-primary transition-transform group-hover:translate-x-0.5">chevron_right</span>
+              </Link>
+
               <section>
                 <SentinelSectionHeader
                   title="Quick access"
