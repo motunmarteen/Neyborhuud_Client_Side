@@ -107,6 +107,7 @@ export function FloatingSosButton() {
           className={`text-red-500 app-bottomnav__sos-btn${sosActive ? ' app-bottomnav__sos-btn--active' : ''}`}
           aria-current={sosActive ? 'page' : undefined}
           aria-label="SOS — tap to open command center, long-press for silent SOS"
+          data-tour="sos"
         >
           <AppNavIcon name="sos" />
         </button>
