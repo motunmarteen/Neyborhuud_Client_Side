@@ -37,6 +37,8 @@ import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
 import { useAuth } from '@/hooks/useAuth';
 import { useMapPins } from '@/hooks/useMapPins';
 import { useMapAds } from '@/hooks/useMapAds';
+import { useMyPins } from '@/hooks/useMyPins';
+import { extractUserHomeCoords } from '@/lib/mapUserLocation';
 import { jamStrength, type Jam } from '@/lib/livingMap';
 import { LAYERS, LAYER_META, pinHref, shortNaira, type MapLayer, type MapPin } from '@/lib/mapPins';
 import { openAdTarget, type Ad } from '@/lib/adsApi';
@@ -177,18 +179,23 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     return c;
   }, [pins]);
 
+  // Your home (only you see it) and "You are here".
+  const home = useMemo(() => (user ? extractUserHomeCoords(user as Parameters<typeof extractUserHomeCoords>[0]) : null), [user]);
+  const { showHere } = useMyPins(map, { home, name: firstName ?? 'You' });
+
   const locate = useCallback(() => {
     if (!map || !('geolocation' in navigator)) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLocating(false);
+        showHere({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         map.flyTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom: STREET_ZOOM + 0.5 });
       },
       () => setLocating(false),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 5 * 60_000 },
     );
-  }, [map]);
+  }, [map, showHere]);
 
   // The orb's ring: red for a live safety alert on screen, amber for any safety or traffic pin.
   const mood: AreaMood = pins.some((p) => p.layer === 'safety' && p.live)
