@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 import apiClient from '@/lib/api-client';
 
-export type AreaWelcome = { lga: string | null; state: string | null; neighbours: number };
+export type AreaWelcome = { neighbourhood?: string | null; lga: string | null; state: string | null; neighbours: number };
 
 /** From this zoom the map is on one area (below it, a city or Nigeria). */
 const AREA_ZOOM = 13;

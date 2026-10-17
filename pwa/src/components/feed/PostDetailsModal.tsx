@@ -23,7 +23,7 @@ import {
 import { usePost } from '@/hooks/usePosts';
 import { CommentItem } from './CommentItem';
 import { CommentForm } from './CommentForm';
-import ShareModal from './ShareModal';
+import ShareModal, { alertShareStatus } from './ShareModal';
 import { PostAuthor } from '@/types/api';
 import MapPinAvatar from '@/components/ui/MapPinAvatar';
 import { contentService } from '@/services/content.service';
@@ -558,6 +558,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                     postId={postId}
                     postContent={details?.content?.content ?? details?.content?.body ?? ''}
                     onClose={() => setShowShare(false)}
+                    alert={details?.content ? alertShareStatus(details.content) : undefined}
                 />
             )}
         </div>

@@ -18,6 +18,8 @@ export const BROWSE_SHELL_ROUTE_PREFIXES = [
   '/help-request',
   '/incident-reports',
   '/community-emergency',
+  // Shared safety alerts (public page, AppBrowseLayout).
+  '/alert',
 ] as const;
 
 export function routeUsesBrowseShell(pathname: string): boolean {

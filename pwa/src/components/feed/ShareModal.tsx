@@ -141,13 +141,34 @@ const PLATFORMS: Platform[] = [
 
 // ─── Component ─────────────────────────────────────────────────────────────
 
+export type AlertShareStatus = 'confirmed' | 'unconfirmed' | 'disputed';
+
+/** A safety alert's status from a post (undefined when the post is not a safety alert). */
+export function alertShareStatus(post: { contentType?: string | null; verificationStatus?: string | null }): AlertShareStatus | undefined {
+  if (post.contentType !== 'emergency') return undefined;
+  if (post.verificationStatus === 'community_confirmed' || post.verificationStatus === 'verified') return 'confirmed';
+  return post.verificationStatus === 'disputed' ? 'disputed' : 'unconfirmed';
+}
+
+const ALERT_PREFIX: Record<AlertShareStatus, string> = {
+  confirmed: '✅ Confirmed by neighbours · ',
+  unconfirmed: '⚠️ UNCONFIRMED · ',
+  disputed: '❗ DISPUTED by neighbours · ',
+};
+
 interface ShareModalProps {
   postId: string;
   postContent: string;
   onClose: () => void;
+  /**
+   * Safety alerts share safely (owner 2026-10-17): unconfirmed or disputed ones ask first,
+   * the text says the status, and the link opens a page showing the live status.
+   */
+  alert?: AlertShareStatus;
 }
 
-export default function ShareModal({ postId, postContent, onClose }: ShareModalProps) {
+export default function ShareModal({ postId, postContent, onClose, alert }: ShareModalProps) {
+  const [goAhead, setGoAhead] = useState(!alert || alert === 'confirmed');
   const [loading, setLoading] = useState<string | null>(null); // platform id being processed
   const [copied, setCopied] = useState(false);
   const [earnedLink, setEarnedLink] = useState<string | null>(null);
@@ -162,9 +183,10 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
     );
   }, []);
 
-  const shareText = postContent.length > 100
+  const body = postContent.length > 100
     ? `${postContent.substring(0, 97)}…`
     : postContent;
+  const shareText = alert ? `${ALERT_PREFIX[alert]}${body}` : body;
 
   const getTrackingLink = async (platformId: string): Promise<{ link: string; points_earned: number }> => {
     const res = await apiClient.post<{ link: string; points_earned: number }>(
@@ -258,12 +280,45 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
       panelClassName="w-full max-w-sm rounded-t-3xl bg-white pb-safe shadow-2xl  sm:rounded-3xl"
       handleClassName="pt-2 pb-0"
     >
+        {!goAhead ? (
+          <div className="flex flex-col gap-3 px-5 pb-6 pt-2">
+            <p className="text-lg font-black text-navy">
+              {alert === 'disputed' ? 'Neighbours dispute this alert' : 'Neighbours have not confirmed this yet'}
+            </p>
+            <p className="text-sm font-semibold text-muted">
+              {alert === 'disputed'
+                ? 'People who were there say it may not be true. Forwarding it can spread fear.'
+                : 'Forwarding an unchecked alert can spread fear if it turns out wrong.'}{' '}
+              If you share it, it will be marked {alert === 'disputed' ? 'Disputed' : 'Unconfirmed'}, and the link will
+              always show how it stands, including when it has ended.
+            </p>
+            <p className="text-xs font-semibold text-muted">No HuudCredit for sharing alerts until neighbours confirm them.</p>
+            <button
+              type="button"
+              onClick={() => setGoAhead(true)}
+              className="min-h-12 rounded-full bg-primary text-[15px] font-bold text-white"
+            >
+              Share anyway
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="min-h-11 rounded-full border border-line bg-white text-[15px] font-bold text-navy"
+            >
+              Don&apos;t share
+            </button>
+          </div>
+        ) : (
         <div className="px-5 pb-6 pt-2">
           {/* Header */}
           <div className="mb-5 flex items-center justify-between">
             <div>
               <p className="text-lg font-black text-[var(--neu-text-muted)] ">Share Post</p>
-              <p className="text-xs text-[var(--neu-text-muted)] ">Earn <span className="font-black text-status-warning">+5 HuudCredit</span> per share</p>
+              {alert && alert !== 'confirmed' ? (
+                <p className="text-xs text-[var(--neu-text-muted)] ">Shared as {alert === 'disputed' ? 'Disputed' : 'Unconfirmed'} · no HuudCredit until confirmed</p>
+              ) : (
+                <p className="text-xs text-[var(--neu-text-muted)] ">Earn <span className="font-black text-status-warning">+5 HuudCredit</span> per share</p>
+              )}
             </div>
             <button
               onClick={onClose}
@@ -308,7 +363,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
           <div className="flex items-center gap-2 rounded-2xl bg-brand-surface  border border-black/[0.08]  p-3">
             <span className="material-symbols-outlined text-[18px] text-[var(--neu-text-muted)] shrink-0">link</span>
             <p className="flex-1 truncate text-xs text-[var(--neu-text-muted)] ">
-              {earnedLink ?? `neyborhuud.com/post/${postId}`}
+              {earnedLink ?? (alert ? `app.neyborhuud.com/alert/${postId}` : `neyborhuud.com/post/${postId}`)}
             </p>
             <button
               onClick={handleCopyLink}
@@ -340,6 +395,7 @@ export default function ShareModal({ postId, postContent, onClose }: ShareModalP
             New sign-ups via your link count toward your growth streak.
           </p>
         </div>
+        )}
     </BottomSheetOverlay>
   );
 }
