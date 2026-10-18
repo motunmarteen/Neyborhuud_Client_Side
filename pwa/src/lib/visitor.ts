@@ -14,12 +14,13 @@ export function rememberRef(ref: string | null) {
   }
 }
 
+/** Joining happens on the live map (owner 2026-10-18): /huud opens the join sheet. */
 export function signupHref(): string {
   try {
     const ref = sessionStorage.getItem(REF_KEY);
-    return ref ? `/signup?ref=${encodeURIComponent(ref)}` : '/signup';
+    return ref ? `/huud?join=1&ref=${encodeURIComponent(ref)}` : '/huud?join=1';
   } catch {
-    return '/signup';
+    return '/huud?join=1';
   }
 }
 

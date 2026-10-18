@@ -227,7 +227,7 @@ Kept here so the whole history is in one place.
 - [ ] S-005 `(marketing)/pick-community` → Getting started (restyled)
 - [ ] S-006 `(marketing)/reset-password` → Getting started (restyled)
 - [ ] S-007 `(marketing)/setup-complete` → Getting started (restyled)
-- [ ] S-008 `(marketing)/signup` → Getting started (restyled)
+- [x] S-008 (2026-10-18) `(marketing)/signup` → now the "Join your neighbours" sheet on the live map (/huud?join=1): pick your street on the map, then first name, email, password; @name made for you; invite kept. Old page redirects. Google button appears once GOOGLE keys are set; phone + SMS later (needs an SMS account)
 - [ ] S-009 `(marketing)/verify-email` → Getting started (restyled)
 - [ ] S-010 `(marketing)/verify-location` → Getting started (restyled)
 - [ ] S-011 `(marketing)/welcome` → Getting started (restyled)

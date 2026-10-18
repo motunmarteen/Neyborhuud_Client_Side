@@ -48,6 +48,7 @@ import { MapSkinOverlay } from '@/components/map/MapSkinOverlay';
 import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
 import { VisitorWelcome } from '@/components/map/VisitorWelcome';
+import { JoinSheet } from '@/components/map/JoinSheet';
 import { HelpMapSheet } from '@/components/map/HelpMapSheet';
 import { useAreaWelcome } from '@/hooks/useAreaWelcome';
 import { rememberRef, signupHref } from '@/lib/visitor';
@@ -201,11 +202,22 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   // member card; "Join free" keeps the sharer's invite code from the link.
   const visitor = !user;
   const areaWelcome = useAreaWelcome(map, visitor);
-  const [joinHref, setJoinHref] = useState('/signup');
+  const [joinHref, setJoinHref] = useState('/huud?join=1');
   useEffect(() => {
     rememberRef(params.get('ref'));
     setJoinHref(signupHref());
   }, [params]);
+  // Joining happens here on the live map (owner 2026-10-18), not on a separate page.
+  const [joinOpen, setJoinOpen] = useState(false);
+  useEffect(() => {
+    setJoinOpen(params.get('join') === '1');
+  }, [params]);
+  const closeJoin = useCallback(() => {
+    setJoinOpen(false);
+    const u = new URL(window.location.href);
+    u.searchParams.delete('join');
+    window.history.replaceState(null, '', u.pathname + u.search);
+  }, []);
 
   // Help map Nigeria (M-18): when most buildings here are stand-ins (OpenStreetMap has no
   // outlines yet), invite people to add the real ones. Hidden for a week per area once closed.
@@ -563,7 +575,16 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             </Link>
           </div>
 
-          {visitor ? (
+          {visitor && joinOpen ? (
+            <JoinSheet
+              map={map}
+              area={areaWelcome}
+              refCode={params.get('ref')}
+              onLocate={locate}
+              locating={locating}
+              onClose={closeJoin}
+            />
+          ) : visitor ? (
             <VisitorWelcome
               area={
                 areaWelcome?.neighbourhood && areaWelcome.lga

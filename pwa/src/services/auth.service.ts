@@ -403,6 +403,16 @@ export const authService = {
   },
 
   /**
+   * Sign in (or join) with a provider's ID token, e.g. Google's sign-in button.
+   * POST /auth/social/:provider { id_token } → session token, stored like a normal login.
+   */
+  async socialWithIdToken(provider: "google", idToken: string): Promise<boolean> {
+    const response = await apiClient.post<AuthSessionData>(`/auth/social/${provider}`, { id_token: idToken });
+    if (!response.success || !response.data) return false;
+    return persistLoginSession(response.data);
+  },
+
+  /**
    * Merged user from /profile/me + /identity/profile (fills phone/name gaps).
    */
   async fetchMergedCurrentUser(): Promise<User | null> {
