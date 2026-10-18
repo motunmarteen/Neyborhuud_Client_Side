@@ -591,7 +591,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
                 title={it.label}
                 disabled={it.disabled}
                 onClick={() => {
-                  setMenuOpen(false);
+                  // The tour spotlights parts of the map, so the stack steps aside for it.
+                  if (it.key === 'tour') setMenuOpen(false);
                   it.run();
                 }}
                 className="nh-map-fab-pop grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] transition-colors hover:bg-background disabled:opacity-60"
@@ -602,30 +603,27 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
                 </span>
               </button>
             ))}
-          </div>
-        ) : null}
-        {/* Your avatar on the map (owner 2026-10-18): opens People & places (friends, birthdays, businesses). */}
-        {started && user ? (
-          <button
-            type="button"
-            onClick={() => setLensSheetOpen(true)}
-            aria-label={t('map.peopleTitle')}
-            className="relative mb-2 grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] ring-2 ring-white"
-          >
-            {myPortrait && !portraitBroken ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={myPortrait} alt="" className="h-full w-full object-cover" onError={() => setPortraitBroken(true)} />
-            ) : (
-              <span aria-hidden className="text-2xl">
-                👥
-              </span>
-            )}
-            {lensChoice.on.length ? (
-              <span aria-hidden className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[11px] font-black text-white">
-                {lensChoice.on.length}
-              </span>
+            {/* Your avatar (owner 2026-10-18): part of the stack, nearest ⋯; opens People & places. */}
+            {started && user ? (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => setLensSheetOpen(true)}
+                aria-label={t('map.peopleTitle')}
+                title={t('map.peopleTitle')}
+                className="nh-map-fab-pop relative grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] ring-2 ring-white"
+              >
+                {myPortrait && !portraitBroken ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={myPortrait} alt="" className="h-full w-full object-cover" onError={() => setPortraitBroken(true)} />
+                ) : (
+                  <span aria-hidden className="text-2xl">
+                    👥
+                  </span>
+                )}
+              </button>
             ) : null}
-          </button>
+          </div>
         ) : null}
         <button
           type="button"
@@ -633,11 +631,16 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           aria-haspopup="menu"
           aria-expanded={menuOpen}
           aria-label={menuOpen ? t('map.menu.close') : t('map.menu.open')}
-          className="grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] transition-colors hover:bg-background"
+          className="relative grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] transition-colors hover:bg-background"
         >
           <span aria-hidden className="material-symbols-outlined text-[26px] text-navy">
-            more_horiz
+            {menuOpen ? 'close' : 'more_horiz'}
           </span>
+          {!menuOpen && lensChoice.on.length ? (
+            <span aria-hidden className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[11px] font-black text-white">
+              {lensChoice.on.length}
+            </span>
+          ) : null}
         </button>
       </div>
 
