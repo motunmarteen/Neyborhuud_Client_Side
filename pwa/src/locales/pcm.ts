@@ -502,6 +502,18 @@ const pcm: Record<string, string> = {
     // Map card buttons (2026-10-18)
     'map.invite': 'Call neighbours',
     'map.addEstate': 'Add my estate',
+
+    // Map option buttons (2026-10-18)
+    'map.menu.title': 'Map options',
+    'map.menu.open': 'Map options',
+    'map.menu.close': 'Close map options',
+    'map.menu.here': 'Carry me go where I dey',
+    'map.menu.finding': 'We dey find you…',
+    'map.menu.calm': 'Calm view',
+    'map.menu.live': 'Live view',
+    'map.menu.tour': 'Show me around',
+    'map.menu.soundOn': 'Sound dey on',
+    'map.menu.soundOff': 'Sound dey off',
 };
 
 export default pcm;

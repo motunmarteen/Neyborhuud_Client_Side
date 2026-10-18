@@ -76,8 +76,6 @@ const MAIN_BTN =
   'inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-primary px-5 text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(0,184,46,0.28)] transition-colors hover:bg-brand-green-dark';
 const SOFT_BTN =
   'inline-flex min-h-12 flex-1 items-center justify-center rounded-full border border-line bg-white px-5 text-[15px] font-bold text-navy transition-colors hover:bg-background';
-const MENU_ITEM =
-  'flex min-h-12 items-center gap-3 px-4 text-left text-[15px] font-bold text-navy transition-colors hover:bg-background disabled:opacity-60';
 const SHEET_BTN =
   'inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-white px-3 text-sm font-bold text-navy transition-colors hover:bg-background';
 /** How far up a swipe on the sheet must go to open the Feed. */
@@ -567,28 +565,43 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         className="absolute left-3 z-20 transition-[bottom] duration-300 ease-out motion-reduce:transition-none"
         style={{ bottom: 'calc(var(--app-bottomnav-h) + 3rem + var(--huud-dock, 0px))' }}
       >
+        {/* Map options as round buttons (owner 2026-10-18): icon only, same size as the avatar
+            and ⋯ buttons, popping up above them. Names stay for screen readers and as tooltips. */}
         {menuOpen ? (
-          <div
-            role="menu"
-            aria-label="Map options"
-            className="absolute bottom-full left-0 mb-2 flex w-48 flex-col overflow-hidden rounded-[18px] bg-white py-1 shadow-[0_8px_24px_rgba(29,36,51,0.22)]"
-          >
-            <button type="button" role="menuitem" className={MENU_ITEM} disabled={!map || locating} onClick={() => { setMenuOpen(false); locate(); }}>
-              <span aria-hidden className="material-symbols-outlined text-[20px]">{locating ? 'progress_activity' : 'my_location'}</span>
-              {locating ? 'Finding you…' : 'Go to where I am'}
-            </button>
-            <button type="button" role="menuitemcheckbox" aria-checked={calm} className={MENU_ITEM} onClick={() => { setMenuOpen(false); setSaveData(!calm); }}>
-              <span aria-hidden className="material-symbols-outlined text-[20px]">{calm ? 'play_circle' : 'self_improvement'}</span>
-              {calm ? 'Live view' : 'Calm view'}
-            </button>
-            <button type="button" role="menuitem" className={MENU_ITEM} onClick={() => { setMenuOpen(false); tour.start(); }}>
-              <span aria-hidden className="material-symbols-outlined text-[20px]">explore</span>
-              Show me around
-            </button>
-            <button type="button" role="menuitemcheckbox" aria-checked={soundOn} className={MENU_ITEM} onClick={() => { setMenuOpen(false); toggleSound(); }}>
-              <span aria-hidden className="material-symbols-outlined text-[20px]">{soundOn ? 'volume_up' : 'volume_off'}</span>
-              {soundOn ? 'Sound on' : 'Sound off'}
-            </button>
+          <div role="menu" aria-label={t('map.menu.title')} className="absolute bottom-full left-0 mb-2 flex flex-col gap-2">
+            {[
+              {
+                key: 'here',
+                role: 'menuitem',
+                icon: locating ? 'progress_activity' : 'my_location',
+                label: locating ? t('map.menu.finding') : t('map.menu.here'),
+                disabled: !map || locating,
+                run: () => locate(),
+              },
+              { key: 'calm', role: 'menuitemcheckbox', checked: calm, icon: calm ? 'play_circle' : 'self_improvement', label: calm ? t('map.menu.live') : t('map.menu.calm'), run: () => setSaveData(!calm) },
+              { key: 'tour', role: 'menuitem', icon: 'explore', label: t('map.menu.tour'), run: () => tour.start() },
+              { key: 'sound', role: 'menuitemcheckbox', checked: soundOn, icon: soundOn ? 'volume_up' : 'volume_off', label: soundOn ? t('map.menu.soundOn') : t('map.menu.soundOff'), run: () => toggleSound() },
+            ].map((it, i) => (
+              <button
+                key={it.key}
+                type="button"
+                role={it.role}
+                aria-checked={it.role === 'menuitemcheckbox' ? it.checked : undefined}
+                aria-label={it.label}
+                title={it.label}
+                disabled={it.disabled}
+                onClick={() => {
+                  setMenuOpen(false);
+                  it.run();
+                }}
+                className="nh-map-fab-pop grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] transition-colors hover:bg-background disabled:opacity-60"
+                style={{ animationDelay: `${(3 - i) * 40}ms` }}
+              >
+                <span aria-hidden className={`material-symbols-outlined text-[24px] text-navy ${it.key === 'here' && locating ? 'animate-spin motion-reduce:animate-none' : ''}`}>
+                  {it.icon}
+                </span>
+              </button>
+            ))}
           </div>
         ) : null}
         {/* Your avatar on the map (owner 2026-10-18): opens People & places (friends, birthdays, businesses). */}
@@ -619,7 +632,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           onClick={() => setMenuOpen((v) => !v)}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
-          aria-label="Map options: go to where I am, calm view, show me around, sound"
+          aria-label={menuOpen ? t('map.menu.close') : t('map.menu.open')}
           className="grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] transition-colors hover:bg-background"
         >
           <span aria-hidden className="material-symbols-outlined text-[26px] text-navy">

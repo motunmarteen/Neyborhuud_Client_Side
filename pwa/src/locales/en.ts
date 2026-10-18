@@ -513,6 +513,18 @@ const en: Record<string, string> = {
     // Map card buttons (2026-10-18)
     'map.invite': 'Invite neighbours',
     'map.addEstate': 'Add my estate',
+
+    // Map option buttons (2026-10-18)
+    'map.menu.title': 'Map options',
+    'map.menu.open': 'Map options',
+    'map.menu.close': 'Close map options',
+    'map.menu.here': 'Go to where I am',
+    'map.menu.finding': 'Finding you…',
+    'map.menu.calm': 'Calm view',
+    'map.menu.live': 'Live view',
+    'map.menu.tour': 'Show me around',
+    'map.menu.soundOn': 'Sound on',
+    'map.menu.soundOff': 'Sound off',
 };
 
 export default en;
