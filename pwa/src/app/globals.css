@@ -533,8 +533,10 @@ main.feed-scroll-main,
 :has(> [data-topnav-host]) > .flex-1.overflow-hidden main.overflow-y-auto,
 :has(> [data-topnav-host]) > .relative.flex.flex-1.overflow-hidden main.overflow-y-auto,
 :has(> [data-topnav-host]) > .flex.flex-1.overflow-hidden > .flex-1.overflow-y-auto {
-  padding-top: var(--app-topnav-offset);
-  scroll-padding-top: var(--app-topnav-offset);
+  /* The top bar sits below the notch (sticky top = safe-top + 0.5rem) but only its own height
+     is kept free above the content, so add the notch here too (owner, iPhone, 2026-10-18). */
+  padding-top: calc(var(--app-topnav-offset) + var(--safe-top));
+  scroll-padding-top: calc(var(--app-topnav-offset) + var(--safe-top));
 }
 
 /* Non-scroll chrome below fixed TopNav (explore search bar, friendship tabs, etc.) */
@@ -543,7 +545,7 @@ main.feed-scroll-main,
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding-top: var(--app-topnav-offset);
+  padding-top: calc(var(--app-topnav-offset) + var(--safe-top));
 }
 
 .app-chrome-below-topnav [data-app-scroll-root],
