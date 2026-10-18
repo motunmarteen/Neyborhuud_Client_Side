@@ -5,16 +5,16 @@ type AppRouter = {
 
 /** Route fallbacks when there is no browser history to pop. */
 const PREFIX_FALLBACKS: Array<[prefix: string, href: string]> = [
-  ['/settings', '/feed'],
-  ['/profile', '/feed'],
+  ['/settings', '/huud'],
+  ['/profile', '/huud'],
   ['/marketplace', '/marketplace'],
   ['/events', '/events'],
   ['/jobs', '/jobs'],
   ['/services', '/services'],
   ['/messages', '/chat'],
   ['/chat', '/chat'],
-  ['/safety', '/feed'],
-  ['/sos', '/feed'],
+  ['/safety', '/huud'],
+  ['/sos', '/huud'],
   ['/help-request', '/help-request'],
   ['/local-news', '/local-news'],
   ['/gamification', '/huud-economy'],
@@ -22,15 +22,15 @@ const PREFIX_FALLBACKS: Array<[prefix: string, href: string]> = [
   ['/ads/new', '/ads'],
   ['/ads/wall', '/ads'],
   ['/ads/mine', '/ads'],
-  ['/ads', '/feed'],
-  ['/admin', '/feed'],
+  ['/ads', '/huud'],
+  ['/admin', '/huud'],
   ['/incident-reports', '/incident-reports'],
   ['/explore', '/feed'],
-  ['/sentinel', '/feed'],
+  ['/sentinel', '/huud'],
   ['/lost-found', '/feed'],
-  ['/notifications', '/feed'],
-  ['/communities', '/feed'],
-  ['/neighborhood', '/feed'],
+  ['/notifications', '/huud'],
+  ['/communities', '/huud'],
+  ['/neighborhood', '/huud'],
   ['/popular', '/feed'],
   ['/gossip', '/feed'],
   ['/gist', '/feed'],
@@ -42,7 +42,8 @@ export function resolveBackFallback(pathname: string): string {
       return href;
     }
   }
-  return '/feed';
+  // Home is the map (owner 2026-10-18).
+  return '/huud';
 }
 
 export function canPopHistory(): boolean {

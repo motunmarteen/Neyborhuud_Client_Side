@@ -32,7 +32,7 @@ export function getPostSetupRoute(): '/setup-complete' {
     return '/setup-complete';
 }
 
-/** New users always enter the feed — welcome tips show inline on first visit. */
-export function getAppEntryRoute(): '/feed' {
-    return '/feed';
+/** Home is the map, My Huud (owner 2026-10-18). */
+export function getAppEntryRoute(): '/huud' {
+    return '/huud';
 }

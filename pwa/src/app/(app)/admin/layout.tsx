@@ -29,7 +29,7 @@ export default function AdminLayout({
       return;
     }
     if (!hasAdminAccess) {
-      router.replace('/feed');
+      router.replace('/huud');
     }
   }, [isChecking, isAuthenticated, hasAdminAccess, router]);
 

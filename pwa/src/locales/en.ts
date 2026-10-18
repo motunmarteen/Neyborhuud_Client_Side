@@ -509,6 +509,10 @@ const en: Record<string, string> = {
     'duo.hug': 'You and {name} follow each other 🤗',
     'duo.closeWave': 'You and {name} follow each other 👋🏾',
     'duo.makeMine': 'Make my avatar',
+
+    // Map card buttons (2026-10-18)
+    'map.invite': 'Invite neighbours',
+    'map.addEstate': 'Add my estate',
 };
 
 export default en;

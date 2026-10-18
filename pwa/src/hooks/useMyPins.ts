@@ -6,8 +6,9 @@
  *
  *  - 🏠 Your home: the home you registered. Drawn on your own phone only; nothing is sent
  *    or shown to anyone else (other people's homes never appear on the map).
- *  - You are here: the green pin with your initial, at the phone's position. It follows
- *    you while the map is open. The map never asks for location by itself: it starts when
+ *  - You: your avatar's face (or your initial) at the phone's position, following you while
+ *    the map is open; until we know where you are, it stands at your home (owner 2026-10-18:
+ *    "I should also appear as avatar on the map"). The map never asks for location by itself: it starts when
  *    you tap "Me", or straight away if you already allowed location for NeyborHuud.
  */
 
@@ -25,7 +26,7 @@ function pinMarker(html: string, z: string) {
   return el;
 }
 
-export function useMyPins(map: maplibregl.Map | null, { home, name }: { home: LatLng | null; name: string }) {
+export function useMyPins(map: maplibregl.Map | null, { home, name, avatarUrl }: { home: LatLng | null; name: string; avatarUrl?: string }) {
   const [here, setHere] = useState<LatLng | null>(null);
   const watchId = useRef<number | null>(null);
 
@@ -67,16 +68,22 @@ export function useMyPins(map: maplibregl.Map | null, { home, name }: { home: La
   }, [map, home?.lat, home?.lng]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const meMarker = useRef<maplibregl.Marker | null>(null);
+  const at = here ?? home;
+  // A new look (name or avatar) needs a new pin; moving only moves it.
   useEffect(() => {
-    if (!map || !here) return;
+    meMarker.current?.remove();
+    meMarker.current = null;
+  }, [map, name, avatarUrl]);
+  useEffect(() => {
+    if (!map || !at) return;
     if (!meMarker.current) {
-      meMarker.current = new maplibregl.Marker({ element: pinMarker(personPinHtml({ name, me: true }), '3') })
-        .setLngLat([here.lng, here.lat])
+      meMarker.current = new maplibregl.Marker({ element: pinMarker(personPinHtml({ name, me: true, avatarUrl }), '3'), anchor: 'bottom' })
+        .setLngLat([at.lng, at.lat])
         .addTo(map);
     } else {
-      meMarker.current.setLngLat([here.lng, here.lat]);
+      meMarker.current.setLngLat([at.lng, at.lat]);
     }
-  }, [map, here, name]);
+  }, [map, at?.lat, at?.lng, name, avatarUrl]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(
     () => () => {
       meMarker.current?.remove();

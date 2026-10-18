@@ -170,7 +170,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
                 <div className="flex flex-col h-full px-4 py-4">
                     {/* Header with close button */}
                     <div className="flex items-center justify-between mb-6">
-                        <Link href="/feed" className="flex items-center gap-3" onClick={handleNavClick}>
+                        <Link href="/huud" className="flex items-center gap-3" onClick={handleNavClick}>
                             <NeyborHuudLogo layout="wordmark" size="md" tone="primary" />
                         </Link>
                         <button
@@ -254,7 +254,7 @@ export function Sidebar({ onCreatePost, isMobileOpen = false, onMobileClose }: S
         >
             {/* Logo & Toggle */}
             <div className="flex items-center justify-between h-14 px-3 mb-1">
-                <Link href="/feed" className={`flex items-center rounded-full transition-colors hover:bg-brand-surface  ${isCollapsed ? 'h-12 w-12 justify-center' : 'px-1'}`}>
+                <Link href="/huud" className={`flex items-center rounded-full transition-colors hover:bg-brand-surface  ${isCollapsed ? 'h-12 w-12 justify-center' : 'px-1'}`}>
                     {isCollapsed ? (
                         <span className="font-display font-black text-[16px] tracking-tight text-slate-900  select-none">
                             N<span className="text-[#00B82E]">H</span>

@@ -498,6 +498,10 @@ const pcm: Record<string, string> = {
     'duo.hug': 'You and {name} dey follow each other 🤗',
     'duo.closeWave': 'You and {name} dey follow each other 👋🏾',
     'duo.makeMine': 'Make my avatar',
+
+    // Map card buttons (2026-10-18)
+    'map.invite': 'Call neighbours',
+    'map.addEstate': 'Add my estate',
 };
 
 export default pcm;

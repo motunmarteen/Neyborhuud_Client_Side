@@ -416,14 +416,14 @@ function XFeedInner() {
                 <LeftSidebar mode="both" />
             </Suspense>
 
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-white relative">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background relative">
                 {/* Main scroll area — FeedSkyHero takes the whole top of the screen */}
                 <main
                   ref={mainRef}
                   onPointerDown={(e) => {
                     if ((mainRef.current?.scrollTop ?? 0) <= 2) onFeedPull(e);
                   }}
-                  className="feed-scroll-main feed-scroll-main--sky-feed min-h-0 flex-1 overflow-y-auto scroll-smooth bg-white !pt-0 relative"
+                  className="feed-scroll-main feed-scroll-main--sky-feed min-h-0 flex-1 overflow-y-auto scroll-smooth !pt-0 relative"
                   style={{ paddingTop: 0 }}
                 >
                     {/* Floating Island Capsule Nav — Floats directly on top of the Sky Hero */}
@@ -431,12 +431,13 @@ function XFeedInner() {
                       <TopNav />
                     </div>
 
-                    <div className="feed-page-scroll flex flex-col pb-[var(--app-scroll-bottom)] relative bg-white">
+                    <div className="feed-page-scroll flex flex-col pb-[var(--app-scroll-bottom)] relative">
                         <div className="feed-hero-stack shrink-0">
                           {/* Agreed mockup: the same live sky continues at the top of the Feed. */}
                           <FeedSkyBand />
                         </div>
-                        <div className="feed-sky-feed-body flex flex-col gap-3 sm:gap-3.5 pt-3 sm:pt-3.5">
+                        {/* Doodles behind the posts (owner 2026-10-18), so each white card stands out. */}
+                        <div className="feed-sky-feed-body feed-doodle flex flex-col gap-3 sm:gap-3.5 pt-3 sm:pt-3.5">
                             <FeedComposer
                               initial={started ? (currentAuthUser?.firstName || currentAuthUser?.username || 'Y').charAt(0).toUpperCase() : ''}
                               onOpen={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
@@ -584,7 +585,7 @@ function XFeedInner() {
 
                         {/* Posts stream */}
                         {timeline.length > 0 && (
-                        <div className="feed-posts-stream flex flex-col gap-3 px-3 sm:px-4 py-2 pb-6">
+                        <div className="feed-posts-stream flex flex-col gap-4 px-3 sm:px-4 py-2 pb-6">
 
 
                             {timeline.map((item, index) => {

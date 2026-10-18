@@ -166,7 +166,7 @@ function SidebarContent({
       {/* 1. BRAND & CLOSE (Drawer only) */}
       <div className="flex items-center justify-between px-5 pt-5 pb-3">
         <Link
-          href="/feed"
+          href="/huud"
           onClick={onNavigate}
           className="flex items-center gap-2 focus:outline-none"
         >

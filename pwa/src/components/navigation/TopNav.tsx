@@ -147,7 +147,7 @@ export function TopBar({
       >
         {/* Left: logo + area on home, back + title elsewhere */}
         {isHome ? (
-          <Link href="/feed" className="flex min-w-0 shrink-0 flex-col justify-center leading-none focus:outline-none" aria-label="NeyborHuud home">
+          <Link href="/huud" className="flex min-w-0 shrink-0 flex-col justify-center leading-none focus:outline-none" aria-label="NeyborHuud home">
             <AnimatedNeyborHuudLogo tone="primary" />
             {area ? (
               <span suppressHydrationWarning className="mt-0.5 inline-flex min-w-0 items-center gap-1 text-[11.5px] font-extrabold text-brand-green-dark">

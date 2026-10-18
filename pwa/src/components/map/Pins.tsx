@@ -137,7 +137,7 @@ export function personPinHtml({ name, avatarUrl, me = false, champion = false, l
   return (
     `<div class="${cls}" role="img" aria-label="${esc(label ?? personLabel(name, me, champion))}">` +
     (champion ? '<span class="nh-pin__crown" aria-hidden="true">👑</span>' : '') +
-    (avatarUrl && !me ? `<img src="${esc(avatarUrl)}" alt="" draggable="false" />` : `<span aria-hidden="true">${esc(initialsOf(name))}</span>`) +
+    (avatarUrl ? `<img src="${esc(avatarUrl)}" alt="" draggable="false" />` : `<span aria-hidden="true">${esc(initialsOf(name))}</span>`) +
     '</div>'
   );
 }

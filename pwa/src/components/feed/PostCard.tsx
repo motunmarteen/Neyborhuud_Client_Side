@@ -637,7 +637,7 @@ export function PostCard({
   );
 
   return (
-    <Card padding="none" className="w-full overflow-hidden" onClick={handleCardClick}>
+    <Card padding="none" className="w-full overflow-hidden shadow-[0_3px_14px_rgba(29,36,51,0.10)] ring-1 ring-[rgba(29,36,51,0.06)]" onClick={handleCardClick}>
       <article aria-label={`${badge ? badge.label + ' from' : 'Post from'} ${isAnonymous ? 'a neighbour' : name}`}>
         {/* Pinned / reposted line */}
         {post.isPinned || post.repostedBy ? (

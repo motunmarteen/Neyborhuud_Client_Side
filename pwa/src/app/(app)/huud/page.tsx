@@ -203,7 +203,16 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
 
   // Your home (only you see it) and "You are here".
   const home = useMemo(() => (user ? extractUserHomeCoords(user as Parameters<typeof extractUserHomeCoords>[0]) : null), [user]);
-  const { showHere } = useMyPins(map, { home, name: firstName ?? 'You' });
+  const started = useStarted();
+  const { t } = useTranslation();
+  const { data: myAvatar } = useMyAvatar(Boolean(user));
+  const myId = (user as { id?: string; _id?: string } | null)?.id ?? (user as { _id?: string } | null)?._id;
+  const myPortrait =
+    myId && myAvatar?.avatar?.hasPortrait
+      ? avatarPortraitUrl(`/avatar/${myId}/portrait.png?v=${encodeURIComponent(myAvatar.avatar.updatedAt ?? '')}`)
+      : undefined;
+  const [portraitBroken, setPortraitBroken] = useState(false);
+  const { showHere } = useMyPins(map, { home, name: firstName ?? 'You', avatarUrl: portraitBroken ? undefined : myPortrait });
   // Visitors (not signed in, owner 2026-10-17): the map with a welcome card instead of the
   // member card; "Join free" keeps the sharer's invite code from the link.
   const visitor = !user;
@@ -388,14 +397,6 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   const [lensSheetOpen, setLensSheetOpen] = useState(false);
   const [lensItem, setLensItem] = useState<{ it: LensItem; lens: LensKey } | null>(null);
   useMapLenses(user ? map : null, lensChoice.on, (it, lens) => setLensItem({ it, lens }));
-  const started = useStarted();
-  const { t } = useTranslation();
-  const { data: myAvatar } = useMyAvatar(Boolean(user));
-  const myId = (user as { id?: string; _id?: string } | null)?.id ?? (user as { _id?: string } | null)?._id;
-  const myPortrait =
-    myId && myAvatar?.avatar?.hasPortrait
-      ? avatarPortraitUrl(`/avatar/${myId}/portrait.png?v=${encodeURIComponent(myAvatar.avatar.updatedAt ?? '')}`)
-      : undefined;
   const friendsSharing = useFriendsSharing(!!user);
   const pulseLocal = useMemo<PulseLocalItem[]>(() => {
     const out: PulseLocalItem[] = [];
@@ -598,9 +599,9 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             aria-label={t('map.peopleTitle')}
             className="relative mb-2 grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] ring-2 ring-white"
           >
-            {myPortrait ? (
+            {myPortrait && !portraitBroken ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={myPortrait} alt="" className="h-full w-full object-cover" />
+              <img src={myPortrait} alt="" className="h-full w-full object-cover" onError={() => setPortraitBroken(true)} />
             ) : (
               <span aria-hidden className="text-2xl">
                 👥
@@ -721,11 +722,11 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
                 </p>
               ))}
               <div className="mt-1 flex gap-2">
-                <button type="button" onClick={() => void inviteNeighbours()} className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-3 text-sm font-bold text-white">
-                  <span aria-hidden>🙌🏾</span> Invite neighbours
+                <button type="button" onClick={() => void inviteNeighbours()} className="inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-full bg-primary px-3 text-sm font-bold text-white">
+                  {t('map.invite')}
                 </button>
-                <Link href="/communities?create=1" className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-white px-3 text-sm font-bold text-navy">
-                  <span aria-hidden>🏘️</span> Set up my estate
+                <Link href="/communities?create=1" className="inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-line bg-white px-3 text-sm font-bold text-navy">
+                  {t('map.addEstate')}
                 </Link>
               </div>
             </div>
