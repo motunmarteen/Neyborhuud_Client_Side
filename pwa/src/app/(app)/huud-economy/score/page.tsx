@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { levelLabel } from "@/lib/standing";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppBrowseLayout } from "@/components/layout/AppBrowseLayout";
@@ -284,7 +285,7 @@ export default function HuudScorePage() {
                     <StatCard
                       icon="military_tech"
                       label="Level"
-                      value={statsData.level ?? 1}
+                      value={levelLabel(statsData.standing ?? { level: statsData.level })}
                       color="bg-brand-blue/20 text-brand-blue"
                     />
                     <StatCard

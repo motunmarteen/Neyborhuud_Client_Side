@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { rungFor } from "@/lib/standing";
 import Image from "next/image";
 import { LeaderboardEntry } from "@/types/api";
 
@@ -27,10 +28,11 @@ const LEVEL_COLORS = [
 ];
 
 function levelColor(level: number) {
-  if (level >= 30) return LEVEL_COLORS[4];
-  if (level >= 20) return LEVEL_COLORS[3];
-  if (level >= 10) return LEVEL_COLORS[2];
-  if (level >= 5) return LEVEL_COLORS[1];
+  // Phase 7 ladder: 1-6
+  if (level >= 6) return LEVEL_COLORS[4];
+  if (level >= 5) return LEVEL_COLORS[3];
+  if (level >= 4) return LEVEL_COLORS[2];
+  if (level >= 2) return LEVEL_COLORS[1];
   return LEVEL_COLORS[0];
 }
 
@@ -77,7 +79,7 @@ export default function LeaderboardRow({ entry, currentUserId }: Props) {
 
       <div className="flex shrink-0 items-center gap-2">
         <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${levelColor(entry.level)}`}>
-          Lv {entry.level}
+          <span aria-hidden>{rungFor(entry.level).emoji} </span>Lv {entry.level}
         </span>
         <span className="text-sm font-bold tabular-nums" style={{ color: "var(--neu-text)" }}>
           {(entry.points ?? 0).toLocaleString()}

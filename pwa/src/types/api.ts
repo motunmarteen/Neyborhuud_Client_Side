@@ -134,6 +134,8 @@ export interface LocationData {
 
 export interface GamificationData {
   level: number;
+  /** Phase 7 ladder name for the level (server 2026-10-18). */
+  standing?: { level: number; name: string; emoji: string; impact: number };
   points: number;
   trustScore: number;
   badges: Badge[];

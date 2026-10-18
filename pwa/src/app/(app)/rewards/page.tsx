@@ -6,13 +6,15 @@
  * The old page invented a "Bronze IV" level, a VIP tab, "₦500 claimable", rakeback and
  * promo codes that "redeemed" HuudCredit without the server. This page shows the real
  * balance and streak from GET /gamification/stats, the real ways to earn (amounts from the
- * server rules), and says plainly that quests, levels and spending come later (Phase 7).
+ * server rules) and your level on the ⭐ Impact ladder (Phase 7, 2026-10-18).
  */
 
 import Link from 'next/link';
 import { useMyGamificationStats } from '@/hooks/useGamification';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { StandingCard } from '@/components/gamification/StandingCard';
+import type { Standing } from '@/lib/standing';
 
 // Amounts and daily limits the server really pays today (checked against the
 // server's award calls and huudcoin.ledger DAILY_CAPS, 2026-10-16).
@@ -38,6 +40,7 @@ export default function RewardsPage() {
   const { data: stats, isLoading, isError, refetch } = useMyGamificationStats();
   const balance: number | undefined = stats?.totalHuudCoins;
   const streak: number | undefined = stats?.streak;
+  const standing: Standing | undefined = stats?.standing;
 
   return (
     <div className="min-h-screen bg-background pb-[calc(var(--app-bottomnav-h)+1.5rem)] pt-[var(--app-topnav-offset)]">
@@ -67,6 +70,8 @@ export default function RewardsPage() {
             See your history
           </Link>
         </section>
+
+        {standing ? <StandingCard standing={standing} /> : null}
 
         {/* Ways to earn: amounts the server really pays */}
         <section aria-labelledby="earn-heading" className="flex flex-col gap-2">
@@ -113,7 +118,7 @@ export default function RewardsPage() {
         <section className="flex flex-col gap-1 rounded-[22px] bg-amber-soft p-4">
           <h2 className="font-heading text-base font-extrabold text-navy">Coming soon</h2>
           <p className="text-sm text-navy">
-            Weekly quests, levels, Area Champion, and more things to spend HuudCredit on (map skins, shout-outs).
+            Weekly quests, area leaderboards, Area Champion of the Week, and more things to spend HuudCredit on (map skins, shout-outs).
           </p>
         </section>
       </main>

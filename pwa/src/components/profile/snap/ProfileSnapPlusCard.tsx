@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { levelLabel } from '@/lib/standing';
 
 type ProfileSnapPlusCardProps = {
   username: string;
@@ -8,6 +9,7 @@ type ProfileSnapPlusCardProps = {
   trustScore: number;
   trustLabel: string;
   level: number;
+  levelName?: { level: number; name: string; emoji: string };
 };
 
 export function ProfileSnapPlusCard({
@@ -16,6 +18,7 @@ export function ProfileSnapPlusCard({
   trustScore,
   trustLabel,
   level,
+  levelName,
 }: ProfileSnapPlusCardProps) {
   const href = isOwnProfile ? '/huud-economy' : `/profile/${username}?tab=trust`;
   const eyebrow = isOwnProfile ? 'My Huud Score' : 'Huud Score';
@@ -38,7 +41,7 @@ export function ProfileSnapPlusCard({
             {title}
           </p>
           <p className="text-xs font-semibold text-gray-400 mt-1">
-            Level {level} · {trustLabel} · Score {trustScore}
+            {levelLabel(levelName ?? { level })} · {trustLabel} · Score {trustScore}
           </p>
         </div>
         <span className="material-symbols-outlined shrink-0 text-gray-400">chevron_right</span>

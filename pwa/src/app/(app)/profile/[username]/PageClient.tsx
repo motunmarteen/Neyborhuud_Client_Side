@@ -866,6 +866,7 @@ export default function ProfilePage() {
           trustScore={trustScore}
           trustLabel={profileTrustTier.label}
           level={level}
+          levelName={profile.gamification?.standing}
         />
 
         <ProfileSnapHub

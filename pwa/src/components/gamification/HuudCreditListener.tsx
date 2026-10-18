@@ -14,6 +14,7 @@ import socketService from '@/lib/socket';
 import { nhToast } from '@/lib/toast';
 import { emitCoinsUpdated } from '@/lib/gamification-events';
 import { useAuth } from '@/hooks/useAuth';
+import type { Standing } from '@/lib/standing';
 
 type EarnedEvent = {
   amount: number;
@@ -50,6 +51,8 @@ const REASONS: Record<string, string> = {
   email_verified: 'Email verified',
   complete_profile: 'Profile complete',
   sign_up: 'Welcome to NeyborHuud',
+  report_confirmed: 'You confirmed a true report',
+  incident_confirmed: 'Neighbours confirmed your report',
 };
 
 export function HuudCreditListener() {
@@ -67,11 +70,19 @@ export function HuudCreditListener() {
       if (SHOWN_ELSEWHERE.has(e.action)) return;
       nhToast.reward({ coins: e.amount, reason: REASONS[e.action] ?? e.description ?? 'Thank you' });
     };
+    // Phase 7: moving up the ⭐ Impact ladder gets its own card.
+    const onLevelUp = (s: Standing) => {
+      if (!s || !s.name) return;
+      void queryClient.invalidateQueries({ queryKey: ['gamification', 'stats'] });
+      nhToast.thanks({ emoji: s.emoji, title: `You are now a ${s.name}`, sub: `Level ${s.level} · ${s.unlock}`, duration: 7000 });
+    };
     const socket = socketService.connect() ?? socketService.getSocket();
     if (!socket) return;
     socket.on('huudcredit:earned', onEarned);
+    socket.on('impact:level_up', onLevelUp);
     return () => {
       socket.off('huudcredit:earned', onEarned);
+      socket.off('impact:level_up', onLevelUp);
     };
   }, [user?.id, queryClient]);
 

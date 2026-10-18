@@ -1,5 +1,6 @@
 'use client';
 
+import { levelLabel, type Standing } from '@/lib/standing';
 import Link from 'next/link';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import {
@@ -117,7 +118,7 @@ export default function HuudEconomyOverviewPage() {
           <PreviewStat
             icon="military_tech"
             label="Level"
-            value={String(statsData?.level ?? 1)}
+            value={levelLabel((statsData as { standing?: Standing } | undefined)?.standing ?? { level: Number(statsData?.level ?? 1) })}
             href="/huud-economy/score"
           />
           <PreviewStat

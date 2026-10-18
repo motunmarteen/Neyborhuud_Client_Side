@@ -376,7 +376,7 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 ## Phase 7: Gamification backend
 
-**Waiting on your go-ahead.** It changes how real users earn. See GAMIFICATION-REVIEW.md.
+**Go-ahead given 2026-10-18.** See GAMIFICATION-REVIEW.md. Level powers apply to new accounts only; existing members keep the access they have.
 
 **2026-10-16 audit and bug fixes (no change to what anyone earns):**
 - [x] Fixed, tested and **deployed 2026-10-16** (server 01e76c2, app 23ce041; today's check-in limit reset for the 2 people the old login bonus had blocked):
@@ -393,8 +393,8 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
   - **Emergency reports pay on confirmation (owner, 2026-10-16):** 15 HC once neighbours confirm (3 "I'm nearby" or 5 confirms), not for posting; paid once per report; the reporter can't confirm or vote on their own post.
 - Owner (2026-10-16): levels keep showing until the Phase 7 ladder replaces them.
 
-- [ ] G-01 Separate **Impact** from HuudCredit in the database and API
-- [ ] G-02 6-level ladder (New Neighbour → Huud Elder) with unlocks; migrate existing users (nobody goes down; Legacy marks)
+- [x] G-01 (server 3113da2, deployed 2026-10-18) Separate **Impact** from HuudCredit in the database and API: impact_events ledger, once per action, with the area for leaderboards
+- [x] G-02 (server 3113da2) 6-level ladder (New Neighbour → Huud Elder) with unlocks; migrated on production 2026-10-18: 58 users, 24 kept a higher level floor, 6 got Impact from past deals/help/returns/invites; nobody went down
 - [ ] G-03 New earning table; **pay on confirmation** (safety reports, help, light updates)
 - [ ] G-04 Remove coins for likes, follows and raw posts and comments
 - [ ] G-05 Referral pays when the friend becomes active (first verified action), not at signup
