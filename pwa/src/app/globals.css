@@ -9714,3 +9714,11 @@ html[data-calm] .nh-area-pulse__dot { animation: none !important; opacity: 0.45;
 /* Joining on the map: the floating ⋯ and SOS buttons step aside for the tall sheet. */
 html[data-joining] [data-float-sos],
 html[data-joining] [data-map-menu] { display: none; }
+
+/* Map lenses (friends, birthdays, businesses): a pin with a small name tag. */
+.nh-lens { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; z-index: 3 !important; }
+.nh-lens:focus-visible { outline: 3px solid #00B82E; outline-offset: 2px; border-radius: 12px; }
+.nh-lens__tag { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 999px; background: #FFFFFF; padding: 1px 8px; font-size: 11px; font-weight: 800; color: #1D2433; box-shadow: 0 2px 6px rgba(29, 36, 51, 0.18); }
+.nh-lens--birthdays .nh-lens__tag { background: #FFF0F6; }
+.nh-lens__badge { position: absolute; top: -8px; right: -10px; font-size: 18px; line-height: 1; }
+.nh-lens--birthdays { position: relative; }

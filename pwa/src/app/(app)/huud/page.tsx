@@ -45,6 +45,8 @@ import { ChampionSheet } from '@/components/map/ChampionSheet';
 import { useHuudWeek } from '@/hooks/useQuests';
 import { useShop } from '@/hooks/usePhase7';
 import { MapSkinOverlay } from '@/components/map/MapSkinOverlay';
+import { useFriendsSharing, useLensChoice, useMapLenses, type LensItem, type LensKey } from '@/hooks/useMapLenses';
+import { LensItemSheet, MapLensSheet } from '@/components/map/MapLensSheet';
 import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
 import { VisitorWelcome } from '@/components/map/VisitorWelcome';
@@ -365,6 +367,12 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   // Huud of the Week shows in the Pulse ribbon (GAMIFICATION-REVIEW, G-08). Members only.
   const { data: huudWeek } = useHuudWeek(!!user);
   const { data: shopData } = useShop(!!user);
+  // Map lenses (owner 2026-10-18): friends, birthdays, businesses, one tap each, never crowded.
+  const lensChoice = useLensChoice();
+  const [lensSheetOpen, setLensSheetOpen] = useState(false);
+  const [lensItem, setLensItem] = useState<{ it: LensItem; lens: LensKey } | null>(null);
+  useMapLenses(user ? map : null, lensChoice.on, (it, lens) => setLensItem({ it, lens }));
+  const friendsSharing = useFriendsSharing(!!user);
   const pulseLocal = useMemo<PulseLocalItem[]>(() => {
     const out: PulseLocalItem[] = [];
     if (weatherWords) out.push({ text: `${weatherWords.icon} ${weatherWords.label} now${areaLga ? ` in ${areaLga}` : ''}` });
@@ -497,7 +505,13 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       {/* Under the top bar: layer chips, then the ⚡ PULSE ribbon (news + exchange rates). */}
       <div className="pointer-events-none absolute inset-x-0 top-[calc(var(--app-topnav-height)+var(--safe-top,0px)+0.25rem)] z-10 flex flex-col gap-2 px-3">
         <div className="pointer-events-auto mx-auto w-full max-w-xl" data-tour="chips">
-          <MapLayerChips active={layers} onChange={setLayers} counts={counts} />
+          <MapLayerChips
+            active={layers}
+            onChange={setLayers}
+            counts={counts}
+            onMore={user ? () => setLensSheetOpen(true) : undefined}
+            moreOn={lensChoice.on.length}
+          />
         </div>
         <div className="nh-map-pulse pointer-events-auto mx-auto w-full max-w-xl overflow-hidden rounded-full shadow-[0_4px_14px_rgba(29,36,51,0.16)]">
           <FeedNewsTicker local={pulseLocal} onOpen={() => setPulseOpen(true)} />
@@ -710,6 +724,15 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       )}
 
       <PinPanel pin={pin} onClose={() => setPin(null)} />
+      <MapLensSheet
+        open={lensSheetOpen}
+        onClose={() => setLensSheetOpen(false)}
+        on={lensChoice.on}
+        onToggle={lensChoice.toggle}
+        sharing={friendsSharing.on}
+        onSharing={(v) => void friendsSharing.setOn(v)}
+      />
+      <LensItemSheet item={lensItem} onClose={() => setLensItem(null)} />
       <ChampionSheet
         champion={champion}
         onClose={() => setChampion(null)}
