@@ -420,7 +420,8 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 - [x] AV-02 Start from a selfie: skin tone matched on the phone (photo never uploaded)
 - [x] AV-03 Premium avatar items bought with HuudCredit (server prices), try on before buying
 - [x] AV-04 Avatar portrait on profiles and on friends' map pins
-- [ ] AV-05 Poses and selfie stickers; an artist's 3D models to replace the shapes
+- [x] AV-05 (2026-10-18) 10 poses (wave, thumbs up, peace, hips, shrug, point, please, strong, dance) and 14 Naija stickers (How far?, Abeg!, E don do!, Light don come!…): share, save, or send in chat (➕ → Sticker)
+- [ ] AV-06 An artist's 3D models to replace the toy shapes (when the owner hires one)
 - [x] ML-01 Map lenses: More on the map (Friends, Birthdays today, Businesses), max 2 at once, 25 per lens
 - [x] ML-02 Show me to friends: mutual follows only, ~220 m, only while the app is open, off by default; strangers never shown
 

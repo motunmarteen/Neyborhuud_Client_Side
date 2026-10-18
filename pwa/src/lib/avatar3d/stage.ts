@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { buildAvatar, disposeAvatar, type AvatarConfig, type BuiltAvatar, type ColorOf } from './build';
+import { buildAvatar, disposeAvatar, poseAvatar, type AvatarConfig, type BuiltAvatar, type ColorOf, type PoseId } from './build';
 
 function lights(scene: THREE.Scene) {
   scene.add(new THREE.HemisphereLight(0xfff6e8, 0x9cc9a2, 1.4));
@@ -15,6 +15,7 @@ function lights(scene: THREE.Scene) {
 
 export type Stage = {
   setAvatar: (cfg: AvatarConfig) => void;
+  setPose: (pose: PoseId) => void;
   dispose: () => void;
 };
 
@@ -34,6 +35,7 @@ export function createStage(canvas: HTMLCanvasElement, color: ColorOf, opts: { s
   camera.lookAt(0, 1.22, 0);
 
   let built: BuiltAvatar | null = null;
+  let pose: PoseId = 'idle';
   let yaw = 0.35;
   let dragging = false;
   let lastX = 0;
@@ -75,10 +77,12 @@ export function createStage(canvas: HTMLCanvasElement, color: ColorOf, opts: { s
     if (built) {
       const t = (now - t0) / 1000;
       built.root.rotation.y = yaw + (opts.still || dragging ? 0 : Math.sin(t * 0.4) * 0.12);
+      poseAvatar(built, pose, opts.still ? 0.3 : t);
       if (!opts.still) {
         built.chest.scale.y = 1 + Math.sin(t * 2) * 0.012;
         built.head.rotation.y = Math.sin(t * 0.7) * 0.08;
-        built.head.position.y = Math.sin(t * 2) * 0.006;
+        built.head.position.y += Math.sin(t * 2) * 0.006 - (built.head.userData.lastBob ?? 0);
+        built.head.userData.lastBob = Math.sin(t * 2) * 0.006;
         const blinking = now > nextBlink && now < nextBlink + 130;
         for (const e of built.eyes) e.scale.y = blinking ? 0.1 : 1;
         if (now > nextBlink + 130) nextBlink = now + 2500 + Math.random() * 2500;
@@ -97,6 +101,9 @@ export function createStage(canvas: HTMLCanvasElement, color: ColorOf, opts: { s
       built = buildAvatar(cfg, color);
       scene.add(built.root);
     },
+    setPose(p) {
+      pose = p;
+    },
     dispose() {
       cancelAnimationFrame(raf);
       ro.disconnect();
@@ -111,7 +118,7 @@ export function createStage(canvas: HTMLCanvasElement, color: ColorOf, opts: { s
 }
 
 /** A 256×256 PNG of the head and shoulders on a soft round background (for map pins and profiles). */
-export function renderPortrait(cfg: AvatarConfig, color: ColorOf, size = 256): string {
+export function renderPortrait(cfg: AvatarConfig, color: ColorOf, size = 256, pose: PoseId = 'idle'): string {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -124,12 +131,76 @@ export function renderPortrait(cfg: AvatarConfig, color: ColorOf, size = 256): s
   scene.add(disc);
   const built = buildAvatar(cfg, color);
   built.root.rotation.y = 0.25;
+  poseAvatar(built, pose, 0.3);
   scene.add(built.root);
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 20);
   camera.position.set(0, 1.78, 3.3);
   camera.lookAt(0, 1.62, 0);
   renderer.render(scene, camera);
   const url = canvas.toDataURL('image/png');
+  disposeAvatar(built.root);
+  renderer.dispose();
+  return url;
+}
+
+/**
+ * A sticker: the avatar in a pose (head to knees) with a bold caption, 512×512 PNG with a
+ * transparent background, ready to share or send in a chat.
+ */
+export function renderSticker(cfg: AvatarConfig, color: ColorOf, pose: PoseId, caption: string, size = 512): string {
+  const gl = document.createElement('canvas');
+  gl.width = gl.height = size;
+  const renderer = new THREE.WebGLRenderer({ canvas: gl, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setSize(size, size, false);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene();
+  lights(scene);
+  const built = buildAvatar(cfg, color);
+  built.root.rotation.y = 0.2;
+  poseAvatar(built, pose, 0.35);
+  scene.add(built.root);
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 20);
+  camera.position.set(0, 1.5, 4.1);
+  camera.lookAt(0, 1.38, 0);
+  renderer.render(scene, camera);
+
+  // Compose: soft white outline around the figure, then the caption on a ribbon.
+  const out = document.createElement('canvas');
+  out.width = out.height = size;
+  const g = out.getContext('2d')!;
+  g.filter = 'drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 2px #ffffff) drop-shadow(0 4px 10px rgba(29,36,51,0.25))';
+  g.drawImage(gl, 0, -size * 0.04);
+  g.filter = 'none';
+  if (caption) {
+    const font = getComputedStyle(document.body).fontFamily || 'sans-serif';
+    let fs = size * 0.11;
+    g.font = `900 ${fs}px ${font}`;
+    while (g.measureText(caption).width > size * 0.86 && fs > size * 0.06) {
+      fs -= 2;
+      g.font = `900 ${fs}px ${font}`;
+    }
+    const w = g.measureText(caption).width + size * 0.08;
+    const h = fs * 1.45;
+    const x = (size - w) / 2;
+    const y = size - h - size * 0.03;
+    g.save();
+    g.translate(size / 2, y + h / 2);
+    g.rotate(-0.05);
+    g.translate(-size / 2, -(y + h / 2));
+    g.fillStyle = '#00B82E';
+    g.strokeStyle = '#FFFFFF';
+    g.lineWidth = size * 0.014;
+    g.beginPath();
+    g.roundRect(x, y, w, h, h / 2);
+    g.fill();
+    g.stroke();
+    g.fillStyle = '#FFFFFF';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText(caption, size / 2, y + h / 2 + fs * 0.04);
+    g.restore();
+  }
+  const url = out.toDataURL('image/png');
   disposeAvatar(built.root);
   renderer.dispose();
   return url;

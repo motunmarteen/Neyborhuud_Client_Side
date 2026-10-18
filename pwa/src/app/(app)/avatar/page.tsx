@@ -14,6 +14,8 @@ import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-handler';
 import { createStage, renderPortrait, type Stage } from '@/lib/avatar3d/stage';
 import { skinToneFromSelfie } from '@/lib/avatar3d/selfie';
+import { POSES, type PoseId } from '@/lib/avatar3d/build';
+import { StickerPicker, stickerFile } from '@/components/avatar/StickerPicker';
 import { useAvatarCatalogue, useBuyAvatarItem, useMyAvatar, useSaveAvatar, type AvatarConfig, type AvatarItem } from '@/hooks/useAvatar';
 
 const TABS: { key: string; label: string; slots: { slot: string; label: string }[] }[] = [
@@ -51,6 +53,7 @@ export default function AvatarStudioPage() {
   const buy = useBuyAvatarItem();
   const [cfg, setCfg] = useState<AvatarConfig | null>(null);
   const [tab, setTab] = useState('body');
+  const [pose, setPose] = useState<PoseId>('idle');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stageRef = useRef<Stage | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -78,6 +81,26 @@ export default function AvatarStudioPage() {
   useEffect(() => {
     if (cfg) stageRef.current?.setAvatar(cfg);
   }, [cfg]);
+  useEffect(() => {
+    stageRef.current?.setPose(pose);
+  }, [pose, cat]);
+
+  const shareSticker = async (url: string, caption: string) => {
+    const file = await stickerFile(url, caption);
+    try {
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: caption });
+        return;
+      }
+    } catch {
+      return; // closed the share sheet
+    }
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    a.click();
+    toast.success('Sticker saved');
+  };
 
   const unowned = useMemo(
     () => (cfg ? Object.values(cfg).map((id) => byId.get(id)).filter((i): i is AvatarItem => !!i && i.price > 0 && !owned.has(i.id)) : []),
@@ -133,6 +156,21 @@ export default function AvatarStudioPage() {
             <input ref={fileRef} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => void onSelfie(e.target.files?.[0])} />
           </div>
           <p className="absolute bottom-2 left-0 right-0 text-center text-[11px] font-bold text-navy/60">Drag to turn · your selfie stays on your phone</p>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]" role="group" aria-label="Poses">
+          {POSES.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              aria-pressed={pose === p.id}
+              onClick={() => setPose(p.id)}
+              className={`inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-bold ${pose === p.id ? 'bg-navy text-white' : 'bg-white text-navy shadow-sm'}`}
+            >
+              <span aria-hidden>{p.emoji}</span>
+              {p.label}
+            </button>
+          ))}
         </div>
 
         <div role="tablist" aria-label="Avatar parts" className="flex gap-1 overflow-x-auto rounded-full bg-white p-1 shadow-[0_2px_10px_rgba(29,36,51,0.06)] [scrollbar-width:none]">
@@ -227,6 +265,18 @@ export default function AvatarStudioPage() {
         >
           {save.isPending ? 'Saving…' : 'Save my avatar'}
         </button>
+        {mine?.avatar ? (
+          <section aria-labelledby="stickers-h" className="flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
+            <h2 id="stickers-h" className="px-1 text-sm font-extrabold text-navy">
+              My stickers
+            </h2>
+            <p className="px-1 text-xs font-semibold text-muted">
+              Tap one to share it (WhatsApp, Instagram…) or save it. In a chat, tap ➕ then Sticker. They use your saved look.
+            </p>
+            <StickerPicker onPick={(url, caption) => void shareSticker(url, caption)} />
+          </section>
+        ) : null}
+
         <p className="text-center text-xs font-semibold text-muted">
           Friends who follow you back see your avatar on the map when you choose “Show me to friends”.{' '}
           <Link href="/huud" className="font-bold text-brand-green-dark">

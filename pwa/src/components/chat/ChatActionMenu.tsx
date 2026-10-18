@@ -21,6 +21,7 @@ import { useBottomSheetDrag } from '@/hooks/useBottomSheetDrag';
 import { toast } from '@/lib/toast';
 import { ChatMessage, ChatMessageMeta, ChatMessageType } from '@/types/api';
 import VoiceRecorder from './VoiceRecorder';
+import { StickerPicker, stickerFile } from '@/components/avatar/StickerPicker';
 import { getGeolocation } from '@/lib/nativeGeolocation';
 import { useAuth } from '@/hooks/useAuth';
 import { useSearch } from '@/hooks/useSearch';
@@ -720,7 +721,7 @@ function EmergencyShareModal({ onDone, onClose }: { onDone: (r: ActionResult) =>
 type ActiveModal =
   | 'location' | 'poll' | 'contact' | 'contact_share' | 'sos' | 'tracking' | 'kidnapping_info'
   | 'event' | 'marketplace' | 'product_share' | 'event_share' | 'job_share' | 'post_share'
-  | 'trip_share' | 'emergency_share' | 'voice' | null;
+  | 'trip_share' | 'emergency_share' | 'voice' | 'sticker' | null;
 
 // Media row: gallery picks (image/video/audio/document) plus a distinct
 // Camera tile. Camera and Image/Video both go through the SAME hidden file
@@ -753,6 +754,7 @@ const MEDIA_ACTIONS: {
 // context" safety/location tiles below, mirroring how Telegram/WhatsApp
 // separate "people & content" shares from location/safety-flavored actions.
 const SHARE_ACTIONS: { key: ActiveModal & string; label: string; icon: string; color: string }[] = [
+  { key: 'sticker',       label: 'Sticker',     icon: '🧍🏾', color: 'bg-primary' },
   { key: 'contact_share', label: 'Contact',     icon: '👤', color: 'bg-brand-blue' },
   { key: 'product_share', label: 'Listing',     icon: '🛍️', color: 'bg-primary' },
   { key: 'event_share',   label: 'Event',       icon: '📅', color: 'bg-brand-blue' },
@@ -882,6 +884,16 @@ const ChatActionMenu = forwardRef<ChatActionMenuHandle, Props>(function ChatActi
       {activeModal === 'tracking'        && <TrackingModal      onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
       {activeModal === 'kidnapping_info' && <KidnappingModal    onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
       {activeModal === 'voice'           && <VoiceRecorder      onDone={handleModalDone} onClose={() => setActiveModal(null)} />}
+      {activeModal === 'sticker' && (
+        <Modal title="Your avatar stickers" onClose={() => setActiveModal(null)}>
+          <StickerPicker
+            onPick={async (url, caption) => {
+              const file = await stickerFile(url, caption);
+              handleModalDone({ type: 'image', content: '', mediaFile: file, meta: { sticker: true, caption } as ChatMessageMeta });
+            }}
+          />
+        </Modal>
+      )}
 
       <div className="relative">
         <button

@@ -431,7 +431,15 @@ function limb(r: number, len: number, m: THREE.Material, outline = true): THREE.
   return part(new THREE.CapsuleGeometry(r, len, 6, 12), m, outline);
 }
 
-function buildBody(cfg: AvatarConfig, color: ColorOf): { body: THREE.Group; chest: THREE.Object3D } {
+export type ArmRig = {
+  side: -1 | 1;
+  shoulder: THREE.Group;
+  elbow: THREE.Group;
+  hand: THREE.Group;
+  fingers: { thumb: THREE.Object3D; index: THREE.Object3D; middle: THREE.Object3D };
+};
+
+function buildBody(cfg: AvatarConfig, color: ColorOf): { body: THREE.Group; chest: THREE.Object3D; arms: ArmRig[] } {
   const g = new THREE.Group();
   const skin = color(cfg.skin, '#8D5E42');
   const skinM = mat(skin);
@@ -543,25 +551,48 @@ function buildBody(cfg: AvatarConfig, color: ColorOf): { body: THREE.Group; ches
 
   // Arms: sleeves in the top's material, hands in skin.
   const longSleeve = ['top_shirt', 'top_kaftan', 'top_hoodie', 'top_senator', 'top_agbada', 'top_lace'].includes(top);
+  // Each arm: shoulder joint → upper arm → elbow joint → forearm → hand (with fingers shown
+  // only for gestures). Poses turn the two joints.
+  const arms: ArmRig[] = [];
   for (const s of [-1, 1]) {
-    const arm = new THREE.Group();
-    arm.position.set(s * (b.torsoW + b.armR * 0.6), SHOULDER_Y - 0.06, 0);
-    arm.rotation.z = s * 0.14;
+    const shoulder = new THREE.Group();
+    shoulder.position.set(s * (b.torsoW + b.armR * 0.6), SHOULDER_Y - 0.06, 0);
+    shoulder.rotation.z = s * 0.14;
     const upper = limb(b.armR, 0.22, top === 'top_agbada' ? topM : longSleeve || top !== 'top_blouse' ? topM : skinM);
     upper.position.y = -0.16;
-    arm.add(upper);
+    shoulder.add(upper);
+    const elbow = new THREE.Group();
+    elbow.position.y = -0.31;
+    shoulder.add(elbow);
     const fore = limb(b.armR * 0.9, 0.2, longSleeve ? topM : skinM);
-    fore.position.y = -0.42;
-    arm.add(fore);
-    arm.add(at(part(new THREE.SphereGeometry(b.armR * 1.15, 14, 10), skinM), 0, -0.6, 0.01));
+    fore.position.y = -0.11;
+    elbow.add(fore);
+    const hand = new THREE.Group();
+    hand.position.set(0, -0.29, 0.01);
+    hand.add(part(new THREE.SphereGeometry(b.armR * 1.15, 14, 10), skinM));
+    elbow.add(hand);
+    const finger = (x: number, rz: number, rx = 0) => {
+      const f = part(new THREE.CapsuleGeometry(b.armR * 0.32, b.armR * 1.1, 4, 8), skinM, false);
+      f.position.set(x, -b.armR * 1.2, 0);
+      f.rotation.set(rx, 0, rz);
+      f.visible = false;
+      hand.add(f);
+      return f;
+    };
+    const fingers = {
+      thumb: finger(0, 0, Math.PI),
+      index: finger(-b.armR * 0.35, 0.18),
+      middle: finger(b.armR * 0.35, -0.18),
+    };
     if (top === 'top_agbada') {
       // The wide flowing sleeves.
       const wing = part(new THREE.BoxGeometry(0.34, 0.62, 0.05), topM);
       wing.position.set(s * 0.12, -0.32, 0);
       wing.rotation.z = s * 0.12;
-      arm.add(wing);
+      shoulder.add(wing);
     }
-    g.add(arm);
+    g.add(shoulder);
+    arms.push({ side: s as -1 | 1, shoulder, elbow, hand, fingers });
   }
 
   // Neckwear
@@ -578,7 +609,7 @@ function buildBody(cfg: AvatarConfig, color: ColorOf): { body: THREE.Group; ches
     g.add(at(new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 8), mat('#D4A017', { emissive: '#4A3500' })), 0, SHOULDER_Y - 0.17, b.torsoW * 0.72));
   }
 
-  return { body: g, chest: torso };
+  return { body: g, chest: torso, arms };
 }
 
 function buildGlasses(cfg: AvatarConfig): THREE.Group {
@@ -601,7 +632,7 @@ function buildGlasses(cfg: AvatarConfig): THREE.Group {
   return g;
 }
 
-export type BuiltAvatar = { root: THREE.Group; eyes: THREE.Object3D[]; chest: THREE.Object3D; head: THREE.Group };
+export type BuiltAvatar = { root: THREE.Group; eyes: THREE.Object3D[]; chest: THREE.Object3D; head: THREE.Group; arms: ArmRig[] };
 
 /** The whole figure for a config. `color` turns item ids into colours (from the catalogue). */
 export function buildAvatar(cfg: AvatarConfig, color: ColorOf): BuiltAvatar {
@@ -609,7 +640,7 @@ export function buildAvatar(cfg: AvatarConfig, color: ColorOf): BuiltAvatar {
   const skin = color(cfg.skin, '#8D5E42');
   const hairCol = color(cfg.hairColor, '#15110F');
   const topCol = color(cfg.topColor, '#0E8A3E');
-  const { body, chest } = buildBody(cfg, color);
+  const { body, chest, arms } = buildBody(cfg, color);
   root.add(body);
   const headGroup = new THREE.Group();
   const { head, eyes } = buildHead(cfg, skin, hairCol);
@@ -628,7 +659,7 @@ export function buildAvatar(cfg: AvatarConfig, color: ColorOf): BuiltAvatar {
   headGroup.add(buildHeadwear(cfg, topCol));
   headGroup.add(buildGlasses(cfg));
   root.add(headGroup);
-  return { root, eyes, chest, head: headGroup };
+  return { root, eyes, chest, head: headGroup, arms };
 }
 
 /** Free GPU memory for a figure that is no longer shown (shared textures are kept). */
@@ -639,4 +670,68 @@ export function disposeAvatar(root: THREE.Object3D) {
     const mats = Array.isArray(m.material) ? m.material : m.material ? [m.material] : [];
     for (const x of mats) if (x !== OUTLINE) x.dispose();
   });
+}
+
+// ── Poses (for the studio, stickers and later the map) ─────────────────────
+
+export type PoseId = 'idle' | 'wave' | 'thumbs' | 'peace' | 'hips' | 'shrug' | 'point' | 'dance' | 'pray' | 'flex';
+export const POSES: { id: PoseId; label: string; emoji: string }[] = [
+  { id: 'idle', label: 'Relax', emoji: '🧍🏾' },
+  { id: 'wave', label: 'Wave', emoji: '👋🏾' },
+  { id: 'thumbs', label: 'Thumbs up', emoji: '👍🏾' },
+  { id: 'peace', label: 'Peace', emoji: '✌🏾' },
+  { id: 'hips', label: 'Hands on hips', emoji: '💁🏾' },
+  { id: 'shrug', label: 'Shrug', emoji: '🤷🏾' },
+  { id: 'point', label: 'Point', emoji: '👉🏾' },
+  { id: 'pray', label: 'Please', emoji: '🙏🏾' },
+  { id: 'flex', label: 'Strong', emoji: '💪🏾' },
+  { id: 'dance', label: 'Dance', emoji: '💃🏾' },
+];
+
+type Joint = { sx?: number; sz?: number; ex?: number; ez?: number; hand?: 'fist' | 'thumb' | 'peace' | 'point' };
+/** [left-side arm, right-side arm] in screen terms the figure's own left/right. */
+function poseJoints(pose: PoseId, t: number): [Joint, Joint, { bob?: number; tilt?: number; turn?: number }] {
+  const w = Math.sin(t * 6);
+  switch (pose) {
+    case 'wave':
+      return [{}, { sz: 2.5, ez: -0.6 + w * 0.35 }, { tilt: -0.08 }];
+    case 'thumbs':
+      return [{}, { sx: -0.5, ez: 0, ex: -1.5, hand: 'thumb' }, { tilt: 0.05 }];
+    case 'peace':
+      return [{}, { sx: -0.35, sz: 0.55, ex: -2.2, hand: 'peace' }, { tilt: -0.12 }];
+    case 'hips':
+      return [{ sz: 0.75, ez: -1.9 }, { sz: 0.75, ez: -1.9 }, {}];
+    case 'shrug':
+      return [{ sz: 0.35, ex: -1.3 }, { sz: 0.35, ex: -1.3 }, { tilt: 0.15, bob: 0.03 }];
+    case 'point':
+      return [{}, { sx: -1.45, sz: 0.1, hand: 'point' }, { turn: 0.15 }];
+    case 'pray':
+      return [{ sx: -0.55, sz: -0.05, ex: -1.75, ez: -0.65 }, { sx: -0.55, sz: -0.05, ex: -1.75, ez: -0.65 }, { tilt: 0.1 }];
+    case 'flex':
+      return [{ sz: 1.45, ez: 1.9 + w * 0.08 }, { sz: 1.45, ez: 1.9 - w * 0.08 }, {}];
+    case 'dance': {
+      const a = Math.sin(t * 5);
+      return [{ sz: 1.2 + a * 0.9, ez: -0.6 }, { sz: 1.2 - a * 0.9, ez: -0.6 }, { bob: Math.abs(Math.sin(t * 5)) * 0.06, turn: a * 0.25 }];
+    }
+    default:
+      return [{}, {}, {}];
+  }
+}
+
+/** Put the figure in a pose at time t (seconds); call every frame for moving poses. */
+export function poseAvatar(b: BuiltAvatar, pose: PoseId, t = 0) {
+  const [left, right, body] = poseJoints(pose, t);
+  for (const arm of b.arms) {
+    const j = arm.side === 1 ? right : left;
+    const s = arm.side;
+    arm.shoulder.rotation.set(j.sx ?? 0, 0, s * (j.sz ?? 0.14));
+    arm.elbow.rotation.set(j.ex ?? 0, 0, s * (j.ez ?? 0));
+    const h = j.hand ?? 'fist';
+    arm.fingers.thumb.visible = h === 'thumb';
+    arm.fingers.index.visible = h === 'peace' || h === 'point';
+    arm.fingers.middle.visible = h === 'peace';
+  }
+  b.root.position.y = body.bob ?? 0;
+  b.head.rotation.z = body.tilt ?? 0;
+  if (body.turn !== undefined) b.root.rotation.y += body.turn;
 }
