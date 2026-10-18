@@ -352,7 +352,7 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 - [ ] L-04 Chat, marketplace, services, jobs, events wording
 - [ ] L-05 Safety screens: plain and calm (level 1 of the guide)
 - [ ] L-06 Server messages, push notifications, emails and SMS in the same voice
-- [ ] L-07 Move all text into the language system (`lib/i18n.tsx`) so every screen can switch language
+- [ ] 🟡 L-07 Move all text into the language system so every screen can switch language. Done 2026-10-18: system ready (src/locales/<lang>.ts, other languages load on demand, {name} values, singular/plural, English fallback, `npm run i18n:check`); Sentinel tab moved (English + Pidgin). Rule from now: each screen moves its text here while it is restyled (so each screen is touched once)
 - [ ] L-08 Complete Pidgin; then Yoruba, Hausa, Igbo
 - [ ] L-09 Native-speaker review of every translation before release
 

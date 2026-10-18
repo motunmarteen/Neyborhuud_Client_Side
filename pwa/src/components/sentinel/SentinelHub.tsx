@@ -17,53 +17,52 @@ import { fetchMapPins, type MapPin } from '@/lib/mapPins';
 import { extractUserHomeCoords } from '@/lib/mapUserLocation';
 import { useSos } from '@/hooks/useSos';
 import { SentinelOrb } from '@/components/map/Pins';
+import { useTranslation } from '@/lib/i18n';
 
-const GROUPS: { title: string; items: { icon: string; label: string; sub: string; href: string }[] }[] = [
+// Text lives in src/locales (sentinel.*): tool.<id> and tool.<id>.sub.
+const GROUPS: { id: string; items: { id: string; icon: string; href: string }[] }[] = [
   {
-    title: 'Protect',
+    id: 'protect',
     items: [
-      { icon: '🚗', label: 'Safe trips', sub: 'Guardians follow your trip', href: '/safety/trips' },
-      { icon: '📍', label: 'Emergency tracking', sub: 'Live location if danger', href: '/safety/kidnapping-tracking' },
-      { icon: '🗺️', label: 'Safety zones', sub: 'Red-zone alerts', href: '/safety/geofences' },
-      { icon: '✅', label: 'Check-ins', sub: '“I don reach” reminders', href: '/safety/manage#checkins' },
+      { id: 'trips', icon: '🚗', href: '/safety/trips' },
+      { id: 'tracking', icon: '📍', href: '/safety/kidnapping-tracking' },
+      { id: 'zones', icon: '🗺️', href: '/safety/geofences' },
+      { id: 'checkins', icon: '✅', href: '/safety/manage#checkins' },
     ],
   },
   {
-    title: 'Your network',
+    id: 'network',
     items: [
-      { icon: '👥', label: 'Guardians', sub: 'Who gets your SOS', href: '/safety/manage#guardians' },
-      { icon: '🫂', label: 'Circle', sub: 'Family and close friends', href: '/safety/manage#linkers' },
-      { icon: '📡', label: 'Live status', sub: 'Share how you dey', href: '/safety/manage#status' },
-      { icon: '🔔', label: 'Guardian alerts', sub: 'When your people need you', href: '/safety/manage#alerts' },
+      { id: 'guardians', icon: '👥', href: '/safety/manage#guardians' },
+      { id: 'circle', icon: '🫂', href: '/safety/manage#linkers' },
+      { id: 'status', icon: '📡', href: '/safety/manage#status' },
+      { id: 'alerts', icon: '🔔', href: '/safety/manage#alerts' },
     ],
   },
   {
-    title: 'Tools',
+    id: 'tools',
     items: [
-      { icon: '🔢', label: 'Panic PIN', sub: 'Secret PIN calls for help', href: '/safety/panic-pin' },
-      { icon: '📞', label: 'Fake call', sub: 'Escape a bad situation', href: '/safety/fake-call' },
-      { icon: '🆘', label: 'Report emergency', sub: 'Fire, accident, attack', href: '/safety/emergency' },
-      { icon: '📣', label: 'Community emergency', sub: 'Alert the whole estate', href: '/community-emergency' },
-      { icon: '🚨', label: 'Incident reports', sub: 'Confirm or dispute', href: '/incident-reports' },
-      { icon: '🕘', label: 'History', sub: 'Past trips and incidents', href: '/safety/trips/history' },
+      { id: 'panic', icon: '🔢', href: '/safety/panic-pin' },
+      { id: 'fakecall', icon: '📞', href: '/safety/fake-call' },
+      { id: 'emergency', icon: '🆘', href: '/safety/emergency' },
+      { id: 'community', icon: '📣', href: '/community-emergency' },
+      { id: 'incidents', icon: '🚨', href: '/incident-reports' },
+      { id: 'history', icon: '🕘', href: '/safety/trips/history' },
     ],
   },
 ];
 
 const WATCHES = [
-  { icon: '💬', label: 'Scams and threats in chats' },
-  { icon: '📰', label: 'Dangerous or fake posts' },
-  { icon: '🛒', label: 'Fake sellers, jobs and events' },
-  { icon: '📍', label: 'Red zones where you go' },
-  { icon: '🤝', label: 'Trust and reports about people' },
+  { id: 'chats', icon: '💬' },
+  { id: 'posts', icon: '📰' },
+  { id: 'sellers', icon: '🛒' },
+  { id: 'zones', icon: '📍' },
+  { id: 'trust', icon: '🤝' },
 ];
 
 const HOLD_MS = 3000;
 
-function greeting(d = new Date()) {
-  const h = d.getHours();
-  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-}
+const greetingKey = (d = new Date()) => (d.getHours() < 12 ? 'sentinel.morning' : d.getHours() < 17 ? 'sentinel.afternoon' : 'sentinel.evening');
 
 const countOf = (res: unknown, key: string) => {
   const d = (res as { data?: Record<string, unknown> })?.data ?? (res as Record<string, unknown>);
@@ -73,6 +72,7 @@ const countOf = (res: unknown, key: string) => {
 
 /** Hold the button for 3 seconds to start an SOS (the usual countdown still lets you cancel). */
 function SosHoldCard({ guardians }: { guardians: number }) {
+  const { t } = useTranslation();
   const sos = useSos();
   const [p, setP] = useState(0);
   const [holding, setHolding] = useState(false);
@@ -118,26 +118,26 @@ function SosHoldCard({ guardians }: { guardians: number }) {
         }}
         onKeyUp={stop}
         onContextMenu={(e) => e.preventDefault()}
-        aria-label={active ? 'SOS is on' : 'Hold for 3 seconds to send SOS'}
+        aria-label={active ? t('sentinel.sosOn') : t('sentinel.sosHoldAria')}
         className="relative grid h-20 w-20 shrink-0 touch-none select-none place-items-center rounded-full bg-[#E5484D] text-lg font-black text-white shadow-[0_6px_18px_rgba(229,72,77,0.45)]"
         style={{ background: `conic-gradient(#8E1B1F ${p * 360}deg, #E5484D 0deg)` }}
       >
         <span className="grid h-[68px] w-[68px] place-items-center rounded-full bg-[#E5484D]">SOS</span>
       </button>
       <div className="min-w-0">
-        <p className="font-heading text-base font-black text-navy">{active ? 'SOS is on' : 'Hold SOS for 3 seconds'}</p>
+        <p className="font-heading text-base font-black text-navy">{active ? t('sentinel.sosOn') : t('sentinel.sosHold')}</p>
         <p className="text-sm text-navy">
           {active ? (
             <Link href="/sos" className="font-bold text-[#B42318] underline">
-              Open SOS
+              {t('sentinel.openSos')}
             </Link>
           ) : guardians > 0 ? (
-            `Your ${guardians} ${guardians === 1 ? 'guardian gets' : 'guardians get'} your location at once.`
+            t('sentinel.sosGuardians', { count: guardians })
           ) : (
             <>
-              Add a guardian so someone gets your location.{' '}
+              {t('sentinel.sosNoGuardians')}{' '}
               <Link href="/safety/manage#guardians" className="font-bold text-[#B42318] underline">
-                Add one
+                {t('sentinel.addGuardian')}
               </Link>
             </>
           )}
@@ -148,6 +148,7 @@ function SosHoldCard({ guardians }: { guardians: number }) {
 }
 
 export function SentinelHub({ user, areaName }: { user: unknown; areaName?: string | null }) {
+  const { t } = useTranslation();
   const firstName = (user as { firstName?: string } | null)?.firstName;
   const home = useMemo(() => (user ? extractUserHomeCoords(user as Parameters<typeof extractUserHomeCoords>[0]) : null), [user]);
 
@@ -188,16 +189,16 @@ export function SentinelHub({ user, areaName }: { user: unknown; areaName?: stri
   const traffic = pins.filter((p) => p.layer === 'traffic');
   const light = pins.filter((p) => p.layer === 'light_water');
   const mood = liveSafety.length ? 'alert' : safety.length || traffic.length ? 'advisory' : 'calm';
-  const moodLine = { alert: 'shine your eye well well', advisory: 'shine your eye small', calm: 'all quiet for now' }[mood];
+  const moodLine = t(`sentinel.mood.${mood}`);
   const moodColor = { alert: '#E5484D', advisory: '#E8A33D', calm: '#00B82E' }[mood];
-  const place = areaName || 'your area';
+  const place = areaName || t('sentinel.yourArea');
 
   const summary = (() => {
     const bits: string[] = [];
-    if (safety.length) bits.push(`${safety.length} safety ${safety.length === 1 ? 'report' : 'reports'} near you`);
-    if (traffic.length) bits.push(`go-slow: ${traffic[0].top.title}`);
-    if (light.length) bits.push(`${light.length} light & water ${light.length === 1 ? 'update' : 'updates'}`);
-    return bits.length ? `Today for ${place}: ${bits.join(', ')}.` : `Nothing reported around ${place} today. Wetin you wan know?`;
+    if (safety.length) bits.push(t('sentinel.sumSafety', { count: safety.length }));
+    if (traffic.length) bits.push(t('sentinel.sumTraffic', { road: traffic[0].top.title }));
+    if (light.length) bits.push(t('sentinel.sumLight', { count: light.length }));
+    return bits.length ? t('sentinel.today', { place, items: bits.join(', ') }) : t('sentinel.quiet', { place });
   })();
 
   return (
@@ -216,7 +217,7 @@ export function SentinelHub({ user, areaName }: { user: unknown; areaName?: stri
           </div>
         </div>
         <p className="text-sm text-navy">
-          {greeting()}
+          {t(greetingKey())}
           {firstName ? `, ${firstName}` : ''}. {summary}
         </p>
       </div>
@@ -225,38 +226,38 @@ export function SentinelHub({ user, areaName }: { user: unknown; areaName?: stri
 
       <div className="flex flex-wrap gap-2">
         <Link href="/safety/manage#guardians" className="inline-flex h-8 items-center rounded-full bg-white px-3 text-xs font-extrabold text-navy shadow-sm">
-          👥 {guardians} {guardians === 1 ? 'guardian' : 'guardians'}
+          👥 {t('sentinel.guardians', { count: guardians })}
         </Link>
         <Link href="/safety/manage#linkers" className="inline-flex h-8 items-center rounded-full bg-white px-3 text-xs font-extrabold text-navy shadow-sm">
-          🫂 {circle} in your circle
+          🫂 {t('sentinel.circle', { count: circle })}
         </Link>
         <span className={`inline-flex h-8 items-center rounded-full px-3 text-xs font-extrabold ${trip ? 'bg-navy text-white' : 'bg-white text-muted shadow-sm'}`}>
-          🚗 {trip ? 'Safe trip on' : 'No trip running'}
+          🚗 {trip ? t('sentinel.tripOn') : t('sentinel.tripOff')}
         </span>
       </div>
       <Link
         href="/safety/trips"
         className="inline-flex min-h-12 items-center justify-center rounded-full bg-primary text-[15px] font-bold text-white"
       >
-        {trip ? 'See my safe trip' : 'Start a safe trip'}
+        {trip ? t('sentinel.seeTrip') : t('sentinel.startTrip')}
       </Link>
 
       {GROUPS.map((g) => (
-        <section key={g.title} aria-label={g.title} className="flex flex-col gap-2">
-          <p className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-muted">{g.title}</p>
+        <section key={g.id} aria-label={t(`sentinel.group.${g.id}`)} className="flex flex-col gap-2">
+          <p className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-muted">{t(`sentinel.group.${g.id}`)}</p>
           <div className="grid grid-cols-2 gap-2">
-            {g.items.map((t) => (
+            {g.items.map((it) => (
               <Link
-                key={t.label}
-                href={t.href}
+                key={it.id}
+                href={it.href}
                 className="flex min-h-[64px] items-center gap-2.5 rounded-2xl bg-white p-3 shadow-[0_2px_10px_rgba(29,36,51,0.06)] hover:bg-background"
               >
                 <span aria-hidden className="text-xl">
-                  {t.icon}
+                  {it.icon}
                 </span>
                 <span className="flex min-w-0 flex-col">
-                  <span className="text-sm font-bold leading-tight text-navy">{t.label}</span>
-                  <span className="text-[11px] font-semibold leading-tight text-muted">{t.sub}</span>
+                  <span className="text-sm font-bold leading-tight text-navy">{t(`sentinel.tool.${it.id}`)}</span>
+                  <span className="text-[11px] font-semibold leading-tight text-muted">{t(`sentinel.tool.${it.id}.sub`)}</span>
                 </span>
               </Link>
             ))}
@@ -266,25 +267,25 @@ export function SentinelHub({ user, areaName }: { user: unknown; areaName?: stri
 
       <section aria-labelledby="watch-h" className="flex flex-col gap-2">
         <p id="watch-h" className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-muted">
-          What Sentinel watches for you
+          {t('sentinel.watchesTitle')}
         </p>
         <ul className="divide-y divide-line overflow-hidden rounded-[22px] bg-white shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
           {WATCHES.map((w) => (
-            <li key={w.label} className="flex items-center gap-3 px-4 py-3">
+            <li key={w.id} className="flex items-center gap-3 px-4 py-3">
               <span aria-hidden className="text-lg">
                 {w.icon}
               </span>
-              <span className="min-w-0 flex-1 text-sm font-bold text-navy">{w.label}</span>
-              <span className="rounded-full bg-green-soft px-2.5 py-0.5 text-[11px] font-black text-brand-green-dark">On</span>
+              <span className="min-w-0 flex-1 text-sm font-bold text-navy">{t(`sentinel.watch.${w.id}`)}</span>
+              <span className="rounded-full bg-green-soft px-2.5 py-0.5 text-[11px] font-black text-brand-green-dark">{t('common.on')}</span>
             </li>
           ))}
         </ul>
         <div className="flex flex-wrap gap-x-4 gap-y-1 px-1 text-xs font-bold">
           <Link href="/safety/sentinel/settings" className="text-brand-green-dark">
-            Manage what Sentinel watches
+            {t('sentinel.manage')}
           </Link>
           <Link href="/safety/how-it-works" className="text-brand-green-dark">
-            How Sentinel keeps you safe
+            {t('sentinel.howItWorks')}
           </Link>
         </div>
       </section>
