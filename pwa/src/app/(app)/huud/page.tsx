@@ -212,6 +212,11 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   useEffect(() => {
     setJoinOpen(params.get('join') === '1');
   }, [params]);
+  // While joining, the floating ⋯ and SOS buttons step aside (the sheet is tall).
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-joining', joinOpen && visitor);
+    return () => document.documentElement.removeAttribute('data-joining');
+  }, [joinOpen, visitor]);
   const closeJoin = useCallback(() => {
     setJoinOpen(false);
     const u = new URL(window.location.href);
@@ -519,6 +524,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       {/* ⋯ map menu (owner, 2026-10-16): on the left, opposite SOS, just above the card;
           both follow the card down when it is hidden (--huud-dock, set below). */}
       <div
+        data-map-menu
         className="absolute left-3 z-20 transition-[bottom] duration-300 ease-out motion-reduce:transition-none"
         style={{ bottom: 'calc(var(--app-bottomnav-h) + 3rem + var(--huud-dock, 0px))' }}
       >

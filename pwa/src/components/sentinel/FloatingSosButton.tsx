@@ -76,7 +76,8 @@ export function FloatingSosButton() {
   };
 
   return (
-    <div 
+    <div
+      data-float-sos
       // On the map it needs a solid backing to stay easy to see over a dark night map.
       className={`fixed right-4 z-[40] w-14 h-14${pathname === '/huud' ? ' rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)]' : ''}`}
       style={

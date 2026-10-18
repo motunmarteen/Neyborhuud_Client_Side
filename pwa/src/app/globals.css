@@ -9700,3 +9700,7 @@ html[data-calm] .nh-area-pulse__dot { animation: none !important; opacity: 0.45;
 .nh-shop-swatch--frame_naija { background: radial-gradient(circle, #F3F5F9 40%, #008751 41% 46%, #FFFFFF 47% 50%, #008751 51% 55%, #F3F5F9 56%); }
 .nh-shop-swatch--frame_ankara { background: radial-gradient(circle, #FFF3E6 38%, transparent 39%), conic-gradient(#F28C28 0 25%, #0E7C7B 0 50%, #C2185B 0 75%, #F2C230 0); }
 .nh-shop-swatch--frame_adire { background: radial-gradient(circle, #E8EEF8 38%, transparent 39%), repeating-conic-gradient(#1F3A8A 0 10deg, #E8EEF8 10deg 20deg); }
+
+/* Joining on the map: the floating ⋯ and SOS buttons step aside for the tall sheet. */
+html[data-joining] [data-float-sos],
+html[data-joining] [data-map-menu] { display: none; }
