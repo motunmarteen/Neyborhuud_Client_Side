@@ -31,7 +31,9 @@ export function FloatingSosButton() {
     '/complete-profile',
     '/pick-community',
     '/setup-complete',
-    '/welcome'
+    '/welcome',
+    // The avatar studio keeps Save at the bottom right; SOS stays one tap away on the Sentinel tab.
+    '/avatar'
   ];
 
   if (

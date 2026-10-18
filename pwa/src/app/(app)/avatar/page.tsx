@@ -16,37 +16,23 @@ import { createStage, renderPortrait, type Stage } from '@/lib/avatar3d/stage';
 import { skinToneFromSelfie } from '@/lib/avatar3d/selfie';
 import { POSES, type PoseId } from '@/lib/avatar3d/build';
 import { StickerPicker, stickerFile } from '@/components/avatar/StickerPicker';
+import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
+import { useTranslation } from '@/lib/i18n';
 import { useAvatarCatalogue, useBuyAvatarItem, useMyAvatar, useSaveAvatar, type AvatarConfig, type AvatarItem } from '@/hooks/useAvatar';
 
-const TABS: { key: string; label: string; slots: { slot: string; label: string }[] }[] = [
-  { key: 'body', label: 'Body', slots: [{ slot: 'skin', label: 'Skin tone' }, { slot: 'body', label: 'Body shape' }] },
-  {
-    key: 'face',
-    label: 'Face',
-    slots: [
-      { slot: 'face', label: 'Face shape' },
-      { slot: 'eyes', label: 'Eyes' },
-      { slot: 'brows', label: 'Brows' },
-      { slot: 'mouth', label: 'Mouth' },
-      { slot: 'facialHair', label: 'Facial hair' },
-    ],
-  },
-  { key: 'hair', label: 'Hair', slots: [{ slot: 'hair', label: 'Style' }, { slot: 'hairColor', label: 'Colour' }] },
-  {
-    key: 'clothes',
-    label: 'Clothes',
-    slots: [
-      { slot: 'top', label: 'Top' },
-      { slot: 'topColor', label: 'Top colour' },
-      { slot: 'bottom', label: 'Bottom' },
-      { slot: 'bottomColor', label: 'Bottom colour' },
-      { slot: 'shoes', label: 'Shoes' },
-    ],
-  },
-  { key: 'extras', label: 'Extras', slots: [{ slot: 'headwear', label: 'Headwear' }, { slot: 'glasses', label: 'Glasses' }, { slot: 'neck', label: 'Neck' }] },
+/** Parts of the wardrobe; labels are i18n keys avatar.tab.<key> and avatar.slot.<slot>. */
+const TABS: { key: string; slots: string[] }[] = [
+  { key: 'body', slots: ['skin', 'body'] },
+  { key: 'face', slots: ['face', 'eyes', 'brows', 'mouth', 'facialHair'] },
+  { key: 'hair', slots: ['hair', 'hairColor'] },
+  { key: 'clothes', slots: ['top', 'topColor', 'bottom', 'bottomColor', 'shoes'] },
+  { key: 'extras', slots: ['headwear', 'glasses', 'neck'] },
 ];
 
 export default function AvatarStudioPage() {
+  const { t } = useTranslation();
+  const [stickersOpen, setStickersOpen] = useState(false);
+  const optionsRef = useRef<HTMLDivElement | null>(null);
   const { data: cat } = useAvatarCatalogue();
   const { data: mine } = useMyAvatar();
   const save = useSaveAvatar();
@@ -99,7 +85,7 @@ export default function AvatarStudioPage() {
     a.href = url;
     a.download = file.name;
     a.click();
-    toast.success('Sticker saved');
+    toast.success(t('avatar.stickerSaved'));
   };
 
   const unowned = useMemo(
@@ -117,9 +103,9 @@ export default function AvatarStudioPage() {
     );
     if (tone) {
       pick('skin', tone);
-      toast.success('Matched your skin tone. Now pick your hair and outfit.');
+      toast.success(t('avatar.selfieOk'));
     } else {
-      toast.error('Could not read that photo. Try one with your face in good light.');
+      toast.error(t('avatar.selfieBad'));
     }
     if (fileRef.current) fileRef.current.value = '';
   };
@@ -134,156 +120,162 @@ export default function AvatarStudioPage() {
     }
     save.mutate(
       { config: cfg, portrait },
-      { onSuccess: () => toast.success('Avatar saved 🎉'), onError: (err) => toast.error(getErrorMessage(err)) },
+      { onSuccess: () => toast.success(t('avatar.saved')), onError: (err) => toast.error(getErrorMessage(err)) },
     );
   };
 
-  const current = TABS.find((t) => t.key === tab) ?? TABS[0];
+  const current = TABS.find((tb) => tb.key === tab) ?? TABS[0];
 
+  // Snapchat-style editor (owner 2026-10-18): the avatar stays in view at the top while you
+  // change things; only the options scroll; Save stays at the bottom.
   return (
-    <div className="min-h-screen bg-background pb-[calc(var(--app-bottomnav-h)+1.5rem)] pt-[var(--app-topnav-offset)]">
-      <main className="mx-auto flex max-w-lg flex-col gap-3 px-4 py-3">
-        <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-b from-[#BFE6FF] to-[#E8F7EC] shadow-[0_2px_10px_rgba(29,36,51,0.08)]">
-          <canvas ref={canvasRef} className="block h-[360px] w-full touch-none" aria-label="Your 3D avatar. Drag to turn it." role="img" />
-          <div className="absolute left-3 top-3 flex gap-2">
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-navy shadow"
-            >
-              <span aria-hidden>🤳🏾</span> From a selfie
+    <div className="fixed inset-0 flex flex-col bg-background pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-[calc(var(--safe-top)+var(--app-topnav-height))]">
+      <div className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col px-3">
+        {/* The avatar: always visible */}
+        <div className="relative shrink-0 overflow-hidden rounded-[26px] bg-gradient-to-b from-[#BFE6FF] to-[#E8F7EC] shadow-[0_2px_10px_rgba(29,36,51,0.08)]">
+          <canvas ref={canvasRef} className="block h-[min(40svh,340px)] min-h-[210px] w-full touch-none" aria-label={t('avatar.canvas')} role="img" />
+          <div className="absolute inset-x-2 top-2 flex justify-between gap-2">
+            <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-navy shadow">
+              <span aria-hidden>🤳🏾</span> {t('avatar.selfie')}
             </button>
-            <input ref={fileRef} type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => void onSelfie(e.target.files?.[0])} />
+            {mine?.avatar ? (
+              <button type="button" onClick={() => setStickersOpen(true)} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-navy shadow">
+                <span aria-hidden>🎭</span> {t('avatar.stickers')}
+              </button>
+            ) : null}
+            <input ref={fileRef} type="file" accept="image/*" capture="user" className="hidden" aria-label={t('avatar.selfie')} onChange={(e) => void onSelfie(e.target.files?.[0])} />
           </div>
-          <p className="absolute bottom-2 left-0 right-0 text-center text-[11px] font-bold text-navy/60">Drag to turn · your selfie stays on your phone</p>
+          {/* Poses sit on the stage, like a camera's modes */}
+          <div className="absolute inset-x-0 bottom-2 flex gap-1.5 overflow-x-auto px-2 [scrollbar-width:none]" role="group" aria-label={t('avatar.poses')}>
+            {POSES.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                aria-pressed={pose === p.id}
+                aria-label={t(`avatar.pose.${p.id}`)}
+                onClick={() => setPose(p.id)}
+                className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-lg shadow ${pose === p.id ? 'bg-navy ring-2 ring-white' : 'bg-white/90'}`}
+              >
+                <span aria-hidden>{p.emoji}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]" role="group" aria-label="Poses">
-          {POSES.map((p) => (
+        {/* Parts */}
+        <div role="tablist" aria-label={t('avatar.parts')} className="no-scrollbar -mx-1 mt-2 flex shrink-0 gap-1.5 overflow-x-auto px-1 py-1">
+          {TABS.map((tb) => (
             <button
-              key={p.id}
-              type="button"
-              aria-pressed={pose === p.id}
-              onClick={() => setPose(p.id)}
-              className={`inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-bold ${pose === p.id ? 'bg-navy text-white' : 'bg-white text-navy shadow-sm'}`}
-            >
-              <span aria-hidden>{p.emoji}</span>
-              {p.label}
-            </button>
-          ))}
-        </div>
-
-        <div role="tablist" aria-label="Avatar parts" className="flex gap-1 overflow-x-auto rounded-full bg-white p-1 shadow-[0_2px_10px_rgba(29,36,51,0.06)] [scrollbar-width:none]">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
+              key={tb.key}
               type="button"
               role="tab"
-              aria-selected={tab === t.key}
-              onClick={() => setTab(t.key)}
-              className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-bold ${tab === t.key ? 'bg-navy text-white' : 'text-muted'}`}
+              aria-selected={tab === tb.key}
+              onClick={() => {
+                setTab(tb.key);
+                optionsRef.current?.scrollTo({ top: 0 });
+              }}
+              className={`tap-target inline-flex h-9 shrink-0 items-center rounded-full px-4 text-[13px] font-extrabold shadow-[0_2px_6px_rgba(29,36,51,0.12)] ${tab === tb.key ? 'bg-navy text-white' : 'bg-white text-navy'}`}
             >
-              {t.label}
+              {t(`avatar.tab.${tb.key}`)}
             </button>
           ))}
         </div>
 
-        {!cat || !cfg ? (
-          <p className="rounded-2xl bg-white p-4 text-sm text-muted">Loading the wardrobe…</p>
-        ) : (
-          current.slots.map(({ slot, label }) => {
-            const items = cat.items.filter((i) => i.slot === slot);
-            const swatches = items.every((i) => i.color);
-            return (
-              <section key={slot} aria-label={label} className="flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
-                <h2 className="px-1 text-sm font-extrabold text-navy">{label}</h2>
-                <div className={swatches ? 'flex flex-wrap gap-2' : 'grid grid-cols-3 gap-2'}>
-                  {items.map((i) => {
-                    const on = cfg[slot] === i.id;
-                    const locked = i.price > 0 && !owned.has(i.id);
-                    return swatches ? (
-                      <button
-                        key={i.id}
-                        type="button"
-                        onClick={() => pick(slot, i.id)}
-                        aria-pressed={on}
-                        aria-label={`${i.name}${locked ? `, ${i.price} HuudCredit` : ''}`}
-                        className={`relative h-11 w-11 rounded-full border-2 ${on ? 'border-navy ring-2 ring-primary' : 'border-white shadow'}`}
-                        style={{ background: i.color }}
-                      >
-                        {locked ? <span className="absolute -right-1 -top-1 rounded-full bg-amber-soft px-1 text-[9px] font-black text-[#A86F0A]">🪙</span> : null}
-                      </button>
-                    ) : (
-                      <button
-                        key={i.id}
-                        type="button"
-                        onClick={() => pick(slot, i.id)}
-                        aria-pressed={on}
-                        className={`flex min-h-12 flex-col items-center justify-center rounded-xl border px-2 py-1.5 text-center text-xs font-bold ${on ? 'border-brand-green-dark bg-green-soft text-navy' : 'border-line bg-white text-navy'}`}
-                      >
-                        {i.name}
-                        {locked ? <span className="text-[10px] font-black text-[#A86F0A]">🪙 {i.price}</span> : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })
-        )}
+        {/* Options: the only part that scrolls */}
+        {/* grow/basis-0 (not flex-1): the top bar hides when a "flex-1 overflow-y-auto" area scrolls; here it must stay */}
+        <div ref={optionsRef} className="mt-1 flex min-h-0 grow basis-0 flex-col gap-2.5 overflow-y-auto overscroll-contain pb-2">
+          {!cat || !cfg ? (
+            <p className="rounded-2xl bg-white p-4 text-sm text-muted">{t('avatar.loading')}</p>
+          ) : (
+            current.slots.map((slot) => {
+              const items = cat.items.filter((i) => i.slot === slot);
+              const swatches = items.every((i) => i.color);
+              const label = t(`avatar.slot.${slot}`);
+              return (
+                <section key={slot} aria-label={label} className="flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
+                  <h2 className="px-1 text-sm font-extrabold text-navy">{label}</h2>
+                  <div className={swatches ? 'flex flex-wrap gap-2' : 'grid grid-cols-3 gap-2'}>
+                    {items.map((i) => {
+                      const on = cfg[slot] === i.id;
+                      const locked = i.price > 0 && !owned.has(i.id);
+                      return swatches ? (
+                        <button
+                          key={i.id}
+                          type="button"
+                          onClick={() => pick(slot, i.id)}
+                          aria-pressed={on}
+                          aria-label={locked ? t('avatar.itemPrice', { name: i.name, price: i.price }) : i.name}
+                          className={`relative h-11 w-11 rounded-full border-2 ${on ? 'border-navy ring-2 ring-primary' : 'border-white shadow'}`}
+                          style={{ background: i.color }}
+                        >
+                          {locked ? <span className="absolute -right-1 -top-1 rounded-full bg-amber-soft px-1 text-[9px] font-black text-[#A86F0A]">🪙</span> : null}
+                        </button>
+                      ) : (
+                        <button
+                          key={i.id}
+                          type="button"
+                          onClick={() => pick(slot, i.id)}
+                          aria-pressed={on}
+                          className={`flex min-h-12 flex-col items-center justify-center rounded-xl border px-2 py-1.5 text-center text-xs font-bold ${on ? 'border-brand-green-dark bg-green-soft text-navy' : 'border-line bg-white text-navy'}`}
+                        >
+                          {i.name}
+                          {locked ? <span className="text-[10px] font-black text-[#A86F0A]">🪙 {i.price}</span> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })
+          )}
+          <p className="px-2 pt-1 text-center text-xs font-semibold text-muted">
+            {t('avatar.mapNote')}{' '}
+            <Link href="/huud" className="font-bold text-brand-green-dark">
+              {t('avatar.openMap')}
+            </Link>
+          </p>
+        </div>
 
-        {unowned.length ? (
-          <div className="flex flex-col gap-2 rounded-2xl bg-amber-soft p-3">
-            <p className="text-sm font-bold text-navy">You&apos;re trying on premium items. Get them to keep this look:</p>
-            {unowned.map((i) => (
-              <div key={i.id} className="flex items-center justify-between gap-2">
-                <span className="text-sm text-navy">{i.name}</span>
-                <button
-                  type="button"
-                  disabled={buy.isPending}
-                  onClick={() =>
-                    buy.mutate(i.id, {
-                      onSuccess: () => toast.success(`${i.name} is yours`),
-                      onError: (err) => toast.error(getErrorMessage(err)),
-                    })
-                  }
-                  className="min-h-10 rounded-full bg-navy px-4 text-xs font-bold text-white disabled:opacity-50"
-                >
-                  Get · 🪙 {i.price}
-                </button>
+        {/* Bottom: premium items to get, then Save (always in reach) */}
+        <div className="shrink-0 border-t border-line bg-background pb-2 pt-2">
+          {unowned.length ? (
+            <div className="mb-2 flex flex-col gap-1.5 rounded-2xl bg-amber-soft p-2.5">
+              <p className="px-1 text-xs font-bold text-navy">{t('avatar.premiumNote', { balance: (mine?.balance ?? 0).toLocaleString('en-NG') })}</p>
+              <div className="no-scrollbar flex gap-1.5 overflow-x-auto">
+                {unowned.map((i) => (
+                  <button
+                    key={i.id}
+                    type="button"
+                    disabled={buy.isPending}
+                    onClick={() =>
+                      buy.mutate(i.id, {
+                        onSuccess: () => toast.success(t('avatar.bought', { name: i.name })),
+                        onError: (err) => toast.error(getErrorMessage(err)),
+                      })
+                    }
+                    className="inline-flex min-h-10 shrink-0 items-center rounded-full bg-navy px-3 text-xs font-bold text-white disabled:opacity-50"
+                  >
+                    {t('avatar.get', { name: i.name, price: i.price })}
+                  </button>
+                ))}
               </div>
-            ))}
-            <p className="text-xs font-semibold text-muted">You have 🪙 {(mine?.balance ?? 0).toLocaleString('en-NG')}.</p>
-          </div>
-        ) : null}
+            </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={!cfg || unowned.length > 0 || save.isPending}
+            className="min-h-12 w-full rounded-full bg-primary text-[15px] font-bold text-white disabled:opacity-50"
+          >
+            {save.isPending ? t('avatar.saving') : t('avatar.save')}
+          </button>
+        </div>
+      </div>
 
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={!cfg || unowned.length > 0 || save.isPending}
-          className="min-h-12 rounded-full bg-primary text-[15px] font-bold text-white disabled:opacity-50"
-        >
-          {save.isPending ? 'Saving…' : 'Save my avatar'}
-        </button>
-        {mine?.avatar ? (
-          <section aria-labelledby="stickers-h" className="flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
-            <h2 id="stickers-h" className="px-1 text-sm font-extrabold text-navy">
-              My stickers
-            </h2>
-            <p className="px-1 text-xs font-semibold text-muted">
-              Tap one to share it (WhatsApp, Instagram…) or save it. In a chat, tap ➕ then Sticker. They use your saved look.
-            </p>
-            <StickerPicker onPick={(url, caption) => void shareSticker(url, caption)} />
-          </section>
-        ) : null}
-
-        <p className="text-center text-xs font-semibold text-muted">
-          Friends who follow you back see your avatar on the map when you choose “Show me to friends”.{' '}
-          <Link href="/huud" className="font-bold text-brand-green-dark">
-            Open the map
-          </Link>
-        </p>
-      </main>
+      <AppBottomSheet open={stickersOpen} onClose={() => setStickersOpen(false)} title={t('avatar.stickers')}>
+        <p className="mb-2 text-xs font-semibold text-muted">{t('avatar.stickersHint')}</p>
+        {stickersOpen ? <StickerPicker onPick={(url, caption) => void shareSticker(url, caption)} /> : null}
+      </AppBottomSheet>
     </div>
   );
 }
