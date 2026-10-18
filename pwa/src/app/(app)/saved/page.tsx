@@ -7,57 +7,26 @@ import { contentService } from '@/services/content.service';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
-import { BrowseFilterChip } from '@/components/layout/BrowseFilterChip';
+import { FilterChip } from '@/components/ui/Chip';
+import { useTranslation } from '@/lib/i18n';
 import { BrowseSearchField } from '@/components/layout/BrowseSearchField';
-import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { SavedPostRow } from '@/components/feed/SavedPostRow';
 import { getPostId } from '@/components/feed/TrendingPostRow';
-import { Bookmark, Filter, RefreshCw, FileText, Megaphone, Briefcase } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import type { ContentType, Post } from '@/types/api';
 
 type ContentFilter = 'all' | ContentType;
 
-const VIEW_TABS = [
-  { id: 'all', label: 'All', icon: 'bookmark' },
-  { id: 'post', label: 'Posts', icon: 'article' },
-  { id: 'fyi', label: 'FYI', icon: 'info' },
-  { id: 'job', label: 'Jobs', icon: 'work' },
-] as const;
-
-const EXTRA_FILTERS: { id: ContentFilter; label: string }[] = [
-  { id: 'event', label: 'Events' },
-  { id: 'marketplace', label: 'Market' },
-  { id: 'help_request', label: 'Help' },
+/** One row of filters (Phase 4 restyle): the label keys live in the locale files. */
+const FILTERS: { id: ContentFilter; key: string }[] = [
+  { id: 'all', key: 'saved.f.all' },
+  { id: 'post', key: 'saved.f.post' },
+  { id: 'fyi', key: 'saved.f.fyi' },
+  { id: 'job', key: 'saved.f.job' },
+  { id: 'event', key: 'saved.f.event' },
+  { id: 'marketplace', key: 'saved.f.marketplace' },
+  { id: 'help_request', key: 'saved.f.help_request' },
 ];
-
-function StatCard({
-  icon,
-  label,
-  value,
-  tone = 'primary',
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-  tone?: 'primary' | 'blue';
-}) {
-  const toneClass =
-    tone === 'blue' ? 'text-brand-blue bg-brand-blue/10' : 'text-primary bg-primary/15';
-
-  return (
-    <div className="mod-card flex items-center gap-3 rounded-2xl p-4 border border-black/5 ">
-      <div className={`mod-inset flex h-10 w-10 items-center justify-center rounded-full ${toneClass}`}>
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-lg font-extrabold tabular-nums" style={{ color: 'var(--neu-text)' }}>
-          {value}
-        </p>
-        <p className="text-xs text-[var(--neu-text-muted)]">{label}</p>
-      </div>
-    </div>
-  );
-}
 
 function parseSavedPosts(data: unknown): Post[] {
   if (!data || typeof data !== 'object') return [];
@@ -93,18 +62,18 @@ function postSearchText(post: Post) {
 function SavedToolbarSkeleton() {
   return (
     <div className="space-y-3" aria-hidden>
-      <div className="mod-card h-[2.75rem] animate-pulse rounded-2xl" />
       <div className="flex gap-2">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="mod-inset h-9 w-20 animate-pulse rounded-full" />
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-9 w-20 animate-pulse rounded-full bg-white motion-reduce:animate-none" />
         ))}
       </div>
-      <div className="mod-inset h-10 animate-pulse rounded-xl" />
+      <div className="h-11 animate-pulse rounded-full bg-white motion-reduce:animate-none" />
     </div>
   );
 }
 
 export default function SavedPage() {
+  const { t } = useTranslation();
   const { user, mounted } = useClientAuthUser();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<ContentFilter>('all');
@@ -190,120 +159,86 @@ export default function SavedPage() {
           <SavedToolbarSkeleton />
         ) : user ? (
           <>
-            <BrowseTabStrip
-              tabs={[...VIEW_TABS]}
-              activeId={VIEW_TABS.some((t) => t.id === filter) ? filter : 'all'}
-              onChange={(id) => setFilter(id as ContentFilter)}
-              trailing={
-                <button
-                  type="button"
-                  onClick={() => refetch()}
-                  disabled={isFetching}
-                  className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary disabled:opacity-50"
-                  aria-label="Refresh saved posts"
-                >
-                  <RefreshCw
-                    size={16}
-                    className={isFetching ? 'animate-spin' : ''}
-                    aria-hidden
-                  />
-                  <span>{isFetching ? 'Loading' : 'Refresh'}</span>
-                </button>
-              }
-            />
-
-            <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
-              {EXTRA_FILTERS.map((item) => (
-                <BrowseFilterChip
-                  key={item.id}
-                  active={filter === item.id}
-                  onClick={() => setFilter(item.id)}
-                >
-                  {item.label}
-                  {(typeCounts.get(item.id) ?? 0) > 0 ? (
-                    <span className="ml-1 opacity-70">({typeCounts.get(item.id)})</span>
-                  ) : null}
-                </BrowseFilterChip>
-              ))}
+            <div className="flex items-center gap-2">
+              <div role="tablist" aria-label={t('saved.title')} className="no-scrollbar -mx-1 flex min-w-0 flex-1 gap-1.5 overflow-x-auto px-1 py-1">
+                {FILTERS.filter((f) => f.id === 'all' || f.id === filter || (typeCounts.get(f.id) ?? 0) > 0 || allPosts.length === 0).map((f) => (
+                  <FilterChip key={f.id} active={filter === f.id} onClick={() => setFilter(f.id)} count={f.id === 'all' ? undefined : typeCounts.get(f.id)}>
+                    {t(f.key)}
+                  </FilterChip>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="tap-target grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-navy shadow-[0_2px_6px_rgba(29,36,51,0.12)] disabled:opacity-50"
+                aria-label={t('saved.refresh')}
+              >
+                <RefreshCw size={16} className={isFetching ? 'animate-spin motion-reduce:animate-none' : ''} aria-hidden />
+              </button>
             </div>
-
-            <BrowseSearchField
-              value={search}
-              onChange={setSearch}
-              placeholder="Search saved posts…"
-            />
+            <BrowseSearchField value={search} onChange={setSearch} placeholder={t('saved.search')} />
           </>
         ) : undefined
       }
     >
       {!mounted ? (
-        <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
+        <div className="flex flex-col gap-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="mod-inset h-[5.5rem] animate-pulse rounded-xl" />
+            <div key={i} className="h-[5.5rem] animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />
           ))}
         </div>
       ) : !user ? (
         <BrowseEmptyState
           icon="login"
-          title="Sign in to view saved posts"
-          description="Bookmark posts from your feed and they'll appear here."
+          title={t('saved.signInTitle')}
+          description={t('saved.signInBody')}
           filledIcon
           action={
             <Link
-              href="/login"
-              className="mod-chip mod-chip-active inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-bold text-primary"
+              href="/huud?login=1&next=/saved"
+              className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-extrabold text-white"
             >
-              Sign in
+              {t('saved.signIn')}
             </Link>
           }
         />
       ) : isLoading ? (
-        <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
+        <div className="flex flex-col gap-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="mod-inset h-[5.5rem] animate-pulse rounded-xl" />
+            <div key={i} className="h-[5.5rem] animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />
           ))}
         </div>
       ) : allPosts.length === 0 ? (
         <BrowseEmptyState
           icon="bookmark"
-          title="No saved posts yet"
-          description="Bookmark posts from your feed to find them here later."
+          title={t('saved.emptyTitle')}
+          description={t('saved.emptyBody')}
           filledIcon
           action={
             <Link
               href="/feed"
-              className="mod-chip mod-chip-active inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-bold text-primary"
+              className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-extrabold text-white"
             >
-              Browse feed
+              {t('saved.goFeed')}
             </Link>
           }
         />
       ) : filteredPosts.length === 0 ? (
         <BrowseEmptyState
           icon="search_off"
-          title="No matches"
-          description="Try a different filter or search term."
+          title={t('saved.noMatchTitle')}
+          description={t('saved.noMatchBody')}
         />
       ) : (
-        <div className="space-y-5">
-          <div className="grid grid-cols-2 gap-3">
-            <StatCard icon={<Bookmark size={20} className="fill-primary" />} label="Total saved" value={allPosts.length} />
-            <StatCard
-              icon={<Filter size={20} />}
-              label="Showing now"
-              value={filteredPosts.length}
-              tone="blue"
-            />
-          </div>
-
+        <div className="flex flex-col gap-2">
+          <p className="px-1 text-xs font-bold text-muted">
+            {filteredPosts.length === allPosts.length
+              ? t(allPosts.length === 1 ? 'saved.count_one' : 'saved.count_other', { n: allPosts.length })
+              : t('saved.showing', { n: filteredPosts.length, total: allPosts.length })}
+          </p>
           <div>
-            <h2 className="mb-3 text-base font-bold" style={{ color: 'var(--neu-text)' }}>
-              Your bookmarks
-            </h2>
-            <div
-              className="mod-card divide-y overflow-hidden rounded-2xl"
-              style={{ borderColor: 'var(--neu-shadow-dark)' }}
-            >
+            <div className="flex flex-col gap-2">
               {filteredPosts.map((post, index) => {
                 const id = getPostId(post);
                 return (

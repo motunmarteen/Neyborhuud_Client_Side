@@ -32,7 +32,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
 | 3. Map home (sky + live map) | 14 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; low-data mode, speed done; left: M-14 crown (waits on Phase 7), M-17 living map, mockup extras |
-| 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
+| 4. Screens (restyle all 95) | 25 | 95 | 🟡 Getting started + Home, map and feed done; Chats next |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
 | 7. Gamification backend | 18 | 18 | ✅ done 2026-10-18 (server + app); airtime/data and contributor payouts wait for the legal check |
@@ -220,34 +220,36 @@ Kept here so the whole history is in one place.
 
 ### Getting started (12)
 
-- [ ] S-001 `(marketing)` → Getting started (restyled)
-- [ ] S-002 `(marketing)/complete-profile` → Getting started (restyled)
-- [ ] S-003 `(marketing)/forgot-password` → Getting started (restyled)
-- [ ] S-004 `(marketing)/login` → Getting started (restyled)
-- [ ] S-005 `(marketing)/pick-community` → Getting started (restyled)
-- [ ] S-006 `(marketing)/reset-password` → Getting started (restyled)
-- [ ] S-007 `(marketing)/setup-complete` → Getting started (restyled)
+- [x] S-001 (2026-10-18 7bbf0aa/973a54c) `(marketing)` → Getting started: account screens sit on the real map (your area or Nigeria), text in i18n (en + pcm)
+- [x] S-002 (7bbf0aa) `(marketing)/complete-profile` → standalone "Your profile" from Settings; no Tier/Identity jargon; phone error only when wrong
+- [x] S-003 (7bbf0aa) `(marketing)/forgot-password` → restyled, i18n ⚠️ emails don't send yet (I-05b)
+- [x] S-004 (7bbf0aa) `(marketing)/login` → "Welcome back" sheet on the map (/huud?login=1)
+- [x] S-005 (7bbf0aa) `(marketing)/pick-community` → standalone "Change area"; map-provider names and data footnote removed
+- [x] S-006 (7bbf0aa) `(marketing)/reset-password` → restyled, i18n
+- [x] S-007 (7bbf0aa) `(marketing)/setup-complete` → only true ticks; no longer part of a chain
 - [x] S-008 (2026-10-18) `(marketing)/signup` → now the "Join your neighbours" sheet on the live map (/huud?join=1): pick your street on the map, then first name, email, password; @name made for you; invite kept. Old page redirects. Google and phone/SMS sign-in dropped for now (owner 2026-10-18: bootstrapping)
-- [ ] S-009 `(marketing)/verify-email` → Getting started (restyled)
-- [ ] S-010 `(marketing)/verify-location` → Getting started (restyled)
-- [ ] S-011 `(marketing)/welcome` → Getting started (restyled)
-- [ ] S-012 `/app-root` → Getting started: opening screen (restyled)
+- [x] S-009 (7bbf0aa) `(marketing)/verify-email` → restyled, i18n, goes to the map after ⚠️ emails don't send yet (I-05b)
+- [x] S-010 (7bbf0aa) `(marketing)/verify-location` → optional "Check my location"; no longer blocks check-in/notification/install prompts
+- [x] S-011 (7bbf0aa) `(marketing)/welcome` → redirects to the map
+- [x] S-012 (7bbf0aa) `/app-root` → opens the map (or where you were going)
 
-### Home, map and feed (Gist) (13)
+### Home, map and feed (13)
 
-- [ ] S-013 `/explore` → Gist tab
-- [ ] S-014 `/feed` → Gist tab
-- [ ] S-015 `/feed/media-preview` → Opens from posts (unchanged)
-- [ ] S-016 `/fyi` → Gist → FYI / Light & water layer
-- [ ] S-017 `/gist` → Gist → News / Pulse ticker
-- [ ] S-018 `/gist/[id]` → Gist → News / Pulse ticker
-- [ ] S-019 `/local-news` → Gist → News / Pulse ticker
-- [ ] S-020 `/local-news/[id]` → Gist → News / Pulse ticker
-- [ ] S-021 `/local-news/gist/[id]` → Gist → News / Pulse ticker
-- [ ] S-022 `/map` → Merged into the home map
-- [ ] S-023 `/neighborhood` → Becomes the map home (My Huud)
-- [ ] S-024 `/notifications` → 🔔 in the top bar
-- [ ] S-025 `/saved` → Me → Saved
+Shared pieces restyled with this group (used by later groups too): list-page header card (11 pages: plain title + line, action inside, no reward notes), section tabs as chips, search pill, top bar draws neutral until the page starts (fixed hydration errors on every page).
+
+- [x] S-013 (2026-10-18) `/explore` → opens Sentinel (search + ask), with the search kept
+- [x] S-014 (2026-10-18) `/feed` → matches the mockup (live sky, "Wetin dey happen around you?", tabs, post cards); old welcome sheet removed (the map has the 3-step tour); FYI posts get Helpful; `?post=`/`?postId=` open a post; no hydration errors
+- [x] S-015 (2026-10-18) `/feed/media-preview` → removed (developer sample page; /design-kit shows the cards)
+- [x] S-016 (2026-10-18) `/fyi` → "Notices for your area": same post card as the Feed with Helpful, chip tabs, delete as a sheet; i18n
+- [x] S-017 (2026-10-18) `/gist` → opens the Feed (Gist removed 2026-10-15)
+- [x] S-018 (2026-10-18) `/gist/[id]` → opens the Feed
+- [x] S-019 (2026-10-18) `/local-news` → chip tabs Nigeria/World, topics, papers, round refresh; i18n
+- [x] S-020 (2026-10-18) `/local-news/[id]` → unchanged article page (opens the newspaper's site)
+- [x] S-021 (2026-10-18) `/local-news/gist/[id]` → opens the Feed
+- [x] S-022 (2026-10-18) `/map` → opens the map home (old discovery map removed)
+- [x] S-023 (2026-10-18) `/neighborhood` → opens the map home; links moved to /huud
+- [x] S-024 (2026-10-18) `/notifications` → plain rows (icon, title, message, 5m), tap to open, chips, Unread switch, Mark all read; bottom bar visible
+- [x] S-025 (2026-10-18) `/saved` → one chip row with counts, search pill, "3 saved posts", tap opens the post (was the top of the Feed); i18n
 
 ### Chats and communities (6)
 

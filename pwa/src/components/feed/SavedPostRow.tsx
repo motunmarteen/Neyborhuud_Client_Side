@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n';
 import Image from 'next/image';
 import { Bookmark, BookmarkX } from 'lucide-react';
 import type { Post } from '@/types/api';
@@ -47,6 +48,7 @@ type SavedPostRowProps = {
 };
 
 export function SavedPostRow({ post, onUnsave, isRemoving }: SavedPostRowProps) {
+  const { t } = useTranslation();
   const id = getPostId(post);
   const username = post.author?.username ?? '';
   const typeKey = post.contentType ?? 'post';
@@ -57,8 +59,8 @@ export function SavedPostRow({ post, onUnsave, isRemoving }: SavedPostRowProps) 
   const initial = authorName(post).charAt(0).toUpperCase();
 
   return (
-    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white border border-black/[0.08] shadow-xs mb-2.5 transition-all hover:border-black/[0.14] hover:shadow-sm">
-      <Link href="/feed" className="flex min-w-0 flex-1 items-start gap-3">
+    <div className="flex items-start gap-3 rounded-2xl bg-white p-3.5 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
+      <Link href={id ? `/feed?post=${encodeURIComponent(id)}` : '/feed'} className="flex min-w-0 flex-1 items-start gap-3">
         <div className="flex w-7 shrink-0 justify-center pt-0.5 text-[#0E8A3E]">
           <Bookmark size={18} className="fill-[#0E8A3E] text-[#0E8A3E]" />
         </div>
@@ -96,10 +98,10 @@ export function SavedPostRow({ post, onUnsave, isRemoving }: SavedPostRowProps) 
         type="button"
         onClick={() => onUnsave(id)}
         disabled={!id || isRemoving}
-        className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-rose-500 hover:bg-rose-50 border border-black/[0.06] transition-colors disabled:opacity-40 cursor-pointer"
-        aria-label="Remove bookmark"
+        className="-mr-1 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-brand-red transition-colors hover:bg-red-soft disabled:opacity-40"
+        aria-label={t('saved.remove')}
       >
-        <BookmarkX size={16} className={isRemoving ? 'animate-pulse' : ''} />
+        <BookmarkX size={18} className={isRemoving ? 'animate-pulse motion-reduce:animate-none' : ''} aria-hidden />
       </button>
     </div>
   );

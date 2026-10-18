@@ -10,6 +10,7 @@
  */
 
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { markProductTourComplete } from '@/lib/onboarding';
 
 const DONE_KEY = 'nh_map_tour_done';
 
@@ -76,6 +77,8 @@ export function useMapTour(ready: boolean) {
     } catch {
       /* ignore */
     }
+    // The welcome is done: the check-in, notification and install prompts may start.
+    markProductTourComplete();
   }, []);
   return { step, start: () => setStep(0), next: () => (step >= STEPS.length - 1 ? finish() : setStep(step + 1)), finish };
 }

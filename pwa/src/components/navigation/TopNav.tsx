@@ -99,7 +99,8 @@ export type TopBarProps = {
   title: string;
   /** Your area, e.g. "Somolu"; null hides the line. */
   area: string | null;
-  signedIn: boolean;
+  /** null until the page has started on the phone (the first draw must match the pre-built page). */
+  signedIn: boolean | null;
   /** Where "Join free" goes (keeps a shared link's invite code). */
   joinHref?: string;
   /** HuudCredit balance; null while loading (shows a placeholder, never a guess). */
@@ -166,7 +167,9 @@ export function TopBar({
 
         {/* Right */}
         <div className="flex shrink-0 items-center gap-1 min-[380px]:gap-1.5">
-          {!signedIn ? (
+          {signedIn === null ? (
+            <span className="h-[38px] w-20" aria-hidden />
+          ) : !signedIn ? (
             <Link
               href={joinHref}
               className="tap-target inline-flex h-[38px] items-center rounded-full bg-primary px-4 text-[13px] font-extrabold text-white"
@@ -236,7 +239,11 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
   const huudName = useHuudDisplayName(user);
   // After the page starts (the invite code lives in this visit's storage).
   const [joinHref, setJoinHref] = useState('/signup');
+  // Who you are comes from this phone's storage, which the pre-built page can't know:
+  // draw a neutral bar first, then the signed-in or visitor version.
+  const [started, setStarted] = useState(false);
   useEffect(() => {
+    setStarted(true);
     rememberRef(new URLSearchParams(window.location.search).get('ref'));
     setJoinHref(signupHref());
   }, [pathname]);
@@ -254,13 +261,13 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
     <TopBar
       isHome={pathname === '/feed' || pathname === '/huud' || pathname === '/'}
       title={title}
-      area={huudName && huudName !== HUUD_NAME_FALLBACK ? huudName : null}
-      signedIn={Boolean(user)}
+      area={started && huudName && huudName !== HUUD_NAME_FALLBACK ? huudName : null}
+      signedIn={started ? Boolean(user) : null}
       joinHref={joinHref}
       credit={typeof stats?.totalHuudCoins === 'number' ? stats.totalHuudCoins : null}
       unreadCount={unreadCount}
-      initial={displayName.trim().charAt(0).toUpperCase() || '🙂'}
-      avatarUrl={me?.avatarUrl || me?.profilePicture || null}
+      initial={(started && displayName.trim().charAt(0).toUpperCase()) || '🙂'}
+      avatarUrl={started ? me?.avatarUrl || me?.profilePicture || null : null}
       scrollHidden={scrollHidden}
       origin={origin}
       onBack={() => router.back()}

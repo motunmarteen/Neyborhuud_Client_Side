@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { useStarted } from '@/hooks/useStarted';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { safetyService } from '@/services/safety.service';
@@ -149,6 +150,7 @@ function SosHoldCard({ guardians }: { guardians: number }) {
 
 export function SentinelHub({ user, areaName }: { user: unknown; areaName?: string | null }) {
   const { t } = useTranslation();
+  const started = useStarted();
   const firstName = (user as { firstName?: string } | null)?.firstName;
   const home = useMemo(() => (user ? extractUserHomeCoords(user as Parameters<typeof extractUserHomeCoords>[0]) : null), [user]);
 
@@ -217,8 +219,9 @@ export function SentinelHub({ user, areaName }: { user: unknown; areaName?: stri
           </div>
         </div>
         <p className="text-sm text-navy">
-          {t(greetingKey())}
-          {firstName ? `, ${firstName}` : ''}. {summary}
+          {/* Greeting uses this phone's clock and your name: only once the page has started. */}
+          {started ? `${t(greetingKey())}${firstName ? `, ${firstName}` : ''}. ` : ''}
+          {summary}
         </p>
       </div>
 

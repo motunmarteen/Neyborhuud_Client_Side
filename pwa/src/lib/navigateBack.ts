@@ -31,7 +31,7 @@ const PREFIX_FALLBACKS: Array<[prefix: string, href: string]> = [
   ['/notifications', '/feed'],
   ['/communities', '/feed'],
   ['/neighborhood', '/feed'],
-  ['/popular', '/neighborhood'],
+  ['/popular', '/feed'],
   ['/gossip', '/feed'],
   ['/gist', '/feed'],
 ];

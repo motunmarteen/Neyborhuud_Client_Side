@@ -22,6 +22,7 @@ import { newsService } from '@/services/news.service';
 import { NewsFxStrip } from '@/components/news/NewsFxStrip';
 import type { NewsSource, RssArticle } from '@/types/incident';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { useTranslation } from '@/lib/i18n';
 
 function sourcesForRegion(
   tab: LocalNewsTab,
@@ -34,6 +35,7 @@ function sourcesForRegion(
 }
 
 function LocalNewsInner() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<LocalNewsTab>(() =>
@@ -110,7 +112,7 @@ function LocalNewsInner() {
           const fallback = await newsService.getMultipleFeeds(pool, 12);
           setArticles(filterArticlesByTopic(fallback, topic));
         } catch {
-          setRssError('Failed to load news. Please try again.');
+          setRssError('load-failed');
         }
       } finally {
         setRssLoading(false);
@@ -147,7 +149,7 @@ function LocalNewsInner() {
         <>
           <NewsFxStrip />
           <BrowseTabStrip
-            tabs={[...LOCAL_NEWS_TABS]}
+            tabs={LOCAL_NEWS_TABS.map((tab) => ({ ...tab, label: t(`news.tab.${tab.id}`) }))}
             activeId={activeTab}
             onChange={(id) => setTab(id as LocalNewsTab)}
             trailing={
@@ -155,15 +157,12 @@ function LocalNewsInner() {
                 type="button"
                 onClick={() => loadRss(activeTab, newsTopic, selectedSourceIds)}
                 disabled={rssLoading}
-                className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary disabled:opacity-50"
-                aria-label="Refresh"
+                className="tap-target grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-navy shadow-[0_2px_6px_rgba(29,36,51,0.12)] disabled:opacity-50"
+                aria-label={t('news.refresh')}
               >
-                <span
-                  className={`material-symbols-outlined text-[18px] ${rssLoading ? 'animate-spin' : ''}`}
-                >
+                <span aria-hidden className={`material-symbols-outlined text-[18px] ${rssLoading ? 'animate-spin motion-reduce:animate-none' : ''}`}>
                   refresh
                 </span>
-                <span>Refresh</span>
               </button>
             }
           />
@@ -180,7 +179,7 @@ function LocalNewsInner() {
                       loadRss(activeTab, topic.id, selectedSourceIds);
                     }}
                   >
-                    {topic.label}
+                    {t(`news.topic.${topic.id}`) === `news.topic.${topic.id}` ? topic.label : t(`news.topic.${topic.id}`)}
                   </BrowseFilterChip>
                 ))}
               </div>
@@ -192,7 +191,7 @@ function LocalNewsInner() {
                     loadRss(activeTab, newsTopic, []);
                   }}
                 >
-                  All sources
+                  {t('news.allSources')}
                 </BrowseFilterChip>
                 {sources.map((src) => (
                   <BrowseFilterChip
@@ -216,9 +215,9 @@ function LocalNewsInner() {
     >
       <div className="space-y-5">
         {rssLoading ? (
-          <div className="mod-card flex flex-col gap-2 rounded-2xl p-3">
+          <div className="flex flex-col gap-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="mod-inset h-[4.5rem] animate-pulse rounded-xl" />
+              <div key={i} className="h-[4.5rem] animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />
             ))}
           </div>
         ) : rssError ? (
@@ -226,15 +225,12 @@ function LocalNewsInner() {
         ) : articles.length === 0 ? (
           <BrowseEmptyState
             icon="newspaper"
-            title="No articles in this section"
-            description="Try another topic or source, or tap Refresh."
+            title={t('news.emptyTitle')}
+            description={t('news.emptyBody')}
             filledIcon
           />
         ) : (
-          <div
-            className="mod-card divide-y overflow-hidden rounded-2xl"
-            style={{ borderColor: 'var(--neu-shadow-dark)' }}
-          >
+          <div className="flex flex-col gap-2">
             {articles.map((article) => (
               <NewsArticleRow key={article.id} article={article} />
             ))}
@@ -242,9 +238,7 @@ function LocalNewsInner() {
         )}
 
         {isRssTab && !rssLoading && !rssError && articles.length > 0 ? (
-          <p className="text-center text-[11px] text-[var(--neu-text-muted)]">
-            Headlines open on the publisher site
-          </p>
+          <p className="text-center text-[11px] font-semibold text-muted">{t('news.openNote')}</p>
         ) : null}
       </div>
 

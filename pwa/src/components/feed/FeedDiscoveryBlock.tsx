@@ -665,14 +665,14 @@ export function FeedDiscoveryBlock({ item, userLocation, currentUserId }: FeedDi
     if (!users || users.length === 0) return null;
 
     return (
-      <DiscoveryChrome icon="group" label="People in your Huud" href="/neighborhood">
+      <DiscoveryChrome icon="group" label="People in your Huud" href="/huud">
         <div className="horizontal-carousel items-start">
           <CategoryCoverCard
             imageSrc="/illustration_community_alert.png"
             title="Your Neighbors"
             subtitle="Connect Locally"
             buttonLabel="View All"
-            buttonHref="/neighborhood"
+            buttonHref="/huud"
             gradient="linear-gradient(135deg, #4a2a1a 0%, #8a4a2a 50%, #d46a00 100%)"
           />
           {users.map((user) => {

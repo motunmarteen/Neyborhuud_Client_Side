@@ -2985,7 +2985,9 @@ main.feed-scroll-main--sky-feed {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: var(--neu-bg);
+  /* Not pinned, so no solid band: chips and cards sit on the page (Phase 4 restyle). */
+  background: transparent;
+  padding-top: 0.25rem;
 }
 
 /* ── Local Huud hub headers (Marketplace, Jobs, etc.) ── */

@@ -1,4 +1,7 @@
-/** First-feed welcome — replaces the old full-page product tour. */
+/**
+ * "Welcome done": set when the map tour finishes (or is skipped), or on a first visit to the
+ * Feed. The check-in, notification and install prompts wait for it.
+ */
 export const PRODUCT_TOUR_COMPLETE_KEY = 'neyborhuud_product_tour_complete';
 
 /** Fired when signup / welcome milestones finish — prompts can start their timers. */

@@ -19,11 +19,16 @@ import { skyAt } from '@/lib/sky';
 import { WEATHER_WORDS, weatherLook } from '@/lib/mapWeather';
 import { extractUserMapCoords, type MapUserLike } from '@/lib/mapUserLocation';
 import { userArea } from '@/lib/adsApi';
+import { useStarted } from '@/hooks/useStarted';
+import { useTranslation } from '@/lib/i18n';
 
 /** Sky band height below the floating top bar. */
 const BAND = 112;
 
 export function FeedSkyBand() {
+  const { t } = useTranslation();
+  // The sky depends on this phone's clock and your area: a plain sky until the page has started.
+  const started = useStarted();
   const calm = useCalm();
   const { user } = useAuth();
   const place = useMemo(() => (user ? extractUserMapCoords(user as unknown as MapUserLike) : null), [user]);
@@ -35,25 +40,25 @@ export function FeedSkyBand() {
     return () => window.clearInterval(id);
   }, []);
   const sky = useMemo(() => skyAt(now, place), [now, place]);
-  const look = wx ? weatherLook(wx) : null;
+  const look = started && wx ? weatherLook(wx) : null;
   const rain = !calm && look ? Array.from({ length: Math.min(look.drops, 26) }, (_, i) => i) : [];
   const words = wx ? WEATHER_WORDS[wx] : null;
-  const weatherLine = [words ? `${words.icon} ${words.label}` : null, area?.lga ?? null].filter(Boolean).join(' · ');
+  const weatherLine = started ? [words ? `${words.icon} ${words.label}` : null, area?.lga ?? null].filter(Boolean).join(' · ') : '';
 
   // Pulling down from the top of the Feed (this sky included) goes back to the map: see feed/page.tsx.
 
   return (
     <section
-      aria-label="Feed"
+      aria-label={t('feed.title')}
       className="relative overflow-hidden"
       style={{
         height: `calc(var(--safe-top) + var(--app-topnav-height) + ${BAND}px)`,
-        background: `linear-gradient(180deg, ${sky.skyTop} 0%, ${sky.skyBot} 100%)`,
+        background: started ? `linear-gradient(180deg, ${sky.skyTop} 0%, ${sky.skyBot} 100%)` : 'linear-gradient(180deg, #CFE6F5 0%, #EEF2F7 100%)',
         touchAction: 'pan-y',
       }}
     >
       {look ? <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: look.skyWash }} /> : null}
-      {sky.sun.up ? (
+      {!started ? null : sky.sun.up ? (
         <span
           aria-hidden
           className="pointer-events-none absolute h-9 w-9 -translate-x-1/2 rounded-full"
@@ -78,7 +83,7 @@ export function FeedSkyBand() {
         />
       ) : null}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-11">
-        <SkyHorizon color={sky.skyline} lat={place?.lat} top={0} />
+        {started ? <SkyHorizon color={sky.skyline} lat={place?.lat} top={0} /> : null}
       </div>
       {rain.length ? (
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -99,19 +104,19 @@ export function FeedSkyBand() {
       ) : null}
 
       <div className="absolute inset-x-0 bottom-3 flex items-end justify-between gap-3 px-4">
-        <div className="flex min-w-0 flex-col" style={{ color: sky.dark > 0.5 ? '#FFFFFF' : '#1D2433' }}>
-          <h1 className="font-heading text-[26px] font-black leading-none drop-shadow-sm">Feed</h1>
+        <div className="flex min-w-0 flex-col" style={{ color: started && sky.dark > 0.5 ? '#FFFFFF' : '#1D2433' }}>
+          <h1 className="font-heading text-[26px] font-black leading-none drop-shadow-sm">{t('feed.title')}</h1>
           {weatherLine ? <span className="mt-1 truncate text-[13px] font-bold drop-shadow-sm">{weatherLine}</span> : null}
         </div>
         <Link
           href="/huud"
           className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-white/90 px-3 text-xs font-extrabold text-navy shadow-sm"
-          aria-label="Back to the map. You can also swipe down on the sky."
+          aria-label={t('feed.mapAria')}
         >
           <span aria-hidden className="material-symbols-outlined text-[16px]">
             map
           </span>
-          Map
+          {t('feed.map')}
         </Link>
       </div>
     </section>

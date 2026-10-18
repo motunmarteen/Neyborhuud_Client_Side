@@ -46,7 +46,7 @@ interface NavItem {
 
 const NAV_MAIN: NavItem[] = [
   { icon: Home, label: 'Feed', href: '/feed' },
-  { icon: Compass, label: 'My Huud', href: '/neighborhood' },
+  { icon: Compass, label: 'My Huud', href: '/huud' },
   { icon: Users, label: 'Communities', href: '/communities' },
   { icon: Bookmark, label: 'Saved Posts', href: '/saved' },
 ];

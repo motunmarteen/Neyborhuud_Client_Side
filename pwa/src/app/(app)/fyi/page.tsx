@@ -14,7 +14,9 @@ import {
 } from '@/components/local-huud/LocalHuudHubHeader';
 import { FYISubtypeTabs, FYISubtype } from '@/components/fyi/FYISubtypeTabs';
 import { CreatePostModal } from '@/components/feed/CreatePostModal';
-import { FYICard } from '@/components/fyi/FYICard';
+import { XPostCard } from '@/components/feed/XPostCard';
+import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
+import { fyiService } from '@/services/fyi.service';
 import { useFYIList } from '@/hooks/useFYI';
 import { useAuth } from '@/hooks/useAuth';
 import { Post } from '@/types/api';
@@ -23,8 +25,11 @@ import { usePostMutations } from '@/hooks/usePosts';
 import { ReportModal } from '@/components/feed/ReportModal';
 import { contentService } from '@/services/content.service';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
+import { useTranslation } from '@/lib/i18n';
 
 function FYIPageInner() {
+  const { t } = useTranslation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [subtypeFilter, setSubtypeFilter] = useState<FYISubtype>('');
   const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
@@ -34,7 +39,8 @@ function FYIPageInner() {
 
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { deletePost } = usePostMutations();
+  const { deletePost, likePost, unlikePost, savePost, unsavePost } = usePostMutations();
+  const [detailsPostId, setDetailsPostId] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const {
@@ -78,6 +84,43 @@ function FYIPageInner() {
     }
   };
 
+  // The same post card as the Feed (F-13). FYI notices react with "Helpful".
+  const patchFyi = (postId: string, patch: (p: Post) => Post) =>
+    queryClient.setQueriesData({ queryKey: ['fyi'] }, (old: unknown) => {
+      const o = old as { pages?: { fyi?: Post[] }[] } | undefined;
+      if (!o?.pages) return old;
+      return { ...o, pages: o.pages.map((pg) => ({ ...pg, fyi: (pg.fyi || []).map((p) => (p.id === postId ? patch(p) : p)) })) };
+    });
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['fyi'] });
+    queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
+  };
+  const toggleHelpful = async (post: Post) => {
+    const was = post.isHelpful === true;
+    patchFyi(post.id, (p) => ({ ...p, isHelpful: !was, helpfulCount: Math.max(0, ((p.helpfulCount as number | undefined) ?? 0) + (was ? -1 : 1)) }));
+    try {
+      await fyiService.markHelpful(post.id);
+    } finally {
+      refresh();
+    }
+  };
+  const toggleLike = async (post: Post) => {
+    try {
+      if (post.isLiked) await unlikePost(post.id);
+      else await likePost(post.id);
+    } finally {
+      refresh();
+    }
+  };
+  const toggleSave = async (post: Post) => {
+    try {
+      if (post.isSaved) await unsavePost(post.id);
+      else await savePost(post.id);
+    } finally {
+      refresh();
+    }
+  };
+
   return (
     <>
       <AppBrowseLayout
@@ -85,24 +128,15 @@ function FYIPageInner() {
         header={
           <LocalHuudHubHeader
             hubId="fyi"
-            toolbar={
-              <div className="space-y-3">
-                <div className="flex justify-end">
-                  <LocalHuudHubPrimaryAction
-                    label="Post bulletin"
-                    onClick={() => setIsCreateModalOpen(true)}
-                  />
-                </div>
-                <FYISubtypeTabs activeSubtype={subtypeFilter} onSubtypeChange={setSubtypeFilter} />
-              </div>
-            }
+            action={<LocalHuudHubPrimaryAction label={t('fyi.post')} onClick={() => setIsCreateModalOpen(true)} />}
+            toolbar={<FYISubtypeTabs activeSubtype={subtypeFilter} onSubtypeChange={setSubtypeFilter} />}
           />
         }
       >
         {isLoading && (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="mod-card h-40 animate-pulse rounded-2xl" />
+              <div key={i} className="h-40 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />
             ))}
           </div>
         )}
@@ -114,14 +148,9 @@ function FYIPageInner() {
         {!isLoading && !isError && posts.length === 0 && (
           <BrowseEmptyState
             icon="campaign"
-            title="No bulletins yet"
-            description="Be the first to share a community announcement in your Huud."
-            action={
-              <LocalHuudHubPrimaryAction
-                label="Post bulletin"
-                onClick={() => setIsCreateModalOpen(true)}
-              />
-            }
+            title={t('fyi.emptyTitle')}
+            description={t('fyi.emptyBody')}
+            action={<LocalHuudHubPrimaryAction label={t('fyi.post')} onClick={() => setIsCreateModalOpen(true)} />}
           />
         )}
 
@@ -135,23 +164,26 @@ function FYIPageInner() {
                 ref={isLast ? lastPostRef : undefined}
                 data-comment-anchor={`post-${postId}`}
               >
-                <FYICard
+                <XPostCard
                   post={post}
                   currentUserId={user?.id}
-                  onComment={(id) => {
-                    const el = document.querySelector(
-                      `[data-comment-anchor="post-${id}"]`,
-                    ) as HTMLElement | null;
+                  onLike={() => void toggleLike(post)}
+                  onHelpful={() => void toggleHelpful(post)}
+                  onSave={() => void toggleSave(post)}
+                  onShare={() => undefined}
+                  onComment={() => {
+                    const el = document.querySelector(`[data-comment-anchor="post-${post.id}"]`) as HTMLElement | null;
                     if (el) {
                       const rect = el.getBoundingClientRect();
                       setCommentsAnchor({ left: rect.left, width: rect.width });
                     } else {
                       setCommentsAnchor(null);
                     }
-                    setCommentsPostId(id);
+                    setCommentsPostId(post.id);
                   }}
                   onDelete={(id) => setDeletingPostId(id)}
                   onReport={(id) => setReportingPostId(id)}
+                  onCardClick={() => setDetailsPostId(post.id)}
                 />
               </div>
             );
@@ -184,6 +216,8 @@ function FYIPageInner() {
         }}
       />
 
+      <PostDetailsModal postId={detailsPostId} isOpen={!!detailsPostId} onClose={() => setDetailsPostId(null)} />
+
       {/* Report Modal */}
       {reportingPostId && (
         <ReportModal
@@ -196,31 +230,23 @@ function FYIPageInner() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      {deletingPostId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setDeletingPostId(null)}>
-          <div className="mod-modal rounded-2xl p-6 mx-4 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--neu-text)' }}>Delete Bulletin</h3>
-            <p className="text-sm mb-6" style={{ color: 'var(--neu-text-muted)' }}>
-              Are you sure you want to delete this bulletin? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setDeletingPostId(null)}
-                className="px-4 py-2 rounded-xl text-sm font-bold mod-chip"
-                style={{ color: 'var(--neu-text-muted)' }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeletePost}
-                className="px-4 py-2 rounded-xl text-sm font-bold bg-brand-red/20 text-brand-red mod-chip hover:bg-brand-red/30 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
+      <AppBottomSheet
+        open={!!deletingPostId}
+        onClose={() => setDeletingPostId(null)}
+        title={t('fyi.deleteTitle')}
+        footer={
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setDeletingPostId(null)} className="min-h-12 flex-1 rounded-full bg-white text-sm font-extrabold text-navy ring-1 ring-line">
+              {t('common.cancel')}
+            </button>
+            <button type="button" onClick={handleDeletePost} className="min-h-12 flex-1 rounded-full bg-brand-red text-sm font-extrabold text-white">
+              {t('fyi.delete')}
+            </button>
           </div>
-        </div>
-      )}
+        }
+      >
+        <p className="text-sm font-semibold text-muted">{t('fyi.deleteBody')}</p>
+      </AppBottomSheet>
     </>
   );
 }
@@ -229,7 +255,7 @@ export default function FYIPage() {
   return (
     <Suspense
       fallback={
-        <div className="mod-card mx-auto mt-8 h-24 max-w-[680px] animate-pulse rounded-2xl" />
+        <div className="mx-auto mt-8 h-24 max-w-[680px] animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />
       }
     >
       <FYIPageInner />

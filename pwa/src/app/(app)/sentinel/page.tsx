@@ -34,7 +34,7 @@ import { useSos } from '@/hooks/useSos';
 // tool can never be left off this screen. The first 8 show; the rest open with "More".
 
 const EXPLORE_TILES = [
-  { href: '/map', icon: '🗺️', label: 'Map', sub: 'Pins, safe zones, places' },
+  { href: '/huud', icon: '🗺️', label: 'Map', sub: 'Pins, safe zones, places' },
   { href: '/marketplace', icon: '🛒', label: 'Market', sub: 'Buy and sell near you' },
   { href: '/services', icon: '🛠️', label: 'Artisans', sub: 'Plumbers, electricians…' },
   { href: '/events', icon: '🎉', label: 'Events', sub: 'Meetings, clean-ups, parties' },

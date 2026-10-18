@@ -85,14 +85,14 @@ export default function RightSidebar() {
               </Link>
             </div>
           ) : (
-            upcomingEvents.map((event: any) => {
+            upcomingEvents.map((event: any, i: number) => {
               const date = event.date ? new Date(event.date) : null;
               const month = date ? date.toLocaleString('default', { month: 'short' }) : '';
               const day = date ? String(date.getDate()) : '';
               const attendees = event.attendeeCount ?? event.attendees?.length ?? 0;
               return (
                 <Link
-                  key={event._id ?? event.id}
+                  key={event._id ?? event.id ?? `event-${i}`}
                   href={`/events/${event._id ?? event.id}`}
                   className="p-3 rounded-2xl bg-white border border-black/[0.08] hover:border-[#0E8A3E]/50 transition-all flex gap-3 cursor-pointer shadow-xs group"
                 >
@@ -152,7 +152,7 @@ export default function RightSidebar() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-2.5">
-            {recentListings.map((item: any) => {
+            {recentListings.map((item: any, i: number) => {
               const price = item.price != null
                 ? item.price === 0
                   ? 'Free'
@@ -161,7 +161,7 @@ export default function RightSidebar() {
               const image = item.images?.[0] ?? item.image ?? item.thumbnail ?? null;
               return (
                 <Link
-                  key={item._id ?? item.id}
+                  key={item._id ?? item.id ?? `item-${i}`}
                   href={`/marketplace?product=${encodeURIComponent(String(item._id ?? item.id))}`}
                   className="group p-2.5 rounded-2xl bg-white border border-black/[0.08] hover:border-amber-400/60 transition-all shadow-xs flex flex-col justify-between"
                 >

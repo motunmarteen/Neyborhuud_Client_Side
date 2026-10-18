@@ -18,7 +18,6 @@ import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { PostDetailsModal } from '@/components/feed/PostDetailsModal';
 import { useLocationFeed, usePostMutations } from '@/hooks/usePosts';
-import { FYICard } from '@/components/fyi/FYICard';
 import { HelpRequestCard } from '@/components/help-request/HelpRequestCard';
 import { useDepartments } from '@/hooks/useDepartments';
 import { authService } from '@/services/auth.service';
@@ -28,6 +27,8 @@ import { fyiService } from '@/services/fyi.service';
 import { getCurrentLocation } from '@/lib/geolocation';
 import { triggerSmartLocationSync } from '@/hooks/useSmartLocationSync';
 import { isUserInNigeria } from '@/lib/nigeriaCheck';
+import { hasCompletedProductTour, markProductTourComplete } from '@/lib/onboarding';
+import { useStarted } from '@/hooks/useStarted';
 import { useTranslation } from '@/lib/i18n';
 import { FeedTab, Post, ContentType } from '@/types/api';
 import { useInView } from 'react-intersection-observer';
@@ -40,7 +41,6 @@ import { FeedDiscoveryBlock } from '@/components/feed/FeedDiscoveryBlock';
 import { FrequentPlaceContextBanner } from '@/components/feed/FrequentPlaceContextBanner';
 import { mergeDiscoveryIntoFeed, type BaseFeedItem, type DiscoveryFeedItem } from '@/lib/feedDiscoveryMerge';
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
-import { FeedWelcomeSheet } from '@/components/feed/FeedWelcomeSheet';
 import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
 import { RedZoneBanner } from '@/components/feed/RedZoneBanner';
 import { StreetRadarView } from '@/components/feed/StreetRadarView';
@@ -117,7 +117,7 @@ function XFeedInner() {
     }, [composeParam, router]);
 
     // ?post=<id> opens that post's details (map pins, shared links); then drop the param.
-    const postParam = searchParams.get('post');
+    const postParam = searchParams.get('post') || searchParams.get('postId'); // postId: older links
     useEffect(() => {
         if (!postParam) return;
         setSelectedPostId(postParam);
@@ -162,6 +162,11 @@ function XFeedInner() {
 
     // Current user ID for ownership checks
     const { user: currentAuthUser } = useAuth();
+    const started = useStarted();
+    // Someone who opens the Feed first (a shared link) has had their welcome here.
+    useEffect(() => {
+        if (!hasCompletedProductTour()) markProductTourComplete();
+    }, []);
     const currentUserId = currentAuthUser?.id || null;
     const [editingPost, setEditingPost] = useState<Post | null>(null);
     const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
@@ -433,7 +438,7 @@ function XFeedInner() {
                         </div>
                         <div className="feed-sky-feed-body flex flex-col gap-3 sm:gap-3.5 pt-3 sm:pt-3.5">
                             <FeedComposer
-                              initial={(currentAuthUser?.firstName || currentAuthUser?.username || 'Y').charAt(0).toUpperCase()}
+                              initial={started ? (currentAuthUser?.firstName || currentAuthUser?.username || 'Y').charAt(0).toUpperCase() : ''}
                               onOpen={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
                             />
                             <FeedTabs />
@@ -637,6 +642,7 @@ function XFeedInner() {
                                                 }}
                                                 onShare={() => handleShare(post)}
                                                 onSave={() => handleSave(post)}
+                                                onHelpful={() => void handleHelpful(post.id)}
                                                 onEdit={() => handleEditPost(post)}
                                                 onDelete={() => setDeletingPostId(post.id)}
                                                 onReport={(id) => setReportingPostId(id)}
@@ -788,7 +794,6 @@ function XFeedInner() {
                 onClose={() => setIsAskSentinelOpen(false)}
             />
 
-            <FeedWelcomeSheet />
         </div>
     );
 }

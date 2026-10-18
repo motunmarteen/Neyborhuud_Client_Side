@@ -198,7 +198,7 @@ export default function HuudEconomyOverviewPage() {
             <Link href="/huud-economy/score" className="mod-chip rounded-xl py-2.5 text-center text-xs font-semibold no-underline" style={{ color: 'var(--neu-text-muted)' }}>
               Huud Score
             </Link>
-            <Link href="/neighborhood" className="mod-chip rounded-xl py-2.5 text-center text-xs font-semibold no-underline" style={{ color: 'var(--neu-text-muted)' }}>
+            <Link href="/huud" className="mod-chip rounded-xl py-2.5 text-center text-xs font-semibold no-underline" style={{ color: 'var(--neu-text-muted)' }}>
               Tip a neighbour
             </Link>
             <Link href="/feed" className="mod-chip rounded-xl py-2.5 text-center text-xs font-semibold no-underline" style={{ color: 'var(--neu-text-muted)' }}>

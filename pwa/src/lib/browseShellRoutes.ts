@@ -6,6 +6,7 @@ export const BROWSE_SHELL_ROUTE_PREFIXES = [
   '/local-news',
   '/neighborhood',
   '/saved',
+  '/notifications',
   '/communities',
   '/chat',
   '/safety',

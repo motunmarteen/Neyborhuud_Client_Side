@@ -1730,7 +1730,7 @@ export default function ProfilePage() {
                 <p className="text-[13px] font-medium text-slate-400 mt-1">Trending posts and local news in your Huud</p>
               </div>
               <Link
-                href="/neighborhood?tab=street-radar"
+                href="/feed"
                 className="inline-flex items-center gap-2 rounded-full bg-teal-600 text-white hover:bg-teal-700 px-6 py-2.5 text-sm font-bold transition no-underline"
               >
                 <span className="material-symbols-outlined text-[16px]">radar</span>

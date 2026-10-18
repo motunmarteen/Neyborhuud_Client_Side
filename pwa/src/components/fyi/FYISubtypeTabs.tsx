@@ -5,6 +5,9 @@
 
 'use client';
 
+import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
+import { useTranslation } from '@/lib/i18n';
+
 export type FYISubtype = '' | 'safety_notice' | 'lost_found' | 'community_announcement' | 'alert';
 
 interface FYISubtypeTabsProps {
@@ -20,38 +23,13 @@ const TABS: Array<{ key: FYISubtype; label: string; icon: string }> = [
     { key: 'alert',                  label: 'Alerts',       icon: 'warning' },
 ];
 
-// Per-subtype accent color when active
-const ACTIVE_COLOR: Record<string, string> = {
-    '':                       'text-[var(--primary)]',
-    safety_notice:             'text-brand-red',
-    lost_found:                'text-brand-blue',
-    community_announcement:    'text-brand-blue',
-    alert:                     'text-brand-red',
-};
-
 export function FYISubtypeTabs({ activeSubtype, onSubtypeChange }: FYISubtypeTabsProps) {
+    const { t } = useTranslation();
     return (
-        <div className="border-b overflow-x-auto scrollbar-none" style={{ borderColor: 'var(--neu-shadow-light)' }}>
-            <div className="flex min-w-max px-4">
-                {TABS.map((tab) => {
-                    const isActive = activeSubtype === tab.key;
-                    return (
-                        <button
-                            key={tab.key}
-                            onClick={() => onSubtypeChange(tab.key)}
-                            className={`flex items-center gap-1.5 px-3 py-3 text-xs font-medium transition-all whitespace-nowrap border-b-2 -mb-px ${
-                                isActive
-                                    ? `border-current ${ACTIVE_COLOR[tab.key]} font-semibold`
-                                    : 'border-transparent hover:text-[var(--neu-text-secondary)]'
-                            }`}
-                            style={!isActive ? { color: 'var(--neu-text-muted)' } : undefined}
-                        >
-                            <span className="material-symbols-outlined text-[14px]">{tab.icon}</span>
-                            {tab.label}
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
+        <BrowseTabStrip
+            tabs={TABS.map((tab) => ({ id: tab.key || 'all', label: t(`fyi.tab.${tab.key || 'all'}`), icon: tab.icon }))}
+            activeId={activeSubtype || 'all'}
+            onChange={(id) => onSubtypeChange((id === 'all' ? '' : id) as FYISubtype)}
+        />
     );
 }

@@ -244,7 +244,7 @@ export default function WalletPage() {
                   <span className="text-xs font-bold text-primary">Daily check-in</span>
                 </Link>
                 <Link
-                  href="/neighborhood"
+                  href="/huud"
                   className="mod-inset flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center no-underline"
                 >
                   <span className="material-symbols-outlined text-[22px] text-brand-blue" style={{ fontVariationSettings: "'FILL' 1" }}>
