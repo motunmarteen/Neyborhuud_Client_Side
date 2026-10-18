@@ -414,6 +414,16 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 ---
 
+## Phase 7b: Avatars and map lenses (owner 2026-10-18)
+
+- [x] AV-01 3D toy-style avatars (owner: 3D; toy style now, artist models later): Avatar Studio at /avatar with body, skin (12 tones), face, hair (low cut, waves, afro, cornrows, braids, Bantu knots, locs, puff; premium frontal, mohawk), headwear (fila, cap, hijab, gele; premium gold gele, Oba's crown), clothes (T-shirt, shirt, kaftan, Ankara, hoodie, blouse; premium agbada, senator, Super Eagles, aso-ebi lace), shoes, glasses, neckwear
+- [x] AV-02 Start from a selfie: skin tone matched on the phone (photo never uploaded)
+- [x] AV-03 Premium avatar items bought with HuudCredit (server prices), try on before buying
+- [x] AV-04 Avatar portrait on profiles and on friends' map pins
+- [ ] AV-05 Poses and selfie stickers; an artist's 3D models to replace the shapes
+- [x] ML-01 Map lenses: More on the map (Friends, Birthdays today, Businesses), max 2 at once, 25 per lens
+- [x] ML-02 Show me to friends: mutual follows only, ~220 m, only while the app is open, off by default; strangers never shown
+
 ## Phase 8: Sharing and virality
 
 - [ ] V-01 Shared scene renderer: sky + neighbourhood behind any card (server-side image generation, so links preview on WhatsApp)

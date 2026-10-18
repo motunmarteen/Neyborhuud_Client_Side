@@ -44,6 +44,22 @@ export default function ShopPage() {
           <ErrorState onRetry={() => void refetch()} homeHref={null} />
         ) : (
           <>
+            <Link
+              href="/avatar"
+              className="flex items-center gap-3 rounded-[22px] bg-gradient-to-r from-[#BFE6FF] to-[#E8F7EC] p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)]"
+            >
+              <span aria-hidden className="text-3xl">
+                🧍🏾
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="text-sm font-black text-navy">Avatar Studio</span>
+                <span className="text-xs font-semibold text-navy/70">Your 3D look: agbada, gele, Super Eagles jersey, gold chain and more</span>
+              </span>
+              <span aria-hidden className="material-symbols-outlined text-navy">
+                chevron_right
+              </span>
+            </Link>
+
             {SECTIONS.map((sec) => {
               const slot = sec.kind === 'map_skin' ? 'mapSkin' : 'profileFrame';
               const wearing = data.equipped[slot];

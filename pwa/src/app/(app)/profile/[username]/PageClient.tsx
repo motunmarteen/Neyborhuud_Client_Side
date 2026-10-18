@@ -884,6 +884,7 @@ export default function ProfilePage() {
             firstName={profile.firstName || profile.username}
             isOwnProfile={isOwnProfile}
             canAct={!!currentUser && !isBlocked && !isBlockedByThem}
+            avatarPortrait={(profile.gamification as { avatarPortrait?: string | null } | undefined)?.avatarPortrait ?? null}
           />
         ) : null}
 

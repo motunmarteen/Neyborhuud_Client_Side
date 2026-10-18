@@ -8,13 +8,28 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
+import { avatarPortraitUrl } from '@/hooks/useAvatar';
 import { getErrorMessage } from '@/lib/error-handler';
 import { useHideShoutout, useSendShoutout, useShoutouts, useUserBadges } from '@/hooks/usePhase7';
 
 const SHOUTOUT_PRICE = 50;
 
-export function ProfileRecognition({ userId, firstName, isOwnProfile, canAct }: { userId: string; firstName: string; isOwnProfile: boolean; canAct: boolean }) {
+export function ProfileRecognition({
+  userId,
+  firstName,
+  isOwnProfile,
+  canAct,
+  avatarPortrait,
+}: {
+  userId: string;
+  firstName: string;
+  isOwnProfile: boolean;
+  canAct: boolean;
+  /** API path of their 3D avatar portrait, if they made one. */
+  avatarPortrait?: string | null;
+}) {
   const { data: badges } = useUserBadges(userId);
   const { data: shoutouts } = useShoutouts(userId);
   const hide = useHideShoutout(userId);
@@ -23,7 +38,32 @@ export function ProfileRecognition({ userId, firstName, isOwnProfile, canAct }: 
   const legacy = badges?.legacy ?? [];
 
   return (
-    <section className="mx-auto mt-4 flex w-[calc(100%-1.5rem)] max-w-[600px] flex-col gap-3" aria-label="Badges and shout-outs">
+    <section className="mx-auto mt-4 flex w-[calc(100%-1.5rem)] max-w-[600px] flex-col gap-3" aria-label="Avatar, badges and shout-outs">
+      {avatarPortrait || isOwnProfile ? (
+        <div className="flex items-center gap-4 rounded-2xl bg-[#F4F5F6] p-4">
+          {avatarPortrait ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarPortraitUrl(avatarPortrait)} alt={`${firstName}'s avatar`} className="h-20 w-20 rounded-full bg-[#E8F7EC] object-cover" />
+          ) : (
+            <span aria-hidden className="grid h-20 w-20 place-items-center rounded-full bg-[#E8F7EC] text-3xl">
+              🧍🏾
+            </span>
+          )}
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">Avatar</p>
+            {isOwnProfile ? (
+              <>
+                <p className="text-sm font-bold text-gray-800">{avatarPortrait ? 'Your 3D avatar' : 'Make your 3D avatar'}</p>
+                <Link href="/avatar" className="inline-flex min-h-10 w-fit items-center rounded-full bg-white px-4 text-xs font-bold text-gray-800 shadow-sm">
+                  {avatarPortrait ? 'Change my look' : 'Start, from a selfie'}
+                </Link>
+              </>
+            ) : (
+              <p className="text-sm font-bold text-gray-800">{firstName}&apos;s avatar</p>
+            )}
+          </div>
+        </div>
+      ) : null}
       {earned.length || legacy.length ? (
         <div className="flex flex-col gap-2 rounded-2xl bg-[#F4F5F6] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">Badges</p>

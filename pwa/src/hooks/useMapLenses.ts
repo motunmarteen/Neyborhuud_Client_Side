@@ -12,9 +12,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import apiClient from '@/lib/api-client';
 import { mapPinHtml, personPinHtml } from '@/components/map/Pins';
+import { avatarPortraitUrl } from '@/hooks/useAvatar';
 
 export type LensKey = 'friends' | 'birthdays' | 'businesses';
-export type LensItem = { id: string; lat: number; lng: number; title: string; sub?: string; emoji?: string; avatarUrl?: string; username?: string; href?: string };
+export type LensItem = { id: string; lat: number; lng: number; title: string; sub?: string; emoji?: string; avatarUrl?: string; avatarPortrait?: string; username?: string; href?: string };
 
 export const LENSES: { key: LensKey; label: string; emoji: string; note: string }[] = [
   { key: 'friends', label: 'Friends', emoji: '👥', note: 'Friends who follow you back and chose to show themselves, near where they are' },
@@ -62,7 +63,7 @@ function markerFor(lens: LensKey, it: LensItem, onOpen: (it: LensItem, lens: Len
   el.innerHTML =
     lens === 'businesses'
       ? mapPinHtml({ emoji: '🏪', label, ring: 'amber', size: 'sm' })
-      : personPinHtml({ name: it.title, avatarUrl: it.avatarUrl, label }) + (lens === 'birthdays' ? '<span class="nh-lens__badge" aria-hidden="true">🎂</span>' : '') + '<span class="nh-lens__tag" aria-hidden="true"></span>';
+      : personPinHtml({ name: it.title, avatarUrl: avatarPortraitUrl(it.avatarPortrait) ?? it.avatarUrl, label }) + (lens === 'birthdays' ? '<span class="nh-lens__badge" aria-hidden="true">🎂</span>' : '') + '<span class="nh-lens__tag" aria-hidden="true"></span>';
   const tag = el.querySelector('.nh-lens__tag');
   if (tag) tag.textContent = it.title;
   const open = (e: Event) => {
