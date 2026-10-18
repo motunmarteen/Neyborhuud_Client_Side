@@ -134,7 +134,8 @@ export function parseSafeNextPath(next: string | null | undefined): string | nul
 export function resolvePostAuthRoute(next?: string | null): string {
   const safeNext = parseSafeNextPath(next);
   if (safeNext) return safeNext;
-  return '/feed';
+  // Home is the live map (agreed mockup, My Huud tab).
+  return '/huud';
 }
 
 export type SessionValidation = 'valid' | 'invalid' | 'unknown';

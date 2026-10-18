@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Suspense, useEffect, useState } from 'react';
+import { useTranslation } from '@/lib/i18n';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     isUserEmailVerified,
@@ -36,6 +37,7 @@ function resolveNextRouteFromSession(): string {
 }
 
 function VerifyEmailContent() {
+    const { t } = useTranslation();
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
@@ -74,15 +76,15 @@ function VerifyEmailContent() {
         try {
             const response = await authService.verifyEmailWithToken(verificationToken);
             if (!response.success) {
-                throw new Error(response.message || 'Failed to verify email. Please try again.');
+                throw new Error(response.message || t('auth.verify.failed'));
             }
             applyVerificationPayload(response.data?.user);
             setStep('success');
         } catch (error: unknown) {
-            const message = getApiErrorMessage(error, 'Failed to verify email. Please try again.');
+            const message = getApiErrorMessage(error, t('auth.verify.failed'));
             if (message.toLowerCase().includes('expired')) {
                 setStep('expired');
-                setErrorMessage('This verification link has expired. Please request a new code.');
+                setErrorMessage(t('auth.verify.linkExpired'));
             } else if (message.toLowerCase().includes('already verified')) {
                 setStep('success');
             } else {
@@ -100,7 +102,7 @@ function VerifyEmailContent() {
         const codeToVerify = verificationCode.trim();
         if (!email || isVerifying || !isValidEmailVerificationCode(codeToVerify)) {
             if (codeToVerify.length > 0 && !isValidEmailVerificationCode(codeToVerify)) {
-                setErrorMessage('Enter all 6 digits, then tap Verify.');
+                setErrorMessage(t('auth.verify.allDigits'));
             }
             return;
         }
@@ -111,23 +113,23 @@ function VerifyEmailContent() {
         try {
             const response = await authService.verifyEmailWithCode(email, codeToVerify);
             if (!response.success) {
-                throw new Error(response.message || 'Verification failed. Please try again.');
+                throw new Error(response.message || t('auth.verify.failed'));
             }
             const verifiedUser = response.data?.user;
             if (verifiedUser && !isUserEmailVerified(verifiedUser)) {
-                throw new Error('That code was not accepted. Check your email and try again.');
+                throw new Error(t('auth.verify.notAccepted'));
             }
             applyVerificationPayload(verifiedUser);
             setStep('success');
         } catch (error: unknown) {
-            const message = getApiErrorMessage(error, 'Verification failed. Please try again.');
+            const message = getApiErrorMessage(error, t('auth.verify.failed'));
             const normalized = message.toLowerCase();
             if (normalized.includes('expired')) {
-                setErrorMessage('Code expired. Please request a new one.');
+                setErrorMessage(t('auth.verify.codeExpired'));
             } else if (normalized.includes('invalid') || normalized.includes('incorrect')) {
-                setErrorMessage('Invalid code. Please check and try again.');
+                setErrorMessage(t('auth.verify.wrongCode'));
             } else if (normalized.includes('attempts')) {
-                setErrorMessage('Too many attempts. Please request a new code.');
+                setErrorMessage(t('auth.verify.tooMany'));
             } else if (normalized.includes('already verified')) {
                 setStep('success');
                 return;
@@ -151,7 +153,7 @@ function VerifyEmailContent() {
             setResendCooldown(60);
             setVerificationCode('');
         } catch (error: unknown) {
-            setErrorMessage(getApiErrorMessage(error, 'Failed to resend code. Please try again.'));
+            setErrorMessage(getApiErrorMessage(error, t('auth.error.resend')));
         } finally {
             setIsResending(false);
         }
@@ -171,7 +173,7 @@ function VerifyEmailContent() {
                     ) : (
                         <Send className="shrink-0" size={17} strokeWidth={2} />
                     )}
-                    <span>{isResending ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
+                    <span>{isResending ? t('auth.sending') : resendCooldown > 0 ? `${resendCooldown}s` : t('auth.resend')}</span>
                 </button>
                 <button
                     type="button"
@@ -182,11 +184,11 @@ function VerifyEmailContent() {
                     {isVerifying ? (
                         <>
                             <span className="h-4 w-4 shrink-0 rounded-full border-2 border-black/30 border-t-black animate-spin" aria-hidden />
-                            <span>Verifying</span>
+                            <span>{t('auth.verify.busy')}</span>
                         </>
                     ) : (
                         <>
-                            <span>Verify</span>
+                            <span>{t('auth.verify.submit')}</span>
                             <ArrowRight className="shrink-0" size={17} strokeWidth={2.4} />
                         </>
                     )}
@@ -194,7 +196,7 @@ function VerifyEmailContent() {
             </div>
         ) : step === 'success' ? (
             <button type="button" onClick={() => router.push(nextRoute)} className="auth-btn auth-btn-primary flex items-center justify-center gap-2">
-                <span>Enter your Huud</span>
+                <span>{t('auth.verify.continue')}</span>
                 <ArrowRight className="shrink-0" size={17} strokeWidth={2.4} />
             </button>
         ) : step === 'error' || step === 'expired' ? (
@@ -205,7 +207,7 @@ function VerifyEmailContent() {
                     disabled={!token || step === 'expired'}
                     className="auth-btn auth-btn-secondary"
                 >
-                    <span>Retry link</span>
+                    <span>{t('auth.verify.retryLink')}</span>
                 </button>
                 <button
                     type="button"
@@ -216,7 +218,7 @@ function VerifyEmailContent() {
                     }}
                     className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
                 >
-                    <span>Enter code</span>
+                    <span>{t('auth.verify.enterCode')}</span>
                     <ArrowRight className="shrink-0" size={17} strokeWidth={2.4} />
                 </button>
             </div>
@@ -239,23 +241,23 @@ function VerifyEmailContent() {
             }
             eyebrow={
                 isSuccess
-                    ? 'Account secured'
+                    ? t('auth.verify.doneKicker')
                     : isError
-                      ? 'Needs attention'
+                      ? t('auth.verify.errorKicker')
                       : isLoading
-                        ? 'Checking code'
-                        : 'One-time code'
+                        ? t('auth.verify.checkingKicker')
+                        : t('auth.verify.kicker')
             }
             title={
                 isSuccess
-                    ? 'Email verified'
+                    ? t('auth.verify.doneTitle')
                     : isError
-                      ? 'Verification issue'
+                      ? t('auth.verify.errorTitle')
                       : isLoading
-                        ? 'Verifying email'
-                        : 'Check your email'
+                        ? t('auth.verify.checkingTitle')
+                        : t('auth.verify.title')
             }
-            meta={username ? `@${username}` : email || 'Enter the 6-digit code we sent'}
+            meta={username ? `@${username}` : email || t('auth.verify.meta')}
             error={isError}
             pulse={isLoading}
         />
@@ -263,9 +265,9 @@ function VerifyEmailContent() {
 
     return (
         <AuthFlowPage
-            ariaLabel="Verify email"
+            ariaLabel={t('auth.verify.step')}
             stageKey={`verify-${step}`}
-            stepLabel="Verify email"
+            stepLabel={t('auth.verify.step')}
             backHref="/login"
             keyboardAware={step === 'code-entry'}
             hero={hero}
@@ -275,10 +277,10 @@ function VerifyEmailContent() {
                 <div className="flex flex-col gap-3">
                     {!emailParam && (
                         <PremiumInput
-                            label="Email"
+                            label={t('auth.email')}
                             type="email"
                             icon="mail"
-                            placeholder="your@email.com"
+                            placeholder="you@example.com"
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
                             autoComplete="email"
@@ -299,7 +301,7 @@ function VerifyEmailContent() {
                         </div>
                     ) : (
                         <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
-                            Enter all 6 digits, then tap Verify
+                            {t('auth.verify.allDigits')}
                         </p>
                     )}
                 </div>
@@ -308,7 +310,7 @@ function VerifyEmailContent() {
             {step === 'verifying' && (
                 <div className="auth-flow-notice auth-flow-notice--info flex items-center gap-2" role="status">
                     <Loader2 size={16} strokeWidth={2} className="shrink-0 text-blue-500 animate-spin" />
-                    <span>Verifying your email…</span>
+                    <span>{t('auth.verify.checkingBody')}</span>
                 </div>
             )}
 
@@ -316,12 +318,13 @@ function VerifyEmailContent() {
                 <div className="flex flex-col gap-3">
                     <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
                         <CheckCircle2 size={16} strokeWidth={2} className="shrink-0 text-[#00B82E]" />
-                        <span>Your email is verified. Welcome to the Huud.</span>
+                        <span>{t('auth.verify.doneBody')}</span>
                     </div>
                     <div className="flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/10 px-4 py-3">
                         <div>
                             <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary">HuudCredit</p>
-                            <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">Email verification reward</p>
+                            {/* The whole balance, labelled honestly (it used to be called the "reward"). */}
+                            <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">{t('auth.verify.balance')}</p>
                         </div>
                         <div className="flex items-center gap-2 text-primary">
                             <span className="text-3xl font-black leading-none">
@@ -332,7 +335,7 @@ function VerifyEmailContent() {
                     </div>
                     {verifyCoinBalance === null ? (
                         <p className="text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
-                            Your wallet balance will appear once rewards sync
+                            {t('auth.verify.balanceSoon')}
                         </p>
                     ) : null}
                 </div>

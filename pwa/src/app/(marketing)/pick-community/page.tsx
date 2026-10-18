@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from '@/lib/i18n';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import apiClient from '@/lib/api-client';
@@ -9,8 +10,6 @@ import {
   getStoredPickerContext,
   getNeedsCommunitySelection,
 } from '@/lib/communityContext';
-import { getPostSetupRoute } from '@/lib/onboarding';
-import { getAuthSetupProgress } from '@/lib/authSetupFlow';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthSheetStageHeader } from '@/components/auth/AuthSheetStageHeader';
@@ -43,10 +42,10 @@ type PickerOption = {
 };
 
 function PickCommunityContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isChangingCommunity = searchParams.get('change') === 'true';
-  const setupProgress = getAuthSetupProgress('pick');
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -87,11 +86,11 @@ function PickCommunityContent() {
     try {
       const loc = await getCurrentLocation();
       if (!loc) {
-        throw new Error('Location permission denied or GPS unavailable.');
+        throw new Error(t('auth.loc.permission'));
       }
       const addr = await reverseGeocode(loc.lat, loc.lng);
       if (!addr || !addr.state || !addr.lga) {
-        throw new Error('Could not resolve your state/LGA from GPS coordinates.');
+        throw new Error(t('auth.pick.noResolve'));
       }
       
       const pickerCtx = {
@@ -102,9 +101,9 @@ function PickCommunityContent() {
       };
       localStorage.setItem('neyborhuud_picker_context', JSON.stringify(pickerCtx));
       setCtx(pickerCtx);
-      toast.success(`Detected location: ${addr.lga}, ${addr.state}`);
+      toast.success(t('auth.pick.detected', { place: `${addr.lga}, ${addr.state}` }));
     } catch (err: any) {
-      setError(err.message || 'Failed to detect location.');
+      setError(err.message || t('auth.pick.detectFailed'));
     } finally {
       setDetectingLoc(false);
     }
@@ -122,7 +121,7 @@ function PickCommunityContent() {
     
     localStorage.setItem('neyborhuud_picker_context', JSON.stringify(pickerCtx));
     setCtx(pickerCtx);
-    toast.success(`Location set manually to: ${pickerCtx.lga}, ${pickerCtx.state}`);
+    toast.success(t('auth.pick.setTo', { place: `${pickerCtx.lga}, ${pickerCtx.state}` }));
   };
 
   useEffect(() => {
@@ -131,13 +130,13 @@ function PickCommunityContent() {
         ? localStorage.getItem('neyborhuud_access_token')
         : null;
     if (!token) {
-      router.replace('/login');
+      router.replace('/huud?login=1');
       return;
     }
     apiClient.setToken(token);
 
     if (!isChangingCommunity && !getNeedsCommunitySelection()) {
-      router.replace('/feed');
+      router.replace('/huud');
       return;
     }
 
@@ -184,7 +183,7 @@ function PickCommunityContent() {
           `/geo/community-picker-options?state=${encodeURIComponent(stateParam)}&lga=${encodeURIComponent(lgaParam)}`,
         );
         if (!res.success || !res.data) {
-          setError(res.message || 'Could not load areas.');
+          setError(res.message || t('auth.pick.loadFailed'));
           setOptions([]);
           return;
         }
@@ -194,13 +193,13 @@ function PickCommunityContent() {
           return;
         }
         if (res.data.options?.length === 0) {
-          setError('No communities found in this Local Government Area. Please check your spelling or choose a nearby area.');
+          setError(t('auth.pick.none'));
           setOptions([]);
           return;
         }
         setOptions(res.data.options || []);
       } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : 'Failed to load list.');
+        setError(e instanceof Error ? e.message : t('auth.pick.loadFailed'));
       } finally {
         setLoading(false);
       }
@@ -235,7 +234,7 @@ function PickCommunityContent() {
         lga: locationParams.lga,
       });
       if (!res.success) {
-        setError(res.message || 'Could not save your area.');
+        setError(res.message || t('auth.pick.saveFailed'));
         return;
       }
 
@@ -253,10 +252,9 @@ function PickCommunityContent() {
         return;
       }
 
-      const needsGps = res.data?.needsGpsLocationVerification === true;
-      router.replace(needsGps ? '/verify-location' : getPostSetupRoute());
+      router.replace('/huud');
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Request failed.');
+      setError(e instanceof Error ? e.message : t('auth.error.generic'));
     } finally {
       setSubmitting(false);
     }
@@ -267,33 +265,17 @@ function PickCommunityContent() {
   const locationTitle =
     displayLocation?.lga && displayLocation?.state
       ? `${displayLocation.lga}, ${displayLocation.state}`
-      : 'Loading area…';
+      : t('auth.pick.loading');
   const locationMeta = ctx?.formattedAddress || locationTitle;
-  const locationSignal =
-    ctx?.resolutionSource && ctx.resolutionSource !== 'centroid' && !isChangingCommunity
-      ? `Via ${
-          ctx.resolutionSource === 'google'
-            ? 'Google Maps'
-            : ctx.resolutionSource === 'mapbox'
-              ? 'Mapbox'
-              : ctx.resolutionSource === 'openstreetmap'
-                ? 'OpenStreetMap'
-                : ctx.resolutionSource
-        }${ctx.geocoderDisagreement ? ' (refined)' : ''}`
-      : isChangingCommunity
-        ? 'Select your new ward or area'
-        : 'Area detected from signup';
-
   const showManualForm = !displayLocation?.state || !displayLocation?.lga;
 
   return (
     <AuthFlowPage
-      ariaLabel={isChangingCommunity ? 'Change your Huud' : 'Pick your Huud'}
+      ariaLabel={isChangingCommunity ? t('auth.pick.changeTitle') : t('auth.pick.title')}
       stageKey={`pick-${isChangingCommunity ? 'change' : 'setup'}-${loading ? 'loading' : 'ready'}`}
-      stepLabel={isChangingCommunity ? 'Change area' : setupProgress.stepLabel}
-      progress={isChangingCommunity ? undefined : setupProgress}
+      stepLabel={isChangingCommunity ? t('auth.pick.change') : t('auth.pick.title')}
       backHref={isChangingCommunity ? '/settings' : undefined}
-      backLabel={isChangingCommunity ? 'Back to settings' : undefined}
+      backLabel={isChangingCommunity ? t('auth.pick.backSettings') : undefined}
       peek={
         <div className="auth-signup-location-peek">
           <span className="auth-signup-location-peek__icon" aria-hidden>
@@ -301,7 +283,7 @@ function PickCommunityContent() {
           </span>
           <div className="min-w-0 flex-1">
             <p className="auth-signup-location-peek__label">
-              {isChangingCommunity ? 'Change area' : 'Pick your Huud'}
+              {isChangingCommunity ? t('auth.pick.change') : t('auth.pick.title')}
             </p>
             <p className="auth-signup-location-peek__name truncate">
               {selectedOption?.name || locationTitle}
@@ -323,17 +305,17 @@ function PickCommunityContent() {
             {submitting ? (
               <>
                 <span className="h-4 w-4 shrink-0 rounded-full border-2 border-black/30 border-t-black animate-spin" aria-hidden />
-                <span>Saving…</span>
+                <span>{t('auth.reset.busy')}</span>
               </>
             ) : (
               <>
-                <span>{isChangingCommunity ? 'Update area' : 'Confirm area'}</span>
+                <span>{isChangingCommunity ? t('auth.pick.update') : t('auth.pick.confirm')}</span>
                 <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
               </>
             )}
           </button>
           <Link
-            href={isChangingCommunity ? '/settings' : '/feed'}
+            href={isChangingCommunity ? '/settings' : '/huud'}
             className="auth-btn auth-btn-secondary no-underline flex items-center justify-center gap-1.5"
           >
             {isChangingCommunity ? (
@@ -341,7 +323,7 @@ function PickCommunityContent() {
             ) : (
               <SkipForward size={16} strokeWidth={2} className="shrink-0" />
             )}
-            <span>{isChangingCommunity ? 'Cancel' : 'Skip for now'}</span>
+            <span>{isChangingCommunity ? t('common.cancel') : t('auth.pick.skip')}</span>
           </Link>
         </div>
       }
@@ -350,34 +332,25 @@ function PickCommunityContent() {
           <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8 pt-3">
             {isChangingCommunity ? (
               <>
-                Need help?{' '}
-                <Link href="/settings">Back to settings</Link>
+                {t('auth.pick.needHelp')}{' '}
+                <Link href="/settings">{t('auth.pick.backSettings')}</Link>
               </>
             ) : (
               <>
-                Wrong location?{' '}
-                <Link href="/signup">Start over with signup</Link>
+                {t('auth.pick.wrong')}{' '}
+                <Link href="/huud?join=1">{t('auth.pick.startOver')}</Link>
               </>
             )}
-          </p>
-          <p className="mt-2 text-center text-[10px] leading-relaxed text-[var(--neu-text-muted)]">
-            Data sourced from public Nigerian administrative ward listings.{' '}
-            <Link
-              href="/info/nigeria-postal-codes"
-              className="font-semibold text-[var(--landing-green-deep,#0E8A3E)] underline-offset-2 hover:underline"
-            >
-              Nigeria postal codes &amp; myths
-            </Link>
           </p>
         </>
       }
     >
       <AuthSheetStageHeader
         icon="home"
-        eyebrow={isChangingCommunity ? 'Select new area' : 'Confirm your area'}
-        title={selectedOption?.name || (isChangingCommunity ? 'Change your Huud' : 'Choose your Huud')}
+        eyebrow={isChangingCommunity ? t('auth.pick.changeSignal') : t('auth.pick.fromSignup')}
+        title={selectedOption?.name || (isChangingCommunity ? t('auth.pick.changeTitle') : t('auth.pick.title'))}
         meta={locationMeta}
-        signal={locationSignal}
+        signal=""
         error={error && !loading && !selectedId ? error : undefined}
       />
 
@@ -385,12 +358,12 @@ function PickCommunityContent() {
         {detectingLoc ? (
           <div className="auth-flow-notice auth-flow-notice--info" role="status">
             <span className="h-4 w-4 shrink-0 rounded-full border-2 border-brand-blue/30 border-t-brand-blue animate-spin" aria-hidden />
-            <span>Detecting your location…</span>
+            <span>{t('auth.pick.detecting')}</span>
           </div>
         ) : loading ? (
           <div className="auth-flow-notice auth-flow-notice--info" role="status">
             <span className="h-4 w-4 shrink-0 rounded-full border-2 border-brand-blue/30 border-t-brand-blue animate-spin" aria-hidden />
-            <span>Loading areas for your location…</span>
+            <span>{t('auth.pick.loadingAreas')}</span>
           </div>
         ) : showManualForm ? (
           <div className="flex flex-col gap-3">
@@ -407,7 +380,7 @@ function PickCommunityContent() {
               className="auth-btn auth-btn-secondary w-full py-3 flex items-center justify-center gap-2"
             >
               <Compass className="w-4 h-4 shrink-0 text-primary" aria-hidden="true" />
-              <span>Detect My Location (GPS)</span>
+              <span>{t('auth.pick.useLocation')}</span>
             </button>
 
             <div className="flex items-center gap-3 my-2 text-charcoal/50 " aria-hidden="true">
@@ -417,14 +390,14 @@ function PickCommunityContent() {
             </div>
 
             <PremiumInput
-              label="State (e.g. Kano, Enugu, Lagos, FCT)"
+              label={t('auth.pick.state')}
               placeholder="e.g. Kano"
               value={manualState}
               onChange={(e) => setManualState(e.target.value)}
             />
 
             <PremiumInput
-              label="Local Government Area (LGA)"
+              label={t('auth.pick.lga')}
               placeholder="e.g. Nassarawa"
               value={manualLga}
               onChange={(e) => setManualLga(e.target.value)}
@@ -436,24 +409,24 @@ function PickCommunityContent() {
               onClick={handleManualSubmit}
               className="auth-btn auth-btn-primary w-full py-3 mt-2 flex items-center justify-center gap-2"
             >
-              <span>Find Communities</span>
+              <span>{t('auth.pick.find')}</span>
               <Search className="w-4 h-4 shrink-0" aria-hidden="true" />
             </button>
           </div>
         ) : (
           <>
             <div className="flex items-center justify-between pb-1">
-              <span className="text-xs font-semibold text-charcoal/70 ">Assigned Ward / Huud</span>
+              <span className="text-xs font-semibold text-charcoal/70 ">{t('auth.pick.yourHuud')}</span>
               <Eli5Tooltip 
-                term="Community Ward" 
-                explanation="Your Huud is your hyper-local ward or neighborhood. Posts, SOS alerts, and trade items are shared with residents inside this verified boundary." 
+                term={t('auth.pick.whatTerm')}
+                explanation={t('auth.pick.whatBody')}
               />
             </div>
             <div ref={comboRef} className="relative">
               <button
                 type="button"
                 onClick={() => setDropdownOpen((v) => !v)}
-                aria-label={selectedOption ? `Selected area: ${selectedOption.name}` : 'Select your area'}
+                aria-label={selectedOption ? t('auth.pick.selected', { name: selectedOption.name }) : t('auth.pick.select')}
                 className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 transition-all outline-none focus:outline-none ${
                   selectedId
                     ? 'border-primary/40 bg-primary/10 shadow-[0_0_0_1px_rgba(0,184,46,0.2)]'
@@ -491,7 +464,7 @@ function PickCommunityContent() {
                       <Search className="w-4 h-4 text-[var(--neu-text-muted)] shrink-0" aria-hidden="true" />
                       <input
                         type="text"
-                        placeholder="Search areas…"
+                        placeholder={t('auth.pick.search')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         autoFocus
@@ -502,7 +475,7 @@ function PickCommunityContent() {
                           type="button"
                           onClick={() => setSearch('')}
                           className="text-[var(--neu-text-muted)] hover:text-brand-black  transition-colors"
-                          aria-label="Clear search"
+                          aria-label={t('auth.pick.clear')}
                         >
                           <X className="w-4 h-4" aria-hidden="true" />
                         </button>
@@ -574,8 +547,8 @@ function PickCommunityContent() {
             ) : (
               <p className="text-center text-[11px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
                 {isChangingCommunity
-                  ? 'Select a different ward or area after moving.'
-                  : 'Your Huud is tied to the area you choose'}
+                  ? t('auth.pick.movedHint')
+                  : t('auth.pick.hint')}
               </p>
             )}
           </>

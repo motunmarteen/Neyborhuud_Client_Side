@@ -9722,3 +9722,12 @@ html[data-joining] [data-map-menu] { display: none; }
 .nh-lens--birthdays .nh-lens__tag { background: #FFF0F6; }
 .nh-lens__badge { position: absolute; top: -8px; right: -10px; font-size: 18px; line-height: 1; }
 .nh-lens--birthdays { position: relative; }
+
+/* Getting started restyle (2026-10-18): light sky chrome — wordmark, back button and step
+   label sit on white so they read on any sky (day or night). */
+.auth-flow-wordmark { display: inline-flex; align-items: center; border-radius: 999px; background: rgba(255, 255, 255, 0.96); padding: 0.3rem 0.9rem; box-shadow: 0 4px 14px rgba(29, 36, 51, 0.16); }
+.auth-signup-chrome .auth-flow-back { background: rgba(255, 255, 255, 0.96) !important; color: #1D2433 !important; box-shadow: 0 4px 14px rgba(29, 36, 51, 0.16); }
+.auth-signup-chrome .auth-signup-progress__label { color: #1D2433 !important; background: rgba(255, 255, 255, 0.85); border-radius: 999px; padding: 0.15rem 0.6rem; }
+.auth-signup-chrome .auth-signup-progress__dot { background: rgba(29, 36, 51, 0.2); }
+.auth-signup-chrome .auth-signup-progress__dot--active,
+.auth-signup-chrome .auth-signup-progress__dot--done { background: #00B82E; }

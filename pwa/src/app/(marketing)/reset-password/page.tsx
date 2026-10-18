@@ -1,7 +1,8 @@
 'use client';
 
 import React, { Suspense, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { authService } from '@/services/auth.service';
@@ -16,7 +17,7 @@ import { Lock, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from 'lucide-rea
 type Step = 'form' | 'success' | 'error' | 'expired';
 
 function ResetPasswordContent() {
-    const router = useRouter();
+    const { t } = useTranslation();
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
 
@@ -34,7 +35,7 @@ function ResetPasswordContent() {
     useEffect(() => {
         if (!token) {
             setStep('expired');
-            setErrorMessage('Invalid or missing reset token. Please request a new password reset.');
+            setErrorMessage(t('auth.reset.badLink'));
         }
     }, [token]);
 
@@ -48,14 +49,14 @@ function ResetPasswordContent() {
         try {
             const response = await authService.resetPassword(token, password);
             if (!response.success) {
-                throw new Error(response.message || 'Failed to reset password.');
+                throw new Error(response.message || t('auth.reset.failed'));
             }
             setStep('success');
         } catch (error: unknown) {
-            const message = getApiErrorMessage(error, 'Failed to reset password. Please try again.');
+            const message = getApiErrorMessage(error, t('auth.reset.failed'));
             if (message.toLowerCase().includes('expired') || message.toLowerCase().includes('invalid')) {
                 setStep('expired');
-                setErrorMessage('This reset link has expired. Please request a new one.');
+                setErrorMessage(t('auth.reset.expiredBody'));
             } else {
                 setStep('error');
                 setErrorMessage(message);
@@ -66,8 +67,8 @@ function ResetPasswordContent() {
     };
 
     const isError = step === 'error' || step === 'expired';
-    const headline = step === 'success' ? 'Password updated' : step === 'expired' ? 'Link expired' : step === 'error' ? 'Reset failed' : 'Create new password';
-    const status = step === 'success' ? 'Secure again' : step === 'expired' ? 'New link needed' : step === 'error' ? 'Needs attention' : 'Password reset';
+    const headline = step === 'success' ? t('auth.reset.doneTitle') : step === 'expired' ? t('auth.reset.expiredTitle') : step === 'error' ? t('auth.reset.errorTitle') : t('auth.reset.title');
+    const status = step === 'success' ? t('auth.reset.doneKicker') : step === 'expired' ? t('auth.reset.expiredKicker') : step === 'error' ? t('auth.reset.errorKicker') : t('auth.reset.kicker');
     const icon = step === 'success' ? 'verified_user' : isError ? 'warning' : 'lock';
 
     const footer =
@@ -81,18 +82,18 @@ function ResetPasswordContent() {
                 {loading ? (
                     <>
                         <Loader2 className="w-4 h-4 shrink-0 animate-spin" aria-hidden />
-                        <span>Updating…</span>
+                        <span>{t('auth.reset.busy')}</span>
                     </>
                 ) : (
                     <>
-                        <span>Reset password</span>
+                        <span>{t('auth.reset.submit')}</span>
                         <Lock size={16} className="shrink-0" aria-hidden="true" />
                     </>
                 )}
             </button>
         ) : step === 'success' ? (
-            <Link href="/login" className="auth-btn auth-btn-primary no-underline flex items-center justify-center gap-2">
-                <span>Enter your Huud</span>
+            <Link href="/huud?login=1" className="auth-btn auth-btn-primary no-underline flex items-center justify-center gap-2">
+                <span>{t('auth.login.submit')}</span>
                 <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
             </Link>
         ) : (
@@ -103,10 +104,10 @@ function ResetPasswordContent() {
                     disabled={step === 'expired'}
                     className="auth-btn auth-btn-secondary"
                 >
-                    <span>Retry</span>
+                    <span>{t('auth.tryAgain')}</span>
                 </button>
                 <Link href="/forgot-password" className="auth-btn auth-btn-primary no-underline flex items-center justify-center gap-2">
-                    <span>New link</span>
+                    <span>{t('auth.reset.newLink')}</span>
                     <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                 </Link>
             </div>
@@ -114,16 +115,16 @@ function ResetPasswordContent() {
 
     return (
         <AuthFlowPage
-            ariaLabel="Reset password"
+            ariaLabel={t('auth.reset.title')}
             stageKey={`reset-${step}`}
-            stepLabel="Password reset"
-            backHref="/login"
+            stepLabel={t('auth.forgot.step')}
+            backHref="/huud?login=1"
             hero={
                 <AuthFlowHero
                     icon={icon}
                     eyebrow={status}
                     title={headline}
-                    meta="NeyborHuud account access"
+                    meta={t('auth.reset.meta')}
                     error={isError}
                 />
             }
@@ -133,10 +134,10 @@ function ResetPasswordContent() {
             {step === 'form' && (
                 <form id="reset-password-form" onSubmit={handleSubmit} className="auth-signup-sheet-fields flex flex-col gap-3">
                     <PremiumInput
-                        label="New password"
+                        label={t('auth.reset.new')}
                         type="password"
                         icon="lock"
-                        placeholder="12+ chars, mixed case, number"
+                        placeholder={t('auth.reset.newHint')}
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         autoComplete="new-password"
@@ -146,15 +147,15 @@ function ResetPasswordContent() {
                         <p className="px-1 text-[10px] text-[var(--neu-text-muted)]">{policy.message}</p>
                     ) : null}
                     <PremiumInput
-                        label="Confirm password"
+                        label={t('auth.reset.confirm')}
                         type="password"
                         icon="lock"
-                        placeholder="Repeat password"
+                        placeholder={t('auth.reset.confirmHint')}
                         value={confirmPassword}
                         onChange={(event) => setConfirmPassword(event.target.value)}
-                        error={confirmPassword && !passwordsMatch ? "Passwords don't match" : undefined}
+                        error={confirmPassword && !passwordsMatch ? t('auth.reset.noMatch') : undefined}
                         success={passwordsMatch}
-                        successText={passwordsMatch ? 'Passwords match' : undefined}
+                        successText={passwordsMatch ? t('auth.reset.match') : undefined}
                         autoComplete="new-password"
                     />
                 </form>
@@ -163,7 +164,7 @@ function ResetPasswordContent() {
             {step === 'success' && (
                 <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-primary shrink-0" aria-hidden="true" />
-                    <span>Your password has been updated. You can sign in with the new password.</span>
+                    <span>{t('auth.reset.doneBody')}</span>
                 </div>
             )}
 

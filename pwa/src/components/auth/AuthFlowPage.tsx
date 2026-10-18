@@ -5,8 +5,9 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
-import { AuthFlowBackdrop } from '@/components/auth/AuthFlowBackdrop';
+import { AuthSkyBackdrop } from '@/components/auth/AuthSkyBackdrop';
 import type { SignupMapLocation } from '@/lib/signupMap';
+import { useTranslation } from '@/lib/i18n';
 
 const AuthSignupMapBackdrop = dynamic(
     () => import('@/components/auth/AuthSignupMapBackdrop').then((m) => m.AuthSignupMapBackdrop),
@@ -63,7 +64,7 @@ export function AuthFlowPage({
     stepLabel,
     progress,
     backHref,
-    backLabel = 'Back',
+    backLabel,
     onBackClick,
     children,
     footer,
@@ -75,6 +76,7 @@ export function AuthFlowPage({
     mapLocation = null,
     showChrome = true,
 }: AuthFlowPageProps) {
+    const { t } = useTranslation();
     const chromeRef = useRef<HTMLDivElement>(null);
     const [sheetCollapsed, setSheetCollapsed] = useState(false);
 
@@ -108,7 +110,7 @@ export function AuthFlowPage({
     }, [stepLabel, progress, syncChromeHeight]);
 
     const chromeLabel = progress
-        ? `Step ${progress.active} of ${progress.total} · ${progress.stepLabel}`
+        ? t('auth.stepOf', { n: progress.active, total: progress.total, label: t(progress.stepLabel) })
         : stepLabel;
 
     const hasBack = Boolean(onBackClick || backHref);
@@ -117,7 +119,8 @@ export function AuthFlowPage({
         <div className="auth-signup-page fixed-app overflow-hidden">
             <div className="auth-signup-map-layer auth-signup-map-layer--readonly">
                 {landingBackdrop ? (
-                    <AuthFlowBackdrop sheetCollapsed={sheetCollapsed} />
+                    // Light sky + doodle ground (restyle 2026-10-18), replacing the dark aerial video.
+                    <AuthSkyBackdrop />
                 ) : (
                     <AuthSignupMapBackdrop
                         mapLocation={mapLocation}
@@ -130,16 +133,18 @@ export function AuthFlowPage({
             <div ref={chromeRef} className="auth-signup-chrome">
                 <div className={`auth-signup-top${hasBack ? ' auth-flow-chrome' : ''}`}>
                     {onBackClick ? (
-                        <button type="button" onClick={onBackClick} className="auth-flow-back" aria-label={backLabel}>
+                        <button type="button" onClick={onBackClick} className="auth-flow-back" aria-label={backLabel ?? t('common.back')}>
                             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
                         </button>
                     ) : backHref ? (
-                        <Link href={backHref} className="auth-flow-back" aria-label={backLabel}>
+                        <Link href={backHref} className="auth-flow-back" aria-label={backLabel ?? t('common.back')}>
                             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
                         </Link>
                     ) : null}
 
-                    <NeyborHuudLogo layout="wordmark" size="md" textSize={22} tone="light" />
+                    <span className="auth-flow-wordmark">
+                        <NeyborHuudLogo layout="wordmark" size="md" textSize={20} tone="primary" />
+                    </span>
 
                     {progress ? (
                         <>

@@ -51,6 +51,7 @@ import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
 import { VisitorWelcome } from '@/components/map/VisitorWelcome';
 import { JoinSheet } from '@/components/map/JoinSheet';
+import { LoginSheet } from '@/components/map/LoginSheet';
 import { HelpMapSheet } from '@/components/map/HelpMapSheet';
 import { useAreaWelcome } from '@/hooks/useAreaWelcome';
 import { rememberRef, signupHref } from '@/lib/visitor';
@@ -211,14 +212,26 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   }, [params]);
   // Joining happens here on the live map (owner 2026-10-18), not on a separate page.
   const [joinOpen, setJoinOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   useEffect(() => {
     setJoinOpen(params.get('join') === '1');
+    setLoginOpen(params.get('login') === '1');
   }, [params]);
+  /** Switch between the Join and Welcome back sheets without reloading the map. */
+  const showSheet = useCallback((which: 'join' | 'login' | null) => {
+    setJoinOpen(which === 'join');
+    setLoginOpen(which === 'login');
+    const u = new URL(window.location.href);
+    u.searchParams.delete('join');
+    u.searchParams.delete('login');
+    if (which) u.searchParams.set(which, '1');
+    window.history.replaceState(null, '', u.pathname + u.search);
+  }, []);
   // While joining, the floating ⋯ and SOS buttons step aside (the sheet is tall).
   useEffect(() => {
-    document.documentElement.toggleAttribute('data-joining', joinOpen && visitor);
+    document.documentElement.toggleAttribute('data-joining', (joinOpen || loginOpen) && visitor);
     return () => document.documentElement.removeAttribute('data-joining');
-  }, [joinOpen, visitor]);
+  }, [joinOpen, loginOpen, visitor]);
   const closeJoin = useCallback(() => {
     setJoinOpen(false);
     const u = new URL(window.location.href);
@@ -614,7 +627,9 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             </Link>
           </div>
 
-          {visitor && joinOpen ? (
+          {visitor && loginOpen ? (
+            <LoginSheet next={params.get('next')} onClose={() => showSheet(null)} onJoin={() => showSheet('join')} />
+          ) : visitor && joinOpen ? (
             <JoinSheet
               map={map}
               area={areaWelcome}

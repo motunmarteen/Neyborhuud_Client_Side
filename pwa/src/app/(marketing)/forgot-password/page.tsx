@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { Send, Loader2, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 function isNetworkError(message: string): boolean {
     const normalized = message.toLowerCase();
@@ -19,6 +20,7 @@ function isNetworkError(message: string): boolean {
 type Step = 'form' | 'sent' | 'error';
 
 export default function ForgotPasswordPage() {
+    const { t } = useTranslation();
     const [step, setStep] = useState<Step>('form');
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
@@ -52,7 +54,7 @@ export default function ForgotPasswordPage() {
             setStep('sent');
             setResendCooldown(60);
         } catch (error: unknown) {
-            const message = getApiErrorMessage(error, 'Something went wrong.');
+            const message = getApiErrorMessage(error, t('auth.error.generic'));
             const status = getApiErrorStatus(error);
 
             if (status === 429 || (status !== undefined && status >= 400 && status < 500)) {
@@ -63,7 +65,7 @@ export default function ForgotPasswordPage() {
             }
 
             if (status === undefined ? isNetworkError(message) : status >= 500) {
-                const generic = 'Unable to process request. Please try again later.';
+                const generic = t('auth.error.later');
                 setErrorMessage(generic);
                 setStep('error');
                 toast.error(generic);
@@ -85,9 +87,9 @@ export default function ForgotPasswordPage() {
         try {
             await requestReset();
             setResendCooldown(60);
-            toast.success('Reset link sent.');
+            toast.success(t('auth.forgot.sent'));
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Could not resend. Try again later.';
+            const message = error instanceof Error ? error.message : t('auth.error.resend');
             setErrorMessage(message);
             toast.error(message);
         } finally {
@@ -101,9 +103,9 @@ export default function ForgotPasswordPage() {
     const hero = (
         <AuthFlowHero
             icon={isError ? 'warning' : isSent ? 'mark_email_read' : 'key'}
-            eyebrow={isError ? 'Request failed' : isSent ? 'Inbox next' : 'Account recovery'}
-            title={isError ? 'Try again' : isSent ? 'Check your inbox' : 'Reset password'}
-            meta={email || 'Use your account email'}
+            eyebrow={isError ? t('auth.forgot.failedKicker') : isSent ? t('auth.forgot.sentKicker') : t('auth.forgot.kicker')}
+            title={isError ? t('auth.tryAgain') : isSent ? t('auth.forgot.sentTitle') : t('auth.forgot.title')}
+            meta={email || t('auth.forgot.meta')}
             error={isError}
         />
     );
@@ -119,11 +121,11 @@ export default function ForgotPasswordPage() {
                 {loading ? (
                     <>
                         <Loader2 className="w-4 h-4 shrink-0 animate-spin" aria-hidden />
-                        <span>Sending…</span>
+                        <span>{t('auth.sending')}</span>
                     </>
                 ) : (
                     <>
-                        <span>Send reset link</span>
+                        <span>{t('auth.forgot.submit')}</span>
                         <Send size={16} className="shrink-0" aria-hidden="true" />
                     </>
                 )}
@@ -141,26 +143,26 @@ export default function ForgotPasswordPage() {
                     ) : (
                         <Send size={16} className="shrink-0" aria-hidden="true" />
                     )}
-                    <span>{loading ? 'Sending' : resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}</span>
+                    <span>{loading ? t('auth.sending') : resendCooldown > 0 ? `${resendCooldown}s` : t('auth.resend')}</span>
                 </button>
-                <Link href="/login" className="auth-btn auth-btn-primary no-underline flex items-center justify-center gap-2">
-                    <span>Back to login</span>
+                <Link href="/huud?login=1" className="auth-btn auth-btn-primary no-underline flex items-center justify-center gap-2">
+                    <span>{t('auth.backToLogin')}</span>
                     <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                 </Link>
             </div>
         ) : (
             <button type="button" onClick={() => setStep('form')} className="auth-btn auth-btn-primary flex items-center justify-center gap-2">
-                <span>Try again</span>
+                <span>{t('auth.tryAgain')}</span>
                 <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
             </button>
         );
 
     return (
         <AuthFlowPage
-            ariaLabel="Reset password"
+            ariaLabel={t('auth.forgot.title')}
             stageKey={`forgot-${step}`}
-            stepLabel="Password help"
-            backHref="/login"
+            stepLabel={t('auth.forgot.step')}
+            backHref="/huud?login=1"
             hero={hero}
             footer={footer}
             keyboardAware={step === 'form'}
@@ -168,19 +170,19 @@ export default function ForgotPasswordPage() {
             {step === 'form' && (
                 <form id="forgot-password-form" onSubmit={handleSubmit} className="auth-signup-sheet-fields flex flex-col gap-3">
                     <PremiumInput
-                        label="Email"
+                        label={t('auth.email')}
                         type="email"
                         icon="mail"
-                        placeholder="nancy@example.com"
+                        placeholder="you@example.com"
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
                         validationStatus={emailValidation.status}
-                        invalidText="Please enter a valid email"
+                        invalidText={t('auth.emailInvalid')}
                         autoComplete="email"
                         inputMode="email"
                     />
                     <p className="text-center text-[10px] font-medium leading-relaxed text-[var(--neu-text-muted)]">
-                        We&apos;ll email you a link to reset your password
+                        {t('auth.forgot.hint')}
                     </p>
                 </form>
             )}
@@ -188,7 +190,7 @@ export default function ForgotPasswordPage() {
             {step === 'sent' && (
                 <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-primary shrink-0" aria-hidden="true" />
-                    <span>If an account exists for {email}, a reset link has been sent.</span>
+                    <span>{t('auth.forgot.sentBody', { email })}</span>
                 </div>
             )}
 

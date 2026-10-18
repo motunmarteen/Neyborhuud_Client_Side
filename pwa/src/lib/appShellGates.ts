@@ -1,7 +1,4 @@
-import {
-  getNeedsCommunitySelection,
-  getNeedsGpsLocationVerification,
-} from '@/lib/communityContext';
+import { getNeedsCommunitySelection } from '@/lib/communityContext';
 import { hasCompletedProductTour } from '@/lib/onboarding';
 
 /** Routes where post-login prompts (check-in, push) must not appear. */
@@ -32,11 +29,10 @@ export function isOnboardingOrAuthRoute(pathname: string): boolean {
   );
 }
 
-/** True while signup / community / GPS / first-feed welcome is still unfinished. */
+/** True while the home area or the first welcome is still unfinished (the location check is optional). */
 export function isAccountSetupIncomplete(): boolean {
   if (typeof window === 'undefined') return true;
   if (getNeedsCommunitySelection()) return true;
-  if (getNeedsGpsLocationVerification()) return true;
   if (!hasCompletedProductTour()) return true;
   return false;
 }

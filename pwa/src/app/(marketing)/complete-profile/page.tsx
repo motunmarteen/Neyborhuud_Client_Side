@@ -1,15 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from '@/lib/i18n';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { PremiumInput } from '@/components/ui/PremiumInput';
 import { authService } from '@/services/auth.service';
 import { getApiErrorMessage, getApiErrorStatus } from '@/lib/apiErrors';
 import { AuthFlowLoading } from '@/components/auth/AuthFlowLoading';
 import { toast } from 'sonner';
-import { getAuthSetupProgress } from '@/lib/authSetupFlow';
 import { AuthFlowPage } from '@/components/auth/AuthFlowPage';
 import { AuthFlowHero } from '@/components/auth/AuthFlowHero';
 import { AuthSheetStageHeader } from '@/components/auth/AuthSheetStageHeader';
@@ -23,8 +22,6 @@ import {
   ChevronUp,
   SkipForward,
   ShieldCheck,
-  Award,
-  Sparkles,
 } from 'lucide-react';
 
 const TOKEN_KEY = 'neyborhuud_access_token';
@@ -37,10 +34,10 @@ function clearAuth() {
 }
 
 export default function CompleteProfilePage() {
+    const { t } = useTranslation();
     const router = useRouter();
     const queryClient = useQueryClient();
     const submittingRef = useRef(false);
-    const setupProgress = getAuthSetupProgress('profile');
     const [step, setStep] = useState<'form' | 'success'>('form');
     const [loading, setLoading] = useState(false);
     const [hasToken, setHasToken] = useState<boolean | null>(null);
@@ -68,7 +65,7 @@ export default function CompleteProfilePage() {
     const displayName =
         formData.firstName && formData.lastName
             ? `${formData.firstName} ${formData.lastName}`
-            : 'Your profile';
+            : t('auth.profile.yours');
 
     useEffect(() => {
         const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
@@ -77,7 +74,7 @@ export default function CompleteProfilePage() {
         setHasToken(!!token);
 
         if (!token) {
-            router.replace('/login');
+            router.replace('/huud?login=1');
             return;
         }
 
@@ -91,7 +88,7 @@ export default function CompleteProfilePage() {
                     user.verificationStatus === 'verified';
 
                 if (!isVerified) {
-                    toast.error('Please verify your email before completing your profile.');
+                    toast.error(t('auth.profile.verifyFirst'));
                     router.replace('/verify-email');
                     return;
                 }
@@ -116,8 +113,8 @@ export default function CompleteProfilePage() {
         const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
 
         if (!token) {
-            toast.error('Your session expired. Please sign up or log in again.');
-            router.push('/login');
+            toast.error(t('auth.profile.expired'));
+            router.push('/huud?login=1');
             return;
         }
 
@@ -129,7 +126,7 @@ export default function CompleteProfilePage() {
         try {
             const response = await authService.completeProfile(formData);
             if (!response.success) {
-                throw new Error(response.message || 'Profile update failed.');
+                throw new Error(response.message || t('auth.profile.failed'));
             }
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: ['currentUser'] }),
@@ -137,7 +134,7 @@ export default function CompleteProfilePage() {
             ]);
             setStep('success');
         } catch (error: unknown) {
-            const msg = getApiErrorMessage(error, 'Profile update failed.');
+            const msg = getApiErrorMessage(error, t('auth.profile.failed'));
             const status = getApiErrorStatus(error);
             const msgLower = msg.toLowerCase();
 
@@ -161,7 +158,7 @@ export default function CompleteProfilePage() {
                 msgLower.includes('verification') ||
                 msgLower.includes('email not verified')
             ) {
-                toast.error(msg || 'Please verify your email before completing your profile.');
+                toast.error(msg || t('auth.profile.verifyFirst'));
                 router.push('/verify-email');
                 return;
             }
@@ -173,17 +170,17 @@ export default function CompleteProfilePage() {
             ) {
                 if (userVerified && status === 401) {
                     clearAuth();
-                    toast.error('Your session expired. Please log in again.');
-                    router.push('/login');
+                    toast.error(t('auth.profile.expired'));
+                    router.push('/huud?login=1');
                     return;
                 }
 
                 if (status === 403) {
-                    toast.error('Please verify your email before completing your profile.');
+                    toast.error(t('auth.profile.verifyFirst'));
                     router.push('/verify-email');
                     return;
                 }
-                toast.error("Your account isn't active yet. Please verify your email first.");
+                toast.error(t('auth.profile.verifyFirst'));
                 router.push('/verify-email');
                 return;
             }
@@ -196,12 +193,12 @@ export default function CompleteProfilePage() {
                 msgLower.includes('invalid token')
             ) {
                 clearAuth();
-                toast.error(msg || 'Your session is invalid or expired. Please log in again.');
-                router.push('/login');
+                toast.error(msg || t('auth.profile.expired'));
+                router.push('/huud?login=1');
                 return;
             }
 
-            toast.error(`Profile Error: ${msg}`);
+            toast.error(msg);
         } finally {
             submittingRef.current = false;
             setLoading(false);
@@ -215,25 +212,25 @@ export default function CompleteProfilePage() {
     if (step === 'success') {
         return (
             <AuthFlowPage
-                ariaLabel="Profile complete"
+                ariaLabel={t('auth.profile.doneTitle')}
                 stageKey="complete-profile-success"
-                stepLabel="Profile complete"
+                stepLabel={t('auth.profile.doneTitle')}
                 hero={
                     <AuthFlowHero
                         icon="redeem-fill"
-                        eyebrow="Identity unlocked"
-                        title="Profile complete"
-                        meta="You are now a Tier 1 Neyborh"
+                        eyebrow={t('auth.profile.doneKicker')}
+                        title={t('auth.profile.doneTitle')}
+                        meta={t('auth.profile.doneMeta')}
                     />
                 }
                 footer={
                     <div className="auth-signup-actions">
                         <button
                             type="button"
-                            onClick={() => router.push('/feed')}
+                            onClick={() => router.push('/huud')}
                             className="auth-btn auth-btn-primary flex items-center justify-center gap-2"
                         >
-                            <span>Enter the Huud</span>
+                            <span>{t('auth.verify.continue')}</span>
                             <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                         </button>
                     </div>
@@ -242,19 +239,19 @@ export default function CompleteProfilePage() {
                 <div className="flex flex-col gap-3">
                     <div className="auth-flow-notice auth-flow-notice--success flex items-center gap-2">
                         <CheckCircle2 size={16} className="text-primary shrink-0" aria-hidden="true" />
-                        <span>Your trust score has increased. Welcome to the Huud.</span>
+                        <span>{t('auth.profile.doneNote')}</span>
                     </div>
                     <div className="flex items-center justify-between rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3">
                         <div>
                             <div className="flex items-center gap-1.5">
                                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary">HuudCredit</p>
                                 <Eli5Tooltip 
-                                    term="HuudCredit" 
-                                    explanation="NeyborHuud's own credit. You earn it by checking in, posting and helping neighbours, and spend it on things like map ads. It can't be changed to naira." 
+                                    term="HuudCredit"
+                                    explanation={t('auth.profile.creditWhat')}
                                 />
                             </div>
                             <p className="text-[11px] font-semibold text-[var(--neu-text-muted)]">
-                                {earnedProfileReward ? 'Profile completion reward' : 'Your balance'}
+                                {earnedProfileReward ? t('auth.profile.reward') : t('auth.profile.balance')}
                             </p>
                         </div>
                         <div className="flex items-center gap-2 text-primary">
@@ -266,7 +263,7 @@ export default function CompleteProfilePage() {
                     </div>
                     {earnedProfileReward && profileCoinBalance !== null ? (
                         <p className="text-center text-[10px] font-medium text-[var(--neu-text-muted)]">
-                            You now have {profileCoinBalance.toLocaleString('en-NG')} HuudCredit
+                            {t('auth.profile.nowHave', { n: profileCoinBalance.toLocaleString('en-NG') })}
                         </p>
                     ) : null}
                 </div>
@@ -277,9 +274,9 @@ export default function CompleteProfilePage() {
     return (
         <form onSubmit={handleSubmit}>
             <AuthFlowPage
-                ariaLabel="Complete profile"
+                ariaLabel={t('auth.profile.title')}
                 stageKey="complete-profile-form"
-                progress={setupProgress}
+                stepLabel={t('auth.profile.title')}
                 keyboardAware
                 peek={
                     <div className="auth-signup-identity-peek">
@@ -287,7 +284,7 @@ export default function CompleteProfilePage() {
                             {formData.firstName.trim() ? formData.firstName.trim().charAt(0).toUpperCase() : 'N'}
                         </span>
                         <div className="min-w-0 flex-1">
-                            <p className="auth-signup-identity-peek__label">Complete profile</p>
+                            <p className="auth-signup-identity-peek__label">{t('auth.profile.title')}</p>
                             <p className="auth-signup-identity-peek__name truncate">{displayName}</p>
                         </div>
                         <span className="auth-signup-identity-peek__chevron" aria-hidden>
@@ -306,51 +303,48 @@ export default function CompleteProfilePage() {
                                 {loading ? (
                                     <>
                                         <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#0a1a0f]/30 border-t-[#0a1a0f] animate-spin" aria-hidden />
-                                        <span>Processing…</span>
+                                        <span>{t('auth.reset.busy')}</span>
                                     </>
                                 ) : (
                                     <>
-                                        <span>{profileRewardPaid ? 'Save my profile' : 'Claim 100 HuudCredit'}</span>
+                                        <span>{profileRewardPaid ? t('auth.profile.save') : t('auth.profile.claim')}</span>
                                         <ArrowRight size={17} strokeWidth={2.4} className="shrink-0" />
                                     </>
                                 )}
                             </button>
                             <button
                                 type="button"
-                                onClick={() => router.push('/feed')}
+                                onClick={() => router.push('/huud')}
                                 className="auth-btn auth-btn-secondary flex items-center justify-center gap-2"
                             >
                                 <SkipForward size={16} strokeWidth={2} className="shrink-0" />
-                                <span>I&apos;ll do this later</span>
+                                <span>{t('auth.pick.skip')}</span>
                             </button>
                         </div>
-                        <p className="auth-signin-link auth-signin-link--sheet mt-3 border-t border-charcoal/8  pt-3">
-                            Already complete? <Link href="/feed">Enter the Huud</Link>
-                        </p>
                     </div>
                 }
             >
                 <AuthSheetStageHeader
                     icon="badge"
-                    eyebrow={profileRewardPaid ? 'Finish your profile' : 'Unlock your reward'}
+                    eyebrow={profileRewardPaid ? t('auth.profile.title') : t('auth.profile.kicker')}
                     title={displayName}
-                    meta={profileRewardPaid ? 'Your neighbours can trust a full profile' : '100 HuudCredit when you finish'}
-                    signal="Tier 1 Neyborh"
+                    meta={profileRewardPaid ? t('auth.profile.why') : t('auth.profile.rewardMeta')}
+                    signal={t('auth.profile.signal')}
                     badge=""
                 />
 
                 <div className="auth-signup-sheet-fields flex max-h-[44dvh] flex-col gap-4 overflow-y-auto overscroll-contain pb-1">
                     <div className="grid grid-cols-2 gap-3">
                         <PremiumInput
-                            label="First Name"
-                            placeholder="John"
+                            label={t('auth.profile.first')}
+                            placeholder="Ada"
                             className="py-0.5"
                             value={formData.firstName}
                             onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                         />
                         <PremiumInput
-                            label="Last Name"
-                            placeholder="Doe"
+                            label={t('auth.profile.last')}
+                            placeholder="Okafor"
                             className="py-0.5"
                             value={formData.lastName}
                             onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
@@ -358,7 +352,7 @@ export default function CompleteProfilePage() {
                     </div>
 
                     <PremiumInput
-                        label="Phone (Nigerian) — required for SOS & live tracking"
+                        label={t('auth.profile.phone')}
                         type="tel"
                         icon="phone"
                         placeholder="08012345678"
@@ -366,17 +360,13 @@ export default function CompleteProfilePage() {
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         error={
-                            formData.phone && !isPhoneValid
-                                ? 'Use 080… or +234… (required for live tracking)'
-                                : !formData.phone.trim()
-                                  ? 'Required for safety features'
-                                  : undefined
+                            formData.phone && !isPhoneValid ? t('auth.profile.phoneBad') : undefined
                         }
                     />
 
                     <div className="flex flex-col gap-1.5">
                         <label className="ml-1 text-[10px] font-bold uppercase tracking-widest text-[var(--neu-text-muted)]">
-                            Gender
+                            {t('auth.profile.gender')}
                         </label>
                         <div className="flex gap-2">
                             {['male', 'female', 'other'].map((g) => (
@@ -390,14 +380,14 @@ export default function CompleteProfilePage() {
                                             : 'border-charcoal/10 bg-[var(--neu-bg)] text-[var(--neu-text-muted)]'
                                     }`}
                                 >
-                                    {g}
+                                    {t(`auth.profile.g.${g}`)}
                                 </button>
                             ))}
                         </div>
                     </div>
 
                     <PremiumInput
-                        label="Date of Birth"
+                        label={t('auth.profile.dob')}
                         type="date"
                         icon="event"
                         className="py-0.5"
@@ -407,9 +397,7 @@ export default function CompleteProfilePage() {
 
                     <div className="auth-flow-notice auth-flow-notice--info flex items-center gap-2">
                         <ShieldCheck size={16} className="text-primary shrink-0" aria-hidden="true" />
-                        <span>
-                            Verified profiles help build a safer NeyborHuud. We never share your personal ID details.
-                        </span>
+                        <span>{t('auth.profile.privacy')}</span>
                     </div>
                 </div>
             </AuthFlowPage>

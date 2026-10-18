@@ -7,6 +7,22 @@ const keysOf = (lang) => {
   return new Set([...src.matchAll(/^\s*'([^']+)'\s*:/gm)].map((m) => m[1]));
 };
 
+// Duplicate keys silently overwrite each other: fail loudly instead.
+let dupes = 0;
+for (const lang of ['en', 'pcm', 'yo', 'ha', 'ig']) {
+  const src = readFileSync(new URL(`../src/locales/${lang}.ts`, import.meta.url), 'utf8');
+  const all = [...src.matchAll(/^\s*'([^']+)'\s*:/gm)].map((m) => m[1]);
+  const seen = new Set();
+  for (const k of all) {
+    if (seen.has(k)) {
+      console.log(`${lang}: duplicate key ${k}`);
+      dupes++;
+    }
+    seen.add(k);
+  }
+}
+if (dupes) process.exitCode = 1;
+
 const en = keysOf('en');
 for (const lang of ['pcm', 'yo', 'ha', 'ig']) {
   const have = keysOf(lang);

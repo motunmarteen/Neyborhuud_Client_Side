@@ -97,7 +97,7 @@ export const PremiumInput: React.FC<PremiumInputProps> = ({
 
   const isPasswordField = type === 'password';
   const inputType = isPasswordField && showPassword ? 'text' : type;
-  const isFloating = isFocused || hasValue || !!value;
+  const isFloating = isFocused || hasValue || !!value || type === 'date' || type === 'time';
 
   const getRingClass = () => {
     if (error || validationStatus === 'invalid' || validationStatus === 'taken') {

@@ -76,8 +76,8 @@ describe('resolvePostAuthRoute', () => {
     expect(resolvePostAuthRoute('/admin')).toBe('/admin');
   });
 
-  it('falls back to the feed', () => {
-    expect(resolvePostAuthRoute()).toBe('/feed');
+  it('falls back to the map (home)', () => {
+    expect(resolvePostAuthRoute()).toBe('/huud');
   });
 });
 
