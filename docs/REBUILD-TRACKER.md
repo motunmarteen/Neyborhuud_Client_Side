@@ -227,7 +227,7 @@ Kept here so the whole history is in one place.
 - [ ] S-005 `(marketing)/pick-community` → Getting started (restyled)
 - [ ] S-006 `(marketing)/reset-password` → Getting started (restyled)
 - [ ] S-007 `(marketing)/setup-complete` → Getting started (restyled)
-- [x] S-008 (2026-10-18) `(marketing)/signup` → now the "Join your neighbours" sheet on the live map (/huud?join=1): pick your street on the map, then first name, email, password; @name made for you; invite kept. Old page redirects. Google button appears once GOOGLE keys are set; phone + SMS later (needs an SMS account)
+- [x] S-008 (2026-10-18) `(marketing)/signup` → now the "Join your neighbours" sheet on the live map (/huud?join=1): pick your street on the map, then first name, email, password; @name made for you; invite kept. Old page redirects. Google and phone/SMS sign-in dropped for now (owner 2026-10-18: bootstrapping)
 - [ ] S-009 `(marketing)/verify-email` → Getting started (restyled)
 - [ ] S-010 `(marketing)/verify-location` → Getting started (restyled)
 - [ ] S-011 `(marketing)/welcome` → Getting started (restyled)
@@ -395,7 +395,7 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 - [x] G-01 (server 3113da2, deployed 2026-10-18) Separate **Impact** from HuudCredit in the database and API: impact_events ledger, once per action, with the area for leaderboards
 - [x] G-02 (server 3113da2) 6-level ladder (New Neighbour → Huud Elder) with unlocks; migrated on production 2026-10-18: 58 users, 24 kept a higher level floor, 6 got Impact from past deals/help/returns/invites; nobody went down
-- [x] G-03 (2026-10-18) Pay on confirmation: reports (2+ verified confirmers), light/water updates, events with 5+ verified going, jobs filled; posting no longer pays. Not possible yet: SOS responders (who responded isn't recorded)
+- [x] G-03 (2026-10-18) Pay on confirmation: reports (2+ verified confirmers), light/water updates, events with 5+ verified going, jobs filled; posting no longer pays. SOS responders: 50 Impact + 30 HC + SOS Responder badge when the person in the SOS confirms who helped (2026-10-18)
 - [x] G-04 (2026-10-18) Remove coins for likes, follows and raw posts and comments (also acknowledge, cross-post, product likes/comments); post/comment achievements hidden until the new badges
 - [x] G-05 (2026-10-18) Referral pays when the friend becomes active (their first Impact: confirmed report, help, deal, return): 50 HC each, +20 Impact to the inviter, max 10 a month; friends paid at signup under the old rule are not paid again
 - [x] G-06 (2026-10-18) Welcome quest (5 steps checked on the server: home area, email, guardian, follow, invite; 100 HC once + Neighbour level)
@@ -404,7 +404,7 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 - [x] G-09 (2026-10-18) Area leaderboards: my area, areas across Nigeria, people I follow; weekly reset (Monday, Nigeria time); on the Rewards page
 - [x] G-10 (2026-10-18) Area Champion of the Week (auto-picked every Monday: top verified helper per LGA with 25+ Impact; crown on the map at the LGA centre; notification; share card)
 - [x] G-11 (2026-10-18) Founding Neighbour: first 25 verified people per ward (the app has no streets)
-- [x] G-12 (2026-10-18) 16 badges from confirmed outcomes (SOS Responder became Honest Neighbour: SOS responders aren't recorded); old badges kept as Legacy; on Rewards and profiles
+- [x] G-12 (2026-10-18) 17 badges from confirmed outcomes (incl. Honest Neighbour and SOS Responder); old badges kept as Legacy; on Rewards and profiles
 - [x] G-13 (2026-10-18) Shop at /rewards/shop: 4 map skins, 4 profile frames, shout-outs on profiles (50 HC, no links/phones, owner can hide), birthday board links to the Ads page
 - [x] G-14 (2026-10-18) Community projects at /projects with sponsor matching; cancel refunds everyone; admin adds them in Admin › Community
 - [x] G-15 (2026-10-18) Gifting limits: Neighbour level+, verified, 500/day, 2,000/30 days, nothing earned in the last 7 days, not to an account on the same phone

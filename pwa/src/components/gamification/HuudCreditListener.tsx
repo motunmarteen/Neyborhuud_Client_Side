@@ -34,7 +34,7 @@ const REASONS: Record<string, string> = {
   share_external: 'For sharing outside the app',
   cross_post: 'For sharing with another area',
   emergency_report: 'Neighbours confirmed your report',
-  sos_help: 'For helping a neighbour',
+  sos_help: 'You responded to an SOS',
   event_created: 'For your event',
   job_posted: 'For your job post',
   marketplace_listed: 'For your listing',

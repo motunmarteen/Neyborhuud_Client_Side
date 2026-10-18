@@ -13,6 +13,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
 import { safetyService } from '@/services/safety.service';
 import type { IncidentSummary } from '@/types/api';
+import { ThankRespondersCard } from '@/components/sentinel/sos/ThankRespondersCard';
 
 const TIMELINE_ICON: Record<IncidentSummary['timeline'][number]['event'], string> = {
   sos_created: 'flag',
@@ -225,6 +226,9 @@ export default function IncidentRecapPage() {
                 </ul>
               )}
             </div>
+
+            {/* ── Who helped you? (SOS Responder badge + reward) ──────── */}
+            {id ? <ThankRespondersCard sosId={id} /> : null}
 
             {/* ── Agency dispatch ─────────────────────────────────────── */}
             <div className="rounded-xl neu-card p-4 mb-4">

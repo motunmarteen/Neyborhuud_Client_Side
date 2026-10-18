@@ -38,6 +38,7 @@ const WAYS_TO_EARN: { icon: string; title: string; detail: string; amount: strin
   { icon: '🚨', title: 'Report something neighbours confirm', detail: 'Paid only after they confirm it, never for posting', amount: '15' },
   { icon: '✅', title: 'Confirm a report that turns out true', detail: 'When enough neighbours confirm it, up to 10 a day', amount: '2' },
   { icon: '👋🏾', title: 'Invite a neighbour who becomes active', detail: 'When they help someone or finish a deal; they get 50 too', amount: '50' },
+  { icon: '🚑', title: 'Respond to an SOS', detail: 'When the person confirms you helped', amount: '30' },
   { icon: '🔎', title: 'Return a lost item', detail: 'After the owner confirms with the code', amount: '50' },
   { icon: '🙌🏾', title: 'Help someone find their item', detail: 'When they thank you for the tip', amount: '10' },
   { icon: '📊', title: 'Post a poll 10 neighbours vote on', detail: 'Once a day', amount: '2' },

@@ -35,6 +35,8 @@ export const IMPACT_WAYS: { icon: string; title: string; amount: number }[] = [
   { icon: '🤝🏾', title: 'You finish a marketplace deal', amount: 15 },
   { icon: '✅', title: 'You confirmed a report that turned out true', amount: 5 },
   { icon: '🙌🏾', title: 'Your tip helps return an item', amount: 5 },
+  { icon: '🚨', title: 'You respond to an SOS (they confirm)', amount: 50 },
+  { icon: '💡', title: 'Your light or water update is confirmed', amount: 10 },
 ];
 
 export function rungFor(level: number | null | undefined) {
