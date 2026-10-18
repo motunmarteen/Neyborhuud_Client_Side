@@ -263,7 +263,7 @@ Kept here so the whole history is in one place.
 - [ ] S-032 `/community-emergency` → Sentinel → Tools (+ map banner when active)
 - [ ] S-033 `/incident-reports` → Safety layer pins / Sentinel → Reports
 - [ ] S-034 `/incident-reports/[id]` → Safety layer pins / Sentinel → Reports
-- [ ] S-035 `/safety` → Sentinel tab
+- [x] S-035 (2026-10-18) `/safety` → Sentinel tab (/safety now opens /sentinel)
 - [ ] S-036 `/safety/emergency` → Sentinel → Tools → Report emergency
 - [ ] S-037 `/safety/fake-call` → Sentinel → Tools → Fake call
 - [ ] S-038 `/safety/geofences` → Sentinel → Protect → Safety zones (+ red zones on map)
@@ -370,7 +370,7 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 - [ ] S-03 Answers show their sources and end with an action (start safe trip, show route, chat service)
 - [ ] S-04 Voice questions (hold to talk)
 - [ ] S-05 Widen scope: questions about Lagos and general topics, while safety and money answers stay strictly grounded in real data
-- [ ] S-06 Sentinel tab: SOS centre, Protect, Your network, Tools, "What Sentinel watches", History (all existing safety features)
+- [x] S-06 (2026-10-18) Sentinel tab to the mockup: area mood + today's summary, Hold SOS for 3 seconds, guardians/circle/trip chips, safe-trip button, Protect / Your network / Tools, What Sentinel watches
 
 ---
 
