@@ -265,8 +265,16 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   // Members only, on their own area; visitors can tap "Show me around".
   const tour = useMapTour(!!map && !hasFocus && !!user);
 
+  // A tap before the map has finished loading is remembered and run when it is ready
+  // (it used to do nothing, so "Use my location" looked broken on a slow phone).
+  const pendingLocate = useRef(false);
   const locate = useCallback(() => {
-    if (!map || !('geolocation' in navigator)) return;
+    if (!('geolocation' in navigator)) return;
+    if (!map) {
+      pendingLocate.current = true;
+      setLocating(true);
+      return;
+    }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -283,6 +291,12 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 5 * 60_000 },
     );
   }, [map, showHere]);
+  useEffect(() => {
+    if (map && pendingLocate.current) {
+      pendingLocate.current = false;
+      locate();
+    }
+  }, [map, locate]);
 
   // The orb's ring: red for a live safety alert on screen, amber for any safety or traffic pin.
   const mood: AreaMood = pins.some((p) => p.layer === 'safety' && p.live)
