@@ -553,6 +553,16 @@ function ContactCard({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 
 // ─── Media renderers ─────────────────────────────────────────────────────────
 
+function StickerBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
+  return (
+    <div className="flex flex-col">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={msg.mediaUrl ?? ''} alt={`Sticker: ${msg.meta?.caption ?? msg.content ?? ''}`} className="h-40 w-40 object-contain" />
+      <Meta msg={msg} mine={mine} />
+    </div>
+  );
+}
+
 function ImageBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   // The bubble sits in a `flex flex-col items-start/items-end` stack, so it
   // shrinks to its content. This must NOT use a `fill` Image: `fill` is
@@ -918,7 +928,7 @@ export default function ChatMessageCard({
   }
 
   switch (msg.type) {
-    case 'image': return wrap(msg.mediaUrl ? <ImageBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />);
+    case 'image': return wrap(msg.mediaUrl ? (msg.meta?.sticker ? <StickerBubble msg={msg} mine={mine} /> : <ImageBubble msg={msg} mine={mine} />) : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />);
     case 'video': return wrap(msg.mediaUrl ? <VideoBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />);
     case 'audio': return wrap(msg.mediaUrl ? <AudioBubble msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />);
     case 'file':  return wrap(msg.mediaUrl ? <FileBubble  msg={msg} mine={mine} /> : <TextBubble msg={msg} mine={mine} isPriority={isPriority} />);

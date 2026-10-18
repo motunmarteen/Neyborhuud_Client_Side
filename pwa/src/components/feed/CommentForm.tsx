@@ -5,6 +5,7 @@ import { useCommentMutations } from '@/hooks/useComments';
 import { useAuth } from '@/hooks/useAuth';
 import { usePostMutations } from '@/hooks/usePosts';
 import type { Post } from '@/types/api';
+import { StickerReplySheet } from '@/components/feed/StickerReplySheet';
 
 const QUICK_EMOJIS = ['❤️', '🙌', '🔥', '👏', '😢', '😍', '😮', '😂'];
 
@@ -29,6 +30,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
     const [mediaUrls, setMediaUrls] = useState<string[]>([]);
     const [showMediaInput, setShowMediaInput] = useState(false);
     const [tempUrl, setTempUrl] = useState('');
+    const [stickerOpen, setStickerOpen] = useState(false);
     const { createComment, isCreating } = useCommentMutations(postId);
     const { isUpdating } = usePostMutations();
     const { user } = useAuth();
@@ -299,6 +301,8 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                                     type="button"
                                     className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--neu-text-secondary)] transition-colors hover:bg-black/5 hover:text-primary "
                                     title="Sticker"
+                                    aria-label="Sticker"
+                                    onClick={() => setStickerOpen(true)}
                                     disabled={isCreating}
                                 >
                                     <Smile size={18} />
@@ -308,6 +312,9 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                     </div>
                 </div>
             </div>
+            {stickerOpen ? (
+                <StickerReplySheet postId={postId} parentId={parentId} open={stickerOpen} onClose={() => setStickerOpen(false)} onSent={onSuccess} />
+            ) : null}
         </form>
     );
 };

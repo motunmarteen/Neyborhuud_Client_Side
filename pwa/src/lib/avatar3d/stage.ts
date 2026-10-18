@@ -147,7 +147,7 @@ export function renderPortrait(cfg: AvatarConfig, color: ColorOf, size = 256, po
  * A sticker: the avatar in a pose (head to knees) with a bold caption, 512×512 PNG with a
  * transparent background, ready to share or send in a chat.
  */
-export function renderSticker(cfg: AvatarConfig, color: ColorOf, pose: PoseId, caption: string, size = 512): string {
+export function renderSticker(cfg: AvatarConfig, color: ColorOf, pose: PoseId, caption: string, size = 512, ribbon = '#00B82E'): string {
   const gl = document.createElement('canvas');
   gl.width = gl.height = size;
   const renderer = new THREE.WebGLRenderer({ canvas: gl, antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -187,7 +187,7 @@ export function renderSticker(cfg: AvatarConfig, color: ColorOf, pose: PoseId, c
     g.translate(size / 2, y + h / 2);
     g.rotate(-0.05);
     g.translate(-size / 2, -(y + h / 2));
-    g.fillStyle = '#00B82E';
+    g.fillStyle = ribbon;
     g.strokeStyle = '#FFFFFF';
     g.lineWidth = size * 0.014;
     g.beginPath();

@@ -321,6 +321,18 @@ const pcm: Record<string, string> = {
 
     // Getting started: one sign-up (2026-10-18)
     'auth.loc.done': 'We don check your location. Thank you!',
+
+    // Stickers (2026-10-18)
+    'sticker.title': 'Your stickers',
+    'sticker.loading': 'Your stickers dey load…',
+    'sticker.needAvatar': 'Make your 3D avatar first. Your stickers go show here after.',
+    'sticker.makeAvatar': 'Make my avatar',
+    'sticker.group.greet': 'Greetings',
+    'sticker.group.feel': 'How you feel',
+    'sticker.group.celebrate': 'Jollificate',
+    'sticker.one': 'Sticker: {caption}',
+    'sticker.sent': 'Sticker don go',
+    'sticker.failed': 'The sticker no go. Try again.',
 };
 
 export default pcm;

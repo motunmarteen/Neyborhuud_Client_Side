@@ -332,6 +332,18 @@ const en: Record<string, string> = {
 
     // Getting started: one sign-up (2026-10-18)
     'auth.loc.done': 'Location checked. Thank you!',
+
+    // Stickers (2026-10-18)
+    'sticker.title': 'Your stickers',
+    'sticker.loading': 'Loading your stickers…',
+    'sticker.needAvatar': 'Make your 3D avatar first. Then your stickers appear here.',
+    'sticker.makeAvatar': 'Make my avatar',
+    'sticker.group.greet': 'Greetings',
+    'sticker.group.feel': 'Feelings',
+    'sticker.group.celebrate': 'Celebrate',
+    'sticker.one': 'Sticker: {caption}',
+    'sticker.sent': 'Sticker sent',
+    'sticker.failed': 'The sticker didn\'t send. Try again.',
 };
 
 export default en;

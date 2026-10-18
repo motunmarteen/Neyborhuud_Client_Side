@@ -312,6 +312,7 @@ export const contentService = {
       _id: c._id,
       body: c.body || c.content || "",
       mediaUrls: c.mediaUrls || [],
+      sticker: c.sticker === true,
       userId: c.userId,
       parentId: c.parentId,
       replies: (c.replies || []).map((r: any) => this.normalizeComment(r)),
@@ -497,7 +498,7 @@ export const contentService = {
    */
   async createComment(
     postId: string,
-    payload: { body: string; mediaUrls?: string[]; parentId?: string },
+    payload: { body: string; mediaUrls?: string[]; sticker?: boolean; parentId?: string },
   ) {
     return await apiClient.post<Comment>(
       `/content/posts/${postId}/comments`,

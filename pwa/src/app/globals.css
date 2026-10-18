@@ -345,7 +345,7 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-image: url('/doodle-pattern.svg?v=5');
+  background-image: url('/doodle-pattern-faint.svg?v=6');
   background-repeat: repeat;
   background-size: 440px 440px;
   /* The tile carries its own soft strength; this used to be 4%, which hid it. */
@@ -4201,7 +4201,7 @@ main.feed-scroll-main--sky-feed {
 .min-h-screen.bg-white,
 .min-h-screen.bg-soft-bg {
   background-color: #EEF2F7;
-  background-image: url('/doodle-pattern.svg?v=5');
+  background-image: url('/doodle-pattern-faint.svg?v=6');
   background-repeat: repeat;
   background-size: 440px 440px;
 }
@@ -4211,14 +4211,14 @@ main.feed-scroll-main--sky-feed {
 /* Dark page wrappers (marketplace, safety dark pages) */
 .min-h-screen.bg-black,
 .min-h-screen.bg-\[\#0f0f1e\] {
-  background-image: url('/doodle-pattern-dark.svg?v=5');
+  background-image: url('/doodle-pattern-faint-dark.svg?v=6');
   background-repeat: repeat;
   background-size: 440px 440px;
 }
 
 .doodle-surface {
   background-color: #EEF2F7;
-  background-image: url('/doodle-pattern.svg?v=5');
+  background-image: url('/doodle-pattern.svg?v=6');
   background-repeat: repeat;
   background-size: 440px 440px;
   color: var(--foreground);
@@ -4226,7 +4226,7 @@ main.feed-scroll-main--sky-feed {
 
 .doodle-surface-muted {
   background-color: #F2F7F2;
-  background-image: url('/doodle-pattern.svg?v=5');
+  background-image: url('/doodle-pattern.svg?v=6');
   background-repeat: repeat;
   background-size: 440px 440px;
 }
@@ -5221,7 +5221,7 @@ button.left-sidebar__link:focus-visible {
 .feed-comments-panel,
 .doodle-modal-panel {
   background-color: #ffffff;
-  background-image: url('/doodle-pattern.svg?v=5');
+  background-image: url('/doodle-pattern.svg?v=6');
   background-repeat: repeat;
   background-size: 440px 440px;
   color: var(--neu-text);
@@ -5689,7 +5689,8 @@ body,
    on every page). Reading-heavy screens opt out with .no-doodle. ── */
 .neu-base {
   background-color: #EEF2F7;
-  background-image: url('/doodle-pattern.svg?v=5');
+  /* Faint behind busy pages; chats, empty screens and pop-ups keep the full pattern. */
+  background-image: url('/doodle-pattern-faint.svg?v=6');
   background-repeat: repeat;
   background-size: 440px 440px;
 }
@@ -6788,7 +6789,7 @@ button.mod-card:active {
   padding: 0.75rem 1rem 1.25rem;
   -webkit-overflow-scrolling: touch;
   background-color: #ffffff;
-  background-image: url('/doodle-pattern.svg?v=5');
+  background-image: url('/doodle-pattern.svg?v=6');
   background-repeat: repeat;
   background-size: 440px 440px;
   background-attachment: local;

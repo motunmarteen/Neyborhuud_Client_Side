@@ -79,7 +79,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
         }
     })();
 
-    const hasBubbleContent = !isStatusUpdate || !!cleanBody;
+    const isSticker = comment.sticker === true && (comment.mediaUrls?.length ?? 0) > 0;
+    const hasBubbleContent = !isSticker && (!isStatusUpdate || !!cleanBody);
 
     return (
         <div className={`flex gap-2.5 ${isReply ? 'mt-2.5' : 'py-2'}`}>
@@ -135,7 +136,16 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, postId, isRep
                         )}
 
                         {/* Media Grid — fills the comment content width (feed-style) */}
-                        {comment.mediaUrls && comment.mediaUrls.length > 0 && (
+                        {isSticker ? (
+                            <div className="mt-0.5">
+                                <Link href={`/profile/${username}`} className="text-[13px] font-semibold text-[#050505] hover:underline">
+                                    {displayName}
+                                </Link>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={comment.mediaUrls![0]} alt={`Sticker: ${comment.body}`} className="mt-1 h-32 w-32 object-contain" loading="lazy" />
+                            </div>
+                        ) : null}
+                        {!isSticker && comment.mediaUrls && comment.mediaUrls.length > 0 && (
                             <div className="mt-2 grid w-full grid-cols-2 gap-0.5 overflow-hidden rounded-xl">
                                 {comment.mediaUrls.map((url, idx) => (
                                     <div key={idx} className={`${comment.mediaUrls?.length === 1 ? 'col-span-2' : ''} relative aspect-square`}>

@@ -27,6 +27,7 @@ import { getPostAuthorUserId } from '@/lib/postAuthor';
 import { resolveUserAvatarUrl } from '@/lib/userAvatar';
 import { usePostMutations } from '@/hooks/usePosts';
 import { apiMessage, votePoll } from '@/lib/pollsApi';
+import { StickerReplySheet } from '@/components/feed/StickerReplySheet';
 
 interface XPostCardProps {
   post: Post;
@@ -68,6 +69,7 @@ export function XPostCard({
   const [showShare, setShowShare] = useState(false);
   const [showRepostComposer, setShowRepostComposer] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [stickerOpen, setStickerOpen] = useState(false);
   const [chainModalOpen, setChainModalOpen] = useState(false);
   const [pollOverride, setPollOverride] = useState<PostPoll | null>(null);
   const { sharePost, unsharePost } = usePostMutations();
@@ -166,6 +168,7 @@ export function XPostCard({
         onSave={onSave}
         onShare={() => setShowShare(true)}
         onRepost={handleInstantRepost}
+        onSticker={() => setStickerOpen(true)}
         onHelpful={onHelpful}
         onMenu={() => setMenuOpen(true)}
         onCardClick={openCard}
@@ -182,6 +185,7 @@ export function XPostCard({
       {showShare ? (
         <ShareModal postId={postId} postContent={post.content ?? ''} onClose={() => setShowShare(false)} alert={alertShareStatus(post)} />
       ) : null}
+      {stickerOpen ? <StickerReplySheet postId={postId} open={stickerOpen} onClose={() => setStickerOpen(false)} /> : null}
       <RepostComposerSheet open={showRepostComposer} sourcePost={post} onClose={() => setShowRepostComposer(false)} onReposted={onReposted} />
       {chainModalOpen ? <PostRepostChainModal postId={postId} open={chainModalOpen} onClose={() => setChainModalOpen(false)} /> : null}
       <PostCardActionsSheet

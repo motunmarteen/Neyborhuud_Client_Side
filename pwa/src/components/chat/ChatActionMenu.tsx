@@ -889,7 +889,7 @@ const ChatActionMenu = forwardRef<ChatActionMenuHandle, Props>(function ChatActi
           <StickerPicker
             onPick={async (url, caption) => {
               const file = await stickerFile(url, caption);
-              handleModalDone({ type: 'image', content: '', mediaFile: file, meta: { sticker: true, caption } as ChatMessageMeta });
+              handleModalDone({ type: 'image', content: caption, mediaFile: file, meta: { sticker: true, caption } as ChatMessageMeta });
             }}
           />
         </Modal>

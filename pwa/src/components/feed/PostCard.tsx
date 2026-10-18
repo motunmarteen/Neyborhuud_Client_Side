@@ -34,6 +34,7 @@ import {
   Pin,
   Repeat2,
   Share2,
+  Sticker,
   ThumbsUp,
   UserCheck,
   UserPlus,
@@ -81,6 +82,8 @@ export type PostCardProps = {
   onShare: () => void;
   onSave: () => void;
   onRepost?: () => void;
+  /** Reply with one of your avatar stickers. */
+  onSticker?: () => void;
   onHelpful?: () => void;
   onMenu?: () => void;
   onCardClick?: () => void;
@@ -551,6 +554,7 @@ export function PostCard({
   onShare,
   onSave,
   onRepost,
+  onSticker,
   onHelpful,
   onMenu,
   onCardClick,
@@ -822,6 +826,11 @@ export function PostCard({
             <ActionButton label="Comment" count={compact(post.comments)} activeClass="" onClick={onComment}>
               <MessageCircle size={19} aria-hidden />
             </ActionButton>
+            {onSticker ? (
+              <ActionButton label="Sticker" activeClass="" onClick={onSticker}>
+                <Sticker size={19} aria-hidden />
+              </ActionButton>
+            ) : null}
             {onRepost ? (
               <ActionButton label="Repost" count={compact(post.shares)} active={post.isShared} activeClass="text-brand-green-dark bg-green-soft" onClick={onRepost}>
                 <Repeat2 size={19} aria-hidden />

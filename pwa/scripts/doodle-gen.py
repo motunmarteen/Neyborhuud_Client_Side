@@ -56,7 +56,8 @@ M = {
     "chat": '<path d="M4 5h16a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H9l-5 3.8v-3.8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><circle cx="8" cy="11" r=".7"/><circle cx="12" cy="11" r=".7"/><circle cx="16" cy="11" r=".7"/>',
 }
 
-WORDS = ["NeyborHuud", "How far?", "Ẹ káàbọ̀", "Sannu", "Nnọọ", "Abeg", "Naija", "Light don come!", "Ndewo", "We dey", "Owambe", "My Huud"]
+# Few, short words (owner 2026-10-18: the pattern was too busy and long words got sliced at screen edges).
+WORDS = ["How far?", "Sannu", "Ndewo", "Abeg"]
 
 SPARKLE = '<path d="M0 -4 1 -1 4 0 1 1 0 4 -1 1 -4 0 -1 -1z"/>'
 
@@ -72,15 +73,17 @@ def wrap(el_at, x, y, size, reach):
     return out
 
 
-def build(dark: bool) -> str:
+def build(dark: bool, faint: bool = False) -> str:
     rnd = random.Random(20261018)
     size = 480
-    n = 9
+    n = 7  # 49 spots instead of 81: calmer
     cell = size / n
     if dark:
-        main, accent, third, route, op = "#46D98C", "#F2C14E", "#9FB3D1", "#46D98C", 0.15
+        main, accent, third, route, op = "#46D98C", "#F2C14E", "#9FB3D1", "#46D98C", 0.12
     else:
-        main, accent, third, route, op = "#0E8A3E", "#C98A0B", "#1D2433", "#0E8A3E", 0.19
+        main, accent, third, route, op = "#0E8A3E", "#C98A0B", "#1D2433", "#0E8A3E", 0.16
+    if faint:  # behind busy pages (feed, lists, settings): texture only
+        op = round(op * 0.5, 3)
     names = list(M.keys())
     cells = [(r, c) for r in range(n) for c in range(n)]
     rnd.shuffle(cells)
@@ -88,8 +91,8 @@ def build(dark: bool) -> str:
     out = []
 
     # Faint dotted streets winding across the tile (they join up from tile to tile).
-    for k in range(3):
-        y0 = size * (k + 0.5) / 3 + rnd.uniform(-20, 20)
+    for k in range(2):
+        y0 = size * (k + 0.5) / 2 + rnd.uniform(-20, 20)
         amp = rnd.uniform(14, 26)
         ph = rnd.uniform(0, math.tau)
         pts = [(x, y0 + amp * math.sin(ph + x / size * math.tau * 2)) for x in range(0, size + 1, 12)]
@@ -133,7 +136,7 @@ def build(dark: bool) -> str:
     # Sparkles and dots where cells meet, filling the gaps without crowding.
     for r in range(n):
         for c in range(n):
-            if rnd.random() < 0.6:
+            if rnd.random() < 0.35:
                 x, y = (c + 1) * cell, (r + 1) * cell
                 if rnd.random() < 0.5:
                     s = rnd.uniform(0.9, 1.4)
@@ -153,4 +156,6 @@ if __name__ == "__main__":
     pub = sys.argv[1]
     open(f"{pub}/doodle-pattern.svg", "w", encoding="utf-8").write(build(False))
     open(f"{pub}/doodle-pattern-dark.svg", "w", encoding="utf-8").write(build(True))
+    open(f"{pub}/doodle-pattern-faint.svg", "w", encoding="utf-8").write(build(False, True))
+    open(f"{pub}/doodle-pattern-faint-dark.svg", "w", encoding="utf-8").write(build(True, True))
     print("motifs", len(M), "words", len(WORDS))

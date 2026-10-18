@@ -420,6 +420,8 @@ export interface Comment {
   };
   content?: string;
   body: string; // The backend uses 'body' for the text content
+  /** Posted from the sticker picker: show as a sticker, not a photo with text. */
+  sticker?: boolean;
   mediaUrls?: string[];
   parentId?: string;
   replies?: Comment[];
@@ -540,6 +542,9 @@ export type ChatMessageType =
 
 /** Rich metadata carried by non-text message types */
 export interface ChatMessageMeta {
+  // avatar sticker (the caption is drawn on the picture)
+  sticker?: boolean;
+  caption?: string;
   // location
   latitude?: number;
   longitude?: number;

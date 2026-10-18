@@ -44,6 +44,7 @@ export function useCommentMutations(postId: string) {
     mutationFn: (payload: {
       body: string;
       mediaUrls?: string[];
+      sticker?: boolean;
       parentId?: string;
     }) => contentService.createComment(postId, payload),
     onMutate: async (newComment) => {
@@ -75,6 +76,7 @@ export function useCommentMutations(postId: string) {
             id: `temp-${Date.now()}`,
             body: newComment.body,
             mediaUrls: newComment.mediaUrls || [],
+            sticker: newComment.sticker === true,
             userId: "current-user", // Will be replaced by real data on success/refetch
             parentId: newComment.parentId,
             replies: [],
