@@ -116,7 +116,9 @@ export function JoinSheet({ map, area, refCode, onLocate, locating, onClose }: P
     if (!editName && nameCheck.status === 'taken' && first.trim().length >= 2) setUsername(suggestName(first));
   }, [nameCheck.status, editName, first]);
 
-  const areaName = area?.neighbourhood && area.lga ? `${area.neighbourhood}, ${area.lga}` : area?.lga ?? null;
+  // Addresses often come in capitals ("SHOFUNDE"): show them as names.
+  const nice = (s: string) => (s === s.toUpperCase() ? s.toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (_m, a: string, b: string) => a + b.toUpperCase()) : s);
+  const areaName = area?.neighbourhood && area.lga ? `${nice(area.neighbourhood)}, ${area.lga}` : area?.lga ?? null;
   const policy = useMemo(() => evaluatePasswordPolicy(password, { email, username }), [password, email, username]);
   const nameOk = nameCheck.status === 'valid';
   const emailOk = emailCheck.status === 'valid';

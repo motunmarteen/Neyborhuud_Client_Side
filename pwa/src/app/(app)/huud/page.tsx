@@ -272,7 +272,12 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       (pos) => {
         setLocating(false);
         showHere({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        map.flyTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom: STREET_ZOOM + 0.5 });
+        const target = { center: [pos.coords.longitude, pos.coords.latitude] as [number, number], zoom: STREET_ZOOM + 0.5 };
+        map.flyTo({ ...target, essential: true });
+        // If anything interrupts the flight (the map still starting up), jump straight there.
+        map.once('moveend', () => {
+          if (map.getZoom() < target.zoom - 1) map.jumpTo(target);
+        });
       },
       () => setLocating(false),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 5 * 60_000 },
