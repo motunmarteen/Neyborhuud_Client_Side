@@ -487,6 +487,17 @@ const pcm: Record<string, string> = {
     'avatar.selfieBad': 'We no fit read that photo. Try one wey your face dey for good light.',
     'avatar.stickerSaved': 'Sticker don save',
     'avatar.stickersHint': 'Tap one to share am (WhatsApp, Instagram…) or save am. For chat, tap ➕ then Sticker. Dem dey use your saved look.',
+
+    // Avatars: you and them, map people (2026-10-18)
+    'map.people': 'People & places',
+    'map.peopleTitle': 'People & places for map',
+    'duo.title': 'You and {name}',
+    'duo.none': 'Follow {name}, your avatar go wave for dem.',
+    'duo.iWave': 'You dey wave {name} from far 👋🏾',
+    'duo.theyWave': '{name} dey wave you. Follow back? 👋🏾',
+    'duo.hug': 'You and {name} dey follow each other 🤗',
+    'duo.closeWave': 'You and {name} dey follow each other 👋🏾',
+    'duo.makeMine': 'Make my avatar',
 };
 
 export default pcm;

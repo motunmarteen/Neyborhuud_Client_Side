@@ -6,6 +6,7 @@
 
 'use client';
 
+import { AvatarDuo } from '@/components/avatar/AvatarDuo';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { resolveDynamicParam } from '@/lib/staticExportParams';
@@ -794,6 +795,13 @@ export default function ProfilePage() {
               )}
             </div>
           )}
+
+          {/* You and them (owner 2026-10-18): your avatars wave or hug as you follow each other. */}
+          {shouldEnableFollow && !isBlocked && !isBlockedByThem && profile?.id && !isLoadingStatus ? (
+            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] pb-3">
+              <AvatarDuo userId={String(profile.id)} name={displayName} isFollowing={!!isFollowing} followsYou={!!followsYou} />
+            </div>
+          ) : null}
 
           <div className="relative bg-white border-b border-gray-100/80">
             <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] pt-4 pb-5 flex items-center justify-around gap-2 overflow-x-auto no-scrollbar">

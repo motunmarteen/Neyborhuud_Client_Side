@@ -228,3 +228,123 @@ export function renderSticker(cfg: AvatarConfig, color: ColorOf, pose: PoseId, c
   disposeAvatar(built.root);
   return url;
 }
+
+export type DuoMode = 'none' | 'i_wave' | 'they_wave' | 'hug' | 'close_wave';
+
+/** Where each avatar stands, which way it faces and what it does, per mode (me on the left). */
+const DUO: Record<DuoMode, { gap: number; me: PoseId; them: PoseId; face: number }> = {
+  none: { gap: 1.3, me: 'idle', them: 'idle', face: 0.5 },
+  i_wave: { gap: 1.3, me: 'wave', them: 'idle', face: 0.65 },
+  they_wave: { gap: 1.3, me: 'idle', them: 'waveL', face: 0.65 },
+  close_wave: { gap: 0.62, me: 'wave', them: 'waveL', face: 0.85 },
+  hug: { gap: 0.34, me: 'hug', them: 'hug', face: 1.25 },
+};
+
+export type DuoStage = {
+  set: (me: AvatarConfig, them: AvatarConfig, mode: DuoMode) => void;
+  dispose: () => void;
+};
+
+/**
+ * Two avatars on one stage (owner 2026-10-18): follow someone and your avatar waves at them
+ * from afar; they follow you and theirs waves at you; follow each other and they walk over
+ * and hug (two men or two women) or come close and wave. One WebGL context for both.
+ */
+export function createDuoStage(canvas: HTMLCanvasElement, color: ColorOf, opts: { still?: boolean; onLost?: () => void } = {}): DuoStage {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const lost = (e: Event) => {
+    e.preventDefault();
+    opts.onLost?.();
+  };
+  canvas.addEventListener('webglcontextlost', lost);
+  const scene = new THREE.Scene();
+  lights(scene);
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(2.4, 48), new THREE.MeshBasicMaterial({ color: 0x1d2433, transparent: true, opacity: 0.07 }));
+  floor.rotation.x = -Math.PI / 2;
+  floor.scale.y = 0.35;
+  scene.add(floor);
+  const camera = new THREE.PerspectiveCamera(28, 2, 0.1, 50);
+  camera.position.set(0, 1.35, 7.2);
+  camera.lookAt(0, 1.1, 0);
+
+  let me: BuiltAvatar | null = null;
+  let them: BuiltAvatar | null = null;
+  let mode: DuoMode = 'none';
+  let gap = DUO.none.gap; // current half-distance, eased towards the mode's
+  let raf = 0;
+  const t0 = performance.now();
+  let last = t0;
+
+  const resize = () => {
+    const w = canvas.clientWidth || 340;
+    const h = canvas.clientHeight || 170;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  };
+  resize();
+  const ro = new ResizeObserver(resize);
+  ro.observe(canvas);
+
+  const place = (b: BuiltAvatar, x: number, face: number, pose: PoseId, t: number) => {
+    b.root.position.x = x;
+    b.root.rotation.y = face;
+    poseAvatar(b, pose, t);
+  };
+
+  const tick = (now: number) => {
+    raf = requestAnimationFrame(tick);
+    const t = opts.still ? 0.3 : (now - t0) / 1000;
+    const d = DUO[mode];
+    // Walk at a steady pace (same on a fast or slow phone), about a second across.
+    const dt = Math.min(0.1, (now - last) / 1000);
+    last = now;
+    const step = opts.still ? Infinity : 0.9 * dt;
+    const diff = d.gap - gap;
+    gap = Math.abs(diff) <= step ? d.gap : gap + Math.sign(diff) * step;
+    const walking = gap !== d.gap;
+    if (me) place(me, -gap, d.face, walking ? 'walk' : d.me, t);
+    if (them) place(them, gap, -d.face, walking ? 'walk' : d.them, t + 0.4);
+    renderer.render(scene, camera);
+  };
+  raf = requestAnimationFrame(tick);
+
+  const swap = (old: BuiltAvatar | null, cfg: AvatarConfig) => {
+    if (old) {
+      scene.remove(old.root);
+      disposeAvatar(old.root);
+    }
+    const b = buildAvatar(cfg, color);
+    scene.add(b.root);
+    return b;
+  };
+  let lastMe = '';
+  let lastThem = '';
+
+  return {
+    set(meCfg, themCfg, m) {
+      const a = JSON.stringify(meCfg);
+      const b = JSON.stringify(themCfg);
+      if (a !== lastMe) {
+        me = swap(me, meCfg);
+        lastMe = a;
+      }
+      if (b !== lastThem) {
+        them = swap(them, themCfg);
+        lastThem = b;
+      }
+      mode = m;
+    },
+    dispose() {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      canvas.removeEventListener('webglcontextlost', lost);
+      if (me) disposeAvatar(me.root);
+      if (them) disposeAvatar(them.root);
+      renderer.dispose();
+      renderer.forceContextLoss();
+    },
+  };
+}

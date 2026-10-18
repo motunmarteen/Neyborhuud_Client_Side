@@ -22,8 +22,8 @@ export function useAvatarCatalogue() {
   });
 }
 
-export function useMyAvatar() {
-  return useQuery({ queryKey: ['avatar', 'me'], queryFn: async () => unwrap<Mine>(await apiClient.get('/avatar/me')), retry: 1 });
+export function useMyAvatar(enabled = true) {
+  return useQuery({ queryKey: ['avatar', 'me'], queryFn: async () => unwrap<Mine>(await apiClient.get('/avatar/me')), retry: 1, enabled });
 }
 
 export function useSaveAvatar() {

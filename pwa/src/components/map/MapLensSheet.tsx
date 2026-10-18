@@ -8,6 +8,7 @@
 import Link from 'next/link';
 import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
 import { LENSES, MAX_LENSES, type LensItem, type LensKey } from '@/hooks/useMapLenses';
+import { useTranslation } from '@/lib/i18n';
 
 type Props = {
   open: boolean;
@@ -19,8 +20,9 @@ type Props = {
 };
 
 export function MapLensSheet({ open, onClose, on, onToggle, sharing, onSharing }: Props) {
+  const { t } = useTranslation();
   return (
-    <AppBottomSheet open={open} onClose={onClose} title="More on the map">
+    <AppBottomSheet open={open} onClose={onClose} title={t('map.peopleTitle')}>
       <div className="flex flex-col gap-3 pb-2">
         <p className="text-sm text-muted">Pick up to {MAX_LENSES} at a time, so the map stays clear.</p>
         <ul className="flex flex-col gap-2">

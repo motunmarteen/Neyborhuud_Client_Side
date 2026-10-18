@@ -46,6 +46,9 @@ import { useHuudWeek } from '@/hooks/useQuests';
 import { useShop } from '@/hooks/usePhase7';
 import { MapSkinOverlay } from '@/components/map/MapSkinOverlay';
 import { useFriendsSharing, useLensChoice, useMapLenses, type LensItem, type LensKey } from '@/hooks/useMapLenses';
+import { useStarted } from '@/hooks/useStarted';
+import { useTranslation } from '@/lib/i18n';
+import { avatarPortraitUrl, useMyAvatar } from '@/hooks/useAvatar';
 import { LensItemSheet, MapLensSheet } from '@/components/map/MapLensSheet';
 import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
@@ -385,6 +388,14 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   const [lensSheetOpen, setLensSheetOpen] = useState(false);
   const [lensItem, setLensItem] = useState<{ it: LensItem; lens: LensKey } | null>(null);
   useMapLenses(user ? map : null, lensChoice.on, (it, lens) => setLensItem({ it, lens }));
+  const started = useStarted();
+  const { t } = useTranslation();
+  const { data: myAvatar } = useMyAvatar(Boolean(user));
+  const myId = (user as { id?: string; _id?: string } | null)?.id ?? (user as { _id?: string } | null)?._id;
+  const myPortrait =
+    myId && myAvatar?.avatar?.hasPortrait
+      ? avatarPortraitUrl(`/avatar/${myId}/portrait.png?v=${encodeURIComponent(myAvatar.avatar.updatedAt ?? '')}`)
+      : undefined;
   const friendsSharing = useFriendsSharing(!!user);
   const pulseLocal = useMemo<PulseLocalItem[]>(() => {
     const out: PulseLocalItem[] = [];
@@ -512,7 +523,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           skyLift={{ safeTopPlus: 60 }}
         />
         {/* Phase 7 shop: the person's map skin (only they see it). */}
-        <MapSkinOverlay skin={shopData?.equipped.mapSkin} calm={calm} />
+        <MapSkinOverlay skin={shopData?.equipped?.mapSkin} calm={calm} />
       </div>
 
       {/* Under the top bar: layer chips, then the ⚡ PULSE ribbon (news + exchange rates). */}
@@ -522,7 +533,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             active={layers}
             onChange={setLayers}
             counts={counts}
-            onMore={user ? () => setLensSheetOpen(true) : undefined}
+            onMore={started && user ? () => setLensSheetOpen(true) : undefined}
             moreOn={lensChoice.on.length}
           />
         </div>
@@ -578,6 +589,29 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
               {soundOn ? 'Sound on' : 'Sound off'}
             </button>
           </div>
+        ) : null}
+        {/* Your avatar on the map (owner 2026-10-18): opens People & places (friends, birthdays, businesses). */}
+        {started && user ? (
+          <button
+            type="button"
+            onClick={() => setLensSheetOpen(true)}
+            aria-label={t('map.peopleTitle')}
+            className="relative mb-2 grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] ring-2 ring-white"
+          >
+            {myPortrait ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={myPortrait} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <span aria-hidden className="text-2xl">
+                👥
+              </span>
+            )}
+            {lensChoice.on.length ? (
+              <span aria-hidden className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[11px] font-black text-white">
+                {lensChoice.on.length}
+              </span>
+            ) : null}
+          </button>
         ) : null}
         <button
           type="button"
@@ -638,7 +672,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
               locating={locating}
               onClose={closeJoin}
             />
-          ) : visitor ? (
+          ) : !started ? null : visitor ? (
             <VisitorWelcome
               area={
                 areaWelcome?.neighbourhood && areaWelcome.lga

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import {
+  Smile,
   Home,
   Compass,
   Users,
@@ -47,12 +48,13 @@ interface NavItem {
 const NAV_MAIN: NavItem[] = [
   { icon: Home, label: 'Feed', href: '/feed' },
   { icon: Compass, label: 'My Huud', href: '/huud' },
+  { icon: Smile, label: 'My avatar', href: '/avatar' },
   { icon: Users, label: 'Communities', href: '/communities' },
   { icon: Bookmark, label: 'Saved Posts', href: '/saved' },
 ];
 
 const NAV_DISCOVER: NavItem[] = [
-  { icon: ShieldAlert, label: 'Sentinel Radar', href: '/safety', badge: 'LIVE', badgeColor: 'bg-emerald-100 text-emerald-800' },
+  { icon: ShieldAlert, label: 'Sentinel Radar', href: '/sentinel', badge: 'LIVE', badgeColor: 'bg-emerald-100 text-emerald-800' },
   { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace' },
   { icon: Briefcase, label: 'Gigs & Services', href: '/jobs' },
   { icon: Megaphone, label: 'FYI Bulletins', href: '/fyi' },

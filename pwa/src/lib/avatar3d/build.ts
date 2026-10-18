@@ -674,7 +674,7 @@ export function disposeAvatar(root: THREE.Object3D) {
 
 // ── Poses (for the studio, stickers and later the map) ─────────────────────
 
-export type PoseId = 'idle' | 'wave' | 'thumbs' | 'peace' | 'hips' | 'shrug' | 'point' | 'dance' | 'pray' | 'flex';
+export type PoseId = 'idle' | 'wave' | 'thumbs' | 'peace' | 'hips' | 'shrug' | 'point' | 'dance' | 'pray' | 'flex' | 'hug' | 'walk' | 'waveL';
 export const POSES: { id: PoseId; label: string; emoji: string }[] = [
   { id: 'idle', label: 'Relax', emoji: '🧍🏾' },
   { id: 'wave', label: 'Wave', emoji: '👋🏾' },
@@ -695,6 +695,9 @@ function poseJoints(pose: PoseId, t: number): [Joint, Joint, { bob?: number; til
   switch (pose) {
     case 'wave':
       return [{}, { sz: 2.5, ez: -0.6 + w * 0.35 }, { tilt: -0.08 }];
+    // Waving with the other hand (the one nearer the friend when standing on the right).
+    case 'waveL':
+      return [{ sz: 2.5, ez: -0.6 + w * 0.35 }, {}, { tilt: 0.08 }];
     case 'thumbs':
       return [{}, { sx: -0.5, ez: 0, ex: -1.5, hand: 'thumb' }, { tilt: 0.05 }];
     case 'peace':
@@ -712,6 +715,14 @@ function poseJoints(pose: PoseId, t: number): [Joint, Joint, { bob?: number; til
     case 'dance': {
       const a = Math.sin(t * 5);
       return [{ sz: 1.2 + a * 0.9, ez: -0.6 }, { sz: 1.2 - a * 0.9, ez: -0.6 }, { bob: Math.abs(Math.sin(t * 5)) * 0.06, turn: a * 0.25 }];
+    }
+    // Two friends (owner 2026-10-18): arms out and round the other person.
+    case 'hug':
+      return [{ sx: -1.35, sz: 0.35, ez: -1.35 }, { sx: -1.35, sz: 0.35, ez: -1.35 }, { tilt: 0.32 + Math.sin(t * 2) * 0.03, turn: 0.35 }];
+    // Walking over to someone: arms swing, a small bounce.
+    case 'walk': {
+      const a = Math.sin(t * 7);
+      return [{ sx: a * 0.45 }, { sx: -a * 0.45 }, { bob: Math.abs(a) * 0.035 }];
     }
     default:
       return [{}, {}, {}];

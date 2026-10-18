@@ -498,6 +498,17 @@ const en: Record<string, string> = {
     'avatar.selfieBad': 'We couldn\'t read that photo. Try one with your face in good light.',
     'avatar.stickerSaved': 'Sticker saved',
     'avatar.stickersHint': 'Tap one to share it (WhatsApp, Instagram…) or save it. In a chat, tap ➕ then Sticker. They use your saved look.',
+
+    // Avatars: you and them, map people (2026-10-18)
+    'map.people': 'People & places',
+    'map.peopleTitle': 'People & places on the map',
+    'duo.title': 'You and {name}',
+    'duo.none': 'Follow {name} and your avatar will wave at them.',
+    'duo.iWave': 'You\'re waving at {name} from afar 👋🏾',
+    'duo.theyWave': '{name} is waving at you. Follow back? 👋🏾',
+    'duo.hug': 'You and {name} follow each other 🤗',
+    'duo.closeWave': 'You and {name} follow each other 👋🏾',
+    'duo.makeMine': 'Make my avatar',
 };
 
 export default en;
