@@ -1042,7 +1042,7 @@ export default function SettingsPage() {
                 <Section title="Invite NeyburHs">
                   <p className="mb-3 text-xs leading-relaxed text-gray-500">
                     Your username is the referral code on this app. Friends who sign up from your link
-                    attach you as inviter (HuudCredit may apply per server rules).
+                    attach you as inviter. You both get 50 HuudCredit once they help a neighbour or finish a deal.
                   </p>
                   <div className="mb-3 break-all rounded-2xl border border-gray-100 bg-gray-50/50 px-3 py-2 text-[11px] font-mono text-gray-700">
                     {typeof window !== 'undefined'

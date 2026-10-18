@@ -281,12 +281,13 @@ export default function WalletPage() {
               </h2>
               <div className="grid grid-cols-2 gap-2">
                 {[
+                  // Phase 7 (2026-10-18): outcomes neighbours confirm, not posts or comments.
                   { icon: "today", label: "Daily check-in", amount: "+10 HC" },
-                  { icon: "edit_note", label: "Create a post", amount: "+5 HC" },
-                  { icon: "campaign", label: "Post an FYI", amount: "+8 HC" },
-                  { icon: "comment", label: "Comment", amount: "+2 HC" },
-                  { icon: "storefront", label: "List an item", amount: "+10 HC" },
-                  { icon: "military_tech", label: "Earn a badge", amount: "+50 HC" },
+                  { icon: "verified", label: "Report neighbours confirm", amount: "+15 HC" },
+                  { icon: "volunteer_activism", label: "Help a neighbour", amount: "+5 HC" },
+                  { icon: "handshake", label: "Finish a deal", amount: "+10 HC" },
+                  { icon: "search", label: "Return a lost item", amount: "+50 HC" },
+                  { icon: "group_add", label: "Invite who becomes active", amount: "+50 HC" },
                 ].map((item) => (
                   <EarnRow key={item.label} {...item} />
                 ))}

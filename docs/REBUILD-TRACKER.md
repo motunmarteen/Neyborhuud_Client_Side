@@ -395,9 +395,9 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 - [x] G-01 (server 3113da2, deployed 2026-10-18) Separate **Impact** from HuudCredit in the database and API: impact_events ledger, once per action, with the area for leaderboards
 - [x] G-02 (server 3113da2) 6-level ladder (New Neighbour → Huud Elder) with unlocks; migrated on production 2026-10-18: 58 users, 24 kept a higher level floor, 6 got Impact from past deals/help/returns/invites; nobody went down
-- [ ] G-03 New earning table; **pay on confirmation** (safety reports, help, light updates)
-- [ ] G-04 Remove coins for likes, follows and raw posts and comments
-- [ ] G-05 Referral pays when the friend becomes active (first verified action), not at signup
+- [ ] G-03 New earning table; **pay on confirmation** (safety reports, help, light updates). Done 2026-10-18: reports pay the reporter only once confirmed (also the old /safety/emergency/report, which paid 20 for posting), confirmers who were right get 2 HC + 5 Impact. Left: light updates, SOS on resolve, events with 5+ attending, listings/jobs pay on creation still
+- [x] G-04 (2026-10-18) Remove coins for likes, follows and raw posts and comments (also acknowledge, cross-post, product likes/comments); post/comment achievements hidden until the new badges
+- [x] G-05 (2026-10-18) Referral pays when the friend becomes active (their first Impact: confirmed report, help, deal, return): 50 HC each, +20 Impact to the inviter, max 10 a month; friends paid at signup under the old rule are not paid again
 - [ ] G-06 Welcome quest (5 steps)
 - [ ] G-07 Daily quests (3 a day, bonus, streak with weekly saver)
 - [ ] G-08 Huud of the Week challenge (admin sets the theme; area progress)
