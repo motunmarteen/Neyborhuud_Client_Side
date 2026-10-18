@@ -9633,3 +9633,29 @@ html[data-calm] .nh-area-pulse__dot { animation: none !important; opacity: 0.45;
 @media (prefers-reduced-motion: reduce) {
   .nh-area-pulse__dot { animation: none !important; opacity: 0.45; transform: scale(0.6); }
 }
+
+/* 👑 Area Champion of the Week on the map (M-14): the mockup's champion pin with a name tag. */
+.nh-champion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 20px; /* room for the crown above the pin */
+  cursor: pointer;
+  z-index: 4 !important;
+}
+.nh-champion:focus-visible { outline: 3px solid #F6C344; outline-offset: 2px; border-radius: 12px; }
+.nh-champion__tag {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: #FFF6DB;
+  border: 1px solid #F6C344;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #1D2433;
+  box-shadow: 0 2px 6px rgba(29, 36, 51, 0.18);
+}

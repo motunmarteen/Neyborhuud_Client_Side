@@ -17,9 +17,12 @@ type Props = {
   card: Omit<TodayCard, 'linkLabel'> | null;
   /** The real link (with invite code); the card shows a short label. */
   link: string;
+  /** For other cards (Area Champion): the share title and message. */
+  title?: string;
+  text?: string;
 };
 
-export function ShareTodaySheet({ open, onClose, card, link }: Props) {
+export function ShareTodaySheet({ open, onClose, card, link, title: titleProp, text: textProp }: Props) {
   const [blob, setBlob] = useState<Blob | null>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -45,8 +48,8 @@ export function ShareTodaySheet({ open, onClose, card, link }: Props) {
     };
   }, [open, card, link]);
 
-  const title = card ? `Today in ${card.area}` : 'Today';
-  const text = card ? `See what is happening in ${card.area} today on NeyborHuud.` : '';
+  const title = titleProp ?? (card ? `Today in ${card.area}` : 'Today');
+  const text = textProp ?? (card ? `See what is happening in ${card.area} today on NeyborHuud.` : '');
   const fileName = `neyborhuud-today-${(card?.area ?? 'area').toLowerCase().replace(/\s+/g, '-')}.png`;
 
   const sharePicture = async () => {
@@ -109,7 +112,7 @@ export function ShareTodaySheet({ open, onClose, card, link }: Props) {
           </button>
         </div>
         <p className="text-center text-xs font-semibold text-muted">
-          When a neighbour joins with your link, you both get HuudCredit.
+          When a neighbour joins with your link and becomes active, you both get HuudCredit.
         </p>
       </div>
     </AppBottomSheet>

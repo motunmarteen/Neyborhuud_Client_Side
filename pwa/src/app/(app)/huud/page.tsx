@@ -40,6 +40,8 @@ import { useMapPins } from '@/hooks/useMapPins';
 import { useMapAds } from '@/hooks/useMapAds';
 import { useMyPins } from '@/hooks/useMyPins';
 import { useAreaPulses } from '@/hooks/useAreaPulses';
+import { useAreaChampions, type AreaChampion } from '@/hooks/useAreaChampions';
+import { ChampionSheet } from '@/components/map/ChampionSheet';
 import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
 import { VisitorWelcome } from '@/components/map/VisitorWelcome';
@@ -241,6 +243,9 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
 
   // M-11: where neighbours are active now (busy areas, never people or homes).
   useAreaPulses(map);
+  // M-14: last week's 👑 Area Champions, at the centre of their area.
+  const [champion, setChampion] = useState<AreaChampion | null>(null);
+  useAreaChampions(map, setChampion);
   // First-time tour (mockup): three steps, once per phone; replay from the ⋯ menu.
   // Members only, on their own area; visitors can tap "Show me around".
   const tour = useMapTour(!!map && !hasFocus && !!user);
@@ -329,8 +334,26 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   // Share today (mockup share card 1): the live sky over the area plus today's real items.
   // Safety alerts never go on it (safety reports are not shared publicly).
   const [shareOpen, setShareOpen] = useState(false);
+  // The champion's own card (Phase 7): their sky, the crown and what they did.
+  const [shareChampion, setShareChampion] = useState<AreaChampion | null>(null);
   const shareCard = useMemo(() => {
     if (!sky) return null;
+    if (shareChampion) {
+      const c = shareChampion;
+      return {
+        area: c.lga,
+        date: now,
+        sky,
+        weather: null,
+        label: `AREA CHAMPION OF THE WEEK · ${c.lga.toUpperCase()}`,
+        headline: `👑 ${c.isMe ? 'I am' : `${c.name} is`} ${c.lga}'s Area Champion this week`,
+        rows: [
+          { icon: '⭐', text: `${c.impact.toLocaleString('en-NG')} Impact from helping neighbours` },
+          { icon: '🤝🏾', text: 'Confirmed reports, help, deals, returns' },
+          { icon: '🏘️', text: 'Looking out for each other, street by street' },
+        ],
+      };
+    }
     const rows: ShareRow[] = pins
       .filter((p) => p.layer === 'traffic')
       .slice(0, 2)
@@ -351,7 +374,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       weather: weatherWords ? `${weatherWords.icon} ${weatherWords.label} now` : null,
       rows,
     };
-  }, [sky, pins, counts, area?.lga, now, weatherWords]);
+  }, [sky, pins, counts, area?.lga, now, weatherWords, shareChampion]);
   // Worked out after the page starts in the browser (the server does not know the address),
   // so the first render matches the server's.
   const [origin, setOrigin] = useState('');
@@ -626,6 +649,17 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       )}
 
       <PinPanel pin={pin} onClose={() => setPin(null)} />
+      <ChampionSheet
+        champion={champion}
+        onClose={() => setChampion(null)}
+        isMember={!!user}
+        joinHref={joinHref}
+        onShare={(c) => {
+          setChampion(null);
+          setShareChampion(c);
+          setShareOpen(true);
+        }}
+      />
       <HelpMapSheet
         open={helpMapOpen}
         onClose={() => setHelpMapOpen(false)}
@@ -634,7 +668,21 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         fillerCount={mapGap.filler}
       />
       {shareLink ? (
-        <ShareTodaySheet open={shareOpen} onClose={() => setShareOpen(false)} card={shareCard} link={shareLink} />
+        <ShareTodaySheet
+          open={shareOpen}
+          onClose={() => {
+            setShareOpen(false);
+            setShareChampion(null);
+          }}
+          card={shareCard}
+          link={shareLink}
+          {...(shareChampion
+            ? {
+                title: `Area Champion of the Week: ${shareChampion.lga}`,
+                text: `${shareChampion.isMe ? 'I am' : `${shareChampion.name} is`} ${shareChampion.lga}'s Area Champion of the Week on NeyborHuud.`,
+              }
+            : {})}
+        />
       ) : null}
       {tour.step >= 0 ? <MapTour step={tour.step} onNext={tour.next} onSkip={tour.finish} /> : null}
       <TodaysPulseSheet

@@ -17,6 +17,10 @@ export type TodayCard = {
   rows: ShareRow[];
   /** Short link shown on the card (the real one goes with the share). */
   linkLabel: string;
+  /** Small caps line at the top of the panel; default "TODAY IN <AREA> · <DAY>". */
+  label?: string;
+  /** Big line; default the weather and "Here’s wetin dey happen." */
+  headline?: string;
 };
 
 const W = 1080;
@@ -171,7 +175,7 @@ export async function drawTodayCard(c: TodayCard): Promise<Blob> {
   const pw = W - 28 * S;
   const inner = pw - 32 * S;
   g.font = `600 ${24 * S}px ${font}`;
-  const headline = `${c.weather ? `${c.weather}. ` : ''}Here’s wetin dey happen.`;
+  const headline = c.headline ?? `${c.weather ? `${c.weather}. ` : ''}Here’s wetin dey happen.`;
   const hl = wrap(g, headline, inner, 3);
   const panelH = 16 * S + 26 * S + hl.length * 28 * S + 6 * S + rows.length * 40 * S + 16 * S + 34 * S + 16 * S;
   const py = H - 16 * S - panelH;
@@ -187,7 +191,7 @@ export async function drawTodayCard(c: TodayCard): Promise<Blob> {
   g.fillStyle = '#5B6478';
   g.font = `800 ${11 * S}px ${font}`;
   const day = c.date.toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase();
-  g.fillText(`TODAY IN ${c.area.toUpperCase()} · ${day}`, px + 16 * S, y);
+  g.fillText(c.label ?? `TODAY IN ${c.area.toUpperCase()} · ${day}`, px + 16 * S, y);
   y += 26 * S;
   g.fillStyle = '#1D2433';
   g.font = `600 ${24 * S}px ${font}`;

@@ -14,6 +14,7 @@ import { useMyGamificationStats } from '@/hooks/useGamification';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { StandingCard } from '@/components/gamification/StandingCard';
+import { AreaBoard } from '@/components/gamification/AreaBoard';
 import type { Standing } from '@/lib/standing';
 
 // Amounts and daily limits the server really pays (checked against the server's award
@@ -74,6 +75,8 @@ export default function RewardsPage() {
 
         {standing ? <StandingCard standing={standing} /> : null}
 
+        <AreaBoard />
+
         {/* Ways to earn: amounts the server really pays */}
         <section aria-labelledby="earn-heading" className="flex flex-col gap-2">
           <h2 id="earn-heading" className="px-1 font-heading text-lg font-extrabold text-navy">
@@ -119,7 +122,7 @@ export default function RewardsPage() {
         <section className="flex flex-col gap-1 rounded-[22px] bg-amber-soft p-4">
           <h2 className="font-heading text-base font-extrabold text-navy">Coming soon</h2>
           <p className="text-sm text-navy">
-            Weekly quests, area leaderboards, Area Champion of the Week, and more things to spend HuudCredit on (map skins, shout-outs).
+            Weekly quests, Huud of the Week, and more things to spend HuudCredit on (map skins, shout-outs).
           </p>
         </section>
       </main>
