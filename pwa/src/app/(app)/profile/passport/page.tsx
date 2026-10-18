@@ -59,7 +59,7 @@ export default function HuudPassportPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 ">
+    <div className="flex min-h-screen flex-col doodle-surface ">
       <TopNav />
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 py-6 sm:px-6">
         <div className="mb-4 flex items-center justify-between">

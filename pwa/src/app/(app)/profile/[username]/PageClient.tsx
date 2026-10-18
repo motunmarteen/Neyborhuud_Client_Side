@@ -483,7 +483,7 @@ export default function ProfilePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex h-[100dvh] w-full flex-col bg-white overflow-hidden">
+      <div className="flex h-[100dvh] w-full flex-col doodle-surface overflow-hidden">
         <TopNav />
         <div className="app-chrome-below-topnav mx-auto w-full max-w-[600px] !bg-white flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto no-scrollbar pb-24 !mt-0 !pt-0 px-6 py-4 space-y-6">
@@ -513,7 +513,7 @@ export default function ProfilePage() {
     const isRateLimited = status === 429;
 
     return (
-      <div className="flex h-[100dvh] w-full flex-col bg-white overflow-hidden">
+      <div className="flex h-[100dvh] w-full flex-col doodle-surface overflow-hidden">
         <TopNav />
         <div className="app-chrome-below-topnav mx-auto w-full max-w-[600px] !bg-white flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto no-scrollbar pb-24 !mt-0 !pt-0 flex items-center justify-center">
@@ -718,7 +718,7 @@ export default function ProfilePage() {
         />
       )}
 
-      <div className="flex h-[100dvh] w-full flex-col bg-white overflow-hidden">
+      <div className="flex h-[100dvh] w-full flex-col doodle-surface overflow-hidden">
         <TopNav />
 
         <div className="app-chrome-below-topnav mx-auto w-full max-w-[600px] !bg-white flex flex-col flex-1 overflow-y-auto">

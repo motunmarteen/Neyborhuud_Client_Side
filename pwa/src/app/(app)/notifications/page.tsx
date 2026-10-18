@@ -88,7 +88,7 @@ function NotificationsPageInner() {
   const totalUnread = rawNotifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="min-h-screen bg-[#F6F8F6] text-[#1D2433] flex flex-col select-none pt-[var(--app-topnav-offset)]">
+    <div className="min-h-screen doodle-surface text-[#1D2433] flex flex-col select-none pt-[var(--app-topnav-offset)]">
 
       {/* 2. SEGMENTED PILL SELECTOR */}
       <div className="px-4 py-2.5 bg-white border-b border-black/[0.08]">
