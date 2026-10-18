@@ -42,6 +42,7 @@ import { useMyPins } from '@/hooks/useMyPins';
 import { useAreaPulses } from '@/hooks/useAreaPulses';
 import { useAreaChampions, type AreaChampion } from '@/hooks/useAreaChampions';
 import { ChampionSheet } from '@/components/map/ChampionSheet';
+import { useHuudWeek } from '@/hooks/useQuests';
 import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
 import { VisitorWelcome } from '@/components/map/VisitorWelcome';
@@ -323,14 +324,23 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
 
   // Pulse (mockup): the weather now and reported go-slows in this area come first.
   const areaLga = area?.lga;
+  // Huud of the Week shows in the Pulse ribbon (GAMIFICATION-REVIEW, G-08). Members only.
+  const { data: huudWeek } = useHuudWeek(!!user);
   const pulseLocal = useMemo<PulseLocalItem[]>(() => {
     const out: PulseLocalItem[] = [];
     if (weatherWords) out.push({ text: `${weatherWords.icon} ${weatherWords.label} now${areaLga ? ` in ${areaLga}` : ''}` });
     for (const p of pins.filter((x) => x.layer === 'traffic').slice(0, 3)) {
       out.push({ text: `🚧 ${p.top.title}`, href: pinHref(p) });
     }
+    if (huudWeek?.area) {
+      const g = huudWeek.theme.goal;
+      out.push({
+        text: `${huudWeek.theme.emoji} ${huudWeek.theme.title}: ${huudWeek.done ? `${huudWeek.area.lga} did it!` : `${Math.min(huudWeek.progress, g)} of ${g} in ${huudWeek.area.lga}`}`,
+        href: '/rewards',
+      });
+    }
     return out;
-  }, [weatherWords, areaLga, pins]);
+  }, [weatherWords, areaLga, pins, huudWeek]);
   // Share today (mockup share card 1): the live sky over the area plus today's real items.
   // Safety alerts never go on it (safety reports are not shared publicly).
   const [shareOpen, setShareOpen] = useState(false);

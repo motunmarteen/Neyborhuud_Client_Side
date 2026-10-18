@@ -110,7 +110,8 @@ export function useCheckIn(onSuccess?: (data: any) => void, { showToast = true }
           nhToast.info("You don check in today already", "Come back tomorrow to keep your streak.");
         } else if (data?.coinsEarned > 0) {
           const bonus = data?.bonusCoins > 0 ? ` (with +${data.bonusCoins} streak bonus)` : "";
-          nhToast.thanks({ emoji: "🔥", title: `Day ${data.streak} check-in`, sub: `See you tomorrow${bonus}.`, coins: data.coinsEarned });
+          const saved = data?.savedByStreakSaver ? " You missed a day, so this week's streak saver kept your streak." : "";
+          nhToast.thanks({ emoji: "🔥", title: `Day ${data.streak} check-in`, sub: `See you tomorrow${bonus}.${saved}`, coins: data.coinsEarned });
         }
       }
       onSuccess?.(data);

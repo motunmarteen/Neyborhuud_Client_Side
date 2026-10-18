@@ -54,7 +54,7 @@ Trust stays, but as a **verification tick** (✅ verified, 🏠 address verified
 | 2 | 🌿 **Neighbour** | First week, verified | Sell in the market, vote in polls |
 | 3 | 🤝 **Helper** | ~1 month active | Confirm reports (your confirmation counts more) |
 | 4 | 🏅 **Trusted Neighbour** | ~3 months, vouched | Create events, verified-seller badge |
-| 5 | 🌳 **Area Champion** | ~6 months | Moderate local reports, start community challenges |
+| 5 | 🌳 **Community Pillar** (renamed from Area Champion, owner 2026-10-18) | ~6 months | Moderate local reports, start community challenges |
 | 6 | 🌲 **Huud Elder (Baobab)** | 1 year+, top of area | Run for Area Champion of the Week, special map marker |
 
 Every level is reachable in months, not years. Each level **gives a new power**, not just a number. That matches "reward useful outcomes" in the growth roadmap.

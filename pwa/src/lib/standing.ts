@@ -23,7 +23,7 @@ export const LADDER = [
   { level: 2, name: 'Neighbour', emoji: '🌿', minImpact: 20, unlock: 'Sell in the market and vote in polls' },
   { level: 3, name: 'Helper', emoji: '🤝', minImpact: 100, unlock: 'Your confirmations of reports count more' },
   { level: 4, name: 'Trusted Neighbour', emoji: '🏅', minImpact: 300, unlock: 'Create events and get the trusted seller badge' },
-  { level: 5, name: 'Area Champion', emoji: '🌳', minImpact: 800, unlock: 'Help review local reports and start community challenges' },
+  { level: 5, name: 'Community Pillar', emoji: '🌳', minImpact: 800, unlock: 'Help review local reports and start community challenges' },
   { level: 6, name: 'Huud Elder', emoji: '🌲', minImpact: 2000, unlock: 'A special map marker and the Elder badge' },
 ] as const;
 

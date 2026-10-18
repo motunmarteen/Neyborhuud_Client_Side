@@ -15,13 +15,18 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { StandingCard } from '@/components/gamification/StandingCard';
 import { AreaBoard } from '@/components/gamification/AreaBoard';
+import { QuestsCard } from '@/components/gamification/QuestsCard';
+import { HuudWeekCard } from '@/components/gamification/HuudWeekCard';
 import type { Standing } from '@/lib/standing';
 
 // Amounts and daily limits the server really pays (checked against the server's award
 // calls and huudcoin.ledger DAILY_CAPS). Phase 7 (2026-10-18): no coins for raw posts,
 // comments or likes; invites pay when the friend becomes active.
 const WAYS_TO_EARN: { icon: string; title: string; detail: string; amount: string }[] = [
-  { icon: '📅', title: 'Check in every day', detail: 'Extra on days 7, 14, 21… (+50 to +100) and every 30th day (+200)', amount: '10+' },
+  { icon: '📅', title: 'Check in every day', detail: 'Extra on days 7, 14, 21… (+50 to +100) and every 30th day (+200). One missed day a week is forgiven', amount: '10+' },
+  { icon: '🎯', title: "Today's quests", detail: '3 a day, +20 more for all 3', amount: '10' },
+  { icon: '🧭', title: 'Welcome quest', detail: 'Once: 5 first steps', amount: '100' },
+  { icon: '🏘️', title: 'Huud of the Week', detail: "When your area reaches the week's goal", amount: '20' },
   { icon: '↗️', title: 'Share a post outside the app', detail: 'Up to 10 a day', amount: '5' },
   { icon: '🎉', title: 'Create an event', detail: 'Up to 2 a day', amount: '15' },
   { icon: '💼', title: 'Post a job', detail: 'Up to 2 a day', amount: '10' },
@@ -75,6 +80,10 @@ export default function RewardsPage() {
 
         {standing ? <StandingCard standing={standing} /> : null}
 
+        <QuestsCard />
+
+        <HuudWeekCard />
+
         <AreaBoard />
 
         {/* Ways to earn: amounts the server really pays */}
@@ -122,7 +131,7 @@ export default function RewardsPage() {
         <section className="flex flex-col gap-1 rounded-[22px] bg-amber-soft p-4">
           <h2 className="font-heading text-base font-extrabold text-navy">Coming soon</h2>
           <p className="text-sm text-navy">
-            Weekly quests, Huud of the Week, and more things to spend HuudCredit on (map skins, shout-outs).
+            New badges, Founding Neighbour, and more things to spend HuudCredit on (map skins, profile frames, shout-outs).
           </p>
         </section>
       </main>

@@ -53,6 +53,10 @@ const REASONS: Record<string, string> = {
   sign_up: 'Welcome to NeyborHuud',
   report_confirmed: 'You confirmed a true report',
   incident_confirmed: 'Neighbours confirmed your report',
+  welcome_quest: 'Welcome quest done',
+  daily_quest: 'Daily quest done',
+  daily_quest_bonus: 'All 3 daily quests done',
+  huud_week: 'Your area did Huud of the Week',
 };
 
 export function HuudCreditListener() {

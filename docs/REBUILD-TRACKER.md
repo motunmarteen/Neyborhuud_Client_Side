@@ -398,9 +398,9 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 - [ ] G-03 New earning table; **pay on confirmation** (safety reports, help, light updates). Done 2026-10-18: reports pay the reporter only once confirmed (also the old /safety/emergency/report, which paid 20 for posting), confirmers who were right get 2 HC + 5 Impact. Left: light updates, SOS on resolve, events with 5+ attending, listings/jobs pay on creation still
 - [x] G-04 (2026-10-18) Remove coins for likes, follows and raw posts and comments (also acknowledge, cross-post, product likes/comments); post/comment achievements hidden until the new badges
 - [x] G-05 (2026-10-18) Referral pays when the friend becomes active (their first Impact: confirmed report, help, deal, return): 50 HC each, +20 Impact to the inviter, max 10 a month; friends paid at signup under the old rule are not paid again
-- [ ] G-06 Welcome quest (5 steps)
-- [ ] G-07 Daily quests (3 a day, bonus, streak with weekly saver)
-- [ ] G-08 Huud of the Week challenge (admin sets the theme; area progress)
+- [x] G-06 (2026-10-18) Welcome quest (5 steps checked on the server: home area, email, guardian, follow, invite; 100 HC once + Neighbour level)
+- [x] G-07 (2026-10-18) Daily quests (check-in + 2 of: offer help, follow a new neighbour, light/water update a neighbour confirms; 10 HC each, +20 for all 3) and the check-in streak saver (one missed day a week). Not paid: confirm/dispute taps, ratings (would invite false confirmations and fake reviews)
+- [x] G-08 (2026-10-18) Huud of the Week (5 built-in themes in turn, admin can pick via PUT /gamification/huud-of-the-week; area progress from confirmed outcomes; in the Pulse ribbon; areas that reach the goal: 20 HC to verified helpers on Monday). Admin screen not built yet
 - [x] G-09 (2026-10-18) Area leaderboards: my area, areas across Nigeria, people I follow; weekly reset (Monday, Nigeria time); on the Rewards page
 - [x] G-10 (2026-10-18) Area Champion of the Week (auto-picked every Monday: top verified helper per LGA with 25+ Impact; crown on the map at the LGA centre; notification; share card)
 - [ ] G-11 Founding Neighbour: 25 slots per street
