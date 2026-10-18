@@ -24,11 +24,12 @@ html[data-text-size='large'] { font-size: 112.5%; }
   max-width: none !important;
 }
 
-/* ── NeyborHuud Doodle Background Pattern ──
-   500×500 SVG tile with neighbourhood-themed icons:
-   shield, SOS, marketplace, megaphone, chat, location pin,
-   star, house, naira, helping hand, community, search, etc.
-   Served as static files for reliability (no encoding issues). */
+/* ── NeyborHuud Doodle Background Pattern (owner 2026-10-18: fuller, all Nigeria) ──
+   480×480 seamless tile made by scripts/doodle-gen.py: danfo, okada, keke, Zuma Rock, the
+   bridge and skyline, palm, jollof, suya, dodo, Agege bread, talking drum, Eyo hat, fila,
+   gele, adire, Ankara, NEPA pole, gen, "light don come", football, market umbrella, the
+   NeyborHuud pin, Sentinel shield and HuudCredit coin, greetings (How far? Ẹ káàbọ̀, Sannu,
+   Nnọọ, Ndewo), dotted streets and sparkles. Edit the script and rerun; don't hand-edit. */
 
 :root {
   /* ═══════════════════════════════════════════════════
@@ -344,9 +345,9 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-image: url('/doodle-pattern.svg?v=3');
+  background-image: url('/doodle-pattern.svg?v=5');
   background-repeat: repeat;
-  background-size: 360px 360px;
+  background-size: 440px 440px;
   opacity: 0.04;
   pointer-events: none;
 }
@@ -4198,9 +4199,9 @@ main.feed-scroll-main--sky-feed {
 .min-h-screen.bg-white,
 .min-h-screen.bg-soft-bg {
   background-color: #EEF2F7;
-  background-image: url('/doodle-pattern.svg?v=3');
+  background-image: url('/doodle-pattern.svg?v=5');
   background-repeat: repeat;
-  background-size: 360px 360px;
+  background-size: 440px 440px;
 }
 
 /* Dark mode: swap to dark doodle */
@@ -4208,24 +4209,24 @@ main.feed-scroll-main--sky-feed {
 /* Dark page wrappers (marketplace, safety dark pages) */
 .min-h-screen.bg-black,
 .min-h-screen.bg-\[\#0f0f1e\] {
-  background-image: url('/doodle-pattern-dark.svg?v=3');
+  background-image: url('/doodle-pattern-dark.svg?v=5');
   background-repeat: repeat;
-  background-size: 360px 360px;
+  background-size: 440px 440px;
 }
 
 .doodle-surface {
   background-color: #EEF2F7;
-  background-image: url('/doodle-pattern.svg?v=3');
+  background-image: url('/doodle-pattern.svg?v=5');
   background-repeat: repeat;
-  background-size: 360px 360px;
+  background-size: 440px 440px;
   color: var(--foreground);
 }
 
 .doodle-surface-muted {
   background-color: #F2F7F2;
-  background-image: url('/doodle-pattern.svg?v=3');
+  background-image: url('/doodle-pattern.svg?v=5');
   background-repeat: repeat;
-  background-size: 360px 360px;
+  background-size: 440px 440px;
 }
 
 .location-picker-premium-map {
@@ -5218,9 +5219,9 @@ button.left-sidebar__link:focus-visible {
 .feed-comments-panel,
 .doodle-modal-panel {
   background-color: #ffffff;
-  background-image: url('/doodle-pattern.svg?v=3');
+  background-image: url('/doodle-pattern.svg?v=5');
   background-repeat: repeat;
-  background-size: 360px 360px;
+  background-size: 440px 440px;
   color: var(--neu-text);
 }
 
@@ -6777,9 +6778,9 @@ button.mod-card:active {
   padding: 0.75rem 1rem 1.25rem;
   -webkit-overflow-scrolling: touch;
   background-color: #ffffff;
-  background-image: url('/doodle-pattern.svg?v=3');
+  background-image: url('/doodle-pattern.svg?v=5');
   background-repeat: repeat;
-  background-size: 360px 360px;
+  background-size: 440px 440px;
   background-attachment: local;
   scroll-behavior: smooth;
 }
