@@ -9731,3 +9731,18 @@ html[data-joining] [data-map-menu] { display: none; }
 .auth-signup-chrome .auth-signup-progress__dot { background: rgba(29, 36, 51, 0.2); }
 .auth-signup-chrome .auth-signup-progress__dot--active,
 .auth-signup-chrome .auth-signup-progress__dot--done { background: #00B82E; }
+
+/* Real map behind account screens (2026-10-18). Plain sky colour while tiles load or without WebGL. */
+.auth-map-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #dfe9e2;
+}
+.auth-map-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, 0.55));
+}

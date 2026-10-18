@@ -5,9 +5,13 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { NeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { SignupBottomSheet } from '@/components/auth/SignupBottomSheet';
-import { AuthSkyBackdrop } from '@/components/auth/AuthSkyBackdrop';
 import type { SignupMapLocation } from '@/lib/signupMap';
 import { useTranslation } from '@/lib/i18n';
+
+const AuthMapBackdrop = dynamic(
+    () => import('@/components/auth/AuthMapBackdrop').then((m) => m.AuthMapBackdrop),
+    { ssr: false },
+);
 
 const AuthSignupMapBackdrop = dynamic(
     () => import('@/components/auth/AuthSignupMapBackdrop').then((m) => m.AuthSignupMapBackdrop),
@@ -45,7 +49,7 @@ type AuthFlowPageProps = {
     /** Collapsed peek row (signup-aligned) */
     peek?: ReactNode;
     keyboardAware?: boolean;
-    /** Landing aerial video behind sheet (default true). Set false for signup map. */
+    /** Real map of your area (or Nigeria) behind the sheet (default true). False: the street-picker map. */
     landingBackdrop?: boolean;
     /** Map centre when `landingBackdrop` is false (e.g. street picked on signup). */
     mapLocation?: SignupMapLocation | null;
@@ -119,8 +123,8 @@ export function AuthFlowPage({
         <div className="auth-signup-page fixed-app overflow-hidden">
             <div className="auth-signup-map-layer auth-signup-map-layer--readonly">
                 {landingBackdrop ? (
-                    // Light sky + doodle ground (restyle 2026-10-18), replacing the dark aerial video.
-                    <AuthSkyBackdrop />
+                    // The real map (owner, 2026-10-18), replacing the sky-and-doodle backdrop.
+                    <AuthMapBackdrop />
                 ) : (
                     <AuthSignupMapBackdrop
                         mapLocation={mapLocation}
