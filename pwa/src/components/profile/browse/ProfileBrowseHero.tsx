@@ -26,6 +26,8 @@ type ProfileBrowseHeroProps = {
   maskedPostcode?: string;
   /** Grey badge while verification journey is underway */
   verificationInProgress?: boolean;
+  /** Phase 7 shop: the frame the person bought and wears ("frame_gold"…). */
+  profileFrame?: string | null;
   verificationTierLabel?: string;
   vouchReceived?: number;
   vouchGiven?: number;
@@ -38,6 +40,7 @@ export function ProfileBrowseHero({
   personalName,
   username,
   profilePicture,
+  profileFrame,
   avatarUrl,
   isOwnProfile,
   uploading,
@@ -105,7 +108,7 @@ export function ProfileBrowseHero({
       </div>
 
       <div className="relative px-6 pb-4">
-        <div className="-mt-12 mb-3">
+        <div className={`-mt-12 mb-3 ${profileFrame ? `nh-frame nh-frame--${profileFrame}` : ''}`}>
           <BrandPinAvatar
             src={resolved}
             alt={displayName}

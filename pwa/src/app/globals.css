@@ -9659,3 +9659,43 @@ html[data-calm] .nh-area-pulse__dot { animation: none !important; opacity: 0.45;
   color: #1D2433;
   box-shadow: 0 2px 6px rgba(29, 36, 51, 0.18);
 }
+
+/* Phase 7 shop: profile frames. The photo is pin-shaped, so the frame follows its outline. */
+.nh-frame { display: inline-block; }
+.nh-frame--frame_gold { filter: drop-shadow(2.5px 0 0 #E8B020) drop-shadow(-2.5px 0 0 #E8B020) drop-shadow(0 2.5px 0 #E8B020) drop-shadow(0 -2.5px 0 #E8B020) drop-shadow(0 0 10px rgba(246, 195, 68, 0.65)); }
+.nh-frame--frame_naija { filter: drop-shadow(2px 0 0 #FFFFFF) drop-shadow(-2px 0 0 #FFFFFF) drop-shadow(0 2px 0 #FFFFFF) drop-shadow(0 -2px 0 #FFFFFF) drop-shadow(2.5px 0 0 #008751) drop-shadow(-2.5px 0 0 #008751) drop-shadow(0 2.5px 0 #008751) drop-shadow(0 -2.5px 0 #008751); }
+.nh-frame--frame_ankara { filter: drop-shadow(2px 0 0 #F28C28) drop-shadow(-2px 0 0 #0E7C7B) drop-shadow(0 2px 0 #C2185B) drop-shadow(0 -2px 0 #F2C230) drop-shadow(1.5px 1.5px 0 #0E7C7B); }
+.nh-frame--frame_adire { filter: drop-shadow(2px 0 0 #E8EEF8) drop-shadow(-2px 0 0 #E8EEF8) drop-shadow(0 2px 0 #E8EEF8) drop-shadow(0 -2px 0 #E8EEF8) drop-shadow(2.5px 0 0 #1F3A8A) drop-shadow(-2.5px 0 0 #1F3A8A) drop-shadow(0 2.5px 0 #1F3A8A) drop-shadow(0 -2.5px 0 #1F3A8A); }
+
+/* Phase 7 shop: map skins over the top of your own map home (decoration only). */
+.nh-skin { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.nh-skin > svg { position: absolute; left: 0; right: 0; top: calc(var(--safe-top, 0px) + var(--app-topnav-height, 56px) + 92px); width: 100%; height: 48px; }
+.nh-skin--detty_december { background: radial-gradient(120% 60% at 50% 0%, rgba(255, 176, 59, 0.16), transparent 60%); }
+.nh-skin__bulb { animation: nh-twinkle 1.6s ease-in-out infinite alternate; }
+@keyframes nh-twinkle { from { opacity: 0.45; } to { opacity: 1; } }
+.nh-skin--independence { background: linear-gradient(180deg, rgba(0, 135, 81, 0.12), transparent 22%); }
+.nh-skin--eyo { background: radial-gradient(120% 55% at 50% 0%, rgba(255, 255, 255, 0.42), transparent 60%); }
+.nh-skin__hat { animation: nh-drift 6s ease-in-out infinite alternate; }
+@keyframes nh-drift { from { transform: translateX(-4px); } to { transform: translateX(4px); } }
+.nh-skin--rainy_season { background: linear-gradient(180deg, rgba(92, 112, 104, 0.22), rgba(92, 112, 104, 0.06) 45%, transparent); }
+.nh-skin__rain {
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(105deg, transparent 0 14px, rgba(255, 255, 255, 0.22) 14px 15px, transparent 15px 30px);
+  background-size: 120px 120px;
+  animation: nh-rain 0.7s linear infinite;
+  opacity: 0.55;
+}
+@keyframes nh-rain { from { background-position: 0 0; } to { background-position: -30px 120px; } }
+.nh-skin--calm *, html[data-calm] .nh-skin * { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .nh-skin * { animation: none !important; } }
+
+/* Shop swatches */
+.nh-shop-swatch { display: grid; place-items: center; height: 56px; border-radius: 14px; font-size: 26px; background: #F3F5F9; }
+.nh-shop-swatch--skin_detty_december { background: radial-gradient(circle at 20% 30%, #FFC93C 0 3px, transparent 4px), radial-gradient(circle at 50% 20%, #FF5A5F 0 3px, transparent 4px), radial-gradient(circle at 80% 32%, #3DDC97 0 3px, transparent 4px), linear-gradient(180deg, #2C2340, #6B3A5B); }
+.nh-shop-swatch--skin_independence { background: linear-gradient(90deg, #008751 0 33%, #FFFFFF 33% 66%, #008751 66%); }
+.nh-shop-swatch--skin_eyo { background: radial-gradient(circle at 50% 30%, #FFFFFF, #F4EBCF); }
+.nh-shop-swatch--skin_rainy_season { background: repeating-linear-gradient(105deg, #6E8379 0 8px, #8FA39A 8px 9px), #6E8379; }
+.nh-shop-swatch--frame_gold { background: radial-gradient(circle, #FFF6DB 40%, #E8B020 41% 52%, #FFF6DB 53%); }
+.nh-shop-swatch--frame_naija { background: radial-gradient(circle, #F3F5F9 40%, #008751 41% 46%, #FFFFFF 47% 50%, #008751 51% 55%, #F3F5F9 56%); }
+.nh-shop-swatch--frame_ankara { background: radial-gradient(circle, #FFF3E6 38%, transparent 39%), conic-gradient(#F28C28 0 25%, #0E7C7B 0 50%, #C2185B 0 75%, #F2C230 0); }
+.nh-shop-swatch--frame_adire { background: radial-gradient(circle, #E8EEF8 38%, transparent 39%), repeating-conic-gradient(#1F3A8A 0 10deg, #E8EEF8 10deg 20deg); }

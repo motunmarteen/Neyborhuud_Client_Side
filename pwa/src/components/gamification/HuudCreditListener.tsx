@@ -57,6 +57,11 @@ const REASONS: Record<string, string> = {
   daily_quest: 'Daily quest done',
   daily_quest_bonus: 'All 3 daily quests done',
   huud_week: 'Your area did Huud of the Week',
+  light_update: 'A neighbour confirmed your light update',
+  event_hosted: 'Your event happened',
+  job_filled: 'You hired a neighbour',
+  mission_reward: 'Sponsored mission done',
+  project_refund: 'Project cancelled, HuudCredit back',
 };
 
 export function HuudCreditListener() {
@@ -84,9 +89,17 @@ export function HuudCreditListener() {
     if (!socket) return;
     socket.on('huudcredit:earned', onEarned);
     socket.on('impact:level_up', onLevelUp);
+    // Phase 7: a new badge.
+    const onBadge = (b: { name?: string; emoji?: string; description?: string }) => {
+      if (!b?.name) return;
+      void queryClient.invalidateQueries({ queryKey: ['gamification', 'badges-v2'] });
+      nhToast.thanks({ emoji: b.emoji ?? '🏅', title: `New badge: ${b.name}`, sub: b.description, duration: 6000 });
+    };
+    socket.on('badge:earned', onBadge);
     return () => {
       socket.off('huudcredit:earned', onEarned);
       socket.off('impact:level_up', onLevelUp);
+      socket.off('badge:earned', onBadge);
     };
   }, [user?.id, queryClient]);
 

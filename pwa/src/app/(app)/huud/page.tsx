@@ -43,6 +43,8 @@ import { useAreaPulses } from '@/hooks/useAreaPulses';
 import { useAreaChampions, type AreaChampion } from '@/hooks/useAreaChampions';
 import { ChampionSheet } from '@/components/map/ChampionSheet';
 import { useHuudWeek } from '@/hooks/useQuests';
+import { useShop } from '@/hooks/usePhase7';
+import { MapSkinOverlay } from '@/components/map/MapSkinOverlay';
 import { MapTour, useMapTour } from '@/components/map/MapTour';
 import { ShareTodaySheet } from '@/components/map/ShareTodaySheet';
 import { VisitorWelcome } from '@/components/map/VisitorWelcome';
@@ -326,6 +328,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   const areaLga = area?.lga;
   // Huud of the Week shows in the Pulse ribbon (GAMIFICATION-REVIEW, G-08). Members only.
   const { data: huudWeek } = useHuudWeek(!!user);
+  const { data: shopData } = useShop(!!user);
   const pulseLocal = useMemo<PulseLocalItem[]>(() => {
     const out: PulseLocalItem[] = [];
     if (weatherWords) out.push({ text: `${weatherWords.icon} ${weatherWords.label} now${areaLga ? ` in ${areaLga}` : ''}` });
@@ -451,6 +454,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           // Sky reaches up behind the notch and the top bar; the horizon stays just under the controls.
           skyLift={{ safeTopPlus: 60 }}
         />
+        {/* Phase 7 shop: the person's map skin (only they see it). */}
+        <MapSkinOverlay skin={shopData?.equipped.mapSkin} calm={calm} />
       </div>
 
       {/* Under the top bar: layer chips, then the ⚡ PULSE ribbon (news + exchange rates). */}

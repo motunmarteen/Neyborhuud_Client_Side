@@ -35,7 +35,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 4. Screens (restyle all 95) | 1 | 95 | 🟡 language batch 1 only |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
-| 7. Gamification backend | 0 | 18 | ⬜ waiting on your OK |
+| 7. Gamification backend | 18 | 18 | ✅ done 2026-10-18 (server + app); airtime/data and contributor payouts wait for the legal check |
 | 8. Sharing and virality | 0 | 10 | ⬜ |
 | 9. Growth features | 0 | 9 | ⬜ |
 | 10. Ads, billboards and payouts | 0 | 9 | 🟡 map ads built (server + app); waiting on Bachs keys, prices and the map home |
@@ -395,7 +395,7 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 - [x] G-01 (server 3113da2, deployed 2026-10-18) Separate **Impact** from HuudCredit in the database and API: impact_events ledger, once per action, with the area for leaderboards
 - [x] G-02 (server 3113da2) 6-level ladder (New Neighbour → Huud Elder) with unlocks; migrated on production 2026-10-18: 58 users, 24 kept a higher level floor, 6 got Impact from past deals/help/returns/invites; nobody went down
-- [ ] G-03 New earning table; **pay on confirmation** (safety reports, help, light updates). Done 2026-10-18: reports pay the reporter only once confirmed (also the old /safety/emergency/report, which paid 20 for posting), confirmers who were right get 2 HC + 5 Impact. Left: light updates, SOS on resolve, events with 5+ attending, listings/jobs pay on creation still
+- [x] G-03 (2026-10-18) Pay on confirmation: reports (2+ verified confirmers), light/water updates, events with 5+ verified going, jobs filled; posting no longer pays. Not possible yet: SOS responders (who responded isn't recorded)
 - [x] G-04 (2026-10-18) Remove coins for likes, follows and raw posts and comments (also acknowledge, cross-post, product likes/comments); post/comment achievements hidden until the new badges
 - [x] G-05 (2026-10-18) Referral pays when the friend becomes active (their first Impact: confirmed report, help, deal, return): 50 HC each, +20 Impact to the inviter, max 10 a month; friends paid at signup under the old rule are not paid again
 - [x] G-06 (2026-10-18) Welcome quest (5 steps checked on the server: home area, email, guardian, follow, invite; 100 HC once + Neighbour level)
@@ -403,14 +403,14 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 - [x] G-08 (2026-10-18) Huud of the Week (5 built-in themes in turn, admin can pick via PUT /gamification/huud-of-the-week; area progress from confirmed outcomes; in the Pulse ribbon; areas that reach the goal: 20 HC to verified helpers on Monday). Admin screen not built yet
 - [x] G-09 (2026-10-18) Area leaderboards: my area, areas across Nigeria, people I follow; weekly reset (Monday, Nigeria time); on the Rewards page
 - [x] G-10 (2026-10-18) Area Champion of the Week (auto-picked every Monday: top verified helper per LGA with 25+ Impact; crown on the map at the LGA centre; notification; share card)
-- [ ] G-11 Founding Neighbour: 25 slots per street
-- [ ] G-12 Badges cut to 16; old badges kept as Legacy
-- [ ] G-13 Shop: map skins, profile frames, shout-outs, birthday boards
-- [ ] G-14 Community projects with sponsor matching
-- [ ] G-15 Gifting HuudCredit with limits (Level 2+, verified, 500 a day, 2,000 a month)
-- [ ] G-16 Sponsored missions (labelled; never buy reviews)
-- [ ] G-17 One price list checked against real earning (no inflation)
-- [ ] G-18 Anti-abuse: confirmations from different verified people, device/phone overlap checks, reversals
+- [x] G-11 (2026-10-18) Founding Neighbour: first 25 verified people per ward (the app has no streets)
+- [x] G-12 (2026-10-18) 16 badges from confirmed outcomes (SOS Responder became Honest Neighbour: SOS responders aren't recorded); old badges kept as Legacy; on Rewards and profiles
+- [x] G-13 (2026-10-18) Shop at /rewards/shop: 4 map skins, 4 profile frames, shout-outs on profiles (50 HC, no links/phones, owner can hide), birthday board links to the Ads page
+- [x] G-14 (2026-10-18) Community projects at /projects with sponsor matching; cancel refunds everyone; admin adds them in Admin › Community
+- [x] G-15 (2026-10-18) Gifting limits: Neighbour level+, verified, 500/day, 2,000/30 days, nothing earned in the last 7 days, not to an account on the same phone
+- [x] G-16 (2026-10-18) Sponsored missions, labelled, proved with a code the sponsor gives in person; server refuses review/rating/follow tasks
+- [x] G-17 (2026-10-18) One price list (GET /gamification/price-list) and an admin economy report (earned vs spent per week)
+- [x] G-18 (2026-10-18) Anti-abuse: rewards only from different verified people; hashed phone id links accounts (no IP matching, Nigerian mobile users share IPs); reversals automatic when moderators remove a post, plus an admin tool
 
 ---
 

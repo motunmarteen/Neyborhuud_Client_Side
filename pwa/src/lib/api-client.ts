@@ -19,6 +19,25 @@ const PUBLIC_AUTH_PATHS = [
   "/auth/social/",
 ];
 
+/**
+ * Anonymous id for this phone (Phase 7 anti-abuse). The server keeps only a salted hash, to
+ * stop one person farming rewards with several accounts on one phone. It is not tied to
+ * anything personal and is never shown to anyone.
+ */
+function deviceId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    let id = localStorage.getItem("nh_device");
+    if (!id || !/^[a-zA-Z0-9-]{16,64}$/.test(id)) {
+      id = crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}-nh`;
+      localStorage.setItem("nh_device", id);
+    }
+    return id;
+  } catch {
+    return null;
+  }
+}
+
 function isPublicAuthRequest(url: string | undefined): boolean {
   if (!url) return false;
   return PUBLIC_AUTH_PATHS.some((path) => url.includes(path));
@@ -47,6 +66,8 @@ class ApiClient {
         const token = this.getToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+          const device = deviceId();
+          if (device) config.headers["X-NH-Device"] = device;
         }
         return config;
       },

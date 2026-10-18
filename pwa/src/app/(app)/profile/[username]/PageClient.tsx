@@ -49,6 +49,7 @@ import { ProfileBrowseEyebrow, ProfileBrowseSectionTitle } from '@/components/pr
 import { ProfileSnapStatsRow } from '@/components/profile/snap/ProfileSnapStatsRow';
 import { ProfileSnapPlusCard } from '@/components/profile/snap/ProfileSnapPlusCard';
 import { ProfileSnapHub } from '@/components/profile/snap/ProfileSnapHub';
+import { ProfileRecognition } from '@/components/profile/ProfileRecognition';
 import { ProfileSnapFriends } from '@/components/profile/snap/ProfileSnapFriends';
 import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { AvatarAdjusterModal } from '@/components/profile/AvatarAdjusterModal';
@@ -67,6 +68,7 @@ import { getNextTrustTier, normalizeTrustScore } from '@/lib/trust-economy';
 import { getPrivilegesForTier } from '@/lib/trust-privileges';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/error-handler';
 import { getGeolocation } from '@/lib/nativeGeolocation';
 import { fromKobo } from '@/lib/currency';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -728,6 +730,7 @@ export default function ProfilePage() {
             username={profile.username}
             profilePicture={profile.profilePicture}
             avatarUrl={profile.avatarUrl}
+            profileFrame={(profile.gamification as { profileFrame?: string | null } | undefined)?.profileFrame ?? null}
             isOwnProfile={isOwnProfile}
             uploading={isUploadingAvatar}
             hasMapLocation={hasMapLocation}
@@ -874,6 +877,15 @@ export default function ProfilePage() {
           onCreatePost={handleCreatePost}
           showPinPrompt={!hasMapLocation}
         />
+
+        {profile.id ? (
+          <ProfileRecognition
+            userId={profile.id}
+            firstName={profile.firstName || profile.username}
+            isOwnProfile={isOwnProfile}
+            canAct={!!currentUser && !isBlocked && !isBlockedByThem}
+          />
+        ) : null}
 
         {!isOwnProfile && !isBlocked && !isBlockedByThem && currentUser && (
           <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t border-gray-100 mt-4 pt-4 px-3">
@@ -1779,7 +1791,13 @@ export default function ProfilePage() {
           }}
           isPending={tipUser.isPending}
           onConfirm={async (amount) => {
-            await tipUser.mutateAsync({ recipientId: profile.id, amount });
+            try {
+              await tipUser.mutateAsync({ recipientId: profile.id, amount });
+            } catch (err) {
+              // The server says why (gifting limits, level, same phone); the modal stays open.
+              toast.error(getErrorMessage(err));
+              throw err;
+            }
             toast.success('Tip sent!');
             setShowTipModal(false);
           }}

@@ -17,6 +17,8 @@ import { StandingCard } from '@/components/gamification/StandingCard';
 import { AreaBoard } from '@/components/gamification/AreaBoard';
 import { QuestsCard } from '@/components/gamification/QuestsCard';
 import { HuudWeekCard } from '@/components/gamification/HuudWeekCard';
+import { BadgesCard } from '@/components/gamification/BadgesCard';
+import { MissionsCard } from '@/components/gamification/MissionsCard';
 import type { Standing } from '@/lib/standing';
 
 // Amounts and daily limits the server really pays (checked against the server's award
@@ -86,6 +88,10 @@ export default function RewardsPage() {
 
         <AreaBoard />
 
+        <MissionsCard />
+
+        <BadgesCard />
+
         {/* Ways to earn: amounts the server really pays */}
         <section aria-labelledby="earn-heading" className="flex flex-col gap-2">
           <h2 id="earn-heading" className="px-1 font-heading text-lg font-extrabold text-navy">
@@ -110,6 +116,20 @@ export default function RewardsPage() {
           </p>
         </section>
 
+        {/* Spend: the shop and community projects (Phase 7) */}
+        <div className="grid grid-cols-2 gap-2">
+          <Link href="/rewards/shop" className="flex flex-col gap-1 rounded-[22px] bg-white p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)] hover:bg-background">
+            <span aria-hidden className="text-2xl">🛍️</span>
+            <span className="text-sm font-bold text-navy">Shop</span>
+            <span className="text-xs font-semibold text-muted">Map skins, frames, shout-outs</span>
+          </Link>
+          <Link href="/projects" className="flex flex-col gap-1 rounded-[22px] bg-white p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)] hover:bg-background">
+            <span aria-hidden className="text-2xl">🏗️</span>
+            <span className="text-sm font-bold text-navy">Projects</span>
+            <span className="text-xs font-semibold text-muted">Help fund what your area needs</span>
+          </Link>
+        </div>
+
         {/* Spend: map ads are live (2026-10-12) */}
         <Link
           href="/ads"
@@ -131,7 +151,7 @@ export default function RewardsPage() {
         <section className="flex flex-col gap-1 rounded-[22px] bg-amber-soft p-4">
           <h2 className="font-heading text-base font-extrabold text-navy">Coming soon</h2>
           <p className="text-sm text-navy">
-            New badges, Founding Neighbour, and more things to spend HuudCredit on (map skins, profile frames, shout-outs).
+            Airtime and data rewards, and a share of ad money for top helpers, once the legal checks are done.
           </p>
         </section>
       </main>
