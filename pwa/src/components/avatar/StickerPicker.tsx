@@ -66,7 +66,9 @@ export function StickerPicker({ onPick }: { onPick: (dataUrl: string, caption: s
   const { t } = useTranslation();
   const { data: cat } = useAvatarCatalogue();
   const { data: mine, isLoading } = useMyAvatar();
-  const cfg = mine?.avatar?.config;
+  // Fill any missing parts from the defaults, as the studio does.
+  const saved = mine?.avatar?.config;
+  const cfg = useMemo(() => (saved && cat ? { ...cat.defaults, ...saved } : saved), [saved, cat]);
   const key = cfg ? JSON.stringify(cfg) : '';
   const [imgs, setImgs] = useState<Record<string, string>>(() => cache.get(key) ?? {});
   const color = useMemo(() => {

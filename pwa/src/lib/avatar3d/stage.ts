@@ -13,14 +13,44 @@ function lights(scene: THREE.Scene) {
   scene.add(sun);
 }
 
+/**
+ * One shared off-screen renderer for portraits and stickers. Phones (iPhone above all) allow
+ * only a few WebGL contexts and silently take one away from the oldest when more are made;
+ * a new renderer per sticker (33 of them) used to kill the studio's own view (owner 2026-10-18).
+ */
+let shared: { renderer: THREE.WebGLRenderer; canvas: HTMLCanvasElement } | null = null;
+function offscreen(size: number) {
+  if (!shared || shared.renderer.getContext().isContextLost()) {
+    shared?.renderer.dispose();
+    const canvas = document.createElement('canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    shared = { renderer, canvas };
+  }
+  shared.renderer.setPixelRatio(1);
+  shared.renderer.setSize(size, size, false);
+  shared.renderer.setClearColor(0x000000, 0);
+  shared.renderer.clear();
+  return shared;
+}
+
 export type Stage = {
   setAvatar: (cfg: AvatarConfig) => void;
   setPose: (pose: PoseId) => void;
   dispose: () => void;
 };
 
-export function createStage(canvas: HTMLCanvasElement, color: ColorOf, opts: { still?: boolean } = {}): Stage {
+export function createStage(
+  canvas: HTMLCanvasElement,
+  color: ColorOf,
+  opts: { still?: boolean; /** The phone took the 3D view away (memory, app in background): rebuild it. */ onLost?: () => void } = {},
+): Stage {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: false });
+  const lost = (e: Event) => {
+    e.preventDefault();
+    opts.onLost?.();
+  };
+  canvas.addEventListener('webglcontextlost', lost);
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
@@ -111,19 +141,18 @@ export function createStage(canvas: HTMLCanvasElement, color: ColorOf, opts: { s
       canvas.removeEventListener('pointermove', move);
       canvas.removeEventListener('pointerup', up);
       canvas.removeEventListener('pointercancel', up);
+      canvas.removeEventListener('webglcontextlost', lost);
       if (built) disposeAvatar(built.root);
       renderer.dispose();
+      // Hand the context back now instead of waiting for garbage collection.
+      renderer.forceContextLoss();
     },
   };
 }
 
 /** A 256×256 PNG of the head and shoulders on a soft round background (for map pins and profiles). */
 export function renderPortrait(cfg: AvatarConfig, color: ColorOf, size = 256, pose: PoseId = 'idle'): string {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
-  renderer.setSize(size, size, false);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const { renderer, canvas } = offscreen(size);
   const scene = new THREE.Scene();
   lights(scene);
   const disc = new THREE.Mesh(new THREE.CircleGeometry(1.4, 48), new THREE.MeshBasicMaterial({ color: 0xe8f7ec }));
@@ -139,7 +168,6 @@ export function renderPortrait(cfg: AvatarConfig, color: ColorOf, size = 256, po
   renderer.render(scene, camera);
   const url = canvas.toDataURL('image/png');
   disposeAvatar(built.root);
-  renderer.dispose();
   return url;
 }
 
@@ -148,11 +176,7 @@ export function renderPortrait(cfg: AvatarConfig, color: ColorOf, size = 256, po
  * transparent background, ready to share or send in a chat.
  */
 export function renderSticker(cfg: AvatarConfig, color: ColorOf, pose: PoseId, caption: string, size = 512, ribbon = '#00B82E'): string {
-  const gl = document.createElement('canvas');
-  gl.width = gl.height = size;
-  const renderer = new THREE.WebGLRenderer({ canvas: gl, antialias: true, alpha: true, preserveDrawingBuffer: true });
-  renderer.setSize(size, size, false);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const { renderer, canvas: gl } = offscreen(size);
   const scene = new THREE.Scene();
   lights(scene);
   const built = buildAvatar(cfg, color);
@@ -202,6 +226,5 @@ export function renderSticker(cfg: AvatarConfig, color: ColorOf, pose: PoseId, c
   }
   const url = out.toDataURL('image/png');
   disposeAvatar(built.root);
-  renderer.dispose();
   return url;
 }

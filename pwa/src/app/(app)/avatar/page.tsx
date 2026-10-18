@@ -41,6 +41,10 @@ export default function AvatarStudioPage() {
   const [tab, setTab] = useState('body');
   const [pose, setPose] = useState<PoseId>('idle');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Bumped when the phone takes the 3D view away: a fresh canvas gets a fresh context.
+  const [stageKey, setStageKey] = useState(0);
+  const cfgRef = useRef<AvatarConfig | null>(null);
+  const poseRef = useRef<PoseId>('idle');
   const stageRef = useRef<Stage | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
@@ -58,18 +62,32 @@ export default function AvatarStudioPage() {
   useEffect(() => {
     if (!canvasRef.current || !cat) return;
     const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || document.documentElement.hasAttribute('data-calm');
-    stageRef.current = createStage(canvasRef.current, color, { still });
-    return () => {
-      stageRef.current?.dispose();
-      stageRef.current = null;
+    const stage = createStage(canvasRef.current, color, { still, onLost: () => window.setTimeout(() => setStageKey((k) => k + 1), 300) });
+    stageRef.current = stage;
+    // A new stage (first open, wardrobe reloaded, view rebuilt) starts with your current look.
+    if (cfgRef.current) stage.setAvatar(cfgRef.current);
+    stage.setPose(poseRef.current);
+    // Coming back to the app: if the view was lost while away, rebuild it.
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const gl = canvasRef.current?.getContext('webgl2') ?? canvasRef.current?.getContext('webgl');
+      if (gl && gl.isContextLost()) setStageKey((k) => k + 1);
     };
-  }, [cat, color]);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      stage.dispose();
+      if (stageRef.current === stage) stageRef.current = null;
+    };
+  }, [cat, color, stageKey]);
   useEffect(() => {
+    cfgRef.current = cfg;
     if (cfg) stageRef.current?.setAvatar(cfg);
   }, [cfg]);
   useEffect(() => {
+    poseRef.current = pose;
     stageRef.current?.setPose(pose);
-  }, [pose, cat]);
+  }, [pose]);
 
   const shareSticker = async (url: string, caption: string) => {
     const file = await stickerFile(url, caption);
@@ -133,7 +151,7 @@ export default function AvatarStudioPage() {
       <div className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col px-3">
         {/* The avatar: always visible */}
         <div className="relative shrink-0 overflow-hidden rounded-[26px] bg-gradient-to-b from-[#BFE6FF] to-[#E8F7EC] shadow-[0_2px_10px_rgba(29,36,51,0.08)]">
-          <canvas ref={canvasRef} className="block h-[min(40svh,340px)] min-h-[210px] w-full touch-none" aria-label={t('avatar.canvas')} role="img" />
+          <canvas key={stageKey} ref={canvasRef} className="block h-[min(40svh,340px)] min-h-[210px] w-full touch-none" aria-label={t('avatar.canvas')} role="img" />
           <div className="absolute inset-x-2 top-2 flex justify-between gap-2">
             <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-navy shadow">
               <span aria-hidden>🤳🏾</span> {t('avatar.selfie')}
