@@ -59,7 +59,7 @@ import { HelpMapSheet } from '@/components/map/HelpMapSheet';
 import { useAreaWelcome } from '@/hooks/useAreaWelcome';
 import { rememberRef, signupHref } from '@/lib/visitor';
 import type { ShareRow } from '@/lib/shareCard';
-import { extractUserHomeCoords } from '@/lib/mapUserLocation';
+import { extractUserHomeCoords, extractUserMapCoords } from '@/lib/mapUserLocation';
 import { jamStrength, type Jam } from '@/lib/livingMap';
 import { LAYERS, LAYER_META, pinHref, shortNaira, type MapLayer, type MapPin } from '@/lib/mapPins';
 import { openAdTarget, type Ad } from '@/lib/adsApi';
@@ -327,6 +327,50 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       locate();
     }
   }, [map, locate]);
+
+  // Open on your area (owner 2026-10-19: "the map stays showing the whole country"). The map
+  // is drawn once, often before your profile has loaded, and older accounts have no saved
+  // spot: use your saved spot, else your home, else where you last looked; with none of
+  // those, find you once (the phone asks the first time). Never moves a map you've touched.
+  const settledRef = useRef(false);
+  useEffect(() => {
+    if (!map || hasFocus || settledRef.current) return;
+    const u = user as Parameters<typeof extractUserMapCoords>[0] | null;
+    let target: { lat: number; lng: number } | null = (u && extractUserMapCoords(u)) || home;
+    if (!target) {
+      try {
+        const last = JSON.parse(localStorage.getItem('nh_map_last_view') || 'null') as { lat: number; lng: number } | null;
+        if (last && Number.isFinite(last.lat) && Number.isFinite(last.lng)) target = last;
+      } catch {
+        /* nothing saved */
+      }
+    }
+    if (target) {
+      settledRef.current = true;
+      if (map.getZoom() < STREET_ZOOM - 1) map.jumpTo({ center: [target.lng, target.lat], zoom: STREET_ZOOM, pitch: calm ? 0 : 60, bearing: calm ? 0 : -12 });
+      return;
+    }
+    if (user) {
+      settledRef.current = true;
+      locate();
+    }
+  }, [map, user, home, hasFocus, locate, calm]);
+  useEffect(() => {
+    if (!map) return;
+    const save = () => {
+      if (map.getZoom() < STREET_ZOOM - 2) return;
+      const c = map.getCenter();
+      try {
+        localStorage.setItem('nh_map_last_view', JSON.stringify({ lat: c.lat, lng: c.lng }));
+      } catch {
+        /* storage off */
+      }
+    };
+    map.on('moveend', save);
+    return () => {
+      map.off('moveend', save);
+    };
+  }, [map]);
 
   // The orb's ring: red for a live safety alert on screen, amber for any safety or traffic pin.
   const mood: AreaMood = pins.some((p) => p.layer === 'safety' && p.live)
@@ -603,31 +647,35 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
                 </span>
               </button>
             ))}
-            {/* Your avatar (owner 2026-10-18): part of the stack, nearest ⋯; opens People & places. */}
-            {started && user ? (
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => setLensSheetOpen(true)}
-                aria-label={t('map.peopleTitle')}
-                title={t('map.peopleTitle')}
-                className="nh-map-fab-pop relative grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] ring-2 ring-white"
-              >
-                {myPortrait && !portraitBroken ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={myPortrait} alt="" className="h-full w-full object-cover" onError={() => setPortraitBroken(true)} />
-                ) : (
-                  <span aria-hidden className="text-2xl">
-                    👥
-                  </span>
-                )}
-              </button>
-            ) : null}
           </div>
+        ) : null}
+        {/* Your avatar: its own button, not part of the ⋯ stack (owner 2026-10-19); opens People & places. */}
+        {started && user ? (
+          <button
+            type="button"
+            onClick={() => setLensSheetOpen(true)}
+            aria-label={t('map.peopleTitle')}
+            title={t('map.peopleTitle')}
+            className="relative mb-2 grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] ring-2 ring-white"
+          >
+            {myPortrait && !portraitBroken ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={myPortrait} alt="" className="h-full w-full object-cover" onError={() => setPortraitBroken(true)} />
+            ) : (
+              <span aria-hidden className="text-2xl">
+                👥
+              </span>
+            )}
+          </button>
         ) : null}
         <button
           type="button"
-          onClick={() => setMenuOpen((v) => !v)}
+          onClick={() => {
+            // Opening the options tucks the area card down to its tab; closing brings it back (owner 2026-10-19).
+            const open = !menuOpen;
+            setMenuOpen(open);
+            setCardOpen(!open);
+          }}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
           aria-label={menuOpen ? t('map.menu.close') : t('map.menu.open')}
@@ -636,11 +684,6 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           <span aria-hidden className="material-symbols-outlined text-[26px] text-navy">
             {menuOpen ? 'close' : 'more_horiz'}
           </span>
-          {!menuOpen && lensChoice.on.length ? (
-            <span aria-hidden className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[11px] font-black text-white">
-              {lensChoice.on.length}
-            </span>
-          ) : null}
         </button>
       </div>
 
