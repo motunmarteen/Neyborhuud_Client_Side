@@ -366,7 +366,7 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 - [x] AH-1 (server 16a9a36, app b354600) Ask Huud screen `/ask` (🔍, map card, map pins); Sentinel tab safety only; feature guide of 45 features answers "which feature / how do I / start a trip" with Open buttons
 - [x] AH-2 (server 44bec5d, app 1456e4c) Understand + find + answer, no AI: buy, services, jobs, events, estate meetings, news, weather in plain English/Pidgin; your area first; results open their own pages
-- [ ] AH-3 Meaning matching: free small model on our server so similar words match; index every new item as it's created
+- [x] AH-3 (server 2d58d19) Meaning matching: free all-MiniLM-L6-v2 on our server (+~100 MB, PM2 limit 600M); listings, services, jobs, events indexed live via change streams + 10-min sweep; finders add close-in-meaning items, public-only rules re-applied. Live data today: 36 archived listings, 3 past events, 1 closed job, 0 services, so nothing active to match yet
 - [ ] AH-4 Chat: follow-ups, free AI tiers with fallback, caching per area, fair daily limits
 - [ ] AH-5 Learning loop: 👍👎, unanswered-questions list for admins, "Ask your neighbours"
 - [ ] AH-6 Yoruba, Hausa, Igbo word lists (native speaker)
