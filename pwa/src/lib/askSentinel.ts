@@ -7,7 +7,7 @@ import apiClient from '@/lib/api-client';
 
 export type AskMode = 'question' | 'search';
 export type ResultGroup =
-  | 'features' | 'people' | 'places' | 'posts' | 'alerts' | 'bulletins' | 'market'
+  | 'features' | 'news' | 'people' | 'places' | 'posts' | 'alerts' | 'bulletins' | 'market'
   | 'events' | 'artisans' | 'jobs' | 'help' | 'gist';
 
 /** A feature from Ask Huud's feature guide, with where it opens. */
@@ -26,6 +26,10 @@ export type AskPost = {
   likes: number;
   comments: number;
   createdAt: string;
+  /** Where it opens: an app path, or the newspaper's site for news (Ask Huud step 2). */
+  href?: string;
+  /** Extra line, e.g. "Sat 25 Oct, 10:00 · Unity Hall" or "1.2 km away". */
+  sub?: string;
 };
 
 export type AskAnswer = {
@@ -48,6 +52,7 @@ export type AskResult = {
 /** Group headings (i18n keys). */
 export const GROUP_KEY: Record<ResultGroup, string> = {
   features: 'ask.g.features',
+  news: 'ask.g.news',
   alerts: 'ask.g.alerts',
   people: 'ask.g.people',
   places: 'ask.g.places',
@@ -90,7 +95,7 @@ const GROUP_OF: Record<string, ResultGroup> = {
   emergency: 'alerts', fyi: 'bulletins', marketplace: 'market', event: 'events',
   services: 'artisans', job: 'jobs', help_request: 'help', gossip: 'gist',
 };
-const ORDER: ResultGroup[] = ['features', 'alerts', 'people', 'places', 'artisans', 'market', 'events', 'jobs', 'help', 'bulletins', 'posts', 'gist'];
+const ORDER: ResultGroup[] = ['features', 'news', 'alerts', 'people', 'places', 'artisans', 'market', 'events', 'jobs', 'help', 'bulletins', 'posts', 'gist'];
 
 /**
  * Fallback while a server without /sentinel/ask is still live: use the older

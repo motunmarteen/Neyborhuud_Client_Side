@@ -41,7 +41,7 @@ const EXPLORE_TILES = [
 ];
 
 const TYPE_ICON: Record<string, string> = {
-  emergency: '🚨', fyi: '📢', marketplace: '🛒', event: '🎉', services: '🛠️', job: '💼', help_request: '🙏', gossip: '💬', post: '✏️',
+  news: '📰', emergency: '🚨', fyi: '📢', marketplace: '🛒', event: '🎉', services: '🛠️', job: '💼', help_request: '🙏', gossip: '💬', post: '✏️',
 };
 
 const MOOD = {
@@ -455,14 +455,23 @@ function PlaceRow({ p, onAsk }: { p: AskPlace; onAsk: (q: string) => void }) {
 
 function PostRow({ p, onOpen }: { p: AskPost; onOpen: (id: string) => void }) {
   const { t } = useTranslation();
+  const router = useRouter();
   const text = (p.title || p.content || '').trim();
+  // Listings, services, jobs and events open their own page; news opens the paper's site.
+  const open = () => {
+    if (p.href?.startsWith('http')) window.open(p.href, '_blank', 'noopener,noreferrer');
+    else if (p.href) router.push(p.href);
+    else onOpen(p.id);
+  };
+  const price = p.price !== null && p.price !== undefined && p.contentType !== 'news' ? `₦${p.price.toLocaleString('en-NG')}` : null;
   return (
-    <button type="button" onClick={() => onOpen(p.id)} className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-[#F6F8FB]">
+    <button type="button" onClick={open} className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-[#F6F8FB]">
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-background text-lg" aria-hidden>{TYPE_ICON[p.contentType] ?? '✏️'}</span>
       <span className="min-w-0 flex-1">
         <span className="line-clamp-2 text-sm font-semibold text-navy">{text || t('ask.post')}</span>
+        {price ? <span className="mt-0.5 block text-sm font-extrabold text-brand-green-dark">{price}</span> : null}
         <span className="mt-0.5 block truncate text-xs text-muted">
-          {[p.author?.name, p.area, timeAgo(p.createdAt)].filter(Boolean).join(' · ')}
+          {p.sub ?? [p.author?.name, p.area, p.contentType === 'event' ? null : timeAgo(p.createdAt)].filter(Boolean).join(' · ')}
         </span>
       </span>
       {p.media[0] ? (

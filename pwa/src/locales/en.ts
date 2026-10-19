@@ -599,6 +599,9 @@ const en: Record<string, string> = {
     'sentinel.askHuudTitle': 'Ask Huud about your area',
     'sentinel.askSafe': 'Is my area safe right now?',
     'sentinel.askSafeArea': 'Is {area} safe right now?',
+
+    // Ask Huud step 2 (2026-10-19)
+    'ask.g.news': '📰 News',
 };
 
 export default en;
