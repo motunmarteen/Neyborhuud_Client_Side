@@ -4,7 +4,7 @@ import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
- * Explore and search now live on the Sentinel screen (Ask Sentinel, tracker F-14).
+ * Explore and search now live in Ask Huud (/ask, owner 2026-10-19).
  * Old links (/explore, /explore?q=#tag from posts) still work: they land there with the query.
  */
 function ExploreRedirect() {
@@ -12,7 +12,7 @@ function ExploreRedirect() {
   const params = useSearchParams();
   useEffect(() => {
     const q = params.get('q');
-    router.replace(q ? `/sentinel?q=${encodeURIComponent(q)}` : '/sentinel');
+    router.replace(q ? `/ask?q=${encodeURIComponent(q)}` : '/ask');
   }, [params, router]);
   return null;
 }

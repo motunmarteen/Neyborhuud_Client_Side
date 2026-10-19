@@ -8,7 +8,7 @@
  *
  * Layout from the agreed mockup (owner, 2026-10-15): top bar, layer chips, the ⚡ PULSE ribbon
  * (news + exchange rates); the Sentinel orb (ring = the area's mood from real safety pins), "Me"
- * and Calm view on the right; a bottom sheet with the greeting and weather, "Ask Sentinel
+ * and Calm view on the right; a bottom sheet with the greeting and weather, "Ask Huud
  * anything…", "Wetin dey happen?", "Report" and "Share today in <area>". Swipe the sheet up
  * (or tap "Feed") to open the Feed.
  */
@@ -689,7 +689,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
 
       {/* Area card (redesigned, owner 2026-10-16: no repeats). One job per line:
           handle (drag up = Feed, drag down or tap = hide), greeting + one live status line,
-          Ask Sentinel, then Post and Share. Weather and area are already in Pulse and the top bar;
+          Ask Huud, then Post and Share. Weather and area are already in Pulse and the top bar;
           Report lives in the Create sheet that Post opens. */}
       {cardOpen ? (
       <section
@@ -792,13 +792,13 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
           ) : null}
 
           <Link
-            href="/sentinel"
+            href="/ask?focus=1"
             className="flex min-h-12 items-center gap-2.5 rounded-full bg-background px-3 text-[15px] font-semibold text-muted transition-colors hover:bg-[#E9EDF3]"
           >
             <span aria-hidden className="grid h-8 w-8 place-items-center rounded-full bg-brand-green-dark text-white">
               <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
             </span>
-            Ask Sentinel anything…
+            {t('ask.placeholder')}
           </Link>
 
           <div className="flex gap-2">
@@ -912,6 +912,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
 
 /** M-09: what a pin is, how fresh, and where to go next. */
 function PinPanel({ pin, onClose }: { pin: MapPin | null; onClose: () => void }) {
+  const { t } = useTranslation();
   const meta = pin ? LAYER_META[pin.layer] : null;
   const price = pin?.layer === 'market' ? shortNaira(pin.top.price) : undefined;
   const isSafety = pin?.layer === 'safety';
@@ -934,8 +935,8 @@ function PinPanel({ pin, onClose }: { pin: MapPin | null; onClose: () => void })
             <Link href={pinHref(pin)} className={MAIN_BTN}>
               {isSafety ? 'See the report' : 'Open'}
             </Link>
-            <Link href={`/sentinel?q=${encodeURIComponent(pin.top.title)}`} className={SOFT_BTN}>
-              Ask Sentinel
+            <Link href={`/ask?q=${encodeURIComponent(pin.top.title)}`} className={SOFT_BTN}>
+              {t('ask.title')}
             </Link>
           </div>
         </div>

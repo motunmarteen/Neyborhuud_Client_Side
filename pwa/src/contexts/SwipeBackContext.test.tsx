@@ -270,6 +270,6 @@ describe('SwipeBackProvider integration', () => {
     });
 
     expect(mockBack).not.toHaveBeenCalled();
-    expect(mockPush).toHaveBeenCalledWith('/feed');
+    expect(mockPush).toHaveBeenCalledWith('/huud');
   });
 });

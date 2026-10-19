@@ -15,7 +15,7 @@ import { CreateSheet } from '@/components/navigation/CreateSheet';
  *   My Huud · Feed · ➕ · Chats · Sentinel   (Gist removed 2026-10-15: the Feed replaced it)
  *
  * - ➕ opens "Wetin you wan share?" (quick signals + create) on every screen
- * - Sentinel opens the Sentinel screen: Ask Sentinel (SSAA) + safety + Explore. Press and hold for a silent SOS
+ * - Sentinel opens the Sentinel screen: every safety feature (Ask Huud is the 🔍 in the top bar). Press and hold for a silent SOS
  *   (moved here from the old centre Home button, so the habit still works).
  * - Profile is the avatar in the top bar; search/explore become part of Sentinel.
  *
@@ -69,10 +69,16 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const { phase: sosPhase, triggerSos } = useSos();
   const { data: messageUnreadCount = 0 } = useUnreadCount('message');
   const [createOpen, setCreateOpen] = useState(false);
+  const [createSub, setCreateSub] = useState<'poll' | 'lost_found' | null>(null);
 
-  // Other screens (the map's "Wetin dey happen?" and "Report") open the same Create sheet.
+  // Other screens (the map's "Wetin dey happen?" and "Report") open the same Create sheet;
+  // Ask Huud can open the poll or lost & found form straight away (detail.sub).
   useEffect(() => {
-    const open = () => setCreateOpen(true);
+    const open = (e: Event) => {
+      const sub = (e as CustomEvent<{ sub?: 'poll' | 'lost_found' }>).detail?.sub;
+      if (sub) setCreateSub(sub);
+      else setCreateOpen(true);
+    };
     window.addEventListener(OPEN_CREATE_SHEET, open);
     return () => window.removeEventListener(OPEN_CREATE_SHEET, open);
   }, []);
@@ -104,7 +110,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const isHome = pathname === '/huud' || pathname === '/';
   const isFeed = pathname === '/feed' || pathname.startsWith('/feed/');
   const isChats = pathname.startsWith('/friendship') || pathname.startsWith('/chat') || pathname.startsWith('/messages');
-  const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel') || pathname.startsWith('/explore');
+  const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel') || pathname.startsWith('/sos');
 
   const tabClass = 'flex flex-1 justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
 
@@ -167,7 +173,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             onPointerCancel={clearHold}
             onContextMenu={(e) => e.preventDefault()}
             className={tabClass}
-            aria-label={sosActive ? 'Sentinel: SOS is active' : 'Sentinel: safety and Ask Sentinel. Press and hold for silent SOS'}
+            aria-label={sosActive ? 'Sentinel: SOS is active' : 'Sentinel: all your safety tools. Press and hold for silent SOS'}
             aria-current={isSentinel ? 'page' : undefined}
           >
             {sosActive ? (
@@ -184,7 +190,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
         </div>
       </nav>
 
-      <CreateSheet open={createOpen} onClose={() => setCreateOpen(false)} />
+      <CreateSheet open={createOpen} onClose={() => setCreateOpen(false)} sub={createSub} onSubClosed={() => setCreateSub(null)} />
     </>
   );
 }

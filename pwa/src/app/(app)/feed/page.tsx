@@ -28,6 +28,7 @@ import { getCurrentLocation } from '@/lib/geolocation';
 import { triggerSmartLocationSync } from '@/hooks/useSmartLocationSync';
 import { isUserInNigeria } from '@/lib/nigeriaCheck';
 import { hasCompletedProductTour, markProductTourComplete } from '@/lib/onboarding';
+import { OPEN_CREATE_SHEET } from '@/components/feed/BottomNav';
 import { useStarted } from '@/hooks/useStarted';
 import { useTranslation } from '@/lib/i18n';
 import { FeedTab, Post, ContentType } from '@/types/api';
@@ -43,9 +44,7 @@ import { mergeDiscoveryIntoFeed, type BaseFeedItem, type DiscoveryFeedItem } fro
 import { useFeedDiscoveryPools } from '@/hooks/useFeedDiscoveryPools';
 import { FeedProfilePrompt } from '@/components/feed/FeedProfilePrompt';
 import { RedZoneBanner } from '@/components/feed/RedZoneBanner';
-import { StreetRadarView } from '@/components/feed/StreetRadarView';
 import { WhoIsInMyHuudDrawer } from '@/components/neighborhood/WhoIsInMyHuudDrawer';
-import { AskMyHuudDrawer } from '@/components/assistant/AskMyHuudDrawer';
 import { FeedEmailVerificationBanner } from '@/components/feed/FeedEmailVerificationBanner';
 import { SponsoredCard } from '@/components/feed/SponsoredCard';
 import { FeedSkyBand } from '@/components/feed/FeedSkyBand';
@@ -66,7 +65,6 @@ function XFeedInner() {
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const [isPostDetailsOpen, setIsPostDetailsOpen] = useState(false);
     const [isWhoIsInMyHuudOpen, setIsWhoIsInMyHuudOpen] = useState(false);
-    const [isAskSentinelOpen, setIsAskSentinelOpen] = useState(false);
     const [feedTab, setFeedTab] = useState<FeedTab>('your_huud');
     const [departmentFilter, setDepartmentFilter] = useState<string | undefined>(undefined);
     const [fyiSubtypeFilter, setFyiSubtypeFilter] = useState<string>('');
@@ -110,6 +108,11 @@ function XFeedInner() {
     const composeParam = searchParams.get('compose');
     useEffect(() => {
         if (!composeParam) return;
+        if (composeParam === 'poll' || composeParam === 'lost_found') {
+            window.dispatchEvent(new CustomEvent(OPEN_CREATE_SHEET, { detail: { sub: composeParam } }));
+            router.replace('/feed', { scroll: false });
+            return;
+        }
         setCreatePostFocusMedia(false);
         setCreatePostDefaultContentType(composeParam as ContentType);
         setIsCreatePostOpen(true);
@@ -789,10 +792,6 @@ function XFeedInner() {
             <WhoIsInMyHuudDrawer
                 isOpen={isWhoIsInMyHuudOpen}
                 onClose={() => setIsWhoIsInMyHuudOpen(false)}
-            />
-            <AskMyHuudDrawer
-                isOpen={isAskSentinelOpen}
-                onClose={() => setIsAskSentinelOpen(false)}
             />
 
         </div>

@@ -246,7 +246,7 @@ const GROUPS: { title: string; sections: Section[] }[] = [
       {
         id: 'ask-sentinel',
         icon: '✨',
-        title: 'Ask Sentinel',
+        title: 'Ask Huud',
         what: 'One box on the Sentinel tab for searching and asking questions about your area.',
         steps: [
           'Type a name, word or #tag and results show as you type. No AI is used for this.',
@@ -255,10 +255,10 @@ const GROUPS: { title: string; sections: Section[] }[] = [
         ],
         know: [
           'Sentinel only knows what neighbours have reported. If nobody reported anything, it says so. It never tells you “all clear” or “light is on” without reports.',
-          'Ask Sentinel cannot contact anyone. In danger, use SOS.',
+          'Ask Huud cannot contact anyone. In danger, use SOS.',
           'It needs your location to answer about your area.',
         ],
-        open: { href: '/sentinel', label: 'Ask Sentinel' },
+        open: { href: '/ask', label: 'Ask Huud' },
       },
       {
         id: 'privacy',

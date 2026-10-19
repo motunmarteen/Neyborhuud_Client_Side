@@ -23,7 +23,7 @@ export function TopBarDemo() {
           </div>
         </div>
       ))}
-      <p className="text-xs text-muted">🔍 opens Search / Ask Sentinel. Create (➕) is in the bottom bar.</p>
+      <p className="text-xs text-muted">🔍 opens Ask Huud. Create (➕) is in the bottom bar.</p>
     </div>
   );
 }

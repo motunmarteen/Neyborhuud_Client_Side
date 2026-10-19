@@ -176,7 +176,7 @@ export default function DesignKitPage() {
             <li>📰 <b>Feed</b> — everything neighbours post, under the same live sky</li>
             <li>➕ <b>Create</b> — one-tap signals, or post, sell, event, job, help…</li>
             <li>💬 <b>Chats</b> — messages and groups</li>
-            <li>🛡️ <b>Sentinel</b> — safety tools and Ask Sentinel (search). Press and hold for a silent SOS.</li>
+            <li>🛡️ <b>Sentinel</b> — all the safety tools. Press and hold for a silent SOS. (Ask Huud is the 🔍 in the top bar.)</li>
           </ul>
         </Section>
       </div>

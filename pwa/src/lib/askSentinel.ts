@@ -1,15 +1,17 @@
 import apiClient from '@/lib/api-client';
 
 /**
- * Ask Sentinel (SSAA) — the one box for every search and question.
- * Server: POST /api/v1/sentinel/ask (NeyborHuud_Server_Side, modules/sentinel).
+ * Ask Huud: the one box for every search and question (renamed from Ask Sentinel, owner
+ * 2026-10-19; Sentinel is now the safety features). Server: POST /api/v1/sentinel/ask.
  */
 
 export type AskMode = 'question' | 'search';
 export type ResultGroup =
-  | 'people' | 'places' | 'posts' | 'alerts' | 'bulletins' | 'market'
+  | 'features' | 'people' | 'places' | 'posts' | 'alerts' | 'bulletins' | 'market'
   | 'events' | 'artisans' | 'jobs' | 'help' | 'gist';
 
+/** A feature from Ask Huud's feature guide, with where it opens. */
+export type AskFeature = { id: string; name: string; emoji: string; what: string; href: string };
 export type AskPerson = { id: string; username: string; name: string; avatarUrl: string | null; isVerified: boolean; area: string | null };
 export type AskPlace = { lga: string; state: string | null; people: number };
 export type AskPost = {
@@ -39,22 +41,24 @@ export type AskResult = {
   mode: AskMode;
   answer: AskAnswer | null;
   needsLocation: boolean;
-  groups: { key: ResultGroup; items: (AskPerson | AskPlace | AskPost)[] }[];
+  groups: { key: ResultGroup; items: (AskFeature | AskPerson | AskPlace | AskPost)[] }[];
   total: number;
 };
 
-export const GROUP_LABEL: Record<ResultGroup, string> = {
-  alerts: '🚨 Safety alerts',
-  people: '👥 Neighbours',
-  places: '📍 Places',
-  artisans: '🛠️ Artisans',
-  market: '🛒 Market',
-  events: '🎉 Events',
-  jobs: '💼 Jobs',
-  help: '🙏 Help requests',
-  bulletins: '📢 Bulletins',
-  posts: '✏️ Posts',
-  gist: '💬 Talk',
+/** Group headings (i18n keys). */
+export const GROUP_KEY: Record<ResultGroup, string> = {
+  features: 'ask.g.features',
+  alerts: 'ask.g.alerts',
+  people: 'ask.g.people',
+  places: 'ask.g.places',
+  artisans: 'ask.g.artisans',
+  market: 'ask.g.market',
+  events: 'ask.g.events',
+  jobs: 'ask.g.jobs',
+  help: 'ask.g.help',
+  bulletins: 'ask.g.bulletins',
+  posts: 'ask.g.posts',
+  gist: 'ask.g.gist',
 };
 
 // Kept in step with the server's ask.rules.ts so the screen knows when a query is a
@@ -86,7 +90,7 @@ const GROUP_OF: Record<string, ResultGroup> = {
   emergency: 'alerts', fyi: 'bulletins', marketplace: 'market', event: 'events',
   services: 'artisans', job: 'jobs', help_request: 'help', gossip: 'gist',
 };
-const ORDER: ResultGroup[] = ['alerts', 'people', 'places', 'artisans', 'market', 'events', 'jobs', 'help', 'bulletins', 'posts', 'gist'];
+const ORDER: ResultGroup[] = ['features', 'alerts', 'people', 'places', 'artisans', 'market', 'events', 'jobs', 'help', 'bulletins', 'posts', 'gist'];
 
 /**
  * Fallback while a server without /sentinel/ask is still live: use the older
@@ -95,7 +99,7 @@ const ORDER: ResultGroup[] = ['alerts', 'people', 'places', 'artisans', 'market'
 async function legacySearch(query: string): Promise<AskResult> {
   const res = await apiClient.get<any>('/search', { params: { q: query, type: 'all', limit: 8 } });
   const d = (res as any)?.data ?? {};
-  const byGroup: Partial<Record<ResultGroup, (AskPerson | AskPlace | AskPost)[]>> = {};
+  const byGroup: Partial<Record<ResultGroup, (AskFeature | AskPerson | AskPlace | AskPost)[]>> = {};
   byGroup.people = (d.users?.data ?? []).map((u: any) => ({
     id: String(u._id ?? u.id), username: u.username, name: u.name || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username,
     avatarUrl: u.avatarUrl ?? null, isVerified: !!u.isVerified, area: null,
@@ -113,7 +117,7 @@ async function legacySearch(query: string): Promise<AskResult> {
   return { query, mode: classifyQuery(query), answer: null, needsLocation: false, groups, total: groups.reduce((n, g) => n + g.items.length, 0) };
 }
 
-export async function askSentinel(query: string, coords?: { lat: number; lng: number } | null): Promise<AskResult> {
+export async function askHuud(query: string, coords?: { lat: number; lng: number } | null): Promise<AskResult> {
   try {
     const res = await apiClient.post<AskResult>('/sentinel/ask', {
       query,

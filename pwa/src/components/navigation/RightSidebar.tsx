@@ -34,7 +34,7 @@ export default function RightSidebar() {
       {/* 1. Global Search Bar (Twitter/X style desktop search) */}
       <button
         type="button"
-        onClick={() => router.push('/explore')}
+        onClick={() => router.push('/ask?focus=1')}
         className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.08] text-xs text-[#5B6478] transition-all cursor-pointer group"
       >
         <div className="flex items-center gap-2.5 truncate">

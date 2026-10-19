@@ -12,7 +12,7 @@ export const GlobalSearch = () => {
 
   return (
     <button
-      onClick={() => router.push('/explore')}
+      onClick={() => router.push('/ask?focus=1')}
       className="w-full flex items-center gap-2 pl-10 pr-4 py-2.5 rounded-full neu-inset text-sm cursor-pointer transition-all hover:opacity-90 relative"
       aria-label="Search NeyborHuud"
     >

@@ -95,9 +95,9 @@ export function PersonPin({ name, avatarUrl, me = false, champion = false, label
 }
 
 const MOOD_LABEL: Record<AreaMood, string> = {
-  calm: 'Ask Sentinel. Your area is calm',
-  advisory: 'Ask Sentinel. Your area is on advisory',
-  alert: 'Ask Sentinel. There is an alert in your area',
+  calm: 'Sentinel. Your area is calm',
+  advisory: 'Sentinel. Your area is on advisory',
+  alert: 'Sentinel. There is an alert in your area',
 };
 
 export function SentinelOrb({ mood = 'calm', onClick }: { mood?: AreaMood; onClick?: () => void }) {

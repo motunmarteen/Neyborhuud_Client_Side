@@ -27,7 +27,7 @@ const CREATE_OPTIONS: { type: string; icon: string; label: string }[] = [
   { type: 'lost_found', icon: '🔎', label: 'Lost & Found' },
 ];
 
-export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CreateSheet({ open, onClose, sub: forcedSub, onSubClosed }: { open: boolean; onClose: () => void; sub?: 'poll' | 'lost_found' | null; onSubClosed?: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const { send, submittingId } = useQuickSignal();
@@ -97,8 +97,8 @@ export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => v
         </section>
       </div>
     </AppBottomSheet>
-    <CreatePollSheet open={sub === 'poll'} onClose={() => setSub(null)} />
-    <CreateLostFoundSheet open={sub === 'lost_found'} onClose={() => setSub(null)} />
+    <CreatePollSheet open={sub === 'poll' || forcedSub === 'poll'} onClose={() => { setSub(null); onSubClosed?.(); }} />
+    <CreateLostFoundSheet open={sub === 'lost_found' || forcedSub === 'lost_found'} onClose={() => { setSub(null); onSubClosed?.(); }} />
     </>
   );
 }

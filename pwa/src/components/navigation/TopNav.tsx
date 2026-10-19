@@ -30,7 +30,7 @@ type TopNavOrigin = 'page' | 'global';
  * notifications, create, and your avatar, which opens the "Me" menu.
  * Visitors (not signed in) see "Join free" instead.
  *
- * Create (➕) lives in the bottom bar (F-07). 🔍 opens Search / Ask Sentinel (SSAA).
+ * Create (➕) lives in the bottom bar (F-07). 🔍 opens Ask Huud (search and questions).
  */
 
 function titleCaseFromSegment(segment: string) {
@@ -66,8 +66,9 @@ function getRouteTitle(pathname: string) {
     notifications: 'Notifications',
     fyi: 'FYI',
     settings: 'Settings',
-    safety: 'Sentinel Radar',
+    safety: 'Sentinel',
     sentinel: 'Sentinel',
+    ask: 'Ask Huud',
     'lost-found': 'Lost & Found',
     map: 'Discovery',
     explore: 'Explore',
@@ -191,7 +192,7 @@ export function TopBar({
                 <span className="hidden h-[34px] w-14 animate-pulse rounded-full bg-[#F3F5F9] motion-reduce:animate-none min-[350px]:block" aria-hidden />
               )}
 
-              <button type="button" onClick={onSearch} className={ICON_BTN} aria-label="Search or ask Sentinel">
+              <button type="button" onClick={onSearch} className={ICON_BTN} aria-label="Ask Huud: search or ask anything">
                 <Search size={17} />
               </button>
 
@@ -271,7 +272,7 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
       scrollHidden={scrollHidden}
       origin={origin}
       onBack={() => router.back()}
-      onSearch={() => router.push('/sentinel?focus=1')}
+      onSearch={() => router.push('/ask?focus=1')}
       onMe={() => window.dispatchEvent(new CustomEvent('toggle-mobile-sidebar'))}
     />
   );

@@ -7,15 +7,15 @@ import {
 
 describe('resolveBackFallback', () => {
   it('maps nested routes to section hubs', () => {
-    expect(resolveBackFallback('/settings/location')).toBe('/feed');
-    expect(resolveBackFallback('/profile/motun')).toBe('/feed');
+    expect(resolveBackFallback('/settings/location')).toBe('/huud');
+    expect(resolveBackFallback('/profile/motun')).toBe('/huud');
     expect(resolveBackFallback('/marketplace/abc123')).toBe('/marketplace');
     expect(resolveBackFallback('/events/create')).toBe('/events');
     expect(resolveBackFallback('/jobs/saved')).toBe('/jobs');
   });
 
-  it('defaults unknown paths to feed', () => {
-    expect(resolveBackFallback('/unknown-page')).toBe('/feed');
+  it('defaults unknown paths to the map (home)', () => {
+    expect(resolveBackFallback('/unknown-page')).toBe('/huud');
   });
 });
 
@@ -45,7 +45,7 @@ describe('navigateBack', () => {
     vi.stubGlobal('history', { length: 1 });
     navigateBack(router, { pathname: '/settings/blocked' });
     expect(back).not.toHaveBeenCalled();
-    expect(push).toHaveBeenCalledWith('/feed');
+    expect(push).toHaveBeenCalledWith('/huud');
   });
 
   it('honours explicit fallback', () => {
