@@ -362,6 +362,16 @@ Plus the panels and pop-ups that belong to these screens (post window, SOS sheet
 
 ## Phase 6: Sentinel AI upgrades
 
+**2026-10-19 (owner): the assistant is now Ask Huud** (Sentinel = the safety features). Plan: [ASK-HUUD-PLAN.md](ASK-HUUD-PLAN.md), ₦0 budget.
+
+- [x] AH-1 (server 16a9a36, app b354600) Ask Huud screen `/ask` (🔍, map card, map pins); Sentinel tab safety only; feature guide of 45 features answers "which feature / how do I / start a trip" with Open buttons
+- [x] AH-2 (server 44bec5d, app 1456e4c) Understand + find + answer, no AI: buy, services, jobs, events, estate meetings, news, weather in plain English/Pidgin; your area first; results open their own pages
+- [ ] AH-3 Meaning matching: free small model on our server so similar words match; index every new item as it's created
+- [ ] AH-4 Chat: follow-ups, free AI tiers with fallback, caching per area, fair daily limits
+- [ ] AH-5 Learning loop: 👍👎, unanswered-questions list for admins, "Ask your neighbours"
+- [ ] AH-6 Yoruba, Hausa, Igbo word lists (native speaker)
+- [ ] FO-1 Fans-Out: area trends page + notifications (spec after Ask Huud)
+
 - [x] 2026-10-17 (owner) **How it works for everything in Sentinel**: new guide `/safety/how-it-works` (16 sections: SOS, Panic PIN, Live Tracking, Fake Call, Safe Trips, check-ins, safe zones, guardians, Circle and status, emergency report, community emergency, incident reports, recap, how Sentinel watches, Ask Sentinel, what Sentinel never does), checked against today's code; every safety screen's How it works box links to its section; boxes added to Community emergency and Incident reports; links from the Sentinel tab and the hub. Corrected: Sentinel page said it reads chats (it never does), Live Tracking said agencies are alerted (they are not), Trips now states the 3-miss silent SOS
 - [x] 2026-10-17 Ask Sentinel honesty (server 6692a39, deployed): "no reports" is never turned into "clear road", "power stable" or "calm"; no Lagos default area; no claims that DisCo / Huud Watch were notified
 - [x] 2026-10-17 (owner: keep Share, share safely) **safety alerts share safely**: unconfirmed/disputed alerts ask "Share anyway?" first and the text is marked UNCONFIRMED/DISPUTED; the link opens a public page `/alert/<id>` with the live status (confirmed / unconfirmed / disputed / ended, age, area only; never the reporter, address or exact spot), and the WhatsApp preview says the same; no share HuudCredit until neighbours confirm (server 5c2a41b)
