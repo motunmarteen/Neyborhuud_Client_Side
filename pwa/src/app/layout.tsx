@@ -104,6 +104,8 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  // Android: the page shrinks above the keyboard instead of the keyboard covering it.
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({

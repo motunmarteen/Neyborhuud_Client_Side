@@ -9772,3 +9772,15 @@ html[data-joining] [data-map-menu] { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .nh-map-fab-pop { animation: none; }
 }
+
+/* Typing must not shake the page (owner 2026-10-19): iPhones zoom in on any text box whose
+   text is under 16px, which pushed the page sideways and hid the box. On touch screens every
+   field uses at least 16px; pinch-to-zoom stays available for people who need it. */
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']),
+  textarea,
+  select,
+  [contenteditable='true'] {
+    font-size: max(16px, 1em) !important;
+  }
+}
