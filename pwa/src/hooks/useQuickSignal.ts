@@ -13,7 +13,7 @@ import { getCurrentLocation } from '@/lib/geolocation';
  * signal bar and the ➕ "Wetin you wan share?" sheet so both send the same way.
  */
 
-export type SignalCategory = 'power' | 'traffic' | 'safety';
+export type SignalCategory = 'power' | 'fuel' | 'water_waste' | 'traffic' | 'safety' | 'essentials';
 
 export interface SignalPreset {
   id: string;
@@ -30,16 +30,39 @@ export interface SignalPreset {
 }
 
 export const QUICK_SIGNALS: SignalPreset[] = [
-  { id: 'p_outage', group: 'power', emoji: '🔌', label: 'No Light (Outage)', short: 'No light', sub: 'DisCo power is off in the area', severity: 'medium', type: 'fyi', category: 'infrastructure', defaultTitle: 'Power Outage (Light Off)' },
+  // 1. POWER & LIGHT
   { id: 'p_restored', group: 'power', emoji: '💡', label: 'Light Don Come!', short: 'Light don come!', sub: 'Grid power restored to our street', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Power Restored (Light is Back)' },
-  { id: 'p_fault', group: 'power', emoji: '⚡', label: 'Transformer / Cable Fault', short: 'Transformer fault', sub: 'Sparking wire, blown fuse or pole issue', severity: 'high', type: 'incident', category: 'infrastructure', defaultTitle: 'Transformer / Electrical Fault' },
+  { id: 'p_outage', group: 'power', emoji: '🔌', label: 'No Light (Outage)', short: 'No light', sub: 'DisCo power is off in the area', severity: 'medium', type: 'fyi', category: 'infrastructure', defaultTitle: 'Power Outage (Light Off)' },
+  { id: 'p_voltage', group: 'power', emoji: '⚡', label: 'Low / Unstable Voltage', short: 'Low voltage', sub: 'Dangerous power fluctuation, protect appliances', severity: 'high', type: 'fyi', category: 'infrastructure', defaultTitle: 'Low Voltage / Power Fluctuation' },
+  { id: 'p_fault', group: 'power', emoji: '💥', label: 'Transformer / Cable Fault', short: 'Transformer fault', sub: 'Sparking wire, blown fuse or fallen pole', severity: 'high', type: 'incident', category: 'infrastructure', defaultTitle: 'Transformer / Electrical Fault' },
+
+  // 2. FUEL & GAS RADAR
+  { id: 'f_selling', group: 'fuel', emoji: '⛽', label: 'Fuel Selling (Normal Queue)', short: 'Fuel selling', sub: 'Station selling smoothly with short queue', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Fuel Available (Short Queue)' },
+  { id: 'f_queue', group: 'fuel', emoji: '🚗', label: 'Heavy Fuel Queue (1hr+)', short: 'Long queue', sub: 'Extensive line spilling onto the road', severity: 'medium', type: 'fyi', category: 'infrastructure', defaultTitle: 'Heavy Fuel Station Queue' },
+  { id: 'f_nofuel', group: 'fuel', emoji: '🚫', label: 'No Fuel / Gate Locked', short: 'No fuel', sub: 'Pumps dry, gates locked, avoid the trip', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Fuel Out of Stock (Gates Closed)' },
+  { id: 'f_gas', group: 'fuel', emoji: '🔥', label: 'Cooking Gas Depot Open', short: 'Cooking gas', sub: 'LPG refilling station active and open', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Cooking Gas Available' },
+
+  // 3. WASTE & WATER PULSE
+  { id: 'w_lawma', group: 'water_waste', emoji: '🚚', label: 'LAWMA / PSP Truck Arrived!', short: 'LAWMA truck', sub: 'Bring out your waste bins now before they leave', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'LAWMA / PSP Waste Truck Arrived' },
+  { id: 'w_running', group: 'water_waste', emoji: '💧', label: 'Borehole / Public Water Running', short: 'Water running', sub: 'Estate water is pumping, open your intake valves', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Borehole / Water Supply Active' },
+  { id: 'w_tanker', group: 'water_waste', emoji: '🚛', label: 'Water Tanker Supply Available', short: 'Water tanker', sub: 'Clean water delivery truck available in neighborhood', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Water Tanker In Area' },
+
+  // 4. ROADS & TRAFFIC
+  { id: 't_clear', group: 'traffic', emoji: '🟢', label: 'Road Clear (Free Flow)', short: 'Road clear', sub: 'Smooth transit with zero hold-up', severity: 'low', type: 'fyi', category: 'traffic', defaultTitle: 'Road Clear / Traffic Moving' },
   { id: 't_gridlock', group: 'traffic', emoji: '🚗', label: 'Heavy Gridlock', short: 'Heavy go-slow', sub: 'Stationary or moving very slowly', severity: 'medium', type: 'fyi', category: 'traffic', defaultTitle: 'Heavy Traffic Gridlock' },
-  { id: 't_flood', group: 'traffic', emoji: '🌊', label: 'Street Flooded', short: 'Street flooded', sub: 'High standing water, risky for small cars', severity: 'high', type: 'incident', category: 'traffic', defaultTitle: 'Road Flooded / High Water' },
-  { id: 't_gate', group: 'traffic', emoji: '🚧', label: 'Gate Locked / Blocked', short: 'Gate locked', sub: 'Estate gate restricted or closed early', severity: 'medium', type: 'fyi', category: 'traffic', defaultTitle: 'Estate Gate Access Locked' },
-  { id: 't_checkpoint', group: 'traffic', emoji: '👮🏾', label: 'Security Checkpoint', short: 'Checkpoint', sub: 'Stop-and-search causing delay', severity: 'low', type: 'fyi', category: 'traffic', defaultTitle: 'Security Checkpoint Active' },
+  { id: 't_flood', group: 'traffic', emoji: '🌊', label: 'Street Flooded', short: 'Street flooded', sub: 'High standing water, risky for low cars', severity: 'high', type: 'incident', category: 'traffic', defaultTitle: 'Road Flooded / High Water' },
+  { id: 't_checkpoint', group: 'traffic', emoji: '👮🏾', label: 'Taskforce / Stop & Search', short: 'Checkpoint', sub: 'Law enforcement / taskforce stop causing delay', severity: 'low', type: 'fyi', category: 'traffic', defaultTitle: 'Security Checkpoint Active' },
+
+  // 5. SAFETY & ESTATE GATE
+  { id: 's_gate', group: 'safety', emoji: '🚧', label: 'Estate Gate Locked / Curfew', short: 'Gate locked', sub: 'Estate gate restricted or closed early', severity: 'medium', type: 'fyi', category: 'safety', defaultTitle: 'Estate Gate Access Locked' },
+  { id: 's_patrol', group: 'safety', emoji: '🛡️', label: 'Huud Watch Patrol Active', short: 'Watch patrol', sub: 'Vetted neighborhood security actively on duty', severity: 'low', type: 'fyi', category: 'safety', defaultTitle: 'Huud Watch Patrol Active' },
   { id: 's_suspicious', group: 'safety', emoji: '👀', label: 'Suspicious Movement', short: 'Suspicious movement', sub: 'Unidentified prowler or loitering vehicle', severity: 'high', type: 'incident', category: 'safety', defaultTitle: 'Suspicious Activity Reported' },
   { id: 's_disturbance', group: 'safety', emoji: '⚠️', label: 'Security Disturbance', short: 'Wahala / disturbance', sub: 'Urgent dispute or threat requiring watch', severity: 'critical', type: 'incident', category: 'safety', defaultTitle: 'Urgent Security Incident' },
-  { id: 's_hazard', group: 'safety', emoji: '🔥', label: 'Fire / Hazard Threat', short: 'Fire or hazard', sub: 'Open fire, fallen pole, or hazard', severity: 'critical', type: 'incident', category: 'safety', defaultTitle: 'Fire / Physical Hazard Alert' },
+  { id: 's_hazard', group: 'safety', emoji: '🔥', label: 'Fire / Hazard Threat', short: 'Fire or hazard', sub: 'Open fire, fallen pole, or road hazard', severity: 'critical', type: 'incident', category: 'safety', defaultTitle: 'Fire / Physical Hazard Alert' },
+
+  // 6. CASH & ESSENTIALS
+  { id: 'm_pos', group: 'essentials', emoji: '💵', label: 'POS Cash Available (Normal Rate)', short: 'POS cash', sub: 'Point-of-sale point has cash at standard rate', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'POS Cash Available' },
+  { id: 'm_market', group: 'essentials', emoji: '🥬', label: 'Fresh Market Goods Arrived', short: 'Fresh market', sub: 'Farm produce or fresh food vendor is here', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Fresh Market Produce Arrived' },
 ];
 
 export const signalsIn = (group: SignalCategory) => QUICK_SIGNALS.filter((s) => s.group === group);

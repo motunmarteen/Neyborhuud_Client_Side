@@ -58,6 +58,7 @@ import { LoginSheet } from '@/components/map/LoginSheet';
 import { HelpMapSheet } from '@/components/map/HelpMapSheet';
 import { useAreaWelcome } from '@/hooks/useAreaWelcome';
 import { rememberRef, signupHref } from '@/lib/visitor';
+import { HuudPulseWidget } from '@/components/feed/HuudPulseWidget';
 import type { ShareRow } from '@/lib/shareCard';
 import { extractUserHomeCoords, extractUserMapCoords } from '@/lib/mapUserLocation';
 import { jamStrength, type Jam } from '@/lib/livingMap';
@@ -790,6 +791,9 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
               </div>
             </div>
           ) : null}
+
+          {/* Live Street Consensus & Pulse */}
+          <HuudPulseWidget />
 
           <Link
             href="/ask?focus=1"
