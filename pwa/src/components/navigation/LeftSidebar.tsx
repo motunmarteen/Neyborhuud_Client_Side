@@ -25,6 +25,7 @@ import {
   MapPin,
   TrendingUp,
   Presentation,
+  SearchCheck,
 } from 'lucide-react';
 import { AnimatedNeyborHuudLogo } from '@/components/brand/NeyborHuudLogo';
 import { useAuth } from '@/hooks/useAuth';
@@ -57,6 +58,7 @@ const NAV_DISCOVER: NavItem[] = [
   { icon: ShieldAlert, label: 'Sentinel Radar', href: '/sentinel', badge: 'LIVE', badgeColor: 'bg-emerald-100 text-emerald-800' },
   { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace' },
   { icon: Briefcase, label: 'Gigs & Services', href: '/jobs' },
+  { icon: SearchCheck, label: 'Lost & Found', href: '/lost-found' },
   { icon: Megaphone, label: 'FYI Bulletins', href: '/fyi' },
   { icon: Newspaper, label: 'Local News', href: '/local-news' },
 ];

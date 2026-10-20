@@ -158,7 +158,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             </span>
           </div>
 
-          <Link href="/friendship" className={tabClass} aria-current={isChats ? 'page' : undefined}>
+          <Link href="/chat" className={tabClass} aria-current={isChats ? 'page' : undefined}>
             <Tab label="Chats" active={isChats} badge={messageUnreadCount}>
               <MessagesSquare size={22} strokeWidth={isChats ? 2.5 : 2} aria-hidden />
             </Tab>

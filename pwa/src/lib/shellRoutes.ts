@@ -60,7 +60,9 @@ export function shouldRenderGlobalTopNav(pathname: string): boolean {
  */
 export function routeHasPageOwnedSidebar(pathname: string): boolean {
   const path = normalizePath(pathname);
-  if (path === '/' || path === '/feed' || path === '/huud' || routeUsesBrowseShell(path)) return true;
+  // /feed and routeUsesBrowseShell mount their own LeftSidebar in their page shell.
+  // /huud is a full-screen canvas map and does NOT mount a page sidebar, so it needs AutoLeftSidebar for the mobile drawer.
+  if (path === '/' || path === '/feed' || routeUsesBrowseShell(path)) return true;
   if (path.startsWith('/safety') || path.startsWith('/sos')) return true;
   if (path === '/events/create' || path === '/marketplace/create') return true;
   if (/^\/marketplace\/[^/]+\/edit$/.test(path)) return true;

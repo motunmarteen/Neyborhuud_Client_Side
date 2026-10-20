@@ -205,8 +205,8 @@ function FriendshipPageContent() {
     // Legacy comms tabs (dms/communities) now fold into one "Chats" stream.
     if (t === 'dms' || t === 'direct' || t === 'communities' || t === 'groups' || t === 'chats') return 'chats';
     if (t === 'map') return 'near_me'; // legacy Map tab → Near me (map now a header)
-    if (t === 'following' || t === 'followers' || t === 'near_me') return t as MainTab;
-    return 'chats'; // Chats is the default landing tab
+    if (t === 'following' || t === 'followers' || t === 'chats') return t as MainTab;
+    return 'near_me'; // Neighbors Near Me is the default landing tab for Friendship/Connect
   })();
   const [mainTab, setMainTab] = useState<MainTab>(initialTab);
   const [search, setSearch] = useState('');

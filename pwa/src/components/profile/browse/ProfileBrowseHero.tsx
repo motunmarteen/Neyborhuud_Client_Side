@@ -184,6 +184,27 @@ export function ProfileBrowseHero({
           ) : null}
         </div>
 
+        {isOwnProfile ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Link
+              href="/avatar"
+              className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#00B82E] text-white hover:bg-[#0E8A3E] px-4 py-2 text-xs font-extrabold shadow-sm transition active:scale-95"
+            >
+              <span aria-hidden>🎨</span>
+              Customize 3D Avatar
+            </Link>
+            <button
+              type="button"
+              onClick={onChangePhoto}
+              disabled={uploading}
+              className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#DDE3EC] bg-white text-[#1D2433] hover:bg-[#EEF2F7] px-4 py-2 text-xs font-bold shadow-sm transition active:scale-95"
+            >
+              <span className="material-symbols-outlined text-[14px]">photo_camera</span>
+              {uploading ? 'Uploading…' : 'Change Photo'}
+            </button>
+          </div>
+        ) : null}
+
         {!isOwnProfile ? (
           <div className="mt-3 flex flex-wrap gap-2">
             <button
