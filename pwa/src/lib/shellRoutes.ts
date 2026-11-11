@@ -11,6 +11,7 @@ export const PAGE_OWNED_TOP_NAV_PREFIXES = [
   '/explore',
   '/ask',
   '/way',
+  '/election',
   '/sentinel',
   '/marketplace',
   '/jobs',

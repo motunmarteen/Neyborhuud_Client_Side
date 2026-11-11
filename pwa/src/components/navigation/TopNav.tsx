@@ -70,6 +70,7 @@ function getRouteTitle(pathname: string) {
     sentinel: 'Sentinel',
     ask: 'Ask Huud',
     way: 'Way Finder',
+    election: 'Election 2027',
     'lost-found': 'Lost & Found',
     map: 'Discovery',
     explore: 'Explore',

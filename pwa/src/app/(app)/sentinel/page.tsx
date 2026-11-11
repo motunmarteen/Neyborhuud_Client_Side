@@ -18,6 +18,8 @@ import { SentinelHub } from '@/components/sentinel/SentinelHub';
 import SosCountdownOverlay from '@/components/safety/SosCountdownOverlay';
 import { useSos } from '@/hooks/useSos';
 import { useTranslation } from '@/lib/i18n';
+import { useStarted } from '@/hooks/useStarted';
+import { daysUntil, useNextElection } from '@/lib/election';
 
 export default function SentinelPage() {
   return (
@@ -55,6 +57,7 @@ function SentinelScreen() {
       />
       <AppBrowseLayout className="!px-0">
         <div className="flex flex-col gap-4 px-4 pb-6 pt-1">
+          <ElectionCard />
           <SentinelHub user={user} areaName={area} />
           <Link
             href={`/ask?q=${encodeURIComponent(safetyQ)}`}
@@ -71,5 +74,28 @@ function SentinelScreen() {
         </div>
       </AppBrowseLayout>
     </>
+  );
+}
+
+/** Election mode (owner 2026-11-11): the hub, at the top of Sentinel until the last election day. */
+function ElectionCard() {
+  const { t } = useTranslation();
+  const started = useStarted();
+  const next = useNextElection();
+  if (!started || !next) return null;
+  const days = daysUntil(next.date);
+  return (
+    <Link
+      href="/election"
+      className="flex min-h-16 items-center gap-3 rounded-[22px] bg-navy px-4 py-3 text-white shadow-[0_4px_14px_rgba(29,36,51,0.18)]"
+    >
+      <span className="text-3xl" aria-hidden>🗳️</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-extrabold">{t('sentinel.election.title')}</span>
+        <span className="block text-[13px] text-white/80">
+          {days === 0 ? t('sentinel.election.today') : t(days === 1 ? 'sentinel.election.body_one' : 'sentinel.election.body_other', { n: days })}
+        </span>
+      </span>
+    </Link>
   );
 }
