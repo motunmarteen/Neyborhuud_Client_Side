@@ -81,7 +81,7 @@
     "@types/react-dom": "^19",
     "@types/three": "0.170.0",
     "@vitejs/plugin-react": "^6.0.2",
-    "@vitest/coverage-v8": "4.1.11",
+    "@vitest/coverage-v8": "4.1.12",
     "babel-loader": "^10.1.1",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
@@ -92,7 +92,8 @@
     "sharp": "0.35.5",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.11",
+    "vite": "8.1.6",
+    "vitest": "4.1.12",
     "ws": "^8.21.0"
   }
 }
