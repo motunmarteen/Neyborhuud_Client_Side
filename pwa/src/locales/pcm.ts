@@ -660,9 +660,9 @@ const pcm: Record<string, string> = {
     'way.add.leg': 'Step {n}',
     'way.add.remove': 'Comot step {n}',
     'way.add.how': 'How you dey move?',
-    'way.add.board': 'Where to enter',
+    'way.add.board': 'Enter for',
     'way.add.boardPh': 'Enter for… e.g. Isolo bus stop',
-    'way.add.alight': 'Where to drop',
+    'way.add.alight': 'Drop for',
     'way.add.alightPh': 'Drop for… e.g. Oshodi',
     'way.add.fareMin': '₦ from',
     'way.add.fareMax': 'reach ₦',
@@ -683,6 +683,12 @@ const pcm: Record<string, string> = {
     'ask.tile.waySub': 'How to reach there',
     'ask.tile.news': 'News',
     'ask.tile.newsSub': 'Naija and abroad',
+
+    // Way Finder form labels (2026-11-11)
+    'way.add.fareLow': 'Lowest ₦',
+    'way.add.fareHigh': 'Highest ₦',
+    'way.add.mins': 'Minutes',
+    'way.add.fareHint': 'Money for this motor alone: the lowest and highest wey you dey pay. Minutes wey you go spend inside am.',
 };
 
 export default pcm;

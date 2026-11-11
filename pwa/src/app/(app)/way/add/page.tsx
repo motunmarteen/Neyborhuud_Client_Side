@@ -148,13 +148,30 @@ function AddRoute() {
                   </button>
                 ))}
               </div>
-              <input value={l.board} onChange={(e) => setLeg(i, { board: e.target.value })} placeholder={t('way.add.boardPh')} aria-label={t('way.add.board')} className={field} />
-              <input value={l.alight} onChange={(e) => setLeg(i, { alight: e.target.value })} placeholder={t('way.add.alightPh')} aria-label={t('way.add.alight')} className={field} />
+              {/* Labels stay visible after typing (owner asked what the boxes were, 2026-11-11). */}
+              <label className="flex flex-col gap-1">
+                <span className="px-1 text-xs font-extrabold text-navy">{t('way.add.board')}</span>
+                <input value={l.board} onChange={(e) => setLeg(i, { board: e.target.value })} placeholder={t('way.add.boardPh')} className={field} />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="px-1 text-xs font-extrabold text-navy">{t('way.add.alight')}</span>
+                <input value={l.alight} onChange={(e) => setLeg(i, { alight: e.target.value })} placeholder={t('way.add.alightPh')} className={field} />
+              </label>
               <div className="grid grid-cols-3 gap-2">
-                <input inputMode="numeric" value={l.fareMin} onChange={(e) => setLeg(i, { fareMin: e.target.value.replace(/\D/g, '') })} placeholder={t('way.add.fareMin')} aria-label={t('way.add.fareMin')} className={field} />
-                <input inputMode="numeric" value={l.fareMax} onChange={(e) => setLeg(i, { fareMax: e.target.value.replace(/\D/g, '') })} placeholder={t('way.add.fareMax')} aria-label={t('way.add.fareMax')} className={field} />
-                <input inputMode="numeric" value={l.minutes} onChange={(e) => setLeg(i, { minutes: e.target.value.replace(/\D/g, '') })} placeholder={t('way.add.minutes')} aria-label={t('way.add.minutes')} className={field} />
+                <label className="flex min-w-0 flex-col gap-1">
+                  <span className="truncate px-1 text-xs font-extrabold text-navy">{t('way.add.fareLow')}</span>
+                  <input inputMode="numeric" value={l.fareMin} onChange={(e) => setLeg(i, { fareMin: e.target.value.replace(/\D/g, '') })} placeholder="300" className={field} />
+                </label>
+                <label className="flex min-w-0 flex-col gap-1">
+                  <span className="truncate px-1 text-xs font-extrabold text-navy">{t('way.add.fareHigh')}</span>
+                  <input inputMode="numeric" value={l.fareMax} onChange={(e) => setLeg(i, { fareMax: e.target.value.replace(/\D/g, '') })} placeholder="400" className={field} />
+                </label>
+                <label className="flex min-w-0 flex-col gap-1">
+                  <span className="truncate px-1 text-xs font-extrabold text-navy">{t('way.add.mins')}</span>
+                  <input inputMode="numeric" value={l.minutes} onChange={(e) => setLeg(i, { minutes: e.target.value.replace(/\D/g, '') })} placeholder="25" className={field} />
+                </label>
               </div>
+              <p className="px-1 text-[11px] font-semibold text-muted">{t('way.add.fareHint')}</p>
               <input value={l.note} onChange={(e) => setLeg(i, { note: e.target.value })} maxLength={200} placeholder={t('way.add.notePh')} aria-label={t('way.add.note')} className={field} />
             </li>
           ))}

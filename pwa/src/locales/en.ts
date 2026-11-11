@@ -671,9 +671,9 @@ const en: Record<string, string> = {
     'way.add.leg': 'Step {n}',
     'way.add.remove': 'Remove step {n}',
     'way.add.how': 'How do you travel?',
-    'way.add.board': 'Where to board',
+    'way.add.board': 'Board at',
     'way.add.boardPh': 'Board at… e.g. Isolo bus stop',
-    'way.add.alight': 'Where to get off',
+    'way.add.alight': 'Get off at',
     'way.add.alightPh': 'Get off at… e.g. Oshodi',
     'way.add.fareMin': '₦ from',
     'way.add.fareMax': 'to ₦',
@@ -694,6 +694,12 @@ const en: Record<string, string> = {
     'ask.tile.waySub': 'How to get there',
     'ask.tile.news': 'News',
     'ask.tile.newsSub': 'Nigeria and the world',
+
+    // Way Finder form labels (2026-11-11)
+    'way.add.fareLow': 'Lowest ₦',
+    'way.add.fareHigh': 'Highest ₦',
+    'way.add.mins': 'Minutes',
+    'way.add.fareHint': 'Fare for this vehicle only: the lowest and highest you usually pay. Minutes you spend in it.',
 };
 
 export default en;
