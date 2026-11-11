@@ -27,6 +27,8 @@ import { searchService } from '@/services/search.service';
 import { newsService } from '@/services/news.service';
 import type { RssArticle } from '@/types/incident';
 import { WhoIsInMyHuudDrawer } from '@/components/neighborhood/WhoIsInMyHuudDrawer';
+import { toast } from 'sonner';
+import { askRiders } from '@/lib/wayFinder';
 import { useTranslation } from '@/lib/i18n';
 
 const EXPLORE_TILES = [
@@ -38,10 +40,12 @@ const EXPLORE_TILES = [
   { href: '/fyi', icon: '📢', key: 'notices' },
   { href: '/communities', icon: '🏘️', key: 'estates' },
   { href: '/help-request', icon: '🙏', key: 'help' },
+  { href: '/way', icon: '🧭', key: 'way' },
+  { href: '/local-news', icon: '📰', key: 'news' },
 ];
 
 const TYPE_ICON: Record<string, string> = {
-  news: '📰', emergency: '🚨', fyi: '📢', marketplace: '🛒', event: '🎉', services: '🛠️', job: '💼', help_request: '🙏', gossip: '💬', post: '✏️',
+  route: '🧭', news: '📰', emergency: '🚨', fyi: '📢', marketplace: '🛒', event: '🎉', services: '🛠️', job: '💼', help_request: '🙏', gossip: '💬', post: '✏️',
 };
 
 const MOOD = {
@@ -353,6 +357,8 @@ function Results({
         </Card>
       ) : null}
 
+      {result.way ? <WayActions way={result.way} /> : null}
+
       {result.needsLocation ? (
         <Card>
           <p className="font-bold text-navy">{t('ask.whereTitle')}</p>
@@ -395,6 +401,49 @@ function Results({
           </Card>
         </section>
       ))}
+    </div>
+  );
+}
+
+/**
+ * Way Finder buttons under a directions answer (owner 2026-10-19): ask riders who know the way
+ * (you're told when someone shares it), or share it yourself; with routes, see them all.
+ */
+function WayActions({ way }: { way: { from: string | null; to: string; found: number } }) {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const { user } = useAuth();
+  const [asked, setAsked] = useState(false);
+  const q = `from=${encodeURIComponent(way.from ?? '')}&to=${encodeURIComponent(way.to)}`;
+  const ask = async () => {
+    if (!user) {
+      router.push(`/huud?login=1&next=${encodeURIComponent(`/way?${q}`)}`);
+      return;
+    }
+    try {
+      const out = await askRiders(way.from ?? '', way.to);
+      setAsked(true);
+      toast.success(out.existing ? t('way.askedJoin') : t('way.asked'));
+    } catch {
+      toast.error(t('way.failed'));
+    }
+  };
+  return (
+    <div className="flex flex-wrap gap-2">
+      {way.found ? (
+        <Link href={`/way?${q}`} className="inline-flex min-h-11 items-center rounded-full bg-primary px-4 text-sm font-extrabold text-white">
+          🧭 {t('ask.way.all', { n: way.found })}
+        </Link>
+      ) : way.from ? (
+        <button type="button" disabled={asked} onClick={() => void ask()} className="inline-flex min-h-11 items-center rounded-full bg-primary px-4 text-sm font-extrabold text-white disabled:opacity-60">
+          {asked ? t('way.askedShort') : t('way.askRiders')}
+        </button>
+      ) : null}
+      {way.from ? (
+        <Link href={`/way/add?${q}`} className="inline-flex min-h-11 items-center rounded-full bg-white px-4 text-sm font-extrabold text-navy ring-1 ring-line">
+          {way.found ? t('way.addAnother') : t('way.iKnow')}
+        </Link>
+      ) : null}
     </div>
   );
 }
