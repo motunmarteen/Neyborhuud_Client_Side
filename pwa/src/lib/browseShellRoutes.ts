@@ -8,6 +8,7 @@ export const BROWSE_SHELL_ROUTE_PREFIXES = [
   '/saved',
   '/notifications',
   '/ask',
+  '/way',
   '/communities',
   '/chat',
   '/safety',
