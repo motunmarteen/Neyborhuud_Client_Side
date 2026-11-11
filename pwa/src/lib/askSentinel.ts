@@ -38,7 +38,12 @@ export type AskAnswer = {
   sources: { title: string; category: string; sourceType: string; distanceLabel?: string }[];
   suggestedFollowUps: string[];
   assessedArea?: { state?: string; lga?: string; district?: string };
+  /** Written by the free AI tier from NeyborHuud results (step 4). */
+  via?: 'ai';
 };
+
+/** One earlier turn of the chat, sent so follow-ups ("and on Saturday?") make sense. */
+export type AskTurn = { q: string; a: string };
 
 export type AskResult = {
   query: string;
@@ -49,6 +54,8 @@ export type AskResult = {
   total: number;
   /** Way Finder: the trip asked about, so the screen can offer "Ask riders" / "Share a route". */
   way?: { from: string | null; to: string; found: number };
+  /** A follow-up read together with the last question ("any events in Yaba on Saturday"). */
+  understood?: string;
 };
 
 /** Group headings (i18n keys). */
@@ -125,11 +132,12 @@ async function legacySearch(query: string): Promise<AskResult> {
   return { query, mode: classifyQuery(query), answer: null, needsLocation: false, groups, total: groups.reduce((n, g) => n + g.items.length, 0) };
 }
 
-export async function askHuud(query: string, coords?: { lat: number; lng: number } | null): Promise<AskResult> {
+export async function askHuud(query: string, coords?: { lat: number; lng: number } | null, history: AskTurn[] = []): Promise<AskResult> {
   try {
     const res = await apiClient.post<AskResult>('/sentinel/ask', {
       query,
       ...(coords ? { latitude: coords.lat, longitude: coords.lng } : {}),
+      ...(history.length ? { history: history.slice(-4).map((h) => ({ q: h.q.slice(0, 300), a: h.a.slice(0, 1500) })) } : {}),
     });
     return ((res as any)?.data ?? res) as AskResult;
   } catch (e: any) {

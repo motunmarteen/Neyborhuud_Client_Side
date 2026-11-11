@@ -5,8 +5,10 @@
  *
  * One box for everything: "Ask Huud anything…".
  * - Names, words, #tags: results as you type
- * - Questions ("where can I buy…", "which feature helps me…"): press Enter; the answer is on
- *   top with results and "Open" buttons below
+ * - Questions ("where can I buy…", "which feature helps me…"): press Enter; a chat (step 4).
+ *   The newest answer sits right under the box with its results and "Open" buttons; earlier
+ *   turns are below it. Follow-ups ("and on Saturday?") are understood. The chat survives
+ *   leaving the page (this tab only) until "New chat".
  * - Empty box: what to try, Explore, trending and news
  * Safety tools live on the Sentinel tab; Ask Huud can still answer about your area's safety.
  */
@@ -14,7 +16,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowUp, BadgeCheck, ExternalLink, Loader2, MapPin, Search, Sparkles, X } from 'lucide-react';
+import { ArrowUp, BadgeCheck, ExternalLink, Loader2, MapPin, RotateCcw, Search, Sparkles, X } from 'lucide-react';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
@@ -22,7 +24,7 @@ import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { useHuudDisplayName, HUUD_NAME_FALLBACK } from '@/hooks/useHuudDisplayName';
 import { getCurrentLocation } from '@/lib/geolocation';
-import { askHuud, classifyQuery, GROUP_KEY, type AskFeature, type AskPerson, type AskPlace, type AskPost, type AskResult } from '@/lib/askSentinel';
+import { askHuud, classifyQuery, GROUP_KEY, type AskFeature, type AskPerson, type AskPlace, type AskPost, type AskResult, type AskTurn } from '@/lib/askSentinel';
 import { searchService } from '@/services/search.service';
 import { newsService } from '@/services/news.service';
 import type { RssArticle } from '@/types/incident';
@@ -61,6 +63,12 @@ function timeAgo(iso: string) {
   return `${Math.floor(s / 86400)}d`;
 }
 
+type ChatTurn = { q: string; result: AskResult };
+const CHAT_KEY = 'nh_ask_chat';
+const MAX_TURNS = 10;
+
+const historyOf = (turns: ChatTurn[]): AskTurn[] => turns.slice(-4).map((t) => ({ q: t.q, a: t.result.answer?.answer ?? '' }));
+
 export default function AskHuudPage() {
   return (
     <Suspense>
@@ -87,6 +95,36 @@ function AskHuudScreen() {
   const [news, setNews] = useState<RssArticle[]>([]);
   const [whoOpen, setWhoOpen] = useState(false);
   const runId = useRef(0);
+  // The chat (step 4): newest last in state, shown newest first under the box.
+  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const [pending, setPending] = useState<string | null>(null);
+  const turnsRef = useRef<ChatTurn[]>([]);
+  const sendId = useRef(0);
+  const restored = useRef(false);
+  useEffect(() => {
+    turnsRef.current = turns;
+  }, [turns]);
+
+  // Keep the chat while moving around the app (this tab only); restored after the page starts.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(CHAT_KEY);
+      const saved = raw ? (JSON.parse(raw) as ChatTurn[]) : [];
+      if (Array.isArray(saved) && saved.length) setTurns(saved.filter((x) => x && typeof x.q === 'string' && x.result).slice(-MAX_TURNS));
+    } catch {
+      /* private mode or bad data: start fresh */
+    }
+    restored.current = true;
+  }, []);
+  useEffect(() => {
+    if (!restored.current) return;
+    try {
+      if (turns.length) sessionStorage.setItem(CHAT_KEY, JSON.stringify(turns.slice(-MAX_TURNS)));
+      else sessionStorage.removeItem(CHAT_KEY);
+    } catch {
+      /* storage full or blocked: the chat still works for this visit */
+    }
+  }, [turns]);
 
   const mode = classifyQuery(query);
 
@@ -110,14 +148,6 @@ function AskHuudScreen() {
     [coords, t],
   );
 
-  // Opened from the top bar 🔍, the map card or a #tag link: focus the box, run ?q= once.
-  useEffect(() => {
-    const q = params.get('q');
-    if (q) void run(q);
-    if (params.get('focus') === '1' || q) inputRef.current?.focus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Lookups search as you type; questions wait for Enter so the AI is not called on every key.
   useEffect(() => {
     if (!query.trim()) {
@@ -135,20 +165,89 @@ function AskHuudScreen() {
     newsService.getArticles({ region: 'nigeria', limit: 3 }).then(setNews).catch(() => setNews([]));
   }, []);
 
+  /** A chat turn: the question shows at once, the box clears for a follow-up. */
+  const send = useCallback(
+    async (q: string, withCoords = coords, replaceAt?: number) => {
+      const text = q.trim();
+      if (!text) return;
+      const id = ++sendId.current;
+      ++runId.current; // drop any search still on its way
+      const before = replaceAt === undefined ? turnsRef.current : turnsRef.current.slice(0, replaceAt);
+      setPending(text);
+      setQuery('');
+      setResult(null);
+      setError(null);
+      try {
+        const out = await askHuud(text, withCoords, historyOf(before));
+        if (id !== sendId.current) return;
+        setTurns((ts) =>
+          replaceAt === undefined ? [...ts, { q: text, result: out }].slice(-MAX_TURNS) : ts.map((x, i) => (i === replaceAt ? { q: text, result: out } : x)),
+        );
+      } catch (e: unknown) {
+        if (id !== sendId.current) return;
+        const status = (e as { response?: { status?: number } })?.response?.status;
+        setError(status === 429 ? t('ask.tooMany') : t('ask.failed'));
+        if (replaceAt === undefined) setQuery(text); // give the question back to try again
+      } finally {
+        if (id === sendId.current) setPending(null);
+      }
+    },
+    [coords, t],
+  );
+
   const ask = (q: string) => {
-    setQuery(q);
-    void run(q);
+    if (classifyQuery(q) === 'question' || turnsRef.current.length) void send(q);
+    else {
+      setQuery(q);
+      void run(q);
+    }
+  };
+
+  const newChat = () => {
+    ++sendId.current;
+    setPending(null);
+    setTurns([]);
+    setError(null);
+    inputRef.current?.focus();
+  };
+
+  const locate = async () => {
+    const c = await getCurrentLocation().catch(() => null);
+    if (c && Number.isFinite(c.lat) && Number.isFinite(c.lng)) {
+      const at = { lat: c.lat, lng: c.lng };
+      setCoords(at);
+      return at;
+    }
+    setError(t('ask.locationOff'));
+    return null;
   };
 
   const useMyLocation = async () => {
-    const c = await getCurrentLocation().catch(() => null);
-    if (c && Number.isFinite(c.lat) && Number.isFinite(c.lng)) {
-      setCoords({ lat: c.lat, lng: c.lng });
-      void run(query, { lat: c.lat, lng: c.lng });
-    } else {
-      setError(t('ask.locationOff'));
-    }
+    const at = await locate();
+    if (at) void run(query, at);
   };
+
+  /** "Use my location" on a chat answer asks that turn again, now about where you are. */
+  const relocateTurn = async (i: number) => {
+    const at = await locate();
+    const turn = turnsRef.current[i];
+    if (at && turn) void send(turn.q, at, i);
+  };
+
+  // Opened from the top bar 🔍, the map card or a #tag link: focus the box, run ?q= once
+  // (a question starts or continues the chat).
+  useEffect(() => {
+    const q = params.get('q');
+    if (q) {
+      if (classifyQuery(q) === 'question') void send(q);
+      else {
+        setQuery(q);
+        void run(q);
+      }
+    }
+    if (params.get('focus') === '1' || q) inputRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // What Ask Huud can do, as one-tap questions (plan §2).
   const tryQuestions = useMemo(
@@ -173,7 +272,9 @@ function AskHuudScreen() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              void run(query);
+              // Questions, and anything typed once a chat has started, go to the chat.
+              if (mode === 'question' || turns.length) void send(query);
+              else void run(query);
             }}
             className="relative flex items-center"
             role="search"
@@ -183,9 +284,9 @@ function AskHuudScreen() {
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={t('ask.placeholder')}
+              placeholder={turns.length ? t('ask.followUp') : t('ask.placeholder')}
               aria-label={t('ask.placeholder')}
-              enterKeyHint={mode === 'question' ? 'send' : 'search'}
+              enterKeyHint={mode === 'question' || turns.length ? 'send' : 'search'}
               className="h-[52px] w-full rounded-full border border-line bg-white pl-11 pr-24 text-[15px] font-semibold text-navy shadow-[0_2px_10px_rgba(29,36,51,0.06)] outline-none placeholder:font-medium placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/25"
             />
             {hasQuery ? (
@@ -196,13 +297,13 @@ function AskHuudScreen() {
             <button
               type="submit"
               aria-label={mode === 'question' ? t('ask.send') : t('ask.search')}
-              disabled={!hasQuery || loading}
+              disabled={!hasQuery || loading || pending !== null}
               className="absolute right-1.5 grid h-10 w-10 place-items-center rounded-full bg-primary text-white disabled:bg-line disabled:text-faint"
             >
-              {loading ? <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden /> : mode === 'question' ? <ArrowUp size={19} strokeWidth={2.6} aria-hidden /> : <Search size={17} aria-hidden />}
+              {loading || pending ? <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden /> : mode === 'question' || turns.length ? <ArrowUp size={19} strokeWidth={2.6} aria-hidden /> : <Search size={17} aria-hidden />}
             </button>
           </form>
-          {hasQuery && mode === 'question' && !loading && (!result || result.query !== query.trim()) ? (
+          {hasQuery && mode === 'question' && !loading && !pending && (!result || result.query !== query.trim()) ? (
             <p className="mt-1.5 px-4 text-xs font-semibold text-muted">{t('ask.pressEnter')}</p>
           ) : null}
         </div>
@@ -211,17 +312,55 @@ function AskHuudScreen() {
       <div className="flex flex-col gap-4 px-4 pb-6">
         {error ? <Card className="border border-red-soft bg-red-soft/40 text-sm font-semibold text-[#C2353A]">{error}</Card> : null}
 
-        {hasQuery && result ? (
+        {/* Results as you type a lookup (also mid-chat, above the conversation). */}
+        {hasQuery && result && mode === 'search' ? (
           <Results result={result} onAsk={ask} onUseLocation={useMyLocation} onOpenPost={(id) => router.push(`/feed?post=${id}`)} />
         ) : null}
 
-        {hasQuery && !result && loading ? (
+        {hasQuery && !result && loading && mode === 'search' ? (
           <div className="flex items-center justify-center gap-2 py-10 text-sm font-semibold text-muted" role="status">
-            <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden /> {mode === 'question' ? t('ask.thinking') : t('ask.searching')}
+            <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden /> {t('ask.searching')}
           </div>
         ) : null}
 
-        {!hasQuery ? (
+        {turns.length || pending ? (
+          <div className="flex items-center justify-between px-1">
+            <p className="text-[11px] font-black uppercase tracking-wider text-faint">{t('ask.title')}</p>
+            {turns.length ? (
+              <button type="button" onClick={newChat} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-white px-3 text-sm font-extrabold text-navy ring-1 ring-line">
+                <RotateCcw size={14} aria-hidden /> {t('ask.newChat')}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
+        {pending ? (
+          <div className="flex flex-col gap-3">
+            <QuestionBubble text={pending} />
+            <div className="flex items-center gap-2 px-1 py-3 text-sm font-semibold text-muted" role="status">
+              <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden /> {t('ask.thinking')}
+            </div>
+          </div>
+        ) : null}
+
+        {turns
+          .map((turn, i) => ({ turn, i }))
+          .reverse()
+          .map(({ turn, i }, k) => (
+            <div key={`${i}-${turn.q}`} className="flex flex-col gap-3">
+              {k === 1 ? <p className="px-1 pt-2 text-[11px] font-black uppercase tracking-wider text-faint">{t('ask.earlier')}</p> : null}
+              <QuestionBubble text={turn.q} />
+              <Results
+                result={turn.result}
+                compact={k > 0 || pending !== null}
+                onAsk={ask}
+                onUseLocation={() => void relocateTurn(i)}
+                onOpenPost={(id) => router.push(`/feed?post=${id}`)}
+              />
+            </div>
+          ))}
+
+        {!hasQuery && !turns.length && !pending ? (
           <>
             <Card className="ring-1 ring-green-soft">
               <div className="flex items-center gap-2.5">
@@ -307,19 +446,38 @@ function AskHuudScreen() {
   );
 }
 
+/** The person's own question in the chat. */
+function QuestionBubble({ text }: { text: string }) {
+  return (
+    <p className="max-w-[85%] self-end whitespace-pre-wrap break-words rounded-[20px] rounded-br-md bg-navy px-4 py-2.5 text-[15px] font-semibold text-white">
+      {text}
+    </p>
+  );
+}
+
 function Results({
   result,
+  compact = false,
   onAsk,
   onUseLocation,
   onOpenPost,
 }: {
   result: AskResult;
+  /** Earlier chat turns: just the answer, no result lists. */
+  compact?: boolean;
   onAsk: (q: string) => void;
   onUseLocation: () => void;
   onOpenPost: (id: string) => void;
 }) {
   const { t } = useTranslation();
   const mood = result.answer ? MOOD[result.answer.sentiment] : null;
+  if (compact) {
+    return result.answer ? (
+      <Card className="ring-1 ring-line">
+        <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-navy">{result.answer.answer}</p>
+      </Card>
+    ) : null;
+  }
   return (
     <div className="flex flex-col gap-4" aria-live="polite">
       {result.answer ? (
@@ -332,6 +490,7 @@ function Results({
             {mood && result.answer.sources.length ? <Chip tone={mood.tone}>{mood.icon} {t(mood.key)}</Chip> : null}
             {result.answer.assessedArea?.lga ? <span className="ml-auto truncate text-xs font-bold text-muted">{result.answer.assessedArea.lga}</span> : null}
           </div>
+          {result.understood ? <p className="mt-2 text-xs font-semibold text-muted">{t('ask.understood', { q: result.understood })}</p> : null}
           <p className="mt-2.5 whitespace-pre-wrap text-[15px] leading-relaxed text-navy">{result.answer.answer}</p>
           {result.answer.sources.length ? (
             <ul className="mt-3 flex flex-col gap-1.5">
@@ -353,7 +512,8 @@ function Results({
               ))}
             </div>
           ) : null}
-          <p className="mt-3 text-[11px] text-faint">{t('ask.disclaimer')}</p>
+          {result.answer.via === 'ai' ? <p className="mt-3 text-[11px] font-bold text-brand-green-dark">{t('ask.aiNote')}</p> : null}
+          <p className={`${result.answer.via === 'ai' ? 'mt-0.5' : 'mt-3'} text-[11px] text-faint`}>{t('ask.disclaimer')}</p>
         </Card>
       ) : null}
 
