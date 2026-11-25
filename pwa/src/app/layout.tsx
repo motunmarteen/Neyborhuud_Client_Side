@@ -126,7 +126,7 @@ export default function RootLayout({
         {/* Material Symbols — self-hosted (offline-safe, no CDN dependency) */}
         <link
           rel="preload"
-          href="/fonts/MaterialSymbolsOutlined.woff2"
+          href="/fonts/material-symbols-v2.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
