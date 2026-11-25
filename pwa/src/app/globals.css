@@ -6,10 +6,13 @@
 
 html { color-scheme: light; }
 
-/* ── Accessibility — font size tiers ── */
-/* Text size from Settings (on <html>, so every rem-sized thing follows). */
-html[data-text-size='small'] { font-size: 87.5%; }
-html[data-text-size='large'] { font-size: 112.5%; }
+/* ── Text size for the whole platform (owner 2026-11-25) ──
+   Every font size is multiplied by this when the CSS is built (tools/font-scale).
+   Change the default here; Settings → Text size picks small or large. Spacing is unchanged. */
+:root { --font-scale: 0.9; }
+:root[data-text-size='small'] { --font-scale: 0.84; }
+:root[data-text-size='large'] { --font-scale: 1.04; }
+body { font-size: 1rem; }
 
 /* ── Leaflet Map — fix Tailwind reset breaking tiles ── */
 .leaflet-container {

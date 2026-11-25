@@ -218,6 +218,9 @@ importers:
       jsdom:
         specifier: ^29.1.1
         version: 29.1.1(@noble/hashes@2.2.0)
+      nh-font-scale:
+        specifier: file:./tools/font-scale
+        version: file:pwa/tools/font-scale
       playwright:
         specifier: ^1.60.0
         version: 1.61.1
@@ -3777,6 +3780,9 @@ packages:
         optional: true
       sass:
         optional: true
+
+  nh-font-scale@file:pwa/tools/font-scale:
+    resolution: {directory: pwa/tools/font-scale, type: directory}
 
   node-exports-info@1.6.2:
     resolution: {integrity: sha512-kXs9Go0cah0qHVV2v389IXQLdLCeE1xfFtjOAF+iobu0OIoG1pje8At2vMHyaPMiPMnG/LWP50twML21eMcAag==}
@@ -8962,6 +8968,8 @@ snapshots:
       - '@babel/core'
       - '@types/node'
       - babel-plugin-macros
+
+  nh-font-scale@file:pwa/tools/font-scale: {}
 
   node-exports-info@1.6.2:
     dependencies:

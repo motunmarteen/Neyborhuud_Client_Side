@@ -6,11 +6,11 @@
  * live pins in layers, and map ads. Opens on the person's area, or on all of Nigeria when it
  * is not known (never a Lagos default). Tapping a pin opens its panel (M-09).
  *
- * Layout from the agreed mockup (owner, 2026-10-15): top bar, layer chips, the ⚡ PULSE ribbon
- * (news + exchange rates); the Sentinel orb (ring = the area's mood from real safety pins), "Me"
- * and Calm view on the right; a bottom sheet with the greeting and weather, "Ask Huud
- * anything…", "Wetin dey happen?", "Report" and "Share today in <area>". Swipe the sheet up
- * (or tap "Feed") to open the Feed.
+ * Layout (reworked for the owner 2026-11-25, from the agreed mockup): the map first, each thing
+ * once. Top: bar, filters ("All" or one kind), the ⚡ ribbon. Left: your avatar (People & places)
+ * and the ⋯ options; right: SOS. Bottom: a short card with the greeting and the one thing
+ * happening now, Ask Huud, and one-tap signals. Posting is ➕ and the Feed is its tab, so they
+ * are not repeated on the card. Swipe the card up for the Feed, down for the whole map.
  */
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -20,7 +20,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type * as maplibregl from 'maplibre-gl';
 import TopNav from '@/components/navigation/TopNav';
-import { BottomNav, OPEN_CREATE_SHEET } from '@/components/feed/BottomNav';
+import { BottomNav } from '@/components/feed/BottomNav';
 import { FeedNewsTicker, type PulseLocalItem } from '@/components/feed/FeedNewsTicker';
 import { TodaysPulseSheet } from '@/components/feed/TodaysPulseSheet';
 import type { AreaMood } from '@/components/map/Pins';
@@ -58,7 +58,7 @@ import { LoginSheet } from '@/components/map/LoginSheet';
 import { HelpMapSheet } from '@/components/map/HelpMapSheet';
 import { useAreaWelcome } from '@/hooks/useAreaWelcome';
 import { rememberRef, signupHref } from '@/lib/visitor';
-import { HuudPulseWidget } from '@/components/feed/HuudPulseWidget';
+import { StreetSignals } from '@/components/feed/StreetSignals';
 import type { ShareRow } from '@/lib/shareCard';
 import { extractUserHomeCoords, extractUserMapCoords } from '@/lib/mapUserLocation';
 import { jamStrength, type Jam } from '@/lib/livingMap';
@@ -77,8 +77,10 @@ const MAIN_BTN =
   'inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-primary px-5 text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(0,184,46,0.28)] transition-colors hover:bg-brand-green-dark';
 const SOFT_BTN =
   'inline-flex min-h-12 flex-1 items-center justify-center rounded-full border border-line bg-white px-5 text-[15px] font-bold text-navy transition-colors hover:bg-background';
-const SHEET_BTN =
-  'inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-white px-3 text-sm font-bold text-navy transition-colors hover:bg-background';
+/** Every kind is always loaded; the chips only choose what is drawn. */
+const ALL_LAYERS = LAYERS.map((l) => l.key);
+/** SOS and the ⋯ buttons sit above the card, but never higher than this share of the screen. */
+const DOCK_MAX = 0.46;
 /** How far up a swipe on the sheet must go to open the Feed. */
 const SWIPE_UP_PX = 60;
 
@@ -119,7 +121,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   const knowsArea = view.zoom >= STREET_ZOOM;
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [sky, setSky] = useState<SkyState | null>(null);
-  const [layers, setLayers] = useState<MapLayer[]>(LAYERS.map((l) => l.key));
+  const [show, setShow] = useState<MapLayer | null>(null);
   const [pin, setPin] = useState<MapPin | null>(null);
   const [ad, setAd] = useState<Ad | null>(null);
   const [pulseOpen, setPulseOpen] = useState(false);
@@ -134,14 +136,11 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     return () => window.clearInterval(id);
   }, []);
 
-  const { status, pins, fresh } = useMapPins(map, layers, { onOpen: setPin, live: true });
+  const { status, pins, fresh } = useMapPins(map, ALL_LAYERS, { onOpen: setPin, live: true, show });
 
   // M-10: fresh traffic reports (go-slows, road blocks, accidents, floods) make the street
-  // life crawl and queue there. Kept while the Traffic chip is off: hiding pins clears no road.
-  const [trafficPins, setTrafficPins] = useState<MapPin[]>([]);
-  useEffect(() => {
-    if (layers.includes('traffic')) setTrafficPins(pins.filter((p) => p.layer === 'traffic'));
-  }, [pins, layers]);
+  // life crawl and queue there. A filter hides pins but clears no road.
+  const trafficPins = useMemo(() => pins.filter((p) => p.layer === 'traffic'), [pins]);
   const jams = useMemo<Jam[]>(
     () =>
       trafficPins
@@ -385,13 +384,14 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   }, [soundOn, sound, sky?.dark, wx]);
 
   const weatherWords = wx ? WEATHER_WORDS[wx] : null;
-  const openCreate = () => window.dispatchEvent(new CustomEvent(OPEN_CREATE_SHEET));
 
-  // One live line under the greeting: an alert first, then what is going on, then quiet.
+  // One live line under the greeting: an alert first, then the newest real thing, then quiet.
   const where = area?.lga ?? 'your area';
   const firstAlert = pins.find((p) => p.layer === 'safety' && p.live) ?? null;
   const safetyCount = pins.filter((p) => p.layer === 'safety').reduce((n, p) => n + p.count, 0);
   const allCount = pins.reduce((n, p) => n + p.count, 0);
+  const newest = pins.reduce<MapPin | null>((a, p) => (!a || p.top.createdAt > a.top.createdAt ? p : a), null);
+  const headline = status === 'zoom-in' || status === 'error' ? null : (firstAlert ?? newest);
   const statusLine =
     status === 'zoom-in'
       ? knowsArea
@@ -399,15 +399,14 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         : 'Zoom in to your area to see what is happening'
       : status === 'error'
         ? 'Could not load what is happening'
-        : status === 'loading' && pins.length === 0
+        : (status === 'idle' || status === 'loading') && pins.length === 0
           ? 'Checking your area…'
-          : firstAlert
-            ? safetyCount > 1
-              ? `${safetyCount} safety alerts nearby`
-              : '1 safety alert nearby'
-            : allCount > 0
-              ? `${allCount} ${allCount === 1 ? 'thing' : 'things'} happening nearby`
-              : `All quiet in ${where}`;
+          : firstAlert && safetyCount > 1
+            ? `${safetyCount} safety alerts nearby`
+            : headline
+              ? headline.top.title
+              : t('home.quiet', { area: where });
+  const statusMore = headline && allCount > 1 && !(firstAlert && safetyCount > 1) ? allCount - 1 : 0;
   // Quiet street (mockup): nothing reported here yet. Honest, and still useful.
   const quiet = knowsArea && status === 'ready' && allCount === 0;
   const username = (user as { username?: string } | null)?.username;
@@ -426,7 +425,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
   };
 
   const openStatus = () => {
-    if (firstAlert) setPin(firstAlert);
+    if (headline) setPin(headline);
     else router.push('/feed');
   };
 
@@ -493,13 +492,13 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     add(counts.work, '💼', (n) => `${n} jobs and services nearby`);
     if (!rows.length) rows.push({ icon: '🏘️', text: 'Quiet street today. Be the first to post' });
     return {
-      area: area?.lga ?? 'my area',
+      area: areaLga ?? 'my area',
       date: now,
       sky,
       weather: weatherWords ? `${weatherWords.icon} ${weatherWords.label} now` : null,
       rows,
     };
-  }, [sky, pins, counts, area?.lga, now, weatherWords, shareChampion]);
+  }, [sky, pins, counts, areaLga, now, weatherWords, shareChampion]);
   // Worked out after the page starts in the browser (the server does not know the address),
   // so the first render matches the server's.
   const [origin, setOrigin] = useState('');
@@ -527,7 +526,9 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
     }
     const el = dockRef.current;
     if (!el) return;
-    const set = () => document.documentElement.style.setProperty('--huud-dock', `${Math.round(el.getBoundingClientRect().height)}px`);
+    // Never let a tall card push SOS and the ⋯ buttons over the top bar.
+    const set = () =>
+      document.documentElement.style.setProperty('--huud-dock', `${Math.round(Math.min(el.getBoundingClientRect().height, window.innerHeight * DOCK_MAX))}px`);
     set();
     const ro = new ResizeObserver(set);
     ro.observe(el);
@@ -573,47 +574,24 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       {/* Under the top bar: layer chips, then the ⚡ PULSE ribbon (news + exchange rates). */}
       <div className="pointer-events-none absolute inset-x-0 top-[calc(var(--app-topnav-height)+var(--safe-top,0px)+0.25rem)] z-10 flex flex-col gap-2 px-3">
         <div className="pointer-events-auto mx-auto w-full max-w-xl" data-tour="chips">
-          <MapLayerChips
-            active={layers}
-            onChange={setLayers}
-            counts={counts}
-            onMore={started && user ? () => setLensSheetOpen(true) : undefined}
-            moreOn={lensChoice.on.length}
-          />
+          <MapLayerChips selected={show} onSelect={setShow} counts={counts} />
         </div>
         <div className="nh-map-pulse pointer-events-auto mx-auto w-full max-w-xl overflow-hidden rounded-full shadow-[0_4px_14px_rgba(29,36,51,0.16)]">
           <FeedNewsTicker local={pulseLocal} onOpen={() => setPulseOpen(true)} />
         </div>
-        {helpMapShown ? (
-          <div className="pointer-events-auto mx-auto flex w-full max-w-xl justify-center">
-            <div className="inline-flex items-center gap-1 rounded-full bg-white/95 py-1 pl-3 pr-1 text-xs font-extrabold text-navy shadow-[0_4px_14px_rgba(29,36,51,0.16)]">
-              <button type="button" onClick={() => setHelpMapOpen(true)} className="inline-flex min-h-8 items-center gap-1">
-                <span aria-hidden>🗺️</span> This street isn&apos;t fully mapped. Help map it
-              </button>
-              <button
-                type="button"
-                onClick={dismissHelpMap}
-                aria-label="Hide for a week"
-                className="grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-background"
-              >
-                <span aria-hidden className="material-symbols-outlined text-[16px]">close</span>
-              </button>
-            </div>
-          </div>
-        ) : null}
       </div>
 
       {/* ⋯ map menu (owner, 2026-10-16): on the left, opposite SOS, just above the card;
           both follow the card down when it is hidden (--huud-dock, set below). */}
       <div
         data-map-menu
-        className="absolute left-3 z-20 transition-[bottom] duration-300 ease-out motion-reduce:transition-none"
+        className={`absolute left-3 z-20 flex flex-col gap-2 transition-[bottom] ${cardOpen ? '[@media(max-height:720px)]:flex-row-reverse' : ''} duration-300 ease-out motion-reduce:transition-none`}
         style={{ bottom: 'calc(var(--app-bottomnav-h) + 3rem + var(--huud-dock, 0px))' }}
       >
         {/* Map options as round buttons (owner 2026-10-18): icon only, same size as the avatar
             and ⋯ buttons, popping up above them. Names stay for screen readers and as tooltips. */}
         {menuOpen ? (
-          <div role="menu" aria-label={t('map.menu.title')} className="absolute bottom-full left-0 mb-2 flex flex-col gap-2">
+          <div role="menu" aria-label={t('map.menu.title')} className="absolute bottom-full left-0 mb-2 grid w-max grid-cols-1 gap-2 [@media(max-height:720px)]:grid-cols-2">
             {[
               {
                 key: 'here',
@@ -626,6 +604,9 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
               { key: 'calm', role: 'menuitemcheckbox', checked: calm, icon: calm ? 'play_circle' : 'self_improvement', label: calm ? t('map.menu.live') : t('map.menu.calm'), run: () => setSaveData(!calm) },
               { key: 'tour', role: 'menuitem', icon: 'explore', label: t('map.menu.tour'), run: () => tour.start() },
               { key: 'sound', role: 'menuitemcheckbox', checked: soundOn, icon: soundOn ? 'volume_up' : 'volume_off', label: soundOn ? t('map.menu.soundOn') : t('map.menu.soundOff'), run: () => toggleSound() },
+              ...(helpMapShown
+                ? [{ key: 'helpmap', role: 'menuitem', icon: 'edit_location_alt', label: t('home.helpMap'), run: () => setHelpMapOpen(true) }]
+                : []),
             ].map((it, i) => (
               <button
                 key={it.key}
@@ -637,7 +618,7 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
                 disabled={it.disabled}
                 onClick={() => {
                   // The tour spotlights parts of the map, so the stack steps aside for it.
-                  if (it.key === 'tour') setMenuOpen(false);
+                  if (it.key === 'tour' || it.key === 'helpmap') setMenuOpen(false);
                   it.run();
                 }}
                 className="nh-map-fab-pop grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] transition-colors hover:bg-background disabled:opacity-60"
@@ -657,16 +638,21 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             onClick={() => setLensSheetOpen(true)}
             aria-label={t('map.peopleTitle')}
             title={t('map.peopleTitle')}
-            className="relative mb-2 grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)] ring-2 ring-white"
+            className="relative grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_4px_14px_rgba(29,36,51,0.3)]"
           >
             {myPortrait && !portraitBroken ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={myPortrait} alt="" className="h-full w-full object-cover" onError={() => setPortraitBroken(true)} />
+              <img src={myPortrait} alt="" className="h-full w-full rounded-full object-cover" onError={() => setPortraitBroken(true)} />
             ) : (
               <span aria-hidden className="text-2xl">
                 👥
               </span>
             )}
+            {lensChoice.on.length ? (
+              <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full border-2 border-white bg-primary px-1 text-[11px] font-extrabold text-white">
+                {lensChoice.on.length}
+              </span>
+            ) : null}
           </button>
         ) : null}
         <button
@@ -688,10 +674,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         </button>
       </div>
 
-      {/* Area card (redesigned, owner 2026-10-16: no repeats). One job per line:
-          handle (drag up = Feed, drag down or tap = hide), greeting + one live status line,
-          Ask Huud, then Post and Share. Weather and area are already in Pulse and the top bar;
-          Report lives in the Create sheet that Post opens. */}
+      {/* Area card: short, so the map is what you see. Greeting and the one thing happening now
+          (tap it), Share; Ask Huud; one-tap signals. */}
       {cardOpen ? (
       <section
         ref={dockRef as unknown as React.Ref<HTMLElement>}
@@ -701,8 +685,8 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
         className="absolute inset-x-0 bottom-[calc(var(--app-bottomnav-h)+2.5rem)] z-10 px-3"
         style={{ touchAction: 'pan-x' }}
       >
-        <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-[24px] bg-white/95 px-4 pb-4 pt-1.5 shadow-[0_-4px_24px_rgba(29,36,51,0.18)] backdrop-blur">
-          <div className="relative flex h-6 items-center justify-center">
+        <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-[24px] bg-white/95 px-4 max-h-[calc(100dvh-var(--app-bottomnav-h)-var(--app-topnav-height)-var(--safe-top,0px)-4rem)] overflow-y-auto overscroll-contain pb-3.5 pt-1.5 shadow-[0_-4px_24px_rgba(29,36,51,0.18)] backdrop-blur">
+          <div className="relative -mb-2 flex h-6 shrink-0 items-center justify-center">
             <button
               type="button"
               onClick={() => setCardOpen(false)}
@@ -711,15 +695,6 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             >
               <span aria-hidden className="h-1.5 w-10 rounded-full bg-line" />
             </button>
-            <Link
-              href="/feed"
-              className="absolute right-0 top-0 inline-flex h-6 items-center gap-0.5 rounded-full px-2 text-[11px] font-extrabold text-muted hover:text-navy"
-            >
-              Feed
-              <span aria-hidden className="material-symbols-outlined text-[16px]">
-                expand_less
-              </span>
-            </Link>
           </div>
 
           {visitor && loginOpen ? (
@@ -749,55 +724,46 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             />
           ) : (
           <>
-          <div className="flex flex-col gap-0.5">
-            <h2 className="font-heading text-lg font-extrabold leading-tight text-navy">
-              {greetingFor(now)}
-              {firstName ? `, ${firstName}` : ''}
-            </h2>
+          <div className="flex items-center gap-3">
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <h2 className="truncate font-heading text-lg font-extrabold leading-tight text-navy">
+                {greetingFor(now)}
+                {firstName ? `, ${firstName}` : ''}
+              </h2>
+              <button
+                type="button"
+                onClick={openStatus}
+                aria-live="polite"
+                className="flex max-w-full items-center gap-2 self-start text-left text-sm font-bold text-muted hover:text-navy"
+              >
+                <span
+                  aria-hidden
+                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                    mood === 'alert' ? 'bg-brand-red motion-safe:animate-pulse' : mood === 'advisory' ? 'bg-[#F0A93B]' : status === 'ready' ? 'bg-primary' : 'bg-faint'
+                  }`}
+                />
+                <span className={`truncate ${mood === 'alert' ? 'text-[#C8102E]' : ''}`}>{statusLine}</span>
+                {headline ? (
+                  <span className="shrink-0 text-xs font-semibold text-muted">
+                    {statusMore ? t('home.more', { n: statusMore }) : formatTimeAgo(headline.top.createdAt)}
+                  </span>
+                ) : null}
+              </button>
+            </div>
             <button
               type="button"
-              onClick={openStatus}
-              aria-live="polite"
-              className="inline-flex items-center gap-2 self-start text-left text-sm font-bold text-muted hover:text-navy"
+              onClick={() => setShareOpen(true)}
+              aria-label={t('home.share')}
+              title={t('home.share')}
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-green-soft text-xl transition-colors hover:bg-[#D4F0DB]"
             >
-              <span
-                aria-hidden
-                className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                  mood === 'alert' ? 'bg-brand-red motion-safe:animate-pulse' : mood === 'advisory' ? 'bg-[#F0A93B]' : 'bg-primary'
-                }`}
-              />
-              <span className={mood === 'alert' ? 'text-[#C8102E]' : undefined}>{statusLine}</span>
+              <span aria-hidden>📸</span>
             </button>
           </div>
 
-          {quiet ? (
-            <div className="flex flex-col gap-2 rounded-2xl bg-background p-3">
-              <p className="font-heading text-base font-extrabold text-navy">Your street dey wait for you 🏘️</p>
-              <p className="text-sm font-semibold text-muted">
-                Nobody don post for {where} yet.{pulseLocal.length ? ' Here’s what we know already:' : ''}
-              </p>
-              {pulseLocal.slice(0, 3).map((l) => (
-                <p key={l.text} className="text-sm font-bold text-navy">
-                  {l.text}
-                </p>
-              ))}
-              <div className="mt-1 flex gap-2">
-                <button type="button" onClick={() => void inviteNeighbours()} className="inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-full bg-primary px-3 text-sm font-bold text-white">
-                  {t('map.invite')}
-                </button>
-                <Link href="/communities?create=1" className="inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-line bg-white px-3 text-sm font-bold text-navy">
-                  {t('map.addEstate')}
-                </Link>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Live Street Consensus & Pulse */}
-          <HuudPulseWidget />
-
           <Link
             href="/ask?focus=1"
-            className="flex min-h-12 items-center gap-2.5 rounded-full bg-background px-3 text-[15px] font-semibold text-muted transition-colors hover:bg-[#E9EDF3]"
+            className="flex min-h-12 items-center gap-2.5 rounded-full bg-background px-2 text-[15px] font-semibold text-muted transition-colors hover:bg-[#E9EDF3]"
           >
             <span aria-hidden className="grid h-8 w-8 place-items-center rounded-full bg-brand-green-dark text-white">
               <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
@@ -805,14 +771,19 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
             {t('ask.placeholder')}
           </Link>
 
-          <div className="flex gap-2">
-            <button type="button" onClick={openCreate} className={SHEET_BTN}>
-              <span aria-hidden>✏️</span> Post
-            </button>
-            <button type="button" onClick={() => setShareOpen(true)} className={SHEET_BTN}>
-              <span aria-hidden>📸</span> Share today
-            </button>
-          </div>
+          {/* Quiet street (mockup): nothing reported yet, so the useful next steps instead. */}
+          {quiet ? (
+            <div className="flex gap-2 [@media(max-height:720px)]:hidden">
+              <button type="button" onClick={() => void inviteNeighbours()} className="inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-full bg-primary px-3 text-sm font-bold text-white">
+                {t('map.invite')}
+              </button>
+              <Link href="/communities?create=1" className="inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-line bg-white px-3 text-sm font-bold text-navy">
+                {t('map.addEstate')}
+              </Link>
+            </div>
+          ) : null}
+
+          <StreetSignals className="-mx-4 px-4" />
           </>
           )}
         </div>
@@ -859,7 +830,10 @@ function MapHome({ user }: { user: ReturnType<typeof useAuth>['user'] }) {
       />
       <HelpMapSheet
         open={helpMapOpen}
-        onClose={() => setHelpMapOpen(false)}
+        onClose={() => {
+          setHelpMapOpen(false);
+          dismissHelpMap();
+        }}
         centre={map ? { lat: map.getCenter().lat, lng: map.getCenter().lng } : null}
         realCount={mapGap.real}
         fillerCount={mapGap.filler}

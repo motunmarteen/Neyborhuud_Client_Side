@@ -52,7 +52,7 @@ import { FeedComposer, FeedTabs } from '@/components/feed/FeedTabs';
 import { useFeedAds } from '@/hooks/useFeedAds';
 import { placeFeedAds } from '@/lib/feedAds';
 import { useVerticalSwipes } from '@/hooks/useSwipe';
-import { HuudPulseWidget } from '@/components/feed/HuudPulseWidget';
+import { StreetSignals } from '@/components/feed/StreetSignals';
 
 function XFeedInner() {
     const router = useRouter();
@@ -446,7 +446,7 @@ function XFeedInner() {
                               initial={started ? (currentAuthUser?.firstName || currentAuthUser?.username || 'Y').charAt(0).toUpperCase() : ''}
                               onOpen={() => window.dispatchEvent(new CustomEvent('open-create-post'))}
                             />
-                            <HuudPulseWidget />
+                            <StreetSignals className="px-3" />
                             <FeedTabs />
 
                             <FeedEmailVerificationBanner />

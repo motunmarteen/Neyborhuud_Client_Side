@@ -12,6 +12,7 @@ const SkyMap = dynamic(() => import('@/components/map/SkyMap').then((m) => m.Sky
   loading: () => <div className="h-[560px] w-full animate-pulse rounded-[22px] bg-[#6BBFF1] motion-reduce:animate-none" />,
 });
 
+const ALL_LAYERS = LAYERS.map((l) => l.key);
 const ENUGU = { lat: 6.4413, lng: 7.4988 };
 // The tilted view looks north, so the samples sit just south of the centre, in view.
 const ago = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
@@ -29,9 +30,9 @@ const SAMPLE: MapPin[] = [
 
 export function LivePinsDemo() {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
-  const [layers, setLayers] = useState<MapLayer[]>(LAYERS.map((l) => l.key));
+  const [show, setShow] = useState<MapLayer | null>(null);
   const [opened, setOpened] = useState<MapPin | null>(null);
-  const { pins } = useMapPins(map, layers, { sample: SAMPLE, onOpen: setOpened });
+  const { pins } = useMapPins(map, ALL_LAYERS, { sample: SAMPLE, onOpen: setOpened, show });
   const counts = useMemo(() => {
     const c: Partial<Record<MapLayer, number>> = {};
     for (const p of SAMPLE) c[p.layer] = (c[p.layer] ?? 0) + p.count;
@@ -40,7 +41,7 @@ export function LivePinsDemo() {
 
   return (
     <div className="flex flex-col gap-2">
-      <MapLayerChips active={layers} onChange={setLayers} counts={counts} />
+      <MapLayerChips selected={show} onSelect={setShow} counts={counts} />
       <div className="relative overflow-hidden rounded-[22px]">
         <SkyMap center={ENUGU} zoom={16.4} className="h-[560px] w-full" label="Sample pins on a map of Enugu" onReady={setMap} weather={null} />
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-extrabold text-navy">Sample pins</span>

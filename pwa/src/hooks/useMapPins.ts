@@ -24,6 +24,9 @@ type Options = {
   onOpen?: (pin: MapPin) => void;
   /** Refresh at once when neighbours post something new in the area on screen (M-08). */
   live?: boolean;
+  /** Draw only this kind (null = all). Everything is still fetched, so counts and the area's
+   *  mood stay true, and a live safety alert is always drawn. */
+  show?: MapLayer | null;
 };
 
 /** How long a newly arrived pin ripples. */
@@ -43,7 +46,7 @@ function pinMarkup(p: MapPin, fresh = false): string {
   });
 }
 
-export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sample, onOpen, live = false }: Options = {}) {
+export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sample, onOpen, live = false, show = null }: Options = {}) {
   const [status, setStatus] = useState<MapPinsStatus>('idle');
   const [pins, setPins] = useState<MapPin[]>([]);
   const [fresh, setFresh] = useState<Set<string>>(() => new Set());
@@ -157,6 +160,7 @@ export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sam
     if (!map) return;
     const seen = new Set<string>();
     for (const p of pins) {
+      if (show && p.layer !== show && !(p.layer === 'safety' && p.live)) continue;
       seen.add(p.id);
       const html = pinMarkup(p, fresh.has(p.id));
       const existing = markers.current.get(p.id);
@@ -197,7 +201,7 @@ export function useMapPins(map: maplibregl.Map | null, layers: MapLayer[], { sam
         markers.current.delete(id);
       }
     }
-  }, [map, pins, fresh]);
+  }, [map, pins, fresh, show]);
 
   // Remove every marker when the map goes away.
   useEffect(() => {

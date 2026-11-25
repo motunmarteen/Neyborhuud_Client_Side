@@ -214,6 +214,8 @@ Kept here so the whole history is in one place.
 
 ---
 
+- [x] 2026-11-25 (owner) home rework: map first, short card, All/one-kind filters, no repeats, invented Street Pulse report removed (My Huud and Feed); platform text 10% smaller by default through one knob (--font-scale, tools/font-scale)
+
 ## Phase 4: Screens (restyle all 95)
 
 **Goal:** every real screen rebuilt in the new design and language. Tick a screen when it is restyled, uses the new components, uses Nigerian wording, works on a phone and has no console errors. New home for each screen is in [FEATURE-MAP.md](FEATURE-MAP.md).

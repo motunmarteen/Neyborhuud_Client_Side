@@ -43,7 +43,7 @@ export const QUICK_SIGNALS: SignalPreset[] = [
   { id: 'f_gas', group: 'fuel', emoji: '🔥', label: 'Cooking Gas Depot Open', short: 'Cooking gas', sub: 'LPG refilling station active and open', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Cooking Gas Available' },
 
   // 3. WASTE & WATER PULSE
-  { id: 'w_lawma', group: 'water_waste', emoji: '🚚', label: 'LAWMA / PSP Truck Arrived!', short: 'LAWMA truck', sub: 'Bring out your waste bins now before they leave', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'LAWMA / PSP Waste Truck Arrived' },
+  { id: 'w_lawma', group: 'water_waste', emoji: '🚚', label: 'Waste Truck Don Come!', short: 'Waste truck', sub: 'Bring out your waste bins now before they leave', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Waste (PSP) Truck Arrived' },
   { id: 'w_running', group: 'water_waste', emoji: '💧', label: 'Borehole / Public Water Running', short: 'Water running', sub: 'Estate water is pumping, open your intake valves', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Borehole / Water Supply Active' },
   { id: 'w_tanker', group: 'water_waste', emoji: '🚛', label: 'Water Tanker Supply Available', short: 'Water tanker', sub: 'Clean water delivery truck available in neighborhood', severity: 'low', type: 'fyi', category: 'infrastructure', defaultTitle: 'Water Tanker In Area' },
 

@@ -52,24 +52,21 @@ export function VisitorWelcome({ area, lga, neighbours, joinHref, onTour, onShow
           {locating ? 'Finding your area…' : 'Show my area'}
         </button>
       ) : null}
-      <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
         <Link
           href={joinHref}
-          className="inline-flex min-h-12 items-center justify-center whitespace-nowrap rounded-full bg-primary px-4 text-[15px] font-bold text-white"
+          className="inline-flex min-h-12 flex-1 items-center justify-center whitespace-nowrap rounded-full bg-primary px-3 text-[15px] font-bold text-white"
         >
-          Join free · 30 seconds
+          Join free
         </Link>
         <button
           type="button"
           onClick={onTour}
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-white px-4 text-[15px] font-bold text-navy"
+          className="inline-flex min-h-12 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-line bg-white px-3 text-[15px] font-bold text-navy"
         >
           Show me around
         </button>
       </div>
-      <p className="text-center text-xs font-semibold text-muted">
-        Join to post, buy and sell, ask Sentinel and set up SOS for your family.
-      </p>
     </>
   );
 }

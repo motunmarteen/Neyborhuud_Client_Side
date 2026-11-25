@@ -4,32 +4,34 @@ import { FilterChip } from '@/components/ui/Chip';
 import { LAYERS, type MapLayer } from '@/lib/mapPins';
 import { useTranslation } from '@/lib/i18n';
 
-/** The map's layer chips (M-07): switch each kind of pin on or off. */
+/**
+ * The map's filters (M-07): "All", or one kind of pin at a time (owner 2026-11-25; all seven
+ * used to be dark and "on" together, so nothing stood out). Tap the chosen one again for All.
+ */
 export function MapLayerChips({
-  active,
-  onChange,
+  selected,
+  onSelect,
   counts,
-  onMore,
-  moreOn = 0,
 }: {
-  active: MapLayer[];
-  onChange: (next: MapLayer[]) => void;
+  /** null = All. */
+  selected: MapLayer | null;
+  onSelect: (next: MapLayer | null) => void;
   counts?: Partial<Record<MapLayer, number>>;
-  /** "People & places" (friends, birthdays, businesses): opens the lens picker. */
-  onMore?: () => void;
-  moreOn?: number;
 }) {
   const { t } = useTranslation();
-  const toggle = (k: MapLayer) => onChange(active.includes(k) ? active.filter((x) => x !== k) : [...active, k]);
   return (
-    <div className="flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]" role="group" aria-label="What to show on the map">
-      {onMore ? (
-        <FilterChip active={moreOn > 0} onClick={onMore} icon="👥" count={moreOn || undefined}>
-          {t('map.people')}
-        </FilterChip>
-      ) : null}
+    <div className="no-scrollbar flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label={t('home.filters')}>
+      <FilterChip active={selected === null} onClick={() => onSelect(null)}>
+        {t('home.all')}
+      </FilterChip>
       {LAYERS.map((l) => (
-        <FilterChip key={l.key} active={active.includes(l.key)} onClick={() => toggle(l.key)} icon={l.emoji} count={counts?.[l.key]}>
+        <FilterChip
+          key={l.key}
+          active={selected === l.key}
+          onClick={() => onSelect(selected === l.key ? null : l.key)}
+          icon={l.emoji}
+          count={counts?.[l.key]}
+        >
           {l.label}
         </FilterChip>
       ))}
