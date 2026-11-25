@@ -83,6 +83,16 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
     return () => window.removeEventListener(OPEN_CREATE_SHEET, open);
   }, []);
 
+  // Feed and Chats (~330 KB) are fetched ahead only once the screen you opened has settled, and
+  // never for people saving data: on 3G they used to compete with the map.
+  const [ready, setReady] = useState<null | false>(false);
+  useEffect(() => {
+    const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    if (net?.saveData || /2g|3g/.test(net?.effectiveType ?? '')) return;
+    const timer = setTimeout(() => setReady(null), 12_000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Press-and-hold Sentinel = silent SOS.
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const holdFired = useRef(false);
@@ -137,7 +147,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             </Tab>
           </Link>
 
-          <Link href="/feed" className={tabClass} aria-current={isFeed ? 'page' : undefined}>
+          <Link href="/feed" prefetch={ready} className={tabClass} aria-current={isFeed ? 'page' : undefined}>
             <Tab label="Feed" active={isFeed}>
               <Newspaper size={22} strokeWidth={isFeed ? 2.5 : 2} aria-hidden />
             </Tab>
@@ -158,7 +168,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
             </span>
           </div>
 
-          <Link href="/chat" className={tabClass} aria-current={isChats ? 'page' : undefined}>
+          <Link href="/chat" prefetch={ready} className={tabClass} aria-current={isChats ? 'page' : undefined}>
             <Tab label="Chats" active={isChats} badge={messageUnreadCount}>
               <MessagesSquare size={22} strokeWidth={isChats ? 2.5 : 2} aria-hidden />
             </Tab>

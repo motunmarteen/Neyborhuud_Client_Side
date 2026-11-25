@@ -1,4 +1,4 @@
-import { preload } from 'react-dom';
+import { preconnect, preload } from 'react-dom';
 import { MAPLIBRE_WORKER_URL } from '@/lib/maplibreWorkerUrl';
 
 /**
@@ -6,6 +6,8 @@ import { MAPLIBRE_WORKER_URL } from '@/lib/maplibreWorkerUrl';
  * page instead of after the map code has loaded, saving a step on slow networks.
  */
 export default function HuudLayout({ children }: { children: React.ReactNode }) {
-  preload(MAPLIBRE_WORKER_URL, { as: 'fetch', crossOrigin: 'anonymous' });
+  preconnect('https://tiles.openfreemap.org', { crossOrigin: 'anonymous' });
+  // Low: it must not slow the page's own styles and text.
+  preload(MAPLIBRE_WORKER_URL, { as: 'fetch', crossOrigin: 'anonymous', fetchPriority: 'low' });
   return children;
 }

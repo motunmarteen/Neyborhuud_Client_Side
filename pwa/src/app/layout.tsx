@@ -121,16 +121,6 @@ export default function RootLayout({
       className={`${nunitoSans.variable} ${nunito.variable} ${notoSans.variable}`}
     >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Material Symbols — self-hosted (offline-safe, no CDN dependency) */}
-        <link
-          rel="preload"
-          href="/fonts/material-symbols-v2.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
         <script
           dangerouslySetInnerHTML={{
             __html: SYSTEM_THEME_BOOT_SCRIPT,
