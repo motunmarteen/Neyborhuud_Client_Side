@@ -912,6 +912,21 @@ const pcm: Record<string, string> = {
     'comm.kind.sports': 'Sports',
     'comm.kind.volunteer': 'Volunteer',
     'comm.kind.general': 'General',
+    'chats.f.emergency': 'Emergency',
+    'chats.f.market': 'Market',
+    'chats.f.jobs': 'Jobs',
+    'chats.f.services': 'Services',
+    'chats.f.events': 'Events',
+    'chats.empty.emergency': 'No emergency chat',
+    'chats.emptyBody.emergency': 'When you or neighbour send SOS, the chat go show here.',
+    'chats.empty.market': 'No market chat',
+    'chats.emptyBody.market': 'Chat with buyers and sellers go show here.',
+    'chats.empty.jobs': 'No job chat',
+    'chats.emptyBody.jobs': 'Chat about job wey you post or apply go show here.',
+    'chats.empty.services': 'No service chat',
+    'chats.emptyBody.services': 'Chat with artisans and service people go show here.',
+    'chats.empty.events': 'No event chat',
+    'chats.emptyBody.events': 'Chat about events go show here.',
 };
 
 export default pcm;

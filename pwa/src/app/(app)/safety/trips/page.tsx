@@ -8,7 +8,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
-import { SentinelBackLink } from '@/components/sentinel/SentinelBackLink';
 import { TripsActivePanel } from '@/components/sentinel/trips/TripsActivePanel';
 import { TripsAutoSosBanner } from '@/components/sentinel/trips/TripsAutoSosBanner';
 import { TripsEscalationBanner } from '@/components/sentinel/trips/TripsEscalationBanner';
@@ -89,9 +88,6 @@ function SafeTripsInner() {
         maxWidth="680"
         header={
           <div className="flex flex-col gap-3">
-            <Suspense fallback={null}>
-              <SentinelBackLink />
-            </Suspense>
             <BrowseTabStrip tabs={TABS} activeId={tab} onChange={(id) => setTabWithHash(id as TripsTab)} />
           </div>
         }

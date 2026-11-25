@@ -10,7 +10,6 @@ import { Suspense, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
-import { SentinelBackLink } from '@/components/sentinel/SentinelBackLink';
 import { LiveTrackingActivePanel } from '@/components/sentinel/tracking/LiveTrackingActivePanel';
 import { LiveTrackingDuringSessionTips } from '@/components/sentinel/tracking/LiveTrackingDuringSessionTips';
 import { LiveTrackingGuardianPanel } from '@/components/sentinel/tracking/LiveTrackingGuardianPanel';
@@ -145,9 +144,6 @@ function LiveTrackingInner() {
       maxWidth="920"
       header={
         <div className="flex flex-col gap-3">
-          <Suspense fallback={null}>
-            <SentinelBackLink />
-          </Suspense>
           <BrowseTabStrip tabs={TABS} activeId={tab} onChange={handleTabChange} />
         </div>
       }

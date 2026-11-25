@@ -15,6 +15,7 @@ import {
   LocalHuudHubPrimaryAction,
 } from '@/components/local-huud/LocalHuudHubHeader';
 import { useAuth } from '@/hooks/useAuth';
+import { useStarted } from '@/hooks/useStarted';
 import { incidentService } from '@/services/incident.service';
 import {
   IncidentReport,
@@ -369,7 +370,9 @@ const CATEGORY_FILTERS: Array<{ value: IncidentCategory | ''; label: string }> =
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 function IncidentReportsInner() {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  // Who you are is known only on the phone; wait so the first draw matches the pre-built page.
+  const user = useStarted() ? authUser : null;
   const [showCreate, setShowCreate] = useState(false);
   const [incidents, setIncidents] = useState<IncidentReport[]>([]);
   const [loading, setLoading] = useState(true);

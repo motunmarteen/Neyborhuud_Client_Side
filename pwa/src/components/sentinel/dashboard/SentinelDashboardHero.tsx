@@ -77,7 +77,7 @@ export function SentinelDashboardHero({
           className="mod-chip inline-flex items-center gap-1 rounded-full px-4 py-2.5 text-sm font-semibold no-underline"
           style={{ color: 'var(--neu-text)' }}
         >
-          Feature hub
+          All safety tools
         </Link>
       </div>
     </div>

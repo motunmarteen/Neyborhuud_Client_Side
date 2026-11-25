@@ -3,7 +3,7 @@ const STEPS = [
   {
     icon: 'touch_app',
     title: 'Arm or trigger',
-    body: 'Set countdown & options on the Now tab, tap the red button, or long-press SOS in the bottom nav for silent mode.',
+    body: 'Set countdown & options on the Now tab, tap the red button, or hold the Sentinel tab at the bottom for a silent SOS.',
   },
   {
     icon: 'groups',

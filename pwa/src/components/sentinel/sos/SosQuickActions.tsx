@@ -50,7 +50,7 @@ const ACCENT_ICON: Record<SentinelFeature['accent'], string> = {
   primary: 'text-blue-600 bg-blue-50 border-blue-100',
   blue: 'text-blue-600 bg-blue-50 border-blue-100',
   red: 'text-red-600 bg-red-50 border-red-100',
-  muted: 'text-gray-650 bg-gray-50 border-gray-100',
+  muted: 'text-muted bg-gray-50 border-gray-100',
 };
 
 export function SosQuickActions() {

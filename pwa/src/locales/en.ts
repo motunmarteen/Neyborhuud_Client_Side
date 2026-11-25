@@ -923,6 +923,21 @@ const en: Record<string, string> = {
     'comm.kind.sports': 'Sports',
     'comm.kind.volunteer': 'Volunteer',
     'comm.kind.general': 'General',
+    'chats.f.emergency': 'Emergency',
+    'chats.f.market': 'Market',
+    'chats.f.jobs': 'Jobs',
+    'chats.f.services': 'Services',
+    'chats.f.events': 'Events',
+    'chats.empty.emergency': 'No emergency chats',
+    'chats.emptyBody.emergency': 'When you or a neighbour sends an SOS, its chat shows here.',
+    'chats.empty.market': 'No market chats',
+    'chats.emptyBody.market': 'Chats with buyers and sellers show here.',
+    'chats.empty.jobs': 'No job chats',
+    'chats.emptyBody.jobs': 'Chats about jobs you posted or applied for show here.',
+    'chats.empty.services': 'No service chats',
+    'chats.emptyBody.services': 'Chats with artisans and service people show here.',
+    'chats.empty.events': 'No event chats',
+    'chats.emptyBody.events': 'Chats about events show here.',
 };
 
 export default en;

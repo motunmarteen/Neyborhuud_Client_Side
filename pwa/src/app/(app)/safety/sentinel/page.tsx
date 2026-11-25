@@ -11,8 +11,8 @@ import { useRedZoneAlerts } from '@/contexts/RedZoneAlertsContext';
 const SCAN_AREAS = [
   {
     icon: 'chat',
-    title: 'Messages & chat',
-    body: 'Flags harassment, scams, and coercion patterns before they escalate.',
+    title: 'Reported messages',
+    body: 'Messages that people report to us for scams, threats or harassment.',
   },
   {
     icon: 'feed',
@@ -32,7 +32,7 @@ const SCAN_AREAS = [
   {
     icon: 'gavel',
     title: 'Trust & reports',
-    body: 'Weights community reports and TrustOS signals for repeat offenders.',
+    body: 'Counts reports from neighbours, so people reported again and again stand out.',
   },
 ] as const;
 
@@ -103,35 +103,29 @@ function RecentRedZoneAlerts() {
 export default function SentinelAiPage() {
   return (
     <SentinelSubpageLayout
-      pageTitle="Threat scanning"
-      pageSubtitle="Sentinel AI watches patterns across your Huud and suggests action."
+      pageTitle="Threat alerts"
+      pageSubtitle="Warnings about danger near your home and work, and what Sentinel looks at."
       icon="psychology"
       iconAccent="blue"
     >
       <div className="mod-card rounded-2xl bg-gradient-to-br from-brand-blue/12 via-[var(--neu-bg)] to-primary/6 p-5">
         <p className="text-[11px] font-black uppercase tracking-[0.16em] text-brand-blue">
-          Sentinel intelligence
+          Sentinel
         </p>
         <h2 className="mt-2 text-lg font-extrabold" style={{ color: 'var(--neu-text)' }}>
-          AI-assisted safety, built for Nigerian neighbourhoods
+          Warnings before trouble reaches you
         </h2>
         <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
-          Sentinel does not replace guardians or emergency services — it helps you spot risk
-          earlier, document incidents, and route the right tool (SOS, trips, or agency report).
+          Sentinel does not replace your guardians or the police. It helps you see danger early and
+          points you to the right tool: SOS, a safe trip or an emergency report.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <span className="mod-chip rounded-full px-3 py-1 text-xs font-semibold">Scanning active</span>
-          <span className="mod-chip rounded-full px-3 py-1 text-xs font-semibold text-primary">
-            Huud-aware
-          </span>
-        </div>
       </div>
 
       <section>
         <div className="flex items-center justify-between gap-2">
           <SentinelSectionHeader
             title="Recent alerts near you"
-            subtitle="Home area and saved work place — dismiss what you've seen"
+            subtitle="Near your home and your saved work place"
           />
           <Link
             href="/safety/sentinel/settings"
@@ -164,7 +158,7 @@ export default function SentinelAiPage() {
       <section>
         <SentinelSectionHeader
           title="What Sentinel watches"
-          subtitle="Four lenses — same design language as the rest of your safety tools"
+          subtitle="Public posts and listings only. Sentinel never reads your chats."
         />
         <div className="mt-3 mod-card divide-y overflow-hidden rounded-2xl">
           {SCAN_AREAS.map((row) => (

@@ -214,7 +214,7 @@ export default function IncidentRecapPage() {
                           </span>
                         )}
                       </span>
-                      <span className={g.acknowledgedAt ? 'text-primary' : g.notifiedAt ? 'text-primary400' : 'text-white/40'}>
+                      <span className={g.acknowledgedAt ? 'text-primary' : g.notifiedAt ? 'text-amber-ink' : 'text-muted'}>
                         {g.acknowledgedAt
                           ? `Acked in ${formatDuration(g.responseMs ?? 0)}`
                           : g.notifiedAt

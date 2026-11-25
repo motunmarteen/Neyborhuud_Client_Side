@@ -49,6 +49,22 @@ function getRouteTitle(pathname: string) {
   if ((segment === 'gamification' || segment === 'huud-economy') && parts[1] === 'wallet') return 'Huud Wallet';
   if (segment === 'huud-economy' && parts[1] === 'score') return 'Huud Score';
   if (segment === 'huud-economy') return 'Huud Economy';
+  if (segment === 'safety' && parts[1]) {
+    const safety: Record<string, string> = {
+      trips: parts[2] === 'history' ? 'Trip history' : parts[2] === 'watch' ? 'Guardian trip view' : 'Safe trips',
+      'kidnapping-tracking': parts[2] === 'watch' ? 'Live tracking' : 'Emergency tracking',
+      geofences: 'Safety zones',
+      manage: 'Your network',
+      'panic-pin': 'Panic PIN',
+      'fake-call': 'Fake call',
+      emergency: 'Report emergency',
+      sentinel: parts[2] === 'settings' ? 'Alert settings' : 'Threat alerts',
+      incident: 'Incident recap',
+      'how-it-works': 'How Sentinel works',
+    };
+    if (safety[parts[1]]) return safety[parts[1]];
+  }
+  if (segment === 'incident-reports') return parts[1] ? 'Incident report' : 'Incident reports';
   if (segment === 'ads' && parts[1] === 'wall') return 'Ad Wall';
   if (segment === 'ads' && parts[1] === 'new') return 'Book an ad';
   if (segment === 'ads' && parts[1] === 'mine') return 'My ads';
@@ -80,7 +96,8 @@ function getRouteTitle(pathname: string) {
     messages: 'Messages',
     chat: 'Chats',
     info: 'Info',
-    sos: 'Safety Alert',
+    sos: 'SOS',
+    'community-emergency': 'Community alert',
     profile: 'Profile',
     gamification: 'Huud Economy',
     'huud-economy': 'Huud Economy',
@@ -273,7 +290,11 @@ export default function TopNav({ origin = 'page' }: { origin?: TopNavOrigin }) {
       avatarUrl={started ? me?.avatarUrl || me?.profilePicture || null : null}
       scrollHidden={scrollHidden}
       origin={origin}
-      onBack={() => router.back()}
+      onBack={() => {
+        // Opened straight from a link or a notification: there is nothing to go back to.
+        if (window.history.length > 1) router.back();
+        else router.push(pathname.startsWith('/safety') || pathname.startsWith('/sos') ? '/sentinel' : '/huud');
+      }}
       onSearch={() => router.push('/ask?focus=1')}
       onMe={() => window.dispatchEvent(new CustomEvent('toggle-mobile-sidebar'))}
     />

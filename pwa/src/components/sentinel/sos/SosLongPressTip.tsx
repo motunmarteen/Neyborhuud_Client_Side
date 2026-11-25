@@ -6,10 +6,10 @@ export function SosLongPressTip() {
       </div>
       <div className="min-w-0">
         <p className="text-sm font-bold text-gray-800">
-          Long-press SOS in the bottom nav
+          Hold the Sentinel tab for a silent SOS
         </p>
         <p className="mt-1 text-xs leading-relaxed text-gray-500">
-          From any screen, press and hold the red SOS tab to fire a silent alert instantly — no countdown,
+          From any screen, press and hold the Sentinel tab at the bottom to send a silent alert at once — no countdown,
           no on-screen feedback.
         </p>
       </div>

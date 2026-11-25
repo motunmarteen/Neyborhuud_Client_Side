@@ -41,8 +41,8 @@ const EMERGENCY_TYPES: Array<{ value: EmergencyType; label: string; icon: string
 
 const SEVERITY_LEVELS = [
   { value: 'low',      label: 'Low',      color: 'text-primary',  bg: 'bg-status-success/10 border-status-success/40' },
-  { value: 'medium',   label: 'Medium',   color: 'text-primary400', bg: 'bg-primary900/30 border-yellow-700' },
-  { value: 'high',     label: 'High',     color: 'text-brand-red', bg: 'bg-brand-red900/30 border-orange-700' },
+  { value: 'medium',   label: 'Medium',   color: 'text-amber-ink', bg: 'bg-amber-soft border-amber-300' },
+  { value: 'high',     label: 'High',     color: 'text-brand-red', bg: 'bg-red-soft border-brand-red/40' },
   { value: 'critical', label: 'Critical', color: 'text-brand-red',    bg: 'bg-status-danger/15 border-status-danger/50' },
 ] as const;
 
@@ -50,7 +50,7 @@ const STATUS_BADGE: Record<Emergency['status'], string> = {
   active:      'bg-status-danger/15 text-status-danger border border-status-danger/40',
   responding:  'bg-status-warning/15 text-status-warning border border-status-warning/40',
   resolved:    'bg-status-success/10 text-status-success border border-status-success/40',
-  false_alarm: 'bg-brand-black text-[var(--neu-text-muted)] border border-black/[0.08]',
+  false_alarm: 'bg-background text-[var(--neu-text-muted)] border border-black/[0.08]',
 };
 
 const SOURCE_LABEL: Record<EmergencySource, { icon: string; label: string }> = {
@@ -61,10 +61,10 @@ const SOURCE_LABEL: Record<EmergencySource, { icon: string; label: string }> = {
 };
 
 const DISPATCH_BADGE: Record<DispatchStatus, string> = {
-  pending:      'bg-primary900/40 text-primary border border-yellow-700',
+  pending:      'bg-amber-soft text-amber-ink border border-transparent',
   sent:         'bg-status-success/10 text-status-success border border-status-success/40',
   failed:       'bg-status-danger/12 text-status-danger border border-status-danger/40',
-  not_required: 'bg-brand-black text-[var(--neu-text-muted)] border border-black/[0.08]',
+  not_required: 'bg-background text-[var(--neu-text-muted)] border border-black/[0.08]',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -330,12 +330,12 @@ export default function EmergencyPage() {
                         <div key={em._id} className="flex items-center gap-3 rounded-xl border border-status-danger/25 bg-status-danger/8 px-4 py-3">
                           <span className="text-lg">{typeInfo?.icon ?? '⚠️'}</span>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-[var(--neu-text-muted)] text-sm">{typeInfo?.label ?? em.type}</p>
+                            <p className="text-sm font-bold text-navy">{typeInfo?.label ?? em.type}</p>
                             <p className="text-xs text-[var(--neu-text-muted)] truncate">{em.description || em.location?.address || '—'}</p>
                           </div>
                           <div className="flex flex-col items-end gap-1">
                             {src && (
-                              <span className="rounded-full bg-brand-black border border-black/[0.08] px-2 py-0.5 text-xs text-[var(--neu-text-muted)]">
+                              <span className="rounded-full bg-background border border-black/[0.08] px-2 py-0.5 text-xs text-[var(--neu-text-muted)]">
                                 {src.icon} {src.label}
                               </span>
                             )}
@@ -358,31 +358,32 @@ export default function EmergencyPage() {
               </div>
             )}
 
-            {/* Your emergency history stats */}
-            {(statsLoading || stats) && (
+            {/* Your reports so far */}
+            {/* Only once there is something to count. */}
+            {(stats?.totalEmergencies ?? 0) > 0 && (
               <div className="neu-card-sm rounded-2xl p-5">
-                <h2 className="mb-3 font-semibold text-[var(--neu-text)]">Your emergency history stats</h2>
+                <h2 className="mb-3 font-semibold text-[var(--neu-text)]">Your reports so far</h2>
                 {statsLoading && !stats ? (
                   <p className="text-sm text-[var(--neu-text-muted)]">Loading…</p>
                 ) : stats ? (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                    <div className="rounded-lg bg-background p-3 text-center">
                       <p className="text-lg font-bold text-[var(--neu-text)]">{stats.totalEmergencies}</p>
                       <p className="text-[10px] text-[var(--neu-text-muted)]">Total reports</p>
                     </div>
-                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                    <div className="rounded-lg bg-background p-3 text-center">
                       <p className="text-lg font-bold text-status-danger">{stats.activeEmergencies}</p>
                       <p className="text-[10px] text-[var(--neu-text-muted)]">Active</p>
                     </div>
-                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                    <div className="rounded-lg bg-background p-3 text-center">
                       <p className="text-lg font-bold text-status-success">{stats.resolvedEmergencies}</p>
                       <p className="text-[10px] text-[var(--neu-text-muted)]">Resolved</p>
                     </div>
-                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                    <div className="rounded-lg bg-background p-3 text-center">
                       <p className="text-lg font-bold text-status-warning">{stats.falseAlarms}</p>
                       <p className="text-[10px] text-[var(--neu-text-muted)]">False alarms</p>
                     </div>
-                    <div className="rounded-lg bg-brand-black/40 p-3 text-center">
+                    <div className="rounded-lg bg-background p-3 text-center">
                       <p className="text-lg font-bold text-brand-blue">{stats.avgResponseTimeMinutes}m</p>
                       <p className="text-[10px] text-[var(--neu-text-muted)]">Avg. resolution time</p>
                     </div>
@@ -427,13 +428,13 @@ export default function EmergencyPage() {
 
             {/* Report form */}
             <div className="neu-card-sm rounded-2xl p-5">
-              <h2 className="mb-4 type-display font-bold text-white">New Emergency Report</h2>
+              <h2 className="mb-4 font-heading text-lg font-extrabold text-navy">Report an emergency</h2>
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
                 {/* Type selector */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[var(--neu-text-muted)]">
-                    Emergency Type
+                  <label className="mb-2 block text-sm font-bold text-navy">
+                    What is happening?
                   </label>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {EMERGENCY_TYPES.map((t) => (
@@ -441,10 +442,10 @@ export default function EmergencyPage() {
                         key={t.value}
                         type="button"
                         onClick={() => setType(t.value)}
-                        className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition-colors ${
+                        className={`flex items-center gap-2 min-h-11 rounded-xl border px-3 py-2 text-left text-sm font-semibold transition-colors ${
                           type === t.value
                             ? 'border-brand-blue bg-brand-blue/15 text-brand-blue'
-                            : 'border-black/[0.08] bg-brand-black/40 text-[var(--neu-text-muted)] hover:border-black/[0.08]'
+                            : 'border-transparent bg-background text-navy hover:bg-[#E6EAF0]'
                         }`}
                       >
                         <span>{t.icon}</span>
@@ -459,7 +460,7 @@ export default function EmergencyPage() {
 
                 {/* Severity */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[var(--neu-text-muted)]">
+                  <label className="mb-2 block text-sm font-bold text-navy">
                     Severity
                   </label>
                   <div className="flex gap-2">
@@ -468,8 +469,8 @@ export default function EmergencyPage() {
                         key={s.value}
                         type="button"
                         onClick={() => setSeverity(s.value)}
-                        className={`flex-1 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
-                          severity === s.value ? s.bg + ' ' + s.color : 'border-black/[0.08] bg-brand-black/40 text-[var(--neu-text-muted)]'
+                        className={`min-h-11 flex-1 rounded-xl border px-1 py-2 text-sm font-bold transition-colors ${
+                          severity === s.value ? s.bg + ' ' + s.color : 'border-transparent bg-background text-navy'
                         }`}
                       >
                         {s.label}
@@ -485,7 +486,7 @@ export default function EmergencyPage() {
 
                 {/* Description */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-[var(--neu-text-muted)]">
+                  <label className="mb-1 block text-sm font-bold text-navy">
                     Description <span className="text-[var(--neu-text-muted)]">(optional)</span>
                   </label>
                   <textarea
@@ -494,21 +495,21 @@ export default function EmergencyPage() {
                     rows={3}
                     maxLength={500}
                     placeholder="Brief description of the situation…"
-                    className="w-full rounded-xl border border-black/[0.08] bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:border-brand-blue focus:outline-none"
+                    className="w-full rounded-xl border border-black/[0.08] bg-background px-3 py-2 text-[15px] text-navy placeholder:text-muted focus:border-brand-blue focus:outline-none"
                   />
                 </div>
 
                 {/* Reporter contact */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-[var(--neu-text-muted)]">
-                    Your Contact Number <span className="text-[var(--neu-text-muted)]">(optional, shared with agency)</span>
+                  <label className="mb-1 block text-sm font-bold text-navy">
+                    Your phone number <span className="text-[var(--neu-text-muted)]">(optional, shared with agency)</span>
                   </label>
                   <input
                     type="tel"
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
                     placeholder="+234 800 000 0000"
-                    className="w-full rounded-xl border border-black/[0.08] bg-brand-black px-3 py-2 text-sm text-[var(--neu-text-muted)] placeholder:text-[var(--neu-text-muted)] focus:border-brand-blue focus:outline-none"
+                    className="w-full rounded-xl border border-black/[0.08] bg-background px-3 py-2 text-[15px] text-navy placeholder:text-muted focus:border-brand-blue focus:outline-none"
                   />
                 </div>
 
@@ -528,7 +529,7 @@ export default function EmergencyPage() {
 
             {/* Recent emergencies */}
             <div className="neu-card-sm rounded-2xl p-5">
-              <h2 className="mb-4 font-semibold text-[var(--neu-text)]">Recent Emergencies</h2>
+              <h2 className="mb-4 font-semibold text-[var(--neu-text)]">Your recent reports</h2>
 
               {historyLoading ? (
                 <p className="text-sm text-[var(--neu-text-muted)]">Loading…</p>
@@ -541,13 +542,13 @@ export default function EmergencyPage() {
                     return (
                       <div
                         key={em._id}
-                        className="flex flex-col gap-2 rounded-xl border border-black/[0.08] bg-brand-black/40 p-4"
+                        className="flex flex-col gap-2 rounded-xl border border-black/[0.08] bg-background p-4"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{typeInfo?.icon ?? '⚠️'}</span>
                             <div>
-                              <p className="font-medium text-[var(--neu-text-muted)]">
+                              <p className="font-bold text-navy">
                                 {typeInfo?.label ?? em.type}
                                 {em.severity && (
                                   <span className={`ml-2 text-xs ${SEVERITY_LEVELS.find((s) => s.value === em.severity)?.color ?? ''}`}>
@@ -573,7 +574,7 @@ export default function EmergencyPage() {
                             </span>
                           )}
                           {em.source && SOURCE_LABEL[em.source] && (
-                            <span className="rounded-full bg-brand-black border border-black/[0.08] px-2 py-0.5">
+                            <span className="rounded-full bg-background border border-black/[0.08] px-2 py-0.5">
                               {SOURCE_LABEL[em.source].icon} {SOURCE_LABEL[em.source].label}
                             </span>
                           )}
@@ -596,7 +597,7 @@ export default function EmergencyPage() {
                               <button
                                 onClick={() => handleEscalate(em._id)}
                                 disabled={escalating === em._id}
-                                className="flex-1 rounded-lg bg-brand-red700 py-1.5 text-xs font-medium text-white hover:bg-brand-red600 disabled:opacity-50"
+                                className="flex-1 rounded-lg bg-brand-red py-1.5 text-xs font-medium text-white hover:bg-[#D23A40] disabled:opacity-50"
                                 title="Marks this as logged in our system — does not contact any agency. Call directly for real dispatch."
                               >
                                 {escalating === em._id ? 'Marking…' : '📋 Mark as logged (not a real dispatch)'}
@@ -605,7 +606,7 @@ export default function EmergencyPage() {
                             <button
                               onClick={() => handleAcknowledge(em._id)}
                               disabled={acknowledging === em._id || acknowledgedIds.has(em._id)}
-                              className="flex-1 rounded-lg bg-brand-black py-1.5 text-xs font-medium text-brand-blue hover:bg-brand-surface disabled:opacity-50"
+                              className="flex-1 rounded-lg bg-background py-1.5 text-xs font-medium text-brand-blue hover:bg-brand-surface disabled:opacity-50"
                             >
                               {acknowledgedIds.has(em._id)
                                 ? '✓ Acknowledged'
@@ -615,14 +616,14 @@ export default function EmergencyPage() {
                             </button>
                             <button
                               onClick={() => handleResolve(em._id)}
-                              className="flex-1 rounded-lg bg-brand-black py-1.5 text-xs font-medium text-[var(--neu-text-muted)] hover:bg-brand-surface"
+                              className="flex-1 rounded-lg bg-background py-1.5 text-xs font-medium text-[var(--neu-text-muted)] hover:bg-brand-surface"
                             >
                               ✓ Resolve
                             </button>
                             <button
                               onClick={() => handleCancel(em._id)}
                               disabled={cancelling === em._id}
-                              className="flex-1 rounded-lg bg-brand-black py-1.5 text-xs font-medium text-status-warning hover:bg-brand-surface disabled:opacity-50"
+                              className="flex-1 rounded-lg bg-background py-1.5 text-xs font-medium text-status-warning hover:bg-brand-surface disabled:opacity-50"
                             >
                               {cancelling === em._id ? 'Cancelling…' : '✕ Cancel (mistake)'}
                             </button>
@@ -650,7 +651,7 @@ export default function EmergencyPage() {
                             </button>
 
                             {replayOpen[em._id] && !replayLoading[em._id] && (
-                              <div className="mt-2 rounded-xl border border-black/[0.08] bg-brand-black p-3">
+                              <div className="mt-2 rounded-xl border border-black/[0.08] bg-background p-3">
                                 {!replayData[em._id] ? (
                                   <p className="text-xs text-brand-red">Failed to load timeline.</p>
                                 ) : (
@@ -663,7 +664,7 @@ export default function EmergencyPage() {
                                         { label: 'Chat Messages', value: replayData[em._id]!.summary.chatMessages },
                                         { label: 'System Events', value: replayData[em._id]!.summary.systemEvents },
                                       ].map(({ label, value }) => (
-                                        <div key={label} className="rounded-lg bg-brand-black p-2 text-center">
+                                        <div key={label} className="rounded-lg bg-background p-2 text-center">
                                           <p className="text-base font-bold text-brand-blue">{value}</p>
                                           <p className="text-[10px] text-[var(--neu-text-muted)]">{label}</p>
                                         </div>
@@ -672,7 +673,7 @@ export default function EmergencyPage() {
 
                                     {/* Clock drift warning */}
                                     {replayData[em._id]!.summary.clockDriftFlaggedPings > 0 && (
-                                      <div className="mb-3 rounded-lg bg-primary950/40 p-2 text-xs text-primary">
+                                      <div className="mb-3 rounded-lg bg-green-soft p-2 text-xs text-primary">
                                         ⚠️ {replayData[em._id]!.summary.clockDriftFlaggedPings} location ping(s) flagged for clock drift — timestamps may be inaccurate.
                                       </div>
                                     )}
@@ -689,8 +690,8 @@ export default function EmergencyPage() {
                                             key={idx}
                                             className={`flex items-start gap-2 rounded-lg px-2 py-1.5 ${
                                               entry.clockDriftFlagged
-                                                ? 'bg-primary950/30 border border-yellow-800/40'
-                                                : 'bg-brand-black/60'
+                                                ? 'bg-amber-soft'
+                                                : 'bg-background'
                                             }`}
                                           >
                                             <span className="shrink-0 text-sm">{icon}</span>
@@ -708,7 +709,7 @@ export default function EmergencyPage() {
                                                   second: '2-digit',
                                                 })}
                                                 {entry.clockDriftFlagged && (
-                                                  <span className="ml-1 text-primary400">⚠️ drift</span>
+                                                  <span className="ml-1 text-amber-ink">⚠️ drift</span>
                                                 )}
                                               </p>
                                             </div>

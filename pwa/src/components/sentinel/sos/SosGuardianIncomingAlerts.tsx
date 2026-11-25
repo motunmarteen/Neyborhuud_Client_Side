@@ -79,7 +79,7 @@ export function SosGuardianIncomingAlerts() {
                   <button
                     type="button"
                     onClick={() => dismissAlert(alert.emergencyId)}
-                    className="shrink-0 text-lg leading-none text-gray-400 hover:text-gray-650"
+                    className="shrink-0 text-lg leading-none text-gray-400 hover:text-muted"
                     aria-label="Dismiss"
                   >
                     ×

@@ -305,7 +305,7 @@ function IncidentDetailInner() {
             {statusMeta.label}
           </span>
           {incident.isEscalated && (
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-red100 text-brand-red700 border border-orange-200">
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-red-soft text-[#B42318] border border-transparent">
               Escalated
             </span>
           )}

@@ -10,7 +10,6 @@
 import { Suspense, useState } from 'react';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
-import { SentinelBackLink } from '@/components/sentinel/SentinelBackLink';
 import SosCountdownOverlay from '@/components/safety/SosCountdownOverlay';
 import { SosGuardianIncomingAlerts } from '@/components/sentinel/sos/SosGuardianIncomingAlerts';
 import { SosGuardiansFeed } from '@/components/sentinel/sos/SosGuardiansFeed';

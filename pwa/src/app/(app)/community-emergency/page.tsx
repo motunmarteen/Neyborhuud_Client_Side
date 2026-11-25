@@ -20,6 +20,7 @@ import {
   LocalHuudHubPrimaryAction,
 } from '@/components/local-huud/LocalHuudHubHeader';
 import { useAuth } from '@/hooks/useAuth';
+import { useStarted } from '@/hooks/useStarted';
 import { contentService } from '@/services/content.service';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
@@ -59,16 +60,16 @@ interface EmergencyPost {
 
 const EMERGENCY_TYPE_META: Record<EmergencyType, { label: string; icon: string; color: string }> = {
   crime:               { label: 'Crime',              icon: 'local_police',      color: 'text-status-danger' },
-  danger:              { label: 'Danger',             icon: 'dangerous',         color: 'text-brand-red600' },
+  danger:              { label: 'Danger',             icon: 'dangerous',         color: 'text-brand-red' },
   missing_person:      { label: 'Missing Person',     icon: 'person_search',     color: 'text-brand-blue' },
   fire:                { label: 'Fire',               icon: 'local_fire_department', color: 'text-brand-red' },
   accident:            { label: 'Accident',           icon: 'car_crash',         color: 'text-status-warning' },
-  suspicious_activity: { label: 'Suspicious Activity', icon: 'report',          color: 'text-primary600' },
+  suspicious_activity: { label: 'Suspicious Activity', icon: 'report',          color: 'text-amber-ink' },
 };
 
 const SEVERITY_META: Record<Severity, { label: string; bg: string; text: string; border: string }> = {
-  low:      { label: 'Low',      bg: 'bg-primary50',  text: 'text-primary700', border: 'border-yellow-200' },
-  medium:   { label: 'Medium',   bg: 'bg-brand-red50',  text: 'text-brand-red700', border: 'border-orange-200' },
+  low:      { label: 'Low',      bg: 'bg-amber-soft',  text: 'text-amber-ink', border: 'border-transparent' },
+  medium:   { label: 'Medium',   bg: 'bg-red-soft',  text: 'text-[#B42318]', border: 'border-transparent' },
   critical: { label: 'CRITICAL', bg: 'bg-status-danger/8',     text: 'text-status-danger',    border: 'border-status-danger/30' },
 };
 
@@ -498,7 +499,9 @@ function CommunityEmergencyInner({
 
 function CommunityEmergencyPageContent() {
   const [showCreate, setShowCreate] = useState(false);
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  // Who you are is known only on the phone; wait so the first draw matches the pre-built page.
+  const user = useStarted() ? authUser : null;
 
   return (
     <AppBrowseLayout

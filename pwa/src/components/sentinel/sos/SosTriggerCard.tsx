@@ -99,7 +99,7 @@ export function SosTriggerCard({ sos }: SosTriggerCardProps) {
                 Silent mode
               </span>
               <span className="mt-0.5 block text-xs leading-relaxed text-gray-400">
-                No on-screen feedback. Fires immediately — use under duress or long-press the bottom nav SOS tab.
+                No on-screen feedback. Fires immediately — use under duress or hold the Sentinel tab at the bottom.
               </span>
             </span>
           </label>

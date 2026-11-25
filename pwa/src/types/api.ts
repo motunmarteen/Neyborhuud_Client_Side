@@ -796,7 +796,9 @@ export type ConversationContextType =
   | "marketplace"
   | "incident"
   | "community"
-  | "jobs";
+  | "jobs"
+  | "services"
+  | "events";
 
 export interface Conversation {
   id: string;

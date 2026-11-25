@@ -16,9 +16,9 @@ type SentinelBackLinkProps = {
 };
 
 const linkClass =
-  'inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary no-underline hover:underline';
+  'tap-target inline-flex min-h-10 w-fit items-center gap-1 rounded-full bg-white pl-2 pr-4 text-sm font-bold text-navy no-underline shadow-[0_2px_8px_rgba(29,36,51,0.08)] hover:bg-[#F6F8FB]';
 
-const fallbackDefault: SentinelBackTarget = { href: '/safety', label: 'Sentinel AI hub' };
+const fallbackDefault: SentinelBackTarget = { href: '/sentinel', label: 'Sentinel' };
 
 export function SentinelBackLink({ className, fallback }: SentinelBackLinkProps) {
   const searchParams = useSearchParams();
@@ -32,7 +32,7 @@ export function SentinelBackLink({ className, fallback }: SentinelBackLinkProps)
 
   return (
     <Link href={back.href} className={className ?? linkClass}>
-      <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+      <span aria-hidden className="material-symbols-outlined text-[20px]">chevron_left</span>
       {back.label}
     </Link>
   );

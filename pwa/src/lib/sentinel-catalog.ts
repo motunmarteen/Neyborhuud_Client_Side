@@ -52,7 +52,7 @@ export const SENTINEL_FEATURES: SentinelFeature[] = [
   {
     id: 'geofences',
     icon: 'fence',
-    label: 'Geofences',
+    label: 'Safety zones',
     href: '/safety/geofences',
     tab: 'protect',
     accent: 'primary',
@@ -148,7 +148,7 @@ export const SENTINEL_FEATURES: SentinelFeature[] = [
     tab: 'tools',
     accent: 'red',
     tagline: 'Arm, cancel, or resolve an active emergency.',
-    howTo: 'Tap the red SOS on the bottom nav, or open here for full controls.',
+    howTo: 'Hold the Sentinel tab for a silent SOS, or open here for full controls.',
   },
   {
     id: 'trip-log',

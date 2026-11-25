@@ -8,7 +8,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
-import { SentinelBackLink } from '@/components/sentinel/SentinelBackLink';
 import SosCountdownOverlay from '@/components/safety/SosCountdownOverlay';
 import { DashboardActiveSosPanel } from '@/components/sentinel/dashboard/DashboardActiveSosPanel';
 import { DashboardCheckInsPanel } from '@/components/sentinel/dashboard/DashboardCheckInsPanel';
@@ -93,9 +92,6 @@ function SafetyDashboardInner() {
         maxWidth="920"
         header={
           <div className="flex flex-col gap-3">
-            <Suspense fallback={null}>
-              <SentinelBackLink />
-            </Suspense>
             <BrowseTabStrip tabs={TABS} activeId={tab} onChange={(id) => setTabWithHash(id as DashboardTab)} />
           </div>
         }

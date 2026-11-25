@@ -40,7 +40,7 @@ import { getGeolocation } from '@/lib/nativeGeolocation';
 const GeofenceMap = dynamicImport(() => import('@/components/safety/GeofenceMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-72 rounded-xl bg-brand-black animate-pulse flex items-center justify-center text-[var(--neu-text-muted)] text-sm">
+    <div className="w-full h-72 rounded-xl bg-background animate-pulse flex items-center justify-center text-[var(--neu-text-muted)] text-sm">
       Loading map…
     </div>
   ),
@@ -233,7 +233,7 @@ export default function GeofencesPage() {
 
   return (
     <SentinelSubpageLayout
-      pageTitle="Geofences"
+      pageTitle="Safety zones"
       pageSubtitle="Safe, alert, and restricted zones that react when you enter or leave."
       icon="fence"
       iconAccent="blue"
@@ -475,7 +475,7 @@ export default function GeofencesPage() {
                     setEditingId(null);
                     setForm(DEFAULT_FORM);
                   }}
-                  className="px-4 py-2 bg-brand-black hover:bg-brand-surface rounded-lg text-sm"
+                  className="px-4 py-2 bg-background hover:bg-brand-surface rounded-lg text-sm"
                 >
                   Cancel
                 </button>
@@ -486,14 +486,14 @@ export default function GeofencesPage() {
       {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-20 rounded-xl bg-brand-black animate-pulse" />
+                <div key={i} className="h-20 rounded-xl bg-background animate-pulse" />
               ))}
             </div>
       ) : geofences.length === 0 ? (
         <div className="mod-card rounded-2xl py-12 text-center">
           <p className="text-4xl mb-2">🗺️</p>
           <p className="font-semibold" style={{ color: 'var(--neu-text)' }}>
-            No geofences yet
+            No safety zones yet
           </p>
           <p className="mt-1 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
             Tap &quot;+ New zone&quot; or click the map to draw your first boundary.
@@ -531,7 +531,7 @@ function GeofenceCard({
       ? 'bg-primary'
       : fence.lastStatus === 'outside'
       ? 'bg-brand-surface'
-      : 'bg-brand-black';
+      : 'bg-background';
   const statusLabel = fence.lastStatus === 'inside' ? 'Inside' : fence.lastStatus === 'outside' ? 'Outside' : 'Unknown';
 
   return (

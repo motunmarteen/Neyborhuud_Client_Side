@@ -7,20 +7,22 @@ export type SentinelBackTarget = {
 };
 
 const DEFAULT_BACK: SentinelBackTarget = {
-  href: '/safety',
-  label: 'Sentinel AI hub',
+  href: '/sentinel',
+  label: 'Sentinel',
 };
 
 /** Short label for common Sentinel / app routes */
 export function labelForSentinelPath(pathname: string): string {
   const base = pathname.split('?')[0] ?? pathname;
   const labels: Record<string, string> = {
-    '/safety': 'Sentinel AI hub',
-    '/safety/manage': 'Dashboard',
+    '/safety': 'Sentinel',
+    '/sentinel': 'Sentinel',
+    '/safety/manage': 'Your network',
     '/safety/trips': 'Safe trips',
     '/safety/kidnapping-tracking': 'Live tracking',
-    '/sos': 'Safety Alert',
+    '/sos': 'SOS',
     '/': 'Home',
+    '/huud': 'My Huud',
     '/feed': 'Feed',
     '/gamification': 'Huud Economy',
     '/huud-economy': 'Huud Economy',

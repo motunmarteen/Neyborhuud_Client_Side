@@ -17,8 +17,21 @@ import { FilterChip } from '@/components/ui/Chip';
 import { LIST_CLASS, RowAvatar, RowsSkeleton } from '@/components/friendship/PeopleRows';
 import type { Conversation } from '@/types/api';
 
-type Filter = 'all' | 'chats' | 'groups';
-const FILTERS: Filter[] = ['all', 'chats', 'groups'];
+/** What a chat is about. "chats" = plain chats between people (the key stays for old links). */
+type Kind = 'chats' | 'groups' | 'emergency' | 'market' | 'jobs' | 'services' | 'events';
+type Filter = 'all' | Kind;
+const FILTERS: { id: Filter; icon?: string }[] = [
+  { id: 'all' },
+  { id: 'chats' },
+  { id: 'groups' },
+  { id: 'emergency', icon: '🚨' },
+  { id: 'market', icon: '🛒' },
+  { id: 'jobs', icon: '💼' },
+  { id: 'services', icon: '🛠️' },
+  { id: 'events', icon: '🎉' },
+];
+const KIND_OF_CONTEXT: Record<string, Kind> = { marketplace: 'market', jobs: 'jobs', services: 'services', events: 'events', incident: 'emergency' };
+const TOPIC_ICON: Partial<Record<Kind, string>> = { market: '🛒', jobs: '💼', services: '🛠️', events: '🎉' };
 
 type Row = {
   id: string;
@@ -26,6 +39,9 @@ type Row = {
   name: string;
   avatar: string | null;
   community: boolean;
+  kind: Kind;
+  /** What a market, job, service or event chat is about, e.g. the item's name. */
+  topic: string | null;
   verified: boolean;
   danger: boolean;
   unread: number;
@@ -53,7 +69,10 @@ export function ChatsStream({ search }: { search?: string }) {
       const id = c.conversationId ?? c._id ?? c.id ?? '';
       if (!id) continue;
       const community = isCommunityChat(c);
-      const danger = c.type === 'incident';
+      const kind: Kind =
+        c.type === 'incident' ? 'emergency' : community ? 'groups' : KIND_OF_CONTEXT[c.contextType ?? ''] ?? 'chats';
+      const danger = kind === 'emergency';
+      const topic = TOPIC_ICON[kind] ? c.context?.productTitle || c.context?.jobTitle || c.context?.label || c.contextLabel || null : null;
       const other = c.otherParticipant;
       seen.set(id, {
         id,
@@ -65,6 +84,8 @@ export function ChatsStream({ search }: { search?: string }) {
             : other?.name || other?.username || c.name || t('chats.direct'),
         avatar: (community ? c.imageUrl : other?.avatarUrl) || null,
         community,
+        kind,
+        topic,
         verified: !!other?.isVerified,
         danger,
         unread: c.unreadCount ?? 0,
@@ -75,7 +96,7 @@ export function ChatsStream({ search }: { search?: string }) {
     return [...seen.values()].filter((r) => !q || r.name.toLowerCase().includes(q)).sort((a, b) => b.ts - a.ts);
   }, [data, search, t]);
 
-  const inFilter = (r: Row, f: Filter) => f === 'all' || (f === 'groups') === r.community;
+  const inFilter = (r: Row, f: Filter) => f === 'all' || r.kind === f;
   const shown = rows.filter((r) => inFilter(r, filter));
 
   if (mounted && !user) {
@@ -89,12 +110,13 @@ export function ChatsStream({ search }: { search?: string }) {
       <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 py-1" role="group" aria-label={t('chats.filter')}>
         {FILTERS.map((f) => (
           <FilterChip
-            key={f}
-            active={filter === f}
-            onClick={() => setFilter(f)}
-            count={rows.filter((r) => inFilter(r, f)).reduce((n, r) => n + r.unread, 0)}
+            key={f.id}
+            active={filter === f.id}
+            onClick={() => setFilter(f.id)}
+            icon={f.icon}
+            count={rows.filter((r) => inFilter(r, f.id)).reduce((n, r) => n + r.unread, 0)}
           >
-            {t(`chats.f.${f}`)}
+            {t(`chats.f.${f.id}`)}
           </FilterChip>
         ))}
       </div>
@@ -108,6 +130,8 @@ export function ChatsStream({ search }: { search?: string }) {
           <EmptyState icon="🔎" title={t('chats.noMatch')} description={t('chats.noMatchBody')} />
         ) : filter === 'groups' ? (
           <EmptyState icon="🏘️" title={t('chats.noGroups')} description={t('chats.noGroupsBody')} action={{ label: t('chats.seeCommunities'), href: '/communities' }} />
+        ) : filter !== 'all' && filter !== 'chats' ? (
+          <EmptyState icon={FILTERS.find((f) => f.id === filter)?.icon} title={t(`chats.empty.${filter}`)} description={t(`chats.emptyBody.${filter}`)} />
         ) : (
           <EmptyState icon="💬" title={t('chats.none')} description={t('chats.noneBody')} action={{ label: t('chats.findNeighbours'), href: '/friendship' }} />
         )
@@ -126,6 +150,11 @@ export function ChatsStream({ search }: { search?: string }) {
                     <span className={`truncate text-[15px] ${row.unread ? 'font-extrabold' : 'font-bold'} ${row.danger ? 'text-brand-red' : 'text-navy'}`}>{row.name}</span>
                     {row.verified ? <BadgeCheck size={15} className="shrink-0 text-brand-green-dark" aria-label={t('people.verified')} /> : null}
                   </span>
+                  {row.topic ? (
+                    <span className="block truncate text-[12px] font-bold text-brand-green-dark">
+                      {TOPIC_ICON[row.kind]} {row.topic}
+                    </span>
+                  ) : null}
                   <span className={`block truncate text-[13px] ${row.unread ? 'font-bold text-navy' : 'text-muted'}`}>{row.preview}</span>
                 </span>
                 <span className="flex shrink-0 flex-col items-end gap-1">

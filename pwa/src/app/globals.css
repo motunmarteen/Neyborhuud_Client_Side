@@ -114,7 +114,7 @@ body { font-size: 1rem; }
   --neu-bg:             #FFFFFF;
   --neu-text:           #1D2433;
   --neu-text-secondary: #5B6478;
-  --neu-text-muted:     #9AA3B1;
+  --neu-text-muted:     #5B6478; /* was #9AA3B1: too faint to read */
   --neu-shadow-dark:    rgba(0, 0, 0, 0.04);
   --neu-shadow-light:   #FFFFFF;
 }
@@ -5698,7 +5698,7 @@ body,
   --neu-shadow-light: #FFFFFF;
   --neu-text: #1D2433;
   --neu-text-secondary: #5B6478;
-  --neu-text-muted: #9AA3B1;
+  --neu-text-muted: #5B6478;
 }
 
 /* ── Base Surface — the app shell carries the NeyborHuud doodle (owner 2026-10-18: doodles
@@ -6288,13 +6288,15 @@ textarea.neu-input:focus-within::after {
    Supports both light and dark modes.
    ═══════════════════════════════════════════════════════ */
 
-/* ── Glass Card ── */
+/* ── Card ── (2026-11-26: was a dark-theme glass, nearly invisible on the light page; used in
+   ~170 files, so it is fixed here once: a white card with a soft shadow, as in components/ui/Card) */
+@layer components {
 .mod-card {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  background: #FFFFFF;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 10px rgba(29, 36, 51, 0.06);
   transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
 }
 
 /* Cards respond to touch — tactile press state */
@@ -6303,52 +6305,65 @@ button.mod-card:active {
   transform: scale(0.985);
 }
 
+@layer components {
 .mod-card-hover:hover {
-  background: rgba(255, 255, 255, 0.065);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: #F6F8FB;
+}
 }
 
 /* ── Elevated Glass Card (menus, modals) ── */
+@layer components {
 .mod-card-elevated {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
-  -webkit-backdrop-filter: blur(24px);
-  backdrop-filter: blur(24px);
+  background: #FFFFFF;
+  border: 1px solid transparent;
+  box-shadow: 0 10px 28px rgba(29, 36, 51, 0.16);
+}
 }
 
 /* ── Inset surface (tab containers, sockets) ── */
+/* A pale well inside a white card: fields, tab boxes. */
+@layer components {
 .mod-inset {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: #F1F4F8;
+  border: 1px solid transparent;
+}
 }
 
 /* ── Clean Button ── */
+@layer components {
 .mod-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #FFFFFF;
+  border: 1px solid #DDE3EC;
   transition: all 0.2s ease;
 }
+}
 
+@layer components {
 .mod-btn:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: #F6F8FB;
+}
 }
 
+@layer components {
 .mod-btn:active {
-  background: rgba(255, 255, 255, 0.03);
+  background: #EEF2F7;
+}
 }
 
+@layer components {
 .mod-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
+}
 
 /* ── Active Button ── */
+@layer components {
 .mod-btn-active {
   background: rgba(0, 184, 46, 0.1);
   border: 1px solid rgba(0, 184, 46, 0.25);
   color: #0E8A3E;
+}
 }
 
 /* ── Semantic text colour utilities (avoid inline style={{ color: 'var(--neu-text)' }}) ── */
@@ -6364,16 +6379,20 @@ button.mod-card:active {
    .mod-chip        = white chip with a line border and soft shadow (was a dark-mode glass style,
                       nearly invisible on the light background)
    .mod-chip-active = green tint with deep-green text (same as the "soft" button) */
+@layer components {
 .mod-chip {
   background: #FFFFFF;
   border: 1px solid #DDE3EC;
   box-shadow: 0 1px 3px rgba(29, 36, 51, 0.06);
 }
+}
+@layer components {
 .mod-chip-active {
   background: #E8F7EC;
   border: 1px solid transparent;
   color: #0E8A3E;
   font-weight: 700;
+}
 }
 
 /* ═══════════════════════════════════════════════════════

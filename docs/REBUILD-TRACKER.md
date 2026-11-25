@@ -32,7 +32,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
 | 3. Map home (sky + live map) | 14 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; low-data mode, speed done; left: M-14 crown (waits on Phase 7), M-17 living map, mockup extras |
-| 4. Screens (restyle all 95) | 31 | 95 | 🟡 Getting started + Home, map and feed done; Chats and communities done; Sentinel next |
+| 4. Screens (restyle all 95) | 50 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel done; Marketplace next |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
 | 7. Gamification backend | 18 | 18 | ✅ done 2026-10-18 (server + app); airtime/data and contributor payouts wait for the legal check |
@@ -264,26 +264,26 @@ Shared pieces restyled with this group (used by later groups too): list-page hea
 
 ### Sentinel (safety) (20)
 
-- [ ] S-032 `/community-emergency` → Sentinel → Tools (+ map banner when active)
-- [ ] S-033 `/incident-reports` → Safety layer pins / Sentinel → Reports
-- [ ] S-034 `/incident-reports/[id]` → Safety layer pins / Sentinel → Reports
+- [x] S-032 (2026-11-26) `/community-emergency` → Sentinel → Tools (+ map banner when active): readable cards; Post alert no longer breaks the page load
+- [x] S-033 (2026-11-26) `/incident-reports` → Safety layer pins / Sentinel → Reports: readable cards; File report no longer breaks the page load
+- [x] S-034 (2026-11-26) `/incident-reports/[id]` → Safety layer pins / Sentinel → Reports: readable cards, own name in the top bar, one back button
 - [x] S-035 (2026-10-18) `/safety` → Sentinel tab (/safety now opens /sentinel)
-- [ ] S-036 `/safety/emergency` → Sentinel → Tools → Report emergency
-- [ ] S-037 `/safety/fake-call` → Sentinel → Tools → Fake call
-- [ ] S-038 `/safety/geofences` → Sentinel → Protect → Safety zones (+ red zones on map)
-- [ ] S-039 `/safety/incident/[id]` → Safety layer pins / Sentinel → Reports
-- [ ] S-040 `/safety/kidnapping-tracking` → Sentinel → Protect → Emergency tracking
-- [ ] S-041 `/safety/kidnapping-tracking/watch/[sessionId]` → Sentinel → Protect → Emergency tracking
-- [ ] S-042 `/safety/manage` → Sentinel → Your network (guardians, circle)
-- [ ] S-043 `/safety/panic-pin` → Sentinel → Tools → Panic PIN
-- [ ] S-044 `/safety/panic-pin/enter` → Sentinel → Tools → Panic PIN
-- [ ] S-045 `/safety/panic-pin/practice` → Sentinel → Tools → Panic PIN
-- [ ] S-046 `/safety/sentinel` → Sentinel → What Sentinel watches / alerts
-- [ ] S-047 `/safety/sentinel/settings` → Sentinel → What Sentinel watches / alerts
-- [ ] S-048 `/safety/trips` → Sentinel → Protect → Safe trips (+ trip pill on map)
-- [ ] S-049 `/safety/trips/history` → Sentinel → Protect → Safe trips (+ trip pill on map)
-- [ ] S-050 `/safety/trips/watch/[userId]` → Sentinel → Protect → Safe trips (+ trip pill on map)
-- [ ] S-051 `/sos` → SOS button everywhere / Sentinel → SOS
+- [x] S-036 (2026-11-26) `/safety/emergency` → Sentinel → Tools → Report emergency: light buttons and boxes (were dark grey/black), plain labels; empty stats box hidden
+- [x] S-037 (2026-11-26) `/safety/fake-call` → Sentinel → Tools → Fake call: chosen time now shows (was white on white)
+- [x] S-038 (2026-11-26) `/safety/geofences` → Sentinel → Protect → Safety zones (+ red zones on map): "Geofences" renamed Safety zones
+- [x] S-039 (2026-11-26) `/safety/incident/[id]` → Safety layer pins / Sentinel → Reports: readable cards, own name in the top bar, one back button
+- [x] S-040 (2026-11-26) `/safety/kidnapping-tracking` → Sentinel → Protect → Emergency tracking: readable cards, own name in the top bar, one back button
+- [x] S-041 (2026-11-26) `/safety/kidnapping-tracking/watch/[sessionId]` → Sentinel → Protect → Emergency tracking: readable cards, own name in the top bar, one back button
+- [x] S-042 (2026-11-26) `/safety/manage` → Sentinel → Your network (guardians, circle): readable cards, own name in the top bar, one back button
+- [x] S-043 (2026-11-26) `/safety/panic-pin` → Sentinel → Tools → Panic PIN: readable cards, own name in the top bar, one back button
+- [x] S-044 (2026-11-26) `/safety/panic-pin/enter` → Sentinel → Tools → Panic PIN: readable cards, own name in the top bar, one back button
+- [x] S-045 (2026-11-26) `/safety/panic-pin/practice` → Sentinel → Tools → Panic PIN: readable cards, own name in the top bar, one back button
+- [x] S-046 (2026-11-26) `/safety/sentinel` → Sentinel → What Sentinel watches / alerts: Threat alerts: removed made-up "Scanning active" labels and jargon
+- [x] S-047 (2026-11-26) `/safety/sentinel/settings` → Sentinel → What Sentinel watches / alerts: readable cards, own name in the top bar, one back button
+- [x] S-048 (2026-11-26) `/safety/trips` → Sentinel → Protect → Safe trips (+ trip pill on map): readable cards, own name in the top bar, one back button
+- [x] S-049 (2026-11-26) `/safety/trips/history` → Sentinel → Protect → Safe trips (+ trip pill on map): readable cards, own name in the top bar, one back button
+- [x] S-050 (2026-11-26) `/safety/trips/watch/[userId]` → Sentinel → Protect → Safe trips (+ trip pill on map): readable cards, own name in the top bar, one back button
+- [x] S-051 (2026-11-26) `/sos` → SOS button everywhere / Sentinel → SOS: wording: hold the Sentinel tab for silent SOS
 
 ### Marketplace (6)
 
