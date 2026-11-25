@@ -1194,7 +1194,7 @@ export default function ConversationPage() {
       ) : null}
 
       {conv?.contextType === 'marketplace' && conv.context ? (
-        <div className="flex items-center gap-3 bg-blue-50 px-4 py-3">
+        <div className="flex items-center gap-3 bg-white px-4 py-2.5">
           {conv.context.productThumbnail ? (
             <Image
               src={conv.context.productThumbnail}
@@ -1209,20 +1209,20 @@ export default function ConversationPage() {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-600">Marketplace</p>
+            <p className="text-[11px] font-bold text-muted">Marketplace</p>
             <p className="truncate text-sm font-bold text-gray-900">
               {conv.context.productTitle ?? 'Product'}
             </p>
           </div>
           {conv.context.productPrice != null ? (
-            <span className="shrink-0 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold tabular-nums text-blue-700">
+            <span className="shrink-0 rounded-full bg-background px-2.5 py-1 text-xs font-bold tabular-nums text-navy">
               {conv.context.productCurrency ?? 'NGN'} {conv.context.productPrice.toLocaleString()}
             </span>
           ) : null}
           {conv.context.productId ? (
             <Link
               href={`/marketplace?product=${encodeURIComponent(String(conv.context.productId))}`}
-              className="shrink-0 rounded-full bg-slate-800 px-3 py-1.5 text-xs font-bold text-white no-underline hover:bg-slate-900 active:bg-black"
+              className="shrink-0 inline-flex min-h-10 items-center rounded-full bg-green-soft px-4 text-xs font-bold text-brand-green-dark no-underline"
             >
               View
             </Link>
@@ -1351,7 +1351,7 @@ export default function ConversationPage() {
           isIncident={isIncident}
           showKeyPanel={showKeyPanel}
           onToggleKeys={() => setShowKeyPanel((s) => !s)}
-          onBack={() => navigateBack(router, { pathname, fallback: '/friendship?tab=chats' })}
+          onBack={() => navigateBack(router, { pathname, fallback: '/chat' })}
           onInviteGuest={conv?.type === 'direct' && !isPlaceholder ? () => setInviteOpen(true) : undefined}
           onCommunityInfo={isCommunityChat(conv ?? ({} as any)) && !isPlaceholder ? () => setCommunityInfoOpen(true) : undefined}
           onAudioCall={conv?.type === 'direct' && peerUserId ? handleAudioCall : undefined}
@@ -1371,10 +1371,10 @@ export default function ConversationPage() {
         {/* Reply preview above the composer (audit finding #6) — mirrors
             WhatsApp/Telegram's "replying to…" bar shown while composing. */}
         {replyingTo ? (
-          <div className="mx-auto flex w-full max-w-[600px] items-center gap-2 border-t border-gray-100 bg-gray-50 px-3 py-2">
+          <div className="mx-auto flex w-full max-w-[600px] items-center gap-2 border-t border-line bg-white px-3 py-2">
             <span className="material-symbols-outlined shrink-0 text-[16px] text-gray-400">reply</span>
-            <div className="min-w-0 flex-1 border-l-2 border-blue-400 pl-2">
-              <p className="truncate text-[12px] font-semibold text-blue-600">
+            <div className="min-w-0 flex-1 border-l-2 border-brand-green-dark pl-2">
+              <p className="truncate text-[12px] font-bold text-brand-green-dark">
                 {replyingTo.senderId === user?.id
                   ? 'Yourself'
                   : (replyingTo.sender?.firstName || replyingTo.sender?.lastName
@@ -1389,7 +1389,7 @@ export default function ConversationPage() {
               type="button"
               onClick={() => setReplyingTo(null)}
               aria-label="Cancel reply"
-              className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted hover:bg-background"
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -1412,7 +1412,7 @@ export default function ConversationPage() {
       <div className="mx-auto flex w-full max-w-[600px] px-1 flex-col gap-1 pb-4 pt-4">
         {!loading && loadingOlder ? (
           <div className="flex justify-center py-2">
-            <span className="text-xs text-gray-400">Loading earlier messages…</span>
+            <span className="text-xs text-muted">Loading earlier messages…</span>
           </div>
         ) : null}
         {loading ? (
@@ -1426,20 +1426,20 @@ export default function ConversationPage() {
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-3xl">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-soft text-3xl">
               👋
             </div>
-            <p className="mt-4 text-base font-bold text-gray-900">Start the conversation</p>
-            <p className="mt-1 max-w-xs text-sm text-gray-500">
-              Say hello — your messages stay on NeyborHuud with trust and safety built in.
+            <p className="mt-4 font-heading text-lg font-extrabold text-navy">Start the conversation</p>
+            <p className="mt-1 max-w-xs text-sm text-muted">
+              Say hello to start this chat.
             </p>
           </div>
         ) : (
           <div className="flex flex-col gap-1">
             {groups.map(({ key, date, msgs }) => (
               <div key={key} className="flex flex-col gap-1">
-                <div className="my-6 flex items-center justify-center">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">{date}</span>
+                <div className="my-3 flex items-center justify-center">
+                  <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-muted shadow-[0_1px_4px_rgba(29,36,51,0.08)]">{date}</span>
                 </div>
 
                 {msgs.map((msg, msgIdx) => {

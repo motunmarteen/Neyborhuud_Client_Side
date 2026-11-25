@@ -119,7 +119,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const sosActive = sosPhase !== 'idle';
   const isHome = pathname === '/huud' || pathname === '/';
   const isFeed = pathname === '/feed' || pathname.startsWith('/feed/');
-  const isChats = pathname.startsWith('/friendship') || pathname.startsWith('/chat') || pathname.startsWith('/messages');
+  const isChats = pathname.startsWith('/friendship') || pathname.startsWith('/chat') || pathname.startsWith('/messages') || pathname.startsWith('/communities');
   const isSentinel = pathname.startsWith('/safety') || pathname.startsWith('/sentinel') || pathname.startsWith('/sos');
 
   const tabClass = 'flex flex-1 justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';

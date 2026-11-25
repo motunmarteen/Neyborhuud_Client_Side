@@ -49,7 +49,7 @@ export function ChatRoomHeader({
           <button
             type="button"
             onClick={onBack}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 hover:text-slate-900 hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-navy hover:bg-background active:scale-95 transition-all cursor-pointer"
             aria-label="Back"
           >
             <ChevronLeft size={22} strokeWidth={2.4} />
@@ -57,7 +57,7 @@ export function ChatRoomHeader({
         ) : (
           <Link
             href={backHref}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 hover:text-slate-900 hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-navy hover:bg-background active:scale-95 transition-all cursor-pointer"
             aria-label="Back to chats"
           >
             <ChevronLeft size={22} strokeWidth={2.4} />
@@ -90,7 +90,7 @@ export function ChatRoomHeader({
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-xs border ${
                 isIncident
                   ? 'bg-rose-50 text-rose-600 border-rose-200'
-                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'border-transparent bg-green-soft text-brand-green-dark'
               }`}
               aria-hidden
             >
@@ -98,11 +98,11 @@ export function ChatRoomHeader({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[14.5px] sm:text-[15px] font-bold tracking-tight text-slate-900 leading-snug">
+            <p className="truncate text-[14.5px] sm:text-[15px] font-bold tracking-tight text-navy leading-snug">
               {displayName}
             </p>
             {subtitle ? (
-              <p className="truncate text-xs font-medium text-slate-500 leading-none mt-0.5">
+              <p className="truncate mt-0.5 text-xs font-medium leading-snug text-muted">
                 {subtitle}
               </p>
             ) : null}
@@ -110,12 +110,12 @@ export function ChatRoomHeader({
         </div>
 
         {/* Right-Side Action Cluster */}
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center">
           {onAudioCall ? (
             <button
               type="button"
               onClick={onAudioCall}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A827] hover:bg-emerald-50 active:scale-90 transition-all cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-brand-green-dark hover:bg-green-soft active:scale-90 transition-all cursor-pointer"
               title="Voice Call"
               aria-label="Start voice call"
             >
@@ -127,7 +127,7 @@ export function ChatRoomHeader({
             <button
               type="button"
               onClick={onVideoCall}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-[#00A827] hover:bg-emerald-50 active:scale-90 transition-all cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-brand-green-dark hover:bg-green-soft active:scale-90 transition-all cursor-pointer"
               title="Video Call"
               aria-label="Start video call"
             >
@@ -139,7 +139,7 @@ export function ChatRoomHeader({
             <button
               type="button"
               onClick={onInviteGuest}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:text-slate-800 hover:bg-black/5 active:scale-90 transition-all cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-background active:scale-90 transition-all cursor-pointer"
               title="Invite a guest"
               aria-label="Invite a guest for a limited time"
             >
@@ -151,7 +151,7 @@ export function ChatRoomHeader({
             <button
               type="button"
               onClick={onCommunityInfo}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:text-slate-800 hover:bg-black/5 active:scale-90 transition-all cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-background active:scale-90 transition-all cursor-pointer"
               title="Community Details"
               aria-label="Community details"
             >

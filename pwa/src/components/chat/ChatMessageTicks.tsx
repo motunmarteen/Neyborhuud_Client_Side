@@ -4,13 +4,17 @@ import type { ChatMessage } from '@/types/api';
 
 type ChatMessageTicksProps = {
   status?: ChatMessage['status'];
+  /** On the deep green bubble. */
+  light?: boolean;
 };
 
 /** WhatsApp-style delivery ticks on outgoing messages. */
-export function ChatMessageTicks({ status = 'sent' }: ChatMessageTicksProps) {
+export function ChatMessageTicks({ status = 'sent', light }: ChatMessageTicksProps) {
   const read = status === 'read';
   const delivered = status === 'delivered' || read;
 
+  const seen = light ? 'text-[#8FE3FF]' : 'text-[#1683B5]';
+  const plain = light ? 'text-white/70' : 'text-muted';
   const label = read ? 'Read' : delivered ? 'Delivered' : 'Sent';
 
   return (
@@ -21,11 +25,11 @@ export function ChatMessageTicks({ status = 'sent' }: ChatMessageTicksProps) {
     >
       {delivered ? (
         <>
-          <span className={`text-[12px] ${read ? 'text-[#34B7F1]' : 'text-gray-400'}`}>✓</span>
-          <span className={`text-[12px] ${read ? 'text-[#34B7F1]' : 'text-gray-400'}`}>✓</span>
+          <span className={`text-[12px] ${read ? seen : plain}`}>✓</span>
+          <span className={`text-[12px] ${read ? seen : plain}`}>✓</span>
         </>
       ) : (
-        <span className="text-[12px] text-gray-400">✓</span>
+        <span className={`text-[12px] ${plain}`}>✓</span>
       )}
     </span>
   );

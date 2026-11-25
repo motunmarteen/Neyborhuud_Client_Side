@@ -79,7 +79,7 @@ export function CommunityInfoSheet({ open, onClose, conversationId }: CommunityI
       await leaveMutation.mutateAsync(hubId);
       toast.success('You left the community.');
       onClose();
-      router.push('/friendship?tab=chats');
+      router.push('/chat');
     } catch { /* handled */ }
   };
 

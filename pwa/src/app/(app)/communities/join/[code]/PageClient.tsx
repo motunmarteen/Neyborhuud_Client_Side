@@ -1,28 +1,32 @@
 'use client';
 
+/** An invite link to a community: see what it is, then join. */
+
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
-import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
+import { RowAvatar, RowsSkeleton } from '@/components/friendship/PeopleRows';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { hubCommunityService } from '@/services/hubCommunity.service';
-import { useJoinHubCommunity } from '@/hooks/useHubCommunities';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import { toast } from '@/lib/toast';
+import { useTranslation } from '@/lib/i18n';
 
 export default function JoinByInvitePage() {
+  const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const code = params.code as string;
   const { user, mounted } = useClientAuthUser();
-  const joinMutation = useJoinHubCommunity();
+  const [joining, setJoining] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['invite-preview', code],
     queryFn: () => hubCommunityService.previewInvite(code),
     enabled: !!code,
   });
-
   const preview = data?.data?.hub;
 
   const handleJoin = async () => {
@@ -30,68 +34,51 @@ export default function JoinByInvitePage() {
       router.push(`/login?redirect=/communities/join/${code}`);
       return;
     }
+    setJoining(true);
     try {
       const res = await hubCommunityService.joinByCode(code);
       if (res.data?.pending) {
-        toast.success('Join request sent for admin approval');
+        toast.success(t('comm.requestSent'));
         return;
       }
       const cid = res.data?.conversationId ?? res.data?.hub?.conversationId;
       if (cid) router.push(`/chat/${cid}`);
       else if (preview?.id) router.push(`/communities/${preview.id}`);
     } catch {
-      toast.error('Could not join with this invite');
+      toast.error(t('comm.inviteFailed'));
+    } finally {
+      setJoining(false);
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !mounted) {
     return (
-      <AppBrowseLayout maxWidth="680">
-        <div className="mod-card h-32 animate-pulse rounded-2xl" />
+      <AppBrowseLayout>
+        <RowsSkeleton rows={2} />
       </AppBrowseLayout>
     );
   }
 
   if (isError || !preview) {
     return (
-      <AppBrowseLayout maxWidth="680">
-        <BrowseEmptyState
-          icon="link_off"
-          title="Invalid invite"
-          description="This link may have expired or been revoked."
-          action={
-            <Link href="/communities" className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary no-underline">
-              Browse communities
-            </Link>
-          }
-        />
+      <AppBrowseLayout>
+        <EmptyState icon="🔗" title={t('comm.badInvite')} description={t('comm.badInviteBody')} action={{ label: t('comm.seeAll'), href: '/communities' }} />
       </AppBrowseLayout>
     );
   }
 
   return (
-    <AppBrowseLayout maxWidth="680">
-      <div className="mod-card space-y-4 rounded-2xl p-5">
-        <h1 className="text-xl font-bold" style={{ color: 'var(--neu-text)' }}>
-          {preview.name}
-        </h1>
-        <p className="text-sm text-[var(--neu-text-muted)]">{preview.description}</p>
-        <p className="text-xs text-[var(--neu-text-muted)]">
-          {(preview.membersCount ?? 0).toLocaleString()} members
-        </p>
-        {mounted ? (
-          <button
-            type="button"
-            disabled={joinMutation.isPending}
-            onClick={() => void handleJoin()}
-            className="mod-chip mod-chip-active w-full rounded-xl py-3 text-sm font-bold text-primary disabled:opacity-50"
-          >
-            {joinMutation.isPending ? 'Joining…' : user ? 'Join community' : 'Sign in to join'}
-          </button>
-        ) : (
-          <div className="mod-inset h-12 animate-pulse rounded-xl" />
-        )}
-      </div>
+    <AppBrowseLayout>
+      <section className="flex flex-col items-center gap-3 rounded-[22px] bg-white px-6 py-8 text-center shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
+        <RowAvatar name={preview.name ?? ''} community />
+        <p className="text-sm text-muted">{t('comm.invited')}</p>
+        <h1 className="font-heading text-xl font-extrabold text-navy">{preview.name}</h1>
+        {preview.description ? <p className="max-w-sm text-sm leading-relaxed text-navy">{preview.description}</p> : null}
+        <p className="text-[13px] text-muted">{t('comm.members', { count: preview.membersCount ?? 0 })}</p>
+        <Button fullWidth loading={joining} onClick={() => void handleJoin()} className="mt-2 max-w-sm">
+          {t(user ? 'comm.joinLong' : 'comm.signInJoin')}
+        </Button>
+      </section>
     </AppBrowseLayout>
   );
 }

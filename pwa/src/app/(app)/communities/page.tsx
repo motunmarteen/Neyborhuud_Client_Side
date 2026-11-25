@@ -1,273 +1,135 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+/** Communities: estates, streets and groups near you. One list; tap a row for details, Join or Chat on the right. */
+
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, Zap, ShieldCheck, Plus, LogIn, Search } from 'lucide-react';
-import { toast } from '@/lib/toast';
+import { Plus } from 'lucide-react';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
-import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
-import { BrowseFilterChip } from '@/components/layout/BrowseFilterChip';
 import { BrowseSearchField } from '@/components/layout/BrowseSearchField';
-import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { CommunityRow } from '@/components/communities/CommunityRow';
 import { CreateCommunityModal } from '@/components/communities/CreateCommunityModal';
+import { LIST_CLASS, RowsSkeleton } from '@/components/friendship/PeopleRows';
+import { Button } from '@/components/ui/Button';
+import { FilterChip } from '@/components/ui/Chip';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { useHubCommunitiesList, useJoinHubCommunity } from '@/hooks/useHubCommunities';
 import { useClientAuthUser } from '@/hooks/useClientAuthUser';
 import { unwrapApiData } from '@/lib/apiPayload';
+import { toast } from '@/lib/toast';
+import { useTranslation } from '@/lib/i18n';
 import type { HubCategory } from '@/types/hubCommunity';
-import { ErrorState } from '@/components/ui/ErrorState';
 
-export const dynamic = 'force-dynamic';
-
-type ViewTab = 'all' | 'joined' | 'discover';
-
-type CategoryFilter = 'all' | HubCategory;
-
-const VIEW_TABS = [
-  { id: 'all', label: 'All', icon: 'groups' },
-  { id: 'joined', label: 'Joined', icon: 'group' },
-  { id: 'discover', label: 'Discover', icon: 'explore' },
-] as const;
-
-const CATEGORY_FILTERS: { id: CategoryFilter; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'security', label: 'Security' },
-  { id: 'residents', label: 'Residents' },
-  { id: 'trade', label: 'Trade' },
-  { id: 'sports', label: 'Sports' },
-  { id: 'volunteer', label: 'Volunteer' },
+/** One row of filters: everything, mine, then kinds. */
+type Filter = 'all' | 'joined' | Exclude<HubCategory, 'general'>;
+const FILTERS: { id: Filter; icon?: string }[] = [
+  { id: 'all' },
+  { id: 'joined' },
+  { id: 'residents', icon: '🏘️' },
+  { id: 'security', icon: '🛡️' },
+  { id: 'trade', icon: '🛒' },
+  { id: 'sports', icon: '⚽' },
+  { id: 'volunteer', icon: '🤝' },
 ];
 
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  tone = 'primary',
-}: {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  label: string;
-  value: string | number;
-  tone?: 'primary' | 'blue' | 'green';
-}) {
-  const toneClass =
-    tone === 'blue'
-      ? 'text-blue-600 bg-blue-50 border-blue-200'
-      : tone === 'green'
-        ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
-        : 'text-[#00B82E] bg-emerald-50 border-emerald-200';
-
-  return (
-    <div className="flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white p-3.5 shadow-2xs">
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${toneClass}`}>
-        <Icon size={20} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-lg font-extrabold tabular-nums text-slate-900">
-          {value}
-        </p>
-        <p className="text-xs font-medium text-slate-500">{label}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function CommunitiesPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user, mounted } = useClientAuthUser();
   const [search, setSearch] = useState('');
-  const [viewTab, setViewTab] = useState<ViewTab>('all');
-  const [category, setCategory] = useState<CategoryFilter>('all');
+  const [needle, setNeedle] = useState('');
+  const [filter, setFilter] = useState<Filter>('all');
   const [createOpen, setCreateOpen] = useState(false);
+  const [joiningId, setJoiningId] = useState<string | null>(null);
+
   // "Set up my estate" on a quiet map (?create=1) opens the create form straight away.
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('create') === '1') setCreateOpen(true);
   }, []);
-  const [pendingJoinId, setPendingJoinId] = useState<string | null>(null);
 
-  const joinedFilter =
-    viewTab === 'joined' ? 'true' : viewTab === 'discover' ? 'false' : 'all';
+  // Wait for a pause in typing before asking the server.
+  useEffect(() => {
+    const timer = setTimeout(() => setNeedle(search.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const { data, isLoading, isError, refetch } = useHubCommunitiesList(
     {
-      search: search || undefined,
-      category: category === 'all' ? undefined : category,
-      joined: joinedFilter as 'true' | 'false' | 'all',
+      search: needle || undefined,
+      category: filter === 'all' || filter === 'joined' ? undefined : filter,
+      joined: filter === 'joined' ? 'true' : 'all',
       limit: 50,
     },
     { enabled: mounted },
   );
-
-  const joinMutation = useJoinHubCommunity();
-
+  const join = useJoinHubCommunity();
   const hubs = data?.data?.hubs ?? [];
-
-  const joinedCount = useMemo(() => hubs.filter((h) => h.joined).length, [hubs]);
-  const highActivityCount = useMemo(
-    () => hubs.filter((h) => h.activityLevel === 'High').length,
-    [hubs],
-  );
 
   const handleJoin = async (id: string) => {
     if (!user) {
       router.push('/login?redirect=/communities');
       return;
     }
-    const hub = hubs.find((h) => h.id === id);
-    if (!hub || hub.joined) return;
-
-    setPendingJoinId(id);
+    setJoiningId(id);
     try {
-      const res = await joinMutation.mutateAsync(id);
-      const payload = unwrapApiData<{
-        pending?: boolean;
-        conversationId?: string;
-        hub?: { conversationId?: string };
-      }>(res as unknown);
+      const res = await join.mutateAsync(id);
+      const payload = unwrapApiData<{ pending?: boolean; conversationId?: string; hub?: { conversationId?: string } }>(res as unknown);
       if (payload?.pending) {
-        toast.success('Join request submitted — an admin will review it');
+        toast.success(t('comm.requestSent'));
         return;
       }
-      const conversationId = payload?.conversationId ?? payload?.hub?.conversationId;
-      if (conversationId) {
-        router.push(`/chat/${conversationId}`);
-      }
+      const cid = payload?.conversationId ?? payload?.hub?.conversationId;
+      if (cid) router.push(`/chat/${cid}`);
+    } catch {
+      toast.error(t('comm.joinFailed'));
     } finally {
-      setPendingJoinId(null);
+      setJoiningId(null);
     }
   };
+
+  const create = () => (user ? setCreateOpen(true) : router.push('/login?redirect=/communities'));
 
   return (
     <>
       <AppBrowseLayout
-        maxWidth="680"
         header={
-          <>
-            <BrowseTabStrip
-              tabs={[...VIEW_TABS]}
-              activeId={viewTab}
-              onChange={(id) => setViewTab(id as ViewTab)}
-              trailing={
-                mounted && user ? (
-                  <button
-                    type="button"
-                    onClick={() => setCreateOpen(true)}
-                    className="mod-fab flex h-9 w-9 items-center justify-center rounded-full border-0"
-                    aria-label="Create community"
-                  >
-                    <span className="material-symbols-outlined text-[20px] text-white">add</span>
-                  </button>
-                ) : null
-              }
-            />
-
-            <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
-              {CATEGORY_FILTERS.filter((f) => f.id !== 'all').map((item) => (
-                <BrowseFilterChip
-                  key={item.id}
-                  active={category === item.id}
-                  onClick={() => setCategory(category === item.id ? 'all' : item.id)}
-                >
-                  {item.label}
-                </BrowseFilterChip>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <BrowseSearchField className="min-w-0 flex-1" value={search} onChange={setSearch} placeholder={t('comm.search')} />
+              <Button size="md" onClick={create} leftIcon={<Plus size={18} aria-hidden />}>
+                {t('comm.create')}
+              </Button>
+            </div>
+            <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 py-1" role="group" aria-label={t('comm.filter')}>
+              {FILTERS.map((f) => (
+                <FilterChip key={f.id} active={filter === f.id} onClick={() => setFilter(f.id)} icon={f.icon}>
+                  {t(`comm.f.${f.id}`)}
+                </FilterChip>
               ))}
             </div>
-
-            <BrowseSearchField
-              value={search}
-              onChange={setSearch}
-              placeholder="Search communities…"
-            />
-          </>
+          </div>
         }
       >
-        <div className="space-y-5">
-          {!mounted ? (
-            <div className="mod-inset h-12 w-full animate-pulse rounded-xl" aria-hidden />
-          ) : user ? (
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
-              className="mod-chip mod-chip-active inline-flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-primary"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Create a community
-            </button>
+        {!mounted || isLoading ? (
+          <RowsSkeleton />
+        ) : isError ? (
+          <ErrorState onRetry={() => void refetch()} homeHref={null} />
+        ) : hubs.length === 0 ? (
+          needle ? (
+            <EmptyState icon="🔎" title={t('comm.noMatch')} description={t('comm.noMatchBody')} />
+          ) : filter === 'joined' ? (
+            <EmptyState icon="🏘️" title={t('comm.noneJoined')} description={t('comm.noneJoinedBody')} action={{ label: t('comm.seeAll'), onClick: () => setFilter('all') }} />
           ) : (
-            <Link
-              href="/login?redirect=/communities"
-              className="mod-card flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold no-underline"
-            >
-              <span className="material-symbols-outlined text-[18px] text-primary">login</span>
-              Sign in to create or join communities
-            </Link>
-          )}
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard icon={Users} label="Showing" value={hubs.length} />
-            <StatCard icon={ShieldCheck} label="Joined here" value={joinedCount} tone="blue" />
-            <StatCard icon={Zap} label="High activity" value={highActivityCount} tone="green" />
-          </div>
-
-          {isLoading ? (
-            <div className="mod-card space-y-2 rounded-2xl p-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="mod-inset h-16 animate-pulse rounded-xl" />
-              ))}
-            </div>
-          ) : isError ? (
-            <ErrorState onRetry={() => void refetch()} homeHref={null} />
-          ) : hubs.length === 0 ? (
-            <BrowseEmptyState
-              icon="groups"
-              title="No communities found"
-              description={
-                viewTab === 'joined'
-                  ? 'Join or create a community to see it here.'
-                  : 'Try a different search or create the first one for your Huud.'
-              }
-              filledIcon
-              action={
-                !mounted ? null : user ? (
-                  <button
-                    type="button"
-                    onClick={() => setCreateOpen(true)}
-                    className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary"
-                  >
-                    Create community
-                  </button>
-                ) : (
-                  <Link
-                    href="/login?redirect=/communities"
-                    className="mod-chip mod-chip-active rounded-full px-4 py-2 text-sm font-bold text-primary no-underline"
-                  >
-                    Sign in
-                  </Link>
-                )
-              }
-            />
-          ) : (
-            <div>
-              <h2 className="mb-3 text-base font-bold" style={{ color: 'var(--neu-text)' }}>
-                Hyperlocal hubs
-              </h2>
-              <div
-                className="mod-card divide-y overflow-hidden rounded-2xl"
-                style={{ borderColor: 'var(--neu-shadow-dark)' }}
-              >
-                {hubs.map((community) => (
-                  <CommunityRow
-                    key={community.id}
-                    community={community}
-                    joined={community.joined}
-                    onJoin={handleJoin}
-                    joinPending={pendingJoinId === community.id}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+            <EmptyState icon="🏘️" title={t('comm.none')} description={t('comm.noneBody')} action={{ label: t('comm.createLong'), onClick: create }} />
+          )
+        ) : (
+          <ul className={LIST_CLASS}>
+            {hubs.map((c) => (
+              <CommunityRow key={c.id} community={c} onJoin={handleJoin} joinPending={joiningId === c.id} />
+            ))}
+          </ul>
+        )}
       </AppBrowseLayout>
 
       <CreateCommunityModal isOpen={createOpen} onClose={() => setCreateOpen(false)} />

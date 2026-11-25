@@ -32,7 +32,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
 | 3. Map home (sky + live map) | 14 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; low-data mode, speed done; left: M-14 crown (waits on Phase 7), M-17 living map, mockup extras |
-| 4. Screens (restyle all 95) | 25 | 95 | 🟡 Getting started + Home, map and feed done; Chats next |
+| 4. Screens (restyle all 95) | 31 | 95 | 🟡 Getting started + Home, map and feed done; Chats and communities done; Sentinel next |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
 | 7. Gamification backend | 18 | 18 | ✅ done 2026-10-18 (server + app); airtime/data and contributor payouts wait for the legal check |
@@ -255,12 +255,12 @@ Shared pieces restyled with this group (used by later groups too): list-page hea
 
 ### Chats and communities (6)
 
-- [ ] S-026 `/chat/[conversationId]` → Chats → conversation
-- [ ] S-027 `/communities` → Chats → Groups / Everything → Communities
-- [ ] S-028 `/communities/[id]` → Chats → Groups / Everything → Communities
-- [ ] S-029 `/communities/join/[code]` → Chats → Groups / Everything → Communities
-- [ ] S-030 `/friendship` → Chats tab (inbox, find neighbours)
-- [ ] S-031 `/messages/[conversationId]` → Chats → conversation
+- [x] S-026 (2026-11-25) `/chat/[conversationId]` → Chats → conversation: deep green and white bubbles on the pale page, 44px header buttons, readable times and ticks
+- [x] S-027 (2026-11-25) `/communities` → Chats → Groups / Everything → Communities: one search, one chip row, one list; fake-looking stat boxes removed; Create form rebuilt (was see-through)
+- [x] S-028 (2026-11-25) `/communities/[id]` → Chats → Groups / Everything → Communities: one main button, members, waiting people, 7-day invite link; leave asks first; "verified members" claim removed
+- [x] S-029 (2026-11-25) `/communities/join/[code]` → Chats → Groups / Everything → Communities: invite card
+- [x] S-030 (2026-11-25) `/friendship` → Chats tab (inbox, find neighbours): People: Near me / Following / Followers with Message and Follow; map of homes removed
+- [x] S-031 (2026-11-25) `/messages/[conversationId]` → Chats → conversation: redirect to the chat (unchanged)
 
 ### Sentinel (safety) (20)
 

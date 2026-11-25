@@ -55,7 +55,7 @@ function getRouteTitle(pathname: string) {
 
   const map: Record<string, string> = {
     feed: 'Huud Feed',
-    friendship: 'Connections',
+    friendship: 'People',
     marketplace: 'Marketplace',
     communities: 'Communities',
     neighborhood: 'My Huud',
@@ -78,7 +78,7 @@ function getRouteTitle(pathname: string) {
     gossip: 'Feed',
     gist: 'Feed',
     messages: 'Messages',
-    chat: 'Chat',
+    chat: 'Chats',
     info: 'Info',
     sos: 'Safety Alert',
     profile: 'Profile',

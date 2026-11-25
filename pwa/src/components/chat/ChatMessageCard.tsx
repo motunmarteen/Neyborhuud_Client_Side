@@ -6,8 +6,8 @@
  * All cards are self-contained and fail safely (fallback to text bubble).
  *
  * ── Sentinel Design System ──
- * Outgoing: bg-slate-800 text-white  (premium dark bubble)
- * Incoming: bg-gray-100 text-gray-900 (clean, light bubble)
+ * Outgoing: deep green with white text
+ * Incoming: white with navy text, on the pale page
  * Specialty cards: soft tinted backgrounds (blue-50, red-50, etc.)
  */
 
@@ -60,12 +60,13 @@ function timeStr(dateStr: string | undefined): string {
   return dt.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
 }
 
-function Meta({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
+/** `light`: on the deep green of my own bubble. Everywhere else it sits on white or the pale page. */
+function Meta({ msg, mine, light }: { msg: ChatMessage; mine: boolean; light?: boolean }) {
   return (
-    <div className={`flex shrink-0 items-center justify-end gap-1 text-[10px] ${mine ? 'text-white/60' : 'text-gray-400'}`}>
+    <div className={`flex shrink-0 items-center justify-end gap-1 text-[10px] ${light ? 'text-white/85' : 'text-muted'}`}>
       {msg.isEdited && !msg.isDeleted ? <span className="italic">Edited</span> : null}
       <span>{timeStr(msg.createdAt)}</span>
-      {mine ? <ChatMessageTicks status={msg.status} /> : null}
+      {mine ? <ChatMessageTicks status={msg.status} light={light} /> : null}
     </div>
   );
 }
@@ -626,15 +627,15 @@ function AudioBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
 
 function FileBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   return (
-    <div className={`flex items-center gap-3 rounded-2xl px-4 py-3 max-w-[280px] ${mine ? 'bg-slate-700' : 'bg-gray-100'}`}>
+    <div className={`flex items-center gap-3 rounded-2xl px-4 py-3 max-w-[280px] ${mine ? 'bg-[#0B7A36]' : 'bg-white'}`}>
       <span className="text-2xl">📎</span>
       <div className="min-w-0 flex-1">
-        <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className={`block truncate text-sm font-medium hover:underline ${mine ? 'text-blue-300' : 'text-blue-600'}`}>
+        <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className={`block truncate text-sm font-medium hover:underline ${mine ? 'text-white' : 'text-brand-green-dark'}`}>
           {msg.content}
         </a>
-        <p className={`text-[10px] mt-0.5 ${mine ? 'text-white/50' : 'text-gray-400'}`}>Document</p>
+        <p className={`text-[10px] mt-0.5 ${mine ? 'text-white/85' : 'text-muted'}`}>Document</p>
       </div>
-      <Meta msg={msg} mine={mine} />
+      <Meta msg={msg} mine={mine} light={mine} />
     </div>
   );
 }
@@ -672,17 +673,17 @@ function DocumentBubble({ msg, mine }: { msg: ChatMessage; mine: boolean }) {
   const icon = DOC_ICON_BY_EXT[ext] ?? '📄';
   const size = formatFileSize(msg.fileSize);
   return (
-    <div className={`flex items-center gap-3 rounded-2xl px-4 py-3 max-w-[280px] ${mine ? 'bg-slate-700' : 'bg-gray-100'}`}>
+    <div className={`flex items-center gap-3 rounded-2xl px-4 py-3 max-w-[280px] ${mine ? 'bg-[#0B7A36]' : 'bg-white'}`}>
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black/10 text-2xl">{icon}</span>
       <div className="min-w-0 flex-1">
-        <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" download className={`block truncate text-sm font-medium hover:underline ${mine ? 'text-blue-300' : 'text-blue-600'}`}>
+        <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" download className={`block truncate text-sm font-medium hover:underline ${mine ? 'text-white' : 'text-brand-green-dark'}`}>
           {msg.fileName ?? msg.content}
         </a>
-        <p className={`text-[10px] mt-0.5 ${mine ? 'text-white/50' : 'text-gray-400'}`}>
+        <p className={`text-[10px] mt-0.5 ${mine ? 'text-white/85' : 'text-muted'}`}>
           {[ext, size].filter(Boolean).join(' · ') || 'Document'}
         </p>
       </div>
-      <Meta msg={msg} mine={mine} />
+      <Meta msg={msg} mine={mine} light={mine} />
     </div>
   );
 }
@@ -700,8 +701,8 @@ function TextBubble({
   const bubbleClass = isPriority
     ? 'rounded-[20px] bg-red-50 text-red-900 px-4 py-1.5 max-w-[280px] sm:max-w-xs border border-red-100'
     : mine
-      ? 'rounded-[20px] bg-slate-800 text-white px-4 py-1.5 max-w-[280px] sm:max-w-xs shadow-sm'
-      : 'rounded-[20px] bg-gray-100 text-gray-900 px-4 py-1.5 max-w-[280px] sm:max-w-xs shadow-sm';
+      ? 'rounded-[20px] rounded-br-md bg-[#0B7A36] text-white px-4 py-2 max-w-[280px] sm:max-w-xs shadow-sm'
+      : 'rounded-[20px] rounded-bl-md bg-white text-navy px-4 py-2 max-w-[280px] sm:max-w-xs shadow-sm';
 
   return (
     <div>
@@ -718,7 +719,7 @@ function TextBubble({
               <ChatExpandableText text={msg.content ?? ''} />
             </div>
           )}
-          <Meta msg={msg} mine={mine} />
+          <Meta msg={msg} mine={mine} light={mine && !isPriority} />
         </div>
       </div>
     </div>

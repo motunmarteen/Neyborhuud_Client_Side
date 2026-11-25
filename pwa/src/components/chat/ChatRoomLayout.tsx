@@ -35,7 +35,7 @@ export function ChatRoomLayout({ header, banners, children, composer, scrollCont
         {header}
         {banners ? <div className="border-b border-gray-100">{banners}</div> : null}
       </div>
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scroll-smooth !bg-white">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scroll-smooth bg-background">
         <div className="mx-auto w-full max-w-[600px] px-1 pb-4">
           {children}
         </div>

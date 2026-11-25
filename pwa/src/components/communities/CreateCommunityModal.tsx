@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { BottomSheetOverlay } from '@/components/ui/BottomSheetOverlay';
+import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
+import { Button } from '@/components/ui/Button';
+import { useTranslation } from '@/lib/i18n';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/lib/toast';
@@ -10,14 +12,17 @@ import { getErrorMessage } from '@/lib/error-handler';
 import { unwrapApiData } from '@/lib/apiPayload';
 import type { HubCategory, HubCommunity } from '@/types/hubCommunity';
 
-const CATEGORIES: { id: HubCategory; label: string; icon: string }[] = [
-  { id: 'security', label: 'Security & Safety', icon: 'shield' },
-  { id: 'residents', label: 'Residents', icon: 'home' },
-  { id: 'trade', label: 'Local Trade', icon: 'storefront' },
-  { id: 'sports', label: 'Sports', icon: 'sports_soccer' },
-  { id: 'volunteer', label: 'Volunteer', icon: 'volunteer_activism' },
-  { id: 'general', label: 'General', icon: 'groups' },
+const CATEGORIES: { id: HubCategory; icon: string }[] = [
+  { id: 'security', icon: 'shield' },
+  { id: 'residents', icon: 'home' },
+  { id: 'trade', icon: 'storefront' },
+  { id: 'sports', icon: 'sports_soccer' },
+  { id: 'volunteer', icon: 'volunteer_activism' },
+  { id: 'general', icon: 'groups' },
 ];
+
+const FIELD =
+  'w-full rounded-2xl bg-background px-4 py-3 text-[15px] text-navy placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 type CreateCommunityModalProps = {
   isOpen: boolean;
@@ -25,6 +30,7 @@ type CreateCommunityModalProps = {
 };
 
 export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const createHub = useCreateHubCommunity();
@@ -61,7 +67,7 @@ export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalPr
       await queryClient.invalidateQueries({ queryKey: ['hub-communities'] });
       await queryClient.invalidateQueries({ queryKey: ['conversations'] });
 
-      toast.success('Community created — opening chat…');
+      toast.success(t('comm.form.done'));
       onClose();
       setName('');
       setDescription('');
@@ -76,108 +82,74 @@ export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalPr
         router.push(`/communities/${hub.id}`);
       }
     } catch (err: unknown) {
-      setError(getErrorMessage(err) || 'Could not create community.');
+      setError(getErrorMessage(err) || t('comm.form.failed'));
     }
   };
 
+  const toggles = [
+    { label: t('comm.form.private'), on: visibility === 'private', set: (v: boolean) => setVisibility(v ? 'private' : 'public') },
+    { label: t('comm.form.approve'), on: joinApprovalRequired, set: setJoinApprovalRequired },
+    { label: t('comm.form.adminsPost'), on: onlyAdminsCanPost, set: setOnlyAdminsCanPost },
+  ];
+
   return (
-    <BottomSheetOverlay
+    <AppBottomSheet
       open={isOpen}
       onClose={onClose}
-      ariaLabel="Create community"
-      zIndexClass="z-[80]"
-      alignClass="items-end justify-center overflow-hidden p-3 sm:items-center sm:p-4"
-      backdropClassName="bg-black/50"
-      panelClassName="mod-card box-border max-h-[min(92vh,720px)] w-full max-w-lg min-w-0 overflow-y-auto rounded-2xl p-4 sm:p-5"
-      handleClassName="pt-2 pb-0"
+      title={t('comm.createLong')}
+      description={t('comm.form.body')}
+      footer={
+        <>
+          {error ? <p role="alert" className="mb-2 text-[13px] font-bold text-brand-red">{error}</p> : null}
+          <Button type="submit" form="create-community" fullWidth loading={createHub.isPending} disabled={!name.trim()}>
+            {t('comm.form.submit')}
+          </Button>
+          <p className="mt-2 text-center text-xs text-muted">{t('comm.form.cost')}</p>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <h2 className="text-lg font-bold" style={{ color: 'var(--neu-text)' }}>
-            Create community
-          </h2>
-          <button type="button" onClick={onClose} className="mod-chip shrink-0 rounded-full px-2 py-1 text-sm">
-            Close
-          </button>
-        </div>
-
-        <p className="mb-4 text-xs leading-relaxed text-[var(--neu-text-muted)]">
-          Start a group for your Huud — chat, share updates, and grow your neighbourhood community.
-        </p>
-
+      <form id="create-community" onSubmit={handleSubmit} className="flex flex-col gap-3 pb-4">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Community name"
-          className="mod-inset mb-3 w-full rounded-xl px-3 py-2.5 text-sm"
+          placeholder={t('comm.form.name')}
+          aria-label={t('comm.form.name')}
+          className={FIELD}
           maxLength={80}
           required
         />
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="What is this community about?"
-          className="mod-inset mb-3 min-h-[88px] w-full rounded-xl px-3 py-2.5 text-sm"
+          placeholder={t('comm.form.about')}
+          aria-label={t('comm.form.about')}
+          className={`${FIELD} min-h-[84px]`}
           maxLength={500}
         />
-
-        <span className="mb-2 block text-xs font-semibold text-[var(--neu-text-muted)]">Category</span>
-        <div className="browse-chip-row browse-chip-row--scroll no-scrollbar mb-3">
+        <div className="flex flex-wrap gap-2" role="group" aria-label={t('comm.form.kind')}>
           {CATEGORIES.map((c) => (
             <button
               key={c.id}
               type="button"
+              aria-pressed={category === c.id}
               onClick={() => setCategory(c.id)}
-              className={`mod-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
-                category === c.id ? 'mod-chip-active text-primary' : ''
+              className={`tap-target inline-flex min-h-9 items-center rounded-full px-3.5 text-[13px] font-bold transition-colors ${
+                category === c.id ? 'bg-navy text-white' : 'bg-background text-navy hover:bg-[#E6EAF0]'
               }`}
             >
-              {c.label}
+              {t(`comm.kind.${c.id}`)}
             </button>
           ))}
         </div>
-
-        <label className="mb-2 flex items-center justify-between gap-3 text-sm">
-          <span style={{ color: 'var(--neu-text)' }}>Private community</span>
-          <input
-            type="checkbox"
-            checked={visibility === 'private'}
-            onChange={(e) => setVisibility(e.target.checked ? 'private' : 'public')}
-          />
-        </label>
-        <label className="mb-2 flex items-center justify-between gap-3 text-sm">
-          <span style={{ color: 'var(--neu-text)' }}>Require admin approval to join</span>
-          <input
-            type="checkbox"
-            checked={joinApprovalRequired}
-            onChange={(e) => setJoinApprovalRequired(e.target.checked)}
-          />
-        </label>
-        <label className="mb-4 flex items-center justify-between gap-3 text-sm">
-          <span style={{ color: 'var(--neu-text)' }}>Only admins can post</span>
-          <input
-            type="checkbox"
-            checked={onlyAdminsCanPost}
-            onChange={(e) => setOnlyAdminsCanPost(e.target.checked)}
-          />
-        </label>
-
-        {/* HuudCredit cost notice */}
-        <div className="mb-3 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-[12px] text-amber-700">
-          <span className="material-symbols-outlined text-[16px]">toll</span>
-          <span>Creating a community costs <strong>200 HuudCredit</strong> and requires a Silver balance (500+ coins).</span>
+        <div>
+          {toggles.map((x) => (
+            <label key={x.label} className="flex min-h-12 items-center justify-between gap-3 text-sm font-semibold text-navy">
+              {x.label}
+              <input type="checkbox" checked={x.on} onChange={(e) => x.set(e.target.checked)} className="h-5 w-5 accent-[#0E8A3E]" />
+            </label>
+          ))}
         </div>
-
-        {error ? <p className="mb-3 text-sm text-brand-red">{error}</p> : null}
-
-        <button
-          type="submit"
-          disabled={createHub.isPending || !name.trim()}
-          className="mod-chip mod-chip-active w-full rounded-xl py-3 text-sm font-bold text-primary disabled:opacity-50"
-        >
-          {createHub.isPending ? 'Creating…' : 'Create & open chat'}
-        </button>
       </form>
-    </BottomSheetOverlay>
+    </AppBottomSheet>
   );
 }

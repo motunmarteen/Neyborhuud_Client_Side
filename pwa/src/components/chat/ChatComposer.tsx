@@ -88,7 +88,7 @@ export function ChatComposer({
             </span>
           </div>
         ) : (
-        <div className="relative flex flex-1 items-end bg-slate-100/90 border border-black/[0.05] rounded-[22px]">
+        <div className="relative flex flex-1 items-end rounded-[22px] bg-background">
           <textarea
             ref={textareaRef}
             rows={1}
@@ -107,9 +107,9 @@ export function ChatComposer({
             }}
             onKeyDown={onKeyDown}
             placeholder={placeholderText}
-            className="w-full resize-none overflow-y-auto bg-transparent px-4 py-2.5 text-[15px] leading-tight text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            className="w-full resize-none overflow-y-auto bg-transparent px-4 py-2.5 text-[15px] leading-tight text-navy placeholder:text-muted focus:outline-none"
             aria-label="Message"
-            style={{ minHeight: '40px' }}
+            style={{ minHeight: '44px' }}
           />
 
           {inputText.length > 8000 ? (
@@ -133,12 +133,12 @@ export function ChatComposer({
             }
           }}
           disabled={sending && !canSend}
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all mb-0.5 active:scale-95 disabled:opacity-50 cursor-pointer shadow-xs ${
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-xs ${
             canSend
               ? 'bg-[#00B82E] text-white hover:bg-[#00B02A]'
               : recording
                 ? 'scale-125 bg-rose-500 text-white'
-                : 'bg-slate-900 text-white hover:bg-black'
+                : 'bg-navy text-white'
           }`}
           style={canSend ? undefined : { touchAction: 'none' }}
           aria-label={canSend ? "Send message" : "Hold to record a voice message, tap for recorder"}

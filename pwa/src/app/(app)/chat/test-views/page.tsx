@@ -68,7 +68,7 @@ function Phase3TestViews() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => router.push('/friendship?tab=chats')}
+              onClick={() => router.push('/chat')}
               className="flex h-9 w-9 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer"
               aria-label="Back to chats"
             >
@@ -86,7 +86,7 @@ function Phase3TestViews() {
           </div>
           <button
             type="button"
-            onClick={() => router.push('/friendship?tab=chats')}
+            onClick={() => router.push('/chat')}
             className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 active:scale-95 transition-all"
           >
             Chats Stream
