@@ -206,7 +206,7 @@ export function DealStatusCard({
     <div className={`overflow-hidden rounded-2xl ${style.bg} max-w-[300px] sm:max-w-sm`}>
       <div className={`flex items-center gap-2 px-3 py-2 ${style.text}`}>
         <span className="text-base">{style.icon}</span>
-        <span className="text-[11px] font-bold uppercase tracking-wide opacity-70">
+        <span className="text-[13px] font-bold opacity-70">
           {isService ? 'Service Booking' : 'NeyborHuud Deal'} · {style.label}
         </span>
       </div>
@@ -253,7 +253,7 @@ export function DealStatusCard({
         {/* Seller's account for the buyer to pay directly (buyer view only). */}
         {buyerNeedsAccount && payout && payout !== 'none' && (
           <div className="mt-2 rounded-xl border border-black/[0.06] bg-white/70 p-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+            <p className="text-[13px] font-bold text-gray-400">
               Pay the {isService ? 'provider' : 'seller'} directly
             </p>
             <p className="mt-0.5 text-sm font-bold text-gray-900">
@@ -299,7 +299,7 @@ export function DealStatusCard({
 
         {!isService && action === 'shipped' && meta.trackingNumber && (
           <p className="mt-2 rounded-xl border border-black/[0.06] bg-white/70 p-2.5">
-            <span className="block text-[10px] font-bold uppercase tracking-wide text-gray-400">
+            <span className="block text-[13px] font-bold text-gray-400">
               Tracking
             </span>
             <span className="text-sm font-bold text-gray-900">

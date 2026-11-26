@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AppBrowseLayout } from "@/components/layout/AppBrowseLayout";
-import { LocalHuudHubHeader } from "@/components/local-huud/LocalHuudHubHeader";
+import { LocalHuudHubHeader, LocalHuudHubPrimaryAction } from "@/components/local-huud/LocalHuudHubHeader";
 import { JobsBrowse, JobsToolbar } from "@/components/work/JobsBrowse";
 import type { JobsFilterState } from "@/components/jobs/JobFilters";
 
@@ -16,6 +16,7 @@ export default function JobsPage() {
       maxWidth="680"
       header={
         <LocalHuudHubHeader
+          action={<LocalHuudHubPrimaryAction href="/jobs/create" label="Post job" />}
           hubId="jobs"
           toolbar={
             <JobsToolbar

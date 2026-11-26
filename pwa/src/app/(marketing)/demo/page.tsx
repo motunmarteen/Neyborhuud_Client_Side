@@ -248,7 +248,7 @@ export default function NeumorphicDemo() {
                 )}
             </div>
 
-            <p className="mt-12 text-[10px] font-bold uppercase tracking-[0.6em] text-deep-text/10 text-center">
+            <p className="mt-12 text-[13px] font-bold text-deep-text/10 text-center">
                 Bento UI v1.0
             </p>
         </div>

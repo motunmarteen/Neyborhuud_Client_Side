@@ -79,7 +79,7 @@ function CardShell({ icon, label, bg, text, children, mine, msg }: {
     <div className={`overflow-hidden rounded-2xl ${bg} max-w-[280px] sm:max-w-xs`}>
       <div className={`flex items-center gap-2 px-3 py-2 ${text}`}>
         <span className="text-base">{icon}</span>
-        <span className="text-[11px] font-bold uppercase tracking-wide opacity-70">{label}</span>
+        <span className="text-[13px] font-bold opacity-70">{label}</span>
       </div>
       <div className="px-3 pb-2 pt-1">
         {children}
@@ -708,7 +708,7 @@ function TextBubble({
     <div>
       <div className={bubbleClass}>
         {isPriority ? (
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-red-600">Priority</p>
+          <p className="mb-1 text-[13px] font-bold text-red-600">Priority</p>
         ) : null}
         {!msg.isDeleted ? <ReplyQuote msg={msg} mine={mine} /> : null}
         <div className="flex flex-wrap items-end gap-x-2 gap-y-1">

@@ -57,15 +57,10 @@ function HelpRequestPageInner() {
         maxWidth="680"
         header={
           <LocalHuudHubHeader
+            action={<LocalHuudHubPrimaryAction label="Post request" onClick={() => setIsCreateModalOpen(true)} />}
             hubId="help-request"
             toolbar={
               <div className="space-y-3">
-                <div className="flex justify-end">
-                  <LocalHuudHubPrimaryAction
-                    label="Post request"
-                    onClick={() => setIsCreateModalOpen(true)}
-                  />
-                </div>
                 <HelpRequestCategoryTabs
                   activeCategory={categoryFilter}
                   onCategoryChange={setCategoryFilter}

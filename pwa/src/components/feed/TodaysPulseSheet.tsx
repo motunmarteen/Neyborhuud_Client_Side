@@ -33,7 +33,7 @@ function dayName(date: string, i: number): string {
 }
 
 const Heading = ({ children }: { children: string }) => (
-  <h3 className="px-1 text-[11px] font-black uppercase tracking-[0.14em] text-muted">{children}</h3>
+  <h3 className="px-1 text-[13px] font-bold text-muted">{children}</h3>
 );
 
 const Empty = ({ children }: { children: string }) => (

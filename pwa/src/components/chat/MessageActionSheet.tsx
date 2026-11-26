@@ -236,7 +236,7 @@ export function MessageActionSheet({
         </>
       ) : (
         <div className="w-56 py-1">
-          <p className="px-4 pb-1.5 pt-2 text-[11px] font-bold uppercase tracking-wide text-gray-400">Report message</p>
+          <p className="px-4 pb-1.5 pt-2 text-[13px] font-bold text-gray-400">Report message</p>
           {REPORT_REASONS.map((r) => (
             <button
               key={r.value}

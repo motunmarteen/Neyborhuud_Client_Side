@@ -50,7 +50,7 @@ export function TripsActivePanel({
       <div className="mod-card rounded-2xl p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Live trip</p>
+            <p className="text-[13px] font-bold text-primary">Live trip</p>
             <h2 className="mt-1 text-base font-bold" style={{ color: 'var(--neu-text)' }}>
               {trip.originText} → {trip.destinationText}
             </h2>
@@ -75,7 +75,7 @@ export function TripsActivePanel({
 
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <div className="mod-inset rounded-xl p-2 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>
+            <p className="text-[13px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>
               ETA
             </p>
             <p className="mt-0.5 text-xs font-semibold" style={{ color: 'var(--neu-text)' }}>
@@ -83,7 +83,7 @@ export function TripsActivePanel({
             </p>
           </div>
           <div className="mod-inset rounded-xl p-2 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>
+            <p className="text-[13px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>
               Next check-in
             </p>
             <p className={`mt-0.5 text-xs font-semibold ${dueSoon ? 'text-primary' : ''}`} style={{ color: dueSoon ? undefined : 'var(--neu-text)' }}>
@@ -91,7 +91,7 @@ export function TripsActivePanel({
             </p>
           </div>
           <div className="mod-inset rounded-xl p-2 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>
+            <p className="text-[13px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>
               Deviation
             </p>
             <p className="mt-0.5 text-xs font-semibold" style={{ color: 'var(--neu-text)' }}>
@@ -99,7 +99,7 @@ export function TripsActivePanel({
             </p>
           </div>
           <div className="mod-inset rounded-xl p-2 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>
+            <p className="text-[13px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>
               Escalation
             </p>
             <div className="mt-1 flex justify-center gap-0.5">

@@ -727,7 +727,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                     <div className="px-5 pt-3 pb-3">
                                         <div className="flex items-start justify-between gap-3">
                                             <div>
-                                                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+                                                <p className="text-[13px] font-extrabold text-[#9AA3B1]">
                                                     Create post
                                                 </p>
                                                 <h2 className="text-base font-black tracking-tight text-[#1D2433] mt-0.5">
@@ -928,7 +928,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                             <div className="flex flex-col gap-3.5 p-4 rounded-2xl bg-black/[0.01]  border border-black/[0.05]  shadow-sm animate-fadeIn">
                                                 {!defaultFyiSubtype && (
                                                     <div>
-                                                        <label className="block text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: 'var(--neu-text-muted)' }}>
+                                                        <label className="block text-[13px] font-bold mb-1.5" style={{ color: 'var(--neu-text-muted)' }}>
                                                             FYI Subtype
                                                         </label>
                                                         <PostFormSelect
@@ -945,7 +945,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <label className="block text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: 'var(--neu-text-muted)' }}>
+                                                    <label className="block text-[13px] font-bold mb-1.5" style={{ color: 'var(--neu-text-muted)' }}>
                                                         Contact Info (optional)
                                                     </label>
                                                     <input
@@ -963,12 +963,12 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         {/* Event-Specific Fields */}
                                         {contentType === 'event' && (
                                             <div className="flex flex-col gap-3.5 p-4 rounded-2xl bg-black/[0.01]  border border-black/[0.05]  shadow-sm animate-fadeIn">
-                                                <label className="block text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
+                                                <label className="block text-[13px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>
                                                     📅 Event Schedule &amp; venue
                                                 </label>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Date *</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Date *</label>
                                                         <input
                                                             type="date"
                                                             value={eventDate}
@@ -979,7 +979,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Time</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Time</label>
                                                         <input
                                                             type="time"
                                                             value={eventTime}
@@ -990,7 +990,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Venue Name *</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Venue Name *</label>
                                                     <input
                                                         type="text"
                                                         value={venueName}
@@ -1002,7 +1002,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Venue Address</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Venue Address</label>
                                                     <input
                                                         type="text"
                                                         value={venueAddress}
@@ -1014,7 +1014,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Ticket Access</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Ticket Access</label>
                                                         <PostFormSelect
                                                             value={ticketInfo}
                                                             onChange={(v) => setTicketInfo(v as 'free' | 'paid')}
@@ -1027,7 +1027,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                     {ticketInfo === 'paid' && (
                                                         <div className="flex-1">
-                                                            <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Price (₦) *</label>
+                                                            <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Price (₦) *</label>
                                                             <input
                                                                 type="number"
                                                                 value={ticketPrice}
@@ -1043,7 +1043,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Max Capacity</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Max Capacity</label>
                                                         <input
                                                             type="number"
                                                             value={capacity}
@@ -1055,7 +1055,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Category</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Category</label>
                                                         <PostFormSelect
                                                             value={eventCategory}
                                                             onChange={(v) => setEventCategory(v)}
@@ -1071,7 +1071,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Organizer</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Organizer</label>
                                                     <input
                                                         type="text"
                                                         value={organizer}
@@ -1087,12 +1087,12 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         {/* Marketplace-Specific Fields */}
                                         {contentType === 'marketplace' && (
                                             <div className="flex flex-col gap-3.5 p-4 rounded-2xl bg-black/[0.01]  border border-black/[0.05]  shadow-sm animate-fadeIn">
-                                                <label className="block text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
+                                                <label className="block text-[13px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>
                                                     🛒 Marketplace Details
                                                 </label>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Price (₦) *</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Price (₦) *</label>
                                                         <input
                                                             type="number"
                                                             value={price}
@@ -1120,7 +1120,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Category *</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Category *</label>
                                                     <PostFormSelect
                                                         value={itemCategory}
                                                         onChange={(v) => setItemCategory(v)}
@@ -1139,7 +1139,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Condition *</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Condition *</label>
                                                         <PostFormSelect
                                                             value={itemCondition}
                                                             onChange={(v) => setItemCondition(v as any)}
@@ -1153,7 +1153,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Delivery Option</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Delivery Option</label>
                                                         <PostFormSelect
                                                             value={deliveryOption}
                                                             onChange={(v) => setDeliveryOption(v as any)}
@@ -1167,7 +1167,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Contact Method</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Contact Method</label>
                                                     <input
                                                         type="text"
                                                         value={contactMethod}
@@ -1201,7 +1201,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             {s < 3 && <div className="w-6 h-px" style={{ background: 'var(--neu-shadow-light)' }} />}
                                                         </div>
                                                     ))}
-                                                    <span className="text-[10px] ml-1.5 font-bold uppercase tracking-wider text-neu-text-secondary/60 ">
+                                                    <span className="text-[13px] ml-1.5 font-bold text-neu-text-secondary/60 ">
                                                         {hrStep === 1 ? 'Category' : hrStep === 2 ? 'Funding' : 'Payment Details'}
                                                     </span>
                                                 </div>
@@ -1209,7 +1209,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 {/* Step 1: Category */}
                                                 {hrStep === 1 && (
                                                     <>
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>
                                                             Help Category
                                                         </label>
                                                         <PostFormSelect
@@ -1237,7 +1237,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 {/* Step 2: Goal */}
                                                 {hrStep === 2 && (
                                                     <>
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>
                                                             Target Amount (₦)
                                                         </label>
                                                         <div className="relative">
@@ -1275,11 +1275,11 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 {/* Step 3: Bank account details */}
                                                 {hrStep === 3 && (
                                                     <div className="space-y-3">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
+                                                        <label className="block text-[13px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>
                                                             Settlement Account Details
                                                         </label>
                                                         <div>
-                                                            <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Bank Name</label>
+                                                            <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Bank Name</label>
                                                             <input
                                                                 type="text"
                                                                 value={bankName}
@@ -1290,7 +1290,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             />
                                                         </div>
                                                         <div>
-                                                            <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Account Name</label>
+                                                            <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Account Name</label>
                                                             <input
                                                                 type="text"
                                                                 value={accountName}
@@ -1301,7 +1301,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                             />
                                                         </div>
                                                         <div>
-                                                            <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Account Number</label>
+                                                            <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Account Number</label>
                                                             <input
                                                                 type="text"
                                                                 value={accountNumber}
@@ -1328,11 +1328,11 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         {/* Services-Specific Fields */}
                                         {contentType === 'services' && (
                                             <div className="flex flex-col gap-3.5 p-4 rounded-2xl bg-black/[0.01]  border border-black/[0.05]  shadow-sm animate-fadeIn">
-                                                <label className="block text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
+                                                <label className="block text-[13px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>
                                                     🛠️ Service Details
                                                 </label>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Service Name *</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Service Name *</label>
                                                     <input
                                                         type="text"
                                                         value={serviceName}
@@ -1345,7 +1345,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Category</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Category</label>
                                                         <PostFormSelect
                                                             value={serviceCategory}
                                                             onChange={(v) => setServiceCategory(v)}
@@ -1362,7 +1362,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Availability</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Availability</label>
                                                         <PostFormSelect
                                                             value={serviceAvailability}
                                                             onChange={(v) => setServiceAvailability(v)}
@@ -1377,7 +1377,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Rate (₦)</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Rate (₦)</label>
                                                         <input
                                                             type="number"
                                                             value={serviceRate}
@@ -1389,7 +1389,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Rate Type</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Rate Type</label>
                                                         <PostFormSelect
                                                             value={serviceRateType}
                                                             onChange={(v) => setServiceRateType(v)}
@@ -1403,7 +1403,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Service Area</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Service Area</label>
                                                     <input
                                                         type="text"
                                                         value={serviceArea}
@@ -1414,7 +1414,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Contact Details *</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Contact Details *</label>
                                                     <input
                                                         type="text"
                                                         value={contactDetails}
@@ -1431,11 +1431,11 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         {/* Job-Specific Fields */}
                                         {contentType === 'job' && (
                                             <div className="flex flex-col gap-3.5 p-4 rounded-2xl bg-black/[0.01]  border border-black/[0.05]  shadow-sm animate-fadeIn">
-                                                <label className="block text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
+                                                <label className="block text-[13px] font-bold" style={{ color: 'var(--neu-text-muted)' }}>
                                                     💼 Job Details
                                                 </label>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Job Title *</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Job Title *</label>
                                                     <input
                                                         type="text"
                                                         value={jobTitle}
@@ -1448,7 +1448,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Job Type</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Job Type</label>
                                                         <PostFormSelect
                                                             value={jobType}
                                                             onChange={(v) => setJobType(v)}
@@ -1463,7 +1463,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Work Mode</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Work Mode</label>
                                                         <PostFormSelect
                                                             value={workMode}
                                                             onChange={(v) => setWorkMode(v)}
@@ -1477,7 +1477,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Salary / Compensation</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Salary / Compensation</label>
                                                     <input
                                                         type="text"
                                                         value={salary}
@@ -1488,7 +1488,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Requirements / Key Skills</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Requirements / Key Skills</label>
                                                     <textarea
                                                         value={jobRequirements}
                                                         onChange={(e) => setJobRequirements(e.target.value)}
@@ -1499,7 +1499,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Contact / Apply details *</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Contact / Apply details *</label>
                                                     <input
                                                         type="text"
                                                         value={contactDetails}
@@ -1516,11 +1516,11 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         {/* Safety Log (Emergency) Fields */}
                                         {contentType === 'emergency' && (
                                             <div className="flex flex-col gap-3.5 p-4 rounded-2xl bg-black/[0.01]  border border-black/[0.05]  shadow-sm animate-fadeIn">
-                                                <label className="block text-[10px] font-black uppercase tracking-wider text-brand-red">
+                                                <label className="block text-[13px] font-bold text-brand-red">
                                                     🚨 Incident / Threat Log Details
                                                 </label>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Hazard / Incident Type</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Hazard / Incident Type</label>
                                                     <PostFormSelect
                                                         value={hazardType}
                                                         onChange={(v) => setHazardType(v)}
@@ -1537,7 +1537,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Time of Incident</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Time of Incident</label>
                                                         <input
                                                             type="text"
                                                             value={incidentTime}
@@ -1548,7 +1548,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Urgency Level</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Urgency Level</label>
                                                         <PostFormSelect
                                                             value={priority}
                                                             onChange={(v) => setPriority(v as any)}
@@ -1562,7 +1562,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Location / Nearby Landmark *</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Location / Nearby Landmark *</label>
                                                     <input
                                                         type="text"
                                                         value={incidentLocation}
@@ -1574,7 +1574,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Recommended Precautions / Actions</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Recommended Precautions / Actions</label>
                                                     <input
                                                         type="text"
                                                         value={recommendedAction}
@@ -1590,12 +1590,12 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                         {/* Urgent Alert Fields */}
                                         {contentType === 'fyi' && fyiSubtype === 'alert' && (
                                             <div className="flex flex-col gap-3.5 p-4 rounded-2xl bg-black/[0.01]  border border-black/[0.05]  shadow-sm animate-fadeIn">
-                                                <label className="block text-[10px] font-black uppercase tracking-wider text-status-warning">
+                                                <label className="block text-[13px] font-bold text-status-warning">
                                                     ⚠️ Urgent Alert Details
                                                 </label>
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Alert Type</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Alert Type</label>
                                                         <PostFormSelect
                                                             value={alertType}
                                                             onChange={(v) => setAlertType(v)}
@@ -1610,7 +1610,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Urgency Level</label>
+                                                        <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Urgency Level</label>
                                                         <PostFormSelect
                                                             value={priority}
                                                             onChange={(v) => setPriority(v as any)}
@@ -1623,7 +1623,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Affected Area *</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Affected Area *</label>
                                                     <input
                                                         type="text"
                                                         value={affectedArea}
@@ -1635,7 +1635,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, focusMediaOnOpen, 
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--neu-text-muted)' }}>Recommended Precautions</label>
+                                                    <label className="block text-[13px] font-bold mb-1" style={{ color: 'var(--neu-text-muted)' }}>Recommended Precautions</label>
                                                     <input
                                                         type="text"
                                                         value={recommendedPrecautions}

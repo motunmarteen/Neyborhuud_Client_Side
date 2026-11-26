@@ -69,7 +69,7 @@ export function PaymentCountdown({
       </span>
       <div className="min-w-0">
         <p
-          className={`text-[10px] font-bold uppercase tracking-wide ${
+          className={`text-[13px] font-bold ${
             expired ? 'text-gray-500' : urgent ? 'text-red-700' : 'text-amber-700'
           }`}
         >

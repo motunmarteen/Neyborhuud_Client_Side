@@ -327,7 +327,7 @@ export default function HelpRequestDetailPage() {
 
                 {/* Account Details — always shown */}
                 <div className="rounded-xl p-3 flex flex-col gap-1.5" style={{ background: 'var(--neu-socket)' }}>
-                  <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>How to Send Money</p>
+                  <p className="text-[13px] font-semibold" style={{ color: 'var(--neu-text-muted)' }}>How to Send Money</p>
                   {accountDetails ? (
                     <>
                       {accountDetails.bankName && (
@@ -366,7 +366,7 @@ export default function HelpRequestDetailPage() {
                 {/* Owner Status Controls */}
                 {isOwner && (
                   <div className="flex flex-col gap-2 pt-1">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Update Status</p>
+                    <p className="text-[13px] font-semibold" style={{ color: 'var(--neu-text-muted)' }}>Update Status</p>
                     <div className="flex flex-wrap gap-2">
                       {(['open', 'in_progress', 'fulfilled', 'closed'] as HelpStatus[]).map((s) => (
                         <button

@@ -245,7 +245,7 @@ export default function LocationSettingsPage() {
           disabled={saving}
           className="neumorphic-btn w-full rounded-2xl py-4"
         >
-          <span className="text-xs font-black uppercase tracking-widest text-charcoal">
+          <span className="text-[13px] font-bold text-charcoal">
             {saving ? 'Saving…' : 'Save Radius & Location'}
           </span>
         </button>

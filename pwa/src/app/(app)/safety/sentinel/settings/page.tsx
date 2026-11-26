@@ -126,7 +126,7 @@ export default function SentinelSettingsPage() {
           )}
 
           <section className="mod-card space-y-3 rounded-2xl p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-blue">
+            <p className="text-[13px] font-bold text-brand-blue">
               Alert threshold
             </p>
             <div className="space-y-2">
@@ -152,7 +152,7 @@ export default function SentinelSettingsPage() {
 
           <section className="mod-card space-y-3 rounded-2xl p-4">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-blue">
+              <p className="text-[13px] font-bold text-brand-blue">
                 Sensitivity
               </p>
               <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>

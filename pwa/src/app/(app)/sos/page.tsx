@@ -35,36 +35,6 @@ const TABS: { id: SosTab; label: string; icon: string }[] = [
   { id: 'circle', label: 'Circle', icon: 'groups' },
 ];
 
-const SOS_TAB_STYLES: Record<SosTab, { active: string; inactive: string; icon: string }> = {
-  now: {
-    active: 'bg-red-600 border-red-600 text-white shadow-[0_4px_16px_rgba(220,38,38,0.25)]',
-    inactive: 'bg-red-50 border-red-100/50 text-red-600 hover:bg-red-100/60',
-    icon: 'emergency',
-  },
-  prepare: {
-    active: 'bg-blue-600 border-blue-600 text-white shadow-[0_4px_16px_rgba(37,99,235,0.25)]',
-    inactive: 'bg-[#F0F5FF] border-blue-100/50 text-blue-600 hover:bg-blue-100/60',
-    icon: 'shield',
-  },
-  history: {
-    active: 'bg-slate-900 border-slate-950 text-white shadow-[0_4px_16px_rgba(15,23,42,0.25)]',
-    inactive: 'bg-slate-50 border-slate-100 text-slate-700 hover:bg-slate-100/60',
-    icon: 'history',
-  },
-  circle: {
-    active: 'bg-emerald-600 border-emerald-600 text-white shadow-[0_4px_16px_rgba(5,150,105,0.25)]',
-    inactive: 'bg-[#F0FDF4] border-emerald-100/50 text-emerald-600 hover:bg-emerald-100/60',
-    icon: 'groups',
-  },
-};
-
-const TAB_ACCENTS: Record<SosTab, string> = {
-  now: 'bg-red-600 shadow-[0_1px_6px_rgba(220,38,38,0.25)]',
-  prepare: 'bg-blue-600 shadow-[0_1px_6px_rgba(37,99,235,0.25)]',
-  history: 'bg-slate-900 shadow-[0_1px_6px_rgba(15,23,42,0.25)]',
-  circle: 'bg-emerald-600 shadow-[0_1px_6px_rgba(5,150,105,0.25)]',
-};
-
 export default function SosPage() {
   const [tab, setTab] = useState<SosTab>('now');
   const sos = useSos();
@@ -84,40 +54,7 @@ export default function SosPage() {
         maxWidth="680"
         className="!bg-white !px-0 !pt-0 !min-h-[100dvh] flex-1"
         header={
-          <div className="bg-white">
-            <div className="relative bg-white">
-              <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-4 flex items-center justify-around gap-2 overflow-x-auto no-scrollbar">
-                {TABS.map((t) => {
-                  const isActive = tab === t.id;
-                  const style = SOS_TAB_STYLES[t.id];
-                  const circleClass = `w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-200 ${
-                    isActive ? style.active : style.inactive
-                  }`;
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setTab(t.id)}
-                      className="flex flex-col items-center gap-1.5 focus:outline-none touch-manipulation group flex-shrink-0"
-                    >
-                      <div className={circleClass}>
-                        <span className="material-symbols-outlined text-[23px] select-none" style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}>
-                          {style.icon}
-                        </span>
-                      </div>
-                      <span className={`text-[11px] font-bold transition-colors uppercase tracking-wider ${
-                        isActive ? 'text-gray-900 font-extrabold' : 'text-gray-400 group-hover:text-gray-600'
-                      }`}>
-                        {t.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              {/* Dynamic Accent Line */}
-              <div className={`absolute bottom-0 left-0 right-0 h-[2.5px] transition-all duration-300 ${TAB_ACCENTS[tab]}`} />
-            </div>
-          </div>
+          <BrowseTabStrip tabs={TABS} activeId={tab} onChange={(id) => setTab(id as SosTab)} className="px-3" />
         }
       >
         <style dangerouslySetInnerHTML={{ __html: `

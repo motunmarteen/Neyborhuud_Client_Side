@@ -146,7 +146,7 @@ export function IncognitoInviteSheet({ open, onClose, conversationId, invitee }:
           </button>
         )}
 
-        <p className="mb-2 text-[12px] font-bold uppercase tracking-wide text-slate-400">How long?</p>
+        <p className="mb-2 text-[12px] font-bold text-slate-400">How long?</p>
         <div className="mb-5 grid grid-cols-4 gap-2">
           {DURATIONS.map((d) => (
             <button

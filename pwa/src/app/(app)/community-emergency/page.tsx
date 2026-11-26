@@ -508,19 +508,9 @@ function CommunityEmergencyPageContent() {
       maxWidth="680"
       header={
         <LocalHuudHubHeader
+          action={user ? <LocalHuudHubPrimaryAction label={showCreate ? 'Cancel' : 'Post alert'} icon={showCreate ? 'close' : 'add_alert'} onClick={() => setShowCreate((v) => !v)} /> : null}
           hubId="community-emergency"
-          toolbar={
-            user ? (
-              <div className="flex justify-end">
-                <LocalHuudHubPrimaryAction
-                  label={showCreate ? 'Cancel' : 'Post alert'}
-                  icon={showCreate ? 'close' : 'add_alert'}
-                  onClick={() => setShowCreate((v) => !v)}
-                />
-              </div>
-            ) : null
-          }
-        />
+                  />
       }
     >
       <div className="mb-4">

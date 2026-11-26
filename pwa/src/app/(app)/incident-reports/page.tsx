@@ -459,18 +459,11 @@ function IncidentReportsInner() {
       maxWidth="680"
       header={
         <LocalHuudHubHeader
+          action={user ? <LocalHuudHubPrimaryAction label={showCreate ? 'Cancel' : 'File report'} icon={showCreate ? 'close' : 'add'} onClick={() => setShowCreate((v) => !v)} /> : null}
           hubId="incident-reports"
           toolbar={
             <div className="space-y-3">
-              {user ? (
-                <div className="flex justify-end">
-                  <LocalHuudHubPrimaryAction
-                    label={showCreate ? 'Cancel' : 'File report'}
-                    icon={showCreate ? 'close' : 'add'}
-                    onClick={() => setShowCreate((v) => !v)}
-                  />
-                </div>
-              ) : null}
+              
               <form onSubmit={handleSearch} className="flex gap-2">
                 <input
                   value={searchInput}

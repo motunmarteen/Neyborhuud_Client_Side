@@ -21,12 +21,13 @@ export function MapLayerChips({
   const { t } = useTranslation();
   return (
     <div className="no-scrollbar flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label={t('home.filters')}>
-      <FilterChip active={selected === null} onClick={() => onSelect(null)}>
+      <FilterChip floating active={selected === null} onClick={() => onSelect(null)}>
         {t('home.all')}
       </FilterChip>
       {LAYERS.map((l) => (
         <FilterChip
           key={l.key}
+          floating
           active={selected === l.key}
           onClick={() => onSelect(selected === l.key ? null : l.key)}
           icon={l.emoji}

@@ -165,7 +165,7 @@ function WayFinder() {
 
         {!routes && requests.length ? (
           <section aria-labelledby="req-h" className="flex flex-col gap-2">
-            <p id="req-h" className="px-1 text-[11px] font-black uppercase tracking-wider text-faint">{t('way.requestsTitle')}</p>
+            <p id="req-h" className="px-1 text-[13px] font-bold text-faint">{t('way.requestsTitle')}</p>
             <p className="px-1 text-xs font-semibold text-muted">{t('way.requestsBody')}</p>
             <ul className="divide-y divide-line overflow-hidden rounded-2xl bg-white shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
               {requests.map((q) => (

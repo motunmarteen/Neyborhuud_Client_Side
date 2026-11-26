@@ -118,7 +118,7 @@ export function HuudCoinTierPanel() {
             🪙
           </span>
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">
+            <p className="text-[13px] font-bold text-primary">
               Activity tier
             </p>
             <p className="mt-1 text-sm leading-relaxed text-[var(--neu-text-muted)]">
@@ -136,7 +136,7 @@ export function HuudCoinTierPanel() {
           <>
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
+                <p className="text-[13px] font-bold text-[var(--neu-text-muted)]">
                   HuudCredit balance
                 </p>
                 <p className="mt-1 text-3xl font-extrabold tabular-nums text-primary">
@@ -145,7 +145,7 @@ export function HuudCoinTierPanel() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">
+                <p className="text-[13px] font-bold text-[var(--neu-text-muted)]">
                   Current tier
                 </p>
                 <p className="mt-1 text-xl font-bold" style={{ color: 'var(--neu-text)' }}>

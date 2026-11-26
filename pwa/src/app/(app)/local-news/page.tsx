@@ -6,6 +6,7 @@ import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 import { BrowseFilterChip } from '@/components/layout/BrowseFilterChip';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
+import { ChipRow, ChipSelect, FilterChip } from '@/components/ui/Chip';
 import { NewsArticleRow } from '@/components/news/NewsArticleRow';
 import {
   LOCAL_NEWS_TABS,
@@ -168,9 +169,20 @@ function LocalNewsInner() {
           />
 
           <>
-              <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
+              <ChipRow label={t('news.filters')}>
+                <ChipSelect
+                  label={t('news.allSources')}
+                  value={selectedSourceIds[0] ?? ''}
+                  options={[{ value: '', label: t('news.allSources') }, ...sources.map((src) => ({ value: src.id, label: src.name }))]}
+                  onChange={(id) => {
+                    const next = id ? [id] : [];
+                    setSelectedSourceIds(next);
+                    loadRss(activeTab, newsTopic, next);
+                  }}
+                />
+                <span aria-hidden className="h-5 w-px shrink-0 bg-line" />
                 {newsTopics.map((topic) => (
-                  <BrowseFilterChip
+                  <FilterChip
                     key={topic.id}
                     active={newsTopic === topic.id}
                     onClick={() => {
@@ -180,35 +192,9 @@ function LocalNewsInner() {
                     }}
                   >
                     {t(`news.topic.${topic.id}`) === `news.topic.${topic.id}` ? topic.label : t(`news.topic.${topic.id}`)}
-                  </BrowseFilterChip>
+                  </FilterChip>
                 ))}
-              </div>
-              <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
-                <BrowseFilterChip
-                  active={selectedSourceIds.length === 0}
-                  onClick={() => {
-                    setSelectedSourceIds([]);
-                    loadRss(activeTab, newsTopic, []);
-                  }}
-                >
-                  {t('news.allSources')}
-                </BrowseFilterChip>
-                {sources.map((src) => (
-                  <BrowseFilterChip
-                    key={src.id}
-                    active={selectedSourceIds.includes(src.id)}
-                    onClick={() => {
-                      const next = selectedSourceIds.includes(src.id)
-                        ? selectedSourceIds.filter((id) => id !== src.id)
-                        : [...selectedSourceIds, src.id];
-                      setSelectedSourceIds(next);
-                      loadRss(activeTab, newsTopic, next);
-                    }}
-                  >
-                    {src.name}
-                  </BrowseFilterChip>
-                ))}
-              </div>
+              </ChipRow>
           </>
         </>
       }

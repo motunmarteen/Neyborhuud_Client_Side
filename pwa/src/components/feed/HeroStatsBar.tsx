@@ -33,7 +33,7 @@ export function HeroStatsBar() {
       {/* Trust Score */}
       <div className="flex items-center gap-1.5">
         <span className="text-[13px]" role="img" aria-label="Trust">🛡</span>
-        <span className="text-[11px] font-medium uppercase tracking-wider text-white/40">Trust</span>
+        <span className="text-[13px] font-medium text-white/40">Trust</span>
         <span className="text-[13px] font-bold text-white/90 tabular-nums">{stats.trustScore}</span>
       </div>
 
@@ -44,7 +44,7 @@ export function HeroStatsBar() {
       <div className="flex items-center gap-1.5">
         <span className="text-[13px]" role="img" aria-label="HuudCredit">⭐</span>
         <span className="text-[13px] font-bold text-white/90 tabular-nums">{stats.totalHuudCoins.toLocaleString()}</span>
-        <span className="text-[11px] font-medium uppercase tracking-wider text-white/40">HC</span>
+        <span className="text-[13px] font-medium text-white/40">HC</span>
       </div>
     </div>
   );

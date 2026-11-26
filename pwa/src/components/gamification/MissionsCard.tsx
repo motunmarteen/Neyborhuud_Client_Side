@@ -22,7 +22,7 @@ function MissionRow({ m }: { m: Mission }) {
           {m.emoji}
         </span>
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="text-[10px] font-black uppercase tracking-[0.12em] text-[#A86F0A]">Sponsored · {m.sponsor}</span>
+          <span className="text-[13px] font-bold text-[#A86F0A]">Sponsored · {m.sponsor}</span>
           <span className="text-sm font-bold text-navy">{m.title}</span>
           {m.description ? <span className="text-xs font-semibold text-muted">{m.description}</span> : null}
           <span className="text-xs font-semibold text-muted">

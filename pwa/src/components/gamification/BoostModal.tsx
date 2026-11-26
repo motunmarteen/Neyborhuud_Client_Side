@@ -91,7 +91,7 @@ export function BoostModal({
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">{meta.icon}</span>
-                <span className="text-xs font-semibold uppercase tracking-widest opacity-80">
+                <span className="text-[13px] font-semibold opacity-80">
                   Boost {type}
                 </span>
               </div>
@@ -155,7 +155,7 @@ export function BoostModal({
 
               {/* Boost perks */}
               <div className="mb-4 rounded-2xl bg-brand-surface px-4 py-3">
-                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--neu-text-muted)]">
+                <p className="mb-2 text-[13px] font-bold text-[var(--neu-text-muted)]">
                   What you get
                 </p>
                 <ul className="space-y-1">
@@ -168,7 +168,7 @@ export function BoostModal({
               </div>
 
               {/* Duration options */}
-              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-[var(--neu-text-muted)]">
+              <p className="mb-3 text-[13px] font-bold text-[var(--neu-text-muted)]">
                 Choose duration
               </p>
               <div className={`grid gap-3 mb-5 ${options.length <= 2 ? "grid-cols-2" : "grid-cols-2"}`}>

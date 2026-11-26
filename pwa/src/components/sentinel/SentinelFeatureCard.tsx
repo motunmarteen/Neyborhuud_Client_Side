@@ -72,7 +72,7 @@ export function SentinelFeatureCard({ feature, compact = false }: SentinelFeatur
 
         <div className={`flex items-center gap-1 ${compact ? 'absolute right-2 top-2' : ''}`}>
           {feature.badge ? (
-            <span className="mod-chip mod-chip-active rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
+            <span className="mod-chip mod-chip-active rounded-full px-1.5 py-0.5 text-[13px] font-bold text-primary">
               {feature.badge}
             </span>
           ) : null}

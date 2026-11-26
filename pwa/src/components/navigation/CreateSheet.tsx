@@ -51,7 +51,7 @@ export function CreateSheet({ open, onClose, sub: forcedSub, onSubClosed }: { op
     <AppBottomSheet open={open} onClose={onClose} title="Wetin you wan share?" panelStyle={{ maxHeight: '88svh' }}>
       <div className="flex flex-col gap-4 pb-2">
         <section aria-labelledby="quick-signal-title">
-          <p id="quick-signal-title" className="mb-2 text-[11px] font-black uppercase tracking-wider text-faint">
+          <p id="quick-signal-title" className="mb-2 text-[13px] font-bold text-faint">
             Quick signal · one tap, no typing
           </p>
           <div className="flex flex-wrap gap-2">
@@ -76,7 +76,7 @@ export function CreateSheet({ open, onClose, sub: forcedSub, onSubClosed }: { op
         </section>
 
         <section aria-labelledby="create-title">
-          <p id="create-title" className="mb-2 text-[11px] font-black uppercase tracking-wider text-faint">
+          <p id="create-title" className="mb-2 text-[13px] font-bold text-faint">
             Or create
           </p>
           <div className="grid grid-cols-2 gap-2">

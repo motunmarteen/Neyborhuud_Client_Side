@@ -258,14 +258,14 @@ export function InteractiveMap({
         <div className={`relative overflow-hidden rounded-2xl ${className}`} style={{ height }}>
             {!ready && showSkeleton && (
                 <div className="absolute inset-0 z-10 neu-socket animate-pulse flex items-center justify-center">
-                    <span className="text-[10px] text-[var(--neu-text-muted)] uppercase tracking-wider">Loading map…</span>
+                    <span className="text-[13px] text-[var(--neu-text-muted)]">Loading map…</span>
                 </div>
             )}
             <div ref={containerRef} className="w-full h-full" />
             {markerEl && customMarkerNode && createPortal(customMarkerNode, markerEl)}
             {draggable && ready && showDragHint && (
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg pointer-events-none z-10">
-                    <span className="text-[9px] font-bold text-brand-black/60 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-[13px] font-bold text-brand-black/60 flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-sm text-brand-blue">touch_app</span>
                         {dragHintLabel}
                     </span>

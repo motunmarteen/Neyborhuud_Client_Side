@@ -36,7 +36,7 @@ export function ProfileSnapPlusCard({
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">{eyebrow}</p>
+          <p className="text-[13px] font-bold text-blue-600">{eyebrow}</p>
           <p className="text-sm font-extrabold text-gray-800 mt-0.5">
             {title}
           </p>

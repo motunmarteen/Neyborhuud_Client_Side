@@ -20,7 +20,7 @@ const STEPS = [
 export function SosHowItWorks() {
   return (
     <div className="space-y-0">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400 px-6 pt-4 pb-2">How SOS works</p>
+      <p className="text-[13px] font-bold text-gray-400 px-6 pt-4 pb-2">How SOS works</p>
       <div className="flex flex-col bg-white">
         {STEPS.map((step, i) => (
           <div key={step.title} className="flex gap-4 border-b border-gray-100 py-5 px-6 last:border-b-0 bg-white rounded-none shadow-none">

@@ -55,7 +55,7 @@ export function BrowseInfoTip({ label, children, className = '' }: BrowseInfoTip
               className="fixed z-[199] w-[260px] rounded-xl border border-primary/15 bg-[var(--neu-bg)] p-3 shadow-lg mod-card-elevated"
               style={{ top: rect.top, left: rect.left }}
             >
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-primary">{label}</p>
+              <p className="text-[13px] font-bold text-primary">{label}</p>
               <div className="mt-1.5 text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
                 {children}
               </div>

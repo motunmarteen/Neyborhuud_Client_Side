@@ -261,7 +261,7 @@ export function StakeCard({
             {title}
           </h4>
           {subtitle && (
-            <p className="text-[10px] font-semibold text-white/65 uppercase tracking-wide leading-tight truncate">
+            <p className="text-[13px] font-semibold text-white/65 leading-tight truncate">
               {subtitle}
             </p>
           )}
@@ -324,7 +324,7 @@ export function CategoryCoverCard({
           <h4 className="text-[13px] font-extrabold text-white leading-tight drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
             {title}
           </h4>
-          <p className="text-[9px] font-bold text-white/60 uppercase tracking-wider leading-tight truncate">
+          <p className="text-[13px] font-bold text-white/60 leading-tight truncate">
             {subtitle}
           </p>
           <span className="inline-block mt-1 px-3 py-1 bg-primary hover:bg-brand-green-dark text-black text-[10px] font-black rounded-none text-center transition-all shadow-sm">

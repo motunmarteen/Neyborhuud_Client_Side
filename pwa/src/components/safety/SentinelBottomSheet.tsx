@@ -141,7 +141,7 @@ export function SentinelBottomSheet() {
 
         {/* 3. QUICK ACTIONS GRID */}
         <div className="mb-5">
-          <h3 className="text-[11px] font-black tracking-widest uppercase text-neu-text-secondary  mb-3 px-1">
+          <h3 className="text-[13px] font-bold text-neu-text-secondary  mb-3 px-1">
             Quick Actions
           </h3>
           <div className="grid grid-cols-4 gap-y-5 gap-x-2">

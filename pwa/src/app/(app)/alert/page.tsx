@@ -56,7 +56,7 @@ export default function SafetyAlertsHubPage() {
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1D2433] to-[#0B0E11] p-5 text-white shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-red-400 border border-red-500/30">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 px-2.5 py-0.5 text-[13px] font-bold text-red-400 border border-red-500/30">
                   <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
                   Live Safety Radar
                 </span>
@@ -261,7 +261,7 @@ export default function SafetyAlertsHubPage() {
             <span className="grid h-6 w-6 place-items-center rounded-full bg-[#00B82E] text-white text-[11px] font-black">
               ✓
             </span>
-            <h3 className="text-xs font-extrabold text-[#0E8A3E] uppercase tracking-wider">
+            <h3 className="text-[13px] font-extrabold text-[#0E8A3E]">
               Hyperlocal Safety Tip
             </h3>
           </div>

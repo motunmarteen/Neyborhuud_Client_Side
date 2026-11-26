@@ -25,34 +25,6 @@ const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
   { id: 'language', label: 'Language' },
 ];
 
-const SETTINGS_TAB_STYLES: Record<SettingsTab, { active: string; inactive: string; icon: string }> = {
-  notifications: {
-    active: 'bg-blue-600 border-blue-600 text-white shadow-[0_4px_16px_rgba(37,99,235,0.25)]',
-    inactive: 'bg-[#F0F5FF] border-blue-100/50 text-blue-600 hover:bg-blue-100/60',
-    icon: 'notifications',
-  },
-  privacy: {
-    active: 'bg-emerald-600 border-emerald-600 text-white shadow-[0_4px_16px_rgba(5,150,105,0.25)]',
-    inactive: 'bg-[#F0FDF4] border-emerald-100/50 text-emerald-600 hover:bg-emerald-100/60',
-    icon: 'shield',
-  },
-  posts: {
-    active: 'bg-purple-600 border-purple-600 text-white shadow-[0_4px_16px_rgba(147,51,234,0.25)]',
-    inactive: 'bg-[#FAF5FF] border-purple-100/50 text-purple-600 hover:bg-purple-100/60',
-    icon: 'post_add',
-  },
-  account: {
-    active: 'bg-slate-900 border-slate-950 text-white shadow-[0_4px_16px_rgba(15,23,42,0.25)]',
-    inactive: 'bg-slate-50 border-slate-100 text-slate-700 hover:bg-slate-100/60',
-    icon: 'manage_accounts',
-  },
-  language: {
-    active: 'bg-amber-600 border-amber-600 text-white shadow-[0_4px_16px_rgba(217,119,6,0.25)]',
-    inactive: 'bg-amber-50 border-amber-100/50 text-amber-700 hover:bg-amber-100/60',
-    icon: 'translate',
-  },
-};
-
 function isEmailVerifiedStrict(user: unknown): boolean {
   if (!user || typeof user !== 'object') return false;
   const u = user as Record<string, unknown>;
@@ -73,17 +45,11 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <div className="py-4 border-b border-gray-150/40 last:border-b-0">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400">
-        {title}
-      </p>
-      {description ? (
-        <p className="mt-1 text-xs leading-relaxed text-gray-500">
-          {description}
-        </p>
-      ) : null}
-      <div className="mt-2.5">{children}</div>
-    </div>
+    <section className="py-3">
+      <h2 className="px-1 font-heading text-base font-extrabold text-navy">{title}</h2>
+      {description ? <p className="mt-0.5 px-1 text-[13px] leading-relaxed text-muted">{description}</p> : null}
+      <div className="mt-2 rounded-[22px] bg-white px-4 py-1 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">{children}</div>
+    </section>
   );
 }
 
@@ -101,26 +67,24 @@ function ToggleSwitch({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-gray-100 py-3.5 last:border-0">
+    <div className="flex min-h-14 items-center justify-between gap-4 border-b border-line/60 py-3 last:border-0">
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-gray-800">
-          {label}
-        </p>
-        {description ? (
-          <p className="mt-0.5 text-xs text-gray-400">{description}</p>
-        ) : null}
+        <p className="text-[15px] font-bold text-navy">{label}</p>
+        {description ? <p className="mt-0.5 text-[13px] text-muted">{description}</p> : null}
       </div>
       <button
         type="button"
         disabled={disabled}
         onClick={() => !disabled && onChange(!enabled)}
-        className={`relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none ${
+        role="switch"
+        aria-checked={enabled}
+        aria-label={label}
+        className={`relative h-7 w-12 shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
           disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
-        } ${enabled ? 'bg-blue-600' : 'bg-gray-200'}`}
-        aria-label={`${label}: ${enabled ? 'On' : 'Off'}`}
+        } ${enabled ? 'bg-brand-green-dark' : 'bg-[#C9CFD8]'}`}
       >
         <span
-          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+          className={`absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
             enabled ? 'translate-x-5' : 'translate-x-0'
           }`}
           aria-hidden
@@ -653,48 +617,15 @@ export default function SettingsPage() {
     return (
       <AppBrowseLayout
         maxWidth="680"
-        className="!bg-white !px-0 !pt-0 !min-h-[100dvh] flex-1"
         header={
-          <div className="bg-white pt-4">
-            <div className="relative bg-white border-b border-gray-150/40">
-              <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-4 flex items-center justify-around gap-2 overflow-x-auto no-scrollbar">
-                {SETTINGS_TABS.map((t) => {
-                  const isActive = activeTab === t.id;
-                  const style = SETTINGS_TAB_STYLES[t.id];
-                  const circleClass = `w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-200 ${
-                    isActive ? style.active : style.inactive
-                  }`;
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setActiveTab(t.id)}
-                      className="flex flex-col items-center gap-1.5 focus:outline-none touch-manipulation group flex-shrink-0"
-                    >
-                      <div className={circleClass}>
-                        <span className="material-symbols-outlined text-[23px] select-none" style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}>
-                          {style.icon}
-                        </span>
-                      </div>
-                      <span className={`text-[11px] font-bold transition-colors uppercase tracking-wider ${
-                        isActive ? 'text-gray-900 font-extrabold' : 'text-gray-400 group-hover:text-gray-600'
-                      }`}>
-                        {t.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          <BrowseTabStrip
+            tabs={SETTINGS_TABS}
+            activeId={activeTab}
+            onChange={(id) => setActiveTab(id as SettingsTab)}
+          />
         }
       >
-        <style dangerouslySetInnerHTML={{ __html: `
-          main[data-app-scroll-root] {
-            background-color: #ffffff !important;
-          }
-        ` }} />
-        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 space-y-0">
+        <div className="space-y-1">
           {!emailVerified && user?.email ? (
             <EmailVerificationCard
               email={user.email}
@@ -833,7 +764,7 @@ export default function SettingsPage() {
               <button
                 onClick={handleSaveNotifications}
                 disabled={saving}
-                className="w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
+                className="w-full rounded-full bg-primary hover:bg-brand-green-dark text-white py-3.5 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
               >
                 {saving ? 'Saving…' : 'Save notification settings'}
               </button>
@@ -857,10 +788,10 @@ export default function SettingsPage() {
               <Section title="Profile">
                 <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-gray-400">
+                    <p className="text-[13px] font-bold text-muted">
                       Status
                     </p>
-                    <p className="mt-1 text-sm font-bold text-gray-800">
+                    <p className="mt-1 text-sm font-bold text-navy">
                       {isProfileCompleted ? 'Profile Completed' : 'Profile Incomplete'}
                     </p>
                   </div>
@@ -869,20 +800,20 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-2 gap-3 mt-3">
                   {birthday ? (
                     <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4">
-                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-gray-400">
+                      <p className="text-[13px] font-bold text-muted">
                         Birthday
                       </p>
-                      <p className="mt-1 text-sm font-bold text-gray-800">
+                      <p className="mt-1 text-sm font-bold text-navy">
                         {birthday}
                       </p>
                     </div>
                   ) : null}
                   {zodiac ? (
                     <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4">
-                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-gray-400">
+                      <p className="text-[13px] font-bold text-muted">
                         Sign
                       </p>
-                      <p className="mt-1 text-sm font-bold text-gray-800">
+                      <p className="mt-1 text-sm font-bold text-navy">
                         {zodiac.emoji} {zodiac.sign}
                       </p>
                     </div>
@@ -891,7 +822,7 @@ export default function SettingsPage() {
 
                 <Link
                   href="/complete-profile"
-                  className="mt-4 flex w-full items-center justify-center rounded-full bg-slate-900 hover:bg-slate-800 text-white py-3 text-sm font-bold shadow-sm transition-all duration-200 no-underline"
+                  className="mt-4 flex w-full items-center justify-center rounded-full bg-primary hover:bg-brand-green-dark text-white py-3 text-sm font-bold shadow-sm transition-all duration-200 no-underline"
                 >
                   {isProfileCompleted ? 'Edit profile' : 'Complete profile'}
                 </Link>
@@ -900,13 +831,13 @@ export default function SettingsPage() {
               <Section title="Location">
                 <Link
                   href="/settings/location"
-                  className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-gray-800 no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
+                  className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-navy no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
                 >
                   <span className="inline-flex items-center gap-2.5">
-                    <span className="material-symbols-outlined text-[19px] text-blue-600">location_on</span>
+                    <span className="material-symbols-outlined text-[19px] text-brand-green-dark">location_on</span>
                     Location &amp; Radius
                   </span>
-                  <span className="material-symbols-outlined text-[19px] text-gray-400">
+                  <span className="material-symbols-outlined text-[19px] text-muted">
                     chevron_right
                   </span>
                 </Link>
@@ -917,13 +848,13 @@ export default function SettingsPage() {
                   {isAdminUser(user) ? (
                     <Link
                       href="/admin"
-                      className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-gray-800 no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
+                      className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-navy no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
                     >
                       <span className="inline-flex items-center gap-2.5">
                         <span className="material-symbols-outlined text-[19px] text-emerald-600">shield</span>
                         Admin panel
                       </span>
-                      <span className="material-symbols-outlined text-[19px] text-gray-400">
+                      <span className="material-symbols-outlined text-[19px] text-muted">
                         chevron_right
                       </span>
                     </Link>
@@ -931,13 +862,13 @@ export default function SettingsPage() {
 
                   <Link
                     href="/settings/password"
-                    className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-gray-800 no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
+                    className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-navy no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
                   >
                     <span className="inline-flex items-center gap-2.5">
                       <span className="material-symbols-outlined text-[19px] text-purple-600">key</span>
                       Change password
                     </span>
-                    <span className="material-symbols-outlined text-[19px] text-gray-400">
+                    <span className="material-symbols-outlined text-[19px] text-muted">
                       chevron_right
                     </span>
                   </Link>
@@ -985,7 +916,7 @@ export default function SettingsPage() {
                     !newUsernameDraft.trim() ||
                     usernameChangePolicy?.canChangeUsername === false
                   }
-                  className="w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white py-3 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
+                  className="w-full rounded-full bg-primary hover:bg-brand-green-dark text-white py-3 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
                   onClick={async () => {
                     setUsernameSaving(true);
                     try {
@@ -1011,13 +942,13 @@ export default function SettingsPage() {
                 </button>
                 {usernameTimeline.length > 0 ? (
                   <div className="mt-4 border-t border-gray-100 pt-4">
-                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-gray-400 mb-2">
+                    <p className="text-[13px] font-bold text-muted mb-2">
                       Handle timeline
                     </p>
-                    <ul className="space-y-2 text-[11px] text-gray-500">
+                    <ul className="space-y-2 text-[11px] text-muted">
                       {usernameTimeline.map((row, i) => (
                         <li key={`${row.username}-${row.effectiveFrom}-${i}`}>
-                          <span className="font-mono font-bold text-gray-800">@{row.username}</span>{' '}
+                          <span className="font-mono font-bold text-navy">@{row.username}</span>{' '}
                           — from{' '}
                           {new Date(row.effectiveFrom).toLocaleDateString('en-NG', {
                             day: 'numeric',
@@ -1040,18 +971,18 @@ export default function SettingsPage() {
 
               {user?.username ? (
                 <Section title="Invite NeyburHs">
-                  <p className="mb-3 text-xs leading-relaxed text-gray-500">
+                  <p className="mb-3 text-xs leading-relaxed text-muted">
                     Your username is the referral code on this app. Friends who sign up from your link
                     attach you as inviter. You both get 50 HuudCredit once they help a neighbour or finish a deal.
                   </p>
-                  <div className="mb-3 break-all rounded-2xl border border-gray-100 bg-gray-50/50 px-3 py-2 text-[11px] font-mono text-gray-700">
+                  <div className="mb-3 break-all rounded-2xl border border-transparent bg-background px-3 py-2 text-[11px] font-mono text-gray-700">
                     {typeof window !== 'undefined'
                       ? `${window.location.origin}/signup?ref=${encodeURIComponent(String(user.username))}`
                       : `/signup?ref=${encodeURIComponent(String(user.username))}`}
                   </div>
                   <button
                     type="button"
-                    className="w-full rounded-full border border-gray-200 bg-white hover:bg-gray-50 py-3 text-sm font-bold text-gray-800 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all duration-200"
+                    className="w-full rounded-full border border-gray-200 bg-white hover:bg-gray-50 py-3 text-sm font-bold text-navy shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all duration-200"
                     onClick={() => {
                       const url = `${window.location.origin}/signup?ref=${encodeURIComponent(String(user.username))}`;
                       void navigator.clipboard.writeText(url);
@@ -1064,17 +995,17 @@ export default function SettingsPage() {
               ) : null}
 
               <Section title="Accessibility">
-                <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Font size</p>
+                <p className="text-sm font-bold text-navy mb-3">Font size</p>
                 <div className="flex gap-2 mb-4">
                   {(['small', 'medium', 'large'] as const).map((size) => (
                     <button
                       key={size}
                       type="button"
                       onClick={() => applyTextSize(size)}
-                      className={`flex-1 rounded-xl py-2.5 text-xs font-black uppercase tracking-wider capitalize transition-all ${
+                      className={`flex-1 rounded-xl py-2.5 text-sm font-bold capitalize transition-all ${
                         textSize === size
-                          ? 'bg-slate-900 text-white'
-                          : 'border border-gray-100 bg-white text-gray-500 hover:text-gray-800'
+                          ? 'bg-navy text-white'
+                          : 'border border-gray-100 bg-white text-muted hover:text-navy'
                       }`}
                     >
                       {size}
@@ -1101,7 +1032,7 @@ export default function SettingsPage() {
                   type="button"
                   disabled={accountActionLoading !== null}
                   onClick={() => void handleExportMyData()}
-                  className="flex w-full items-center gap-3 py-3 text-left text-gray-700 hover:text-blue-600 transition-colors disabled:opacity-50"
+                  className="flex w-full items-center gap-3 py-3 text-left text-gray-700 hover:text-brand-green-dark transition-colors disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined" aria-hidden="true">download</span>
                   <span className="text-sm font-bold">
@@ -1138,8 +1069,8 @@ export default function SettingsPage() {
                       onClick={() => setPrivacy({ ...privacy, profileVisibility: opt.value as any })}
                       className={`flex-1 rounded-full py-2.5 text-xs font-bold transition-all ${
                         privacy.profileVisibility === opt.value
-                          ? 'bg-slate-900 text-white shadow-sm'
-                          : 'text-gray-400 hover:text-gray-600'
+                          ? 'bg-navy text-white shadow-sm'
+                          : 'text-muted hover:text-gray-600'
                       }`}
                     >
                       {opt.label}
@@ -1170,13 +1101,13 @@ export default function SettingsPage() {
               <Section title="Blocked NeyburHs">
                 <Link
                   href="/settings/blocked"
-                  className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-gray-800 no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
+                  className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm font-bold text-navy no-underline hover:bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all"
                 >
                   <span className="inline-flex items-center gap-2.5">
                     <span className="material-symbols-outlined text-[19px] text-red-500">block</span>
                     Manage blocked users
                   </span>
-                  <span className="material-symbols-outlined text-[19px] text-gray-400">
+                  <span className="material-symbols-outlined text-[19px] text-muted">
                     chevron_right
                   </span>
                 </Link>
@@ -1187,9 +1118,9 @@ export default function SettingsPage() {
                 description="Manage optional processing. Essential processing is required to run your account; you can export or delete your data from Account → Danger zone."
               >
                 {consentsLoading ? (
-                  <p className="text-xs text-gray-500">Loading consent state…</p>
+                  <p className="text-xs text-muted">Loading consent state…</p>
                 ) : !authService.isAuthenticated() ? (
-                  <p className="text-xs text-gray-500">Log in to view and change consent preferences.</p>
+                  <p className="text-xs text-muted">Log in to view and change consent preferences.</p>
                 ) : (
                   <>
                     {(() => {
@@ -1198,8 +1129,8 @@ export default function SettingsPage() {
                       const dpGrantedAtLabel = formatConsentGrantedAt(dp);
                       return (
                         <div className="mb-2 border-b border-gray-100 py-3">
-                          <p className="text-sm font-bold text-gray-800">Essential data processing</p>
-                          <p className="mt-1 text-[10px] text-gray-500">
+                          <p className="text-sm font-bold text-navy">Essential data processing</p>
+                          <p className="mt-1 text-[10px] text-muted">
                             {dpActive
                               ? `Active — last recorded ${dpGrantedAtLabel}`
                               : 'Not on file (e.g. older account). Confirm to align with our Privacy Policy.'}
@@ -1209,7 +1140,7 @@ export default function SettingsPage() {
                               type="button"
                               disabled={consentBusy !== null}
                               onClick={() => void handleConsentToggle('data_processing', true)}
-                              className="mt-3 text-xs font-bold text-blue-600 hover:underline disabled:opacity-40"
+                              className="mt-3 text-xs font-bold text-brand-green-dark hover:underline disabled:opacity-40"
                             >
                               {consentBusy === 'data_processing' ? 'Saving…' : 'Record essential consent'}
                             </button>
@@ -1241,7 +1172,7 @@ export default function SettingsPage() {
                     <div className="mt-4 border-t border-gray-100 pt-3">
                       <button
                         type="button"
-                        className="flex items-center gap-2 text-xs font-bold text-blue-600"
+                        className="flex items-center gap-2 text-xs font-bold text-brand-green-dark"
                         onClick={() => {
                           const next = !accessLogOpen;
                           setAccessLogOpen(next);
@@ -1256,15 +1187,15 @@ export default function SettingsPage() {
                       {accessLogOpen && (
                         <div className="mt-3 max-h-48 space-y-2 overflow-y-auto">
                           {accessLogLoading ? (
-                            <p className="text-[10px] text-gray-500">Loading…</p>
+                            <p className="text-[10px] text-muted">Loading…</p>
                           ) : accessLogEntries.length === 0 ? (
-                            <p className="text-[10px] text-gray-500">No access events recorded yet.</p>
+                            <p className="text-[10px] text-muted">No access events recorded yet.</p>
                           ) : (
                             accessLogEntries.map((row) => (
                               <div key={row.id} className="rounded-lg bg-gray-50 px-3 py-2 text-[10px]">
-                                <span className="font-bold text-gray-800">{row.accessType}</span>
-                                {row.reason && <span className="text-gray-500"> — {row.reason}</span>}
-                                <div className="mt-0.5 text-gray-400">
+                                <span className="font-bold text-navy">{row.accessType}</span>
+                                {row.reason && <span className="text-muted"> — {row.reason}</span>}
+                                <div className="mt-0.5 text-muted">
                                   {new Date(row.createdAt).toLocaleString()}
                                   {row.accessor &&
                                     ` · ${row.accessor.firstName || ''} ${row.accessor.lastName || ''}`}
@@ -1282,7 +1213,7 @@ export default function SettingsPage() {
               <button
                 onClick={handleSavePrivacy}
                 disabled={saving}
-                className="w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
+                className="w-full rounded-full bg-primary hover:bg-brand-green-dark text-white py-3.5 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
               >
                 {saving ? 'Saving…' : 'Save privacy settings'}
               </button>
@@ -1301,16 +1232,16 @@ export default function SettingsPage() {
                         setLanguage(lang);
                         toast.success(t('settings.languageSaved'));
                       }}
-                      className="flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-4 text-sm font-bold text-gray-800 hover:bg-gray-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
+                      className="flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-4 text-sm font-bold text-navy hover:bg-gray-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
                     >
                       <span className="inline-flex items-center gap-3">
                         <span className="text-base">{lang === 'en' ? '🇬🇧' : '🇳🇬'}</span>
                         <span>{languageNames[lang]}</span>
                       </span>
                       {currentLanguage === lang ? (
-                        <span className="material-symbols-outlined text-[19px] text-blue-600">check_circle</span>
+                        <span className="material-symbols-outlined text-[19px] text-brand-green-dark">check_circle</span>
                       ) : (
-                        <span className="material-symbols-outlined text-[19px] text-gray-400">chevron_right</span>
+                        <span className="material-symbols-outlined text-[19px] text-muted">chevron_right</span>
                       )}
                     </button>
                   ))}
@@ -1323,13 +1254,13 @@ export default function SettingsPage() {
             <div className="space-y-6">
               <Section title="Post Defaults" description="Configure your global default values for new posts created on the feed.">
                 <div className="border-b border-gray-100 py-4">
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-sm font-bold text-navy mb-2">
                     Default Language
                   </label>
                   <select
                     value={postSettings.defaultLanguage}
                     onChange={(e) => updatePostSettings({ defaultLanguage: e.target.value })}
-                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all cursor-pointer"
                   >
                     <option value="en">English</option>
                     <option value="ha">Hausa</option>
@@ -1340,13 +1271,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="border-b border-gray-100 py-4">
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-sm font-bold text-navy mb-2">
                     Default Visibility
                   </label>
                   <select
                     value={postSettings.defaultVisibility}
                     onChange={(e) => updatePostSettings({ defaultVisibility: e.target.value })}
-                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all cursor-pointer"
                   >
                     <option value="public">Public (Everyone)</option>
                     <option value="neighborhood">NeyburH (Local)</option>
@@ -1355,13 +1286,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="border-b border-gray-100 py-4">
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-sm font-bold text-navy mb-2">
                     Default Priority (General Posts)
                   </label>
                   <select
                     value={postSettings.defaultPriorityStandard}
                     onChange={(e) => updatePostSettings({ defaultPriorityStandard: e.target.value })}
-                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all cursor-pointer"
                   >
                     <option value="low">Low</option>
                     <option value="normal">Normal</option>
@@ -1370,13 +1301,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="py-4">
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-sm font-bold text-navy mb-2">
                     Default Priority (Help, Safety & Urgent Alerts)
                   </label>
                   <select
                     value={postSettings.defaultPriorityUrgent}
                     onChange={(e) => updatePostSettings({ defaultPriorityUrgent: e.target.value })}
-                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all cursor-pointer"
                   >
                     <option value="normal">Normal</option>
                     <option value="high">High</option>
@@ -1397,34 +1328,34 @@ export default function SettingsPage() {
               <Section title="Saved Banking Profile" description="Pre-populate account details when creating Help Request templates.">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Bank Name</label>
+                    <label className="block text-sm font-bold text-navy mb-1.5">Bank Name</label>
                     <input
                       type="text"
                       value={postSettings.bankName}
                       onChange={(e) => updatePostSettings({ bankName: e.target.value })}
                       placeholder="e.g. GTBank, Zenith"
-                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all placeholder:text-gray-400"
+                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all placeholder:text-muted"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Account Name</label>
+                    <label className="block text-sm font-bold text-navy mb-1.5">Account Name</label>
                     <input
                       type="text"
                       value={postSettings.accountName}
                       onChange={(e) => updatePostSettings({ accountName: e.target.value })}
                       placeholder="e.g. Yetunde Marteen"
-                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all placeholder:text-gray-400"
+                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all placeholder:text-muted"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Account Number</label>
+                    <label className="block text-sm font-bold text-navy mb-1.5">Account Number</label>
                     <input
                       type="text"
                       value={postSettings.accountNumber}
                       onChange={(e) => updatePostSettings({ accountNumber: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                       placeholder="10-digit NUBAN number"
                       maxLength={10}
-                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-gray-100 bg-gray-50/50 text-gray-800 focus:outline-none focus:border-blue-500 transition-all font-mono placeholder:text-gray-400"
+                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all font-mono placeholder:text-muted"
                     />
                   </div>
                 </div>

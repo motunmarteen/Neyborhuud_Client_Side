@@ -385,7 +385,7 @@ function PickCommunityContent() {
 
             <div className="flex items-center gap-3 my-2 text-charcoal/50 " aria-hidden="true">
               <span className="flex-1 h-[1px] bg-charcoal/10 " />
-              <span className="text-[10px] font-bold tracking-widest uppercase">or enter manually</span>
+              <span className="text-[13px] font-bold">or enter manually</span>
               <span className="flex-1 h-[1px] bg-charcoal/10 " />
             </div>
 
@@ -516,7 +516,7 @@ function PickCommunityContent() {
                                 ) : null}
                               </div>
                               <span className="flex-1 truncate text-sm">{o.name}</span>
-                              <span className="shrink-0 text-[10px] uppercase font-bold tracking-wide px-1.5 py-0.5 rounded bg-black/5  text-[var(--neu-text-muted)]">
+                              <span className="shrink-0 text-[13px] font-bold px-1.5 py-0.5 rounded bg-black/5  text-[var(--neu-text-muted)]">
                                 {o.kind === 'ward' ? 'Ward' : o.kind === 'lcda' ? 'LCDA' : 'LGA'}
                               </span>
                             </button>

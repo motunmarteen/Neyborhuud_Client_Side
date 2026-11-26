@@ -178,7 +178,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
             <ShieldCheck size={28} className={shield.iconColor} strokeWidth={2.2} />
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black uppercase tracking-wider">
+                <span className="text-[13px] font-bold">
                   {data.shieldStrengthLevel} Shield
                 </span>
                 <span className="text-[10px] font-extrabold bg-white/80 px-2 py-0.5 rounded-full border border-black/[0.05]">
@@ -194,7 +194,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
         <div className="grid grid-cols-2 gap-2.5 my-4">
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 shadow-2xs">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Residents</span>
+              <span className="text-[13px] font-bold text-slate-500">Residents</span>
               <Users size={16} className="text-blue-600" />
             </div>
             <p className="text-xl font-extrabold text-slate-900">
@@ -207,7 +207,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
 
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 shadow-2xs">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Buildings</span>
+              <span className="text-[13px] font-bold text-slate-500">Buildings</span>
               <Building2 size={16} className="text-purple-600" />
             </div>
             <p className="text-xl font-extrabold text-slate-900">
@@ -220,7 +220,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
 
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 shadow-2xs">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Local Businesses</span>
+              <span className="text-[13px] font-bold text-slate-500">Local Businesses</span>
               <Store size={16} className="text-amber-600" />
             </div>
             <p className="text-xl font-extrabold text-slate-900">
@@ -233,7 +233,7 @@ export function WhoIsInMyHuudDrawer({ isOpen, onClose }: WhoIsInMyHuudDrawerProp
 
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 shadow-2xs">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Huud Watchers</span>
+              <span className="text-[13px] font-bold text-slate-500">Huud Watchers</span>
               <Eye size={16} className="text-emerald-600" />
             </div>
             <p className="text-xl font-extrabold text-slate-900">

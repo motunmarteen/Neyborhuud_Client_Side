@@ -80,7 +80,7 @@ export function Eli5Tooltip({
               <span className="p-0.5 rounded-md bg-[#00B82E]/10 text-[#0E8A3E]">
                 <Sparkles size={11} strokeWidth={2.2} />
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#0E8A3E]">
+              <span className="text-[13px] font-bold text-[#0E8A3E]">
                 {effectiveTitle || 'Quick Guide'}
               </span>
             </div>

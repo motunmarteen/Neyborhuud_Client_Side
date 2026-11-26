@@ -127,7 +127,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                     {emergencyActionDefs.length > 0 && (
                         <div className="mb-3">
                             <div className="flex items-center justify-between mb-2.5">
-                                <span className="text-[10px] font-extrabold text-[var(--neu-text-secondary)] uppercase tracking-widest flex items-center gap-1.5 opacity-80">
+                                <span className="text-[13px] font-extrabold text-[var(--neu-text-secondary)] flex items-center gap-1.5 opacity-80">
                                     <Zap size={13} className="text-primary" />
                                     Quick Status Update
                                 </span>

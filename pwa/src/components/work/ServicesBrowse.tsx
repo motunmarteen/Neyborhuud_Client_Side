@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useInView } from "react-intersection-observer";
 import { BrowseEmptyState } from "@/components/layout/BrowseEmptyState";
-import { LocalHuudHubPrimaryAction } from "@/components/local-huud/LocalHuudHubHeader";
+import { ChipRow, ChipSelect, FilterChip } from "@/components/ui/Chip";
 import ServiceCard from "@/components/services/ServiceCard";
 import { useServices, useFavoriteService } from "@/hooks/useServices";
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -32,7 +32,7 @@ export const SERVICE_CATEGORIES = [
 ];
 
 export const SERVICE_MIN_RATINGS: { label: string; value: number | undefined }[] = [
-  { label: "Any Rating", value: undefined },
+  { label: "Any rating", value: undefined },
   { label: "3+ ★", value: 3 },
   { label: "4+ ★", value: 4 },
   { label: "4.5+ ★", value: 4.5 },
@@ -50,47 +50,20 @@ export function ServicesToolbar({
   onMinRating: (r: number | undefined) => void;
 }) {
   return (
-    <div className="space-y-3">
-      <div className="flex justify-end">
-        <LocalHuudHubPrimaryAction href="/services/create" label="Offer service" />
-      </div>
-      <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
-        {SERVICE_CATEGORIES.map((cat) => {
-          const active = category === cat;
-          return (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => onCategory(cat)}
-              className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
-              }`}
-              style={active ? undefined : { color: "var(--neu-text-muted)" }}
-            >
-              {cat}
-            </button>
-          );
-        })}
-      </div>
-      <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
-        {SERVICE_MIN_RATINGS.map((r) => {
-          const active = minRating === r.value;
-          return (
-            <button
-              key={r.label}
-              type="button"
-              onClick={() => onMinRating(r.value)}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
-              }`}
-              style={active ? undefined : { color: "var(--neu-text-muted)" }}
-            >
-              {r.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <ChipRow label="Filter services">
+      <ChipSelect
+        label="Rating"
+        value={String(minRating ?? "")}
+        options={SERVICE_MIN_RATINGS.map((r) => ({ value: String(r.value ?? ""), label: r.label }))}
+        onChange={(v) => onMinRating(v ? Number(v) : undefined)}
+      />
+      <span aria-hidden className="h-5 w-px shrink-0 bg-line" />
+      {SERVICE_CATEGORIES.map((cat) => (
+        <FilterChip key={cat} active={category === cat} onClick={() => onCategory(cat)}>
+          {cat}
+        </FilterChip>
+      ))}
+    </ChipRow>
   );
 }
 

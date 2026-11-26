@@ -325,7 +325,7 @@ function AskHuudScreen() {
 
         {turns.length || pending ? (
           <div className="flex items-center justify-between px-1">
-            <p className="text-[11px] font-black uppercase tracking-wider text-faint">{t('ask.title')}</p>
+            <p className="text-[13px] font-bold text-faint">{t('ask.title')}</p>
             {turns.length ? (
               <button type="button" onClick={newChat} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-white px-3 text-sm font-extrabold text-navy ring-1 ring-line">
                 <RotateCcw size={14} aria-hidden /> {t('ask.newChat')}
@@ -348,7 +348,7 @@ function AskHuudScreen() {
           .reverse()
           .map(({ turn, i }, k) => (
             <div key={`${i}-${turn.q}`} className="flex flex-col gap-3">
-              {k === 1 ? <p className="px-1 pt-2 text-[11px] font-black uppercase tracking-wider text-faint">{t('ask.earlier')}</p> : null}
+              {k === 1 ? <p className="px-1 pt-2 text-[13px] font-bold text-faint">{t('ask.earlier')}</p> : null}
               <QuestionBubble text={turn.q} />
               <Results
                 result={turn.result}
@@ -375,7 +375,7 @@ function AskHuudScreen() {
             </Card>
 
             <section aria-labelledby="try-title">
-              <p id="try-title" className="mb-2 px-1 text-[11px] font-black uppercase tracking-wider text-faint">{t('ask.tryTitle')}</p>
+              <p id="try-title" className="mb-2 px-1 text-[13px] font-bold text-faint">{t('ask.tryTitle')}</p>
               <div className="flex flex-wrap gap-2">
                 {tryQuestions.map((q) => (
                   <button key={q} type="button" onClick={() => ask(q)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 text-sm font-bold text-navy hover:bg-[#F6F8FB]">
@@ -389,7 +389,7 @@ function AskHuudScreen() {
             </section>
 
             <section aria-labelledby="explore-title">
-              <p id="explore-title" className="mb-2 px-1 text-[11px] font-black uppercase tracking-wider text-faint">{t('ask.explore')}</p>
+              <p id="explore-title" className="mb-2 px-1 text-[13px] font-bold text-faint">{t('ask.explore')}</p>
               <div className="grid grid-cols-2 gap-2">
                 {EXPLORE_TILES.map((tile) => (
                   <Link key={tile.href} href={tile.href} className="flex min-h-[64px] items-center gap-3 rounded-[22px] bg-white px-3.5 py-3 shadow-[0_2px_10px_rgba(29,36,51,0.06)] hover:bg-[#F6F8FB]">
@@ -405,7 +405,7 @@ function AskHuudScreen() {
 
             {trending.length ? (
               <section aria-labelledby="trend-title">
-                <p id="trend-title" className="mb-2 px-1 text-[11px] font-black uppercase tracking-wider text-faint">{t('ask.trending')}</p>
+                <p id="trend-title" className="mb-2 px-1 text-[13px] font-bold text-faint">{t('ask.trending')}</p>
                 <div className="flex flex-wrap gap-2">
                   {trending.map((tr) => (
                     <button key={tr} type="button" onClick={() => setQuery(tr)} className="min-h-10 rounded-full bg-white px-3 text-sm font-bold text-navy shadow-[0_1px_3px_rgba(29,36,51,0.06)]">
@@ -419,7 +419,7 @@ function AskHuudScreen() {
             {news.length ? (
               <section aria-labelledby="news-title" className="flex flex-col gap-2">
                 <div className="flex items-center justify-between px-1">
-                  <p id="news-title" className="text-[11px] font-black uppercase tracking-wider text-faint">{t('ask.news')}</p>
+                  <p id="news-title" className="text-[13px] font-bold text-faint">{t('ask.news')}</p>
                   <Link href="/local-news" className="text-sm font-extrabold text-brand-green-dark">{t('ask.allNews')}</Link>
                 </div>
                 {news.map((a, i) => (

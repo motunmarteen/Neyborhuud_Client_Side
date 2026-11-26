@@ -39,12 +39,10 @@ export default function EventsPage() {
       maxWidth="680"
       header={
         <LocalHuudHubHeader
+          action={<LocalHuudHubPrimaryAction href="/events/create" label="Create event" />}
           hubId="events"
           toolbar={
             <div className="space-y-3">
-              <div className="flex justify-end">
-                <LocalHuudHubPrimaryAction href="/events/create" label="Create event" />
-              </div>
               <EventFilters
                 filters={filters}
                 onChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}

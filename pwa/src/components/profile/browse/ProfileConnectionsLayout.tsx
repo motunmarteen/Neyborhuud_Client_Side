@@ -181,7 +181,7 @@ export function ProfileConnectionsPagination({
         </div>
       ) : null}
       {total > 0 ? (
-        <p className="text-center text-xs font-bold uppercase tracking-wider text-slate-400">
+        <p className="text-center text-[13px] font-bold text-slate-400">
           {total.toLocaleString()} {label}
         </p>
       ) : null}

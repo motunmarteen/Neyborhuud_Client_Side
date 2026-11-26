@@ -84,7 +84,7 @@ export function SosRecentHistory() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold capitalize text-gray-800">
                       {e.isDrill && (
-                        <span className="mr-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700 align-middle">
+                        <span className="mr-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[13px] font-bold text-amber-700 align-middle">
                           Drill
                         </span>
                       )}

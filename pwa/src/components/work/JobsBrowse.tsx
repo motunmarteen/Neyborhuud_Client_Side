@@ -9,7 +9,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useInView } from "react-intersection-observer";
 import { BrowseEmptyState } from "@/components/layout/BrowseEmptyState";
-import { LocalHuudHubPrimaryAction } from "@/components/local-huud/LocalHuudHubHeader";
 import JobCard from "@/components/jobs/JobCard";
 import JobFilters, { JobsFilterState } from "@/components/jobs/JobFilters";
 import ApplyModal from "@/components/jobs/ApplyModal";
@@ -27,12 +26,7 @@ export function JobsToolbar({
   onChange: (key: keyof JobsFilterState, value: string) => void;
 }) {
   return (
-    <div className="space-y-3">
-      <div className="flex justify-end">
-        <LocalHuudHubPrimaryAction href="/jobs/create" label="Post job" />
-      </div>
-      <JobFilters filters={filters} onChange={onChange} />
-    </div>
+    <JobFilters filters={filters} onChange={onChange} />
   );
 }
 

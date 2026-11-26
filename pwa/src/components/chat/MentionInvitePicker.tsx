@@ -57,7 +57,7 @@ export function MentionInvitePicker({ query, excludeIds, onPick }: MentionInvite
 
   return (
     <div className="mx-2 mb-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-      <div className="border-b border-slate-100 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+      <div className="border-b border-slate-100 px-3 py-1.5 text-[13px] font-bold text-slate-400">
         Invite to this chat
       </div>
       <div className="max-h-[200px] divide-y divide-slate-100 overflow-y-auto">

@@ -61,7 +61,7 @@ export function SentinelHubHero({
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">Sentinel AI</p>
+          <p className="text-[13px] font-bold text-primary">Sentinel AI</p>
           <h2 className="mt-1 text-xl font-extrabold leading-tight tracking-tight" style={{ color: 'var(--neu-text)' }}>
             {isActive ? 'SOS is live' : isPending ? 'SOS arming…' : 'Your safety command center'}
           </h2>

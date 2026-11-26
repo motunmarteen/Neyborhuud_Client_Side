@@ -244,7 +244,7 @@ export default function CompleteProfilePage() {
                     <div className="flex items-center justify-between rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3">
                         <div>
                             <div className="flex items-center gap-1.5">
-                                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary">HuudCredit</p>
+                                <p className="text-[13px] font-bold text-primary">HuudCredit</p>
                                 <Eli5Tooltip 
                                     term="HuudCredit"
                                     explanation={t('auth.profile.creditWhat')}
@@ -365,7 +365,7 @@ export default function CompleteProfilePage() {
                     />
 
                     <div className="flex flex-col gap-1.5">
-                        <label className="ml-1 text-[10px] font-bold uppercase tracking-widest text-[var(--neu-text-muted)]">
+                        <label className="ml-1 text-[13px] font-bold text-[var(--neu-text-muted)]">
                             {t('auth.profile.gender')}
                         </label>
                         <div className="flex gap-2">
@@ -374,7 +374,7 @@ export default function CompleteProfilePage() {
                                     key={g}
                                     type="button"
                                     onClick={() => setFormData({ ...formData, gender: g })}
-                                    className={`flex-1 rounded-xl border py-3 text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                    className={`flex-1 rounded-xl border py-3 text-[13px] font-bold transition-all ${
                                         formData.gender === g
                                             ? 'border-primary bg-primary/10 text-primary'
                                             : 'border-charcoal/10 bg-[var(--neu-bg)] text-[var(--neu-text-muted)]'

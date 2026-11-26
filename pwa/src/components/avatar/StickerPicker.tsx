@@ -123,7 +123,7 @@ export function StickerPicker({ onPick }: { onPick: (dataUrl: string, caption: s
     <div className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto">
       {GROUPS.map((g) => (
         <section key={g} aria-label={t(`sticker.group.${g}`)}>
-          <h3 className="mb-1.5 px-1 text-[11px] font-black uppercase tracking-[0.12em] text-muted">{t(`sticker.group.${g}`)}</h3>
+          <h3 className="mb-1.5 px-1 text-[13px] font-bold text-muted">{t(`sticker.group.${g}`)}</h3>
           <ul className="grid grid-cols-3 gap-2">
             {STICKERS.filter((s) => s.group === g).map((s) => (
               <li key={s.id}>

@@ -318,7 +318,7 @@ export default function SafetyHowItWorksPage() {
 
       {GROUPS.map((g) => (
         <section key={g.title} className="flex flex-col gap-2" aria-label={g.title}>
-          <h2 className="px-1 pt-2 text-[11px] font-black uppercase tracking-[0.14em] text-muted">{g.title}</h2>
+          <h2 className="px-1 pt-2 text-[13px] font-bold text-muted">{g.title}</h2>
           {g.sections.map((s) => (
             <details
               key={s.id}
@@ -350,7 +350,7 @@ export default function SafetyHowItWorksPage() {
                 </ol>
                 {s.know?.length ? (
                   <div className="rounded-2xl bg-amber-soft p-3">
-                    <p className="text-xs font-black uppercase tracking-[0.12em] text-[#8A5A00]">Good to know</p>
+                    <p className="text-[13px] font-bold text-[#8A5A00]">Good to know</p>
                     <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-sm font-semibold text-navy">
                       {s.know.map((k, i) => (
                         <li key={i}>{k}</li>

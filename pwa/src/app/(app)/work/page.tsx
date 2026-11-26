@@ -47,15 +47,15 @@ function WorkHubContent() {
           <div
             role="tablist"
             aria-label="Work sections"
-            className="flex items-center gap-1 rounded-full border border-black/[0.05] bg-brand-surface/60 p-1"
+            className="flex border-b border-line"
           >
             <button
               type="button"
               role="tab"
               aria-selected={tab === "hiring"}
               onClick={() => setTab("hiring")}
-              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold transition-colors ${
-                tab === "hiring" ? "mod-chip mod-chip-active text-primary" : "text-[var(--neu-text-muted)]"
+              className={`relative h-11 flex-1 text-sm transition-colors ${
+                tab === "hiring" ? "font-extrabold text-navy after:absolute after:inset-x-6 after:bottom-0 after:h-[3px] after:rounded-full after:bg-primary" : "font-semibold text-muted"
               }`}
             >
               Hiring
@@ -65,8 +65,8 @@ function WorkHubContent() {
               role="tab"
               aria-selected={tab === "for_hire"}
               onClick={() => setTab("for_hire")}
-              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold transition-colors ${
-                tab === "for_hire" ? "mod-chip mod-chip-active text-primary" : "text-[var(--neu-text-muted)]"
+              className={`relative h-11 flex-1 text-sm transition-colors ${
+                tab === "for_hire" ? "font-extrabold text-navy after:absolute after:inset-x-6 after:bottom-0 after:h-[3px] after:rounded-full after:bg-primary" : "font-semibold text-muted"
               }`}
             >
               For Hire

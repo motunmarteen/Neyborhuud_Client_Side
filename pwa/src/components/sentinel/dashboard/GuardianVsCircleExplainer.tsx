@@ -34,7 +34,7 @@ export function GuardianVsCircleExplainer() {
       {open && (
         <div className="mt-3 space-y-3">
           <div className="mod-inset rounded-xl p-3">
-            <p className="text-xs font-black uppercase tracking-wide text-brand-red">Guardian</p>
+            <p className="text-[13px] font-bold text-brand-red">Guardian</p>
             <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
               Emergency alerts + your exact location
             </p>
@@ -47,7 +47,7 @@ export function GuardianVsCircleExplainer() {
           </div>
 
           <div className="mod-inset rounded-xl p-3">
-            <p className="text-xs font-black uppercase tracking-wide text-primary">Safety Circle</p>
+            <p className="text-[13px] font-bold text-primary">Safety Circle</p>
             <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--neu-text)' }}>
               General status only — no location, no emergency alerts
             </p>

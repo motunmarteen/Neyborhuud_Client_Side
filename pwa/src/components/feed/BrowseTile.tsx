@@ -151,7 +151,7 @@ export function BrowseTile({
         ) : null}
 
         {status ? (
-          <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-navy/85 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-white">
+          <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-navy/85 px-3 py-1 text-[13px] font-extrabold text-white">
             {status}
           </span>
         ) : null}

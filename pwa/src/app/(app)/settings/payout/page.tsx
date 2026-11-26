@@ -91,7 +91,7 @@ export default function PayoutDetailsPage() {
         <div className="mt-8 mb-6">
           <Link
             href="/settings"
-            className="text-[10px] font-bold uppercase tracking-widest text-brand-blue mb-4 inline-block"
+            className="text-[13px] font-bold text-brand-blue mb-4 inline-block"
           >
             ← Settings
           </Link>

@@ -20,7 +20,7 @@ const STEPS = [
 export function DashboardHowItWorks() {
   return (
     <div className="mod-card rounded-2xl border border-primary/15 bg-primary/5 p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">How the dashboard works</p>
+      <p className="text-[13px] font-bold text-primary">How the dashboard works</p>
       <ul className="mt-3 space-y-2">
         {STEPS.map((step) => (
           <li key={step.title} className="flex gap-2.5 text-sm">

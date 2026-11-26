@@ -927,6 +927,7 @@ const pcm: Record<string, string> = {
     'chats.emptyBody.services': 'Chat with artisans and service people go show here.',
     'chats.empty.events': 'No event chat',
     'chats.emptyBody.events': 'Chat about events go show here.',
+    'news.filters': 'Filter news',
 };
 
 export default pcm;

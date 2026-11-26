@@ -22,7 +22,7 @@ export function LiveTrackingTrailPanel({
   return (
     <div className="space-y-3 pb-24">
       <div className="mod-card rounded-2xl p-4">
-        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-red">Location trail</p>
+        <p className="text-[13px] font-bold text-brand-red">Location trail</p>
         <p className="mt-1 text-sm leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
           Every GPS ping from your session — newest first. Guardians use this path to follow your movement. It fills as
           your phone sends locations (about every 30 seconds while tracking is active).

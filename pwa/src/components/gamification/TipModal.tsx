@@ -118,7 +118,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
               </div>
 
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-[var(--neu-text-muted)]">Sending a tip to</p>
+                <p className="text-[13px] font-medium text-[var(--neu-text-muted)]">Sending a tip to</p>
                 <h2 className="text-base font-black text-[var(--neu-text-muted)] leading-tight">
                   {recipient.displayName}
                 </h2>
@@ -178,7 +178,7 @@ export function TipModal({ recipient, onConfirm, isPending, onClose }: Props) {
               </div>
 
               {/* ─── Amount selector ─── */}
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--neu-text-muted)]">
+              <p className="mb-3 text-[13px] font-semibold text-[var(--neu-text-muted)]">
                 Choose an amount
               </p>
               <div className="grid grid-cols-2 gap-3 mb-5">

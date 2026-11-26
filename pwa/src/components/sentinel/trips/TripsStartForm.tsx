@@ -132,7 +132,7 @@ export function TripsStartForm({ onStart, onPlan, disabled }: TripsStartFormProp
 
   return (
     <div className="mod-card rounded-2xl p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Start a safe trip</p>
+      <p className="text-[13px] font-bold text-primary">Start a safe trip</p>
       <p className="mt-1 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
         Guardians are notified and monitoring begins as soon as you start.
       </p>

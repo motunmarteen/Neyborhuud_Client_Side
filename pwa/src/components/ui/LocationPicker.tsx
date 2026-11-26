@@ -144,11 +144,11 @@ export function LocationPicker({
             {/* Label with accuracy indicator */}
             {!isSignupMap && (
                 <div className="flex items-center justify-between px-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--neu-text-muted)]">
+                    <span className="text-[13px] font-bold text-[var(--neu-text-muted)]">
                         {label}
                     </span>
                     {accuracy && accuracyQuality && (
-                        <span className={`text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${accuracyColors[accuracyQuality]}`}>
+                        <span className={`text-[13px] font-bold flex items-center gap-1 ${accuracyColors[accuracyQuality]}`}>
                             <span className="material-symbols-outlined" aria-hidden="true">wifi_tethering</span>
                             {formatAccuracy(accuracy)}
                             {accuracyQuality === 'excellent' && ' GPS'}
@@ -169,7 +169,7 @@ export function LocationPicker({
                             <span className="absolute h-16 w-16 animate-ping rounded-full bg-brand-blue/15" aria-hidden />
                             <span className="material-symbols-outlined text-3xl text-brand-blue animate-bounce" aria-hidden="true">location_on</span>
                         </div>
-                        <span className="text-[10px] text-charcoal/50 font-black uppercase tracking-wider">
+                        <span className="text-[13px] text-charcoal/50 font-bold">
                             Detecting your location...
                         </span>
                     </div>
@@ -213,7 +213,7 @@ export function LocationPicker({
                                 <span className="material-symbols-outlined text-4xl text-primary/35" aria-hidden="true">location_on</span>
                             </div>
                             <div className="space-y-1">
-                                <span className="block text-[11px] text-charcoal/60 font-black uppercase tracking-widest">
+                                <span className="block text-[13px] text-charcoal/60 font-bold">
                                     Location not available
                                 </span>
                                 {isPremium && (
@@ -226,7 +226,7 @@ export function LocationPicker({
                                 <button
                                     type="button"
                                     onClick={onRetry}
-                                    className="text-[9px] font-black uppercase tracking-widest text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-lg hover:bg-brand-blue/20 transition-colors"
+                                    className="text-[13px] font-bold text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-lg hover:bg-brand-blue/20 transition-colors"
                                 >
                                     Enable Location
                                 </button>
@@ -245,7 +245,7 @@ export function LocationPicker({
                     <div className="flex items-center gap-3 overflow-hidden flex-1">
                         <div className={`w-2 h-2 shrink-0 rounded-full ${currentLocation ? 'bg-primary animate-pulse' : 'bg-charcoal/30'}`}></div>
                         <div className="flex flex-col overflow-hidden flex-1">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.1em] truncate text-[var(--neu-text)]">
+                            <span className="text-[13px] font-bold truncate text-[var(--neu-text)]">
                                 {isResolvingAddress ? 'Resolving address...' :
                                     address?.formatted ? address.formatted :
                                         address ? `${address.lga}, ${address.state}` :

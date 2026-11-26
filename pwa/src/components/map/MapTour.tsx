@@ -128,7 +128,7 @@ export function MapTour({ step, onNext, onSkip }: { step: number; onNext: () => 
         className="absolute left-4 right-4 mx-auto flex max-w-sm flex-col gap-2 rounded-[22px] bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.28)]"
         style={{ top: cardTop }}
       >
-        <span className="text-[11px] font-black uppercase tracking-[0.16em] text-brand-green-dark">
+        <span className="text-[13px] font-bold text-brand-green-dark">
           Step {step + 1} of {STEPS.length}
         </span>
         <h2 id="nh-tour-title" className="font-heading text-lg font-extrabold text-navy">

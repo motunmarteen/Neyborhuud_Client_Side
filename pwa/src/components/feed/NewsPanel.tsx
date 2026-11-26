@@ -127,7 +127,7 @@ export function NewsPanel() {
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between px-1 pb-2">
-        <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+        <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#9AA3B1]">
           <Newspaper size={13} className="text-[#0E8A3E]" />
           <span>Today’s News</span>
         </div>

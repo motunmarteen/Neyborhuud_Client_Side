@@ -32,7 +32,7 @@ export function SentinelDashboardHero({
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">
+          <p className="text-[13px] font-bold text-primary">
             Sentinel dashboard
           </p>
           <h1 className="mt-1 text-lg font-extrabold leading-snug" style={{ color: 'var(--neu-text)' }}>
@@ -105,7 +105,7 @@ function StatPill({
   return (
     <div className={`mod-inset rounded-xl border px-3 py-2 text-center ${ring}`}>
       <p className="text-lg font-black tabular-nums leading-none">{value}</p>
-      <p className="mt-1 text-[10px] font-bold uppercase tracking-wide opacity-80">{label}</p>
+      <p className="mt-1 text-[13px] font-bold opacity-80">{label}</p>
     </div>
   );
 }

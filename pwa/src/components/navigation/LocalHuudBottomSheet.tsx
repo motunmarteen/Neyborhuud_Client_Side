@@ -28,7 +28,7 @@ export function LocalHuudBottomSheet({ open, onClose }: LocalHuudBottomSheetProp
       }}
     >
       <header className="shrink-0 px-4 pb-3 text-center">
-        <p className="m-0 text-[10px] font-extrabold uppercase tracking-[0.16em] text-primary">
+        <p className="m-0 text-[13px] font-extrabold text-primary">
           Local Huud
         </p>
         <h2 className="m-0 mt-1 text-lg font-extrabold tracking-tight text-[var(--neu-text)]">

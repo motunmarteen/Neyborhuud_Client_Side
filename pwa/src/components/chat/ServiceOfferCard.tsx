@@ -134,7 +134,7 @@ export function ServiceOfferCard({
     <div className={`overflow-hidden rounded-2xl ${style.bg} max-w-[300px] sm:max-w-sm`}>
       <div className={`flex items-center gap-2 px-3 py-2 ${style.text}`}>
         <span className="text-base">{style.icon}</span>
-        <span className="text-[11px] font-bold uppercase tracking-wide opacity-70">
+        <span className="text-[13px] font-bold opacity-70">
           Service Booking · {style.label}
         </span>
       </div>

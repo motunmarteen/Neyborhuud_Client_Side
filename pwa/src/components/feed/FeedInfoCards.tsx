@@ -437,7 +437,7 @@ export function FeedInfoCards() {
           ) : weather ? (
             <>
               <span
-                className="text-[10px] font-medium uppercase tracking-wider"
+                className="text-[13px] font-medium"
                 style={{ color: theme.mutedColor, textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
               >
                 Weather
@@ -474,7 +474,7 @@ export function FeedInfoCards() {
         ) : currentRate ? (
           <>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--neu-text-muted)' }}>
+              <span className="text-[13px] font-medium" style={{ color: 'var(--neu-text-muted)' }}>
                 ₦ Rates
               </span>
               <span className="material-symbols-outlined text-xl text-primary">

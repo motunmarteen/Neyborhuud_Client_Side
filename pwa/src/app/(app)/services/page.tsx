@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AppBrowseLayout } from "@/components/layout/AppBrowseLayout";
-import { LocalHuudHubHeader } from "@/components/local-huud/LocalHuudHubHeader";
+import { LocalHuudHubHeader, LocalHuudHubPrimaryAction } from "@/components/local-huud/LocalHuudHubHeader";
 import { ServicesBrowse, ServicesToolbar } from "@/components/work/ServicesBrowse";
 
 export default function ServicesPage() {
@@ -14,6 +14,7 @@ export default function ServicesPage() {
       maxWidth="680"
       header={
         <LocalHuudHubHeader
+          action={<LocalHuudHubPrimaryAction href="/services/create" label="Offer service" />}
           hubId="services"
           toolbar={
             <ServicesToolbar

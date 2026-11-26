@@ -270,7 +270,7 @@ export default function GeofencesPage() {
 
       {alerts.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Live alerts</p>
+          <p className="text-[13px] font-bold text-primary">Live alerts</p>
               {alerts.slice(0, 5).map((a, i) => (
                 <div
                   key={i}
@@ -314,7 +314,7 @@ export default function GeofencesPage() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mod-card space-y-4 rounded-2xl p-5">
-          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">
+          <p className="text-[13px] font-bold text-primary">
             {editingId ? 'Edit geofence' : 'New geofence'}
           </p>
 

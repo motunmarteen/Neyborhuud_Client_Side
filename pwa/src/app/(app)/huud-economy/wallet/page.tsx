@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppBrowseLayout } from "@/components/layout/AppBrowseLayout";
-import { BrowseTabStrip } from "@/components/layout/BrowseTabStrip";
+import { ChipRow, FilterChip } from "@/components/ui/Chip";
 import {
   HuudEconomyHero,
   HuudEconomySectionNav,
@@ -128,7 +128,7 @@ function BalanceCard({
         </p>
       ) : (
         <>
-          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">
+          <p className="text-[13px] font-bold text-primary">
             HuudCredit wallet
           </p>
           <p className="mt-1 text-4xl font-extrabold tabular-nums text-primary">
@@ -211,7 +211,13 @@ export default function WalletPage() {
         <div className="space-y-3">
           <HuudEconomyHero />
           <HuudEconomySectionNav />
-          <BrowseTabStrip tabs={WALLET_TABS} activeId={tab} onChange={changeTab} />
+          <ChipRow label="Wallet">
+            {WALLET_TABS.map((w) => (
+              <FilterChip key={w.id} active={tab === w.id} onClick={() => changeTab(w.id)}>
+                {w.label}
+              </FilterChip>
+            ))}
+          </ChipRow>
         </div>
       }
     >

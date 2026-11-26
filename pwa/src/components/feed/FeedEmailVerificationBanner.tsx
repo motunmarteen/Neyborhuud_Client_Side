@@ -56,7 +56,7 @@ export function FeedEmailVerificationBanner() {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#0E8A3E]">
+              <span className="text-[13px] font-bold text-[#0E8A3E]">
                 Claim 50 HuudCredit
               </span>
               <Sparkles size={11} className="text-[#0E8A3E]" />

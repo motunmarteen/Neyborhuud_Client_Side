@@ -11,7 +11,7 @@ import {
   HuudEconomySectionNav,
 } from "@/components/huud-economy/HuudEconomySectionNav";
 import { BrowseEmptyState } from "@/components/layout/BrowseEmptyState";
-import { BrowseTabStrip } from "@/components/layout/BrowseTabStrip";
+import { ChipRow, FilterChip } from "@/components/ui/Chip";
 import BadgeCard from "@/components/gamification/BadgeCard";
 import AchievementCard from "@/components/gamification/AchievementCard";
 import LeaderboardRow from "@/components/gamification/LeaderboardRow";
@@ -89,28 +89,7 @@ function SectionTitle({ children }: { children: ReactNode }) {
   );
 }
 
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
-        active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
-      }`}
-      style={active ? undefined : { color: "var(--neu-text-muted)" }}
-    >
-      {children}
-    </button>
-  );
-}
+/** Same chip as the rest of the app (components/ui/Chip). */
 
 function parseScoreTab(value: string | null): Tab {
   if (
@@ -231,25 +210,13 @@ export default function HuudScorePage() {
         <div className="space-y-3">
           <HuudEconomyHero />
           <HuudEconomySectionNav />
-          <BrowseTabStrip
-            tabs={TABS}
-            activeId={tab}
-            onChange={changeTab}
-            trailing={
-            <Link
-              href="/huud-economy/wallet"
-              className="mod-chip mod-chip-active inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary"
-              aria-label="HuudCredit wallet"
-            >
-              <span aria-hidden>🪙</span>
-              <span className="tabular-nums">
-                {statsData?.huudCoins != null
-                  ? (statsData.huudCoins as number).toLocaleString()
-                  : "Wallet"}
-              </span>
-            </Link>
-          }
-          />
+          <ChipRow label="Huud Score">
+            {TABS.map((x) => (
+              <FilterChip key={x.id} active={tab === x.id} onClick={() => changeTab(x.id)}>
+                {x.label}
+              </FilterChip>
+            ))}
+          </ChipRow>
         </div>
       }
     >
@@ -312,7 +279,7 @@ export default function HuudScorePage() {
                 <div className="mod-card rounded-2xl bg-gradient-to-br from-primary/8 via-[var(--neu-bg)] to-brand-surface p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">TrustOS Signal</p>
+                      <p className="text-[13px] font-bold text-primary">TrustOS Signal</p>
                       <p className="mt-1 text-2xl font-black tabular-nums" style={{ color: "var(--neu-text)" }}>
                         {trustEconomy.score1000.toLocaleString()}
                       </p>
@@ -322,7 +289,7 @@ export default function HuudScorePage() {
                     </div>
                     {trustEconomy.nextTier ? (
                       <div className="mod-inset rounded-xl px-3 py-2 text-right">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">Next Tier</p>
+                        <p className="text-[13px] font-bold text-[var(--neu-text-muted)]">Next Tier</p>
                         <p className="text-sm font-bold" style={{ color: "var(--neu-text)" }}>
                           {trustEconomy.nextTier.icon} {trustEconomy.nextTier.label}
                         </p>
@@ -330,7 +297,7 @@ export default function HuudScorePage() {
                       </div>
                     ) : (
                       <div className="mod-chip mod-chip-active rounded-xl px-3 py-2 text-right">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">Top Tier</p>
+                        <p className="text-[13px] font-bold text-primary">Top Tier</p>
                         <p className="text-sm font-bold text-primary">Baobab unlocked</p>
                       </div>
                     )}
@@ -425,22 +392,22 @@ export default function HuudScorePage() {
               <>
                 {/* ── Core metrics ── */}
                 <section className="mod-card rounded-2xl p-5">
-                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">TrustOS Core</p>
+                  <p className="text-[13px] font-bold text-primary">TrustOS Core</p>
                   <div className="mt-3 grid gap-3 sm:grid-cols-3">
                     <div className="mod-inset rounded-xl p-4">
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">Trust Score</p>
+                      <p className="text-[13px] text-[var(--neu-text-muted)]">Trust Score</p>
                       <p className="mt-2 text-3xl font-black tabular-nums" style={{ color: "var(--neu-text)" }}>
                         {trustEconomy.score1000.toLocaleString()}
                       </p>
                       <p className="text-xs text-[var(--neu-text-muted)]">Scale: 0 to 1,000</p>
                     </div>
                     <div className="mod-inset rounded-xl p-4">
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">Community Trust</p>
+                      <p className="text-[13px] text-[var(--neu-text-muted)]">Community Trust</p>
                       <p className="mt-2 text-3xl font-black text-primary tabular-nums">{trustEconomy.communityTrustPercent}%</p>
                       <p className="text-xs text-[var(--neu-text-muted)]">Public trust perception index</p>
                     </div>
                     <div className="mod-inset rounded-xl p-4">
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--neu-text-muted)]">Current Tier</p>
+                      <p className="text-[13px] text-[var(--neu-text-muted)]">Current Tier</p>
                       <p className="mt-2 text-2xl font-black" style={{ color: "var(--neu-text)" }}>
                         {trustEconomy.trustTier.icon} {trustEconomy.trustTier.label}
                       </p>
@@ -512,7 +479,7 @@ export default function HuudScorePage() {
                   {/* Marketplace badge preview */}
                   {privileges.marketplaceBadge && (
                     <div className="mt-4 rounded-xl border border-emerald-500/20 bg-primary/5 px-3 py-2.5">
-                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Your Marketplace Badge</p>
+                      <p className="text-[13px] font-bold text-primary">Your Marketplace Badge</p>
                       <div className="mt-1.5 flex items-center gap-2">
                         <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black ${privileges.marketplaceBadgeColor}`}>
                           {trustEconomy.trustTier.icon} {privileges.marketplaceBadge}
@@ -523,7 +490,7 @@ export default function HuudScorePage() {
                   )}
                   {!privileges.marketplaceBadge && (
                     <div className="mt-4 rounded-xl mod-inset px-3 py-2.5">
-                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[var(--neu-text-muted)]">Marketplace Badge</p>
+                      <p className="text-[13px] font-bold text-[var(--neu-text-muted)]">Marketplace Badge</p>
                       <p className="mt-1 text-xs text-[var(--neu-text-secondary)]">Reach 🌳 Tree tier (300 pts) to earn the Trusted Seller badge on your listings</p>
                     </div>
                   )}
@@ -906,7 +873,7 @@ export default function HuudScorePage() {
                 {/* Sticky your rank */}
                 {myRankEntry && (
                   <div className="sticky bottom-16 md:bottom-4 mod-card rounded-xl ring-2 ring-brand-blue/30">
-                    <p className="text-[10px] text-brand-blue font-semibold uppercase px-4 pt-2 tracking-wider">
+                    <p className="text-[13px] text-brand-blue font-semibold px-4 pt-2">
                       Your Rank
                     </p>
                     <LeaderboardRow

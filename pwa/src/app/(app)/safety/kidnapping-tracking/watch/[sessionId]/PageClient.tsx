@@ -159,7 +159,7 @@ function GuardianTrackingViewInner({ sessionId }: { sessionId: string }) {
             </p>
           </div>
           <span
-            className="text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+            className="text-[13px] font-bold px-2 py-0.5 rounded-full"
             style={{ background: color + '22', color }}
           >
             {session.status.replace('_', ' ')}
@@ -177,7 +177,7 @@ function GuardianTrackingViewInner({ sessionId }: { sessionId: string }) {
 
       {latest && (
         <div className="neu-socket rounded-xl p-3">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>
             Last known location
           </p>
           <p className="text-xs mt-1 font-mono" style={{ color: 'var(--neu-text)' }}>
@@ -191,19 +191,19 @@ function GuardianTrackingViewInner({ sessionId }: { sessionId: string }) {
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         <div className="neu-socket rounded-xl p-2">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Distance covered</p>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Distance covered</p>
           <p className="text-sm font-semibold mt-0.5" style={{ color: 'var(--neu-text)' }}>
             {formatTrackingDistance(session.summary.totalDistanceMeters)}
           </p>
         </div>
         <div className="neu-socket rounded-xl p-2">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Points logged</p>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Points logged</p>
           <p className="text-sm font-semibold mt-0.5" style={{ color: 'var(--neu-text)' }}>
             {session.summary.totalPoints}
           </p>
         </div>
         <div className="neu-socket rounded-xl p-2">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Missed pings</p>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Missed pings</p>
           <p
             className="text-sm font-semibold mt-0.5"
             style={{ color: session.missedPings > 0 ? '#f97316' : 'var(--neu-text)' }}
@@ -213,7 +213,7 @@ function GuardianTrackingViewInner({ sessionId }: { sessionId: string }) {
         </div>
         {session.summary.stationarySeconds > 0 && (
           <div className="neu-socket rounded-xl p-2">
-            <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Stationary for</p>
+            <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Stationary for</p>
             <p className="text-sm font-semibold mt-0.5" style={{ color: 'var(--neu-text)' }}>
               {formatTrackingDuration(session.summary.stationarySeconds)}
             </p>

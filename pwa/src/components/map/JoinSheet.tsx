@@ -208,7 +208,7 @@ export function JoinSheet({ map, area, refCode, onLocate, locating, onClose }: P
         <section ref={sheetRef} aria-labelledby="join-street-h" className="flex flex-col gap-3">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-green-dark">Join free · step 1 of 2</p>
+              <p className="text-[13px] font-bold text-brand-green-dark">Join free · step 1 of 2</p>
               <h2 id="join-street-h" className="font-heading text-xl font-black text-navy">
                 Where&apos;s your home?
               </h2>
@@ -259,7 +259,7 @@ export function JoinSheet({ map, area, refCode, onLocate, locating, onClose }: P
     <form onSubmit={join} aria-labelledby="join-you-h" className="flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-green-dark">Join free · step 2 of 2</p>
+          <p className="text-[13px] font-bold text-brand-green-dark">Join free · step 2 of 2</p>
           <h2 id="join-you-h" className="font-heading text-xl font-black text-navy">
             Join your neighbours{areaName ? ` in ${area?.lga}` : ''}
           </h2>

@@ -29,7 +29,7 @@ export function LiveTrackingPageHero({ session, wsConnected, queuedCount, isOnli
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-brand-red">Live tracking</p>
+          <p className="text-[13px] font-bold text-brand-red">Live tracking</p>
           <h1 className="mt-1 text-lg font-extrabold leading-snug" style={{ color: 'var(--neu-text)' }}>
             {live ? 'Session active — guardians can follow you' : 'High-risk continuous location sharing'}
           </h1>

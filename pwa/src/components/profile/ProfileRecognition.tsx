@@ -50,7 +50,7 @@ export function ProfileRecognition({
             </span>
           )}
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">Avatar</p>
+            <p className="text-[13px] font-bold text-gray-500">Avatar</p>
             {isOwnProfile ? (
               <>
                 <p className="text-sm font-bold text-gray-800">{avatarPortrait ? 'Your 3D avatar' : 'Make your 3D avatar'}</p>
@@ -66,7 +66,7 @@ export function ProfileRecognition({
       ) : null}
       {earned.length || legacy.length ? (
         <div className="flex flex-col gap-2 rounded-2xl bg-[#F4F5F6] p-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">Badges</p>
+          <p className="text-[13px] font-bold text-gray-500">Badges</p>
           {earned.length ? (
             <ul className="flex flex-wrap gap-2">
               {earned.map((b) => (
@@ -95,7 +95,7 @@ export function ProfileRecognition({
 
       <div className="flex flex-col gap-2 rounded-2xl bg-[#F4F5F6] p-4">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">Shout-outs</p>
+          <p className="text-[13px] font-bold text-gray-500">Shout-outs</p>
           {!isOwnProfile && canAct ? (
             <button
               type="button"

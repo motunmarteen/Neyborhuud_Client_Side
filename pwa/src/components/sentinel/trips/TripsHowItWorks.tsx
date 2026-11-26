@@ -20,7 +20,7 @@ const STEPS = [
 export function TripsHowItWorks() {
   return (
     <div className="mod-card rounded-2xl border border-primary/15 bg-primary/5 p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">How safe trips work</p>
+      <p className="text-[13px] font-bold text-primary">How safe trips work</p>
       <p className="mt-2 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
         <strong className="text-primary">How:</strong> Start a trip, check in on schedule, and mark arrived when you reach.
       </p>

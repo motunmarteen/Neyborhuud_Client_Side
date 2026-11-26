@@ -40,7 +40,7 @@ export default function NigeriaPostalInfoPage() {
       <div className="max-w-2xl mx-auto px-5 py-10 pb-16">
         <Link
           href="/signup"
-          className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-6 inline-block"
+          className="text-[13px] font-bold text-brand-blue mb-6 inline-block"
         >
           ← Back
         </Link>

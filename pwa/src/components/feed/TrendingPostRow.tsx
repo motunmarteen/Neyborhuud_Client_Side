@@ -105,7 +105,7 @@ export function TrendingPostRow({ post, rank = 0, variant = 'ranked' }: Trending
           <span className="truncate text-xs font-black text-[#1D2433]">
             {authorName(post)}
           </span>
-          <span className="shrink-0 rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-[#0E8A3E] border border-emerald-200/50">
+          <span className="shrink-0 rounded-md px-1.5 py-0.5 text-[13px] font-bold bg-emerald-50 text-[#0E8A3E] border border-emerald-200/50">
             {typeLabel}
           </span>
           {timeLabel ? (

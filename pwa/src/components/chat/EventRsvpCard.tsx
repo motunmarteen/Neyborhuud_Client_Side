@@ -151,7 +151,7 @@ export function EventRsvpCard({
     <div className="overflow-hidden rounded-2xl bg-purple-50 max-w-[300px] sm:max-w-sm">
       <div className="flex items-center gap-2 px-3 py-2 text-purple-700">
         <span className="text-base">📅</span>
-        <span className="text-[11px] font-bold uppercase tracking-wide opacity-70">
+        <span className="text-[13px] font-bold opacity-70">
           NeyborHuud Event · RSVP
         </span>
       </div>

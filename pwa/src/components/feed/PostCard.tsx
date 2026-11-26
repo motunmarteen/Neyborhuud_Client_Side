@@ -266,7 +266,7 @@ function EventBlock({ post }: { post: Post }) {
     <div className="flex items-stretch gap-3">
       {date ? (
         <div className="flex w-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-purple-soft py-2 text-[#5E3BB8]" aria-hidden>
-          <span className="text-[11px] font-black uppercase tracking-wide">{date.toLocaleDateString('en-NG', { month: 'short' })}</span>
+          <span className="text-[13px] font-bold">{date.toLocaleDateString('en-NG', { month: 'short' })}</span>
           <span className="font-heading text-2xl font-black leading-none">{date.getDate()}</span>
         </div>
       ) : null}

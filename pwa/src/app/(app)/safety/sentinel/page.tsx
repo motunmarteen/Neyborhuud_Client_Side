@@ -75,14 +75,14 @@ function RecentRedZoneAlerts() {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <p className="text-sm font-bold" style={{ color: 'var(--neu-text)' }}>{a.title}</p>
-              <span className="rounded-full bg-brand-red/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-red">
+              <span className="rounded-full bg-brand-red/10 px-2 py-0.5 text-[13px] font-bold text-brand-red">
                 {SEVERITY_LABEL[a.severity] ?? a.severity}
               </span>
             </div>
             <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
               {a.message}
             </p>
-            <p className="mt-1 text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>
+            <p className="mt-1 text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>
               {a.reason === 'work' ? 'Near your work area' : 'Near home'} · Score {a.threatScore}/10
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function SentinelAiPage() {
       iconAccent="blue"
     >
       <div className="mod-card rounded-2xl bg-gradient-to-br from-brand-blue/12 via-[var(--neu-bg)] to-primary/6 p-5">
-        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-brand-blue">
+        <p className="text-[13px] font-bold text-brand-blue">
           Sentinel
         </p>
         <h2 className="mt-2 text-lg font-extrabold" style={{ color: 'var(--neu-text)' }}>

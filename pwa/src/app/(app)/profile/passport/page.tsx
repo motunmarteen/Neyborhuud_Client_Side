@@ -73,7 +73,7 @@ export default function HuudPassportPage() {
           </button>
           <div className="flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[18px] text-emerald-600">verified</span>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800 ">
+            <span className="text-[13px] font-bold text-slate-800 ">
               Identity Proof
             </span>
           </div>
@@ -100,7 +100,7 @@ export default function HuudPassportPage() {
             <div className="mt-6">
               <Link
                 href="/verify-location"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3 text-xs font-black uppercase tracking-wider text-white hover:bg-emerald-500 transition shadow-sm"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3 text-[13px] font-bold text-white hover:bg-emerald-500 transition shadow-sm"
               >
                 <span className="material-symbols-outlined text-[16px]">my_location</span>
                 Verify Building Address
@@ -112,7 +112,7 @@ export default function HuudPassportPage() {
             <HuudPassportCard passport={passport} onShare={handleShare} />
 
             <div className="rounded-2xl bg-white p-4 shadow-sm border border-slate-200/80  ">
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 ">
+              <h4 className="text-[13px] font-bold text-slate-800 ">
                 About Your Huud Passport
               </h4>
               <ul className="mt-2 space-y-2 text-[11px] text-slate-600 ">

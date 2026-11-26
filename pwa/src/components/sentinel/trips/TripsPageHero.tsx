@@ -35,7 +35,7 @@ export function TripsPageHero({ trip, tracking, checkInCountdown, autoSosTrigger
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">Safe trips</p>
+          <p className="text-[13px] font-bold text-primary">Safe trips</p>
           <h1 className="mt-1 text-lg font-extrabold leading-snug" style={{ color: 'var(--neu-text)' }}>
             {autoSosTriggered
               ? 'SOS linked to this trip'

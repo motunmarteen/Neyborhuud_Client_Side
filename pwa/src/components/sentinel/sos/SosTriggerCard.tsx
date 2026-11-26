@@ -32,11 +32,11 @@ export function SosTriggerCard({ sos }: SosTriggerCardProps) {
 
   return (
     <div className="rounded-none border-b border-gray-100 p-6 bg-white space-y-6 shadow-none">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-red-600">Trigger SOS</p>
+      <p className="text-[13px] font-bold text-red-600">Trigger SOS</p>
 
       {drill.running && (
         <div className="border-b border-blue-100 bg-blue-50/20 py-4 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-600">
+          <p className="text-[13px] font-bold text-blue-600">
             Drill mode — no real alert
           </p>
           <p className="my-2 text-5xl font-black tabular-nums text-blue-600">{drill.seconds}</p>
@@ -75,7 +75,7 @@ export function SosTriggerCard({ sos }: SosTriggerCardProps) {
         <button
           type="button"
           onClick={() => setShowSettings(!showSettings)}
-          className="flex items-center gap-1 text-[11px] font-bold text-gray-500 hover:text-gray-800 transition-colors uppercase tracking-wider"
+          className="flex items-center gap-1 text-[13px] font-bold text-gray-500 hover:text-gray-800 transition-colors"
         >
           <span className="material-symbols-outlined text-[16px] transition-transform duration-200" style={{ transform: showSettings ? 'rotate(180deg)' : 'rotate(0deg)' }}>
             expand_more

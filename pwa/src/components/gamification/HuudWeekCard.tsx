@@ -17,7 +17,7 @@ export function HuudWeekCard() {
 
   return (
     <section aria-labelledby="hotw-heading" className="flex flex-col gap-3 rounded-[22px] bg-white p-5 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-green-dark">Huud of the Week</p>
+      <p className="text-[13px] font-bold text-brand-green-dark">Huud of the Week</p>
       <div className="flex items-center gap-3">
         <span aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-green-soft text-2xl">
           {theme.emoji}

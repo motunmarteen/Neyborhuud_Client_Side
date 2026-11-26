@@ -249,7 +249,7 @@ function SidebarContent({
       <nav className="flex-1 overflow-y-auto px-3.5 py-2 space-y-4 no-scrollbar">
         {/* Main Section */}
         <div>
-          <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+          <p className="px-3 pb-1.5 text-[13px] font-extrabold text-[#9AA3B1]">
             Main
           </p>
           <ul className="space-y-0.5">
@@ -266,7 +266,7 @@ function SidebarContent({
 
         {/* Discover & Services */}
         <div>
-          <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+          <p className="px-3 pb-1.5 text-[13px] font-extrabold text-[#9AA3B1]">
             Services &amp; Safety
           </p>
           <ul className="space-y-0.5">
@@ -283,7 +283,7 @@ function SidebarContent({
 
         {/* Economy */}
         <div>
-          <p className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+          <p className="px-3 pb-1.5 text-[13px] font-extrabold text-[#9AA3B1]">
             Economy
           </p>
           <ul className="space-y-0.5">

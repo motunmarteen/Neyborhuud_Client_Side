@@ -146,7 +146,7 @@ export default function HandoverPage() {
     <AppBrowseLayout>
       <div className="flex flex-col gap-4 pb-6">
         <Card>
-          <p className="text-[11px] font-black uppercase tracking-wider text-faint">Handover</p>
+          <p className="text-[13px] font-bold text-faint">Handover</p>
           <p className="mt-1 font-heading text-xl font-extrabold text-navy">{item?.itemName ?? 'Item'}</p>
           {item?.place ? <p className="text-sm text-muted">{item.kind === 'found' ? 'Found at' : 'Last seen'} {item.place}</p> : null}
           <Link href={`/lost-found/${claim.postId}`} className="mt-2 inline-block text-sm font-extrabold text-brand-green-dark hover:underline">See the post</Link>

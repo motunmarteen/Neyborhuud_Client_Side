@@ -43,20 +43,19 @@ function useHubText(hubId: LocalHuudHubId) {
  */
 export function LocalHuudHubHero({ hubId, action }: { hubId: LocalHuudHubId; action?: ReactNode }) {
   const { hub, tagline, body } = useHubText(hubId);
+  // Owner 2026-11-26: the words get the whole width; the button sits under them, inside the card.
   return (
-    <div className="rounded-2xl bg-white p-3.5 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
-      <div className="flex items-start gap-3">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-green-soft text-brand-green-dark">
-          <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden>
-            {hub.icon}
-          </span>
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="font-heading text-[17px] font-black leading-snug text-navy">{tagline}</p>
-          <p className="mt-0.5 text-[13px] font-semibold leading-relaxed text-muted">{body}</p>
-        </div>
+    <div className="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
+      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-green-soft text-brand-green-dark">
+        <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden>
+          {hub.icon}
+        </span>
       </div>
-      {action ? <div className="mt-3 flex">{action}</div> : null}
+      <div className="min-w-0 flex-1">
+        <p className="font-heading text-[17px] font-black leading-snug text-navy">{tagline}</p>
+        <p className="mt-0.5 text-[13px] font-semibold leading-relaxed text-muted">{body}</p>
+        {action ? <div className="mt-3 flex">{action}</div> : null}
+      </div>
     </div>
   );
 }
@@ -69,7 +68,7 @@ export function LocalHuudHubSectionNav({ hubId }: { hubId: LocalHuudHubId }) {
   if (hub.sections.length <= 1) return null;
 
   return (
-    <nav className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 py-1" aria-label={sectionsLabel}>
+    <nav className="no-scrollbar flex overflow-x-auto border-b border-line" aria-label={sectionsLabel}>
       {hub.sections.map((sec) => {
         const isActive = sec.id === active;
         return (
@@ -77,15 +76,12 @@ export function LocalHuudHubSectionNav({ hubId }: { hubId: LocalHuudHubId }) {
             key={sec.id}
             href={sec.href}
             className={[
-              'tap-target inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-[13px] font-extrabold no-underline',
-              'shadow-[0_2px_6px_rgba(29,36,51,0.12)] transition-colors',
-              isActive ? 'bg-navy text-white' : 'bg-white text-navy hover:bg-[#F6F8FB]',
-            ].join(' ')}
+                'relative inline-flex h-11 shrink-0 items-center whitespace-nowrap px-3 text-sm transition-colors no-underline',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
+                isActive ? 'font-extrabold text-navy after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-full after:bg-primary' : 'font-semibold text-muted hover:text-navy',
+              ].join(' ')}
             aria-current={isActive ? 'page' : undefined}
           >
-            <span className="material-symbols-outlined text-[17px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden>
-              {sec.icon}
-            </span>
             {section(`${hubId}.${sec.id}`, sec.label)}
           </Link>
         );
@@ -118,7 +114,7 @@ export function LocalHuudHubPrimaryAction({
   icon = 'add',
 }: LocalHuudHubPrimaryActionProps) {
   const className =
-    'tap-target inline-flex min-h-11 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-extrabold text-white shadow-[0_4px_12px_rgba(0,184,46,0.25)] transition-opacity hover:opacity-90';
+    'tap-target inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-full bg-primary pl-2.5 pr-3.5 text-[13px] font-extrabold text-white transition-colors hover:bg-brand-green-dark';
 
   const inner = (
     <>

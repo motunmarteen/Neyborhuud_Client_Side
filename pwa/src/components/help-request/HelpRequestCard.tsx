@@ -254,7 +254,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[17px] text-primary" style={{ fontVariationSettings: '"FILL" 1' }}>savings</span>
-                    <span className="text-[10px] font-black uppercase text-neu-text-secondary  tracking-wider">Funding Goal</span>
+                    <span className="text-[13px] font-bold text-neu-text-secondary">Funding Goal</span>
                 </div>
                 <span className="text-sm font-black text-neu-text ">{formatNaira(targetAmount)}</span>
             </div>
@@ -311,7 +311,7 @@ export function HelpRequestCard({ post, onComment, onEdit, onDelete, onReport, o
         <div className="p-3.5 rounded-2xl bg-black/[0.02]  flex flex-col gap-2 mt-3">
             <div className="flex items-center gap-1.5 mb-1">
                 <span className="material-symbols-outlined text-[16px] text-neu-text-secondary ">account_balance</span>
-                <span className="text-[10px] font-black uppercase text-neu-text-secondary  tracking-wider">How to Help</span>
+                <span className="text-[13px] font-bold text-neu-text-secondary">How to Help</span>
             </div>
             <div className="flex flex-col gap-1.5 text-xs">
                 {accountDetails.bankName && (

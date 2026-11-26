@@ -15,6 +15,7 @@ import { useGeolocation } from "@/hooks/useGeolocation";
 import { ProductCard } from "@/components/marketplace";
 import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonTiles } from '@/components/ui/Skeleton';
+import { ChipRow, FilterChip } from '@/components/ui/Chip';
 
 const CATEGORIES = [
   "All",
@@ -85,30 +86,17 @@ function MarketplacePageInner() {
       maxWidth="680"
       header={
         <LocalHuudHubHeader
+          action={<LocalHuudHubPrimaryAction href="/marketplace/create" label="Sell item" />}
           hubId="marketplace"
           toolbar={
             <div className="space-y-3">
-              <div className="flex justify-end">
-                <LocalHuudHubPrimaryAction href="/marketplace/create" label="Sell item" />
-              </div>
-              <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
-                {CATEGORIES.map((category) => {
-                  const active = selectedCategory === category;
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => setSelectedCategory(category)}
-                      className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                        active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
-                      }`}
-                      style={active ? undefined : { color: "var(--neu-text-muted)" }}
-                    >
-                      {category}
-                    </button>
-                  );
-                })}
-              </div>
+              <ChipRow label="Categories">
+                {CATEGORIES.map((category) => (
+                  <FilterChip key={category} active={selectedCategory === category} onClick={() => setSelectedCategory(category)}>
+                    {category}
+                  </FilterChip>
+                ))}
+              </ChipRow>
             </div>
           }
         />

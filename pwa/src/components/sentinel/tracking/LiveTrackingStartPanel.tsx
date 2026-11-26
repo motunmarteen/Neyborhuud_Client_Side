@@ -33,7 +33,7 @@ export function LiveTrackingStartPanel({ onStart, busy, error, eligibilityIssues
 
   return (
     <div className="mod-card relative z-10 space-y-4 overflow-visible rounded-2xl p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-red">Start live tracking</p>
+      <p className="text-[13px] font-bold text-brand-red">Start live tracking</p>
       <p className="text-sm leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
         Begins continuous location pings, notifies your guardians, and can alert security agencies. Allow location
         access when prompted.

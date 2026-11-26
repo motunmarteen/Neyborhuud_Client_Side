@@ -3,7 +3,7 @@
 export function LiveTrackingDuringSessionTips() {
   return (
     <div className="mod-card rounded-2xl border border-primary/20 bg-primary/5 p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">While this session is active</p>
+      <p className="text-[13px] font-bold text-primary">While this session is active</p>
       <ul className="mt-2 space-y-2 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
         <li>
           <strong style={{ color: 'var(--neu-text)' }}>Keep this app open</strong> (or in the background) so your phone

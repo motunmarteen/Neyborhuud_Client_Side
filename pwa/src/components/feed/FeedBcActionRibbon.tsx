@@ -179,7 +179,7 @@ export function FeedBcActionRibbon() {
       {DEMO_MODE ? (
       <div className="rounded-2xl bg-white border border-black/[0.08] p-3.5 shadow-xs">
         <div className="flex items-center justify-between pb-2 border-b border-black/[0.05]">
-          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+          <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#9AA3B1]">
             <span className="w-2 h-2 rounded-full bg-[#00B82E] animate-pulse" />
             <span>Live Huud Pulse</span>
           </div>

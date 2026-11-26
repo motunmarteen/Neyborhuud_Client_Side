@@ -47,7 +47,7 @@ export function LiveTrackingActivePanel({
       <div className="mod-card space-y-4 overflow-visible rounded-2xl border border-brand-red/25 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-red">Active session</p>
+            <p className="text-[13px] font-bold text-brand-red">Active session</p>
             <p className="mt-1 text-sm font-bold capitalize" style={{ color: 'var(--neu-text)' }}>
               {emergencyTypeLabel(session.emergencyType)} · {session.status.replace('_', ' ')}
             </p>

@@ -181,7 +181,7 @@ function LostFoundHub() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide ${
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[13px] font-bold ${
                         isFound
                           ? 'bg-[#E8F7EC] text-[#0E8A3E]'
                           : 'bg-[#FDECEC] text-[#E5484D]'

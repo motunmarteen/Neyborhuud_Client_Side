@@ -32,7 +32,7 @@ function StatCard({
         <p className="text-[13px] font-extrabold tracking-tight text-slate-800 leading-none tabular-nums truncate">
           {value}
         </p>
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">{label}</p>
+        <p className="text-[13px] font-bold text-slate-400 mt-1">{label}</p>
       </div>
     </div>
   );

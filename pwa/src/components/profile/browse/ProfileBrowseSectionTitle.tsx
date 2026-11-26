@@ -12,6 +12,6 @@ export function ProfileBrowseSectionTitle({ children }: { children: ReactNode })
 
 export function ProfileBrowseEyebrow({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">{children}</p>
+    <p className="text-[13px] font-bold text-primary">{children}</p>
   );
 }

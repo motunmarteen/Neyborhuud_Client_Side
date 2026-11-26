@@ -9,12 +9,9 @@ import {
 
 export function HuudEconomyHero() {
   return (
-    <div className="mod-card rounded-2xl p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">Huud Economy</p>
-      <p className="mt-1 text-sm leading-relaxed text-[var(--neu-text-muted)]">
-        Huud Score, HuudCredit wallet, and TrustOS — your neighbourhood reputation and currency in one hub.
-      </p>
-    </div>
+    <p className="px-1 text-[15px] leading-relaxed text-muted">
+      Your Huud Score, your HuudCredit and how much neighbours trust you.
+    </p>
   );
 }
 
@@ -24,29 +21,24 @@ export function HuudEconomySectionNav() {
   const active = resolveHuudEconomySection(pathname, searchParams.get('tab'));
 
   return (
-    <div className="browse-chip-row browse-chip-row--scroll no-scrollbar">
+    <nav aria-label="Huud Economy" className="no-scrollbar flex overflow-x-auto border-b border-line">
       {HUUD_ECONOMY_SECTIONS.map((section) => {
         const isActive = section.id === active;
         return (
           <Link
             key={section.id}
             href={section.href}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold no-underline transition-colors ${
-              isActive ? 'mod-chip mod-chip-active text-primary' : 'mod-chip'
+            className={`relative inline-flex h-11 shrink-0 items-center whitespace-nowrap px-3 text-sm no-underline transition-colors ${
+              isActive
+                ? 'font-extrabold text-navy after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-full after:bg-primary'
+                : 'font-semibold text-muted hover:text-navy'
             }`}
-            style={isActive ? undefined : { color: 'var(--neu-text-muted)' }}
             aria-current={isActive ? 'page' : undefined}
           >
-            <span
-              className="material-symbols-outlined text-[18px]"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              {section.icon}
-            </span>
             {section.label}
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }

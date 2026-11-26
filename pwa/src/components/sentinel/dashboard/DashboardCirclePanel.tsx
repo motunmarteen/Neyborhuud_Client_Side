@@ -101,7 +101,7 @@ export function DashboardCirclePanel() {
   return (
     <div className="space-y-4">
       <div className="mod-card rounded-2xl p-4">
-        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-blue">Safety circle</p>
+        <p className="text-[13px] font-bold text-brand-blue">Safety circle</p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
           Mutual followers you&apos;ve explicitly let see your safety status — not your live location,
           and not the same as a Guardian, who also receives SOS and trip alerts.

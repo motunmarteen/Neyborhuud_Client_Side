@@ -20,7 +20,7 @@ export function SosGuardiansNotifiedCard({ notifyMeta, phase }: SosGuardiansNoti
         noneQueued ? 'border-amber-100 bg-amber-50/20' : 'border-blue-100 bg-blue-50/20'
       }`}
     >
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-blue-600">
+      <p className="text-[13px] font-bold text-blue-600">
         Guardian sharing
       </p>
       {noneQueued ? (

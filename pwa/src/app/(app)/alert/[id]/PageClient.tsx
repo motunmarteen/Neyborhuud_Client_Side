@@ -108,7 +108,7 @@ export default function PageClient() {
   return (
     <AppBrowseLayout maxWidth="680">
       <div className="flex flex-col gap-3 py-2">
-        <p className="px-1 text-[11px] font-black uppercase tracking-[0.14em] text-muted">Safety alert from NeyborHuud</p>
+        <p className="px-1 text-[13px] font-bold text-muted">Safety alert from NeyborHuud</p>
         {body}
         <p className="px-1 text-xs font-semibold text-muted">We never show who reported an alert or the exact spot, only the area.</p>
       </div>

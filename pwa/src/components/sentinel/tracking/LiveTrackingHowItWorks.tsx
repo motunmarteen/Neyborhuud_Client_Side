@@ -20,7 +20,7 @@ const STEPS = [
 export function LiveTrackingHowItWorks() {
   return (
     <div className="mod-card rounded-2xl border border-brand-red/15 bg-brand-red/5 p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-red">How live tracking works</p>
+      <p className="text-[13px] font-bold text-brand-red">How live tracking works</p>
       <p className="mt-2 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
         <strong className="text-brand-red">How:</strong> Start a session when you need guardians to follow your path in
         real time.

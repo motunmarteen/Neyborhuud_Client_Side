@@ -16,7 +16,7 @@ export function SentinelHubTabBanner({ tab, count }: SentinelHubTabBannerProps) 
       <div className="pointer-events-none absolute inset-0 bg-[#00B82E]/5" aria-hidden />
       <div className="relative flex items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">{meta.title}</p>
+          <p className="text-[13px] font-bold text-primary">{meta.title}</p>
           <p className="mt-0.5 text-sm" style={{ color: 'var(--neu-text-muted)' }}>
             {meta.subtitle}
           </p>

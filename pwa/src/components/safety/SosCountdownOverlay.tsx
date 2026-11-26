@@ -43,7 +43,7 @@ export default function SosCountdownOverlay({
           <span className="text-7xl font-black tabular-nums text-brand-red drop-shadow">
             {secondsRemaining}
           </span>
-          <span className="mt-1 text-xs uppercase tracking-widest text-brand-red/80">
+          <span className="mt-1 text-[13px] text-brand-red/80">
             seconds
           </span>
         </div>

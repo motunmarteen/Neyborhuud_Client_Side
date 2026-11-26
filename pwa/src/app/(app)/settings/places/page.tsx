@@ -116,7 +116,7 @@ export default function MyPlacesPage() {
                       <p className="truncate text-xs text-charcoal/50">
                         {p.formattedAddress ?? `${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`}
                       </p>
-                      <p className="text-[10px] uppercase tracking-wide text-charcoal/40">{meta.label}</p>
+                      <p className="text-[13px] text-charcoal/40">{meta.label}</p>
                     </div>
                     <button
                       type="button"

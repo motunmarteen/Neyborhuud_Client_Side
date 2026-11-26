@@ -491,13 +491,13 @@ export default function EventDetailPage() {
 
                     <div className="flex items-center gap-1.5 flex-wrap justify-end">
                       <span
-                        className={`text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider ${TYPE_COLORS[eventType] ?? "bg-brand-surface/20 text-[var(--neu-text-muted)]"}`}
+                        className={`text-[13px] px-2 py-[3px] rounded-full font-bold ${TYPE_COLORS[eventType] ?? "bg-brand-surface/20 text-[var(--neu-text-muted)]"}`}
                       >
                         {eventType}
                       </span>
                       {event.status && (
                         <span
-                          className={`text-[9px] px-2 py-[3px] rounded-full font-bold uppercase tracking-wider ${STATUS_COLORS[event.status] ?? "bg-brand-surface/20 text-[var(--neu-text-muted)]"}`}
+                          className={`text-[13px] px-2 py-[3px] rounded-full font-bold ${STATUS_COLORS[event.status] ?? "bg-brand-surface/20 text-[var(--neu-text-muted)]"}`}
                         >
                           {event.status}
                         </span>

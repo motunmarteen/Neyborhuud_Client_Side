@@ -54,7 +54,7 @@ export default function RightSidebar() {
       {/* Events Widget */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+          <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#9AA3B1]">
             <Calendar size={13} className="text-[#0E8A3E]" />
             <span>Upcoming Events</span>
           </div>
@@ -123,7 +123,7 @@ export default function RightSidebar() {
       {/* Marketplace Widget */}
       <div className="flex flex-col gap-3 pt-2 border-t border-black/[0.06]">
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#9AA3B1]">
+          <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#9AA3B1]">
             <ShoppingBag size={13} className="text-amber-600" />
             <span>Marketplace Picks</span>
           </div>

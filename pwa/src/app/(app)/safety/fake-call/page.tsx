@@ -15,6 +15,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { SentinelHowItWorks } from '@/components/sentinel/SentinelHowItWorks';
 import { SentinelSubpageLayout } from '@/components/sentinel/SentinelSubpageLayout';
+import { FilterChip } from '@/components/ui/Chip';
 import {
   canScheduleLocalNotifications,
   cancelLocalNotification,
@@ -228,7 +229,7 @@ export default function FakeCallPage() {
     return (
       <div className="fixed inset-0 z-[100] bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-          <div className="text-xs uppercase tracking-widest text-white/50 mb-2">
+          <div className="text-[13px] text-white/50 mb-2">
             {phase === 'ringing' ? 'Incoming call' : 'On call'}
           </div>
           <div className="w-32 h-32 rounded-full bg-white/10 flex items-center justify-center mb-6">
@@ -311,7 +312,7 @@ export default function FakeCallPage() {
       )}
 
       <section className="mod-card rounded-2xl p-4">
-        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Caller</p>
+        <p className="text-[13px] font-bold text-primary">Caller</p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           {PRESET_CALLERS.map((c) => (
             <button
@@ -346,20 +347,12 @@ export default function FakeCallPage() {
       </section>
 
       <section className="mod-card rounded-2xl p-4">
-        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">When to ring</p>
+        <p className="text-[13px] font-bold text-primary">When to ring</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {DELAY_OPTIONS.map((d) => (
-            <button
-              key={d.ms}
-              type="button"
-              onClick={() => setDelayMs(d.ms)}
-              className={`mod-chip px-4 py-2 text-sm font-semibold ${
-                delayMs === d.ms ? 'bg-primary text-white' : ''
-              }`}
-              style={delayMs === d.ms ? undefined : { color: 'var(--neu-text-muted)' }}
-            >
+            <FilterChip key={d.ms} active={delayMs === d.ms} onClick={() => setDelayMs(d.ms)}>
               {d.label}
-            </button>
+            </FilterChip>
           ))}
         </div>
       </section>

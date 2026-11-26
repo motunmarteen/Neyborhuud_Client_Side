@@ -64,7 +64,7 @@ export function AuthFlowHero({ icon, eyebrow, title, meta, error, pulse }: AuthF
         />
       </span>
       <div className="min-w-0 flex-1">
-        <p className={`text-[10px] font-extrabold uppercase tracking-wider ${error ? 'text-rose-600' : 'text-[#9AA3B1]'}`}>
+        <p className={`text-[13px] font-extrabold ${error ? 'text-rose-600' : 'text-[#9AA3B1]'}`}>
           {eyebrow}
         </p>
         <p className="text-sm sm:text-base font-black text-[#1D2433] truncate leading-snug">{title}</p>

@@ -111,7 +111,7 @@ export const StackedGallery: React.FC<StackedGalleryProps> = ({ images }) => {
                             {/* Top Card Overlays for Image Only */}
                             {isTop && !isVideo(item.url) && (
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6 pointer-events-none">
-                                    <span className="text-white text-xs font-light tracking-widest uppercase backdrop-blur-md px-3 py-1 bg-white/10 rounded-full border border-white/20">
+                                    <span className="text-white text-[13px] font-light backdrop-blur-md px-3 py-1 bg-white/10 rounded-full border border-white/20">
                                         Tap to Shuffle
                                     </span>
                                 </div>

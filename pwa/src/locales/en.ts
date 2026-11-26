@@ -938,6 +938,7 @@ const en: Record<string, string> = {
     'chats.emptyBody.services': 'Chats with artisans and service people show here.',
     'chats.empty.events': 'No event chats',
     'chats.emptyBody.events': 'Chats about events show here.',
+    'news.filters': 'Filter news',
 };
 
 export default en;

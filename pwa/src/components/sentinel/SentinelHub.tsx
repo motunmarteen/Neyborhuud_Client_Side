@@ -247,7 +247,7 @@ export function SentinelHub({ user, areaName }: { user: unknown; areaName?: stri
 
       {GROUPS.map((g) => (
         <section key={g.id} aria-label={t(`sentinel.group.${g.id}`)} className="flex flex-col gap-2">
-          <p className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-muted">{t(`sentinel.group.${g.id}`)}</p>
+          <p className="px-1 text-[13px] font-bold text-muted">{t(`sentinel.group.${g.id}`)}</p>
           <div className="grid grid-cols-2 gap-2">
             {g.items.map((it) => (
               <Link
@@ -269,7 +269,7 @@ export function SentinelHub({ user, areaName }: { user: unknown; areaName?: stri
       ))}
 
       <section aria-labelledby="watch-h" className="flex flex-col gap-2">
-        <p id="watch-h" className="px-1 text-[11px] font-black uppercase tracking-[0.12em] text-muted">
+        <p id="watch-h" className="px-1 text-[13px] font-bold text-muted">
           {t('sentinel.watchesTitle')}
         </p>
         <ul className="divide-y divide-line overflow-hidden rounded-[22px] bg-white shadow-[0_2px_10px_rgba(29,36,51,0.06)]">

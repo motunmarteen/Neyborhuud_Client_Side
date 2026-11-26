@@ -142,7 +142,7 @@ export function CommunityInfoSheet({ open, onClose, conversationId }: CommunityI
           )}
 
           {/* Members */}
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Members</p>
+          <p className="mb-2 text-[13px] font-bold text-slate-400">Members</p>
           <div className="divide-y divide-slate-100 rounded-2xl border border-slate-100">
             {members.map((m) => {
               const mid = m.id ?? m._id ?? m.userId;

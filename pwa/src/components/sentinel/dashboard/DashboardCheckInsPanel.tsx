@@ -94,7 +94,7 @@ export function DashboardCheckInsPanel() {
   return (
     <div className="space-y-3">
       <div className="mod-card rounded-2xl p-4">
-        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Wellness check-ins</p>
+        <p className="text-[13px] font-bold text-primary">Wellness check-ins</p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--neu-text-muted)' }}>
           Scheduled wellness pings to your guardians — separate from Safe Trips. Miss one and your
           guardians are notified. Missing <strong>3 in a row</strong> automatically triggers a silent SOS,

@@ -79,7 +79,7 @@ export function SosPageHero({
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${isSilent ? 'text-gray-500' : 'text-red-600'}`}>
+          <p className={`text-[13px] font-bold ${isSilent ? 'text-gray-500' : 'text-red-600'}`}>
             {isSilent ? 'Status' : 'SOS command center'}
           </p>
           <h1 className="mt-1 text-lg font-extrabold leading-snug text-gray-800">

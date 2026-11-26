@@ -157,7 +157,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
             </p>
           </div>
           <span
-            className="text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+            className="text-[13px] font-bold px-2 py-0.5 rounded-full"
             style={{
               background: escalationColor(trip.escalationLevel) + '22',
               color: escalationColor(trip.escalationLevel),
@@ -179,7 +179,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         <div className="neu-socket rounded-xl p-2">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Progress</p>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Progress</p>
           <p className="text-sm font-semibold mt-0.5" style={{ color: 'var(--neu-text)' }}>{trip.progressPercent ?? 0}%</p>
           <div className="mt-1 h-1.5 rounded-full bg-brand-surface overflow-hidden">
             <div
@@ -189,17 +189,17 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
           </div>
         </div>
         <div className="neu-socket rounded-xl p-2">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>ETA</p>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>ETA</p>
           <p className="text-xs font-semibold mt-0.5" style={{ color: 'var(--neu-text)' }}>
             {trip.estimatedArrival ? fmt(trip.estimatedArrival) : fmt(trip.expectedArrival)}
           </p>
         </div>
         <div className="neu-socket rounded-xl p-2">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Last Check-in</p>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Last Check-in</p>
           <p className="text-xs font-semibold mt-0.5" style={{ color: 'var(--neu-text)' }}>{minsAgo(trip.lastCheckIn)}</p>
         </div>
         <div className="neu-socket rounded-xl p-2">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Deviation</p>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Deviation</p>
           <p
             className="text-xs font-semibold mt-0.5"
             style={{ color: (trip.routeDeviationMeters ?? 0) > 300 ? '#00B82E' : 'var(--neu-text)' }}
@@ -208,7 +208,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
           </p>
         </div>
         <div className="neu-socket rounded-xl p-2">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Missed Check-ins</p>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Missed Check-ins</p>
           <p
             className="text-xs font-semibold mt-0.5"
             style={{ color: (trip.missedCheckIns ?? 0) > 0 ? '#00B82E' : 'var(--neu-text)' }}
@@ -218,7 +218,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
         </div>
         {isPaused && (
           <div className="neu-socket rounded-xl p-2">
-            <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Paused since</p>
+            <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Paused since</p>
             <p className="text-xs font-semibold mt-0.5 text-status-warning">{minsAgo(trip.pausedAt)}</p>
           </div>
         )}
@@ -227,7 +227,7 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
       {/* Notes */}
       {trip.notes && (
         <div className="neu-socket rounded-xl p-3">
-          <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--neu-text-muted)' }}>Trip notes</p>
+          <p className="text-[13px]" style={{ color: 'var(--neu-text-muted)' }}>Trip notes</p>
           <p className="text-xs mt-1" style={{ color: 'var(--neu-text)' }}>{trip.notes}</p>
         </div>
       )}

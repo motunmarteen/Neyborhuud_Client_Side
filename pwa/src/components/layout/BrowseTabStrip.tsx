@@ -17,14 +17,14 @@ type BrowseTabStripProps = {
 };
 
 /**
- * Section tabs for list pages (Phase 4 restyle, 2026-10-18): the approved chip row from the
- * Feed and the design kit (F-04): white chips, the chosen one navy; scrolls sideways; an
- * optional action (e.g. Refresh) stays pinned on the right. Replaces the old grey segmented box.
+ * Section tabs for list pages (owner 2026-11-26: simpler): plain words, a green line under the
+ * chosen one, like the bottom bar. Scrolls sideways; an optional action stays on the right.
+ * Icons in `tabs` are no longer drawn.
  */
 export function BrowseTabStrip({ tabs, activeId, onChange, trailing, className = '' }: BrowseTabStripProps) {
   return (
     <div className={`flex w-full items-center gap-2 ${className}`.trim()}>
-      <div role="tablist" aria-label="Sections" className="no-scrollbar -mx-1 flex min-w-0 flex-1 gap-1.5 overflow-x-auto px-1 py-1">
+      <div role="tablist" aria-label="Sections" className="no-scrollbar flex min-w-0 flex-1 overflow-x-auto border-b border-line">
         {tabs.map((tab) => {
           const active = tab.id === activeId;
           return (
@@ -35,17 +35,11 @@ export function BrowseTabStrip({ tabs, activeId, onChange, trailing, className =
               aria-selected={active}
               onClick={() => onChange(tab.id)}
               className={[
-                'tap-target inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-[13px] font-extrabold',
-                'shadow-[0_2px_6px_rgba(29,36,51,0.12)] transition-colors duration-150',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                active ? 'bg-navy text-white' : 'bg-white text-navy hover:bg-[#F6F8FB]',
+                'relative inline-flex h-11 shrink-0 items-center whitespace-nowrap px-3 text-sm transition-colors no-underline',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
+                active ? 'font-extrabold text-navy after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-full after:bg-primary' : 'font-semibold text-muted hover:text-navy',
               ].join(' ')}
             >
-              {tab.icon ? (
-                <span className="material-symbols-outlined text-[17px] leading-none" aria-hidden>
-                  {tab.icon}
-                </span>
-              ) : null}
               <span>{tab.label}</span>
             </button>
           );

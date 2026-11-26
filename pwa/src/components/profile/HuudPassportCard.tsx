@@ -45,7 +45,7 @@ export function HuudPassportCard({ passport, onShare }: HuudPassportProps) {
             <span className="material-symbols-outlined text-[20px]">shield</span>
           </div>
           <div>
-            <h3 className="text-xs font-black uppercase tracking-widest text-emerald-400">
+            <h3 className="text-[13px] font-bold text-emerald-400">
               Huud Passport
             </h3>
             <p className="text-[10px] text-emerald-200/60 font-medium tracking-wide">
@@ -53,7 +53,7 @@ export function HuudPassportCard({ passport, onShare }: HuudPassportProps) {
             </p>
           </div>
         </div>
-        <div className="rounded-full bg-emerald-500/20 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-300 border border-emerald-500/30">
+        <div className="rounded-full bg-emerald-500/20 px-2.5 py-1 text-[13px] font-bold text-emerald-300 border border-emerald-500/30">
           Official
         </div>
       </div>
@@ -62,7 +62,7 @@ export function HuudPassportCard({ passport, onShare }: HuudPassportProps) {
       <div className="relative mt-5 space-y-4">
         {/* Name & Community */}
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-300/60">
+          <p className="text-[13px] font-bold text-emerald-300/60">
             Resident Name
           </p>
           <h2 className="text-lg font-black tracking-tight text-white mt-0.5">
@@ -76,7 +76,7 @@ export function HuudPassportCard({ passport, onShare }: HuudPassportProps) {
         {/* Masked Digital Postcode Card */}
         <div className="rounded-2xl bg-black/40 p-3.5 border border-emerald-500/20">
           <div className="flex items-center justify-between">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300/70">
+            <span className="text-[13px] font-bold text-emerald-300/70">
               Physical Building ID (NIPOST NDAPS)
             </span>
             <span className="text-[10px] font-semibold text-emerald-400 flex items-center gap-1">
@@ -138,7 +138,7 @@ export function HuudPassportCard({ passport, onShare }: HuudPassportProps) {
           <button
             type="button"
             onClick={onShare}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 text-[#040e09] py-2.5 text-xs font-black uppercase tracking-wider hover:bg-emerald-400 transition"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 text-[#040e09] py-2.5 text-[13px] font-bold hover:bg-emerald-400 transition"
           >
             <span className="material-symbols-outlined text-[16px]">share</span>
             Share Verification Proof

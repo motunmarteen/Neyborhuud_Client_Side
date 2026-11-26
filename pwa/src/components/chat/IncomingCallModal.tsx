@@ -69,7 +69,7 @@ export function IncomingCallModal() {
             <div className="h-16 w-16 rounded-full bg-rose-600 hover:bg-rose-500 active:scale-90 text-white flex items-center justify-center shadow-lg shadow-rose-950/50 transition-all">
               <PhoneOff size={28} strokeWidth={2.4} />
             </div>
-            <span className="text-xs font-bold text-slate-400 group-hover:text-white uppercase tracking-wider">
+            <span className="text-[13px] font-bold text-slate-400 group-hover:text-white">
               Decline
             </span>
           </button>
@@ -84,7 +84,7 @@ export function IncomingCallModal() {
             <div className="h-16 w-16 rounded-full bg-[#00B82E] hover:bg-[#00B02A] active:scale-90 text-white flex items-center justify-center shadow-lg shadow-emerald-950/50 animate-bounce transition-all">
               {isVideo ? <Video size={28} strokeWidth={2.4} /> : <Phone size={28} strokeWidth={2.4} />}
             </div>
-            <span className="text-xs font-bold text-[#00B82E] group-hover:text-emerald-300 uppercase tracking-wider">
+            <span className="text-[13px] font-bold text-[#00B82E] group-hover:text-emerald-300">
               Answer
             </span>
           </button>

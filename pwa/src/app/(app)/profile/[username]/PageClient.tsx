@@ -822,7 +822,7 @@ export default function ProfilePage() {
                         {style.icon}
                       </span>
                     </div>
-                    <span className={`text-[11px] font-bold transition-colors uppercase tracking-wider ${
+                    <span className={`text-[13px] font-bold transition-colors ${
                       isActive ? 'text-gray-900 font-extrabold' : 'text-gray-400 group-hover:text-gray-600'
                     }`}>
                       {t.label}
@@ -840,7 +840,7 @@ export default function ProfilePage() {
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 border border-amber-100 text-amber-600 hover:bg-amber-100 hover:text-amber-700 shadow-sm transition-all duration-200">
                     <span className="text-xl select-none">🪙</span>
                   </div>
-                  <span className="text-[11px] font-bold text-amber-500 group-hover:text-amber-600 transition-colors uppercase tracking-wider">
+                  <span className="text-[13px] font-bold text-amber-500 group-hover:text-amber-600 transition-colors">
                     Tip
                   </span>
                 </button>
@@ -1103,7 +1103,7 @@ export default function ProfilePage() {
                 <div className="flex items-baseline gap-2.5">
                   <p className="text-5xl font-black tracking-tight text-gray-900 leading-none tabular-nums">{trustScore}</p>
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">NeyburH Score</p>
+                    <p className="text-[13px] font-bold text-gray-400">NeyburH Score</p>
                     <p className="text-[13px] font-semibold text-gray-600 mt-0.5">
                       {profileTrustTier.icon} {profileTrustTier.label}
                       {nextTrustTier ? ` · ${Math.max(0, nextTrustTier.minScore - trustScore)} pts to ${nextTrustTier.label}` : ' · Top tier reached'}
@@ -1133,7 +1133,7 @@ export default function ProfilePage() {
                 {/* Voucher list */}
                 {voucherList.length > 0 && (
                   <div className="mt-6 border-t border-gray-100 pt-5">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400 mb-3">
+                    <p className="text-[13px] font-bold text-gray-400 mb-3">
                       Vouched by
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -1220,7 +1220,7 @@ export default function ProfilePage() {
                       <div key={`side-${fact.label}`} className="flex items-center gap-3 bg-gray-50/60 border border-gray-100/50 rounded-2xl px-4 py-3 hover:bg-gray-50 transition-colors">
                         <span className="material-symbols-outlined text-[18px] text-blue-500">{fact.icon}</span>
                         <div className="min-w-0">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{fact.label}</p>
+                          <p className="text-[13px] font-bold text-gray-400">{fact.label}</p>
                           <p className="text-sm font-extrabold text-gray-800 capitalize mt-0.5">{fact.value}</p>
                         </div>
                       </div>
@@ -1253,7 +1253,7 @@ export default function ProfilePage() {
                           {axis.done ? 'check_circle' : 'pending'}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                          <p className="text-[13px] font-bold text-gray-400">
                             {axis.label}
                           </p>
                           <p className="text-sm font-extrabold text-gray-800 mt-0.5">
@@ -1266,7 +1266,7 @@ export default function ProfilePage() {
                   </div>
                   {verificationProgress.blockers.length > 0 ? (
                     <div className="mt-4 rounded-2xl border border-blue-100/50 bg-blue-50/30 px-4 py-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">Next steps</p>
+                      <p className="text-[13px] font-bold text-blue-600">Next steps</p>
                       <ul className="mt-1.5 space-y-1.5 text-xs font-semibold text-gray-500">
                         {verificationProgress.blockers.slice(0, 4).map((item) => (
                           <li key={item}>• {item}</li>
@@ -1294,7 +1294,7 @@ export default function ProfilePage() {
                       <div key={item.label} className="flex items-center gap-3 bg-gray-50/60 border border-gray-100/50 rounded-2xl px-4 py-3 hover:bg-gray-50 transition-colors">
                         <span className="material-symbols-outlined text-[18px] text-blue-500">{item.done ? 'check_circle' : 'pending'}</span>
                         <div>
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Status</p>
+                          <p className="text-[13px] font-bold text-gray-400">Status</p>
                           <p className="text-sm font-extrabold text-gray-800 mt-0.5">{item.label}</p>
                         </div>
                       </div>
@@ -1329,7 +1329,7 @@ export default function ProfilePage() {
                             </div>
                             <div className="mt-3">
                               <p className="text-sm font-extrabold text-gray-800 leading-tight">{badge.name ?? badge.title ?? 'Badge'}</p>
-                              <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-gray-400">{badge.tier ?? badge.category ?? 'Earned'}</p>
+                              <p className="mt-1 text-[13px] font-bold text-gray-400">{badge.tier ?? badge.category ?? 'Earned'}</p>
                             </div>
                           </div>
                         ))}
@@ -1377,7 +1377,7 @@ export default function ProfilePage() {
                               </div>
                               <div className="mt-3">
                                 <p className="text-sm font-extrabold text-gray-800 leading-tight">{badge.name ?? badge.title ?? 'Badge'}</p>
-                                <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-gray-400">
+                                <p className="mt-1 text-[13px] font-bold text-gray-400">
                                   {badge.rarity ?? badge.tier ?? badge.category ?? 'Earned'}
                                 </p>
                               </div>

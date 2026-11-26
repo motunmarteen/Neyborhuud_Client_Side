@@ -106,7 +106,7 @@ export function PaymentReceiptSheet({ paymentId, onClose }: Props) {
                 ...(receipt.description ? [{ label: 'Note', value: receipt.description, valueClass: 'neu-text-muted' }] : []),
               ].map(({ label, value, valueClass }) => (
                 <div key={label} className="flex items-center justify-between py-3">
-                  <span className="text-xs font-bold uppercase tracking-widest neu-text-muted">{label}</span>
+                  <span className="text-[13px] font-bold neu-text-muted">{label}</span>
                   <span className={`text-sm text-right max-w-[60%] ${valueClass}`}>{value}</span>
                 </div>
               ))}

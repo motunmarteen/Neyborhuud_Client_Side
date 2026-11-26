@@ -59,11 +59,11 @@ export function AuthSheetStageHeader({
         </div>
         <div className="min-w-0 flex-1">
           <div className="mb-0.5 flex items-center gap-2">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#00B82E]">{eyebrow}</p>
+            <p className="text-[13px] font-extrabold text-[#00B82E]">{eyebrow}</p>
             {signal ? (
               <>
                 <span className="h-1 w-1 rounded-full bg-[#3B82C4]" aria-hidden />
-                <p className="truncate text-[10px] font-bold uppercase tracking-wider text-[#3B82C4]">
+                <p className="truncate text-[13px] font-bold text-[#3B82C4]">
                   {signal}
                 </p>
               </>

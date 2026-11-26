@@ -19,7 +19,7 @@ export function PremiumSafetyAlertBlock({ post, authorUsername }: PremiumSafetyA
       {/* Header Bar */}
       <div className="flex items-center gap-2 mb-2">
         <span className="material-symbols-outlined text-[14px] text-brand-red">warning</span>
-        <span className="text-[11px] font-black uppercase tracking-wider text-brand-red mr-auto">
+        <span className="text-[13px] font-bold text-brand-red mr-auto">
           Safety Alert
         </span>
       </div>
