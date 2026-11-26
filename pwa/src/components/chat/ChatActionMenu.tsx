@@ -371,7 +371,7 @@ function SOSModal({ onDone, onClose }: { onDone: (r: ActionResult) => void; onCl
 
   return (
     <Modal title="🆘 Send SOS Context" onClose={onClose}>
-      <p className="mb-3 text-xs text-brand-red300">This shares emergency context with chat participants.</p>
+      <p className="mb-3 text-xs text-brand-red">This shares emergency context with chat participants.</p>
       <input
         className="mb-3 w-full rounded-xl bg-background px-3 py-2 text-sm text-navy placeholder:text-[var(--neu-text-muted)] focus:outline-none"
         placeholder="Emergency ID / Reference (optional)"

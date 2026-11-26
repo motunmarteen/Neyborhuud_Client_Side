@@ -32,7 +32,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
 | 3. Map home (sky + live map) | 14 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; low-data mode, speed done; left: M-14 crown (waits on Phase 7), M-17 living map, mockup extras |
-| 4. Screens (restyle all 95) | 56 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel and Marketplace done; Work next |
+| 4. Screens (restyle all 95) | 65 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel and Marketplace and Work done; Events and help next |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
 | 7. Gamification backend | 18 | 18 | ✅ done 2026-10-18 (server + app); airtime/data and contributor payouts wait for the legal check |
@@ -296,15 +296,15 @@ Shared pieces restyled with this group (used by later groups too): list-page hea
 
 ### Work: jobs and services (9)
 
-- [ ] S-058 `/jobs` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved
-- [ ] S-059 `/jobs/[id]` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved
-- [ ] S-060 `/jobs/my-applications` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved
-- [ ] S-061 `/jobs/saved` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved
-- [ ] S-062 `/services` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved
-- [ ] S-063 `/services/[id]` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved
-- [ ] S-064 `/services/my-bookings` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved
-- [ ] S-065 `/services/my-favorites` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved
-- [ ] S-066 `/work` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved
+- [x] S-058 (2026-11-26) `/jobs` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved: one row of dropdown chips; Post job in the header card
+- [x] S-059 (2026-11-26) `/jobs/[id]` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved: title showed white on white; rebuilt: facts box, Apply, about, needs, skills
+- [x] S-060 (2026-11-26) `/jobs/my-applications` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved: restyled list; loading fixed
+- [x] S-061 (2026-11-26) `/jobs/saved` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved: restyled list
+- [x] S-062 (2026-11-26) `/services` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved: Rating dropdown chip + kinds
+- [x] S-063 (2026-11-26) `/services/[id]` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved: restyled
+- [x] S-064 (2026-11-26) `/services/my-bookings` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved: loading error fixed
+- [x] S-065 (2026-11-26) `/services/my-favorites` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved: loading error fixed
+- [x] S-066 (2026-11-26) `/work` → Work layer on the map / Everything → Jobs & Services / Me → my applications, bookings, saved: plain tabs, one chip row
 
 ### Events and help (7)
 

@@ -279,9 +279,9 @@ export function LocationPicker({
 
             {/* Error message */}
             {!isSignupMap && error && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-red50 border border-orange-200">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-soft border border-orange-200">
                     <span className="material-symbols-outlined text-brand-red" aria-hidden="true">warning</span>
-                    <span className="text-[10px] text-brand-red600 font-medium">{error}</span>
+                    <span className="text-[10px] text-brand-red font-medium">{error}</span>
                 </div>
             )}
 

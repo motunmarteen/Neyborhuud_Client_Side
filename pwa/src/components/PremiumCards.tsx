@@ -46,8 +46,8 @@ const TIERS = [
     name: "Gold",
     coinsRequired: 2000,
     borderColor: "border-yellow-400",
-    badgeClass: "bg-primary900/40 text-primary400",
-    progressColor: "bg-primary400",
+    badgeClass: "bg-primary/40 text-brand-green-dark",
+    progressColor: "bg-primary",
     icon: "🥇",
     features: [
       "Everything in Silver",

@@ -153,7 +153,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
               {/* Category */}
               <div>
                 <label className="text-white/70 text-xs font-medium mb-2 block">
-                  Category <span className="text-brand-red400">*</span>
+                  Category <span className="text-brand-red">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {CATEGORIES.map((cat) => (
@@ -183,7 +183,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
               {/* Description */}
               <div>
                 <label className="text-white/70 text-xs font-medium mb-1.5 block">
-                  Describe your situation <span className="text-brand-red400">*</span>
+                  Describe your situation <span className="text-brand-red">*</span>
                 </label>
                 <textarea
                   value={body}
@@ -195,7 +195,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                 />
                 <div className="flex justify-between mt-1">
                   {body.trim().length > 0 && body.trim().length < 20 && (
-                    <span className="text-brand-red400 text-[11px] flex items-center gap-1">
+                    <span className="text-brand-red text-[11px] flex items-center gap-1">
                       <AlertCircle size={10} /> Minimum 20 characters
                     </span>
                   )}
@@ -235,7 +235,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                     [
                       { value: "normal", label: "Normal", color: "text-white/70" },
                       { value: "high", label: "⚠️ High", color: "text-primary" },
-                      { value: "critical", label: "🚨 Critical", color: "text-brand-red400" },
+                      { value: "critical", label: "🚨 Critical", color: "text-brand-red" },
                     ] as const
                   ).map((p) => (
                     <button
@@ -271,7 +271,7 @@ export default function CreateHelpRequestModal({ isOpen, onClose }: Props) {
                       />
                       <button
                         onClick={() => removeImage(i)}
-                        className="absolute -top-1 -right-1 bg-brand-red500 rounded-full w-4 h-4 flex items-center justify-center"
+                        className="absolute -top-1 -right-1 bg-brand-red rounded-full w-4 h-4 flex items-center justify-center"
                       >
                         <X size={10} />
                       </button>

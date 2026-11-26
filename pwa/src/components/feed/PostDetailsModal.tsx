@@ -326,7 +326,7 @@ export const PostDetailsModal: React.FC<PostDetailsModalProps> = ({ postId, isOp
                                                         disabled={rsvpLoading}
                                                         className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors disabled:opacity-50 ${
                                                             rsvpStatus === 'going' ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' :
-                                                            rsvpStatus === 'maybe' ? 'bg-primary/10 text-primary400 border-yellow-500/20 hover:bg-primary/20' :
+                                                            rsvpStatus === 'maybe' ? 'bg-primary/10 text-brand-green-dark border-yellow-500/20 hover:bg-primary/20' :
                                                             'bg-brand-red/10 text-brand-red border-brand-red/20 hover:bg-brand-red/20'
                                                         }`}
                                                         onClick={async () => {

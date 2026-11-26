@@ -7,6 +7,7 @@ import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageS
 import EventCard from "@/components/events/EventCard";
 import { useMyEvents, useMyOrganizedEvents, useAttendEvent, useBoostEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
+import { useStarted } from "@/hooks/useStarted";
 import { BoostModal } from "@/components/gamification/BoostModal";
 import { useInView } from "react-intersection-observer";
 
@@ -14,6 +15,7 @@ type Tab = "attending" | "organizing";
 
 export default function MyEventsPage() {
   const { user, isLoading: authLoading } = useAuth();
+  const started = useStarted();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("attending");
   const attendEvent = useAttendEvent();
@@ -45,7 +47,8 @@ export default function MyEventsPage() {
     }
   }, [inView, activeQuery]);
 
-  if (authLoading || !user) return null;
+  // Who you are is known only on the phone: wait, so the first draw matches the pre-built page.
+  if (!started || authLoading || !user) return null;
 
   return (
     <>

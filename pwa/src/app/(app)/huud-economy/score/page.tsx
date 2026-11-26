@@ -271,7 +271,7 @@ export default function HuudScorePage() {
                       icon="token"
                       label="HuudCredit"
                       value={(statsData.huudCoins ?? statsData.totalHuudCoins ?? 0).toLocaleString()}
-                      color="bg-primary/20 text-primary400"
+                      color="bg-primary/20 text-brand-green-dark"
                     />
                   </div>
                 ) : null}
@@ -430,7 +430,7 @@ export default function HuudScorePage() {
                     </div>
                   )}
                   {!trustEconomy.nextTier && (
-                    <p className="mt-4 text-xs font-bold text-primary300">🌴 You have reached the highest trust tier — Community Elder</p>
+                    <p className="mt-4 text-xs font-bold text-brand-green-dark">🌴 You have reached the highest trust tier — Community Elder</p>
                   )}
                 </section>
 
@@ -589,8 +589,8 @@ export default function HuudScorePage() {
                           {v.voucherAvatar ? (
                             <Image src={v.voucherAvatar} alt={v.voucherUsername} width={28} height={28} className="w-7 h-7 rounded-full object-cover border border-violet-400/30" />
                           ) : (
-                            <div className="w-7 h-7 rounded-full bg-brand-blue500/20 flex items-center justify-center">
-                              <span className="text-brand-blue300 font-bold text-xs">{v.voucherUsername.charAt(0).toUpperCase()}</span>
+                            <div className="w-7 h-7 rounded-full bg-brand-blue/20 flex items-center justify-center">
+                              <span className="text-brand-blue font-bold text-xs">{v.voucherUsername.charAt(0).toUpperCase()}</span>
                             </div>
                           )}
                           <span className="text-xs font-semibold text-brand-blue group-hover:text-[#0E8A3E]">@{v.voucherUsername}</span>
@@ -648,8 +648,8 @@ export default function HuudScorePage() {
                         const isPositive = meta.positive && event.pointsChange >= 0;
                         return (
                           <div key={event.id} className="flex items-start gap-3 rounded-xl mod-inset px-3 py-2.5">
-                            <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isPositive ? "bg-primary/15" : "bg-brand-red500/15"}`}>
-                              <span className={`material-symbols-outlined text-[16px] ${isPositive ? "text-primary" : "text-brand-red400"}`}
+                            <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isPositive ? "bg-primary/15" : "bg-brand-red/15"}`}>
+                              <span className={`material-symbols-outlined text-[16px] ${isPositive ? "text-primary" : "text-brand-red"}`}
                                 style={{ fontVariationSettings: "'FILL' 1" }}>
                                 {meta.icon}
                               </span>
@@ -661,7 +661,7 @@ export default function HuudScorePage() {
                               {event.reason && <p className="text-xs text-[var(--neu-text-muted)]">{event.reason}</p>}
                               <p className="text-[11px] text-[var(--neu-text-secondary)]">{formatTimeAgo(event.createdAt)}</p>
                             </div>
-                            <span className={`shrink-0 text-sm font-black tabular-nums ${isPositive ? "text-primary" : "text-brand-red400"}`}>
+                            <span className={`shrink-0 text-sm font-black tabular-nums ${isPositive ? "text-primary" : "text-brand-red"}`}>
                               {isPositive ? "+" : ""}{event.pointsChange}
                             </span>
                           </div>

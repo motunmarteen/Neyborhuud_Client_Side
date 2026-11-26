@@ -7,6 +7,7 @@ import { toast } from '@/lib/toast';
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
 import { useEvent, useUpdateEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
+import { useStarted } from "@/hooks/useStarted";
 import { CreateEventPayload } from "@/types/api";
 
 const EVENT_TYPES = [
@@ -32,6 +33,7 @@ export default function EditEventPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
+  const started = useStarted();
   const { data, isLoading } = useEvent(id);
   const updateEvent = useUpdateEvent(id);
 
@@ -120,7 +122,8 @@ export default function EditEventPage() {
     updateEvent.mutate(payload);
   }
 
-  if (authLoading || !user) return null;
+  // Who you are is known only on the phone: wait, so the first draw matches the pre-built page.
+  if (!started || authLoading || !user) return null;
 
   if (isLoading) {
     return (

@@ -106,7 +106,7 @@ export default function AdminDashboardPage() {
         <StatCard label="Active (24h)"     value={stats.activeUsers ?? 0}           icon="person_check"  color="text-primary" />
         <StatCard label="Total Posts"      value={stats.totalPosts ?? 0}            icon="article"       color="text-brand-blue" />
         <StatCard label="Events"           value={stats.totalEvents ?? 0}           icon="event"         color="text-primary" />
-        <StatCard label="Jobs"             value={stats.totalJobs ?? 0}             icon="work"          color="text-brand-red400" />
+        <StatCard label="Jobs"             value={stats.totalJobs ?? 0}             icon="work"          color="text-brand-red" />
         <StatCard label="Listings"         value={stats.totalMarketplaceItems ?? 0} icon="storefront"    color="text-brand-green-dark" />
       </div>
 
@@ -116,7 +116,7 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-3 gap-3">
           <StatCard label="Likes"    value={stats.engagement?.likes ?? 0}    icon="thumb_up"  color="text-pink-400" />
           <StatCard label="Comments" value={stats.engagement?.comments ?? 0} icon="comment"   color="text-brand-blue" />
-          <StatCard label="Shares"   value={stats.engagement?.shares ?? 0}   icon="share"     color="text-brand-blue400" />
+          <StatCard label="Shares"   value={stats.engagement?.shares ?? 0}   icon="share"     color="text-brand-blue" />
         </div>
       </div>
 

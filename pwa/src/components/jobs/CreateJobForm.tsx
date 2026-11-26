@@ -19,18 +19,18 @@ const PERIODS = ["hourly", "daily", "weekly", "monthly", "yearly"] as const;
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <label className="block text-sm font-semibold mb-1.5 text-[var(--neu-text-secondary)]">
+    <label className="mb-1.5 block text-sm font-bold text-navy">
       {children}
     </label>
   );
 }
 
 function inputCls() {
-  return "w-full bg-transparent px-4 py-3 text-sm focus:outline-none rounded-xl text-[var(--neu-text)]";
+  return "w-full bg-transparent px-4 py-3 text-base text-navy placeholder:text-muted focus:outline-none rounded-2xl sm:text-[15px]";
 }
 
 const sectionCls = "mod-card rounded-2xl p-5 space-y-5";
-const neuInputCls = "neu-input rounded-xl";
+const neuInputCls = "rounded-2xl bg-background focus-within:ring-2 focus-within:ring-primary/25";
 
 export default function CreateJobForm() {
   const router = useRouter();
@@ -113,7 +113,7 @@ export default function CreateJobForm() {
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-5 pb-20">
         {/* Basic Details */}
         <div className={sectionCls}>
-          <h2 className="text-base font-bold neu-text">Job Details</h2>
+          <h2 className="font-heading text-base font-extrabold text-navy">Job Details</h2>
 
           <div>
             <Label>Job Title <span className="text-brand-red">*</span></Label>
@@ -146,7 +146,7 @@ export default function CreateJobForm() {
                   value={form.type}
                   onChange={(e) => set("type", e.target.value)}
                   aria-label="Job type"
-                  className={`${inputCls()} cursor-pointer bg-transparent`}
+                  className={`${inputCls()} cursor-pointer`}
                 >
                   {JOB_TYPES.map((t) => (
                     <option key={t} value={t} className="bg-[var(--neu-bg)]">
@@ -163,7 +163,7 @@ export default function CreateJobForm() {
                   value={form.workMode}
                   onChange={(e) => set("workMode", e.target.value)}
                   aria-label="Work mode"
-                  className={`${inputCls()} cursor-pointer bg-transparent`}
+                  className={`${inputCls()} cursor-pointer`}
                 >
                   {WORK_MODES.map((m) => (
                     <option key={m} value={m} className="bg-[var(--neu-bg)]">
@@ -183,7 +183,7 @@ export default function CreateJobForm() {
                 value={form.category}
                 onChange={(e) => set("category", e.target.value)}
                 aria-label="Category"
-                className={`${inputCls()} cursor-pointer bg-transparent`}
+                className={`${inputCls()} cursor-pointer`}
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c} className="bg-[var(--neu-bg)]">{c}</option>
@@ -195,7 +195,7 @@ export default function CreateJobForm() {
 
         {/* Salary */}
         <div className={sectionCls}>
-          <h2 className="text-base font-bold neu-text">
+          <h2 className="font-heading text-base font-extrabold text-navy">
             Salary <span className="text-sm font-normal neu-text-muted">(optional)</span>
           </h2>
 
@@ -236,7 +236,7 @@ export default function CreateJobForm() {
                   value={form.salaryCurrency}
                   onChange={(e) => set("salaryCurrency", e.target.value)}
                   aria-label="Salary currency"
-                  className={`${inputCls()} cursor-pointer bg-transparent`}
+                  className={`${inputCls()} cursor-pointer`}
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c} className="bg-[var(--neu-bg)]">{c}</option>
@@ -251,7 +251,7 @@ export default function CreateJobForm() {
                   value={form.salaryPeriod}
                   onChange={(e) => set("salaryPeriod", e.target.value)}
                   aria-label="Salary period"
-                  className={`${inputCls()} cursor-pointer bg-transparent`}
+                  className={`${inputCls()} cursor-pointer`}
                 >
                   {PERIODS.map((p) => (
                     <option key={p} value={p} className="bg-[var(--neu-bg)]">{p}</option>
@@ -264,7 +264,7 @@ export default function CreateJobForm() {
 
         {/* Skills */}
         <div className={sectionCls}>
-          <h2 className="text-base font-bold neu-text">Skills Required</h2>
+          <h2 className="font-heading text-base font-extrabold text-navy">Skills Required</h2>
           {skills.map((skill, idx) => (
             <div key={idx} className="flex gap-2">
               <div className={`${neuInputCls} flex-1`}>
@@ -279,7 +279,7 @@ export default function CreateJobForm() {
                 <button
                   type="button"
                   onClick={() => removeFromList(skills, setSkills, idx)}
-                  className="p-2 rounded-xl mod-chip shrink-0 text-brand-red"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-red-soft text-brand-red"
                 >
                   <span className="material-symbols-outlined text-[18px]">remove</span>
                 </button>
@@ -298,7 +298,7 @@ export default function CreateJobForm() {
 
         {/* Requirements */}
         <div className={sectionCls}>
-          <h2 className="text-base font-bold neu-text">
+          <h2 className="font-heading text-base font-extrabold text-navy">
             Requirements <span className="text-sm font-normal neu-text-muted">(optional)</span>
           </h2>
           {requirements.map((req, idx) => (
@@ -315,7 +315,7 @@ export default function CreateJobForm() {
                 <button
                   type="button"
                   onClick={() => removeFromList(requirements, setRequirements, idx)}
-                  className="p-2 rounded-xl mod-chip shrink-0 text-brand-red"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-red-soft text-brand-red"
                 >
                   <span className="material-symbols-outlined text-[18px]">remove</span>
                 </button>
@@ -334,7 +334,7 @@ export default function CreateJobForm() {
 
         {/* Expiry */}
         <div className={sectionCls}>
-          <h2 className="text-base font-bold neu-text">
+          <h2 className="font-heading text-base font-extrabold text-navy">
             Expiry Date <span className="text-sm font-normal neu-text-muted">(optional)</span>
           </h2>
           <div className={neuInputCls}>
@@ -353,11 +353,11 @@ export default function CreateJobForm() {
         <button
           type="submit"
           disabled={createJob.isPending}
-          className="w-full py-4 rounded-2xl font-bold text-base transition-all mod-chip mod-chip-active text-primary disabled:opacity-60"
+          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(0,184,46,0.28)] transition-colors hover:bg-brand-green-dark disabled:bg-primary/40 disabled:shadow-none"
         >
           {createJob.isPending ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
               Posting Job…
             </span>
           ) : (

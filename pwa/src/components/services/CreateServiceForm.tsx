@@ -129,10 +129,10 @@ export default function CreateServiceForm() {
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-4 px-4 pb-24">
       {/* ── Service Details ── */}
       <div className="mod-card rounded-2xl p-5 space-y-5">
-        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>Service Details</h2>
+        <h2 className="font-heading text-base font-extrabold text-navy" style={{ color: "var(--neu-text)" }}>Service Details</h2>
 
         <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+          <label className="mb-1.5 block text-sm font-bold text-navy" style={{ color: "var(--neu-text-muted)" }}>
             Service Title <span style={{ color: "var(--brand-red)" }}>*</span>
           </label>
           <input
@@ -140,7 +140,7 @@ export default function CreateServiceForm() {
             onChange={(e) => set("title", e.target.value)}
             required
             placeholder="e.g. Professional Home Cleaning"
-            className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+            className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
             style={{ color: "var(--neu-text)" }}
           />
         </div>
@@ -156,7 +156,7 @@ export default function CreateServiceForm() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+            <label className="mb-1.5 block text-sm font-bold text-navy" style={{ color: "var(--neu-text-muted)" }}>
               Category <span style={{ color: "var(--brand-red)" }}>*</span>
             </label>
             <select
@@ -166,14 +166,14 @@ export default function CreateServiceForm() {
                 set("category", e.target.value as (typeof CATEGORIES)[number]);
                 set("subcategory", "");
               }}
-              className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+              className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
               style={{ color: "var(--neu-text)" }}
             >
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+            <label className="mb-1.5 block text-sm font-bold text-navy" style={{ color: "var(--neu-text-muted)" }}>
               Subcategory <span className="font-normal text-xs">(optional)</span>
             </label>
             <select
@@ -181,7 +181,7 @@ export default function CreateServiceForm() {
               value={form.subcategory}
               onChange={(e) => set("subcategory", e.target.value)}
               disabled={subcategoryOptions.length === 0}
-              className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all disabled:opacity-40"
+              className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px] disabled:opacity-40"
               style={{ color: "var(--neu-text)" }}
             >
               <option value="">— Select —</option>
@@ -193,7 +193,7 @@ export default function CreateServiceForm() {
 
       {/* ── Pricing ── */}
       <div className="mod-card rounded-2xl p-5 space-y-4">
-        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>Pricing</h2>
+        <h2 className="font-heading text-base font-extrabold text-navy" style={{ color: "var(--neu-text)" }}>Pricing</h2>
 
         <div className="flex gap-2">
           {PRICING_TYPES.map(({ value, label }) => (
@@ -202,7 +202,7 @@ export default function CreateServiceForm() {
               type="button"
               onClick={() => set("pricingType", value)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                form.pricingType === value ? "mod-chip mod-chip-active text-primary" : "mod-chip"
+                form.pricingType === value ? "bg-navy text-white" : "bg-white text-navy ring-1 ring-inset ring-line"
               }`}
               style={form.pricingType !== value ? { color: "var(--neu-text-muted)" } : {}}
             >
@@ -214,7 +214,7 @@ export default function CreateServiceForm() {
         {form.pricingType !== "custom" && (
           <div className="grid grid-cols-3 gap-4">
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>
+              <label className="mb-1.5 block text-sm font-bold text-navy" style={{ color: "var(--neu-text-muted)" }}>
                 Amount{form.pricingType === "hourly" && <span className="font-normal"> / hour</span>}
               </label>
               <input
@@ -223,17 +223,17 @@ export default function CreateServiceForm() {
                 onChange={(e) => set("pricingAmount", e.target.value)}
                 placeholder="e.g. 5000"
                 min={0}
-                className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+                className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
                 style={{ color: "var(--neu-text)" }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>Currency</label>
+              <label className="mb-1.5 block text-sm font-bold text-navy" style={{ color: "var(--neu-text-muted)" }}>Currency</label>
               <select
                 aria-label="Currency"
                 value={form.pricingCurrency}
                 onChange={(e) => set("pricingCurrency", e.target.value)}
-                className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+                className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
                 style={{ color: "var(--neu-text)" }}
               >
                 {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -243,7 +243,7 @@ export default function CreateServiceForm() {
         )}
 
         {form.pricingType === "custom" && (
-          <p className="text-sm mod-inset rounded-xl px-4 py-3" style={{ color: "var(--neu-text-muted)" }}>
+          <p className="rounded-2xl bg-green-soft px-4 py-3 text-[13px] font-semibold text-brand-green-dark" style={{ color: "var(--neu-text-muted)" }}>
             Clients will contact you to negotiate a price.
           </p>
         )}
@@ -251,10 +251,10 @@ export default function CreateServiceForm() {
 
       {/* ── Availability ── */}
       <div className="mod-card rounded-2xl p-5 space-y-4">
-        <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>Availability</h2>
+        <h2 className="font-heading text-base font-extrabold text-navy" style={{ color: "var(--neu-text)" }}>Availability</h2>
 
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: "var(--neu-text-muted)" }}>
+          <label className="mb-2 block text-sm font-bold text-navy" style={{ color: "var(--neu-text-muted)" }}>
             Working Days <span style={{ color: "var(--brand-red)" }}>*</span>
           </label>
           <div className="flex gap-2 flex-wrap">
@@ -266,7 +266,7 @@ export default function CreateServiceForm() {
                   type="button"
                   onClick={() => toggleDay(day)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    active ? "mod-chip mod-chip-active text-primary" : "mod-chip"
+                    active ? "bg-navy text-white" : "bg-white text-navy ring-1 ring-inset ring-line"
                   }`}
                   style={!active ? { color: "var(--neu-text-muted)" } : {}}
                 >
@@ -281,12 +281,12 @@ export default function CreateServiceForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--neu-text-muted)" }}>Working Hours</label>
+          <label className="mb-1.5 block text-sm font-bold text-navy" style={{ color: "var(--neu-text-muted)" }}>Working Hours</label>
           <input
             value={form.hoursText}
             onChange={(e) => set("hoursText", e.target.value)}
             placeholder="e.g. 8am – 6pm, or Flexible"
-            className="w-full mod-inset rounded-xl px-4 py-3 focus:outline-none transition-all"
+            className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
             style={{ color: "var(--neu-text)" }}
           />
         </div>
@@ -295,7 +295,7 @@ export default function CreateServiceForm() {
       {/* ── Photos ── */}
       <div className="mod-card rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold" style={{ color: "var(--neu-text)" }}>
+          <h2 className="font-heading text-base font-extrabold text-navy" style={{ color: "var(--neu-text)" }}>
             Photos <span className="text-sm font-normal" style={{ color: "var(--neu-text-muted)" }}>(optional, max 6)</span>
           </h2>
           {imageFiles.length < 6 && (
@@ -340,7 +340,7 @@ export default function CreateServiceForm() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="aspect-square rounded-xl mod-inset flex flex-col items-center justify-center gap-1 transition-all"
+                className="aspect-square rounded-2xl border-2 border-dashed border-line bg-background flex flex-col items-center justify-center gap-1 transition-all"
                 style={{ color: "var(--neu-text-muted)" }}
               >
                 <span className="material-symbols-outlined text-[28px]">add</span>
@@ -352,7 +352,7 @@ export default function CreateServiceForm() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full h-32 rounded-xl mod-inset flex flex-col items-center justify-center gap-2 transition-all"
+            className="w-full h-32 rounded-2xl border-2 border-dashed border-line bg-background flex flex-col items-center justify-center gap-2 transition-all"
             style={{ color: "var(--neu-text-muted)" }}
           >
             <span className="material-symbols-outlined text-[36px]">add_photo_alternate</span>
@@ -370,7 +370,7 @@ export default function CreateServiceForm() {
           !form.description.trim() ||
           selectedDays.length === 0
         }
-        className="w-full py-4 mod-chip mod-chip-active text-primary disabled:opacity-50 font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
+        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(0,184,46,0.28)] transition-colors hover:bg-brand-green-dark disabled:bg-primary/40 disabled:shadow-none"
       >
         {createService.isPending ? (
           <>

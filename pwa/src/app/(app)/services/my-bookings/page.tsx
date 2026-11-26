@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
 import { useMyBookings, useWithdrawBooking } from "@/hooks/useServices";
 import { useAuth } from "@/hooks/useAuth";
+import { useStarted } from "@/hooks/useStarted";
 import { chatThreadPath } from "@/lib/chatPaths";
 import { ServiceBookingOffer } from "@/types/api";
 import { formatNaira } from "@/lib/currency";
@@ -41,6 +42,7 @@ function formatDateTime(d: string) {
 
 export default function MyBookingsPage() {
   const { user, isLoading: authLoading } = useAuth();
+  const started = useStarted();
   const router = useRouter();
 
   useEffect(() => {
@@ -56,7 +58,8 @@ export default function MyBookingsPage() {
       return Array.isArray(inner) ? inner : (inner?.data ?? []);
     }) ?? [];
 
-  if (authLoading || !user) return null;
+  // Who you are is known only on the phone: wait, so the first draw matches the pre-built page.
+  if (!started || authLoading || !user) return null;
 
   return (
     <LocalHuudSubpageShell hubId="services">

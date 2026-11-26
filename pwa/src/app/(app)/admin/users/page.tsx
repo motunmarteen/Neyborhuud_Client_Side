@@ -20,7 +20,7 @@ import { User } from '@/types/api';
 const ROLE_COLORS: Record<string, string> = {
   user:        'bg-slate-700 text-slate-200',
   moderator:   'bg-sky-700 text-sky-100',
-  admin:       'bg-brand-blue700 text-brand-blue100',
+  admin:       'bg-brand-blue text-brand-blue',
   super_admin: 'bg-amber-600 text-amber-100',
 };
 

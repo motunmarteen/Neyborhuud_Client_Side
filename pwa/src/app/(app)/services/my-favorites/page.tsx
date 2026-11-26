@@ -6,10 +6,12 @@ import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageS
 import ServiceCard from "@/components/services/ServiceCard";
 import { useMyFavorites, useFavoriteService } from "@/hooks/useServices";
 import { useAuth } from "@/hooks/useAuth";
+import { useStarted } from "@/hooks/useStarted";
 import Link from "next/link";
 
 export default function MyFavoritesPage() {
   const { user, isLoading: authLoading } = useAuth();
+  const started = useStarted();
   const router = useRouter();
 
   useEffect(() => {
@@ -24,7 +26,8 @@ export default function MyFavoritesPage() {
     return Array.isArray(inner) ? inner : (inner?.data ?? []);
   }) ?? [];
 
-  if (authLoading || !user) return null;
+  // Who you are is known only on the phone: wait, so the first draw matches the pre-built page.
+  if (!started || authLoading || !user) return null;
 
   return (
     <LocalHuudSubpageShell hubId="services">

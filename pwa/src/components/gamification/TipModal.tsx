@@ -35,7 +35,7 @@ interface Props {
 const TIER_COLORS: Record<string, string> = {
   bronze:   "text-amber-700 bg-amber-100 border-amber-300",
   silver:   "text-slate-600 bg-slate-100 border-slate-300",
-  gold:     "text-primary700 bg-primary100 border-yellow-300",
+  gold:     "text-brand-green-dark bg-green-soft border-yellow-300",
   platinum: "text-purple-700 bg-purple-100 border-purple-300",
 };
 

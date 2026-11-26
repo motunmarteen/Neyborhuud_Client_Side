@@ -15,19 +15,19 @@ const STATUS_CHIP: Record<string, string> = {
 };
 
 const TARGET_CHIP: Record<string, string> = {
-  user:        'bg-brand-blue500/20 text-brand-blue300',
+  user:        'bg-brand-blue/20 text-brand-blue',
   post:        'bg-brand-blue/20   text-brand-blue',
-  comment:     'bg-brand-blue500/20 text-brand-blue300',
+  comment:     'bg-brand-blue/20 text-brand-blue',
   message:     'bg-sky-500/20    text-sky-300',
   marketplace: 'bg-status-warning/15 text-status-warning',
   service:     'bg-brand-green-dark/20   text-brand-green-dark',
-  event:       'bg-brand-red500/20   text-brand-red300',
+  event:       'bg-brand-red/20   text-brand-red',
 };
 
 const RESOLVE_ACTIONS = [
   { value: 'dismiss',  label: 'Dismiss',      color: 'bg-slate-600 hover:bg-slate-500' },
   { value: 'warn',     label: 'Warn User',    color: 'bg-amber-600 hover:bg-primary' },
-  { value: 'remove',   label: 'Remove Content', color: 'bg-brand-red600 hover:bg-brand-red' },
+  { value: 'remove',   label: 'Remove Content', color: 'bg-brand-red hover:bg-brand-red' },
   { value: 'suspend',  label: 'Suspend User', color: 'bg-status-danger hover:bg-status-danger/85' },
 ] as const;
 

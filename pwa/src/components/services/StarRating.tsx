@@ -28,7 +28,7 @@ export default function StarRating({ value, size = "md", onChange }: Props) {
             className={`transition-colors ${onChange ? "cursor-pointer hover:scale-110" : "cursor-default"}`}
           >
             <span
-              className={`material-symbols-outlined ${SIZE_CLASS[size]} ${filled ? "text-primary400" : "text-[var(--neu-text-secondary)]"}`}
+              className={`material-symbols-outlined ${SIZE_CLASS[size]} ${filled ? "text-amber-400" : "text-[var(--neu-text-secondary)]"}`}
               style={{ fontVariationSettings: filled ? "'FILL' 1" : "'FILL' 0" }}
             >
               star
