@@ -1,84 +1,47 @@
 "use client";
 
 /**
- * Full-route “modal” shell: doodle + ambient washes + centered glass sheet (offer-dialog family).
+ * Full-screen form page (create / edit a listing, an event…). Restyled 2026-11-26: the usual app
+ * frame and one white card, like the rest of the app. It used to be a see-through "glass" sheet
+ * with the background pattern showing through the fields.
  */
 
-import TopNav from "@/components/navigation/TopNav";
-import LeftSidebar from "@/components/navigation/LeftSidebar";
-import RightSidebar from "@/components/navigation/RightSidebar";
-import { BottomNav } from "@/components/feed/BottomNav";
+import { AppBrowseLayout } from "@/components/layout/AppBrowseLayout";
 
 type GlassFormPageProps = {
   title: string;
   subtitle?: string;
   titleId?: string;
   onClose: () => void;
-  /** Wider sheet for long marketplace listing form */
+  /** Kept for older callers; every form now uses the normal page width. */
   wide?: boolean;
   children: React.ReactNode;
 };
 
-export function GlassFormPage({ title, subtitle, titleId = "glass-form-title", onClose, wide, children }: GlassFormPageProps) {
+export function GlassFormPage({ title, subtitle, titleId = "glass-form-title", onClose, children }: GlassFormPageProps) {
   return (
-    <div className="doodle-surface relative flex h-screen w-full flex-col overflow-hidden text-brand-black">
-      <TopNav />
-      <div className="relative flex min-h-0 flex-1 overflow-hidden">
-        <LeftSidebar />
-        <main
-          data-app-scroll-root
-          className="feed-scroll-main relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-3 py-4 pb-28 sm:px-4 sm:py-6"
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            className={`doodle-modal-panel relative z-10 mx-auto w-full shrink-0 overflow-hidden rounded-[24px] border border-[var(--border-light)] shadow-[0_24px_60px_rgba(14,138,62,0.14),0_0_0_1px_rgba(255,255,255,0.85)_inset]   sm:rounded-[28px] ${wide ? "max-w-2xl" : "max-w-lg"}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="doodle-modal-panel-wash z-0" aria-hidden />
-            <div className="doodle-modal-ambient z-0 motion-safe:animate-soft-float" aria-hidden>
-              <div className="doodle-modal-ambient-float" />
-            </div>
-
-            <div className="relative z-[1] flex flex-col">
-              <div className="flex shrink-0 justify-center pt-3 pb-1 sm:hidden">
-                <div className="h-1 w-11 rounded-full bg-black/15 " aria-hidden />
-              </div>
-
-              <div
-                className="border-b border-[var(--border-light)] px-4 pb-4 pt-2  sm:px-6 sm:pt-4"
-                style={{ boxShadow: "0 1px 0 var(--neu-shadow-light)" }}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h1 id={titleId} className="text-lg font-bold tracking-tight sm:text-xl" style={{ color: "var(--neu-text)" }}>
-                      {title}
-                    </h1>
-                    {subtitle ? (
-                      <p className="mt-1 text-xs font-medium leading-relaxed text-brand-green-dark/70  sm:text-sm">{subtitle}</p>
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="mod-chip grid h-10 w-10 shrink-0 place-items-center rounded-full transition-colors"
-                    aria-label="Close"
-                  >
-                    <span className="material-symbols-outlined text-[22px]" style={{ color: "var(--neu-text-secondary)" }}>
-                      close
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="px-4 py-4 sm:px-6 sm:py-6">{children}</div>
-            </div>
+    <AppBrowseLayout>
+      <section aria-labelledby={titleId} className="rounded-[22px] bg-white shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
+        <div className="flex items-start justify-between gap-3 border-b border-line/70 px-4 py-4">
+          <div className="min-w-0">
+            <h1 id={titleId} className="font-heading text-xl font-extrabold leading-tight text-navy">
+              {title}
+            </h1>
+            {subtitle ? <p className="mt-1 text-sm leading-relaxed text-muted">{subtitle}</p> : null}
           </div>
-        </main>
-        <RightSidebar />
-      </div>
-      <BottomNav />
-    </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-background text-navy hover:bg-[#E6EAF0]"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
+              <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div className="px-4 py-5">{children}</div>
+      </section>
+    </AppBrowseLayout>
   );
 }

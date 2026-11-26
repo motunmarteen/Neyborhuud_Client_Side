@@ -32,7 +32,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
 | 3. Map home (sky + live map) | 14 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; low-data mode, speed done; left: M-14 crown (waits on Phase 7), M-17 living map, mockup extras |
-| 4. Screens (restyle all 95) | 50 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel done; Marketplace next |
+| 4. Screens (restyle all 95) | 56 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel and Marketplace done; Work next |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
 | 7. Gamification backend | 18 | 18 | ✅ done 2026-10-18 (server + app); airtime/data and contributor payouts wait for the legal check |
@@ -287,12 +287,12 @@ Shared pieces restyled with this group (used by later groups too): list-page hea
 
 ### Marketplace (6)
 
-- [ ] S-052 `/marketplace` → Market layer on the map / Everything → Market / Me → my listings & deals
-- [ ] S-053 `/marketplace/[id]` → Market layer on the map / Everything → Market / Me → my listings & deals
-- [ ] S-054 `/marketplace/[id]/edit` → Market layer on the map / Everything → Market / Me → my listings & deals
-- [ ] S-055 `/marketplace/create` → Market layer on the map / Everything → Market / Me → my listings & deals
-- [ ] S-056 `/marketplace/my-deals` → Market layer on the map / Everything → Market / Me → my listings & deals
-- [ ] S-057 `/marketplace/my-listings` → Market layer on the map / Everything → Market / Me → my listings & deals
+- [x] S-052 (2026-11-26) `/marketplace` → Market layer on the map / Everything → Market / Me → my listings & deals: one chip row, item cards show one label (stage or boost), "Show more"
+- [x] S-053 (2026-11-26) `/marketplace/[id]` → Market layer on the map / Everything → Market / Me → my listings & deals: opens the item in the market list (unchanged)
+- [x] S-054 (2026-11-26) `/marketplace/[id]/edit` → Market layer on the map / Everything → Market / Me → my listings & deals: same form as listing; removing photos only (adding needs a new listing)
+- [x] S-055 (2026-11-26) `/marketplace/create` → Market layer on the map / Everything → Market / Me → my listings & deals: form rebuilt: photos first, ₦ price, condition chips, plain fields (was see-through, loading error fixed)
+- [x] S-056 (2026-11-26) `/marketplace/my-deals` → Market layer on the map / Everything → Market / Me → my listings & deals: white rows with photo, price, who and stage (were dark boxes, names cut off)
+- [x] S-057 (2026-11-26) `/marketplace/my-listings` → Market layer on the map / Everything → Market / Me → my listings & deals: Edit, Boost and offers inside each card
 
 ### Work: jobs and services (9)
 

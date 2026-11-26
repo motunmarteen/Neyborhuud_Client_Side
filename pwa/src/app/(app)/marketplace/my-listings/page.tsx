@@ -1,274 +1,151 @@
 "use client";
 
 /**
- * My Listings Page
- * View and manage user's own marketplace listings
+ * My Listings: what you are selling. Each card carries its own Edit and Boost buttons and, when
+ * buyers have made offers, a link to them (offers are answered in the deal chat).
+ * Restyled 2026-11-26: the buttons sit inside the card (they floated under it, Edit looked greyed out).
  */
 
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Pencil, Rocket } from "lucide-react";
 import { useMyListings, useProductOffers, useMyDeals } from "@/hooks/useMarketplace";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { ProductCard } from "@/components/marketplace";
 import { BoostModal } from "@/components/marketplace/BoostModal";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { DealStatus, Product } from "@/services/marketplace.service";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
+import { LocalHuudHubPrimaryAction } from "@/components/local-huud/LocalHuudHubHeader";
+import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { SkeletonTiles } from "@/components/ui/Skeleton";
 
-// ─── Per-listing pending offer badge ─────────────────────────────────────────
+type BoostTarget = { id: string; title: string; isBoosted: boolean; boostedUntil?: string };
 
-// Offers are acted on in the deal chat, never in a separate list — this badge
-// only counts them and routes into the thread (the newest one when there are
-// several, since each offer is its own conversation).
-function PendingOffersBadge({ product }: { product: Product }) {
+const idOf = (p: Product) => String((p as { _id?: string })._id ?? p.id ?? "");
+
+/** "2 offers" when buyers are waiting; opens the newest offer's chat. */
+function OffersLink({ product }: { product: Product }) {
   const router = useRouter();
-  const productId = (product as any)._id ?? product.id;
-  const { data } = useProductOffers(productId, "pending");
+  const { data } = useProductOffers(idOf(product), "pending");
   const offers = data?.offers ?? [];
-  const count = offers.length;
-
-  if (count === 0) return null;
-
-  const targetConversation = offers.find((o) => o.conversationId)?.conversationId;
-
+  if (offers.length === 0) return null;
+  const chat = offers.find((o) => o.conversationId)?.conversationId;
   return (
     <button
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (targetConversation) {
-          router.push(`/chat/${targetConversation}`);
-        } else {
-          router.push("/marketplace/my-deals");
-        }
-      }}
-      className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-status-warning hover:bg-primary/30 transition-colors"
+      type="button"
+      onClick={() => router.push(chat ? `/chat/${chat}` : "/marketplace/my-deals")}
+      className="tap-target w-full rounded-full bg-amber-soft py-2 text-[13px] font-bold text-amber-ink"
     >
-      <span>💰</span>
-      {count} pending {count === 1 ? "offer" : "offers"}
+      {offers.length === 1 ? "1 offer waiting" : `${offers.length} offers waiting`}
     </button>
   );
 }
 
-// ─── Listing card wrapper ─────────────────────────────────────────────────────
-
-function ListingWithOffers({
-  product,
-  userLocation,
-  onBoost,
-  dealStatus,
-  dealConversationId,
-}: {
-  product: Product;
-  userLocation: { lat: number; lng: number } | null;
-  onBoost: (id: string, title: string, isBoosted: boolean, boostedUntil?: string) => void;
-  dealStatus?: DealStatus;
-  dealConversationId?: string | null;
-}) {
-  const productId = (product as any)._id ?? product.id;
-  const productTitle = (product as any).title ?? (product as any).name ?? "Listing";
-  const isBoosted = (product as any).isBoosted === true;
-  const boostedUntil: string | undefined = (product as any).boostedUntil;
-  const boostActive = isBoosted && boostedUntil && new Date(boostedUntil) > new Date();
-
+function OwnerButtons({ product, onBoost }: { product: Product; onBoost: (b: BoostTarget) => void }) {
+  const id = idOf(product);
+  const until = (product as { boostedUntil?: string }).boostedUntil;
+  const isBoosted = (product as { isBoosted?: boolean }).isBoosted === true;
+  const boostActive = isBoosted && !!until && new Date(until) > new Date();
   return (
-    <div className="flex flex-col">
-      <ProductCard
-        product={product}
-        userLocation={userLocation}
-        dealStatus={dealStatus}
-        dealConversationId={dealConversationId}
-      />
-      <PendingOffersBadge product={product} />
-
-      {/* Active boost expiry notice */}
-      {boostActive && (
-        <p className="mt-1 text-center text-[11px] text-primary/80">
-          🚀 Boosted until{" "}
-          {new Date(boostedUntil!).toLocaleDateString("en-NG", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })}
-        </p>
-      )}
-
-      {/* Owner actions: Edit + Boost */}
-      <div className="mt-2 flex gap-2">
+    <div className="flex flex-col gap-2">
+      <OffersLink product={product} />
+      <div className="flex gap-2">
         <Link
-          href={`/marketplace/${productId}/edit`}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-brand-black/50 px-3 py-1 text-xs font-semibold text-[var(--neu-text-muted)] hover:bg-brand-black transition-colors"
+          href={`/marketplace/${id}/edit`}
+          className="tap-target inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-background text-[13px] font-bold text-navy hover:bg-[#E6EAF0]"
         >
-          <span className="material-symbols-outlined text-sm">edit</span>
-          Edit
+          <Pencil size={15} aria-hidden /> Edit
         </Link>
         <button
-          onClick={() => onBoost(productId, productTitle, isBoosted, boostedUntil)}
-          className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
-            boostActive
-              ? "bg-status-warning/15 text-status-warning hover:bg-status-warning/20"
-              : "bg-primary/15 text-primary hover:bg-primary/25"
-          }`}
+          type="button"
+          onClick={() => onBoost({ id, title: product.title, isBoosted, boostedUntil: until })}
+          className="tap-target inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-green-soft text-[13px] font-bold text-brand-green-dark hover:bg-[#D6F1DE]"
         >
-          <span className="material-symbols-outlined text-sm">rocket_launch</span>
-          {boostActive ? "Extend Boost" : "Boost"}
+          <Rocket size={15} aria-hidden /> {boostActive ? "Extend" : "Boost"}
         </button>
       </div>
+      {boostActive ? (
+        <p className="text-center text-[12px] text-muted">
+          Boosted until {new Date(until!).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
+        </p>
+      ) : null}
     </div>
   );
 }
 
 export default function MyListingsPage() {
   const { location } = useGeolocation();
-  const [
-    boostProduct,
-    setBoostProduct,
-  ] = useState<{ id: string; title: string; isBoosted: boolean; boostedUntil?: string } | null>(null);
+  const [boost, setBoost] = useState<BoostTarget | null>(null);
 
-  // One badge per card instead of a separate page: fetch the seller's live
-  // deals (as seller) once and look them up by product id per card.
+  // One deal stage per card: fetch the seller's live deals once and look them up by item.
   const { data: myDeals } = useMyDeals("selling");
   const dealByProductId = new Map(
     (myDeals ?? [])
       .filter((d) => d.product?.id || d.product?._id)
       .map((d) => [String(d.product?.id ?? d.product?._id), d]),
   );
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    error,
-  } = useMyListings();
-
-  const products = data?.pages.flatMap((page) => page.data || []) ?? [];
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } = useMyListings();
+  const products = (data?.pages.flatMap((page) => page.data || []) ?? []).map(
+    (p) => ((p as unknown as { data?: Product }).data ?? p) as Product,
+  );
+  const userLocation = location ? { lat: location.latitude, lng: location.longitude } : null;
 
   return (
-    <LocalHuudSubpageShell hubId="marketplace" maxWidth="920">
-      {boostProduct && (
+    <LocalHuudSubpageShell hubId="marketplace" action={<LocalHuudHubPrimaryAction href="/marketplace/create" label="Sell item" />}>
+      {boost ? (
         <BoostModal
-          productId={boostProduct.id}
-          productTitle={boostProduct.title}
-          alreadyBoosted={boostProduct.isBoosted}
-          boostedUntil={boostProduct.boostedUntil}
-          onClose={() => setBoostProduct(null)}
+          productId={boost.id}
+          productTitle={boost.title}
+          alreadyBoosted={boost.isBoosted}
+          boostedUntil={boost.boostedUntil}
+          onClose={() => setBoost(null)}
         />
+      ) : null}
+
+      {isLoading ? (
+        <SkeletonTiles count={4} />
+      ) : error ? (
+        <ErrorState onRetry={() => void refetch()} homeHref={null} />
+      ) : products.length === 0 ? (
+        <EmptyState
+          icon="🛍️"
+          title="You are not selling anything yet"
+          description="List something you no longer need. Neighbours nearby will see it."
+          action={{ label: "Sell an item", href: "/marketplace/create" }}
+        />
+      ) : (
+        <>
+          <p className="px-1 text-[13px] font-semibold text-muted">
+            {products.length === 1 ? "1 item for sale" : `${products.length} items for sale`}
+          </p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            {products.map((product, index) => {
+              const id = idOf(product);
+              const deal = dealByProductId.get(id);
+              return (
+                <ProductCard
+                  key={id || `product-${index}`}
+                  product={product}
+                  userLocation={userLocation}
+                  dealStatus={deal?.dealStatus as DealStatus | undefined}
+                  dealConversationId={deal?.conversationId}
+                  ownerFooter={<OwnerButtons product={product} onBoost={setBoost} />}
+                />
+              );
+            })}
+          </div>
+          {hasNextPage ? (
+            <div className="flex justify-center">
+              <Button variant="secondary" loading={isFetchingNextPage} onClick={() => fetchNextPage()}>
+                Show more
+              </Button>
+            </div>
+          ) : null}
+        </>
       )}
-      <div className="mod-card rounded-2xl p-4 space-y-4">
-        <div className="flex justify-end">
-          <Link
-            href="/marketplace/create"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold mod-chip mod-chip-active text-primary text-sm transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            New Listing
-          </Link>
-        </div>
-        {/* Loading State */}
-        {isLoading && (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="aspect-square bg-brand-black rounded-xl mb-3" />
-                <div className="h-4 bg-brand-black rounded w-3/4 mb-2" />
-                <div className="h-6 bg-brand-black rounded w-1/2" />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="text-center py-12">
-            <p className="text-brand-red mb-4">Failed to load your listings</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-brand-black hover:bg-brand-black rounded-lg transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {/* Products Grid */}
-        {!isLoading && !error && products.length > 0 && (
-          <>
-            <div className="mb-4 text-[var(--neu-text-muted)]">
-              {products.length} {products.length === 1 ? "listing" : "listings"}
-            </div>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-              {products.map((product, index) => {
-                // Unwrap product if it's wrapped in an API response
-                const productData = (product as any).data || product;
-                const productId = String(productData.id || productData._id || "");
-                const deal = dealByProductId.get(productId);
-                return (
-                  <ListingWithOffers
-                    key={productId || `product-${index}`}
-                    product={productData}
-                    userLocation={
-                      location
-                        ? {
-                            lat: location.latitude,
-                            lng: location.longitude,
-                          }
-                        : null
-                    }
-                    onBoost={(id, title, isBoosted, boostedUntil) => setBoostProduct({ id, title, isBoosted, boostedUntil })}
-                    dealStatus={deal?.dealStatus}
-                    dealConversationId={deal?.conversationId}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Load More */}
-            {hasNextPage && (
-              <div className="mt-8 text-center">
-                <button
-                  onClick={() => fetchNextPage()}
-                  disabled={isFetchingNextPage}
-                  className="px-8 py-3 bg-brand-black hover:bg-brand-black disabled:bg-brand-black disabled:text-[var(--neu-text-secondary)] rounded-lg font-semibold transition-colors"
-                >
-                  {isFetchingNextPage ? "Loading..." : "Load More"}
-                </button>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Empty State */}
-        {!isLoading && !error && products.length === 0 && (
-          <div className="text-center py-12">
-            <svg
-              className="w-24 h-24 mx-auto mb-4 text-[var(--neu-text-secondary)]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-              />
-            </svg>
-            <h3 className="text-xl font-semibold mb-2 text-[var(--neu-text-muted)]">
-              No listings yet
-            </h3>
-            <p className="text-[var(--neu-text-muted)] mb-6">
-              Start selling items in your Huud
-            </p>
-            <Link
-              href="/marketplace/create"
-              className="inline-block px-6 py-3 bg-primary hover:bg-brand-green-dark rounded-lg font-semibold transition-colors"
-            >
-              Create Your First Listing
-            </Link>
-          </div>
-        )}
-      </div>
     </LocalHuudSubpageShell>
   );
 }

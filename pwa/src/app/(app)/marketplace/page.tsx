@@ -4,7 +4,8 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AppBrowseLayout } from "@/components/layout/AppBrowseLayout";
-import { BrowseEmptyState } from "@/components/layout/BrowseEmptyState";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/Button";
 import {
   LocalHuudHubHeader,
   LocalHuudHubPrimaryAction,
@@ -136,37 +137,20 @@ function MarketplacePageInner() {
           </div>
           {hasNextPage ? (
             <div className="mt-6 flex justify-center">
-              <button
-                type="button"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="mod-chip rounded-xl px-6 py-2.5 text-sm font-bold disabled:opacity-50"
-                style={{ color: "var(--neu-text)" }}
-              >
-                {isFetchingNextPage ? "Loading…" : "Load more"}
-              </button>
+              <Button variant="secondary" loading={isFetchingNextPage} onClick={() => fetchNextPage()}>
+                Show more
+              </Button>
             </div>
           ) : null}
         </>
       )}
 
       {!isLoading && !error && products.length === 0 && (
-        <BrowseEmptyState
-          icon="shopping_bag"
-          title="No products found"
-          description={
-            selectedCategory !== "All"
-              ? `Nothing in ${selectedCategory} yet.`
-              : "Be the first to list something in your Huud."
-          }
-          action={
-            <Link
-              href="/marketplace/create"
-              className="mod-chip mod-chip-active inline-flex rounded-xl px-5 py-2.5 text-sm font-bold text-primary no-underline"
-            >
-              Create listing
-            </Link>
-          }
+        <EmptyState
+          icon="🛍️"
+          title={selectedCategory !== "All" ? `Nothing in ${selectedCategory} yet` : "Nothing for sale here yet"}
+          description="Be the first to sell something to your neighbours."
+          action={{ label: "Sell an item", href: "/marketplace/create" }}
         />
       )}
     </AppBrowseLayout>

@@ -30,6 +30,8 @@ interface ProductCardProps {
   /** If the viewer has a live deal on this product, its lifecycle status + chat. */
   dealStatus?: DealStatus;
   dealConversationId?: string | null;
+  /** On your own listings page: Edit, Boost and offers, in place of "Your listing". */
+  ownerFooter?: React.ReactNode;
 }
 
 function formatConditionWords(condition?: string) {
@@ -54,6 +56,7 @@ export function ProductCard({
   currentUserId: currentUserIdProp,
   dealStatus,
   dealConversationId,
+  ownerFooter,
 }: ProductCardProps) {
   const router = useRouter();
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -111,7 +114,7 @@ export function ProductCard({
     toggleLike.mutate();
   };
 
-  const meta = [distanceLabel ? `${distanceLabel} away` : null, product.createdAt ? formatTimeAgo(product.createdAt) : null]
+  const meta = [conditionBadge || categoryLabel || null, distanceLabel ? `${distanceLabel} away` : null, product.createdAt ? formatTimeAgo(product.createdAt) : null]
     .filter(Boolean)
     .join(" · ");
 
@@ -136,8 +139,7 @@ export function ProductCard({
           <>
             {dealStatus ? <Chip tone="purple">{DEAL_STATUS_META[dealStatus].label}</Chip> : null}
             {isActiveBoosted ? <Chip tone="amber" icon="🚀">Boosted</Chip> : null}
-            {conditionBadge ? <Chip>{conditionBadge}</Chip> : null}
-            {!dealStatus && !isActiveBoosted && categoryLabel ? <Chip>{categoryLabel}</Chip> : null}
+
           </>
         }
         meta={meta || undefined}
@@ -173,11 +175,13 @@ export function ProductCard({
                   onClick={() => router.push(`/chat/${dealConversationId}`)}
                   className="tap-target ml-auto inline-flex h-8 items-center rounded-full px-2 text-xs font-bold text-brand-green-dark hover:bg-green-soft"
                 >
-                  Open chat
+                  Chat
                 </button>
               ) : null}
             </div>
-            {isOwner ? (
+            {isOwner && ownerFooter ? (
+              ownerFooter
+            ) : isOwner ? (
               <p className="rounded-full bg-background py-2 text-center text-xs font-bold text-muted">Your listing</p>
             ) : isSold ? (
               <p className="rounded-full bg-background py-2 text-center text-xs font-bold text-muted">No longer available</p>

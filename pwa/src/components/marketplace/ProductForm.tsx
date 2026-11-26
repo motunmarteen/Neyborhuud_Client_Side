@@ -12,7 +12,9 @@ import { useRegisteredLocation } from "@/hooks/useRegisteredLocation";
 import { useAuth } from "@/hooks/useAuth";
 import { SellerBadge } from "./SellerBadge";
 import { glassField, glassFieldError, glassLabel } from "@/lib/glass-form-styles";
-import { PremiumTextArea } from "@/components/ui/PremiumTextArea";
+import { Button } from "@/components/ui/Button";
+import { FilterChip } from "@/components/ui/Chip";
+import { useStarted } from "@/hooks/useStarted";
 import { toKobo, fromKobo } from "@/lib/currency";
 
 interface ProductFormProps {
@@ -35,7 +37,7 @@ const CATEGORIES = [
 
 const CONDITIONS = [
   { value: "new", label: "New" },
-  { value: "like_new", label: "Like New" },
+  { value: "like_new", label: "Like new" },
   { value: "good", label: "Good" },
   { value: "fair", label: "Fair" },
   { value: "poor", label: "Poor" },
@@ -52,6 +54,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
   } = useRegisteredLocation();
   const { user } = useAuth();
   const myId = (user as any)?.id ?? (user as any)?._id;
+  // Who you are is known only on the phone; wait so the first draw matches the pre-built page.
+  const started = useStarted();
 
   const [title, setTitle] = useState(product?.title || "");
   const [description, setDescription] = useState(product?.description || "");
@@ -70,23 +74,23 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     const newErrors: Record<string, string> = {};
 
     if (!title.trim() || title.length < 3 || title.length > 100) {
-      newErrors.title = "Title must be between 3 and 100 characters";
+      newErrors.title = "Give it a name of 3 to 100 letters";
     }
 
     if (!description.trim() || description.length < 10) {
-      newErrors.description = "Description must be at least 10 characters";
+      newErrors.description = "Say a little more (at least 10 letters)";
     }
 
     if (!price || parseFloat(price) < 0) {
-      newErrors.price = "Price must be a positive number";
+      newErrors.price = "Enter a price";
     }
 
     if (!category) {
-      newErrors.category = "Please select a category";
+      newErrors.category = "Choose a category";
     }
 
     if (!isEditing && images.length === 0 && imageUrls.length === 0) {
-      newErrors.images = "At least one image is required";
+      newErrors.images = "Add at least one photo";
     }
 
     setErrors(newErrors);
@@ -98,7 +102,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     const validImages = files.filter((file) => file.type.startsWith("image/"));
 
     if (validImages.length + imageUrls.length + images.length > 5) {
-      setErrors({ ...errors, images: "Maximum 5 images allowed" });
+      setErrors({ ...errors, images: "5 photos at most" });
       return;
     }
 
@@ -193,220 +197,173 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
   const isPending = createProduct.isPending || updateProduct.isPending;
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {!isEditing && myId && (
-        <div className="rounded-2xl border border-black/[0.06] bg-black/[0.02] px-4 py-3  ">
-          <p className="mb-1.5 text-xs font-semibold text-brand-green-dark/70 ">
-            Your seller status
-          </p>
-          <SellerBadge sellerId={myId} showProgress />
-        </div>
-      )}
+  const photoCount = images.length + imageUrls.length;
+  const fieldError = (key: string) =>
+    errors[key] ? <p role="alert" className="mt-1.5 text-[13px] font-bold text-brand-red">{errors[key]}</p> : null;
 
-      {/* Title */}
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
+      {/* Photos first: buyers look at them before anything else. */}
       <div>
-        <label className={glassLabel}>
-          Title <span className="text-brand-red">*</span>
-        </label>
+        <p className={glassLabel}>
+          Photos <span className="font-semibold text-muted">({photoCount}/5)</span>
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {imageUrls.map((url, idx) => (
+            <div key={`url-${idx}`} className="relative aspect-square overflow-hidden rounded-2xl bg-background">
+              <Image src={url} alt={`Photo ${idx + 1}`} fill sizes="33vw" className="object-cover" />
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(idx, true)}
+                className="absolute right-1.5 top-1.5 grid h-8 w-8 place-items-center rounded-full bg-navy/80 text-white"
+                aria-label={`Remove photo ${idx + 1}`}
+              >
+                <span className="material-symbols-outlined text-[18px]" aria-hidden>close</span>
+              </button>
+            </div>
+          ))}
+          {images.map((file, idx) => (
+            <div key={`file-${idx}`} className="relative aspect-square overflow-hidden rounded-2xl bg-background">
+              <Image src={URL.createObjectURL(file)} alt={`New photo ${idx + 1}`} fill unoptimized sizes="33vw" className="object-cover" />
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(idx, false)}
+                className="absolute right-1.5 top-1.5 grid h-8 w-8 place-items-center rounded-full bg-navy/80 text-white"
+                aria-label={`Remove new photo ${idx + 1}`}
+              >
+                <span className="material-symbols-outlined text-[18px]" aria-hidden>close</span>
+              </button>
+            </div>
+          ))}
+          {/* Saving an edit sends photo links only, so new photos are added when listing, not when editing. */}
+          {!isEditing && photoCount < 5 ? (
+            <label
+              htmlFor="product-images"
+              className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-line bg-background text-center text-[13px] font-bold text-brand-green-dark hover:border-primary"
+            >
+              <span className="material-symbols-outlined text-[28px]" aria-hidden>add_photo_alternate</span>
+              Add photo
+            </label>
+          ) : null}
+        </div>
+        <input type="file" accept="image/*" multiple onChange={handleImageChange} className="sr-only" id="product-images" />
+        {isEditing ? <p className="mt-1.5 text-[13px] text-muted">You can remove photos here. To use new photos, list the item again.</p> : null}
+        {fieldError('images')}
+      </div>
+
+      <div>
+        <label htmlFor="product-title" className={glassLabel}>What are you selling?</label>
         <input
+          id="product-title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g., iPhone 15 Pro Max - Like New"
+          placeholder="e.g. Samsung 43-inch TV"
           maxLength={100}
           className={`${glassField} ${errors.title ? glassFieldError : ""}`}
         />
-        {errors.title && <p className="mt-1 text-sm font-medium text-status-danger ">{errors.title}</p>}
-        <p className="mt-1 text-xs text-brand-green-dark/70/70 ">{title.length}/100</p>
+        {fieldError('title')}
       </div>
 
-      {/* Description */}
-      <PremiumTextArea
-        label="Description *"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Describe your product in detail..."
-        rows={6}
-        error={errors.description}
-      />
-
-      {/* Price and Category Row */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className={glassLabel}>
-            Price (₦) <span className="text-brand-red">*</span>
-          </label>
+      <div>
+        <label htmlFor="product-price" className={glassLabel}>Price</label>
+        <div className="relative">
+          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base font-bold text-navy" aria-hidden>₦</span>
           <input
+            id="product-price"
             type="number"
+            inputMode="numeric"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="0"
             min="0"
-            step="0.01"
-            className={`${glassField} ${errors.price ? glassFieldError : ""}`}
+            className={`${glassField} pl-9 ${errors.price ? glassFieldError : ""}`}
           />
-          {errors.price && <p className="mt-1 text-sm font-medium text-status-danger ">{errors.price}</p>}
         </div>
-
-        <div>
-          <label className={glassLabel}>
-            Category <span className="text-brand-red">*</span>
+        {fieldError('price')}
+        {!isEditing ? (
+          <label className="mt-2 flex min-h-11 cursor-pointer items-center justify-between gap-3 text-[15px] font-semibold text-navy">
+            Buyers can make an offer
+            <input type="checkbox" checked={negotiable} onChange={(e) => setNegotiable(e.target.checked)} className="h-5 w-5 accent-[#0E8A3E]" />
           </label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className={`${glassField} ${errors.category ? glassFieldError : ""}`}
-          >
-            <option value="">Select a category</option>
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-          {errors.category && (
-            <p className="mt-1 text-sm font-medium text-status-danger ">{errors.category}</p>
-          )}
-        </div>
+        ) : null}
       </div>
 
-      {/* Condition */}
       <div>
-        <label className={glassLabel}>Condition</label>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <label htmlFor="product-category" className={glassLabel}>Category</label>
+        <select
+          id="product-category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className={`${glassField} ${errors.category ? glassFieldError : ""}`}
+        >
+          <option value="">Choose a category</option>
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+        {fieldError('category')}
+      </div>
+
+      <div>
+        <p className={glassLabel}>Condition</p>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Condition">
           {CONDITIONS.map((cond) => (
-            <button
-              key={cond.value}
-              type="button"
-              onClick={() => setCondition(cond.value as typeof condition)}
-              className={`rounded-2xl border-2 px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
-                condition === cond.value
-                  ? "border-transparent bg-[#00B82E] text-black font-extrabold shadow-[0_8px_20px_rgba(0,184,46,0.28)]"
-                  : "border-[var(--border-light)] bg-white/75 text-brand-green-dark/70 hover:border-primary/35   "
-              }`}
-            >
+            <FilterChip key={cond.value} active={condition === cond.value} onClick={() => setCondition(cond.value as typeof condition)}>
               {cond.label}
-            </button>
+            </FilterChip>
           ))}
         </div>
       </div>
 
-      {/* Images */}
       <div>
-        <label className={glassLabel}>
-          Images <span className="text-brand-red">*</span>
-        </label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageChange}
-          className="hidden"
-          id="product-images"
+        <label htmlFor="product-description" className={glassLabel}>Description</label>
+        <textarea
+          id="product-description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Size, age, any faults, and where to meet."
+          rows={5}
+          className={`${glassField} resize-y ${errors.description ? glassFieldError : ""}`}
         />
-        <label
-          htmlFor="product-images"
-          className="block w-full cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-primary/[0.06] px-4 py-8 text-center text-sm font-medium text-brand-green-dark/70 transition-colors hover:border-primary/50 hover:bg-primary/[0.1]   "
-        >
-          <span className="material-symbols-outlined mx-auto mb-2 block text-4xl text-[#0E8A3E]/60 ">
-            add_photo_alternate
-          </span>
-          Click to upload images (max 5)
-        </label>
-        {errors.images && <p className="mt-1 text-sm font-medium text-status-danger ">{errors.images}</p>}
-
-        {(images.length > 0 || imageUrls.length > 0) && (
-          <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
-            {imageUrls.map((url, idx) => (
-              <div key={`url-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] ">
-                <Image src={url} alt={`Product ${idx + 1}`} fill sizes="(max-width: 640px) 33vw, 20vw" className="object-cover" />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(idx, true)}
-                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-brand-red text-white shadow-md transition-colors hover:bg-brand-red/85"
-                  aria-label="Remove image"
-                >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
-              </div>
-            ))}
-            {images.map((file, idx) => (
-              <div key={`file-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-light)] ">
-                <Image src={URL.createObjectURL(file)} alt={`Upload ${idx + 1}`} fill unoptimized sizes="(max-width: 640px) 33vw, 20vw" className="object-cover" />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(idx, false)}
-                  className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-brand-red text-white shadow-md transition-colors hover:bg-brand-red/85"
-                  aria-label="Remove image"
-                >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        {fieldError('description')}
       </div>
 
-      {!isEditing && (
-        <div>
-          <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[var(--border-light)] bg-[var(--surface-light)]/80 px-4 py-3  ">
-            <input
-              type="checkbox"
-              checked={negotiable}
-              onChange={(e) => setNegotiable(e.target.checked)}
-              className="h-5 w-5 rounded border-[var(--border-light)] text-primary focus:ring-primary/30  "
-            />
-            <span className="text-sm font-medium text-[#2E502E] ">Price is negotiable</span>
-          </label>
-        </div>
-      )}
+      {!isEditing ? (
+        locationLoading ? (
+          <p className="text-[13px] text-muted">Finding your area…</p>
+        ) : registeredLocation ? (
+          <p className="flex items-center gap-2 rounded-2xl bg-green-soft px-4 py-3 text-[13px] font-semibold text-brand-green-dark">
+            <span className="material-symbols-outlined text-[18px]" aria-hidden>location_on</span>
+            Shown to people in {areaLabel || 'your area'}
+          </p>
+        ) : (
+          <div className="flex items-center justify-between gap-3 rounded-2xl bg-red-soft px-4 py-3">
+            <p className="text-[13px] font-semibold text-[#B42318]">Set your home area first, so neighbours can find your item.</p>
+            <Link href="/settings/location" className="shrink-0 rounded-full bg-brand-red px-4 py-2 text-[13px] font-bold text-white">
+              Set area
+            </Link>
+          </div>
+        )
+      ) : null}
+      {fieldError('location')}
 
-      {!isEditing && (
-        <div>
-          {locationLoading && (
-            <p className="text-sm font-medium text-brand-green-dark/70 ">Loading your location…</p>
-          )}
-          {!locationLoading && registeredLocation && (
-            <p className="rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3 text-sm font-medium text-[#0E8A3E]   ">
-              📍 Listed in your registered area{areaLabel ? `: ${areaLabel}` : ""}
-            </p>
-          )}
-          {!locationLoading && !registeredLocation && (
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-brand-red/40 bg-brand-red/[0.08] p-4 ">
-              <p className="text-sm font-medium text-status-danger ">
-                No registered location found. Set your home location to list items.
-              </p>
-              <Link
-                href="/settings/location"
-                className="shrink-0 rounded-full bg-brand-red px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-brand-red/85"
-              >
-                Set location
-              </Link>
-            </div>
-          )}
-          {errors.location && <p className="mt-2 text-sm font-medium text-status-danger ">{errors.location}</p>}
+      {started && !isEditing && myId ? (
+        <div className="rounded-2xl bg-background px-4 py-3">
+          <p className="mb-1.5 text-[13px] font-bold text-muted">Your seller level</p>
+          <SellerBadge sellerId={myId} showProgress />
         </div>
-      )}
+      ) : null}
 
-      <div className="flex flex-col gap-3 border-t border-[var(--border-light)] pt-5  sm:flex-row sm:justify-end">
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isPending}
-            className="min-h-[48px] w-full shrink-0 rounded-full border border-[var(--border-light)] bg-white px-4 text-sm font-bold text-brand-black shadow-sm transition-transform active:scale-[0.99] disabled:opacity-50    sm:min-w-0 sm:flex-1"
-          >
+      <div className="flex gap-3 border-t border-line/70 pt-4">
+        {onCancel ? (
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={isPending} className="flex-1">
             Cancel
-          </button>
-        )}
-        <button
-          type="submit"
-          disabled={isPending || (!isEditing && locationLoading)}
-          className="min-h-[48px] w-full shrink-0 rounded-full bg-[#00B82E] hover:bg-[#00F53B] px-4 text-sm font-extrabold text-black shadow-[0_8px_24px_rgba(0,184,46,0.35)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-0 sm:flex-1"
-        >
-          {isPending ? (isEditing ? "Updating…" : "Creating…") : isEditing ? "Save changes" : "Create listing"}
-        </button>
+          </Button>
+        ) : null}
+        <Button type="submit" loading={isPending} disabled={!isEditing && locationLoading} className="flex-[2]">
+          {isEditing ? "Save changes" : "List item"}
+        </Button>
       </div>
     </form>
   );

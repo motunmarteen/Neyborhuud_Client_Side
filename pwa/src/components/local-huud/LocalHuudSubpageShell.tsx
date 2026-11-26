@@ -12,6 +12,8 @@ type LocalHuudSubpageShellProps = {
   /** Optional extra toolbar (filters, actions) below section nav. */
   toolbar?: ReactNode;
   hideSectionNav?: boolean;
+  /** The main action in the header card, e.g. "Sell item". */
+  action?: ReactNode;
 };
 
 /**
@@ -24,12 +26,13 @@ export function LocalHuudSubpageShell({
   maxWidth = '680',
   toolbar,
   hideSectionNav = false,
+  action,
 }: LocalHuudSubpageShellProps) {
   return (
     <AppBrowseLayout
       maxWidth={maxWidth}
       header={
-        <LocalHuudHubHeader hubId={hubId} toolbar={toolbar} hideSectionNav={hideSectionNav} />
+        <LocalHuudHubHeader hubId={hubId} toolbar={toolbar} hideSectionNav={hideSectionNav} action={action} />
       }
     >
       {children}
