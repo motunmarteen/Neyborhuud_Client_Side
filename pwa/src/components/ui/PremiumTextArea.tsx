@@ -137,7 +137,7 @@ export const PremiumTextArea: React.FC<PremiumTextAreaProps> = ({
                             transition-all duration-200 ease-out
                             ${icon ? 'ml-[2.875rem]' : 'ml-4'}
                             ${isFloating
-                                ? 'top-[0.45rem] text-[0.625rem] font-bold uppercase tracking-widest neu-text-muted'
+                                ? 'top-[0.45rem] text-[12px] font-bold text-muted'
                                 : 'top-[0.875rem] text-sm font-light neu-text-muted opacity-60'
                             }
                             ${isFocused && isFloating ? 'text-brand-blue' : ''}

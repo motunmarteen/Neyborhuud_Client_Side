@@ -10,7 +10,8 @@ import { useHuudWeek } from '@/hooks/useQuests';
 
 export function HuudWeekCard() {
   const { data } = useHuudWeek();
-  if (!data) return null;
+  // An answer without this week's theme shows nothing instead of breaking Rewards.
+  if (!data?.theme) return null;
   const { theme, area, progress, done, areasDone, reward, lastWeek, people } = data;
   const goal = theme.goal;
   const pct = Math.round(Math.min(1, progress / Math.max(1, goal)) * 100);

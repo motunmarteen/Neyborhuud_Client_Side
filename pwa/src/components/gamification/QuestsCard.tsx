@@ -32,7 +32,8 @@ function StepRow({ s, reward, paid }: { s: QuestStep; reward?: number; paid?: bo
 
 export function QuestsCard() {
   const { data, isLoading, isError } = useQuests();
-  if (isLoading || isError || !data) return null;
+  // An answer without quests (older server, or none yet) shows nothing instead of breaking Rewards.
+  if (isLoading || isError || !data?.welcome?.steps || !data?.daily?.quests) return null;
   const { welcome, daily } = data;
   const doneCount = welcome.steps.filter((s) => s.done).length;
   const dailyDone = daily.quests.filter((q) => q.done).length;

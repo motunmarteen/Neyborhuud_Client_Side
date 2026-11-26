@@ -86,43 +86,6 @@ const PROFILE_TABS: { id: ProfileTab; label: string }[] = [
   { id: 'street_radar', label: 'Radar' },
 ];
 
-const TAB_STYLES: Record<ProfileTab, { active: string; inactive: string; icon: string }> = {
-  overview: {
-    active: 'bg-blue-600 border-blue-600 text-white shadow-[0_4px_16px_rgba(37,99,235,0.25)]',
-    inactive: 'bg-[#F0F5FF] border-blue-100/50 text-blue-600 hover:bg-blue-100/60',
-    icon: 'dashboard',
-  },
-  posts: {
-    active: 'bg-purple-600 border-purple-600 text-white shadow-[0_4px_16px_rgba(147,51,234,0.25)]',
-    inactive: 'bg-[#FAF5FF] border-purple-100/50 text-purple-600 hover:bg-purple-100/60',
-    icon: 'chat_bubble',
-  },
-  trust: {
-    active: 'bg-emerald-600 border-emerald-600 text-white shadow-[0_4px_16px_rgba(5,150,105,0.25)]',
-    inactive: 'bg-[#F0FDF4] border-emerald-100/50 text-emerald-600 hover:bg-emerald-100/60',
-    icon: 'verified_user',
-  },
-  listings: {
-    active: 'bg-orange-500 border-orange-500 text-white shadow-[0_4px_16px_rgba(249,115,22,0.25)]',
-    inactive: 'bg-[#FFF7ED] border-orange-100/50 text-orange-600 hover:bg-orange-100/60',
-    icon: 'storefront',
-  },
-  saved: {
-    active: 'bg-rose-500 border-rose-500 text-white shadow-[0_4px_16px_rgba(244,63,94,0.25)]',
-    inactive: 'bg-[#FFF1F2] border-rose-100/50 text-rose-500 hover:bg-rose-100/60',
-    icon: 'bookmark',
-  },
-  economy: {
-    active: 'bg-amber-500 border-amber-500 text-white shadow-[0_4px_16px_rgba(245,158,11,0.25)]',
-    inactive: 'bg-[#FFFBEB] border-amber-100/50 text-amber-600 hover:bg-amber-100/60',
-    icon: 'account_balance_wallet',
-  },
-  street_radar: {
-    active: 'bg-teal-600 border-teal-600 text-white shadow-[0_4px_16px_rgba(13,148,136,0.25)]',
-    inactive: 'bg-[#F0FDFA] border-teal-100/50 text-teal-600 hover:bg-teal-100/60',
-    icon: 'radar',
-  },
-};
 
 function parseProfileTab(value: string | null): ProfileTab {
   if (value === 'posts' || value === 'trust' || value === 'listings' || value === 'saved' || value === 'economy' || value === 'street_radar') return value;
@@ -803,59 +766,23 @@ export default function ProfilePage() {
             </div>
           ) : null}
 
-          <div className="relative bg-white border-b border-gray-100/80">
-            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] pt-4 pb-5 flex items-center justify-around gap-2 overflow-x-auto no-scrollbar">
-              {PROFILE_TABS.map((t) => {
-                const isActive = tab === t.id;
-                const style = TAB_STYLES[t.id];
-                const circleClass = `w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-200 ${
-                  isActive ? style.active : style.inactive
-                }`;
-                return (
+          <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px]">
+            <BrowseTabStrip
+              tabs={PROFILE_TABS}
+              activeId={tab}
+              onChange={(id) => changeTab(id as ProfileTab)}
+              trailing={
+                !isOwnProfile ? (
                   <button
-                    key={t.id}
-                    onClick={() => changeTab(t.id)}
-                    className="flex flex-col items-center gap-1.5 focus:outline-none touch-manipulation group flex-shrink-0"
+                    type="button"
+                    onClick={() => setShowTipModal(true)}
+                    className="tap-target ml-1 inline-flex h-9 items-center gap-1 rounded-full bg-amber-soft px-3 text-[13px] font-bold text-amber-ink"
                   >
-                    <div className={circleClass}>
-                      <span className="material-symbols-outlined text-[23px] select-none" style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}>
-                        {style.icon}
-                      </span>
-                    </div>
-                    <span className={`text-[13px] font-bold transition-colors ${
-                      isActive ? 'text-gray-900 font-extrabold' : 'text-gray-400 group-hover:text-gray-600'
-                    }`}>
-                      {t.label}
-                    </span>
+                    <span aria-hidden>🪙</span> Tip
                   </button>
-                );
-              })}
-
-              {!isOwnProfile && (
-                <button
-                  type="button"
-                  onClick={() => setShowTipModal(true)}
-                  className="flex flex-col items-center gap-1.5 focus:outline-none touch-manipulation group flex-shrink-0"
-                >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 border border-amber-100 text-amber-600 hover:bg-amber-100 hover:text-amber-700 shadow-sm transition-all duration-200">
-                    <span className="text-xl select-none">🪙</span>
-                  </div>
-                  <span className="text-[13px] font-bold text-amber-500 group-hover:text-amber-600 transition-colors">
-                    Tip
-                  </span>
-                </button>
-              )}
-            </div>
-            {/* Dynamic Accent Line */}
-            <div className={`absolute bottom-0 left-0 right-0 h-[2.5px] transition-all duration-300 ${
-              tab === 'overview' ? 'bg-blue-600 shadow-[0_1px_8px_rgba(37,99,235,0.4)]' :
-              tab === 'posts' ? 'bg-purple-600 shadow-[0_1px_8px_rgba(147,51,234,0.4)]' :
-              tab === 'trust' ? 'bg-emerald-600 shadow-[0_1px_8px_rgba(5,150,105,0.4)]' :
-              tab === 'saved' ? 'bg-rose-500 shadow-[0_1px_8px_rgba(244,63,94,0.4)]' :
-              tab === 'economy' ? 'bg-amber-500 shadow-[0_1px_8px_rgba(245,158,11,0.4)]' :
-              tab === 'street_radar' ? 'bg-teal-600 shadow-[0_1px_8px_rgba(13,148,136,0.4)]' :
-              'bg-orange-500 shadow-[0_1px_8px_rgba(249,115,22,0.4)]'
-            }`} />
+                ) : null
+              }
+            />
           </div>
 
           {tab === 'overview' && (

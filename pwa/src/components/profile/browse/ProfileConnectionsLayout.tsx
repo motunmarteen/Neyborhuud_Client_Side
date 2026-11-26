@@ -6,6 +6,7 @@ import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 import TopNav from '@/components/navigation/TopNav';
 import { BottomNav } from '@/components/feed/BottomNav';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 
 type ConnectionTab = 'followers' | 'following';
 
@@ -41,47 +42,11 @@ export function ProfileConnectionsLayout({
       <TopNav />
 
       <div className="app-chrome-below-topnav mx-auto w-full max-w-[600px] !bg-white flex flex-col flex-1 overflow-hidden">
-        {/* Tab Bar Container */}
-        <div className="relative bg-white border-b border-gray-100/80 shrink-0">
-          <div className="flex items-center justify-between px-6 pt-4 pb-4">
-            <div className="flex gap-6">
-              {TABS.map((t) => {
-                const active = activeTab === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => {
-                      const path =
-                        t.id === 'followers'
-                          ? `/profile/${username}/followers`
-                          : `/profile/${username}/following`;
-                      router.push(path);
-                    }}
-                    className={`text-[13px] font-bold uppercase tracking-wider transition-colors py-1 ${
-                      active ? 'text-slate-800 font-extrabold' : 'text-slate-400 hover:text-slate-600'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="inline-flex h-8 items-center justify-center rounded-full bg-slate-50 border border-slate-100 px-3.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
-              aria-label="Go back"
-            >
-              Back
-            </button>
-          </div>
-
-          {/* Dynamic Active Tab Line Indicator */}
-          <div
-            className={`absolute bottom-0 h-[2.5px] transition-all duration-300 bg-blue-600 shadow-[0_1px_8px_rgba(37,99,235,0.4)] ${
-              activeTab === 'followers' ? 'left-6 w-20' : 'left-32 w-16'
-            }`}
+        <div className="shrink-0 px-3 pt-2">
+          <BrowseTabStrip
+            tabs={TABS}
+            activeId={activeTab}
+            onChange={(id) => router.replace(`/profile/${username}/${id}`)}
           />
         </div>
 

@@ -20,28 +20,14 @@ export default function MyPlacesPage() {
   return (
     <AppBrowseLayout
       header={
-        <div className="sticky top-0 z-50 border-b border-charcoal/5 bg-white/60 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-lg items-center gap-4 px-6 py-4">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="flex h-10 w-10 items-center justify-center rounded-xl neumorphic"
-            >
-              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-            </button>
-            <div>
-              <h1 className="text-xl font-bold text-charcoal">My places</h1>
-              <p className="text-xs text-charcoal/50">Home + frequent spots for local context</p>
-            </div>
-          </div>
-        </div>
+        <p className="px-1 text-[15px] leading-relaxed text-muted">Your home and the spots you go often, so news nearby reaches you.</p>
       }
     >
       <div className="mx-auto max-w-lg space-y-5 py-6">
         <section className="neumorphic rounded-2xl p-5">
           <div className="mb-3 flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">home</span>
-            <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/50">Home</h2>
+            <h2 className="font-heading text-base font-extrabold text-navy">Home</h2>
           </div>
           {isLoading ? (
             <div className="h-12 animate-pulse rounded-xl bg-charcoal/5" />
@@ -68,7 +54,7 @@ export default function MyPlacesPage() {
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-brand-blue">explore</span>
-              <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/50">
+              <h2 className="font-heading text-base font-extrabold text-navy">
                 Frequent places
               </h2>
             </div>

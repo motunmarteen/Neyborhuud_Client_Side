@@ -111,17 +111,7 @@ export default function LocationSettingsPage() {
   return (
     <AppBrowseLayout
       header={
-        <div className="sticky top-0 z-50 border-b border-charcoal/5 bg-white/60 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-md items-center gap-4 px-6 py-4">
-            <button
-              onClick={() => router.back()}
-              className="flex h-10 w-10 items-center justify-center rounded-xl neumorphic"
-            >
-              <span className="material-symbols-outlined text-[20px] text-charcoal">arrow_back</span>
-            </button>
-            <h1 className="text-xl font-bold text-charcoal">Location &amp; Radius</h1>
-          </div>
-        </div>
+        <p className="px-1 text-[15px] leading-relaxed text-muted">Pin where you live, then choose how far around you to see posts.</p>
       }
     >
       <div className="mx-auto max-w-md space-y-6 py-6">
@@ -129,7 +119,7 @@ export default function LocationSettingsPage() {
         <div className="neumorphic rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-black uppercase tracking-widest text-charcoal/40">
+              <h2 className="font-heading text-base font-extrabold text-navy">
                 Pin Your Location
               </h2>
               <p className="text-xs text-charcoal/50">
@@ -174,7 +164,7 @@ export default function LocationSettingsPage() {
 
         {/* Radius slider */}
         <div className="neumorphic rounded-2xl p-6">
-          <h2 className="mb-1 text-sm font-black uppercase tracking-widest text-charcoal/40">
+          <h2 className="mb-1 font-heading text-base font-extrabold text-navy">
             Content Radius
           </h2>
           <p className="mb-5 text-xs text-charcoal/50">
@@ -211,7 +201,7 @@ export default function LocationSettingsPage() {
 
         {/* Preset buttons */}
         <div className="neumorphic rounded-2xl p-6">
-          <h2 className="mb-4 text-sm font-black uppercase tracking-widest text-charcoal/40">
+          <h2 className="mb-4 font-heading text-base font-extrabold text-navy">
             Quick Presets
           </h2>
           <div className="flex flex-col gap-3">

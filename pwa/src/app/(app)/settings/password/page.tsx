@@ -69,12 +69,6 @@ export default function ChangePasswordPage() {
     <AppBrowseLayout>
       <div className="max-w-md mx-auto w-full py-6">
         <div className="mt-8 mb-6">
-          <Link
-            href="/settings"
-            className="text-[13px] font-bold text-brand-blue mb-4 inline-block"
-          >
-            ← Settings
-          </Link>
           <h1
             className="text-2xl font-semibold tracking-tight mt-2"
             style={{ color: 'var(--neu-text)' }}
@@ -133,7 +127,7 @@ export default function ChangePasswordPage() {
             className={`mod-chip py-5 rounded-2xl mt-2 ${!canSubmit ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             <span
-              className="font-black uppercase tracking-widest text-sm"
+              className="text-[15px] font-bold"
               style={{ color: 'var(--neu-text)' }}
             >
               {loading ? 'Saving…' : 'Update password'}

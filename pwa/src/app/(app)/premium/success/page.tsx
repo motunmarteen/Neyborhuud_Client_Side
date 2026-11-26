@@ -29,12 +29,12 @@ function SuccessInner() {
 
   if (!reference) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-brand-black text-white px-4">
+      <div className="min-h-screen flex items-center justify-center bg-background text-navy px-4">
         <div className="text-center">
           <p className="text-[var(--neu-text-muted)] mb-6">No transaction reference found.</p>
           <Link
             href="/huud-economy/wallet"
-            className="px-6 py-3 bg-brand-black hover:bg-brand-surface rounded-xl text-sm transition-colors"
+            className="px-6 py-3 rounded-full bg-white font-bold text-navy ring-1 ring-inset ring-line hover:bg-[#F6F8FB] text-sm transition-colors"
           >
             View Wallet
           </Link>
@@ -44,7 +44,7 @@ function SuccessInner() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-brand-black text-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background text-navy px-4">
       <div className="w-full max-w-sm text-center">
 
         {/* Loading */}
@@ -77,7 +77,7 @@ function SuccessInner() {
             <div className="flex gap-3 justify-center">
               <Link
                 href="/huud-economy/wallet"
-                className="px-5 py-2.5 bg-brand-black hover:bg-brand-surface rounded-xl text-sm transition-colors"
+                className="px-5 py-2.5 rounded-full bg-white font-bold text-navy ring-1 ring-inset ring-line hover:bg-[#F6F8FB] text-sm transition-colors"
               >
                 View Wallet
               </Link>
@@ -110,7 +110,7 @@ function SuccessInner() {
             <div className="flex gap-3 justify-center">
               <Link
                 href="/huud-economy/wallet"
-                className="px-5 py-2.5 bg-brand-black hover:bg-brand-surface rounded-xl text-sm transition-colors"
+                className="px-5 py-2.5 rounded-full bg-white font-bold text-navy ring-1 ring-inset ring-line hover:bg-[#F6F8FB] text-sm transition-colors"
               >
                 View Wallet
               </Link>

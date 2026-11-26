@@ -13,9 +13,12 @@ import { PremiumInput } from '@/components/ui/PremiumInput';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { marketplaceService } from '@/services/marketplace.service';
 import { useAuth } from '@/hooks/useAuth';
+import { useStarted } from '@/hooks/useStarted';
 
 export default function PayoutDetailsPage() {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  // Your name is known only on the phone: wait, so the first draw matches the pre-built page.
+  const user = useStarted() ? authUser : null;
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
@@ -89,12 +92,6 @@ export default function PayoutDetailsPage() {
     <AppBrowseLayout>
       <div className="max-w-md mx-auto w-full py-6">
         <div className="mt-8 mb-6">
-          <Link
-            href="/settings"
-            className="text-[13px] font-bold text-brand-blue mb-4 inline-block"
-          >
-            ← Settings
-          </Link>
           <h1
             className="text-2xl font-semibold tracking-tight mt-2"
             style={{ color: 'var(--neu-text)' }}

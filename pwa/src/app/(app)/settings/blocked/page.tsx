@@ -18,17 +18,9 @@ export default function BlockedUsersPage() {
     return (
         <AppBrowseLayout
             header={
-                <header className="sticky top-0 z-30 backdrop-blur-xl border-b px-4 pb-3 pt-[calc(var(--safe-top)+0.75rem)] flex items-center gap-3" style={{ borderColor: 'var(--neu-shadow-dark)', background: 'var(--neu-bg)' }}>
-                    <button onClick={() => router.back()} className="p-1.5 rounded-full hover:opacity-70 transition-opacity">
-                        <span className="material-symbols-outlined text-[22px]" style={{ color: 'var(--neu-text)' }}>arrow_back</span>
-                    </button>
-                    <div>
-                        <h1 className="font-bold text-[17px]" style={{ color: 'var(--neu-text)' }}>Blocked NeyburHs</h1>
-                        <p className="text-xs" style={{ color: 'var(--neu-text-muted)' }}>
-                            {pagination?.total ?? 0} blocked
-                        </p>
-                    </div>
-                </header>
+                <p className="px-1 text-[15px] leading-relaxed text-muted">
+                    People you block can't see your posts or contact you. {pagination?.total ? `${pagination.total} blocked.` : ''}
+                </p>
             }
         >
             <div className="py-4">

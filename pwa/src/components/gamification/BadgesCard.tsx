@@ -9,7 +9,7 @@ import { useMyBadges } from '@/hooks/usePhase7';
 
 export function BadgesCard() {
   const { data } = useMyBadges();
-  if (!data) return null;
+  if (!data?.badges) return null;
   const earned = data.badges.filter((b) => b.earned).length;
 
   return (

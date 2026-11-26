@@ -64,6 +64,16 @@ function getRouteTitle(pathname: string) {
     };
     if (safety[parts[1]]) return safety[parts[1]];
   }
+  if (segment === 'settings' && parts[1]) {
+    const settings: Record<string, string> = {
+      blocked: 'Blocked people',
+      location: 'Your area',
+      places: 'My places',
+      password: 'Password',
+      payout: 'Payment details',
+    };
+    if (settings[parts[1]]) return settings[parts[1]];
+  }
   if (segment === 'incident-reports') return parts[1] ? 'Incident report' : 'Incident reports';
   if (segment === 'ads' && parts[1] === 'wall') return 'Ad Wall';
   if (segment === 'ads' && parts[1] === 'new') return 'Book an ad';
