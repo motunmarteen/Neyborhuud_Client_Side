@@ -1195,6 +1195,14 @@ export default function ConversationPage() {
   // ── Groups ────────────────────────────────────────────────────────────────
   // Messages from before you opened the chat load still; new ones arrive with motion.
   const [openedAt] = useState(() => Date.now() - 20_000);
+  // The house badge sits on your newest message only (and on any still sending or not sent).
+  const lastMineId = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m.type !== 'system' && isMineMessage(m, user?.id)) return msgId(m);
+    }
+    return null;
+  })();
   const groups = groupByDate(messages, clientReady);
 
   const isIncident = conv?.type === 'incident';
@@ -1564,6 +1572,7 @@ export default function ConversationPage() {
                             onForward={setForwardingMsg}
                             canModerate={canModerate}
                             onRetry={retryMessage}
+                            showStatus={mine && (id === lastMineId || msg.status === 'sending' || msg.status === 'failed')}
                           />
                         </div>
                       );

@@ -66,7 +66,6 @@ function Meta({ msg, mine, light }: { msg: ChatMessage; mine: boolean; light?: b
     <div className={`flex shrink-0 items-center justify-end gap-1 text-[10px] ${light ? 'text-white/85' : 'text-muted'}`}>
       {msg.isEdited && !msg.isDeleted ? <span className="italic">Edited</span> : null}
       <span>{timeStr(msg.createdAt)}</span>
-      {mine ? <ChatMessageTicks status={msg.status} light={light} /> : null}
     </div>
   );
 }
@@ -740,6 +739,7 @@ function MessageStack({
   onForward,
   canModerate,
   onRetry,
+  showStatus,
   children,
 }: {
   msg: ChatMessage;
@@ -754,6 +754,7 @@ function MessageStack({
   onForward?: (msg: ChatMessage) => void;
   canModerate?: boolean;
   onRetry?: (msg: ChatMessage) => void;
+  showStatus?: boolean;
   children: ReactNode;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -851,6 +852,11 @@ function MessageStack({
         >
           {children}
         </div>
+        {showStatus ? (
+          <span className="huud-mark-pop pointer-events-none absolute -bottom-1.5 -right-1.5">
+            <ChatMessageTicks status={msg.status} />
+          </span>
+        ) : null}
       </div>
       {mine && msg.status === 'failed' ? (
         <button
@@ -902,6 +908,7 @@ export default function ChatMessageCard({
   onForward,
   canModerate,
   onRetry,
+  showStatus,
 }: {
   msg: ChatMessage;
   mine: boolean;
@@ -915,6 +922,8 @@ export default function ChatMessageCard({
   onForward?: (msg: ChatMessage) => void;
   canModerate?: boolean;
   onRetry?: (msg: ChatMessage) => void;
+  /** Show the house badge: your newest message, or one still sending / not sent. */
+  showStatus?: boolean;
 }) {
   const isPriority = msg.priority === 'emergency';
   const textProps = { currentUserId, onReactionsUpdate };
@@ -933,6 +942,7 @@ export default function ChatMessageCard({
       onForward={onForward}
       canModerate={canModerate}
       onRetry={onRetry}
+      showStatus={showStatus}
     >
       {node}
     </MessageStack>
