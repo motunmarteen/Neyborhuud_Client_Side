@@ -67,10 +67,16 @@ function getRouteTitle(pathname: string) {
   if (segment === 'settings' && parts[1]) {
     const settings: Record<string, string> = {
       blocked: 'Blocked people',
-      location: 'Your area',
+      location: 'Your area and distance',
       places: 'My places',
       password: 'Password',
       payout: 'Payment details',
+      profile: 'Edit profile',
+      notifications: 'Notifications',
+      privacy: 'Privacy',
+      account: 'Username and invites',
+      display: 'Language and display',
+      posts: 'Post defaults',
     };
     if (settings[parts[1]]) return settings[parts[1]];
   }

@@ -1,0 +1,1259 @@
+'use client';
+
+import React, { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { fetchAPI } from '@/lib/api';
+import { authService } from '@/services/auth.service';
+import type { ConsentType, UserConsentRecord, AppLanguage } from '@/types/api';
+import { useTranslation } from '@/lib/i18n';
+import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
+import { chatSoundOn, playChatPop, setChatSound } from '@/lib/chatSound';
+import { isAdminUser } from '@/lib/adminAccess';
+import { EmailVerificationCard } from '@/components/auth/EmailVerificationCard';
+import { formatProfileBirthday, getZodiacFromBirthday } from '@/lib/profileSnapHelpers';
+import { savedAccessibility, setSaveData, applyTextSize as setRootTextSize } from '@/lib/calmMode';
+
+export type SettingsTab = 'notifications' | 'privacy' | 'account' | 'language' | 'posts';
+
+
+function isEmailVerifiedStrict(user: unknown): boolean {
+  if (!user || typeof user !== 'object') return false;
+  const u = user as Record<string, unknown>;
+  return (
+    u.emailVerified === true ||
+    u.email_verified === true ||
+    u.verificationStatus === 'verified'
+  );
+}
+
+function Section({
+  title,
+  children,
+  description,
+}: {
+  title: string;
+  description?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="py-3">
+      <h2 className="px-1 font-heading text-base font-extrabold text-navy">{title}</h2>
+      {description ? <p className="mt-0.5 px-1 text-[13px] leading-relaxed text-muted">{description}</p> : null}
+      <div className="mt-2 rounded-[22px] bg-white px-4 py-1 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">{children}</div>
+    </section>
+  );
+}
+
+function ToggleSwitch({
+  enabled,
+  onChange,
+  label,
+  description,
+  disabled,
+}: {
+  enabled: boolean;
+  onChange: (val: boolean) => void;
+  label: string;
+  description?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex min-h-14 items-center justify-between gap-4 border-b border-line/60 py-3 last:border-0">
+      <div className="min-w-0 flex-1">
+        <p className="text-[15px] font-bold text-navy">{label}</p>
+        {description ? <p className="mt-0.5 text-[13px] text-muted">{description}</p> : null}
+      </div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && onChange(!enabled)}
+        role="switch"
+        aria-checked={enabled}
+        aria-label={label}
+        className={`relative h-7 w-12 shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+          disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+        } ${enabled ? 'bg-brand-green-dark' : 'bg-[#C9CFD8]'}`}
+      >
+        <span
+          className={`absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            enabled ? 'translate-x-5' : 'translate-x-0'
+          }`}
+          aria-hidden
+        />
+      </button>
+    </div>
+  );
+}
+
+function latestForType(
+    rows: UserConsentRecord[],
+    type: ConsentType,
+): UserConsentRecord | undefined {
+    const subset = rows.filter((r) => r.consentType === type);
+    if (!subset.length) return undefined;
+    return subset.reduce((a, b) => {
+        const ta = new Date(a.updatedAt || a.createdAt || 0).getTime();
+        const tb = new Date(b.updatedAt || b.createdAt || 0).getTime();
+        return tb >= ta ? b : a;
+    });
+}
+
+function formatConsentGrantedAt(record: UserConsentRecord | undefined): string {
+    if (!record || !record.grantedAt) return '';
+    return new Date(record.grantedAt).toLocaleString();
+}
+
+interface NotificationSettings {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+    chat: boolean;
+    mentions: boolean;
+    likes: boolean;
+    comments: boolean;
+    follows: boolean;
+    events: boolean;
+    jobs: boolean;
+    safety: boolean;
+    gamification: boolean;
+}
+
+interface PrivacySettings {
+    profileVisibility: 'public' | 'friends' | 'private';
+    showLocation: boolean;
+    showPhone: boolean;
+    showEmail: boolean;
+    showBirthday: boolean;
+}
+
+interface UserSettings {
+    notifications: NotificationSettings;
+    privacy: PrivacySettings;
+}
+
+/**
+ * One settings page (owner 2026-11-26: Settings rebuilt as a list with its own pages). The route
+ * picks the section: /settings/notifications, /privacy, /account, /display, /posts.
+ */
+export function SettingsScreen({ section }: { section: SettingsTab }) {
+  // Chat sound lives on this phone only (lib/chatSound). Read after start so the first draw matches.
+  const [chatSound, setChatSoundState] = useState(true);
+  useEffect(() => setChatSoundState(chatSoundOn()), []);
+    const router = useRouter();
+    const { t, language: currentLanguage, setLanguage, languageNames, availableLanguages } = useTranslation();
+    const activeTab = section;
+    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [user, setUser] = useState<any>(null);
+    const [emailVerified, setEmailVerified] = useState(false);
+    const [accountActionLoading, setAccountActionLoading] = useState<'export' | 'delete' | null>(null);
+
+    const [consentRows, setConsentRows] = useState<UserConsentRecord[]>([]);
+    const [postSettings, setPostSettings] = useState({
+        defaultLanguage: 'en',
+        defaultVisibility: 'public',
+        defaultPriorityStandard: 'normal',
+        defaultPriorityUrgent: 'critical',
+        autoHashtagLocation: true,
+        bankName: '',
+        accountName: '',
+        accountNumber: '',
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('neyborhuud_post_settings');
+            if (stored) {
+                try {
+                    setPostSettings((prev) => ({ ...prev, ...JSON.parse(stored) }));
+                } catch { /* ignore */ }
+            }
+        }
+    }, []);
+
+    const updatePostSettings = (updates: Partial<typeof postSettings>) => {
+        const next = { ...postSettings, ...updates };
+        setPostSettings(next);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('neyborhuud_post_settings', JSON.stringify(next));
+        }
+        toast.success('Post settings updated.');
+    };
+    const [consentsLoading, setConsentsLoading] = useState(false);
+    const [consentBusy, setConsentBusy] = useState<ConsentType | null>(null);
+    const [accessLogOpen, setAccessLogOpen] = useState(false);
+    const [accessLogLoading, setAccessLogLoading] = useState(false);
+    const [accessLogEntries, setAccessLogEntries] = useState<
+        {
+            id: string;
+            accessType: string;
+            reason?: string;
+            createdAt: string;
+            accessor: {
+                id: string;
+                firstName?: string;
+                lastName?: string;
+                role?: string;
+            } | null;
+        }[]
+    >([]);
+
+    const [usernameChangePolicy, setUsernameChangePolicy] = useState<{
+        cooldownDays: number;
+        canChangeUsername: boolean;
+        nextUsernameChangeAt: string | null;
+        lastUsernameRenameAt: string | null;
+    } | null>(null);
+    const [usernameTimeline, setUsernameTimeline] = useState<
+        Array<{ username: string; effectiveFrom: string; effectiveTo: string | null }>
+    >([]);
+    const [newUsernameDraft, setNewUsernameDraft] = useState('');
+    const [usernameSaving, setUsernameSaving] = useState(false);
+
+    const [notifications, setNotifications] = useState<NotificationSettings>({
+        email: true,
+        push: true,
+        sms: false,
+        chat: true,
+        mentions: true,
+        likes: true,
+        comments: true,
+        follows: true,
+        events: true,
+        jobs: true,
+        safety: true,
+        gamification: true,
+    });
+
+    const [privacy, setPrivacy] = useState<PrivacySettings>({
+        profileVisibility: 'public',
+        showLocation: true,
+        showPhone: false,
+        showEmail: false,
+        showBirthday: true,
+    });
+
+    // Per-user safety settings
+    const [emergencyServicesEnabled, setEmergencyServicesEnabled] = useState(false);
+    const [savingSafety, setSavingSafety] = useState(false);
+
+    // Accessibility
+    const [textSize, setTextSize] = useState<'small' | 'medium' | 'large'>('medium');
+    const [liteMode, setLiteMode] = useState(false);
+    // F-11: this phone's own Save data / text size choices win over the server copy.
+    useEffect(() => {
+        const local = savedAccessibility();
+        if (local.liteMode !== undefined) setLiteMode(local.liteMode);
+        if (local.textSize) setTextSize(local.textSize);
+    }, []);
+    const applyTextSize = (size: 'small' | 'medium' | 'large') => {
+        setTextSize(size);
+        setRootTextSize(size);
+        fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ accessibility: { textSize: size } }) }).catch(() => {});
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('neyborhuud_user');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), textSize: size } } }));
+                } catch { /* ignore corrupt data */ }
+            }
+        }
+    };
+    const applyLiteMode = (enabled: boolean) => {
+        setLiteMode(enabled);
+        fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ accessibility: { liteMode: enabled } }) }).catch(() => {});
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('neyborhuud_user');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, settings: { ...parsed.settings, accessibility: { ...(parsed.settings?.accessibility ?? {}), liteMode: enabled } } }));
+                } catch { /* ignore corrupt data */ }
+            }
+            // F-11: takes effect at once (stops moving effects and self-playing videos).
+            setSaveData(enabled);
+        }
+    };
+
+    // Debounced notification save ref
+    const notifSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const debouncedSaveNotifications = useCallback((updated: NotificationSettings) => {
+        if (notifSaveTimer.current) clearTimeout(notifSaveTimer.current);
+        notifSaveTimer.current = setTimeout(async () => {
+            try {
+                await fetchAPI('/profile/settings', { method: 'PATCH', body: JSON.stringify({ notifications: updated }) });
+                if (typeof window !== 'undefined') {
+                    const stored = localStorage.getItem('neyborhuud_user');
+                    if (stored) {
+                        try {
+                            const parsed = JSON.parse(stored);
+                            localStorage.setItem('neyborhuud_user', JSON.stringify({ ...parsed, notificationSettings: updated, settings: { ...parsed.settings, notifications: updated } }));
+                        } catch { /* ignore corrupt data */ }
+                    }
+                }
+            } catch { /* silent */ }
+        }, 500);
+    }, []);
+
+    // Clear debounced timer on unmount to prevent stale state updates
+    useEffect(() => () => {
+        if (notifSaveTimer.current) clearTimeout(notifSaveTimer.current);
+    }, []);
+
+    // Load settings from server (source of truth) + fallback to localStorage.
+    useEffect(() => {
+      let cancelled = false;
+
+      const load = async () => {
+        // Fallback (fast paint) from localStorage
+        try {
+          const userData = localStorage.getItem('neyborhuud_user');
+          if (userData && !cancelled) {
+            const parsed = JSON.parse(userData);
+            setUser(parsed);
+            setEmailVerified(isEmailVerifiedStrict(parsed));
+            const pn = parsed.notificationSettings ?? parsed.settings?.notifications;
+            if (pn) setNotifications((prev) => ({ ...prev, ...pn }));
+            const pp = parsed.privacySettings ?? parsed.settings?.privacy;
+            if (pp) setPrivacy((prev) => ({ ...prev, ...pp }));
+            if (parsed.settings?.accessibility?.textSize) {
+              setTextSize(savedAccessibility().textSize ?? parsed.settings.accessibility.textSize);
+            }
+            if (parsed.settings?.accessibility?.liteMode !== undefined) {
+              setLiteMode(savedAccessibility().liteMode ?? !!parsed.settings.accessibility.liteMode);
+            }
+          }
+        } catch {
+          // ignore corrupt
+        }
+
+        // Source of truth from backend
+        if (authService.isAuthenticated()) {
+          try {
+            const res = await authService.getMyProfileFull();
+            const u = res.success ? res.data?.user : null;
+            if (u && !cancelled) {
+              setUser(u);
+              setEmailVerified(isEmailVerifiedStrict(u));
+              localStorage.setItem('neyborhuud_user', JSON.stringify(u));
+
+              const un = (u as any).notificationSettings ?? (u as any).settings?.notifications;
+              if (un) setNotifications((prev) => ({ ...prev, ...un }));
+              const up = (u as any).privacySettings ?? (u as any).settings?.privacy;
+              if (up) setPrivacy((prev) => ({ ...prev, ...up }));
+              if ((u as any).settings?.accessibility?.textSize) {
+                setTextSize(savedAccessibility().textSize ?? (u as any).settings.accessibility.textSize);
+              }
+              if ((u as any).settings?.accessibility?.liteMode !== undefined) {
+                setLiteMode(savedAccessibility().liteMode ?? !!(u as any).settings.accessibility.liteMode);
+              }
+            }
+          } catch {
+            // non-fatal
+          }
+
+          // Per-user safety settings
+          fetchAPI('/safety/settings')
+            .then((res: any) => {
+              if (cancelled) return;
+              if (res?.data?.safetySettings?.emergencyServicesEnabled !== undefined) {
+                setEmergencyServicesEnabled(!!res.data.safetySettings.emergencyServicesEnabled);
+              }
+            })
+            .catch(() => {});
+        }
+      };
+
+      void load();
+      return () => {
+        cancelled = true;
+      };
+    }, []);
+
+    const handleEmailVerified = useCallback(async () => {
+      setEmailVerified(true);
+      try {
+        const res = await authService.getMyProfileFull();
+        const u = res.success ? res.data?.user : null;
+        if (u) {
+          setUser(u);
+          setEmailVerified(isEmailVerifiedStrict(u));
+          localStorage.setItem('neyborhuud_user', JSON.stringify(u));
+        }
+      } catch {
+        // ignore
+      }
+      toast.success('Email verified!');
+    }, []);
+
+    const loadConsents = useCallback(async () => {
+        if (!authService.isAuthenticated()) return;
+        setConsentsLoading(true);
+        try {
+            const res = await authService.getConsents();
+            if (res.success && res.data?.consents) {
+                setConsentRows(res.data.consents);
+            }
+        } catch (e: unknown) {
+            toast.error('Could not load consent settings.');
+        } finally {
+            setConsentsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (activeTab !== 'privacy') return;
+        void loadConsents();
+    }, [activeTab, loadConsents]);
+
+    const refreshAccountProfile = useCallback(async () => {
+        if (!authService.isAuthenticated()) return;
+        try {
+            const res = await authService.getMyProfileFull();
+            if (!res.success || !res.data?.user) return;
+            const u = res.data.user;
+            setUser(u);
+            localStorage.setItem('neyborhuud_user', JSON.stringify(u));
+            if (res.data.usernameChangePolicy) {
+                setUsernameChangePolicy(res.data.usernameChangePolicy);
+            }
+            const tl = (u as unknown as { usernameTimeline?: unknown }).usernameTimeline;
+            setUsernameTimeline(Array.isArray(tl) ? tl : []);
+        } catch {
+            toast.error('Could not load profile from server.');
+        }
+    }, []);
+
+    useEffect(() => {
+        void refreshAccountProfile();
+    }, [refreshAccountProfile]);
+
+    const handleConsentToggle = async (type: ConsentType, granted: boolean) => {
+        if (type === 'data_processing' && !granted) {
+            toast.message(
+                'Essential processing cannot be turned off while your account is active.',
+            );
+            return;
+        }
+        setConsentBusy(type);
+        try {
+            const res = await authService.updateConsent(type, granted);
+            if (!res.success) {
+                toast.error(res.message || 'Update failed');
+                return;
+            }
+            await loadConsents();
+            toast.success('Consent updated.');
+        } catch (e: unknown) {
+            const ax = e as { response?: { data?: { message?: string } }; message?: string };
+            toast.error(
+                ax.response?.data?.message || ax.message || 'Could not update consent',
+            );
+        } finally {
+            setConsentBusy(null);
+        }
+    };
+
+    const loadAccessLog = async () => {
+        if (!authService.isAuthenticated()) return;
+        setAccessLogLoading(true);
+        try {
+            const res = await authService.getDataAccessHistory(1, 25);
+            if (res.success && res.data?.accessHistory) {
+                setAccessLogEntries(res.data.accessHistory);
+            }
+        } catch (e: unknown) {
+            toast.error('Could not load access history.');
+        } finally {
+            setAccessLogLoading(false);
+        }
+    };
+
+    const handleExportMyData = async () => {
+        setAccountActionLoading('export');
+        try {
+            const res = await authService.exportUserData();
+            if (!res.success || !res.data) {
+                toast.error(
+                    (res as { message?: string }).message || 'Export failed',
+                );
+                return;
+            }
+            const wrap = res.data as { export?: unknown };
+            const payload = wrap.export ?? res.data;
+            const blob = new Blob([JSON.stringify(payload, null, 2)], {
+                type: 'application/json',
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `neyborhuud-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('Download started.');
+        } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : 'Export failed';
+            toast.error(msg);
+        } finally {
+            setAccountActionLoading(null);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await authService.logout();
+            router.replace('/login');
+        } catch {
+            // Even if the API call fails, clear local state and redirect
+            router.replace('/login');
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (
+            !window.confirm(
+                'Delete your NeyborHuud account? Your posts will be hidden and personal data scrubbed. This cannot be undone.',
+            )
+        ) {
+            return;
+        }
+        const reason =
+            window.prompt('Optional: why are you leaving? (Cancel to skip)') ||
+            undefined;
+        setAccountActionLoading('delete');
+        try {
+            await authService.deleteAccount(reason);
+            toast.success('Account deleted.');
+            router.push('/login');
+        } catch (e: unknown) {
+            const ax = e as {
+                response?: { data?: { message?: string } };
+                message?: string;
+            };
+            toast.error(
+                ax.response?.data?.message ||
+                    ax.message ||
+                    'Could not delete account',
+            );
+        } finally {
+            setAccountActionLoading(null);
+        }
+    };
+
+    const handleSaveNotifications = async () => {
+        setSaving(true);
+        try {
+            await fetchAPI('/profile/settings', {
+                method: 'PATCH',
+                body: JSON.stringify({ notifications })
+            });
+            
+            // Update local storage
+            if (user && typeof window !== 'undefined') {
+                const updated = { ...user, settings: { ...user.settings, notifications } };
+                localStorage.setItem('neyborhuud_user', JSON.stringify(updated));
+            }
+            
+            toast.success('Notification settings saved.');
+        } catch (error: any) {
+            toast.error('Failed to save settings. Please try again.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleSaveEmergencyConsent = async (newValue: boolean) => {
+        setSavingSafety(true);
+        try {
+            await fetchAPI('/safety/settings', {
+                method: 'PATCH',
+                body: JSON.stringify({ emergencyServicesEnabled: newValue }),
+            });
+            setEmergencyServicesEnabled(newValue);
+            toast.success(newValue ? 'Agency-assignment logging enabled.' : 'Agency-assignment logging disabled.');
+        } catch (err: any) {
+            toast.error('Could not save safety settings. Please try again.');
+        } finally {
+            setSavingSafety(false);
+        }
+    };
+
+    const handleSavePrivacy = async () => {
+        setSaving(true);
+        try {
+            await fetchAPI('/auth/settings/privacy', {
+                method: 'PUT',
+                body: JSON.stringify(privacy)
+            });
+            
+            // Update local storage
+            if (user && typeof window !== 'undefined') {
+                const updated = { ...user, privacySettings: privacy, settings: { ...user.settings, privacy } };
+                localStorage.setItem('neyborhuud_user', JSON.stringify(updated));
+            }
+            
+            toast.success('Privacy settings saved.');
+        } catch (error: any) {
+            toast.error('Failed to save settings. Please try again.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const birthday = formatProfileBirthday(user?.dateOfBirth);
+    const zodiac = getZodiacFromBirthday(user?.dateOfBirth);
+    const isProfileCompleted =
+      Boolean((user as any)?.profileCompletedAt) ||
+      Boolean(user?.firstName && user?.lastName && user?.dateOfBirth);
+    const nextUsernameChangeLabel = usernameChangePolicy?.nextUsernameChangeAt
+        ? new Date(usernameChangePolicy.nextUsernameChangeAt).toLocaleString()
+        : '';
+
+    return (
+      <AppBrowseLayout maxWidth="680">
+        <div className="space-y-1">
+          {!emailVerified && user?.email ? (
+            <EmailVerificationCard
+              email={user.email}
+              onVerified={() => void handleEmailVerified()}
+            />
+          ) : null}
+
+          {!emailVerified && !user?.email ? (
+            <Section
+              title="Email verification"
+              description="Add an email to your profile, then verify it to unlock all features."
+            >
+              <Link
+                href="/complete-profile"
+                className="mod-chip mod-chip-active inline-flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-primary no-underline"
+              >
+                Add email in profile
+              </Link>
+            </Section>
+          ) : null}
+
+          {activeTab === 'notifications' ? (
+            <div className="space-y-4">
+              <Section title="Delivery channels">
+                <ToggleSwitch
+                  enabled={notifications.email}
+                  onChange={(val) => setNotifications({ ...notifications, email: val })}
+                  label="Email notifications"
+                  description="Receive updates via email"
+                />
+                <ToggleSwitch
+                  enabled={notifications.push}
+                  onChange={(val) => setNotifications({ ...notifications, push: val })}
+                  label="Push notifications"
+                  description="Browser and mobile push alerts"
+                />
+                <ToggleSwitch
+                  enabled={notifications.sms}
+                  onChange={(val) => setNotifications({ ...notifications, sms: val })}
+                  label="SMS notifications"
+                  description="Text messages for urgent alerts"
+                />
+              </Section>
+
+              <Section title="Activity alerts">
+                <ToggleSwitch
+                  enabled={notifications.chat}
+                  onChange={(val) => {
+                    const u = { ...notifications, chat: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Chat messages"
+                  description="New messages from neighbours"
+                />
+                <ToggleSwitch
+                  enabled={chatSound}
+                  onChange={(val) => {
+                    setChatSoundState(val);
+                    setChatSound(val);
+                    if (val) playChatPop();
+                  }}
+                  label="Chat sounds"
+                  description="A soft pop when a message lands in an open chat (this phone)"
+                />
+                <ToggleSwitch
+                  enabled={notifications.mentions}
+                  onChange={(val) => {
+                    const u = { ...notifications, mentions: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Mentions"
+                  description="When someone tags you"
+                />
+                <ToggleSwitch
+                  enabled={notifications.likes}
+                  onChange={(val) => {
+                    const u = { ...notifications, likes: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Likes"
+                  description="When someone likes your post"
+                />
+                <ToggleSwitch
+                  enabled={notifications.comments}
+                  onChange={(val) => {
+                    const u = { ...notifications, comments: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Comments"
+                  description="Replies to your posts"
+                />
+              </Section>
+
+              <Section title="Topics">
+                <ToggleSwitch
+                  enabled={notifications.follows}
+                  onChange={(val) => {
+                    const u = { ...notifications, follows: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="New followers"
+                />
+                <ToggleSwitch
+                  enabled={notifications.events}
+                  onChange={(val) => {
+                    const u = { ...notifications, events: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Events in your area"
+                />
+                <ToggleSwitch
+                  enabled={notifications.jobs}
+                  onChange={(val) => {
+                    const u = { ...notifications, jobs: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Job postings"
+                />
+                <ToggleSwitch
+                  enabled={notifications.safety}
+                  onChange={(val) => {
+                    const u = { ...notifications, safety: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Safety alerts"
+                />
+                <ToggleSwitch
+                  enabled={notifications.gamification}
+                  onChange={(val) => {
+                    const u = { ...notifications, gamification: val };
+                    setNotifications(u);
+                    debouncedSaveNotifications(u);
+                  }}
+                  label="Rewards and badges"
+                />
+              </Section>
+
+              <button
+                onClick={handleSaveNotifications}
+                disabled={saving}
+                className="w-full rounded-full bg-primary hover:bg-brand-green-dark text-white py-3.5 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
+              >
+                {saving ? 'Saving…' : 'Save notification settings'}
+              </button>
+
+              <Section
+                title="Emergency services"
+                description="This does not contact any agency automatically — that capability isn't connected yet. When enabled, an unresponsive SOS escalation records which agency would be assigned, for your own reference. For a real emergency, always call the number shown yourself."
+              >
+                <ToggleSwitch
+                  enabled={emergencyServicesEnabled}
+                  onChange={(val) => void handleSaveEmergencyConsent(val)}
+                  label={savingSafety ? 'Saving…' : 'Log agency assignment for me'}
+                  description="Records an assigned agency during an unresponsive SOS escalation — does not contact anyone automatically"
+                />
+              </Section>
+            </div>
+          ) : null}
+
+          {activeTab === 'account' ? (
+            <div className="space-y-6">
+              <Section
+                title="Username"
+                description={
+                  <>
+                    You can change your handle once every {usernameChangePolicy?.cooldownDays ?? 90} days
+                    after your first rename. Your current username (and past ones) can work as referral
+                    codes — see Invite below.
+                  </>
+                }
+              >
+                {usernameChangePolicy?.canChangeUsername === false && nextUsernameChangeLabel ? (
+                  <p className="mb-3 text-xs font-bold text-amber-600">
+                    Next change allowed: {nextUsernameChangeLabel}
+                  </p>
+                ) : null}
+                <input
+                  type="text"
+                  className="mb-3 w-full rounded-2xl border border-gray-100 bg-white px-4 py-3 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.01)] focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                  placeholder="new_handle"
+                  autoComplete="username"
+                  value={newUsernameDraft}
+                  onChange={(e) => setNewUsernameDraft(e.target.value.replace(/\s/g, ''))}
+                  disabled={usernameSaving || usernameChangePolicy?.canChangeUsername === false}
+                />
+                <button
+                  type="button"
+                  disabled={
+                    usernameSaving ||
+                    !newUsernameDraft.trim() ||
+                    usernameChangePolicy?.canChangeUsername === false
+                  }
+                  className="w-full rounded-full bg-primary hover:bg-brand-green-dark text-white py-3 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
+                  onClick={async () => {
+                    setUsernameSaving(true);
+                    try {
+                      const res = await authService.changeUsername(newUsernameDraft.trim());
+                      if (!res.success) {
+                        toast.error(res.message || 'Could not update username');
+                        return;
+                      }
+                      toast.success('Username updated');
+                      setNewUsernameDraft('');
+                      await refreshAccountProfile();
+                    } catch (e: unknown) {
+                      const ax = e as { response?: { status?: number; data?: { message?: string } } };
+                      const msg =
+                        ax.response?.data?.message || (e instanceof Error ? e.message : 'Request failed');
+                      toast.error(msg);
+                    } finally {
+                      setUsernameSaving(false);
+                    }
+                  }}
+                >
+                  {usernameSaving ? 'Saving…' : 'Update username'}
+                </button>
+                {usernameTimeline.length > 0 ? (
+                  <div className="mt-4 border-t border-gray-100 pt-4">
+                    <p className="text-[13px] font-bold text-muted mb-2">
+                      Handle timeline
+                    </p>
+                    <ul className="space-y-2 text-[11px] text-muted">
+                      {usernameTimeline.map((row, i) => (
+                        <li key={`${row.username}-${row.effectiveFrom}-${i}`}>
+                          <span className="font-mono font-bold text-navy">@{row.username}</span>{' '}
+                          — from{' '}
+                          {new Date(row.effectiveFrom).toLocaleDateString('en-NG', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                          {row.effectiveTo
+                            ? ` to ${new Date(row.effectiveTo).toLocaleDateString('en-NG', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              })}`
+                            : ' (current)'}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </Section>
+
+              {user?.username ? (
+                <Section title="Invite NeyburHs">
+                  <p className="mb-3 text-xs leading-relaxed text-muted">
+                    Your username is the referral code on this app. Friends who sign up from your link
+                    attach you as inviter. You both get 50 HuudCredit once they help a neighbour or finish a deal.
+                  </p>
+                  <div className="mb-3 break-all rounded-2xl border border-transparent bg-background px-3 py-2 text-[11px] font-mono text-gray-700">
+                    {typeof window !== 'undefined'
+                      ? `${window.location.origin}/signup?ref=${encodeURIComponent(String(user.username))}`
+                      : `/signup?ref=${encodeURIComponent(String(user.username))}`}
+                  </div>
+                  <button
+                    type="button"
+                    className="w-full rounded-full border border-gray-200 bg-white hover:bg-gray-50 py-3 text-sm font-bold text-navy shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all duration-200"
+                    onClick={() => {
+                      const url = `${window.location.origin}/signup?ref=${encodeURIComponent(String(user.username))}`;
+                      void navigator.clipboard.writeText(url);
+                      toast.success('Invite link copied');
+                    }}
+                  >
+                    Copy invite link
+                  </button>
+                </Section>
+              ) : null}
+
+              <Section
+                title="Data &amp; danger zone"
+                description={
+                  <>
+                    Download your data (NDPR portability) or permanently delete this account.
+                  </>
+                }
+              >
+                <button
+                  type="button"
+                  disabled={accountActionLoading !== null}
+                  onClick={() => void handleExportMyData()}
+                  className="flex w-full items-center gap-3 py-3 text-left text-gray-700 hover:text-brand-green-dark transition-colors disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined" aria-hidden="true">download</span>
+                  <span className="text-sm font-bold">
+                    {accountActionLoading === 'export' ? 'Preparing export…' : 'Download my data'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  disabled={accountActionLoading !== null}
+                  onClick={() => void handleDeleteAccount()}
+                  className="flex w-full items-center gap-3 py-3 text-left text-red-500 hover:text-red-600 transition-colors disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined" aria-hidden="true">delete</span>
+                  <span className="text-sm font-bold">
+                    {accountActionLoading === 'delete' ? 'Deleting…' : 'Delete account'}
+                  </span>
+                </button>
+              </Section>
+            </div>
+          ) : null}
+
+          {activeTab === 'privacy' ? (
+            <div className="space-y-6">
+              <Section title="Who can see your profile" description="Private: only your name and photo show. Friends: people you follow who follow you back.">
+                <div className="flex gap-1 rounded-full p-1 bg-gray-50 border border-gray-100">
+                  {[
+                    { value: 'public', label: 'Public' },
+                    { value: 'friends', label: 'Friends' },
+                    { value: 'private', label: 'Private' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setPrivacy({ ...privacy, profileVisibility: opt.value as any })}
+                      className={`flex-1 rounded-full py-2.5 text-xs font-bold transition-all ${
+                        privacy.profileVisibility === opt.value
+                          ? 'bg-navy text-white shadow-sm'
+                          : 'text-muted hover:text-gray-600'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </Section>
+
+              <Section title="Information sharing">
+                <ToggleSwitch
+                  enabled={privacy.showLocation}
+                  onChange={(val) => setPrivacy({ ...privacy, showLocation: val })}
+                  label="Show location"
+                  description="Your area (LGA and state) on your profile. Never your street or exact spot."
+                />
+                <ToggleSwitch
+                  enabled={privacy.showPhone}
+                  onChange={(val) => setPrivacy({ ...privacy, showPhone: val })}
+                  label="Show phone number"
+                  description="To people who can see your profile"
+                />
+                <ToggleSwitch
+                  enabled={privacy.showBirthday}
+                  onChange={(val) => setPrivacy({ ...privacy, showBirthday: val })}
+                  label="Show birthday"
+                  description="Your birthday on your profile"
+                />
+                <ToggleSwitch
+                  enabled={privacy.showEmail}
+                  onChange={(val) => setPrivacy({ ...privacy, showEmail: val })}
+                  label="Show email address"
+                  description="To people who can see your profile"
+                />
+              </Section>
+
+              <Section
+                title="Data &amp; consent (NDPR)"
+                description="Manage optional processing. Essential processing is required to run your account; you can download or delete your data in Settings → Username and invites."
+              >
+                {/* Wait for your account (known only on the phone) so the first draw matches the pre-built page. */}
+                {consentsLoading || !user ? (
+                  <p className="py-3 text-[13px] text-muted">Loading…</p>
+                ) : (
+                  <>
+                    {(() => {
+                      const dp = latestForType(consentRows, 'data_processing');
+                      const dpActive = dp?.granted === true;
+                      const dpGrantedAtLabel = formatConsentGrantedAt(dp);
+                      return (
+                        <div className="mb-2 border-b border-gray-100 py-3">
+                          <p className="text-sm font-bold text-navy">Essential data processing</p>
+                          <p className="mt-1 text-[10px] text-muted">
+                            {dpActive
+                              ? `Active — last recorded ${dpGrantedAtLabel}`
+                              : 'Not on file (e.g. older account). Confirm to align with our Privacy Policy.'}
+                          </p>
+                          {!dpActive && (
+                            <button
+                              type="button"
+                              disabled={consentBusy !== null}
+                              onClick={() => void handleConsentToggle('data_processing', true)}
+                              className="mt-3 text-xs font-bold text-brand-green-dark hover:underline disabled:opacity-40"
+                            >
+                              {consentBusy === 'data_processing' ? 'Saving…' : 'Record essential consent'}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    <ToggleSwitch
+                      enabled={latestForType(consentRows, 'marketing')?.granted === true}
+                      disabled={consentBusy !== null}
+                      onChange={(val) => void handleConsentToggle('marketing', val)}
+                      label="Marketing"
+                      description="News, features, and promotional messages"
+                    />
+                    <ToggleSwitch
+                      enabled={latestForType(consentRows, 'analytics')?.granted === true}
+                      disabled={consentBusy !== null}
+                      onChange={(val) => void handleConsentToggle('analytics', val)}
+                      label="Analytics"
+                      description="Help us improve the product with usage insights"
+                    />
+                    <ToggleSwitch
+                      enabled={latestForType(consentRows, 'third_party')?.granted === true}
+                      disabled={consentBusy !== null}
+                      onChange={(val) => void handleConsentToggle('third_party', val)}
+                      label="Trusted partners"
+                      description="Limited sharing where described in the Privacy Policy"
+                    />
+                    <div className="mt-4 border-t border-gray-100 pt-3">
+                      <button
+                        type="button"
+                        className="flex items-center gap-2 text-xs font-bold text-brand-green-dark"
+                        onClick={() => {
+                          const next = !accessLogOpen;
+                          setAccessLogOpen(next);
+                          if (next) void loadAccessLog();
+                        }}
+                      >
+                        <span className="material-symbols-outlined text-[1rem]" aria-hidden="true">
+                          {accessLogOpen ? 'expand_less' : 'expand_more'}
+                        </span>
+                        Data access history
+                      </button>
+                      {accessLogOpen && (
+                        <div className="mt-3 max-h-48 space-y-2 overflow-y-auto">
+                          {accessLogLoading ? (
+                            <p className="text-[10px] text-muted">Loading…</p>
+                          ) : accessLogEntries.length === 0 ? (
+                            <p className="text-[10px] text-muted">No access events recorded yet.</p>
+                          ) : (
+                            accessLogEntries.map((row) => (
+                              <div key={row.id} className="rounded-lg bg-gray-50 px-3 py-2 text-[10px]">
+                                <span className="font-bold text-navy">{row.accessType}</span>
+                                {row.reason && <span className="text-muted"> — {row.reason}</span>}
+                                <div className="mt-0.5 text-muted">
+                                  {new Date(row.createdAt).toLocaleString()}
+                                  {row.accessor &&
+                                    ` · ${row.accessor.firstName || ''} ${row.accessor.lastName || ''}`}
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </Section>
+
+              <button
+                onClick={handleSavePrivacy}
+                disabled={saving}
+                className="w-full rounded-full bg-primary hover:bg-brand-green-dark text-white py-3.5 text-sm font-bold shadow-sm transition-all duration-200 disabled:opacity-50"
+              >
+                {saving ? 'Saving…' : 'Save privacy settings'}
+              </button>
+            </div>
+          ) : null}
+
+          {activeTab === 'language' ? (
+            <div className="space-y-6">
+              <Section title={t('settings.language')} description={t('settings.languageDesc')}>
+                <div className="space-y-3">
+                  {availableLanguages.map((lang) => (
+                    <button
+                      key={lang}
+                      type="button"
+                      onClick={() => {
+                        setLanguage(lang);
+                        toast.success(t('settings.languageSaved'));
+                      }}
+                      className="flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-4 text-sm font-bold text-navy hover:bg-gray-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
+                    >
+                      <span className="inline-flex items-center gap-3">
+                        <span className="text-base">{lang === 'en' ? '🇬🇧' : '🇳🇬'}</span>
+                        <span>{languageNames[lang]}</span>
+                      </span>
+                      {currentLanguage === lang ? (
+                        <span className="material-symbols-outlined text-[19px] text-brand-green-dark">check_circle</span>
+                      ) : (
+                        <span className="material-symbols-outlined text-[19px] text-muted">chevron_right</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </Section>
+              <Section title="Text and data">
+                <p className="text-sm font-bold text-navy mb-3">Font size</p>
+                <div className="flex gap-2 mb-4">
+                  {(['small', 'medium', 'large'] as const).map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => applyTextSize(size)}
+                      className={`flex-1 rounded-xl py-2.5 text-sm font-bold capitalize transition-all ${
+                        textSize === size
+                          ? 'bg-navy text-white'
+                          : 'border border-gray-100 bg-white text-muted hover:text-navy'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+                <ToggleSwitch
+                  enabled={liteMode}
+                  onChange={applyLiteMode}
+                  label="Save data"
+                  description="Stops moving effects and videos playing by themselves. Good when data is low. Also on when your phone asks for less motion or Data Saver is on."
+                />
+              </Section>
+
+            </div>
+          ) : null}
+
+          {activeTab === 'posts' ? (
+            <div className="space-y-6">
+              <Section title="New posts start with" description="What a new post is set to before you change it.">
+                <div className="border-b border-gray-100 py-4">
+                  <label className="block text-sm font-bold text-navy mb-2">
+                    Default Language
+                  </label>
+                  <select
+                    value={postSettings.defaultLanguage}
+                    onChange={(e) => updatePostSettings({ defaultLanguage: e.target.value })}
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all cursor-pointer"
+                  >
+                    <option value="en">English</option>
+                    <option value="ha">Hausa</option>
+                    <option value="yo">Yorùbá</option>
+                    <option value="ig">Igbo</option>
+                    <option value="pcm">Pidgin</option>
+                  </select>
+                </div>
+
+                <div className="border-b border-gray-100 py-4">
+                  <label className="block text-sm font-bold text-navy mb-2">
+                    Default Visibility
+                  </label>
+                  <select
+                    value={postSettings.defaultVisibility}
+                    onChange={(e) => updatePostSettings({ defaultVisibility: e.target.value })}
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all cursor-pointer"
+                  >
+                    <option value="public">Public (Everyone)</option>
+                    <option value="neighborhood">NeyburH (Local)</option>
+                    <option value="ward">Ward</option>
+                  </select>
+                </div>
+
+                <div className="border-b border-gray-100 py-4">
+                  <label className="block text-sm font-bold text-navy mb-2">
+                    Default Priority (General Posts)
+                  </label>
+                  <select
+                    value={postSettings.defaultPriorityStandard}
+                    onChange={(e) => updatePostSettings({ defaultPriorityStandard: e.target.value })}
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all cursor-pointer"
+                  >
+                    <option value="low">Low</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+
+                <div className="py-4">
+                  <label className="block text-sm font-bold text-navy mb-2">
+                    Default Priority (Help, Safety & Urgent Alerts)
+                  </label>
+                  <select
+                    value={postSettings.defaultPriorityUrgent}
+                    onChange={(e) => updatePostSettings({ defaultPriorityUrgent: e.target.value })}
+                    className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all cursor-pointer"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+              </Section>
+
+              <Section title="Auto-Hashtagging" description="Enrich your posts with neighborhood details automatically.">
+                <ToggleSwitch
+                  enabled={postSettings.autoHashtagLocation}
+                  onChange={(val) => updatePostSettings({ autoHashtagLocation: val })}
+                  label="Auto-Hashtag Active LGA"
+                  description="Appends a hashtag of your current Local Government Area (e.g. #Ikeja) to all new posts."
+                />
+              </Section>
+
+              <Section title="Saved Banking Profile" description="Pre-populate account details when creating Help Request templates.">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-navy mb-1.5">Bank Name</label>
+                    <input
+                      type="text"
+                      value={postSettings.bankName}
+                      onChange={(e) => updatePostSettings({ bankName: e.target.value })}
+                      placeholder="e.g. GTBank, Zenith"
+                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all placeholder:text-muted"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-navy mb-1.5">Account Name</label>
+                    <input
+                      type="text"
+                      value={postSettings.accountName}
+                      onChange={(e) => updatePostSettings({ accountName: e.target.value })}
+                      placeholder="e.g. Yetunde Marteen"
+                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all placeholder:text-muted"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-navy mb-1.5">Account Number</label>
+                    <input
+                      type="text"
+                      value={postSettings.accountNumber}
+                      onChange={(e) => updatePostSettings({ accountNumber: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      placeholder="10-digit NUBAN number"
+                      maxLength={10}
+                      className="w-full p-3 rounded-2xl text-sm font-semibold border border-transparent bg-background text-navy focus:outline-none focus:border-primary transition-all font-mono placeholder:text-muted"
+                    />
+                  </div>
+                </div>
+              </Section>
+            </div>
+          ) : null}
+        </div>
+      </AppBrowseLayout>
+    );
+}

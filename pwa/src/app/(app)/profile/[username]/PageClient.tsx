@@ -45,16 +45,11 @@ import apiClient from '@/lib/api-client';
 import { normalizeAuthUser, resolveUserAvatarUrl } from '@/lib/userAvatar';
 import { shareProfileUrl, resolveProfileDisplayName, resolveProfilePersonalName, resolveProfileMapCenter, PROFILE_MAP_DEFAULT, type ProfileNameSource } from '@/lib/profileSnapHelpers';
 import { authService } from '@/services/auth.service';
-import { ProfileBrowseHero } from '@/components/profile/browse/ProfileBrowseHero';
 import { ProfileBrowseEyebrow, ProfileBrowseSectionTitle } from '@/components/profile/browse/ProfileBrowseSectionTitle';
-import { ProfileSnapStatsRow } from '@/components/profile/snap/ProfileSnapStatsRow';
-import { ProfileSnapPlusCard } from '@/components/profile/snap/ProfileSnapPlusCard';
-import { ProfileSnapHub } from '@/components/profile/snap/ProfileSnapHub';
 import { ProfileRecognition } from '@/components/profile/ProfileRecognition';
 import { ProfileSnapFriends } from '@/components/profile/snap/ProfileSnapFriends';
 import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { AvatarAdjusterModal } from '@/components/profile/AvatarAdjusterModal';
-import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 import TopNav from '@/components/navigation/TopNav';
@@ -67,29 +62,28 @@ import { useUserMarketplace } from '@/hooks/useMarketplace';
 import { useVouchStatus, useVouchUser, useRevokeVouch, getTrustTier, useVouches, useUserTrustProfile, useVouchMetrics, TRUST_EVENT_META } from '@/hooks/useTrust';
 import { getNextTrustTier, normalizeTrustScore } from '@/lib/trust-economy';
 import { getPrivilegesForTier } from '@/lib/trust-privileges';
-import { formatTimeAgo } from '@/utils/timeAgo';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-handler';
-import { getGeolocation } from '@/lib/nativeGeolocation';
 import { fromKobo } from '@/lib/currency';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { AppBottomSheet } from '@/components/ui/AppBottomSheet';
+import { Button } from '@/components/ui/Button';
+import { Chip } from '@/components/ui/Chip';
+import { EmptyState } from '@/components/ui/EmptyState';
 
-type ProfileTab = 'overview' | 'posts' | 'trust' | 'listings' | 'saved' | 'economy' | 'street_radar';
+type ProfileTab = 'posts' | 'listings' | 'trust' | 'about';
 
 const PROFILE_TABS: { id: ProfileTab; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
   { id: 'posts', label: 'Posts' },
-  { id: 'trust', label: 'Trust' },
   { id: 'listings', label: 'Listings' },
-  { id: 'saved', label: 'Saved' },
-  { id: 'economy', label: 'Economy' },
-  { id: 'street_radar', label: 'Radar' },
+  { id: 'trust', label: 'Trust' },
+  { id: 'about', label: 'About' },
 ];
 
 
 function parseProfileTab(value: string | null): ProfileTab {
-  if (value === 'posts' || value === 'trust' || value === 'listings' || value === 'saved' || value === 'economy' || value === 'street_radar') return value;
-  return 'overview';
+  if (value === 'listings' || value === 'trust' || value === 'about') return value;
+  return 'posts';
 }
 
 export default function ProfilePage() {
@@ -313,7 +307,11 @@ export default function ProfilePage() {
 
   const [startingChat, setStartingChat] = useState(false);
   const [showTipModal, setShowTipModal] = useState(false);
-  const [tab, setTab] = useState<ProfileTab>('overview');
+  const [tab, setTab] = useState<ProfileTab>('posts');
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reporting, setReporting] = useState(false);
   const tipUser = useTipUser();
 
   useEffect(() => {
@@ -325,7 +323,7 @@ export default function ProfilePage() {
   const changeTab = (next: ProfileTab) => {
     setTab(next);
     const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-    if (next === 'overview') params.delete('tab');
+    if (next === 'posts') params.delete('tab');
     else params.set('tab', next);
     const qs = params.toString();
     router.replace(`/profile/${username}${qs ? `?${qs}` : ''}`, { scroll: false });
@@ -502,7 +500,7 @@ export default function ProfilePage() {
                 isMissing ? (
                   <Link
                     href="/explore"
-                    className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800 px-6 py-2 text-xs font-bold shadow-sm transition"
+                    className="inline-flex items-center justify-center rounded-full bg-primary text-white hover:bg-brand-green-dark px-6 py-2 text-xs font-bold shadow-sm transition"
                   >
                     Explore NeyborHuud
                   </Link>
@@ -510,7 +508,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => refetch()}
-                    className="inline-flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-800 px-6 py-2 text-xs font-bold shadow-sm transition"
+                    className="inline-flex items-center justify-center rounded-full bg-primary text-white hover:bg-brand-green-dark px-6 py-2 text-xs font-bold shadow-sm transition"
                   >
                     Try again
                   </button>
@@ -525,30 +523,33 @@ export default function ProfilePage() {
   }
 
   // Merge name fields — profile payload wins, then auth session/cache
+  // Your own account fills gaps only on YOUR profile (it used to lend your last name to others).
+  const selfSrc = isOwnProfile ? (currentUser as ProfileNameSource | null) : null;
+  const cacheSrc = isOwnProfile ? (cachedProfileUser as ProfileNameSource | null) : null;
   const profileNameSource: ProfileNameSource = {
-    ...(cachedProfileUser as ProfileNameSource | null),
-    ...(currentUser as ProfileNameSource | null),
+    ...cacheSrc,
+    ...selfSrc,
     ...(profile as ProfileNameSource),
-    username: profile?.username ?? currentUser?.username ?? cachedProfileUser?.username ?? username,
-    firstName: profile?.firstName ?? currentUser?.firstName ?? cachedProfileUser?.firstName,
-    lastName: profile?.lastName ?? currentUser?.lastName ?? cachedProfileUser?.lastName,
-    middleName: profile?.middleName ?? currentUser?.middleName ?? cachedProfileUser?.middleName,
+    username: profile?.username ?? selfSrc?.username ?? cacheSrc?.username ?? username,
+    firstName: profile?.firstName ?? selfSrc?.firstName ?? cacheSrc?.firstName,
+    lastName: profile?.lastName ?? selfSrc?.lastName ?? cacheSrc?.lastName,
+    middleName: profile?.middleName ?? selfSrc?.middleName ?? cacheSrc?.middleName,
     name:
       (profile as ProfileNameSource)?.name ??
-      (currentUser as ProfileNameSource | undefined)?.name ??
-      (cachedProfileUser as ProfileNameSource | undefined)?.name,
+      selfSrc?.name ??
+      cacheSrc?.name,
     fullName:
       (profile as ProfileNameSource)?.fullName ??
-      (currentUser as ProfileNameSource | undefined)?.fullName ??
-      (cachedProfileUser as ProfileNameSource | undefined)?.fullName,
+      selfSrc?.fullName ??
+      cacheSrc?.fullName,
     full_name:
       (profile as ProfileNameSource)?.full_name ??
-      (currentUser as ProfileNameSource | undefined)?.full_name ??
-      (cachedProfileUser as ProfileNameSource | undefined)?.full_name,
+      selfSrc?.full_name ??
+      cacheSrc?.full_name,
     displayName:
       (profile as ProfileNameSource)?.displayName ??
-      (currentUser as ProfileNameSource | undefined)?.displayName ??
-      (cachedProfileUser as ProfileNameSource | undefined)?.displayName,
+      selfSrc?.displayName ??
+      cacheSrc?.displayName,
   };
 
   const personalName = resolveProfilePersonalName(profileNameSource, username);
@@ -685,146 +686,222 @@ export default function ProfilePage() {
       <div className="flex h-[100dvh] w-full flex-col doodle-surface overflow-hidden">
         <TopNav />
 
-        <div className="app-chrome-below-topnav mx-auto w-full max-w-[600px] !bg-white flex flex-col flex-1 overflow-y-auto">
+        <div className="app-chrome-below-topnav mx-auto w-full max-w-[600px] flex flex-col flex-1 overflow-y-auto">
           <div className="flex-1 no-scrollbar pb-24 !mt-0 !pt-0">
             <div className="flex flex-col">
-          <ProfileBrowseHero
-            displayName={displayName}
-            personalName={personalName}
-            username={profile.username}
-            profilePicture={profile.profilePicture}
-            avatarUrl={profile.avatarUrl}
-            profileFrame={(profile.gamification as { profileFrame?: string | null } | undefined)?.profileFrame ?? null}
-            isOwnProfile={isOwnProfile}
-            uploading={isUploadingAvatar}
-            hasMapLocation={hasMapLocation}
-            mapCenter={mapCenter}
-            locationLabel={locationLabel}
-            onShare={handleShareProfile}
-            onMessage={!isOwnProfile ? handleStartChat : undefined}
-            messaging={startingChat}
-            onChangePhoto={isOwnProfile ? handleAvatarClick : undefined}
-            identityVerified={profileCommunityVerified}
-            isBuildingVerified={Boolean((profile as any).isBuildingVerified)}
-            maskedPostcode={(profile as any).maskedPostcode}
-            verificationInProgress={['bronze', 'silver'].includes(verificationProgress.tier)}
-            verificationTierLabel={
-              verificationProgress.tier !== 'none'
-                ? `${verificationTierMeta.emoji} ${verificationTierMeta.label}`
-                : undefined
-            }
-            vouchReceived={vouchMetrics?.received ?? vouchStatus?.vouchCount ?? 0}
-            vouchGiven={isOwnProfile ? (vouchMetrics?.given ?? 0) : 0}
-            onVouch={!isOwnProfile ? handleVouchClick : undefined}
-            hasVouched={Boolean(vouchStatus?.hasVouched)}
-          />
+          {/* ── Header card (rebuilt 2026-11-26): who this is, their numbers, and the main buttons.
+               No map of where they live (privacy). ── */}
+          <section className="mx-3 mt-3 rounded-[22px] bg-white p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
+            <div className="flex items-center gap-4">
+              <div className="relative shrink-0">
+                <div className="grid h-[76px] w-[76px] place-items-center overflow-hidden rounded-full bg-green-soft ring-4 ring-white shadow-[0_2px_10px_rgba(29,36,51,0.12)]">
+                  {profileAvatarSrc ? (
+                    <Image src={profileAvatarSrc} alt="" width={76} height={76} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="font-heading text-3xl font-black text-brand-green-dark">{profileInitial}</span>
+                  )}
+                </div>
+                {isOwnProfile ? (
+                  <button
+                    type="button"
+                    onClick={handleAvatarClick}
+                    disabled={isUploadingAvatar}
+                    aria-label="Change photo"
+                    className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full bg-navy text-white ring-2 ring-white disabled:opacity-60"
+                  >
+                    <span className="material-symbols-outlined text-[16px]" aria-hidden>photo_camera</span>
+                  </button>
+                ) : null}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="flex items-center gap-1 font-heading text-xl font-extrabold leading-tight text-navy">
+                  <span className="truncate">{displayName}</span>
+                  {profileCommunityVerified ? (
+                    <span className="material-symbols-outlined shrink-0 text-[19px] text-brand-green-dark" style={{ fontVariationSettings: "'FILL' 1" }} aria-label="Verified neighbour">verified</span>
+                  ) : null}
+                </h1>
+                <p className="truncate text-[13px] text-muted">@{profile.username}</p>
+                <p className="mt-0.5 truncate text-[13px] text-muted">
+                  {[locationLabel, `Joined ${joinedLabel}`].filter(Boolean).join(' · ')}
+                </p>
+              </div>
+            </div>
 
-          {!isOwnProfile && (
-            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 py-1 flex flex-wrap gap-2">
-              {isLoadingStatus ? (
-                <div className="px-4 py-2 text-xs font-bold text-gray-400 animate-pulse bg-gray-50 rounded-full">Loading…</div>
+            {(profile as { restricted?: boolean }).restricted ? null : profile.bio ? (
+              <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-navy">{profile.bio}</p>
+            ) : isOwnProfile ? (
+              <Link href="/settings/profile" className="mt-3 inline-block text-[14px] font-bold text-brand-green-dark">
+                + Add a line about you
+              </Link>
+            ) : null}
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {(profile.gamification as { standing?: { emoji?: string; name?: string } } | undefined)?.standing?.name ? (
+                <Chip tone="green">
+                  {(profile.gamification as { standing?: { emoji?: string } }).standing?.emoji}{' '}
+                  {(profile.gamification as { standing?: { name?: string } }).standing?.name}
+                </Chip>
+              ) : null}
+              {verificationProgress.tier !== 'none' ? <Chip tone="blue">{verificationTierMeta.emoji} {verificationTierMeta.label}</Chip> : null}
+              {!isOwnProfile && isMutual ? <Chip>Friends</Chip> : !isOwnProfile && followsYou ? <Chip>Follows you</Chip> : null}
+            </div>
+
+            <dl className="mt-4 grid grid-cols-4 divide-x divide-line/70 rounded-2xl bg-background py-2.5 text-center">
+              {[
+                { label: 'Followers', value: followerCount, href: `/profile/${profile.username}/followers` },
+                { label: 'Following', value: followingCount, href: `/profile/${profile.username}/following` },
+                { label: 'Vouches', value: vouchMetrics?.received ?? vouchStatus?.vouchCount ?? 0, tab: 'trust' as ProfileTab },
+                { label: 'Trust', value: trustScore, tab: 'trust' as ProfileTab },
+              ].map((s) => {
+                const inner = (
+                  <>
+                    <dd className="font-heading text-lg font-black tabular-nums text-navy">{Number(s.value).toLocaleString()}</dd>
+                    <dt className="text-[12px] font-semibold text-muted">{s.label}</dt>
+                  </>
+                );
+                return (
+                  <div key={s.label} className="flex flex-col-reverse">
+                    {'href' in s && s.href ? (
+                      <Link href={s.href} prefetch={false} className="flex flex-col-reverse rounded-xl hover:bg-white/60">
+                        {inner}
+                      </Link>
+                    ) : (
+                      <button type="button" onClick={() => changeTab(s.tab!)} className="flex flex-col-reverse rounded-xl hover:bg-white/60">
+                        {inner}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </dl>
+
+            <div className="mt-4 flex gap-2">
+              {isOwnProfile ? (
+                <>
+                  <Link href="/settings/profile" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-navy text-[15px] font-bold text-white">
+                    Edit profile
+                  </Link>
+                  <button type="button" onClick={() => void handleShareProfile()} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-white text-[15px] font-bold text-navy ring-1 ring-inset ring-line hover:bg-[#F6F8FB]">
+                    Share
+                  </button>
+                </>
               ) : isBlocked ? (
-                <button
-                  onClick={() => toggleBlock()}
-                  disabled={isBlockPending}
-                  className="inline-flex items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-600 px-5 py-2 text-xs font-bold shadow-sm"
-                  type="button"
-                >
-                  {isBlockPending ? 'Unblocking…' : 'Blocked'}
+                <button type="button" onClick={() => toggleBlock()} disabled={isBlockPending} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-red-soft text-[15px] font-bold text-brand-red">
+                  {isBlockPending ? 'Unblocking…' : 'Unblock'}
                 </button>
               ) : isBlockedByThem ? (
-                <div className="px-4 py-2 text-xs font-bold text-gray-400 bg-gray-50 rounded-full opacity-60">Unavailable</div>
+                <p className="flex min-h-11 flex-1 items-center justify-center rounded-full bg-background text-[14px] font-bold text-muted">You can't follow or message this person</p>
               ) : (
                 <>
                   <button
-                    onClick={toggleFollow}
-                    disabled={isFollowPending}
-                    className={`inline-flex items-center justify-center rounded-full px-5 py-2 text-xs font-bold transition-all shadow-sm ${
-                      isFollowing
-                        ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-                        : 'bg-slate-900 text-white hover:bg-slate-800'
-                    }`}
                     type="button"
+                    onClick={toggleFollow}
+                    disabled={isFollowPending || isLoadingStatus || !currentUser}
+                    className={`inline-flex min-h-11 flex-1 items-center justify-center rounded-full text-[15px] font-bold transition-colors disabled:opacity-60 ${
+                      isFollowing ? 'bg-white text-navy ring-1 ring-inset ring-line' : 'bg-primary text-white hover:bg-brand-green-dark'
+                    }`}
                   >
-                    {isFollowPending
-                      ? isFollowing
-                        ? 'Unfollowing…'
-                        : 'Following…'
-                      : isFollowing
-                        ? 'Following'
-                        : `Follow${followsYou && !isFollowing ? ' back' : ''}`}
+                    {isFollowing ? 'Following' : followsYou ? 'Follow back' : 'Follow'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleStartChat()}
+                    disabled={startingChat || !currentUser}
+                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-white text-[15px] font-bold text-navy ring-1 ring-inset ring-line hover:bg-[#F6F8FB] disabled:opacity-60"
+                  >
+                    {startingChat ? 'Opening…' : 'Message'}
                   </button>
                 </>
               )}
+              {!isOwnProfile ? (
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen(true)}
+                  aria-label="More: vouch, tip, share, block or report"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-navy ring-1 ring-inset ring-line hover:bg-[#F6F8FB]"
+                >
+                  <span className="material-symbols-outlined text-[22px]" aria-hidden>more_horiz</span>
+                </button>
+              ) : null}
+            </div>
+          </section>
+
+          {isOwnProfile ? (
+            <nav aria-label="Your things" className="no-scrollbar mx-3 mt-3 flex gap-2 overflow-x-auto">
+              {[
+                { href: '/huud-economy/wallet', label: `🪙 ${Number(huudCoins).toLocaleString()} HuudCredit` },
+                { href: '/saved', label: '🔖 Saved' },
+                { href: '/huud-economy/score', label: '🏅 Badges' },
+                { href: '/profile/passport', label: '🪪 Passport' },
+                { href: '/avatar', label: '🧍 3D avatar' },
+              ].map((l) => (
+                <Link key={l.href} href={l.href} prefetch={false} className="tap-target inline-flex h-9 shrink-0 items-center rounded-full bg-white px-3.5 text-[13px] font-bold text-navy ring-1 ring-inset ring-line hover:bg-[#F6F8FB]">
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+          ) : null}
+
+          {(profile as { restricted?: boolean }).restricted ? (
+            <div className="mx-3 mt-3">
+              <EmptyState icon="🔒" title="This profile is private" description="Only their name and photo show. Follow each other to see more if they share with friends." />
+            </div>
+          ) : (
+          <>
+          <div className="mx-3 mt-2">
+            <BrowseTabStrip tabs={PROFILE_TABS} activeId={tab} onChange={(id) => changeTab(id as ProfileTab)} />
+          </div>
+
+          {tab === 'about' && (
+            <div className="flex flex-col gap-3 px-3 py-3">
+              <section className="rounded-[22px] bg-white p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)]">
+                <h2 className="font-heading text-base font-extrabold text-navy">About</h2>
+                <p className="mt-1.5 whitespace-pre-line text-[15px] leading-relaxed text-navy">
+                  {profile.bio || `${displayName} is part of the ${locationLabel || 'NeyborHuud'} community.`}
+                </p>
+                <dl className="mt-3 space-y-2">
+                  {[
+                    locationLabel ? { icon: 'location_on', label: 'Area', value: locationLabel } : null,
+                    { icon: 'calendar_month', label: 'Joined', value: joinedLabel },
+                    { icon: profileCommunityVerified ? 'verified' : 'shield', label: 'Verification', value: verificationProgress.tier === 'none' ? 'Not started' : `${verificationTierMeta.emoji} ${verificationTierMeta.label}` },
+                  ].filter(Boolean).map((f) => (
+                    <div key={f!.label} className="flex items-center gap-2 text-[14px]">
+                      <span className="material-symbols-outlined text-[18px] text-brand-green-dark" aria-hidden>{f!.icon}</span>
+                      <dt className="text-muted">{f!.label}</dt>
+                      <dd className="font-bold text-navy">{f!.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {showHandleHistory && hist.usernameTimeline && hist.usernameTimeline.length > 1 ? (
+                  <p className="mt-3 text-[13px] text-muted">
+                    Also known as {hist.usernameTimeline.filter((r) => r.username !== profile.username).map((r) => `@${r.username}`).join(', ')}
+                  </p>
+                ) : null}
+              </section>
+
+              {!isOwnProfile && shouldEnableFollow && !isBlocked && !isBlockedByThem && profile?.id && !isLoadingStatus ? (
+                <AvatarDuo userId={String(profile.id)} name={displayName} isFollowing={!!isFollowing} followsYou={!!followsYou} />
+              ) : null}
+
+              {profile.id ? (
+                <ProfileRecognition
+                  userId={profile.id}
+                  firstName={profile.firstName || profile.username}
+                  isOwnProfile={isOwnProfile}
+                  canAct={!!currentUser && !isBlocked && !isBlockedByThem}
+                  avatarPortrait={(profile.gamification as { avatarPortrait?: string | null } | undefined)?.avatarPortrait ?? null}
+                />
+              ) : null}
+
+              <ProfileSnapFriends username={profile.username} isOwnProfile={isOwnProfile} followers={followerPreview} followerCount={followerCount} />
             </div>
           )}
 
-          {/* You and them (owner 2026-10-18): your avatars wave or hug as you follow each other. */}
-          {shouldEnableFollow && !isBlocked && !isBlockedByThem && profile?.id && !isLoadingStatus ? (
-            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] pb-3">
-              <AvatarDuo userId={String(profile.id)} name={displayName} isFollowing={!!isFollowing} followsYou={!!followsYou} />
-            </div>
-          ) : null}
 
-          <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px]">
-            <BrowseTabStrip
-              tabs={PROFILE_TABS}
-              activeId={tab}
-              onChange={(id) => changeTab(id as ProfileTab)}
-              trailing={
-                !isOwnProfile ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowTipModal(true)}
-                    className="tap-target ml-1 inline-flex h-9 items-center gap-1 rounded-full bg-amber-soft px-3 text-[13px] font-bold text-amber-ink"
-                  >
-                    <span aria-hidden>🪙</span> Tip
-                  </button>
-                ) : null
-              }
-            />
-          </div>
-
-          {tab === 'overview' && (
-            <>
-        <ProfileSnapStatsRow
-          username={profile.username}
-          isOwnProfile={isOwnProfile}
-          dateOfBirth={profile.dateOfBirth}
-          huudCoins={huudCoins}
-          followerCount={followerCount}
-          followingCount={followingCount}
-          vouchReceived={vouchMetrics?.received ?? vouchStatus?.vouchCount ?? 0}
-          vouchGiven={isOwnProfile ? (vouchMetrics?.given ?? 0) : 0}
-        />
-
-        <ProfileSnapPlusCard
-          username={profile.username}
-          isOwnProfile={isOwnProfile}
-          trustScore={trustScore}
-          trustLabel={profileTrustTier.label}
-          level={level}
-          levelName={profile.gamification?.standing}
-        />
-
-        <ProfileSnapHub
-          isOwnProfile={isOwnProfile}
-          onCreatePost={handleCreatePost}
-          showPinPrompt={!hasMapLocation}
-        />
-
-        {profile.id ? (
-          <ProfileRecognition
-            userId={profile.id}
-            firstName={profile.firstName || profile.username}
-            isOwnProfile={isOwnProfile}
-            canAct={!!currentUser && !isBlocked && !isBlockedByThem}
-            avatarPortrait={(profile.gamification as { avatarPortrait?: string | null } | undefined)?.avatarPortrait ?? null}
-          />
-        ) : null}
-
+          {tab === 'trust' && (
+            <div className="flex flex-col">
         {!isOwnProfile && !isBlocked && !isBlockedByThem && currentUser && (
-          <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t border-gray-100 mt-4 pt-4 px-3">
+          <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] mt-3 rounded-[22px] bg-white p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)] px-3">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
@@ -924,7 +1001,7 @@ export default function ProfilePage() {
                   <span>{vouchStatus?.vouchCount ?? 0} / 3 vouches</span>
                 </div>
                 <progress
-                  className="h-1.5 w-full overflow-hidden rounded-full accent-blue-600 bg-gray-100"
+                  className="h-1.5 w-full overflow-hidden rounded-full accent-[#0E8A3E] bg-gray-100"
                   value={Math.min(100, ((vouchStatus?.vouchCount ?? 0) / 3) * 100)}
                   max={100}
                   aria-label="Vouch progress to Tree tier"
@@ -934,98 +1011,12 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <ProfileSnapFriends
-          username={profile.username}
-          isOwnProfile={isOwnProfile}
-          followers={followerPreview}
-          followerCount={followerCount}
-        />
 
-        <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t border-slate-100 mt-4 pt-4">
-          <div className="px-3">
-            <div className="flex items-start justify-between gap-3">
-              <ProfileBrowseEyebrow>About this NeyburH</ProfileBrowseEyebrow>
-              {isOwnProfile ? (
-                <Link href="/settings" className="text-xs font-bold text-blue-600 no-underline hover:underline">
-                  Edit bio
-                </Link>
-              ) : null}
-            </div>
-            <p className="mt-3 text-[14px] leading-relaxed text-gray-600 font-medium">
-              {profile.bio || `${displayName} is part of the ${locationLabel || 'NeyborHuud'} community.`}
-            </p>
-          </div>
-        </div>
-
-        {(showHandleHistory || (!isOwnProfile && (followsYou || isMutual))) && (
-          <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] border-t border-slate-100 mt-4 pt-4">
-            <div className="px-3 flex flex-col gap-4">
-              {showHandleHistory ? (
-                <div>
-                  <div className="pb-2">
-                    <ProfileBrowseEyebrow>Handle history</ProfileBrowseEyebrow>
-                  </div>
-                  {renameAudit.length > 0 ? (
-                    <ul className="space-y-2 text-xs text-gray-700">
-                      {renameAudit.map((row, idx) => (
-                        <li key={`${row.previousUsername}-${row.newUsername}-${idx}`} className="font-semibold">
-                          <span className="font-mono text-emerald-600">@{row.previousUsername}</span>
-                          {' → '}
-                          <span className="font-mono text-slate-800">@{row.newUsername}</span>
-                          {row.changedAt ? (
-                            <span className="block text-[10px] text-gray-400 font-normal mt-0.5">
-                              {new Date(row.changedAt).toLocaleString()}
-                            </span>
-                          ) : null}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : hist.usernameTimeline && hist.usernameTimeline.length > 0 ? (
-                    <ul className="space-y-2 text-xs text-gray-700">
-                      {hist.usernameTimeline.map((row, idx) => (
-                        <li key={`${row.username}-${idx}`} className="font-semibold">
-                          <span className="font-mono text-slate-800">@{row.username}</span>
-                          <span className="block text-[10px] text-gray-400 font-normal mt-0.5">
-                            {new Date(row.effectiveFrom).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
-                            {row.effectiveTo
-                              ? ` – ${new Date(row.effectiveTo).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                              : ' – current'}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
-              ) : null}
-              {!isOwnProfile && (followsYou || isMutual) && (
-                <div className="flex flex-wrap gap-2">
-                  {isMutual ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-100 px-3 py-1.5 text-xs font-bold text-blue-600">
-                      <span className="material-symbols-outlined text-[14px]">link</span>
-                      Mutual follow
-                    </span>
-                  ) : followsYou ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600">
-                      <span className="material-symbols-outlined text-[14px]">person_check</span>
-                      Follows you
-                    </span>
-                  ) : null}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-            </>
-          )}
-
-
-          {tab === 'trust' && (
-            <div className="flex flex-col">
               {/* TrustOS Info */}
               <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] py-6 px-3">
                 <div className="flex items-center justify-between gap-3 mb-4">
                   <ProfileBrowseEyebrow>TrustOS</ProfileBrowseEyebrow>
-                  <span className="material-symbols-outlined text-[20px] text-blue-600">verified_user</span>
+                  <span className="material-symbols-outlined text-[20px] text-brand-green-dark">verified_user</span>
                 </div>
                 <div className="flex items-baseline gap-2.5">
                   <p className="text-5xl font-black tracking-tight text-gray-900 leading-none tabular-nums">{trustScore}</p>
@@ -1050,7 +1041,7 @@ export default function ProfilePage() {
                     <span>{scorePercent}%</span>
                   </div>
                   <progress
-                    className="h-2 w-full overflow-hidden rounded-full accent-blue-600 bg-gray-100"
+                    className="h-2 w-full overflow-hidden rounded-full accent-[#0E8A3E] bg-gray-100"
                     value={scorePercent}
                     max={100}
                     aria-label="Community trust progress"
@@ -1097,7 +1088,7 @@ export default function ProfilePage() {
                   <div className="space-y-2 mt-3">
                     {profilePrivileges.privilegeList.slice(0, 4).map((p) => (
                       <div key={p.label} className={`flex items-center gap-2 text-xs font-semibold ${p.unlocked ? 'text-gray-700' : 'text-gray-400'}`}>
-                        <span className={`material-symbols-outlined text-[15px] ${p.unlocked ? 'text-blue-500' : 'text-gray-300'}`}
+                        <span className={`material-symbols-outlined text-[15px] ${p.unlocked ? 'text-brand-green-dark' : 'text-gray-300'}`}
                           style={{ fontVariationSettings: "'FILL' 1" }}>
                           {p.unlocked ? 'check_circle' : 'cancel'}
                         </span>
@@ -1145,7 +1136,7 @@ export default function ProfilePage() {
                   <div className="space-y-2.5">
                     {profileFacts.map((fact) => (
                       <div key={`side-${fact.label}`} className="flex items-center gap-3 bg-gray-50/60 border border-gray-100/50 rounded-2xl px-4 py-3 hover:bg-gray-50 transition-colors">
-                        <span className="material-symbols-outlined text-[18px] text-blue-500">{fact.icon}</span>
+                        <span className="material-symbols-outlined text-[18px] text-brand-green-dark">{fact.icon}</span>
                         <div className="min-w-0">
                           <p className="text-[13px] font-bold text-gray-400">{fact.label}</p>
                           <p className="text-sm font-extrabold text-gray-800 capitalize mt-0.5">{fact.value}</p>
@@ -1176,7 +1167,7 @@ export default function ProfilePage() {
                   <div className="mt-4 space-y-2.5">
                     {verificationProgress.axes.map((axis) => (
                       <div key={axis.id} className="flex items-center gap-3 bg-gray-50/60 border border-gray-100/50 rounded-2xl px-4 py-3 hover:bg-gray-50 transition-colors">
-                        <span className="material-symbols-outlined text-[18px] text-blue-500">
+                        <span className="material-symbols-outlined text-[18px] text-brand-green-dark">
                           {axis.done ? 'check_circle' : 'pending'}
                         </span>
                         <div className="min-w-0 flex-1">
@@ -1187,13 +1178,13 @@ export default function ProfilePage() {
                             {axis.detail}
                           </p>
                         </div>
-                        <span className="text-xs font-bold tabular-nums text-blue-600">{axis.percent}%</span>
+                        <span className="text-xs font-bold tabular-nums text-brand-green-dark">{axis.percent}%</span>
                       </div>
                     ))}
                   </div>
                   {verificationProgress.blockers.length > 0 ? (
                     <div className="mt-4 rounded-2xl border border-blue-100/50 bg-blue-50/30 px-4 py-3">
-                      <p className="text-[13px] font-bold text-blue-600">Next steps</p>
+                      <p className="text-[13px] font-bold text-brand-green-dark">Next steps</p>
                       <ul className="mt-1.5 space-y-1.5 text-xs font-semibold text-gray-500">
                         {verificationProgress.blockers.slice(0, 4).map((item) => (
                           <li key={item}>• {item}</li>
@@ -1219,7 +1210,7 @@ export default function ProfilePage() {
                       { label: 'Gold trust earned', done: profileCommunityVerified },
                     ].map((item) => (
                       <div key={item.label} className="flex items-center gap-3 bg-gray-50/60 border border-gray-100/50 rounded-2xl px-4 py-3 hover:bg-gray-50 transition-colors">
-                        <span className="material-symbols-outlined text-[18px] text-blue-500">{item.done ? 'check_circle' : 'pending'}</span>
+                        <span className="material-symbols-outlined text-[18px] text-brand-green-dark">{item.done ? 'check_circle' : 'pending'}</span>
                         <div>
                           <p className="text-[13px] font-bold text-gray-400">Status</p>
                           <p className="text-sm font-extrabold text-gray-800 mt-0.5">{item.label}</p>
@@ -1251,7 +1242,7 @@ export default function ProfilePage() {
                       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                         {myBadges.slice(0, 4).map((badge: any, i: number) => (
                           <div key={badge.id ?? badge._id ?? i} className="flex flex-col justify-between bg-gray-50/50 hover:bg-gray-50/80 border border-gray-100/50 rounded-2xl p-4 transition-all duration-200 min-h-[120px]">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 border border-blue-100 text-blue-600 shadow-sm">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 border border-blue-100 text-brand-green-dark shadow-sm">
                               <span className="material-symbols-outlined text-[21px]">{badge.icon ?? 'military_tech'}</span>
                             </div>
                             <div className="mt-3">
@@ -1339,7 +1330,7 @@ export default function ProfilePage() {
                       href="/huud-economy/score"
                       className="flex items-center gap-3.5 border border-gray-100 bg-gray-50/30 rounded-2xl p-4 no-underline transition-all hover:bg-gray-50 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
                     >
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-blue-600">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-brand-green-dark">
                         <span className="material-symbols-outlined text-[20px]">emoji_events</span>
                       </div>
                       <div className="min-w-0">
@@ -1351,7 +1342,7 @@ export default function ProfilePage() {
                       href="/huud-economy/wallet"
                       className="flex items-center gap-3.5 border border-gray-100 bg-gray-50/30 rounded-2xl p-4 no-underline transition-all hover:bg-gray-50 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
                     >
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-blue-600">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-brand-green-dark">
                         <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
                       </div>
                       <div className="min-w-0">
@@ -1394,7 +1385,7 @@ export default function ProfilePage() {
                         <ProfileBrowseEyebrow>Jobs</ProfileBrowseEyebrow>
                         <ProfileBrowseSectionTitle>Posted by {isOwnProfile ? 'you' : displayName}</ProfileBrowseSectionTitle>
                       </div>
-                      <Link href={userId ? `/jobs?employerId=${userId}` : '/jobs'} className="text-xs font-bold text-blue-600 no-underline hover:underline">See all</Link>
+                      <Link href={userId ? `/jobs?employerId=${userId}` : '/jobs'} className="text-xs font-bold text-brand-green-dark no-underline hover:underline">See all</Link>
                     </div>
                     <div className="space-y-2.5">
                       {userJobs.map((job: any, i: number) => (
@@ -1403,7 +1394,7 @@ export default function ProfilePage() {
                           href={`/jobs/${job.id ?? job._id}`}
                           className="flex items-start gap-3.5 border-b border-slate-100 py-3.5 no-underline transition-all hover:opacity-85"
                         >
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-50 border border-slate-100 text-blue-600">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-50 border border-slate-100 text-brand-green-dark">
                             <span className="material-symbols-outlined text-[19px]">work</span>
                           </div>
                           <div className="min-w-0 flex-1">
@@ -1430,7 +1421,7 @@ export default function ProfilePage() {
                         <ProfileBrowseEyebrow>Events</ProfileBrowseEyebrow>
                         <ProfileBrowseSectionTitle>Organised by {isOwnProfile ? 'you' : displayName}</ProfileBrowseSectionTitle>
                       </div>
-                      <Link href={userId ? `/events?organizerId=${userId}` : '/events'} className="text-xs font-bold text-blue-600 no-underline hover:underline">See all</Link>
+                      <Link href={userId ? `/events?organizerId=${userId}` : '/events'} className="text-xs font-bold text-brand-green-dark no-underline hover:underline">See all</Link>
                     </div>
                     <div className="space-y-2.5">
                       {userEvents.map((event: any, i: number) => (
@@ -1465,7 +1456,7 @@ export default function ProfilePage() {
                         <ProfileBrowseEyebrow>Services</ProfileBrowseEyebrow>
                         <ProfileBrowseSectionTitle>{isOwnProfile ? 'Your' : `${displayName}'s`} service offerings</ProfileBrowseSectionTitle>
                       </div>
-                      <Link href={userId ? `/services?providerId=${userId}` : '/services'} className="text-xs font-bold text-blue-600 no-underline hover:underline">See all</Link>
+                      <Link href={userId ? `/services?providerId=${userId}` : '/services'} className="text-xs font-bold text-brand-green-dark no-underline hover:underline">See all</Link>
                     </div>
                     <div className="space-y-2.5">
                       {userServices.map((service: any, i: number) => (
@@ -1484,7 +1475,7 @@ export default function ProfilePage() {
                               {service.pricing?.amount ? ` · ₦${fromKobo(Number(service.pricing.amount)).toLocaleString()}` : service.pricing?.type === 'custom' ? ' · Custom price' : ''}
                             </p>
                           </div>
-                          <div className="flex shrink-0 items-center gap-0.5 text-xs font-bold text-blue-600 mt-1">
+                          <div className="flex shrink-0 items-center gap-0.5 text-xs font-bold text-brand-green-dark mt-1">
                             <span className="material-symbols-outlined text-[14px]">star</span>
                             {service.rating ? service.rating.toFixed(1) : 'New'}
                           </div>
@@ -1503,7 +1494,7 @@ export default function ProfilePage() {
                         <ProfileBrowseEyebrow>Marketplace</ProfileBrowseEyebrow>
                         <ProfileBrowseSectionTitle>{isOwnProfile ? 'Your' : `${displayName}'s`} listings</ProfileBrowseSectionTitle>
                       </div>
-                      <Link href={userId ? `/marketplace?sellerId=${userId}` : '/marketplace'} className="text-xs font-bold text-blue-600 no-underline hover:underline">See all</Link>
+                      <Link href={userId ? `/marketplace?sellerId=${userId}` : '/marketplace'} className="text-xs font-bold text-brand-green-dark no-underline hover:underline">See all</Link>
                     </div>
                     <div className="space-y-2.5">
                       {userMarketplace.map((item: any, i: number) => (
@@ -1522,7 +1513,7 @@ export default function ProfilePage() {
                               {item.price != null ? ` · ₦${fromKobo(Number(item.price)).toLocaleString()}` : ''}
                             </p>
                           </div>
-                          <span className="shrink-0 text-xs font-bold capitalize text-blue-600 mt-1">
+                          <span className="shrink-0 text-xs font-bold capitalize text-brand-green-dark mt-1">
                             {item.condition ?? 'listed'}
                           </span>
                         </Link>
@@ -1608,70 +1599,7 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {tab === 'saved' && (
-            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 py-5 flex flex-col items-center justify-center gap-4 min-h-[200px]">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 border border-rose-100 text-rose-500">
-                <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>bookmark</span>
-              </div>
-              <div className="text-center">
-                <p className="text-[15px] font-extrabold text-slate-800">Your Saved Posts</p>
-                <p className="text-[13px] font-medium text-slate-400 mt-1">Posts and content you have bookmarked</p>
-              </div>
-              <Link
-                href="/saved"
-                className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white hover:bg-slate-800 px-6 py-2.5 text-sm font-bold transition no-underline"
-              >
-                <span className="material-symbols-outlined text-[16px]">bookmark</span>
-                Open Saved
-              </Link>
-            </div>
-          )}
-
-          {tab === 'economy' && (
-            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 py-5 flex flex-col items-center justify-center gap-4 min-h-[200px]">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 border border-amber-100 text-amber-500">
-                <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance_wallet</span>
-              </div>
-              <div className="text-center">
-                <p className="text-[15px] font-extrabold text-slate-800">Huud Economy</p>
-                <p className="text-[13px] font-medium text-slate-400 mt-1">Your HuudCredit, wallet, badges and gamification stats</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/huud-economy/wallet"
-                  className="inline-flex items-center gap-2 rounded-full bg-amber-500 text-white hover:bg-amber-600 px-5 py-2.5 text-sm font-bold transition no-underline"
-                >
-                  <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
-                  Wallet
-                </Link>
-                <Link
-                  href="/huud-economy/score"
-                  className="inline-flex items-center gap-2 rounded-full bg-slate-100 text-slate-800 hover:bg-slate-200 px-5 py-2.5 text-sm font-bold transition no-underline"
-                >
-                  <span className="material-symbols-outlined text-[16px]">military_tech</span>
-                  Badges
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {tab === 'street_radar' && (
-            <div className="mx-auto w-[calc(100%-1.5rem)] max-w-[600px] px-3 py-5 flex flex-col items-center justify-center gap-4 min-h-[200px]">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 border border-teal-100 text-teal-600">
-                <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>radar</span>
-              </div>
-              <div className="text-center">
-                <p className="text-[15px] font-extrabold text-slate-800">Street Radar</p>
-                <p className="text-[13px] font-medium text-slate-400 mt-1">Trending posts and local news in your Huud</p>
-              </div>
-              <Link
-                href="/feed"
-                className="inline-flex items-center gap-2 rounded-full bg-teal-600 text-white hover:bg-teal-700 px-6 py-2.5 text-sm font-bold transition no-underline"
-              >
-                <span className="material-symbols-outlined text-[16px]">radar</span>
-                Open Street Radar
-              </Link>
-            </div>
+          </>
           )}
         </div>
 
@@ -1711,6 +1639,77 @@ export default function ProfilePage() {
           }}
         />
       )}
+
+      <AppBottomSheet open={moreOpen} onClose={() => setMoreOpen(false)} title={displayName}>
+        <div className="flex flex-col gap-1 pb-2">
+          {[
+            !isBlocked && !isBlockedByThem && currentUser
+              ? { icon: 'handshake', label: vouchStatus?.hasVouched ? 'Remove your vouch' : 'Vouch for this neighbour', on: () => { setMoreOpen(false); handleVouchClick(); } }
+              : null,
+            currentUser && !isBlocked ? { icon: 'toll', label: 'Send a tip', on: () => { setMoreOpen(false); setShowTipModal(true); } } : null,
+            { icon: 'share', label: 'Share profile', on: () => { setMoreOpen(false); void handleShareProfile(); } },
+            currentUser && !isBlockedByThem ? { icon: 'block', label: isBlocked ? 'Unblock' : 'Block', danger: !isBlocked, on: () => { setMoreOpen(false); toggleBlock(); } } : null,
+            currentUser ? { icon: 'flag', label: 'Report', danger: true, on: () => { setMoreOpen(false); setReportOpen(true); } } : null,
+          ].filter(Boolean).map((a) => (
+            <button
+              key={a!.label}
+              type="button"
+              onClick={a!.on}
+              disabled={a!.icon === 'handshake' && isVouchPending}
+              className={`flex min-h-12 items-center gap-3 rounded-2xl px-3 text-left text-[15px] font-bold hover:bg-background ${a!.danger ? 'text-brand-red' : 'text-navy'}`}
+            >
+              <span className="material-symbols-outlined text-[22px]" aria-hidden>{a!.icon}</span>
+              {a!.label}
+            </button>
+          ))}
+        </div>
+      </AppBottomSheet>
+
+      <AppBottomSheet
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        title={`Report ${displayName}`}
+        description="Our team checks every report. They won't know it was you."
+        footer={
+          <Button
+            fullWidth
+            variant="danger"
+            disabled={!reportReason}
+            loading={reporting}
+            onClick={async () => {
+              if (!userId) return;
+              setReporting(true);
+              try {
+                await apiClient.post(`/social/users/${userId}/report`, { reason: reportReason });
+                toast.success('Thanks. Our team will look at it.');
+                setReportOpen(false);
+                setReportReason('');
+              } catch (err) {
+                toast.error(getErrorMessage(err));
+              } finally {
+                setReporting(false);
+              }
+            }}
+          >
+            Send report
+          </Button>
+        }
+      >
+        <div className="flex flex-col gap-1 pb-2" role="radiogroup" aria-label="Reason">
+          {[
+            ['scam', 'Scam or fake deal'],
+            ['harassment', 'Harassment or bullying'],
+            ['threat', 'Threats or danger'],
+            ['fake_account', 'Fake account or pretending to be someone'],
+            ['other', 'Something else'],
+          ].map(([value, label]) => (
+            <label key={value} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl px-3 text-[15px] font-semibold text-navy hover:bg-background">
+              <input type="radio" name="report-reason" value={value} checked={reportReason === value} onChange={() => setReportReason(value)} className="h-5 w-5 accent-[#E5484D]" />
+              {label}
+            </label>
+          ))}
+        </div>
+      </AppBottomSheet>
 
       {showTipModal && profile?.id && (
         <TipModal

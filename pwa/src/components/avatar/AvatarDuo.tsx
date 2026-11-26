@@ -51,8 +51,8 @@ export function AvatarDuo({ userId, name, isFollowing, followsYou }: { userId: s
     return (id: string | undefined, fb: string) => (id && by.get(id)?.color) || fb;
   }, [cat]);
   const mode = modeFor(isFollowing, followsYou, data?.sameGender ?? null);
-  const meCfg = useMemo(() => (cat ? { ...cat.defaults, ...(data?.me?.config ?? {}) } : null), [cat, data]);
-  const themCfg = useMemo(() => (cat ? { ...cat.defaults, ...(data?.them?.config ?? {}) } : null), [cat, data]);
+  const meCfg = useMemo(() => (cat?.defaults ? { ...cat.defaults, ...(data?.me?.config ?? {}) } : null), [cat, data]);
+  const themCfg = useMemo(() => (cat?.defaults ? { ...cat.defaults, ...(data?.them?.config ?? {}) } : null), [cat, data]);
   const latest = useRef({ meCfg, themCfg, mode });
   useEffect(() => {
     latest.current = { meCfg, themCfg, mode };

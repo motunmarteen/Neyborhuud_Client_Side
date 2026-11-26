@@ -32,7 +32,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
 | 3. Map home (sky + live map) | 14 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; low-data mode, speed done; left: M-14 crown (waits on Phase 7), M-17 living map, mockup extras |
-| 4. Screens (restyle all 95) | 72 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel and Marketplace and Work, Events and help done; Me next |
+| 4. Screens (restyle all 95) | 87 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel and Marketplace and Me (profile, settings) done; Info and admin next |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
 | 7. Gamification backend | 18 | 18 | ✅ done 2026-10-18 (server + app); airtime/data and contributor payouts wait for the legal check |
@@ -318,21 +318,21 @@ Shared pieces restyled with this group (used by later groups too): list-page hea
 
 ### Me: profile, rewards, settings (15)
 
-- [ ] S-074 `/huud-economy` → Me → HuudCredit, rewards, score (🪙 in top bar)
-- [ ] S-075 `/huud-economy/score` → Me → HuudCredit, rewards, score (🪙 in top bar)
-- [ ] S-076 `/huud-economy/wallet` → Me → HuudCredit, rewards, score (🪙 in top bar)
-- [ ] S-077 `/premium/success` → Me → Premium
-- [ ] S-078 `/profile/[username]` → Me → profile, passport, followers
-- [ ] S-079 `/profile/[username]/followers` → Me → profile, passport, followers
-- [ ] S-080 `/profile/[username]/following` → Me → profile, passport, followers
-- [ ] S-081 `/profile/passport` → Me → profile, passport, followers
-- [ ] S-082 `/rewards` → Me → HuudCredit, rewards, score (🪙 in top bar)
-- [ ] S-083 `/settings` → Me → Settings
-- [ ] S-084 `/settings/blocked` → Me → Settings
-- [ ] S-085 `/settings/location` → Me → Settings
-- [ ] S-086 `/settings/password` → Me → Settings
-- [ ] S-087 `/settings/payout` → Me → Settings
-- [ ] S-088 `/settings/places` → Me → Settings
+- [x] S-074 (2026-11-26) `/huud-economy` → Me → HuudCredit, rewards, score (🪙 in top bar): plain tabs, readable labels
+- [x] S-075 (2026-11-26) `/huud-economy/score` → Me → HuudCredit, rewards, score (🪙 in top bar): chips for its own sections; Rewards no longer breaks
+- [x] S-076 (2026-11-26) `/huud-economy/wallet` → Me → HuudCredit, rewards, score (🪙 in top bar): chips for its own sections
+- [x] S-077 (2026-11-26) `/premium/success` → Me → Premium: light (was a dark screen)
+- [x] S-078 (2026-11-26) `/profile/[username]` → Me → profile, passport, followers: REBUILT: header card (photo, name, area, joined, badges, bio), numbers, Follow/Message/⋯ (vouch, tip, share, block, report), tabs Posts · Listings · Trust · About; home map removed; private profiles respected
+- [x] S-079 (2026-11-26) `/profile/[username]/followers` → Me → profile, passport, followers: plain tabs
+- [x] S-080 (2026-11-26) `/profile/[username]/following` → Me → profile, passport, followers: plain tabs
+- [x] S-081 (2026-11-26) `/profile/passport` → Me → profile, passport, followers: one back button
+- [x] S-082 (2026-11-26) `/rewards` → Me → HuudCredit, rewards, score (🪙 in top bar): loading error fixed
+- [x] S-083 (2026-11-26) `/settings` → Me → Settings: REBUILT: grouped list (Account, Your area, Notifications and privacy, App, Help) with its own pages; new Edit profile; saved choices now show; Show birthday switch
+- [x] S-084 (2026-11-26) `/settings/blocked` → Me → Settings: one back button
+- [x] S-085 (2026-11-26) `/settings/location` → Me → Settings: plain headings
+- [x] S-086 (2026-11-26) `/settings/password` → Me → Settings: plain button
+- [x] S-087 (2026-11-26) `/settings/payout` → Me → Settings: loading error fixed
+- [x] S-088 (2026-11-26) `/settings/places` → Me → Settings: plain headings
 
 ### Info and admin (7)
 
