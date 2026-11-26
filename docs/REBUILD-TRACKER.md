@@ -32,7 +32,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
 | 3. Map home (sky + live map) | 14 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; low-data mode, speed done; left: M-14 crown (waits on Phase 7), M-17 living map, mockup extras |
-| 4. Screens (restyle all 95) | 65 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel and Marketplace and Work done; Events and help next |
+| 4. Screens (restyle all 95) | 72 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel and Marketplace and Work, Events and help done; Me next |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
 | 7. Gamification backend | 18 | 18 | ✅ done 2026-10-18 (server + app); airtime/data and contributor payouts wait for the legal check |
@@ -308,13 +308,13 @@ Shared pieces restyled with this group (used by later groups too): list-page hea
 
 ### Events and help (7)
 
-- [ ] S-067 `/events` → Events layer on the map / Everything → Events / Me → My events
-- [ ] S-068 `/events/[id]` → Events layer on the map / Everything → Events / Me → My events
-- [ ] S-069 `/events/[id]/edit` → Events layer on the map / Everything → Events / Me → My events
-- [ ] S-070 `/events/my-events` → Events layer on the map / Everything → Events / Me → My events
-- [ ] S-071 `/events/nearby` → Events layer on the map / Everything → Events / Me → My events
-- [ ] S-072 `/help-request` → Help layer on the map / ➕ Help request
-- [ ] S-073 `/help-request/[id]` → Help layer on the map / ➕ Help request
+- [x] S-067 (2026-11-26) `/events` → Events layer on the map / Everything → Events / Me → My events: one chip row with an "Any time" dropdown; Create event in the header card
+- [x] S-068 (2026-11-26) `/events/[id]` → Events layer on the map / Everything → Events / Me → My events: full-screen poster kept (reads well); unchanged
+- [x] S-069 (2026-11-26) `/events/[id]/edit` → Events layer on the map / Everything → Events / Me → My events: light fields and green Save (were dark navy boxes, blue button)
+- [x] S-070 (2026-11-26) `/events/my-events` → Events layer on the map / Everything → Events / Me → My events: Going / Hosting chips, Create event in the header card, plain empty state
+- [x] S-071 (2026-11-26) `/events/nearby` → Events layer on the map / Everything → Events / Me → My events: restyled radius chips
+- [x] S-072 (2026-11-26) `/help-request` → Help layer on the map / ➕ Help request: one chip row of kinds; Post request in the header card
+- [x] S-073 (2026-11-26) `/help-request/[id]` → Help layer on the map / ➕ Help request: readable labels
 
 ### Me: profile, rewards, settings (15)
 

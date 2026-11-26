@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LocalHuudSubpageShell } from "@/components/local-huud/LocalHuudSubpageShell";
+import { LocalHuudHubPrimaryAction } from "@/components/local-huud/LocalHuudHubHeader";
+import { ChipRow, FilterChip } from "@/components/ui/Chip";
+import { EmptyState } from "@/components/ui/EmptyState";
 import EventCard from "@/components/events/EventCard";
 import { useMyEvents, useMyOrganizedEvents, useAttendEvent, useBoostEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,42 +55,19 @@ export default function MyEventsPage() {
 
   return (
     <>
-      <LocalHuudSubpageShell hubId="events">
-        <div className="mod-card rounded-2xl p-4 space-y-4">
-          <div className="flex justify-end">
-            <Link
-              href="/events/create"
-              className="shrink-0 flex items-center gap-1 text-xs px-3 py-2 rounded-xl mod-chip mod-chip-active text-primary font-semibold"
+      <LocalHuudSubpageShell hubId="events" action={<LocalHuudHubPrimaryAction href="/events/create" label="Create event" />}>
+        <ChipRow label="My events">
+          {(["attending", "organizing"] as Tab[]).map((x) => (
+            <FilterChip
+              key={x}
+              active={tab === x}
+              onClick={() => setTab(x)}
+              count={x === "attending" ? attendingList.length : organizingList.length}
             >
-              <span className="material-symbols-outlined text-[14px]">add</span>
-              Create
-            </Link>
-          </div>
-
-          <div className="flex gap-2 rounded-2xl p-1 mod-inset">
-            {(["attending", "organizing"] as Tab[]).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`flex-1 py-2 rounded-xl text-sm font-bold capitalize transition-all ${
-                  tab === t ? "mod-chip mod-chip-active text-primary" : "mod-chip"
-                }`}
-              >
-                {t}
-                {t === "attending" && attendingList.length > 0 && (
-                  <span className="ml-1.5 bg-brand-blue text-white text-xs px-1.5 py-0.5 rounded-full">
-                    {attendingList.length}
-                  </span>
-                )}
-                {t === "organizing" && organizingList.length > 0 && (
-                  <span className="ml-1.5 bg-brand-blue text-white text-xs px-1.5 py-0.5 rounded-full">
-                    {organizingList.length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
+              {x === "attending" ? "Going" : "Hosting"}
+            </FilterChip>
+          ))}
+        </ChipRow>
 
         {activeQuery.isLoading && (
           <div className="space-y-3">
@@ -136,25 +116,12 @@ export default function MyEventsPage() {
         )}
 
         {!activeQuery.isLoading && activeList.length === 0 && (
-          <div className="mod-card rounded-2xl px-5 py-14 text-center">
-            <span className="material-symbols-outlined text-6xl" style={{ color: "var(--neu-text-muted)" }}>
-              {tab === "attending" ? "event_busy" : "calendar_add_on"}
-            </span>
-            <h3 className="text-xl font-bold mt-4 mb-2" style={{ color: "var(--neu-text)" }}>
-              {tab === "attending" ? "No events RSVPed" : "No events organised"}
-            </h3>
-            <p className="mb-6" style={{ color: "var(--neu-text-muted)" }}>
-              {tab === "attending"
-                ? "Browse events and RSVP to ones you're interested in"
-                : "Host your first event for the community"}
-            </p>
-            <Link
-              href={tab === "attending" ? "/events" : "/events/create"}
-              className="inline-block px-6 py-2.5 rounded-xl mod-chip mod-chip-active text-primary font-semibold"
-            >
-              {tab === "attending" ? "Browse Events" : "Create Event"}
-            </Link>
-          </div>
+          <EmptyState
+            icon={tab === "attending" ? "🎉" : "📅"}
+            title={tab === "attending" ? "You are not going to anything yet" : "You have not hosted an event yet"}
+            description={tab === "attending" ? "Find something happening near you and tap I'm going." : "Host a meeting, a party or a clean-up for your area."}
+            action={{ label: tab === "attending" ? "See events" : "Create event", href: tab === "attending" ? "/events" : "/events/create" }}
+          />
         )}
       </LocalHuudSubpageShell>
 

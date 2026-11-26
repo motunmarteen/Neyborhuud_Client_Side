@@ -188,34 +188,34 @@ export default function EditEventPage() {
 
             {/* Title */}
             <div>
-              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Event Title *</label>
+              <label className="mb-1.5 block text-sm font-bold text-navy">Event Title *</label>
               <input
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
+                className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
               />
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Description *</label>
+              <label className="mb-1.5 block text-sm font-bold text-navy">Description *</label>
               <textarea
                 required
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors resize-none"
+                className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px] resize-none"
               />
             </div>
 
             {/* Type */}
             <div>
-              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Event Type</label>
+              <label className="mb-1.5 block text-sm font-bold text-navy">Event Type</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as typeof EVENT_TYPES[number])}
-                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors"
+                className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
               >
                 {EVENT_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -228,48 +228,48 @@ export default function EditEventPage() {
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Start Date & Time *</label>
+                <label className="mb-1.5 block text-sm font-bold text-navy">Start Date & Time *</label>
                 <input
                   required
                   type="datetime-local"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors"
+                  className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
                 />
               </div>
               <div>
-                <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">End Date & Time</label>
+                <label className="mb-1.5 block text-sm font-bold text-navy">End Date & Time</label>
                 <input
                   type="datetime-local"
                   value={endDate}
                   min={startDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors"
+                  className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
                 />
               </div>
             </div>
 
             {/* Venue */}
             <div>
-              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Venue</label>
+              <label className="mb-1.5 block text-sm font-bold text-navy">Venue</label>
               <input
                 value={venue}
                 onChange={(e) => setVenue(e.target.value)}
                 placeholder="e.g. Town hall, GRA Phase 2"
-                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
+                className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
               />
             </div>
 
             {/* Capacity */}
             <div>
-              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Capacity (optional)</label>
+              <label className="mb-1.5 block text-sm font-bold text-navy">Capacity (optional)</label>
               <input
                 type="number"
                 min="1"
                 value={capacity}
                 onChange={(e) => setCapacity(e.target.value)}
                 placeholder="Leave blank for unlimited"
-                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
+                className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
               />
             </div>
 
@@ -281,7 +281,7 @@ export default function EditEventPage() {
                   type="button"
                   onClick={() => setIsFree((v) => !v)}
                   className={`w-12 h-6 rounded-full relative transition-colors ${
-                    isFree ? "bg-brand-green-dark" : "bg-brand-black"
+                    isFree ? "bg-brand-green-dark" : "bg-[#C9CFD8]"
                   }`}
                 >
                   <span
@@ -299,18 +299,18 @@ export default function EditEventPage() {
                   value={ticketPrice}
                   onChange={(e) => setTicketPrice(e.target.value)}
                   placeholder="Ticket price (₦)"
-                  className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
+                  className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
                 />
               )}
             </div>
 
             {/* Visibility */}
             <div>
-              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Visibility</label>
+              <label className="mb-1.5 block text-sm font-bold text-navy">Visibility</label>
               <select
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as typeof VISIBILITY_OPTIONS[number])}
-                className="w-full bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors"
+                className="w-full rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
               >
                 <option value="public">Public</option>
                 <option value="neighborhood">Neighborhood Only</option>
@@ -320,7 +320,7 @@ export default function EditEventPage() {
 
             {/* Tags */}
             <div>
-              <label className="block text-sm text-[var(--neu-text-muted)] mb-1.5">Tags (optional)</label>
+              <label className="mb-1.5 block text-sm font-bold text-navy">Tags (optional)</label>
               <div className="flex gap-2">
                 <input
                   value={tagInput}
@@ -332,12 +332,12 @@ export default function EditEventPage() {
                     }
                   }}
                   placeholder="Add a tag and press Enter"
-                  className="flex-1 bg-brand-black border border-black/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-[var(--neu-text-muted)] focus:outline-none focus:border-brand-blue transition-colors"
+                  className="flex-1 rounded-2xl border border-transparent bg-background px-4 py-3 text-base text-navy placeholder:text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-[15px]"
                 />
                 <button
                   type="button"
                   onClick={addTag}
-                  className="px-4 py-3 bg-brand-black hover:bg-brand-surface rounded-xl text-white transition-colors"
+                  className="rounded-full bg-white px-4 py-3 font-bold text-navy ring-1 ring-inset ring-line transition-colors hover:bg-[#F6F8FB]"
                 >
                   Add
                 </button>
@@ -347,7 +347,7 @@ export default function EditEventPage() {
                   {tags.map((t) => (
                     <span
                       key={t}
-                      className="flex items-center gap-1 bg-brand-black text-[var(--neu-text-muted)] rounded-full px-3 py-1 text-sm"
+                      className="flex items-center gap-1 rounded-full bg-green-soft px-3 py-1 text-sm font-bold text-brand-green-dark"
                     >
                       #{t}
                       <button
@@ -367,7 +367,7 @@ export default function EditEventPage() {
             <button
               type="submit"
               disabled={updateEvent.isPending}
-              className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue disabled:opacity-50 rounded-xl font-bold text-white transition-colors"
+              className="flex min-h-12 w-full items-center justify-center rounded-full bg-primary font-bold text-white shadow-[0_6px_16px_rgba(0,184,46,0.28)] transition-colors hover:bg-brand-green-dark disabled:bg-primary/40 disabled:shadow-none"
             >
               {updateEvent.isPending ? "Saving…" : "Save Changes"}
             </button>
