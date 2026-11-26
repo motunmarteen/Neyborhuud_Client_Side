@@ -23,6 +23,7 @@ import { chatService } from '@/services/chat.service';
 import { e2eeService } from '@/services/e2ee.service';
 import { ChatMessage, ChatMessageType, Conversation } from '@/types/api';
 import socketService from '@/lib/socket';
+import { playChatPop } from '@/lib/chatSound';
 import { toast } from '@/lib/toast';
 import ChatMessageCard from '@/components/chat/ChatMessageCard';
 import { EditMessageSheet } from '@/components/chat/EditMessageSheet';
@@ -683,7 +684,7 @@ export default function ConversationPage() {
     const mergeIncoming = (msg: ChatMessage, prev: ChatMessage[], tempIdx: number) => {
       const merged =
         tempIdx !== -1
-          ? { ...msg, senderId: prev[tempIdx].senderId }
+          ? { ...msg, senderId: prev[tempIdx].senderId, localKey: (prev[tempIdx] as any).localKey ?? prev[tempIdx].id }
           : msg;
       return enrichOutgoing(merged);
     };
@@ -704,6 +705,7 @@ export default function ConversationPage() {
           next[tempIdx] = mergeIncoming(msg, prev, tempIdx);
           return next;
         }
+        if (String(msg.senderId) !== String(user?.id)) playChatPop();
         return [...prev, enrichOutgoing(msg)];
       });
       chatService.markAsRead(conversationId).catch(() => {});
@@ -891,7 +893,8 @@ export default function ConversationPage() {
       replyToPreview,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: 'sent',
+      status: 'sending',
+      localKey: tempId,
       priority: 'normal',
       isDeleted: false,
       isEdited: false,
@@ -943,6 +946,7 @@ export default function ConversationPage() {
               ? enrichOutgoing({
                   ...sent,
                   id: sent.id || (sent as any)._id || tempId,
+                  localKey: tempId,
                   senderId: user?.id ?? sent.senderId,
                   // Prefer the server's replyToPreview (reflects current
                   // state) but keep the optimistic one as a fallback so the
@@ -960,10 +964,8 @@ export default function ConversationPage() {
     } catch (err: any) {
       const serverMsg = err?.response?.data?.message || err?.message || 'Failed to send message';
       toast.error(serverMsg);
-      // Remove the optimistic bubble and restore the text so the user doesn't lose their message
-      setMessages((prev) => prev.filter((m) => m.id !== tempId));
-      setInputText(content);
-      setReplyingTo(replyingTo);
+      // Keep the bubble, marked "not sent": tap it to try again (it used to disappear).
+      setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...m, status: 'failed' } : m)));
       // Restore textarea height
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -1121,6 +1123,28 @@ export default function ConversationPage() {
     }
   };
 
+  const retryMessage = async (failed: ChatMessage) => {
+    const key = failed.id;
+    setMessages((prev) => prev.map((m) => (m.id === key ? { ...m, status: 'sending' } : m)));
+    try {
+      const res = await chatService.sendMessage({ conversationId, content: failed.content ?? '', replyTo: failed.replyTo });
+      const payload = res.data as any;
+      const sent: ChatMessage | undefined = payload?.message ?? (payload?.duplicate ? undefined : payload);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === key
+            ? sent
+              ? enrichOutgoing({ ...sent, id: sent.id || (sent as any)._id || key, localKey: (m as any).localKey ?? key, senderId: user?.id ?? sent.senderId })
+              : { ...m, status: 'sent' }
+            : m,
+        ),
+      );
+    } catch {
+      setMessages((prev) => prev.map((m) => (m.id === key ? { ...m, status: 'failed' } : m)));
+      toast.error('Still not sent. Check your connection.');
+    }
+  };
+
   // ── Live location sharing (casual, distinct from emergency Live Tracking) ──
   // While the current user has an active, unexpired live-location message of
   // their own in this conversation, watch their position and push periodic
@@ -1169,6 +1193,8 @@ export default function ConversationPage() {
   }, [messages, user?.id]);
 
   // ── Groups ────────────────────────────────────────────────────────────────
+  // Messages from before you opened the chat load still; new ones arrive with motion.
+  const [openedAt] = useState(() => Date.now() - 20_000);
   const groups = groupByDate(messages, clientReady);
 
   const isIncident = conv?.type === 'incident';
@@ -1178,7 +1204,7 @@ export default function ConversationPage() {
   const readLabel = getOutgoingReadLabel(messages, user?.id, peerUserId);
   const headerSubtitle =
     conv?.type === 'direct' && readLabel
-      ? `${baseSubtitle} · ${readLabel}`
+      ? [baseSubtitle, readLabel].filter(Boolean).join(' · ')
       : baseSubtitle;
 
   const viewerScoped = (conv as { viewerScoped?: { expiresAt?: string } } | undefined)?.viewerScoped;
@@ -1510,9 +1536,11 @@ export default function ConversationPage() {
 
                       return (
                         <div
-                          key={id}
+                          key={(msg as any).localKey ?? id}
                           ref={isLastOverall ? lastMsgRef : undefined}
-                          className={`chat-row ${mine ? 'chat-row--out' : 'chat-row--in'}`}
+                          className={`chat-row ${mine ? 'chat-row--out' : 'chat-row--in'} ${
+                            Date.parse(msg.createdAt) > openedAt ? (mine ? 'chat-row--sent-new' : 'chat-row--arrived') : ''
+                          }`}
                         >
                           <ChatMessageCard
                             msg={msg}
@@ -1535,6 +1563,7 @@ export default function ConversationPage() {
                             onDeleteForEveryone={handleDeleteForEveryone}
                             onForward={setForwardingMsg}
                             canModerate={canModerate}
+                            onRetry={retryMessage}
                           />
                         </div>
                       );

@@ -9,6 +9,7 @@ import { authService } from '@/services/auth.service';
 import type { ConsentType, UserConsentRecord, AppLanguage } from '@/types/api';
 import { useTranslation } from '@/lib/i18n';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
+import { chatSoundOn, playChatPop, setChatSound } from '@/lib/chatSound';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import { isAdminUser } from '@/lib/adminAccess';
 import { EmailVerificationCard } from '@/components/auth/EmailVerificationCard';
@@ -140,6 +141,9 @@ interface UserSettings {
 }
 
 export default function SettingsPage() {
+  // Chat sound lives on this phone only (lib/chatSound). Read after start so the first draw matches.
+  const [chatSound, setChatSoundState] = useState(true);
+  useEffect(() => setChatSoundState(chatSoundOn()), []);
     const router = useRouter();
     const { t, language: currentLanguage, setLanguage, languageNames, availableLanguages } = useTranslation();
     const [activeTab, setActiveTab] = useState<SettingsTab>('notifications');
@@ -680,6 +684,16 @@ export default function SettingsPage() {
                   }}
                   label="Chat messages"
                   description="New messages from neighbours"
+                />
+                <ToggleSwitch
+                  enabled={chatSound}
+                  onChange={(val) => {
+                    setChatSoundState(val);
+                    setChatSound(val);
+                    if (val) playChatPop();
+                  }}
+                  label="Chat sounds"
+                  description="A soft pop when a message lands in an open chat (this phone)"
                 />
                 <ToggleSwitch
                   enabled={notifications.mentions}

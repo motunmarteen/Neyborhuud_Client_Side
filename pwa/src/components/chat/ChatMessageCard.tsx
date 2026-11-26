@@ -701,12 +701,12 @@ function TextBubble({
   const bubbleClass = isPriority
     ? 'rounded-[20px] bg-red-50 text-red-900 px-4 py-1.5 max-w-[280px] sm:max-w-xs border border-red-100'
     : mine
-      ? 'rounded-[20px] rounded-br-md bg-[#0B7A36] text-white px-4 py-2 max-w-[280px] sm:max-w-xs shadow-sm'
+      ? 'rounded-[20px] rounded-br-md bg-[linear-gradient(150deg,#0E8A3E_0%,#0B7A36_100%)] text-white px-4 py-2 max-w-[280px] sm:max-w-xs shadow-sm'
       : 'rounded-[20px] rounded-bl-md bg-white text-navy px-4 py-2 max-w-[280px] sm:max-w-xs shadow-sm';
 
   return (
     <div>
-      <div className={bubbleClass}>
+      <div className={`msg-bubble ${bubbleClass}`}>
         {isPriority ? (
           <p className="mb-1 text-[13px] font-bold text-red-600">Priority</p>
         ) : null}
@@ -739,6 +739,7 @@ function MessageStack({
   onDeleteForEveryone,
   onForward,
   canModerate,
+  onRetry,
   children,
 }: {
   msg: ChatMessage;
@@ -752,6 +753,7 @@ function MessageStack({
   onDeleteForEveryone?: (msg: ChatMessage) => void;
   onForward?: (msg: ChatMessage) => void;
   canModerate?: boolean;
+  onRetry?: (msg: ChatMessage) => void;
   children: ReactNode;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -850,6 +852,15 @@ function MessageStack({
           {children}
         </div>
       </div>
+      {mine && msg.status === 'failed' ? (
+        <button
+          type="button"
+          onClick={() => onRetry?.(msg)}
+          className="mt-1 inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-[12px] font-bold text-brand-red hover:bg-red-soft"
+        >
+          Not sent · Tap to try again
+        </button>
+      ) : null}
       {!msg.isDeleted ? (
         <MessageReactions
           msg={msg}
@@ -890,6 +901,7 @@ export default function ChatMessageCard({
   onDeleteForEveryone,
   onForward,
   canModerate,
+  onRetry,
 }: {
   msg: ChatMessage;
   mine: boolean;
@@ -902,6 +914,7 @@ export default function ChatMessageCard({
   onDeleteForEveryone?: (msg: ChatMessage) => void;
   onForward?: (msg: ChatMessage) => void;
   canModerate?: boolean;
+  onRetry?: (msg: ChatMessage) => void;
 }) {
   const isPriority = msg.priority === 'emergency';
   const textProps = { currentUserId, onReactionsUpdate };
@@ -919,6 +932,7 @@ export default function ChatMessageCard({
       onDeleteForEveryone={onDeleteForEveryone}
       onForward={onForward}
       canModerate={canModerate}
+      onRetry={onRetry}
     >
       {node}
     </MessageStack>
