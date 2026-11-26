@@ -9856,3 +9856,18 @@ html[data-joining] [data-map-menu] { display: none; }
   .huud-mark-pop { animation: huud-badge-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 }
 .msg-bubble { position: relative; }
+
+/* Sideways rows (chips, tabs, shortcuts) scroll only left and right (owner 2026-11-26).
+   A row with overflow-x set gets overflow-y "auto" from the browser, and the 48px invisible
+   touch area of each small chip (.tap-target::after) made it taller than the row, so the row
+   could slide up and down and cut the chips' tops. */
+.overflow-x-auto,
+.overflow-x-scroll,
+.browse-chip-row--scroll,
+.horizontal-carousel,
+.post-card-media-slider__track,
+.news-fx-strip__rates,
+.no-scrollbar[class*="overflow-x"] {
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+}
