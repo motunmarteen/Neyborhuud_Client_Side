@@ -32,7 +32,7 @@ The single place to see **what's done and what's next** in the complete rebuild:
 | 1. Infrastructure and accounts | 9 | 19 | 🟡 API live on HTTPS; owner items left |
 | 2. Design foundation | 22 | 23 | ✅ done (F-15b moves to the Phase 3 map home) |
 | 3. Map home (sky + live map) | 14 | 17 | 🟡 map home live at /huud; live pins, 3D buildings, street life, BRT, night lights, 3D billboards, go-slow traffic, area pulses, Today's Pulse done; low-data mode, speed done; left: M-14 crown (waits on Phase 7), M-17 living map, mockup extras |
-| 4. Screens (restyle all 95) | 87 | 95 | 🟡 Getting started + Home, map and feed done; Chats, communities and Sentinel and Marketplace and Me (profile, settings) done; Info and admin next |
+| 4. Screens (restyle all 95) | 95 | 95 | ✅ Getting started + Home, map and feed done; Chats, communities and Sentinel and Marketplace and all 95 screens done 2026-11-26 |
 | 5. Language rollout | 1 | 9 | 🟡 |
 | 6. Sentinel AI upgrades | 0 | 6 | ⬜ |
 | 7. Gamification backend | 18 | 18 | ✅ done 2026-10-18 (server + app); airtime/data and contributor payouts wait for the legal check |
@@ -336,13 +336,13 @@ Shared pieces restyled with this group (used by later groups too): list-page hea
 
 ### Info and admin (7)
 
-- [ ] S-089 `/admin` → Me → Admin (admins only)
-- [ ] S-090 `/admin/reports` → Me → Admin (admins only)
-- [ ] S-091 `/admin/users` → Me → Admin (admins only)
-- [ ] S-092 `/info/community-rules` → Me → Help & rules
-- [ ] S-093 `/info/nigeria-postal-codes` → Me → Help & rules
-- [ ] S-094 `/info/privacy-policy` → Me → Help & rules
-- [ ] S-095 `/info/terms-of-service` → Me → Help & rules
+- [x] S-089 (2026-11-26) `/admin` → Me → Admin (admins only): staff console kept dark on purpose; checked it loads
+- [x] S-090 (2026-11-26) `/admin/reports` → Me → Admin (admins only): staff console, checked
+- [x] S-091 (2026-11-26) `/admin/users` → Me → Admin (admins only): staff console, checked
+- [x] S-092 (2026-11-26) `/info/community-rules` → Me → Help & rules: readable app page when signed in (was the sign-up sheet with tiny text)
+- [x] S-093 (2026-11-26) `/info/nigeria-postal-codes` → Me → Help & rules: second back link removed
+- [x] S-094 (2026-11-26) `/info/privacy-policy` → Me → Help & rules: readable app page when signed in
+- [x] S-095 (2026-11-26) `/info/terms-of-service` → Me → Help & rules: readable app page when signed in
 
 Plus the panels and pop-ups that belong to these screens (post window, SOS sheet, offer sheet, share sheet, etc.): restyled together with their screen.
 

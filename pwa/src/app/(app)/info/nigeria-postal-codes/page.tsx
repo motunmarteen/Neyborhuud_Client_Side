@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { getApiUrl } from '@/lib/api';
 import TopNav from '@/components/navigation/TopNav';
 import LeftSidebar from '@/components/navigation/LeftSidebar';
@@ -38,12 +37,6 @@ export default function NigeriaPostalInfoPage() {
         <LeftSidebar />
         <div className="flex-1 overflow-y-auto">
       <div className="max-w-2xl mx-auto px-5 py-10 pb-16">
-        <Link
-          href="/signup"
-          className="text-[13px] font-bold text-brand-blue mb-6 inline-block"
-        >
-          ← Back
-        </Link>
 
         <h1 className="text-2xl font-semibold tracking-tight mb-3" style={{ color: 'var(--neu-text)' }}>
           Nigeria: states & postal code heads
