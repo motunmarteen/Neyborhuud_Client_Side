@@ -4,10 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
 import { isOnboardingOrAuthRoute } from '@/lib/appShellGates';
-import { VISITOR_ROUTES } from '@/lib/visitor';
+import { MEMBER_ONLY_ROUTES, VISITOR_ROUTES } from '@/lib/visitor';
 
 /** Visitors may look at these without signing in (the map home). */
-const visitorOk = (pathname: string) => VISITOR_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
+const under = (pathname: string, r: string) => pathname === r || pathname.startsWith(`${r}/`);
+const visitorOk = (pathname: string) =>
+  VISITOR_ROUTES.some((r) => under(pathname, r)) &&
+  !MEMBER_ONLY_ROUTES.some((r) => under(pathname, r)) &&
+  !pathname.endsWith('/edit');
 
 export function ClientRouteGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/';

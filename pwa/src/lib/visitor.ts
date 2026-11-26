@@ -25,4 +25,6 @@ export function signupHref(): string {
 }
 
 /** Pages a visitor may open without signing in. */
-export const VISITOR_ROUTES = ['/huud', '/alert'];
+export const VISITOR_ROUTES = ['/huud', '/alert', '/marketplace'];
+/** Inside a visitor route, these still need an account. */
+export const MEMBER_ONLY_ROUTES = ['/marketplace/create', '/marketplace/my-deals', '/marketplace/my-listings'];

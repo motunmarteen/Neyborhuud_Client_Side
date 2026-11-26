@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/Button";
 import { FilterChip } from "@/components/ui/Chip";
 import { useStarted } from "@/hooks/useStarted";
 import { toKobo, fromKobo } from "@/lib/currency";
+import apiClient from "@/lib/api-client";
 
 interface ProductFormProps {
   product?: Product;
@@ -69,6 +70,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
   const [imageUrls, setImageUrls] = useState<string[]>(product?.images || []);
   const [negotiable, setNegotiable] = useState(product?.negotiable ?? true);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -89,7 +91,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       newErrors.category = "Choose a category";
     }
 
-    if (!isEditing && images.length === 0 && imageUrls.length === 0) {
+    if (images.length === 0 && imageUrls.length === 0) {
       newErrors.images = "Add at least one photo";
     }
 
@@ -162,6 +164,17 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
     try {
       if (isEditing) {
+        let added: string[] = [];
+        if (images.length > 0) {
+          setUploading(true);
+          try {
+            const up = await apiClient.uploadFiles<{ files: { url: string }[] }>("/media/upload", images);
+            added = (up.data?.files ?? []).map((f) => f.url).filter(Boolean);
+          } finally {
+            setUploading(false);
+          }
+          if (added.length !== images.length) throw new Error("Photo upload failed");
+        }
         const result = await updateProduct.mutateAsync({
           productId: product.id,
           data: {
@@ -170,7 +183,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             price: toKobo(parseFloat(price)),
             category,
             condition: condition as any,
-            images: imageUrls,
+            images: [...imageUrls, ...added],
             location,
           },
         });
@@ -192,10 +205,11 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       }
     } catch (error) {
       console.error("Failed to save product:", error);
+      setErrors((prev) => ({ ...prev, images: images.length ? "Could not save. Check your connection and try again." : prev.images }));
     }
   };
 
-  const isPending = createProduct.isPending || updateProduct.isPending;
+  const isPending = createProduct.isPending || updateProduct.isPending || uploading;
 
   const photoCount = images.length + imageUrls.length;
   const fieldError = (key: string) =>
@@ -235,8 +249,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               </button>
             </div>
           ))}
-          {/* Saving an edit sends photo links only, so new photos are added when listing, not when editing. */}
-          {!isEditing && photoCount < 5 ? (
+          {photoCount < 5 ? (
             <label
               htmlFor="product-images"
               className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-line bg-background text-center text-[13px] font-bold text-brand-green-dark hover:border-primary"
@@ -247,7 +260,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           ) : null}
         </div>
         <input type="file" accept="image/*" multiple onChange={handleImageChange} className="sr-only" id="product-images" />
-        {isEditing ? <p className="mt-1.5 text-[13px] text-muted">You can remove photos here. To use new photos, list the item again.</p> : null}
         {fieldError('images')}
       </div>
 

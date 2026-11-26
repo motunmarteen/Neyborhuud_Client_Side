@@ -1,3 +1,4 @@
+import apiClient from "@/lib/api-client";
 /**
  * Marketplace Hook
  * Manages marketplace products with social features (likes, comments, CRUD)
@@ -739,6 +740,7 @@ export function useMyDeals(role?: "buying" | "selling") {
       return (payload?.deals ?? []) as import("@/services/marketplace.service").MyDeal[];
     },
     staleTime: 15_000,
+    enabled: apiClient.isAuthenticated(),
     refetchOnWindowFocus: true,
   });
 }
