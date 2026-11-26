@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
@@ -27,6 +28,14 @@ const GENDERS = [
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  // Your profile page keeps a copy for a few minutes: drop it so the change shows at once.
+  const refreshProfile = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] }),
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] }),
+    ]);
+  };
   const { user, mounted, updateProfile, uploadProfilePicture } = useClientAuthUser();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -73,6 +82,7 @@ export default function EditProfilePage() {
     setUploading(true);
     try {
       await uploadProfilePicture({ file: cropped });
+      await refreshProfile();
       toast.success('Photo updated');
     } catch {
       /* the upload shows its own error */
@@ -93,6 +103,7 @@ export default function EditProfilePage() {
         ...(gender ? { gender } : {}),
         ...(birthday ? { dateOfBirth: new Date(birthday).toISOString() } : {}),
       } as never);
+      await refreshProfile();
       toast.success('Profile saved');
       if (user?.username) router.push(`/profile/${user.username}`);
     } catch {
