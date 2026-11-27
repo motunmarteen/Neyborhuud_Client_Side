@@ -66,7 +66,7 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
   const pathname = usePathname() || '/';
   const scrollHidden = useScrollHideBottomNav();
   const router = useRouter();
-  const { phase: sosPhase, triggerSos } = useSos();
+  const { phase: sosPhase, triggerSos, activeSos } = useSos();
   const { data: messageUnreadCount = 0 } = useUnreadCount('message');
   const [createOpen, setCreateOpen] = useState(false);
   const [createSub, setCreateSub] = useState<'poll' | 'lost_found' | null>(null);
@@ -116,7 +116,9 @@ export function BottomNav({ hidden = false }: BottomNavProps) {
     router.push('/sentinel');
   };
 
-  const sosActive = sosPhase !== 'idle';
+  // Never show a red "SOS on" for a silent SOS: someone looking at the phone must not see it.
+  const sosActive =
+    (sosPhase === 'pending' || sosPhase === 'active') && activeSos?.visibilityMode !== 'silent';
   const isHome = pathname === '/huud' || pathname === '/';
   const isFeed = pathname === '/feed' || pathname.startsWith('/feed/');
   const isChats = pathname.startsWith('/friendship') || pathname.startsWith('/chat') || pathname.startsWith('/messages') || pathname.startsWith('/communities');

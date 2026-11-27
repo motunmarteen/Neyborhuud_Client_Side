@@ -12,6 +12,8 @@ type SosPageHeroProps = {
   offlineQueueStatus?: SosQueueStatus;
   /** A silent SOS must not visibly announce itself — no red styling, no "alert is live" copy. */
   visibilityMode?: 'normal' | 'silent';
+  /** A guardian drill: say "practice" everywhere so nobody mistakes it for a real emergency. */
+  isDrill?: boolean;
   onCancel?: () => void;
   onResolve?: () => void;
 };
@@ -41,6 +43,7 @@ export function SosPageHero({
   incidentHref,
   offlineQueueStatus,
   visibilityMode = 'normal',
+  isDrill = false,
   onCancel,
   onResolve,
 }: SosPageHeroProps) {
@@ -86,7 +89,9 @@ export function SosPageHero({
             {isSilent
               ? 'Everything is set'
               : isActive
-                ? 'Emergency alert is live'
+                ? isDrill
+                  ? 'Practice SOS is running'
+                  : 'Emergency alert is live'
                 : isPending
                   ? `Arming — ${secondsRemaining}s left`
                   : 'Help when you need it most'}
@@ -95,7 +100,9 @@ export function SosPageHero({
             {isSilent
               ? 'Tap below whenever you’re ready to close this out.'
               : isActive
-                ? `Guardians notified · Escalation ${escalationLevel}. Mark safe when you are out of danger.`
+                ? isDrill
+                  ? 'Your guardians got a practice alert. Nothing real was sent. End it when you’re done.'
+                  : `Guardians notified · Escalation ${escalationLevel}. Mark safe when you are out of danger.`
                 : isPending
                   ? 'Cancel now if this was accidental. After countdown, your circle is alerted.'
                   : 'Arm SOS with a countdown, practice with a drill, or long-press the red tab for silent alert.'}
@@ -149,7 +156,7 @@ export function SosPageHero({
                   isSilent ? 'bg-gray-800 hover:bg-gray-900 text-white' : 'bg-red-600 hover:bg-red-700 text-white'
                 }`}
               >
-                {isSilent ? 'Done' : "I'm safe now"}
+                {isSilent ? 'Done' : isDrill ? 'End practice' : "I'm safe now"}
               </button>
             </>
           )}

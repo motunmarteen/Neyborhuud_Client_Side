@@ -24,6 +24,7 @@ import { SosPanicPinBanner } from '@/components/sentinel/sos/SosPanicPinBanner';
 import { SosQuickActions } from '@/components/sentinel/sos/SosQuickActions';
 import { SosRecentHistory } from '@/components/sentinel/sos/SosRecentHistory';
 import { SosTriggerCard } from '@/components/sentinel/sos/SosTriggerCard';
+import { SosResponders } from '@/components/sentinel/sos/SosResponders';
 import { SentinelSectionHeader } from '@/components/sentinel/SentinelSectionHeader';
 import { useSos } from '@/hooks/useSos';
 
@@ -44,6 +45,7 @@ export default function SosPage() {
 
   const incidentHref = sos.activeSos?._id ? `/safety/incident/${sos.activeSos._id}` : undefined;
   const showTrigger = sos.phase === 'idle';
+  const isDrill = sos.activeSos?.isDrill === true;
 
   return (
     <>
@@ -74,6 +76,7 @@ export default function SosPage() {
               incidentHref={incidentHref}
               offlineQueueStatus={sos.offlineQueueStatus}
               visibilityMode={sos.activeSos?.visibilityMode}
+              isDrill={isDrill}
               onCancel={() => void sos.cancelSos('Cancelled from /sos page')}
               onResolve={() => void sos.resolveSos()}
             />
@@ -82,7 +85,15 @@ export default function SosPage() {
           {tab === 'now' && (
             <>
               <Call112Button className="mx-4 mt-3" />
-              {sos.phase === 'pending' || sos.phase === 'active' || sos.offlineQueueStatus === 'queued' || sos.offlineQueueStatus === 'failed' ? (
+              {sos.phase === 'active' && sos.activeSos?._id ? (
+                <SosResponders
+                  className="mx-4 mt-3"
+                  sosEventId={sos.activeSos._id}
+                  isDrill={isDrill}
+                  silent={sos.activeSos.visibilityMode === 'silent'}
+                />
+              ) : null}
+              {!isDrill && (sos.phase === 'pending' || sos.phase === 'active' || sos.offlineQueueStatus === 'queued' || sos.offlineQueueStatus === 'failed') ? (
                 <SosTextGuardians className="mx-4 mt-3" />
               ) : null}
               <SosGuardiansNotifiedCard notifyMeta={sos.notifyMeta} phase={sos.phase} />

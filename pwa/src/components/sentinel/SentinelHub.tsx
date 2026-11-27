@@ -78,6 +78,8 @@ function SosHoldCard({ guardians }: { guardians: number }) {
   const [p, setP] = useState(0);
   const [holding, setHolding] = useState(false);
   const active = sos.phase === 'active' || sos.phase === 'pending';
+  // A silent SOS looks like nothing is happening on this screen.
+  const shownActive = active && sos.activeSos?.visibilityMode !== 'silent';
   const { triggerSos } = sos;
   // While held: fill the ring; at 3 seconds, start the SOS (its countdown still lets you cancel).
   useEffect(() => {
@@ -119,16 +121,16 @@ function SosHoldCard({ guardians }: { guardians: number }) {
         }}
         onKeyUp={stop}
         onContextMenu={(e) => e.preventDefault()}
-        aria-label={active ? t('sentinel.sosOn') : t('sentinel.sosHoldAria')}
+        aria-label={shownActive ? t('sentinel.sosOn') : t('sentinel.sosHoldAria')}
         className="relative grid h-20 w-20 shrink-0 touch-none select-none place-items-center rounded-full bg-[#E5484D] text-lg font-black text-white shadow-[0_6px_18px_rgba(229,72,77,0.45)]"
         style={{ background: `conic-gradient(#8E1B1F ${p * 360}deg, #E5484D 0deg)` }}
       >
         <span className="grid h-[68px] w-[68px] place-items-center rounded-full bg-[#E5484D]">SOS</span>
       </button>
       <div className="min-w-0">
-        <p className="font-heading text-base font-black text-navy">{active ? t('sentinel.sosOn') : t('sentinel.sosHold')}</p>
+        <p className="font-heading text-base font-black text-navy">{shownActive ? t('sentinel.sosOn') : t('sentinel.sosHold')}</p>
         <p className="text-sm text-navy">
-          {active ? (
+          {shownActive ? (
             <Link href="/sos" className="font-bold text-[#B42318] underline">
               {t('sentinel.openSos')}
             </Link>
