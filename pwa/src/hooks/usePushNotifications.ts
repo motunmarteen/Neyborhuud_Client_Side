@@ -51,6 +51,13 @@ export interface UsePushNotificationsReturn {
   permission: PushPermissionState;
   /** Browser push subscription exists OR permission granted + acknowledged */
   isSubscribed: boolean;
+  /**
+   * This phone can really receive a push with the app closed: a live browser push
+   * subscription exists (or there's no service worker at all, as in local dev).
+   * isSubscribed also turns true on permission alone, which hid failed sign-ups
+   * behind "SOS alerts are on" (found in a live drill 2026-11-27).
+   */
+  pushReady: boolean;
   isRegistering: boolean;
   error: string | null;
   requestPermissionAndSubscribe: () => Promise<boolean>;
@@ -65,6 +72,7 @@ export interface UsePushNotificationsReturn {
 export function usePushNotifications(): UsePushNotificationsReturn {
   const [permission, setPermission] = useState<PushPermissionState>('default');
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [pushReady, setPushReady] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const syncingRef = useRef(false);
@@ -75,6 +83,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
     if (perm === 'unsupported') {
       setIsSubscribed(false);
+      setPushReady(false);
       return;
     }
 
@@ -96,6 +105,8 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         hasPushSubscription = false;
       }
     }
+
+    setPushReady(perm === 'granted' && (registration ? hasPushSubscription : true));
 
     let backendSynced = false;
     try {
@@ -157,6 +168,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
           // ignore
         }
         setIsSubscribed(true);
+        setPushReady(true);
         return true;
       }
 
@@ -181,6 +193,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
           );
           setError('Push notifications are not configured on this deployment.');
           setIsSubscribed(false);
+          setPushReady(false);
           return false;
         }
 
@@ -208,10 +221,12 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       }
 
       setIsSubscribed(true);
+      setPushReady(true);
       return true;
     } catch (err: unknown) {
       console.error('[Push] Subscription failed:', err);
       setError(getErrorText(err));
+      setPushReady(false);
       if (readBrowserPermission() === 'granted') {
         try {
           localStorage.setItem(PERMISSION_ACK_KEY, '1');
@@ -268,6 +283,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
   return {
     permission,
     isSubscribed,
+    pushReady,
     isRegistering,
     error,
     requestPermissionAndSubscribe,

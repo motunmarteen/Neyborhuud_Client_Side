@@ -15,7 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import socketService from '@/lib/socket';
 import { EMERGENCY_TEL } from '@/lib/emergency';
 
-type Ring = { sosEventId: string; name: string; silent: boolean; message?: string };
+type Ring = { sosEventId: string; name: string; silent: boolean; message?: string; drill?: boolean };
 
 const RING_FOR_MS = 40_000;
 const VIBRATION = [900, 400, 900, 400, 900, 400, 900, 400, 900];
@@ -114,12 +114,22 @@ export function SosIncomingCall() {
         message: typeof p?.message === 'string' ? p.message : undefined,
       });
     };
-    const bind = () => socketService.getSocket()?.on('safety:sos_alert', onAlert);
+    // A guardian drill rings the same way, clearly marked as practice.
+    const onDrill = (p: Record<string, unknown>) => {
+      if (String(p?.userId ?? '') === String(user.id)) return;
+      show({ sosEventId: String(p?.sosEventId ?? ''), name: String(p?.userName ?? 'Someone you protect'), silent: false, drill: true });
+    };
+    const bind = () => {
+      const s = socketService.getSocket();
+      s?.off('safety:sos_alert', onAlert).on('safety:sos_alert', onAlert);
+      s?.off('safety:sos_drill', onDrill).on('safety:sos_drill', onDrill);
+    };
     bind();
     const socket = socketService.getSocket();
     socket?.on('connect', bind);
     return () => {
       socketService.getSocket()?.off('safety:sos_alert', onAlert);
+      socketService.getSocket()?.off('safety:sos_drill', onDrill);
       socket?.off('connect', bind);
     };
   }, [user?.id, show]);
@@ -130,12 +140,13 @@ export function SosIncomingCall() {
     const onMsg = (e: MessageEvent) => {
       const m = e.data as { kind?: string; type?: string; data?: Record<string, unknown>; title?: string } | null;
       if (m?.kind !== 'nh-push' || !m.data?.sosEventId) return;
-      if (!['sos', 'sos_alert', 'sos_escalated', 'sos_ring'].includes(String(m.type))) return;
+      if (!['sos', 'sos_alert', 'sos_escalated', 'sos_ring', 'sos_drill'].includes(String(m.type))) return;
       show({
         sosEventId: String(m.data.sosEventId),
         name: typeof m.data.userName === 'string' && m.data.userName ? m.data.userName : 'Someone you protect',
         silent: m.data.visibilityMode === 'silent',
         message: m.type === 'sos_ring' ? 'Still no answer' : undefined,
+        drill: m.type === 'sos_drill' || m.data.isDrill === true,
       });
     };
     navigator.serviceWorker.addEventListener('message', onMsg);
@@ -163,7 +174,7 @@ export function SosIncomingCall() {
       style={{ paddingTop: 'calc(var(--safe-top, 0px) + 56px)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 32px)' }}
     >
       <div className="flex flex-col items-center text-center">
-        <p className="text-[14px] font-bold uppercase tracking-[0.12em] text-white/80">SOS call</p>
+        <p className="text-[14px] font-bold uppercase tracking-[0.12em] text-white/80">{ring.drill ? 'Practice SOS' : 'SOS call'}</p>
         <div className="relative mt-8 grid h-32 w-32 place-items-center">
           <span className="absolute inset-0 animate-ping rounded-full bg-white/25 motion-reduce:animate-none" aria-hidden />
           <span className="absolute inset-3 rounded-full bg-white/20" aria-hidden />
@@ -176,7 +187,11 @@ export function SosIncomingCall() {
         </h2>
         <p className="mt-2 max-w-xs text-[15px] text-white/90">
           {ring.message && /Still no answer/i.test(ring.message) ? 'Nobody has answered yet. ' : ''}
-          {ring.silent ? 'Silent SOS: don’t call them.' : 'They pressed SOS just now.'}
+          {ring.drill
+            ? 'This is a drill, not a real emergency. Don’t call 112. Answer to practise.'
+            : ring.silent
+              ? 'Silent SOS: don’t call them.'
+              : 'They pressed SOS just now.'}
         </p>
       </div>
 
@@ -193,6 +208,7 @@ export function SosIncomingCall() {
           <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden>call</span>
           Answer: help {first}
         </button>
+        {ring.drill ? null : (
         <a
           href={EMERGENCY_TEL}
           onClick={stop}
@@ -200,6 +216,7 @@ export function SosIncomingCall() {
         >
           Call 112
         </a>
+        )}
         <button type="button" onClick={stop} className="min-h-11 text-[15px] font-semibold text-white/80">
           Can&apos;t answer now
         </button>

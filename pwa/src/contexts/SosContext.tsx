@@ -474,12 +474,18 @@ function useSosState(): UseSosReturn {
     if (!activeSos?._id) return;
     setError(null);
     try {
-      const res = await safetyService.resolveSos(activeSos._id);
-      setActiveSos(res.data?.sosEvent ?? null);
-      if (res.data?.summary) setLastSummary(res.data.summary);
+      const resolvedId = activeSos._id;
+      const res = await safetyService.resolveSos(resolvedId);
+      // Older servers wrapped the reply twice: { sosEvent: { sosEvent, summary } }.
+      const raw = res.data?.sosEvent as (SosEvent & { sosEvent?: SosEvent; summary?: IncidentSummary }) | null | undefined;
+      const event = raw?.sosEvent ?? raw ?? null;
+      const summary = res.data?.summary ?? raw?.summary;
+      setActiveSos(event ? { ...event, status: 'resolved' } : null);
+      if (summary) setLastSummary(summary);
       setEmergencyContactNeeded(null);
       setTimeout(() => {
-        setActiveSos((prev) => (prev?.status === 'resolved' ? null : prev));
+        // The server said it's resolved: always give the SOS button back.
+        setActiveSos((prev) => (!prev || prev._id === resolvedId ? null : prev));
         setNotifyMeta(null);
       }, 1500);
     } catch (err: unknown) {

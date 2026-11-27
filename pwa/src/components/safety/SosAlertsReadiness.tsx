@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 export function SosAlertsReadiness({ className = '' }: { className?: string }) {
-  const { permission, isSubscribed, isRegistering, requestPermissionAndSubscribe } = usePushNotifications();
+  const { permission, pushReady, isRegistering, error, requestPermissionAndSubscribe } = usePushNotifications();
   const [iosNeedsHome, setIosNeedsHome] = useState(false);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export function SosAlertsReadiness({ className = '' }: { className?: string }) {
 
   const card = `rounded-[22px] bg-white p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)] ${className}`;
 
-  if (isSubscribed && permission === 'granted') {
+  if (pushReady && permission === 'granted') {
     return (
       <p className={`${card} text-[14px] font-bold text-brand-green-dark`}>
         🔔 SOS alerts are on. Your phone rings if someone you protect presses SOS.
@@ -50,9 +50,16 @@ export function SosAlertsReadiness({ className = '' }: { className?: string }) {
       ) : permission === 'unsupported' ? (
         <p className="rounded-2xl bg-background p-3 text-[13px] text-muted">This browser can&apos;t show notifications. Try Chrome.</p>
       ) : (
-        <Button fullWidth loading={isRegistering} onClick={() => void requestPermissionAndSubscribe()}>
-          Turn on SOS alerts
-        </Button>
+        <>
+          {error && permission === 'granted' && !isRegistering ? (
+            <p className="rounded-2xl bg-amber-soft p-3 text-[13px] font-semibold text-navy">
+              Your phone allowed notifications, but signing up for alerts didn&apos;t finish. Check your internet and try again.
+            </p>
+          ) : null}
+          <Button fullWidth loading={isRegistering} onClick={() => void requestPermissionAndSubscribe()}>
+            {permission === 'granted' ? 'Finish turning on SOS alerts' : 'Turn on SOS alerts'}
+          </Button>
+        </>
       )}
     </div>
   );

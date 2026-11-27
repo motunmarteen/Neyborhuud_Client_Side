@@ -176,7 +176,8 @@ self.addEventListener("push", function (event) {
 
 /** Vibrates like a phone ringing: about 10 seconds of long buzzes. */
 var SOS_RING_VIBRATION = [900, 400, 900, 400, 900, 400, 900, 400, 900, 400, 900, 400, 900];
-var SOS_RING_TYPES = ["sos", "sos_alert", "sos_escalated", "sos_ring"];
+// sos_drill rings too, so guardians practise exactly what a real SOS feels like.
+var SOS_RING_TYPES = ["sos", "sos_alert", "sos_escalated", "sos_ring", "sos_drill"];
 
 self.addEventListener("notificationclick", function (event) {
   event.notification.close();
