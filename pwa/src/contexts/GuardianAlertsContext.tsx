@@ -127,7 +127,7 @@ export function GuardianAlertsProvider({ children }: { children: ReactNode }) {
           label: 'Respond',
           onClick: () => {
             window.location.href = alert.sosEventId
-              ? `/safety/incident/${alert.sosEventId}`
+              ? `/safety/help/${alert.sosEventId}`
               : '/safety/emergency';
           },
         },

@@ -23,6 +23,8 @@ import { PwaInstallTracker } from '@/components/PwaInstallTracker';
 import { PageTransition } from '@/components/ui/PageTransition';
 import { SwipeBackProvider } from '@/contexts/SwipeBackContext';
 import { GuardianAlertsProvider } from '@/contexts/GuardianAlertsContext';
+import { SosIncomingCall } from '@/components/safety/SosIncomingCall';
+import EmergencyContactOverlay from '@/components/safety/EmergencyContactOverlay';
 import { RedZoneAlertsProvider } from '@/contexts/RedZoneAlertsContext';
 import { SosProvider } from '@/contexts/SosContext';
 import { IncognitoInviteListener } from '@/components/chat/IncognitoInviteListener';
@@ -331,6 +333,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <LocationSyncOrchestrator />
       <PwaInstallTracker />
       <IncomingCallModal />
+      {/* SOS: the ringing SOS call for guardians, and the 90 s "call 112" screen for the person
+          (it was never mounted before 2026-11-27). */}
+      <SosIncomingCall />
+      <EmergencyContactOverlay />
       <ActiveCallView />
       <ClientRouteGuard>
         <PageTransition>{children}</PageTransition>

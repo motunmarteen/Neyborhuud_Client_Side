@@ -65,6 +65,8 @@ export interface GuardianRelationship {
   expiresAt?: string;
   status: GuardianStatus;
   createdAt: string;
+  /** Server: this guardian has a browser or app that can receive a push right now (2026-11-27). */
+  canReceiveAlerts?: boolean;
 }
 
 export type CircleStatus = "pending" | "accepted" | "rejected" | "removed";

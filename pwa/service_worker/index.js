@@ -74,6 +74,7 @@ function resolveUrl(data) {
 
 /** Types that must stay on screen until user acts */
 var REQUIRE_INTERACTION_TYPES = [
+  "sos_ring",
   "sos_triggered",
   "sos_escalated",
   "sos",
@@ -93,6 +94,7 @@ var REQUIRE_INTERACTION_TYPES = [
 
 /** Types that get action buttons */
 var SAFETY_TYPES = [
+  "sos_ring",
   "sos_triggered",
   "sos_escalated",
   "sos",
@@ -144,8 +146,37 @@ self.addEventListener("push", function (event) {
       : [{ action: "view", title: "Open" }],
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  // SOS rings like a call (owner 2026-11-27): one notification per SOS (same tag, so "ring again"
+  // replaces it and buzzes again), a long call-like vibration, and two buttons. The SOS person
+  // never gets this: these go to their guardians only.
+  if (SOS_RING_TYPES.indexOf(type) !== -1 && notifData.sosEventId) {
+    options.tag = "sos_" + notifData.sosEventId;
+    options.renotify = true;
+    options.requireInteraction = true;
+    options.silent = false;
+    options.vibrate = SOS_RING_VIBRATION;
+    options.actions = [
+      { action: "respond", title: "I'm responding" },
+      { action: "view", title: "Open" },
+    ];
+    if (!notifData.url) notifData.url = "/safety/help/" + notifData.sosEventId;
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(title, options).then(function () {
+      // If the app is open, let it show the full-screen SOS call too.
+      return clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (list) {
+        list.forEach(function (c) {
+          c.postMessage({ kind: "nh-push", type: type, data: notifData, title: title, body: options.body });
+        });
+      });
+    }),
+  );
 });
+
+/** Vibrates like a phone ringing: about 10 seconds of long buzzes. */
+var SOS_RING_VIBRATION = [900, 400, 900, 400, 900, 400, 900, 400, 900, 400, 900, 400, 900];
+var SOS_RING_TYPES = ["sos", "sos_alert", "sos_escalated", "sos_ring"];
 
 self.addEventListener("notificationclick", function (event) {
   event.notification.close();
@@ -156,6 +187,10 @@ self.addEventListener("notificationclick", function (event) {
   var d = event.notification.data || {};
 
   var url = resolveUrl(d);
+  // "I'm responding" on an SOS: open the Help page, which records the response right away.
+  if (event.action === "respond" && d.sosEventId) {
+    url = "/safety/help/" + d.sosEventId + "?respond=1";
+  }
 
   event.waitUntil(
     clients

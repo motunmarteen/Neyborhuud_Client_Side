@@ -324,6 +324,17 @@ export function DashboardGuardiansPanel({
                     <p className="text-xs capitalize" style={{ color: 'var(--neu-text-muted)' }}>
                       {g.relationshipType ?? 'friend'} · priority {g.priorityLevel} · {g.status}
                     </p>
+                    {g.status === 'accepted' ? (
+                      g.canReceiveAlerts ? (
+                        <p className="mt-1 inline-flex rounded-full bg-green-soft px-2 py-0.5 text-[12px] font-bold text-brand-green-dark">
+                          🔔 Alerts on: their phone rings for your SOS
+                        </p>
+                      ) : (
+                        <p className="mt-1 rounded-xl bg-amber-soft px-2 py-1 text-[12px] font-semibold text-navy">
+                          🔕 Can&apos;t get alerts yet. Ask them to open NeyborHuud and turn on notifications.
+                        </p>
+                      )
+                    ) : null}
                   </div>
                   {g.status !== 'removed' && gId ? (
                     <button

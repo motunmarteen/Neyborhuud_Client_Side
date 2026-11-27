@@ -12,6 +12,8 @@ import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import SosCountdownOverlay from '@/components/safety/SosCountdownOverlay';
 import { Call112Button } from '@/components/safety/Call112Button';
+import { SosTextGuardians } from '@/components/safety/SosTextGuardians';
+import { SosAlertsReadiness } from '@/components/safety/SosAlertsReadiness';
 import { SosGuardianIncomingAlerts } from '@/components/sentinel/sos/SosGuardianIncomingAlerts';
 import { SosGuardiansFeed } from '@/components/sentinel/sos/SosGuardiansFeed';
 import { SosGuardiansNotifiedCard } from '@/components/sentinel/sos/SosGuardiansNotifiedCard';
@@ -80,6 +82,9 @@ export default function SosPage() {
           {tab === 'now' && (
             <>
               <Call112Button className="mx-4 mt-3" />
+              {sos.phase === 'pending' || sos.phase === 'active' || sos.offlineQueueStatus === 'queued' || sos.offlineQueueStatus === 'failed' ? (
+                <SosTextGuardians className="mx-4 mt-3" />
+              ) : null}
               <SosGuardiansNotifiedCard notifyMeta={sos.notifyMeta} phase={sos.phase} />
               {showTrigger ? <SosTriggerCard sos={sos} /> : null}
               <SosLongPressTip />
@@ -107,6 +112,7 @@ export default function SosPage() {
 
           {tab === 'circle' && (
             <>
+              <SosAlertsReadiness className="mx-4 mt-3" />
               <SosGuardianIncomingAlerts />
               <SosGuardiansFeed />
             </>

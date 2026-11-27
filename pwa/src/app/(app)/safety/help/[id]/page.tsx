@@ -11,7 +11,7 @@
  * It refreshes every 10 seconds while the SOS is live.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -57,6 +57,24 @@ export default function SosHelpPage() {
     const t = setInterval(() => setNow(Date.now()), 15_000);
     return () => clearInterval(t);
   }, []);
+
+  // Answered from the SOS call or the notification's "I'm responding" button: record it once.
+  const autoRespondedRef = useRef(false);
+  useEffect(() => {
+    const v = q.data;
+    if (!v || autoRespondedRef.current || !v.live || v.isOwner || v.youAreResponding) return;
+    if (new URLSearchParams(window.location.search).get('respond') !== '1') return;
+    autoRespondedRef.current = true;
+    void sosHelpService
+      .responding(id)
+      .then(() => {
+        toast.success(`${v.person.firstName || 'They'} can see you're responding`);
+        return qc.invalidateQueries({ queryKey: ['sos-help', id] });
+      })
+      .catch(() => {
+        autoRespondedRef.current = false;
+      });
+  }, [q.data, id, qc]);
 
   if (!started || q.isLoading) {
     return (
