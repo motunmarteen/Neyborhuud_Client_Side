@@ -117,10 +117,11 @@ export function SosGuardianIncomingAlerts() {
                   {alert.sosEventId ? (
                     <>
                       <Link
-                        href={`/safety/incident/${alert.sosEventId}`}
-                        className="mod-chip mod-chip-active inline-flex items-center gap-1 px-3 py-2 text-xs font-bold text-primary no-underline"
+                        href={`/safety/help/${alert.sosEventId}`}
+                        className="inline-flex items-center gap-1 rounded-full bg-brand-red px-3 py-2 text-xs font-bold text-white no-underline"
                       >
-                        Incident timeline
+                        <span className="material-symbols-outlined text-[16px]" aria-hidden>sos</span>
+                        Help them · Call 112
                       </Link>
                       <button
                         type="button"

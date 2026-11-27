@@ -907,6 +907,7 @@ export interface IncidentSummary {
       | "guardian_acknowledged_alert"
       | "guardian_viewed_location"
       | "guardian_ignored_alert"
+      | "guardian_called_emergency"
       | "agency_dispatched"
       | "sos_resolved"
       | "sos_cancelled";

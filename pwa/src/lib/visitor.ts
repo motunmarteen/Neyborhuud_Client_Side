@@ -25,6 +25,7 @@ export function signupHref(): string {
 }
 
 /** Pages a visitor may open without signing in. */
-export const VISITOR_ROUTES = ['/huud', '/alert', '/marketplace'];
+/** /desk: links we text to security desks, who usually have no account (owner 2026-11-27). */
+export const VISITOR_ROUTES = ['/huud', '/alert', '/marketplace', '/desk'];
 /** Inside a visitor route, these still need an account. */
 export const MEMBER_ONLY_ROUTES = ['/marketplace/create', '/marketplace/my-deals', '/marketplace/my-listings'];

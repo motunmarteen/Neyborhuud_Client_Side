@@ -61,6 +61,8 @@ function getRouteTitle(pathname: string) {
       sentinel: parts[2] === 'settings' ? 'Alert settings' : 'Threat alerts',
       incident: 'Incident recap',
       'how-it-works': 'How Sentinel works',
+      help: 'Help them',
+      'security-desks': 'Estate security',
     };
     if (safety[parts[1]]) return safety[parts[1]];
   }
@@ -87,6 +89,7 @@ function getRouteTitle(pathname: string) {
 
   const map: Record<string, string> = {
     feed: 'Huud Feed',
+    desk: 'Security desk',
     friendship: 'People',
     marketplace: 'Marketplace',
     communities: 'Communities',

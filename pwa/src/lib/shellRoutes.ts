@@ -26,6 +26,7 @@ export const PAGE_OWNED_TOP_NAV_PREFIXES = [
   '/work',
   '/info/nigeria-postal-codes',
   '/chat',
+  '/desk',
 ] as const;
 
 function normalizePath(pathname: string): string {

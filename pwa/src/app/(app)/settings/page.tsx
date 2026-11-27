@@ -51,6 +51,7 @@ const GROUPS: { title: string; rows: Row[] }[] = [
     rows: [
       { href: '/settings/location', label: 'Your area and distance', hint: 'How far around you to see posts', icon: <MapPin size={19} /> },
       { href: '/settings/places', label: 'My places', hint: 'Home and the spots you go often', icon: <Map size={19} /> },
+      { href: '/safety/security-desks', label: 'Estate security', hint: 'Who near you gets SOS texts', icon: <ShieldCheck size={19} /> },
     ],
   },
   {

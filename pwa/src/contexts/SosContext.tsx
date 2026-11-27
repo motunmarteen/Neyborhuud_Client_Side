@@ -223,6 +223,13 @@ function useSosState(): UseSosReturn {
       setEmergencyContactNeeded(payload);
     };
 
+    // A guardian tapped "Call 112 for them" (owner 2026-11-27). Shown to the person and to the
+    // other guardians, so nobody waits for someone else to call.
+    const onGuardianCalled112 = (p: { guardianName?: string; toOwner?: boolean }) => {
+      const who = p?.guardianName || 'A guardian';
+      toast.success(p?.toOwner ? `${who} is calling 112 for you` : `${who} is calling 112`, { duration: 8000 });
+    };
+
     const bind = () => {
       const socket = socketService.getSocket();
       if (!socket) return;
@@ -232,6 +239,7 @@ function useSosState(): UseSosReturn {
       socket.on('safety:sos_alert', onAlert);
       socket.on('safety:emergency_services_dispatched', onEmergencyDispatched);
       socket.on('safety:emergency_contact_needed', onEmergencyContactNeeded);
+      socket.on('safety:guardian_called_112', onGuardianCalled112);
     };
 
     const unbind = () => {
@@ -243,6 +251,7 @@ function useSosState(): UseSosReturn {
       socket.off('safety:sos_alert', onAlert);
       socket.off('safety:emergency_services_dispatched', onEmergencyDispatched);
       socket.off('safety:emergency_contact_needed', onEmergencyContactNeeded);
+      socket.off('safety:guardian_called_112', onGuardianCalled112);
     };
 
     if (shouldConnectSocket() && apiClient.isAuthenticated()) {

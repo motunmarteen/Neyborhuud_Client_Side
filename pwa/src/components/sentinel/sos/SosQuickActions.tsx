@@ -15,6 +15,16 @@ const SOS_PREP_ACTIONS: SentinelFeature[] = [
     tab: 'network',
   },
   {
+    id: 'security-desks',
+    icon: 'security',
+    label: 'Estate security',
+    tagline: 'Your gate or vigilante gets a text if family doesn’t answer.',
+    howTo: 'Add the desk’s number. They agree by text, and a trusted neighbour approves it.',
+    href: '/safety/security-desks',
+    accent: 'blue',
+    tab: 'network',
+  },
+  {
     id: 'trips',
     icon: 'route',
     label: 'Safe trips',
