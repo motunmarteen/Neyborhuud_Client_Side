@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   Siren,
   Phone,
-  Flame,
   Activity,
   Plus,
   ArrowRight,
@@ -25,6 +24,8 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
+import { Call112Button } from '@/components/safety/Call112Button';
+import { POLICE_TEXT_NUMBER } from '@/lib/emergency';
 import { useSos } from '@/hooks/useSos';
 import { useAuth } from '@/hooks/useAuth';
 import { useHuudDisplayName } from '@/hooks/useHuudDisplayName';
@@ -151,56 +152,22 @@ export default function SafetyAlertsHubPage() {
                 <span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-50 text-[#00B82E]">
                   <Phone size={15} strokeWidth={2.5} />
                 </span>
-                <h2 className="text-sm font-black text-[#1D2433]">Official Emergency Hotlines</h2>
+                <h2 className="text-sm font-black text-[#1D2433]">Emergency number</h2>
               </div>
               <span className="text-[11px] font-bold text-[#5B6478]">Tap to call</span>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <a
-                href="tel:08057000003"
-                className="flex items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50/50 p-3 hover:bg-emerald-50 transition-colors"
-              >
-                <div>
-                  <p className="text-xs font-black text-[#1D2433]">Nigeria Police Force</p>
-                  <p className="text-[11px] font-medium text-emerald-800">08057000003 · Voice / WhatsApp</p>
-                </div>
-                <Phone size={16} className="text-[#00B82E]" />
-              </a>
-
-              <a
-                href="tel:112"
-                className="flex items-center justify-between rounded-2xl border border-blue-100 bg-blue-50/50 p-3 hover:bg-blue-50 transition-colors"
-              >
-                <div>
-                  <p className="text-xs font-black text-[#1D2433]">National Emergency (NEMA)</p>
-                  <p className="text-[11px] font-medium text-blue-800">112 · Toll Free</p>
-                </div>
-                <Phone size={16} className="text-blue-600" />
-              </a>
-
-              <a
-                href="tel:199"
-                className="flex items-center justify-between rounded-2xl border border-red-100 bg-red-50/50 p-3 hover:bg-red-50 transition-colors"
-              >
-                <div>
-                  <p className="text-xs font-black text-[#1D2433]">Federal Fire Service</p>
-                  <p className="text-[11px] font-medium text-red-800">199 / 112</p>
-                </div>
-                <Flame size={16} className="text-red-600" />
-              </a>
-
-              <a
-                href="tel:08007233827"
-                className="flex items-center justify-between rounded-2xl border border-amber-100 bg-amber-50/50 p-3 hover:bg-amber-50 transition-colors"
-              >
-                <div>
-                  <p className="text-xs font-black text-[#1D2433]">Lagos State Emergency</p>
-                  <p className="text-[11px] font-medium text-amber-800">767 / 112</p>
-                </div>
-                <Phone size={16} className="text-amber-600" />
-              </a>
-            </div>
+            <Call112Button />
+            <a
+              href={`sms:${POLICE_TEXT_NUMBER}`}
+              className="flex min-h-12 items-center justify-between rounded-2xl border border-line bg-white px-3 hover:bg-background"
+            >
+              <span>
+                <span className="block text-[14px] font-bold text-navy">Text the police</span>
+                <span className="block text-[12px] text-muted">{POLICE_TEXT_NUMBER} · SMS or WhatsApp, for written details</span>
+              </span>
+              <Phone size={16} className="text-muted" />
+            </a>
           </div>
         )}
 

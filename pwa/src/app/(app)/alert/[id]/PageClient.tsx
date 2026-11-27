@@ -92,7 +92,7 @@ export default function PageClient() {
               : 'This has not been confirmed yet. Please check before you act or forward it.'}
           </p>
         ) : null}
-        <p className="text-sm font-semibold text-muted">In danger? Call 112 (or 767 in Lagos). For a road accident, call 122.</p>
+        <a href="tel:112" className="text-sm font-bold text-brand-red underline">In danger? Call 112, free from any network.</a>
         <div className="flex flex-col gap-2">
           <Link href={mapHref} className="inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-4 text-[15px] font-bold text-white">
             See the area live on the map

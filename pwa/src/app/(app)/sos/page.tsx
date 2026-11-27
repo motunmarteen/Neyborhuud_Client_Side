@@ -11,6 +11,7 @@ import { Suspense, useState } from 'react';
 import { AppBrowseLayout } from '@/components/layout/AppBrowseLayout';
 import { BrowseTabStrip } from '@/components/layout/BrowseTabStrip';
 import SosCountdownOverlay from '@/components/safety/SosCountdownOverlay';
+import { Call112Button } from '@/components/safety/Call112Button';
 import { SosGuardianIncomingAlerts } from '@/components/sentinel/sos/SosGuardianIncomingAlerts';
 import { SosGuardiansFeed } from '@/components/sentinel/sos/SosGuardiansFeed';
 import { SosGuardiansNotifiedCard } from '@/components/sentinel/sos/SosGuardiansNotifiedCard';
@@ -78,6 +79,7 @@ export default function SosPage() {
 
           {tab === 'now' && (
             <>
+              <Call112Button className="mx-4 mt-3" />
               <SosGuardiansNotifiedCard notifyMeta={sos.notifyMeta} phase={sos.phase} />
               {showTrigger ? <SosTriggerCard sos={sos} /> : null}
               <SosLongPressTip />

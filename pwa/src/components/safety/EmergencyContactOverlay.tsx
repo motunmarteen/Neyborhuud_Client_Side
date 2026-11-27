@@ -44,8 +44,8 @@ export default function EmergencyContactOverlay() {
           Your guardians haven&apos;t responded
         </h2>
         <p className="mt-2 text-center text-sm text-[var(--neu-text-muted)]">
-          Contact the Nigeria Police Force directly — tap a button below to call or text
-          with your emergency details already filled in.
+          Call 112 now. It&apos;s free and reaches police, fire and ambulance. You can also text the
+          police with your details already filled in.
         </p>
 
         <div className="mt-6 flex flex-col gap-3">

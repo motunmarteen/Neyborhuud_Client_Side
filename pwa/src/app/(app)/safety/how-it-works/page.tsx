@@ -39,7 +39,7 @@ const GROUPS: { title: string; sections: Section[] }[] = [
           'When you are safe, tap “I’m safe”. Every SOS keeps a recap in History: who was told, when, and who responded.',
         ],
         know: [
-          'NeyborHuud does not call the police for you. If your guardians do not respond, the app shows you the right number (112, 122 for road accidents, 767 in Lagos) and a ready message, so one tap calls or texts them.',
+          'NeyborHuud does not call the police for you. If your guardians do not respond, the app shows you 112, Nigeria’s free emergency number, and a ready message, so one tap calls for help or texts your details.',
           'No network? Your SOS is saved and goes the moment your phone is back online.',
           'You can practise: “Run a drill” stays on your screen only; “Run a guardian drill” sends a clearly marked 🧪 practice alert to your guardians and can never become a real emergency.',
         ],
@@ -173,10 +173,10 @@ const GROUPS: { title: string; sections: Section[] }[] = [
         id: 'emergency-report',
         icon: '🚑',
         title: 'Report an emergency (calling for help)',
-        what: 'For a fire, accident, medical or crime emergency: it gives you the right number for where you are and keeps a record.',
+        what: 'For a fire, accident, medical or crime emergency: it gives you 112 to call and keeps a record.',
         steps: [
           'Choose the type and how serious it is.',
-          'You get the right number for your location (112 across Nigeria, 122 for road accidents, 767 in Lagos) and a ready message, so one tap calls or texts them.',
+          'You get 112, the free emergency number for police, fire, ambulance and road accidents anywhere in Nigeria, and a ready message to text.',
           'Update the report, mark it resolved, or cancel it if it was a mistake. Your guardians can acknowledge it.',
         ],
         know: [
