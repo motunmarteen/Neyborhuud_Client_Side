@@ -89,7 +89,10 @@ export function TripsStartForm({ onStart, onPlan, disabled }: TripsStartFormProp
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErr(null);
-    if (!form.originText.trim() || !form.destinationText.trim() || !form.expectedArrival) {
+    // The box shows a suggested time (2 h from now) before the person touches it; use exactly that.
+    // It used to stay empty in the form, so accepting the suggestion said "required" (live test 2026-11-28).
+    const expectedArrival = form.expectedArrival || defaultArrivalLocal();
+    if (!form.originText.trim() || !form.destinationText.trim() || !expectedArrival) {
       setErr('Origin, destination, and expected arrival are required');
       return;
     }
@@ -98,7 +101,7 @@ export function TripsStartForm({ onStart, onPlan, disabled }: TripsStartFormProp
       const payload: StartTripPayload = {
         originText: form.originText.trim(),
         destinationText: form.destinationText.trim(),
-        expectedArrival: new Date(form.expectedArrival).toISOString(),
+        expectedArrival: new Date(expectedArrival).toISOString(),
         checkInIntervalMinutes: form.checkInIntervalMinutes,
         notes: form.notes.trim() || undefined,
         ...(originCoords && {

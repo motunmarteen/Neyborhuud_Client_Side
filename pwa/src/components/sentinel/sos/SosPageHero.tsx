@@ -39,7 +39,7 @@ const OFFLINE_BANNER: Record<'queued' | 'sending' | 'failed', { icon: string; te
 export function SosPageHero({
   phase,
   secondsRemaining = 0,
-  escalationLevel = 0,
+  escalationLevel: _escalationLevel = 0,
   incidentHref,
   offlineQueueStatus,
   visibilityMode = 'normal',
@@ -108,7 +108,7 @@ export function SosPageHero({
                 : isActive
                 ? isDrill
                   ? 'Your guardians got a practice alert. Nothing real was sent. End it when you’re done.'
-                  : `Guardians notified · Escalation ${escalationLevel}. Mark safe when you are out of danger.`
+                  : 'We keep alerting your guardians one by one until someone answers. Mark safe when you are out of danger.'
                 : isPending
                   ? 'Cancel now if this was accidental. After countdown, your circle is alerted.'
                   : 'Arm SOS with a countdown, practice with a drill, or long-press the red tab for silent alert.'}

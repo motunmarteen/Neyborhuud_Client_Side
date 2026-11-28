@@ -155,6 +155,30 @@ function useSosState(): UseSosReturn {
     refreshRef.current = refresh;
   }, [refresh]);
 
+  // Once an SOS is live (after a countdown, or after reopening the app), show the real number of
+  // guardians alerted: everyone accepted, since the ladder reaches all of them within 90 s.
+  const liveId = activeSos && (activeSos.status === 'active' || activeSos.status === 'triggered') ? activeSos._id : null;
+  useEffect(() => {
+    if (!liveId || !/^[a-f0-9]{24}$/i.test(liveId)) return;
+    if (notifyMeta?.sosEventId === liveId && notifyMeta.guardiansTotal > 0) return;
+    let cancelled = false;
+    void safetyService
+      .getGuardians('accepted')
+      .then((res) => {
+        if (cancelled) return;
+        const total = (res.data?.guardians ?? []).length;
+        setNotifyMeta((prev) => ({
+          guardiansTotal: total,
+          emergencyId: prev?.sosEventId === liveId ? prev.emergencyId : null,
+          sosEventId: liveId,
+        }));
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [liveId, notifyMeta?.sosEventId, notifyMeta?.guardiansTotal]);
+
   useEffect(() => {
     if (!user?.id) {
       setActiveSos(null);
@@ -411,11 +435,14 @@ function useSosState(): UseSosReturn {
         const data = res.data;
         if (!data) return;
 
-        setNotifyMeta({
-          guardiansTotal: data.guardiansTotal ?? 0,
-          emergencyId: data.emergencyId ?? null,
-          sosEventId: data.sosEventId,
-        });
+        // During the countdown the server hasn't picked guardians yet and answers 0; showing that
+        // made every normal SOS say "No accepted guardians were queued" (live test 2026-11-28).
+        // The effect below fills the real count once the SOS is live.
+        setNotifyMeta(
+          data.status === 'pending'
+            ? null
+            : { guardiansTotal: data.guardiansTotal ?? 0, emergencyId: data.emergencyId ?? null, sosEventId: data.sosEventId },
+        );
 
         if (data.status === 'pending') {
           setActiveSos({
