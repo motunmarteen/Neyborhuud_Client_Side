@@ -346,7 +346,7 @@ export default function EmergencyPage() {
                               >
                                 {em.dispatchStatus === 'sent' ? '◐ Logged (not yet sent to any agency)' :
                                  em.dispatchStatus === 'failed' ? '✗ Not logged' :
-                                 em.dispatchStatus === 'pending' ? '⏳ Pending' : 'Not required'}
+                                 em.dispatchStatus === 'pending' ? '⏳ Pending' : 'Call 112 yourself'}
                               </span>
                             )}
                           </div>

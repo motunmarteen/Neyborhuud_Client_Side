@@ -356,7 +356,10 @@ function CommunityEmergencyInner({
   showCreate: boolean;
   setShowCreate: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  // Signed-in state is known only on the phone: wait one draw so it matches the pre-built page
+  // (fixes React error #418 found in the live Sentinel test, 2026-11-28).
+  const user = useStarted() ? authUser : null;
   const [posts, setPosts] = useState<EmergencyPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

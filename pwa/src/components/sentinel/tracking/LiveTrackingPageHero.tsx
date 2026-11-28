@@ -45,14 +45,14 @@ export function LiveTrackingPageHero({ session, wsConnected, queuedCount, isOnli
 
       <div className="mt-4 flex flex-wrap gap-2">
         <span
-          className={`mod-chip rounded-full px-3 py-1 text-[10px] font-bold uppercase ${
+          className={`mod-chip rounded-full px-3 py-1 text-[12px] font-bold ${
             wsConnected ? 'mod-chip-active text-primary' : ''
           }`}
         >
-          {wsConnected ? '● Realtime connected' : '○ Realtime offline'}
+          {wsConnected ? '● Live connection on' : '○ Live connection off'}
         </span>
         {live ? (
-          <span className="mod-chip rounded-full px-3 py-1 text-[10px] font-bold uppercase text-brand-red">
+          <span className="mod-chip rounded-full px-3 py-1 text-[12px] font-bold text-brand-red first-letter:uppercase">
             {session?.status.replace('_', ' ')}
           </span>
         ) : null}

@@ -106,7 +106,7 @@ const GROUPS: { title: string; sections: Section[] }[] = [
           'Your guardians are told the trip has started. Your location updates while the trip is on.',
           'Tap check-in when asked. Mark “Arrived” when you reach.',
         ],
-        know: ['Miss 3 check-ins in a row and the app sends a silent SOS for you automatically.'],
+        know: ['Not there 15 minutes after your arrival time? Your guardians are told.', 'Miss 3 check-ins in a row and the app sends a silent SOS for you automatically.'],
         open: { href: '/safety/trips', label: 'Start a trip' },
       },
       {

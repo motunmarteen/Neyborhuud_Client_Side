@@ -38,8 +38,10 @@ interface GuardianTripViewProps {
   displayName?: string;
 }
 
-function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
+function GuardianTripViewInner({ userId, displayName: givenName }: GuardianTripViewProps) {
   const [trip, setTrip] = useState<Trip | null>(null);
+  const [personName, setPersonName] = useState<string | null>(null);
+  const displayName = givenName ?? personName ?? undefined;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
@@ -50,10 +52,12 @@ function GuardianTripViewInner({ userId, displayName }: GuardianTripViewProps) {
     try {
       const res = await tripService.getTripGuardianView(userId);
       setTrip(res.data?.trip ?? null);
+      const p = (res.data as { person?: { firstName?: string | null } | null } | undefined)?.person;
+      if (p?.firstName) setPersonName(p.firstName);
       setLastRefresh(new Date());
     } catch (err: any) {
       if (err?.response?.status === 403) {
-        setError("You are not an accepted guardian of this user.");
+        setError("Only this person's guardians can follow their trips.");
       } else {
         setError(err?.response?.data?.message || err?.message || 'Failed to load trip data');
       }

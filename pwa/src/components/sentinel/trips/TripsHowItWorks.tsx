@@ -13,7 +13,7 @@ const STEPS = [
   {
     icon: 'flag',
     title: 'Arrive safely',
-    body: 'Mark arrived to close the trip. Miss 3 check-ins in a row and a silent SOS is sent for you automatically.',
+    body: 'Mark arrived to close the trip. Not there 15 minutes after your arrival time? Your guardians are told. Miss 3 check-ins in a row and a silent SOS is sent for you automatically.',
   },
 ] as const;
 
