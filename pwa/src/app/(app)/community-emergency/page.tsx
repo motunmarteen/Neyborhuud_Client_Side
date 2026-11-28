@@ -374,10 +374,14 @@ function CommunityEmergencyInner({
     setError(null);
     try {
       const res = await contentService.getEmergencyFeed({ page: p, limit: 20 });
-      const items: EmergencyPost[] = res.data?.data?.feed ?? res.data?.data?.posts ?? res.data?.data ?? [];
-      setPosts(prev => p === 1 ? items : [...prev, ...items]);
-      const pagination = res.data?.data?.pagination;
-      setHasNextPage(pagination?.hasNextPage ?? items.length === 20);
+      // The feed answers { content: [...] }; reading feed/posts left this list always empty,
+      // so it said "All clear" even right after you posted (live Sentinel test 2026-11-28).
+      const d = res.data?.data;
+      const raw: EmergencyPost[] = d?.content ?? d?.feed ?? d?.posts ?? (Array.isArray(d) ? d : []);
+      const items = raw.filter((x, i, all) => all.findIndex((y) => y._id === x._id) === i);
+      setPosts(prev => p === 1 ? items : [...prev, ...items.filter((x) => !prev.some((y) => y._id === x._id))]);
+      const pagination = d?.pagination;
+      setHasNextPage(pagination?.hasNextPage ?? (pagination?.totalPages ? p < pagination.totalPages : items.length === 20));
       setPage(p);
     } catch {
       setError('Failed to load emergency alerts');
