@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { BrowseEmptyState } from '@/components/layout/BrowseEmptyState';
 import { SentinelSectionHeader } from '@/components/sentinel/SentinelSectionHeader';
+import { GuardianInviteCard } from '@/components/sentinel/dashboard/GuardianInviteCard';
 import { BrowseSelect } from '@/components/ui/BrowseSelect';
 import {
   safetyService,
@@ -283,6 +284,7 @@ export function DashboardGuardiansPanel({
             Send guardian request
           </button>
         </form>
+        <GuardianInviteCard className="mt-3" />
       </section>
 
       <section className="mod-card relative z-0 min-w-0 max-w-full space-y-3 rounded-2xl p-4">
