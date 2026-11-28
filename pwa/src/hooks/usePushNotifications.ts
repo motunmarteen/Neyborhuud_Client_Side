@@ -45,6 +45,20 @@ async function serviceWorkerReady(timeoutMs = 4_000): Promise<ServiceWorkerRegis
   }
 }
 
+/**
+ * A service worker is registered but not running yet (first visit: it downloads the app first,
+ * which can take minutes on slow data). Only when there's no registration at all (local dev) may
+ * permission alone count as "on". Found on an Android phone in a live test, 2026-11-27.
+ */
+async function serviceWorkerStillStarting(): Promise<boolean> {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return false;
+  try {
+    return !!(await navigator.serviceWorker.getRegistration());
+  } catch {
+    return false;
+  }
+}
+
 export type PushPermissionState = 'default' | 'granted' | 'denied' | 'unsupported';
 
 export interface UsePushNotificationsReturn {
@@ -106,7 +120,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       }
     }
 
-    setPushReady(perm === 'granted' && (registration ? hasPushSubscription : true));
+    setPushReady(perm === 'granted' && (registration ? hasPushSubscription : !(await serviceWorkerStillStarting())));
 
     let backendSynced = false;
     try {
@@ -161,6 +175,13 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
     try {
       const registration = await serviceWorkerReady();
+      if (!registration && (await serviceWorkerStillStarting())) {
+        // Not ready yet: don't claim success. The effect below finishes sign-up once it's running.
+        setError('Still setting up on this phone. Keep NeyborHuud open for a moment.');
+        setIsSubscribed(false);
+        setPushReady(false);
+        return false;
+      }
       if (!registration) {
         try {
           localStorage.setItem(PERMISSION_ACK_KEY, '1');
@@ -227,14 +248,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       console.error('[Push] Subscription failed:', err);
       setError(getErrorText(err));
       setPushReady(false);
-      if (readBrowserPermission() === 'granted') {
-        try {
-          localStorage.setItem(PERMISSION_ACK_KEY, '1');
-        } catch {
-          // ignore
-        }
-        setIsSubscribed(true);
-      }
+      setIsSubscribed(false);
       return false;
     } finally {
       syncingRef.current = false;
@@ -248,6 +262,19 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     if (readBrowserPermission() !== 'granted') return;
     void syncSubscription();
   }, [syncSubscription]);
+
+  // When the service worker finally starts (first visit on slow data), finish sign-up by itself.
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+    let cancelled = false;
+    void navigator.serviceWorker.ready.then(() => {
+      if (cancelled || !apiClient.isAuthenticated() || readBrowserPermission() !== 'granted') return;
+      void syncSubscription().then(() => refreshSubscribedState());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [syncSubscription, refreshSubscribedState]);
 
   const requestPermissionAndSubscribe = async (): Promise<boolean> => {
     if (typeof window === 'undefined' || !('Notification' in window)) {

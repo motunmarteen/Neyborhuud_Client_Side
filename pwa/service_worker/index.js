@@ -188,13 +188,25 @@ self.addEventListener("notificationclick", function (event) {
   var d = event.notification.data || {};
 
   var url = resolveUrl(d);
-  // "I'm responding" on an SOS: open the Help page, which records the response right away.
+  // "I'm responding" on an SOS: tell the server at once with the signed code in the push (so the
+  // person in danger sees it even if the app is slow to load), then open the Help page, which
+  // also records it as a backup.
+  var recorded = Promise.resolve();
   if (event.action === "respond" && d.sosEventId) {
     url = "/safety/help/" + d.sosEventId + "?respond=1";
+    if (d.respondUrl && d.respondToken && d.guardianId) {
+      recorded = fetch(d.respondUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guardianId: d.guardianId, token: d.respondToken }),
+      }).catch(function () {
+        /* the Help page records it once it opens */
+      });
+    }
   }
 
   event.waitUntil(
-    clients
+    Promise.all([recorded, clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then(function (clientList) {
         // Focus existing open window
@@ -213,7 +225,7 @@ self.addEventListener("notificationclick", function (event) {
         if (clients.openWindow) {
           return clients.openWindow(url);
         }
-      }),
+      })]),
   );
 });
 

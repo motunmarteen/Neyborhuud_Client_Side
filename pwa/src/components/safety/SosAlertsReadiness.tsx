@@ -53,7 +53,9 @@ export function SosAlertsReadiness({ className = '' }: { className?: string }) {
         <>
           {error && permission === 'granted' && !isRegistering ? (
             <p className="rounded-2xl bg-amber-soft p-3 text-[13px] font-semibold text-navy">
-              Your phone allowed notifications, but signing up for alerts didn&apos;t finish. Check your internet and try again.
+              {/Still setting up/.test(error)
+                ? 'Still setting up on this phone (first time can take a minute on slow data). Keep NeyborHuud open; this turns on by itself.'
+                : 'Your phone allowed notifications, but signing up for alerts didn’t finish. Check your internet and try again.'}
             </p>
           ) : null}
           <Button fullWidth loading={isRegistering} onClick={() => void requestPermissionAndSubscribe()}>

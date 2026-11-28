@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { queryClient } from '@/lib/query-client';
 import { useEffect, useRef } from 'react';
 import socketService from '@/lib/socket';
+import { isInMyArea, savedUser } from '@/lib/emergencyArea';
 import apiClient, { isLocalApiHost, shouldConnectSocket } from '@/lib/api-client';
 import { AxiosError } from 'axios';
 import { authService } from '@/services/auth.service';
@@ -191,10 +192,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
         // Refresh feed to show the new emergency post
         queryClient.invalidateQueries({ queryKey: ['locationFeed'] });
 
+        // Every open app hears about every emergency post in Nigeria; only ring people in that area.
+        if (!isInMyArea(data, savedUser())) return;
+
         // Show urgent toast notification
         const severity = data?.severity || 'critical';
         const emergencyType = data?.emergencyType || 'Safety Alert';
-        const message = data?.preview || data?.content || 'A new emergency alert has been posted nearby.';
+        const message = data?.title || data?.preview || data?.content || 'A new emergency alert in your area.';
 
         if (severity === 'critical') {
           toast.error(`🚨 ${emergencyType.toUpperCase()}`, {
