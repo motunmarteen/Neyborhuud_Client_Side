@@ -49,6 +49,8 @@ export function SosPageHero({
 }: SosPageHeroProps) {
   const isActive = phase === 'active';
   const isPending = phase === 'pending';
+  // Pressed with no internet: saved on the phone, nobody told yet. Never say "guardians notified".
+  const notSentYet = offlineQueueStatus === 'queued' || offlineQueueStatus === 'sending' || offlineQueueStatus === 'failed';
   const isSilent = isActive && visibilityMode === 'silent';
   const offlineBanner =
     offlineQueueStatus && offlineQueueStatus in OFFLINE_BANNER
@@ -88,7 +90,9 @@ export function SosPageHero({
           <h1 className="mt-1 text-lg font-extrabold leading-snug text-gray-800">
             {isSilent
               ? 'Everything is set'
-              : isActive
+              : notSentYet
+                ? 'SOS saved, not sent yet'
+                : isActive
                 ? isDrill
                   ? 'Practice SOS is running'
                   : 'Emergency alert is live'
@@ -99,7 +103,9 @@ export function SosPageHero({
           <p className="mt-1.5 text-xs leading-relaxed text-gray-500">
             {isSilent
               ? 'Tap below whenever you’re ready to close this out.'
-              : isActive
+              : notSentYet
+                ? 'No internet, so nobody has been told yet. It sends by itself the moment you’re back online. Call 112 or text someone now.'
+                : isActive
                 ? isDrill
                   ? 'Your guardians got a practice alert. Nothing real was sent. End it when you’re done.'
                   : `Guardians notified · Escalation ${escalationLevel}. Mark safe when you are out of danger.`
@@ -137,7 +143,7 @@ export function SosPageHero({
             </button>
           ) : (
             <>
-              {incidentHref ? (
+              {incidentHref && !notSentYet ? (
                 <Link
                   href={incidentHref}
                   className={`inline-flex items-center gap-1 rounded-full px-5 py-2.5 text-xs font-bold shadow-sm transition-all duration-200 no-underline ${

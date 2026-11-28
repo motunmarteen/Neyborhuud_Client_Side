@@ -46,6 +46,7 @@ export default function SosPage() {
   const incidentHref = sos.activeSos?._id ? `/safety/incident/${sos.activeSos._id}` : undefined;
   const showTrigger = sos.phase === 'idle';
   const isDrill = sos.activeSos?.isDrill === true;
+  const sosNotSentYet = ['queued', 'sending', 'failed'].includes(String(sos.offlineQueueStatus));
 
   return (
     <>
@@ -85,7 +86,7 @@ export default function SosPage() {
           {tab === 'now' && (
             <>
               <Call112Button className="mx-4 mt-3" />
-              {sos.phase === 'active' && sos.activeSos?._id ? (
+              {sos.phase === 'active' && sos.activeSos?._id && !sosNotSentYet ? (
                 <SosResponders
                   className="mx-4 mt-3"
                   sosEventId={sos.activeSos._id}

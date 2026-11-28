@@ -37,6 +37,8 @@ export function intlPhone(raw: string): string | null {
 export function smsHref(phones: string[], body: string, ua: string): string {
   const list = phones.join(',');
   const enc = encodeURIComponent(body);
+  // No numbers: open a new message and let the person choose who.
+  if (phones.length === 0) return /iPhone|iPad|iPod/i.test(ua) ? `sms:&body=${enc}` : `sms:?body=${enc}`;
   return /iPhone|iPad|iPod/i.test(ua) ? `sms:/open?addresses=${list}&body=${enc}` : `sms:${list}?body=${enc}`;
 }
 
@@ -80,7 +82,27 @@ export function SosTextGuardians({ className = '' }: { className?: string }) {
   const loc = sos.activeSos?.location as { lat?: number; lng?: number } | undefined;
   const body = useMemo(() => sosTextBody(loc?.lat, loc?.lng), [loc?.lat, loc?.lng]);
 
-  if (contacts.length === 0) return null;
+  // No guardian has a phone number saved: still let the person text anyone (they pick in the SMS
+  // app). Hiding the button left them with nothing while offline (live test 2026-11-28).
+  if (contacts.length === 0) {
+    return (
+      <div className={`rounded-[22px] bg-white p-4 shadow-[0_2px_10px_rgba(29,36,51,0.06)] ${className}`}>
+        <a
+          href={smsHref([], body, ua)}
+          className="flex min-h-[56px] items-center gap-3 rounded-2xl bg-navy px-4 text-white active:scale-[0.98]"
+        >
+          <span className="material-symbols-outlined text-[24px]" aria-hidden>sms</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] font-extrabold">Text someone for help</span>
+            <span className="block truncate text-[12px] text-white/80">Pick who in your messages · works without data</span>
+          </span>
+        </a>
+        <p className="mt-2 text-[12px] text-muted">
+          Your guardians haven&apos;t added phone numbers yet, so we can&apos;t fill them in. Ask them to add one in their profile.
+        </p>
+      </div>
+    );
+  }
   const names = contacts.map((c) => c.name).slice(0, 3).join(', ') + (contacts.length > 3 ? ` +${contacts.length - 3}` : '');
 
   return (
